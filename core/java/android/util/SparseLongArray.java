@@ -20,11 +20,26 @@ import com.android.internal.util.ArrayUtils;
 
 /**
  * SparseLongArrays map integers to longs.  Unlike a normal array of longs,
- * there can be gaps in the indices.  It is intended to be more efficient
- * than using a HashMap to map Integers to Longs.
+ * there can be gaps in the indices.  It is intended to be more memory efficient
+ * than using a HashMap to map Integers to Longs, both because it avoids
+ * auto-boxing keys and values and its data structure doesn't rely on an extra entry object
+ * for each mapping.
+ *
+ * <p>Note that this container keeps its mappings in an array data structure,
+ * using a binary search to find keys.  The implementation is not intended to be appropriate for
+ * data structures
+ * that may contain large numbers of items.  It is generally slower than a traditional
+ * HashMap, since lookups require a binary search and adds and removes require inserting
+ * and deleting entries in the array.  For containers holding up to hundreds of items,
+ * the performance difference is not significant, less than 50%.</p>
+ *
+ * <p>It is possible to iterate over the items in this container using
+ * {@link #keyAt(int)} and {@link #valueAt(int)}. Iterating over the keys using
+ * <code>keyAt(int)</code> with ascending values of the index will return the
+ * keys in ascending order, or the values corresponding to the keys in ascending
+ * order in the case of <code>valueAt(int)<code>.</p>
  */
 public class SparseLongArray implements Cloneable {
-
     private int[] mKeys;
     private long[] mValues;
     private int mSize;
@@ -39,13 +54,19 @@ public class SparseLongArray implements Cloneable {
     /**
      * Creates a new SparseLongArray containing no mappings that will not
      * require any additional memory allocation to store the specified
-     * number of mappings.
+     * number of mappings.  If you supply an initial capacity of 0, the
+     * sparse array will be initialized with a light-weight representation
+     * not requiring any additional array allocations.
      */
     public SparseLongArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
-
-        mKeys = new int[initialCapacity];
-        mValues = new long[initialCapacity];
+        if (initialCapacity == 0) {
+            mKeys = ContainerHelpers.EMPTY_INTS;
+            mValues = ContainerHelpers.EMPTY_LONGS;
+        } else {
+            initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
+            mKeys = new int[initialCapacity];
+            mValues = new long[initialCapacity];
+        }
         mSize = 0;
     }
 
@@ -75,7 +96,7 @@ public class SparseLongArray implements Cloneable {
      * if no such mapping has been made.
      */
     public long get(int key, long valueIfKeyNotFound) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i < 0) {
             return valueIfKeyNotFound;
@@ -88,7 +109,7 @@ public class SparseLongArray implements Cloneable {
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(int key) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             removeAt(i);
@@ -110,7 +131,7 @@ public class SparseLongArray implements Cloneable {
      * was one.
      */
     public void put(int key, long value) {
-        int i = binarySearch(mKeys, 0, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             mValues[i] = value;
@@ -144,6 +165,11 @@ public class SparseLongArray implements Cloneable {
      * Given an index in the range <code>0...size()-1</code>, returns
      * the key from the <code>index</code>th key-value mapping that this
      * SparseLongArray stores.
+     *
+     * <p>The keys corresponding to indices in ascending order are guaranteed to
+     * be in ascending order, e.g., <code>keyAt(0)</code> will return the
+     * smallest key and <code>keyAt(size()-1)</code> will return the largest
+     * key.</p>
      */
     public int keyAt(int index) {
         return mKeys[index];
@@ -153,6 +179,12 @@ public class SparseLongArray implements Cloneable {
      * Given an index in the range <code>0...size()-1</code>, returns
      * the value from the <code>index</code>th key-value mapping that this
      * SparseLongArray stores.
+     *
+     * <p>The values corresponding to indices in ascending order are guaranteed
+     * to be associated with keys in ascending order, e.g.,
+     * <code>valueAt(0)</code> will return the value associated with the
+     * smallest key and <code>valueAt(size()-1)</code> will return the value
+     * associated with the largest key.</p>
      */
     public long valueAt(int index) {
         return mValues[index];
@@ -164,7 +196,7 @@ public class SparseLongArray implements Cloneable {
      * key is not mapped.
      */
     public int indexOfKey(int key) {
-        return binarySearch(mKeys, 0, mSize, key);
+        return ContainerHelpers.binarySearch(mKeys, mSize, key);
     }
 
     /**
@@ -223,23 +255,30 @@ public class SparseLongArray implements Cloneable {
         mValues = nvalues;
     }
 
-    private static int binarySearch(int[] a, int start, int len, long key) {
-        int high = start + len, low = start - 1, guess;
-
-        while (high - low > 1) {
-            guess = (high + low) / 2;
-
-            if (a[guess] < key)
-                low = guess;
-            else
-                high = guess;
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its mappings.
+     */
+    @Override
+    public String toString() {
+        if (size() <= 0) {
+            return "{}";
         }
 
-        if (high == start + len)
-            return ~(start + len);
-        else if (a[high] == key)
-            return high;
-        else
-            return ~high;
+        StringBuilder buffer = new StringBuilder(mSize * 28);
+        buffer.append('{');
+        for (int i=0; i<mSize; i++) {
+            if (i > 0) {
+                buffer.append(", ");
+            }
+            int key = keyAt(i);
+            buffer.append(key);
+            buffer.append('=');
+            long value = valueAt(i);
+            buffer.append(value);
+        }
+        buffer.append('}');
+        return buffer.toString();
     }
 }

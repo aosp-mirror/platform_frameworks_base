@@ -153,6 +153,11 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
+    public int getAlpha() {
+        return mState.mDrawable.getAlpha();
+    }
+
+    @Override
     public void setColorFilter(ColorFilter cf) {
         mState.mDrawable.setColorFilter(cf);
     }

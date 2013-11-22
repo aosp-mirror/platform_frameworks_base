@@ -59,7 +59,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
     private static final int MAX_HEIGHT = 4096;
 
     private static final Pattern SETTING_PATTERN =
-            Pattern.compile("(\\d+)x(\\d+)/(\\d+)");
+            Pattern.compile("(\\d+)x(\\d+)/(\\d+)(,[a-z]+)*");
 
     private final Handler mUiHandler;
     private final ArrayList<OverlayDisplayHandle> mOverlays =
@@ -143,6 +143,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                     int width = Integer.parseInt(matcher.group(1), 10);
                     int height = Integer.parseInt(matcher.group(2), 10);
                     int densityDpi = Integer.parseInt(matcher.group(3), 10);
+                    String flagString = matcher.group(4);
                     if (width >= MIN_WIDTH && width <= MAX_WIDTH
                             && height >= MIN_HEIGHT && height <= MAX_HEIGHT
                             && densityDpi >= DisplayMetrics.DENSITY_LOW
@@ -152,13 +153,14 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                                 com.android.internal.R.string.display_manager_overlay_display_name,
                                 number);
                         int gravity = chooseOverlayGravity(number);
+                        boolean secure = flagString != null && flagString.contains(",secure");
 
                         Slog.i(TAG, "Showing overlay display device #" + number
                                 + ": name=" + name + ", width=" + width + ", height=" + height
-                                + ", densityDpi=" + densityDpi);
+                                + ", densityDpi=" + densityDpi + ", secure=" + secure);
 
                         mOverlays.add(new OverlayDisplayHandle(name,
-                                width, height, densityDpi, gravity));
+                                width, height, densityDpi, gravity, secure));
                         continue;
                     }
                 } catch (NumberFormatException ex) {
@@ -190,13 +192,14 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final int mHeight;
         private final float mRefreshRate;
         private final int mDensityDpi;
+        private final boolean mSecure;
 
         private Surface mSurface;
         private SurfaceTexture mSurfaceTexture;
         private DisplayDeviceInfo mInfo;
 
         public OverlayDisplayDevice(IBinder displayToken, String name,
-                int width, int height, float refreshRate, int densityDpi,
+                int width, int height, float refreshRate, int densityDpi, boolean secure,
                 SurfaceTexture surfaceTexture) {
             super(OverlayDisplayAdapter.this, displayToken);
             mName = name;
@@ -204,14 +207,17 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             mHeight = height;
             mRefreshRate = refreshRate;
             mDensityDpi = densityDpi;
+            mSecure = secure;
             mSurfaceTexture = surfaceTexture;
         }
 
-        public void clearSurfaceTextureLocked() {
-            if (mSurfaceTexture != null) {
-                mSurfaceTexture = null;
+        public void destroyLocked() {
+            mSurfaceTexture = null;
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
             }
-            sendTraversalRequestLocked();
+            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         @Override
@@ -221,12 +227,6 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                     mSurface = new Surface(mSurfaceTexture);
                 }
                 setSurfaceInTransactionLocked(mSurface);
-            } else {
-                setSurfaceInTransactionLocked(null);
-                if (mSurface != null) {
-                    mSurface.destroy();
-                    mSurface = null;
-                }
             }
         }
 
@@ -241,7 +241,10 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
-                mInfo.flags = 0;
+                mInfo.flags = DisplayDeviceInfo.FLAG_PRESENTATION;
+                if (mSecure) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
+                }
                 mInfo.type = Display.TYPE_OVERLAY;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
             }
@@ -261,17 +264,19 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final int mHeight;
         private final int mDensityDpi;
         private final int mGravity;
+        private final boolean mSecure;
 
         private OverlayDisplayWindow mWindow;
         private OverlayDisplayDevice mDevice;
 
         public OverlayDisplayHandle(String name,
-                int width, int height, int densityDpi, int gravity) {
+                int width, int height, int densityDpi, int gravity, boolean secure) {
             mName = name;
             mWidth = width;
             mHeight = height;
             mDensityDpi = densityDpi;
             mGravity = gravity;
+            mSecure = secure;
 
             mUiHandler.post(mShowRunnable);
         }
@@ -285,9 +290,9 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         @Override
         public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate) {
             synchronized (getSyncRoot()) {
-                IBinder displayToken = SurfaceControl.createDisplay(mName, false);
+                IBinder displayToken = SurfaceControl.createDisplay(mName, mSecure);
                 mDevice = new OverlayDisplayDevice(displayToken, mName,
-                        mWidth, mHeight, refreshRate, mDensityDpi, surfaceTexture);
+                        mWidth, mHeight, refreshRate, mDensityDpi, mSecure, surfaceTexture);
 
                 sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_ADDED);
             }
@@ -298,7 +303,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowDestroyed() {
             synchronized (getSyncRoot()) {
                 if (mDevice != null) {
-                    mDevice.clearSurfaceTextureLocked();
+                    mDevice.destroyLocked();
                     sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_REMOVED);
                 }
             }
@@ -310,6 +315,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             pw.println("    mHeight=" + mHeight);
             pw.println("    mDensityDpi=" + mDensityDpi);
             pw.println("    mGravity=" + mGravity);
+            pw.println("    mSecure=" + mSecure);
 
             // Try to dump the window state.
             if (mWindow != null) {
@@ -324,7 +330,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             @Override
             public void run() {
                 OverlayDisplayWindow window = new OverlayDisplayWindow(getContext(),
-                        mName, mWidth, mHeight, mDensityDpi, mGravity,
+                        mName, mWidth, mHeight, mDensityDpi, mGravity, mSecure,
                         OverlayDisplayHandle.this);
                 window.show();
 

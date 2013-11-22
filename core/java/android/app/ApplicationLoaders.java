@@ -17,10 +17,8 @@
 package android.app;
 
 import android.os.Trace;
+import android.util.ArrayMap;
 import dalvik.system.PathClassLoader;
-
-import java.util.HashMap;
-import java.util.Map;
 
 class ApplicationLoaders
 {
@@ -71,7 +69,7 @@ class ApplicationLoaders
         }
     }
 
-    private final Map<String, ClassLoader> mLoaders = new HashMap<String, ClassLoader>();
+    private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<String, ClassLoader>();
 
     private static final ApplicationLoaders gApplicationLoaders
         = new ApplicationLoaders();

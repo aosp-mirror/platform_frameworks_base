@@ -29,18 +29,14 @@ import android.util.Slog;
  *
  * {@hide}
  */
-public class DummyDataStateTracker implements NetworkStateTracker {
+public class DummyDataStateTracker extends BaseNetworkStateTracker {
 
     private static final String TAG = "DummyDataStateTracker";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
-    private NetworkInfo mNetworkInfo;
     private boolean mTeardownRequested = false;
     private Handler mTarget;
-    private Context mContext;
-    private LinkProperties mLinkProperties;
-    private LinkCapabilities mLinkCapabilities;
     private boolean mPrivateDnsRouteSet = false;
     private boolean mDefaultRouteSet = false;
 
@@ -120,7 +116,13 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         return true;
     }
 
+    @Override
     public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         // not implemented
     }
 

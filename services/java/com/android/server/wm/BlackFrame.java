@@ -22,7 +22,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
-import android.view.Surface;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -37,7 +37,7 @@ public class BlackFrame {
         final SurfaceControl surface;
 
         BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b, int layerStack)
-                throws SurfaceControl.OutOfResourcesException {
+                throws OutOfResourcesException {
             left = l;
             top = t;
             this.layer = layer;
@@ -60,6 +60,10 @@ public class BlackFrame {
             if (WindowManagerService.SHOW_TRANSACTIONS ||
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
                             "  BLACK " + surface + ": CREATE layer=" + layer);
+        }
+
+        void setAlpha(float alpha) {
+            surface.setAlpha(alpha);
         }
 
         void setMatrix(Matrix matrix) {
@@ -93,6 +97,8 @@ public class BlackFrame {
     final float[] mTmpFloats = new float[9];
     final BlackSurface[] mBlackSurfaces = new BlackSurface[4];
 
+    final boolean mForceDefaultOrientation;
+
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Outer: "); mOuterRect.printShortString(pw);
                 pw.print(" / Inner: "); mInnerRect.printShortString(pw);
@@ -106,9 +112,11 @@ public class BlackFrame {
         }
     }
 
-    public BlackFrame(SurfaceSession session, Rect outer, Rect inner,
-            int layer, final int layerStack) throws SurfaceControl.OutOfResourcesException {
+    public BlackFrame(SurfaceSession session, Rect outer, Rect inner, int layer, int layerStack,
+            boolean forceDefaultOrientation) throws OutOfResourcesException {
         boolean success = false;
+
+        mForceDefaultOrientation = forceDefaultOrientation;
 
         mOuterRect = new Rect(outer);
         mInnerRect = new Rect(inner);
@@ -158,6 +166,14 @@ public class BlackFrame {
                 if (mBlackSurfaces[i] != null) {
                     mBlackSurfaces[i].surface.hide();
                 }
+            }
+        }
+    }
+
+    public void setAlpha(float alpha) {
+        for (int i=0; i<mBlackSurfaces.length; i++) {
+            if (mBlackSurfaces[i] != null) {
+                mBlackSurfaces[i].setAlpha(alpha);
             }
         }
     }

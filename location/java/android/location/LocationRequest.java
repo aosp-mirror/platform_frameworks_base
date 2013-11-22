@@ -19,6 +19,7 @@ package android.location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.util.TimeUtils;
 
 
@@ -145,6 +146,8 @@ public final class LocationRequest implements Parcelable {
     private long mExpireAt = Long.MAX_VALUE;  // no expiry
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
     private float mSmallestDisplacement = 0.0f;    // meters
+    private WorkSource mWorkSource = null;
+    private boolean mHideFromAppOps = false; // True if this request shouldn't be counted by AppOps
 
     private String mProvider = LocationManager.FUSED_PROVIDER;  // for deprecated APIs that explicitly request a provider
 
@@ -233,6 +236,8 @@ public final class LocationRequest implements Parcelable {
         mNumUpdates = src.mNumUpdates;
         mSmallestDisplacement = src.mSmallestDisplacement;
         mProvider = src.mProvider;
+        mWorkSource = src.mWorkSource;
+        mHideFromAppOps = src.mHideFromAppOps;
     }
 
     /**
@@ -493,6 +498,48 @@ public final class LocationRequest implements Parcelable {
         return mSmallestDisplacement;
     }
 
+    /**
+     * Sets the WorkSource to use for power blaming of this location request.
+     *
+     * <p>No permissions are required to make this call, however the LocationManager
+     * will throw a SecurityException when requesting location updates if the caller
+     * doesn't have the {@link android.Manifest.permission#UPDATE_DEVICE_STATS} permission.
+     *
+     * @param workSource WorkSource defining power blame for this location request.
+     * @hide
+     */
+    public void setWorkSource(WorkSource workSource) {
+        mWorkSource = workSource;
+    }
+
+    /** @hide */
+    public WorkSource getWorkSource() {
+        return mWorkSource;
+    }
+
+    /**
+     * Sets whether or not this location request should be hidden from AppOps.
+     *
+     * <p>Hiding a location request from AppOps will remove user visibility in the UI as to this
+     * request's existence.  It does not affect power blaming in the Battery page.
+     *
+     * <p>No permissions are required to make this call, however the LocationManager
+     * will throw a SecurityException when requesting location updates if the caller
+     * doesn't have the {@link android.Manifest.permission#UPDATE_APP_OPS_STATS} permission.
+     *
+     * @param hideFromAppOps If true AppOps won't keep track of this location request.
+     * @see android.app.AppOpsManager
+     * @hide
+     */
+    public void setHideFromAppOps(boolean hideFromAppOps) {
+        mHideFromAppOps = hideFromAppOps;
+    }
+
+    /** @hide */
+    public boolean getHideFromAppOps() {
+        return mHideFromAppOps;
+    }
+
     private static void checkInterval(long millis) {
         if (millis < 0) {
             throw new IllegalArgumentException("invalid interval: " + millis);
@@ -536,8 +583,11 @@ public final class LocationRequest implements Parcelable {
             request.setExpireAt(in.readLong());
             request.setNumUpdates(in.readInt());
             request.setSmallestDisplacement(in.readFloat());
+            request.setHideFromAppOps(in.readInt() != 0);
             String provider = in.readString();
             if (provider != null) request.setProvider(provider);
+            WorkSource workSource = in.readParcelable(null);
+            if (workSource != null) request.setWorkSource(workSource);
             return request;
         }
         @Override
@@ -559,7 +609,9 @@ public final class LocationRequest implements Parcelable {
         parcel.writeLong(mExpireAt);
         parcel.writeInt(mNumUpdates);
         parcel.writeFloat(mSmallestDisplacement);
+        parcel.writeInt(mHideFromAppOps ? 1 : 0);
         parcel.writeString(mProvider);
+        parcel.writeParcelable(mWorkSource, 0);
     }
 
     /** @hide */

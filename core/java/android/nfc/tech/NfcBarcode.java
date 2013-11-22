@@ -102,15 +102,21 @@ public final class NfcBarcode extends BasicTagTechnology {
      *       </ul>
      *     <p>The following 12 bytes are payload:<ul>
      *       <li> In case of a URL payload, the payload is encoded in US-ASCII,
-     *            following the limitations defined in RF3987,
-     *            {@see http://www.ietf.org/rfc/rfc3987.txt}</li>
-     *       <li> In case of GS1 EPC daya, {@see http://www.gs1.org/gsmp/kc/epcglobal/tds/}
-     *            for more details.</li></ul>
+     *            following the limitations defined in RFC3987.
+     *            {@see <a href="http://www.ietf.org/rfc/rfc3987.txt">RFC 3987</a>}</li>
+     *       <li> In case of GS1 EPC data, see <a href="http://www.gs1.org/gsmp/kc/epcglobal/tds/">
+     *            GS1 Electronic Product Code (EPC) Tag Data Standard (TDS)</a> for more details.
+     *       </li>
+     *     </ul>
      *     <p>The last 2 bytes comprise the CRC.
      *     </ul>
      * <p>Does not cause any RF activity and does not block.
      *
      * @return a byte array containing the barcode
+     * @see <a href="http://www.kovio.com/docs/kovionfcbarcode.pdf">
+     *      Kovio 128-bit NFC barcode datasheet</a>
+     * @see <a href="http://kovio.com/docs/kovio-128-nfc-barcode-data-format.pdf">
+     *      Kovio 128-bit NFC barcode data format</a>
      */
     public byte[] getBarcode() {
         switch (mType) {

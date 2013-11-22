@@ -503,7 +503,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
             ViewRootImpl viewRoot = mOwnerView.getViewRootImpl();
             if (viewRoot != null) {
-                viewRoot.dispatchKey(event);
+                viewRoot.dispatchInputEvent(event);
             }
 
             // We gave the key to the owner, don't let the container handle this key

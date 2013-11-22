@@ -137,6 +137,32 @@ public class CallLog {
         public static final String NUMBER = "number";
 
         /**
+         * The number presenting rules set by the network.
+         *
+         * <p>
+         * Allowed values:
+         * <ul>
+         * <li>{@link #PRESENTATION_ALLOWED}</li>
+         * <li>{@link #PRESENTATION_RESTRICTED}</li>
+         * <li>{@link #PRESENTATION_UNKNOWN}</li>
+         * <li>{@link #PRESENTATION_PAYPHONE}</li>
+         * </ul>
+         * </p>
+         *
+         * <P>Type: INTEGER</P>
+         */
+        public static final String NUMBER_PRESENTATION = "presentation";
+
+        /** Number is allowed to display for caller id. */
+        public static final int PRESENTATION_ALLOWED = 1;
+        /** Number is blocked by user. */
+        public static final int PRESENTATION_RESTRICTED = 2;
+        /** Number is not specified or unknown by network. */
+        public static final int PRESENTATION_UNKNOWN = 3;
+        /** Number is a pay phone. */
+        public static final int PRESENTATION_PAYPHONE = 4;
+
+        /**
          * The ISO 3166-1 two letters country code of the country where the
          * user received or made the call.
          * <P>
@@ -267,7 +293,8 @@ public class CallLog {
          * if the contact is unknown.
          * @param context the context used to get the ContentResolver
          * @param number the phone number to be added to the calls db
-         * @param presentation the number presenting rules set by the network for
+         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
          * @param start time stamp for the call in milliseconds
@@ -278,24 +305,32 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, long start, int duration) {
             final ContentResolver resolver = context.getContentResolver();
+            int numberPresentation = PRESENTATION_ALLOWED;
 
-            // If this is a private number then set the number to Private, otherwise check
-            // if the number field is empty and set the number to Unavailable
+            // Remap network specified number presentation types
+            // PhoneConstants.PRESENTATION_xxx to calllog number presentation types
+            // Calls.PRESENTATION_xxx, in order to insulate the persistent calllog
+            // from any future radio changes.
+            // If the number field is empty set the presentation type to Unknown.
             if (presentation == PhoneConstants.PRESENTATION_RESTRICTED) {
-                number = CallerInfo.PRIVATE_NUMBER;
-                if (ci != null) ci.name = "";
+                numberPresentation = PRESENTATION_RESTRICTED;
             } else if (presentation == PhoneConstants.PRESENTATION_PAYPHONE) {
-                number = CallerInfo.PAYPHONE_NUMBER;
-                if (ci != null) ci.name = "";
+                numberPresentation = PRESENTATION_PAYPHONE;
             } else if (TextUtils.isEmpty(number)
                     || presentation == PhoneConstants.PRESENTATION_UNKNOWN) {
-                number = CallerInfo.UNKNOWN_NUMBER;
-                if (ci != null) ci.name = "";
+                numberPresentation = PRESENTATION_UNKNOWN;
+            }
+            if (numberPresentation != PRESENTATION_ALLOWED) {
+                number = "";
+                if (ci != null) {
+                    ci.name = "";
+                }
             }
 
-            ContentValues values = new ContentValues(5);
+            ContentValues values = new ContentValues(6);
 
             values.put(NUMBER, number);
+            values.put(NUMBER_PRESENTATION, Integer.valueOf(numberPresentation));
             values.put(TYPE, Integer.valueOf(callType));
             values.put(DATE, Long.valueOf(start));
             values.put(DURATION, Long.valueOf(duration));

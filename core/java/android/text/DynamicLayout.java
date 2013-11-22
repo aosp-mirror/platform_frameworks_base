@@ -502,17 +502,19 @@ public class DynamicLayout extends Layout
         }
 
         mNumberOfBlocks = newNumberOfBlocks;
+        int newFirstChangedBlock;
         final int deltaLines = newLineCount - (endLine - startLine + 1);
         if (deltaLines != 0) {
             // Display list whose index is >= mIndexFirstChangedBlock is valid
             // but it needs to update its drawing location.
-            mIndexFirstChangedBlock = firstBlock + numAddedBlocks;
-            for (int i = mIndexFirstChangedBlock; i < mNumberOfBlocks; i++) {
+            newFirstChangedBlock = firstBlock + numAddedBlocks;
+            for (int i = newFirstChangedBlock; i < mNumberOfBlocks; i++) {
                 mBlockEndLines[i] += deltaLines;
             }
         } else {
-            mIndexFirstChangedBlock = mNumberOfBlocks;
+            newFirstChangedBlock = mNumberOfBlocks;
         }
+        mIndexFirstChangedBlock = Math.min(mIndexFirstChangedBlock, newFirstChangedBlock);
 
         int blockIndex = firstBlock;
         if (createBlockBefore) {

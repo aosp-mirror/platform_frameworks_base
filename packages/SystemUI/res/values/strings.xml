@@ -24,17 +24,6 @@
          all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="status_bar_clear_all_button">Clear</string>
 
-    <!-- The text for the button in the notification window-shade that turns
-         on do not disturb mode, where notifications no longer show their ticker,
-         no sound plays, and no icons are visible.  The windowshade continues to show
-         the notifications. [CHAR LIMIT=25]-->
-    <string name="status_bar_do_not_disturb_button">Do not disturb</string>
-
-    <!-- The text for the button in the notification window-shade that turns
-         off do not disturb mode.  After clicking this, notifications will be
-         shown again. [CHAR LIMIT=25] -->
-    <string name="status_bar_please_disturb_button">Show notifications</string>
-
     <!-- Title shown in recents popup for removing an application from the list -->
     <string name="status_bar_recent_remove_item_title">Remove from list</string>
 
@@ -171,12 +160,6 @@
          [CHAR LIMIT=25] -->
     <string name="compat_mode_off">Stretch to fill screen</string>
 
-    <!-- Compatibility mode help screen: header text. [CHAR LIMIT=50] -->
-    <string name="compat_mode_help_header">Compatibility zoom</string>
-
-    <!-- Compatibility mode help screen: body text. [CHAR LIMIT=150] -->
-    <string name="compat_mode_help_body">When an app was designed for a smaller screen, a zoom control will appear by the clock.</string>
-
     <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
     <string name="screenshot_saving_ticker">Saving screenshot\u2026</string>
     <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->
@@ -209,6 +192,10 @@
     <string name="accessibility_menu">Menu</string>
     <!-- Content description of the recents button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_recent">Recent apps</string>
+    <!-- Content description of the search button for accessibility. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_search_light">Search</string>
+    <!-- Content description of the camera button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_camera_button">Camera</string>
 
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ime_switch_button">Switch input method button.</string>
@@ -429,22 +416,15 @@
     <!-- Notification text: when GPS has found a fix [CHAR LIMIT=50] -->
     <string name="gps_notification_found_text">Location set by GPS</string>
 
+    <!-- Accessibility text describing the presence of active location requests by one or more apps -->
+    <string name="accessibility_location_active">Location requests active</string>
+
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
     <!-- Title shown in notification popup for inspecting the responsible
          application -->
     <string name="status_bar_notification_inspect_item_title">App info</string>
-
-    <!-- [CHAR LIMIT=NONE] -->
-    <string name="close_universe">Close</string>
-
-    <!-- Title for the pseudo-notification shown when notifications are disabled (do-not-disturb
-         mode) -->
-    <string name="notifications_off_title">Notifications off</string>
-
-    <!-- Content text for do-not-disturb mode notification -->
-    <string name="notifications_off_text">Tap here to turn notifications back on.</string>
 
     <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is on. [CHAR LIMIT=NONE] -->
     <string name="accessibility_rotation_lock_off">Screen will rotate automatically.</string>
@@ -455,8 +435,8 @@
     <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is off. [CHAR LIMIT=NONE] -->
     <string name="accessibility_rotation_lock_on_portrait">Screen is locked in portrait orientation.</string>
 
-    <!-- Name of the Jelly Bean platlogo screensaver -->
-    <string name="jelly_bean_dream_name">BeanFlinger</string>
+    <!-- Name of the K-release easter egg: a display case for all our tastiest desserts. [CHAR LIMIT=30] -->
+    <string name="dessert_case">Dessert Case</string>
 
     <!-- Name of the launcher shortcut icon that allows dreams to be started immediately [CHAR LIMIT=20] -->
     <string name="start_dreams">Daydream</string>
@@ -485,7 +465,9 @@
     <!-- QuickSettings: IME [CHAR LIMIT=NONE] -->
     <string name="quick_settings_ime_label">Input Method</string>
     <!-- QuickSettings: Location [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_location_label">Location in use</string>
+    <string name="quick_settings_location_label">Location</string>
+    <!-- QuickSettings: Location (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_off_label">Location Off</string>
     <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
     <string name="quick_settings_media_device_label">Media device</string>
     <!-- QuickSettings: RSSI [CHAR LIMIT=NONE] -->
@@ -515,8 +497,14 @@
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_auto_brightness_label">AUTO</string>
 
-    <!-- Title of help text shown when the notification panel is pulled down for the very first time. [CHAR LIMIT=NONE] -->
-    <string name="status_bar_help_title">Notifications appear here</string>
-    <!-- Body of help text shown when the notification panel is pulled down for the very first time. [CHAR LIMIT=NONE] -->
-    <string name="status_bar_help_text">Access them anytime by swiping down.\nSwipe down again for system controls.</string>
+
+    <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
+    <string name="battery_meter_very_low_overlay_symbol">!</string>
+
+    <!-- Shows up when there is a user SSL CA Cert installed on the
+         device.  Indicates to the user that SSL traffic can be intercepted.
+         If the text fits on one line (~14 chars), it should start with a
+         linebreak to position it correctly.  [CHAR LIMIT=45] -->
+    <string name="ssl_ca_cert_warning">Network may\nbe monitored</string>
+
 </resources>

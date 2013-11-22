@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"رابط کاربر سیستم"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"پاک کردن"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"مزاحم نشوید"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"نمایش اعلان‌ها"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"حذف از لیست"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"اطلاعات برنامه"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"برنامه جدیدی موجود نیست"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"شارژر را متصل کنید"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"باتری در حال کم شدن است."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> باقیمانده است"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"شارژ USB پشتیبانی نمی‌شود."\n"فقط از شارژر ارائه شده استفاده کنید."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"شارژ USB پشتیبانی نمی‌شود.\nفقط از شارژر ارائه شده استفاده کنید."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"استفاده از باتری"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"اجازه به اشکال‌زدایی USB؟"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"اثر انگشت کلید RSA رایانه: "\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"اثر انگشت کلید RSA رایانه: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"همیشه از این رایانه انجام شود"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"بزرگنمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"گسترده کردن برای پر کردن صفحه"</string>
@@ -160,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"داده 4G غیر فعال شد"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"داده‌های تلفن همراه غیرفعال است"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"داده غیرفعال شد"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"به حداکثر محدوده مشخص شده برای استفاده از داده رسیده‌اید."\n\n"در صورت فعال کردن مجدد داده، ممکن است از طرف اپراتور برای شما هزینه محاسبه شود."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"به حداکثر محدوده مشخص شده برای استفاده از داده رسیده‌اید.\n\nدر صورت فعال کردن مجدد داده، ممکن است از طرف اپراتور برای شما هزینه محاسبه شود."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"فعال کردن مجدد داده"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"اتصال اینترنتی وجود ندارد"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi متصل شد"</string>
@@ -168,9 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"مکان تنظیم شده توسط GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"پاک کردن تمام اعلان‌ها"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"اطلاعات برنامه"</string>
-    <string name="close_universe" msgid="3736513750241754348">"بستن"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"اعلان‌ها خاموش"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"برای روشن کردن مجدد اعلان‌ها، اینجا را ضربه بزنید."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
@@ -187,7 +182,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"چرخش خودکار"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"چرخش قفل شد"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"روش ورودی"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"موقعیت مکانی در حال استفاده"</string>
+    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
+    <skip />
+    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"دستگاه رسانه"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"فقط تماس‌های اضطراری"</string>
@@ -203,5 +201,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"روشنایی"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"اعلان‌ها در اینجا نمایش داده می‌شوند"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"با کشیدن انگشت به طرف پایین به آنها دسترسی پیدا کنید."\n"برای کنترل‌های سیستم دوباره انگشت خود را به سمت پایین بکشید."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"با کشیدن انگشت به طرف پایین به آنها دسترسی پیدا کنید.\nبرای کنترل‌های سیستم دوباره انگشت خود را به سمت پایین بکشید."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"برای نمایش نوار، انگشت خود را از لبه‌ صفحه به داخل بکشید"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"برای نمایش نوار سیستم، انگشت خود را از لبه‌ صفحه به داخل بکشید"</string>
 </resources>

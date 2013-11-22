@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Sistem UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Pdm bersih"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Jangan ganggu"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Tunjukkan pemberitahuan"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Alih keluar dari senarai"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Maklumat aplikasi"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Tiada aplikasi terbaharu"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"Sambungkan pengecas"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Bateri semakin lemah."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Berbaki <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Pengecasan USB tidak disokong."\n"Gunakan hanya pengecas yang dibekalkan."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Pengecasan USB tidak disokong.\nGunakan hanya pengecas yang dibekalkan."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Penggunaan bateri"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Tetapan"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Gunakan secara lalai untuk peranti USB ini"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Gunakan secara lalai untuk aksesori USB ini"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Benarkan penyahpepijatan USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Cap jari kekunci RSA komputer ialah:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Cap jari kekunci RSA komputer ialah:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Sentiasa benarkan komputer ini"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zum untuk memenuhi skrin"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Regang utk memenuhi skrin"</string>
@@ -160,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Data 4G dilumpuhkan"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Data mudah alih dilumpuhkan"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data dilumpuhkan"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Anda telah mencapai had penggunaan data yang dinyatakan."\n\n"Jika anda mendayakan semula data, anda mungkin dikenakan caj oleh operator."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Anda telah mencapai had penggunaan data yang dinyatakan.\n\nJika anda mendayakan semula data, anda mungkin dikenakan caj oleh operator."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Dayakan semula data"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Tiada smbg Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi disambungkan"</string>
@@ -168,9 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokasi ditetapkan oleh GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Padamkan semua pemberitahuan."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Maklumat apl"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Tutup"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Pemberitahuan dimatikan"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Ketik di sini untuk menghidupkan kembali pemberitahuan."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skrin akan berputar secara automatik."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skrin dikunci dalam orientasi landskap."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skrin dikunci dalam orientasi potret."</string>
@@ -187,7 +182,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Auto Putar"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Putaran Dikunci"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Kaedah Input"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"Lokasi sedang digunakan"</string>
+    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
+    <skip />
+    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Peranti media"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Panggilan Kecemasan Sahaja"</string>
@@ -203,5 +201,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Kecerahan"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Pemberitahuan dipaparkan di sini"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Akses panel pada bila-bila masa dengan meleret ke bawah."\n"Leret ke bawah sekali lagi untuk mendapatkan kawalan sistem."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Akses panel pada bila-bila masa dengan meleret ke bawah.\nLeret ke bawah sekali lagi untuk mendapatkan kawalan sistem."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Leret ke bahagian tepi skrin untuk menampakkan bar"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Leret dari tepi skrin untuk menampakkan bar sistem"</string>
 </resources>

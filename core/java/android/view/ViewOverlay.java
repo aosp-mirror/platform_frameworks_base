@@ -15,6 +15,7 @@
  */
 package android.view;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -169,6 +170,14 @@ public class ViewOverlay {
                     child.offsetTopAndBottom(parentLocation[1] - hostViewLocation[1]);
                 }
                 parent.removeView(child);
+                if (parent.getLayoutTransition() != null) {
+                    // LayoutTransition will cause the child to delay removal - cancel it
+                    parent.getLayoutTransition().cancel(LayoutTransition.DISAPPEARING);
+                }
+                // fail-safe if view is still attached for any reason
+                if (child.getParent() != null) {
+                    child.mParent = null;
+                }
             }
             super.addView(child);
         }
@@ -289,6 +298,17 @@ public class ViewOverlay {
                 dirty.offset(left, top);
                 mHostView.invalidate(dirty);
             }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected ViewParent invalidateChildInParentFast(int left, int top, Rect dirty) {
+            if (mHostView instanceof ViewGroup) {
+                return ((ViewGroup) mHostView).invalidateChildInParentFast(left, top, dirty);
+            }
+            return null;
         }
 
         @Override

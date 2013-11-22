@@ -32,10 +32,17 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.org.conscrypt.TrustedCertificateStore;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Public interface for managing policies enforced on a device.  Most clients
@@ -1328,6 +1335,70 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Installs the given certificate as a User CA.
+     *
+     * @return false if the certBuffer cannot be parsed or installation is
+     *         interrupted, otherwise true
+     * @hide
+     */
+    public boolean installCaCert(byte[] certBuffer) {
+        if (mService != null) {
+            try {
+                return mService.installCaCert(certBuffer);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Uninstalls the given certificate from the list of User CAs, if present.
+     *
+     * @hide
+     */
+    public void uninstallCaCert(byte[] certBuffer) {
+        if (mService != null) {
+            try {
+                mService.uninstallCaCert(certBuffer);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Returns whether there are any user-installed CA certificates.
+     *
+     * @hide
+     */
+    public static boolean hasAnyCaCertsInstalled() {
+        TrustedCertificateStore certStore = new TrustedCertificateStore();
+        Set<String> aliases = certStore.userAliases();
+        return aliases != null && !aliases.isEmpty();
+    }
+
+    /**
+     * Returns whether this certificate has been installed as a User CA.
+     *
+     * @hide
+     */
+    public boolean hasCaCertInstalled(byte[] certBuffer) {
+        TrustedCertificateStore certStore = new TrustedCertificateStore();
+        String alias;
+        byte[] pemCert;
+        try {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(
+                            new ByteArrayInputStream(certBuffer));
+            return certStore.getCertificateAlias(cert) != null;
+        } catch (CertificateException ce) {
+            Log.w(TAG, "Could not parse certificate", ce);
+        }
+        return false;
+    }
+
+    /**
      * Called by an application that is administering the device to disable all cameras
      * on the device.  After setting this, no applications will be able to access any cameras
      * on the device.
@@ -1527,9 +1598,26 @@ public class DevicePolicyManager {
      */
     public boolean setDeviceOwner(String packageName) throws IllegalArgumentException,
             IllegalStateException {
+        return setDeviceOwner(packageName, null);
+    }
+
+    /**
+     * @hide
+     * Sets the given package as the device owner. The package must already be installed and there
+     * shouldn't be an existing device owner registered, for this call to succeed. Also, this
+     * method must be called before the device is provisioned.
+     * @param packageName the package name of the application to be registered as the device owner.
+     * @param ownerName the human readable name of the institution that owns this device.
+     * @return whether the package was successfully registered as the device owner.
+     * @throws IllegalArgumentException if the package name is null or invalid
+     * @throws IllegalStateException if a device owner is already registered or the device has
+     *         already been provisioned.
+     */
+    public boolean setDeviceOwner(String packageName, String ownerName)
+            throws IllegalArgumentException, IllegalStateException {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(packageName);
+                return mService.setDeviceOwner(packageName, ownerName);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set device owner");
             }
@@ -1575,6 +1663,18 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getDeviceOwner();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get device owner");
+            }
+        }
+        return null;
+    }
+
+    /** @hide */
+    public String getDeviceOwnerName() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwnerName();
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to get device owner");
             }

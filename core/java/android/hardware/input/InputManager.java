@@ -579,14 +579,32 @@ public final class InputManager {
      * @hide
      */
     public boolean[] deviceHasKeys(int[] keyCodes) {
+        return deviceHasKeys(-1, keyCodes);
+    }
+
+    /**
+     * Queries the framework about whether any physical keys exist on the
+     * any keyboard attached to the device that are capable of producing the given
+     * array of key codes.
+     *
+     * @param id The id of the device to query.
+     * @param keyCodes The array of key codes to query.
+     * @return A new array of the same size as the key codes array whose elements are set to true
+     * if the given device could produce the corresponding key code at the same index in the key
+     * codes array.
+     *
+     * @hide
+     */
+    public boolean[] deviceHasKeys(int id, int[] keyCodes) {
         boolean[] ret = new boolean[keyCodes.length];
         try {
-            mIm.hasKeys(-1, InputDevice.SOURCE_ANY, keyCodes, ret);
+            mIm.hasKeys(id, InputDevice.SOURCE_ANY, keyCodes, ret);
         } catch (RemoteException e) {
             // no fallback; just return the empty array
         }
         return ret;
     }
+
 
     /**
      * Injects an input event into the event system on behalf of an application.

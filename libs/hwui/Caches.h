@@ -21,13 +21,18 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+#include <GLES3/gl3.h>
+
+#include <utils/KeyedVector.h>
 #include <utils/Singleton.h>
+#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
 #include "thread/TaskProcessor.h"
 #include "thread/TaskManager.h"
 
+#include "AssetAtlas.h"
 #include "FontRenderer.h"
 #include "GammaFontRenderer.h"
 #include "TextureCache.h"
@@ -50,9 +55,11 @@ namespace uirenderer {
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
 
+// GL ES 2.0 defines that at least 16 texture units must be supported
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
 
-#define REGION_MESH_QUAD_COUNT 512
+// Maximum number of quads that pre-allocated meshes can draw
+static const uint32_t gMaxNumberOfQuads = 2048;
 
 // Generates simple and textured vertices
 #define FV(x, y, u, v) { { x, y }, { u, v } }
@@ -74,6 +81,7 @@ static const GLsizei gVertexAAWidthOffset = 2 * sizeof(float);
 static const GLsizei gVertexAALengthOffset = 3 * sizeof(float);
 static const GLsizei gMeshCount = 4;
 
+// Must define as many texture units as specified by REQUIRED_TEXTURE_UNITS_COUNT
 static const GLenum gTextureUnits[] = {
     GL_TEXTURE0,
     GL_TEXTURE1,
@@ -113,7 +121,7 @@ public:
     /**
      * Initialize caches.
      */
-    void init();
+    bool init();
 
     /**
      * Initialize global system properties.
@@ -140,6 +148,12 @@ public:
     DebugLevel getDebugLevel() const {
         return mDebugLevel;
     }
+
+    /**
+     * Returns a non-premultiplied ARGB color for the specified
+     * amount of overdraw (1 for 1x, 2 for 2x, etc.)
+     */
+    uint32_t getOverdrawColor(uint32_t amount) const;
 
     /**
      * Call this on each frame to ensure that garbage is deleted from
@@ -172,6 +186,11 @@ public:
      */
     bool unbindMeshBuffer();
 
+    /**
+     * Binds a global indices buffer that can draw up to
+     * gMaxNumberOfQuads quads.
+     */
+    bool bindIndicesBuffer();
     bool bindIndicesBuffer(const GLuint buffer);
     bool unbindIndicesBuffer();
 
@@ -211,6 +230,38 @@ public:
      * be specified using an integer number (0 for GL_TEXTURE0 etc.)
      */
     void activeTexture(GLuint textureUnit);
+
+    /**
+     * Invalidate the cached value of the active texture unit.
+     */
+    void resetActiveTexture();
+
+    /**
+     * Binds the specified texture as a GL_TEXTURE_2D texture.
+     * All texture bindings must be performed with this method or
+     * bindTexture(GLenum, GLuint).
+     */
+    void bindTexture(GLuint texture);
+
+    /**
+     * Binds the specified texture with the specified render target.
+     * All texture bindings must be performed with this method or
+     * bindTexture(GLuint).
+     */
+    void bindTexture(GLenum target, GLuint texture);
+
+    /**
+     * Deletes the specified texture and clears it from the cache
+     * of bound textures.
+     * All textures must be deleted using this method.
+     */
+    void deleteTexture(GLuint texture);
+
+    /**
+     * Signals that the cache of bound textures should be cleared.
+     * Other users of the context may have altered which textures are bound.
+     */
+    void resetBoundTextures();
 
     /**
      * Sets the scissor for the current surface.
@@ -290,6 +341,10 @@ public:
     Dither dither;
     Stencil stencil;
 
+    AssetAtlas assetAtlas;
+
+    bool gpuPixelBuffersEnabled;
+
     // Debug methods
     PFNGLINSERTEVENTMARKEREXTPROC eventMark;
     PFNGLPUSHGROUPMARKEREXTPROC startMark;
@@ -299,9 +354,15 @@ public:
     PFNGLGETOBJECTLABELEXTPROC getLabel;
 
 private:
+    enum OverdrawColorSet {
+        kColorSet_Default = 0,
+        kColorSet_Deuteranomaly
+    };
+
     void initFont();
     void initExtensions();
     void initConstraints();
+    void initStaticProperties();
 
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }
@@ -336,7 +397,9 @@ private:
 
     // Used to render layers
     TextureVertex* mRegionMesh;
-    GLuint mRegionMeshIndices;
+
+    // Global index buffer
+    GLuint mMeshIndices;
 
     mutable Mutex mGarbageLock;
     Vector<Layer*> mLayerGarbage;
@@ -346,6 +409,10 @@ private:
     bool mInitialized;
 
     uint32_t mFunctorsCount;
+
+    GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
+
+    OverdrawColorSet mOverdrawDebugColorSet;
 }; // class Caches
 
 }; // namespace uirenderer

@@ -279,6 +279,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
         try {
             InputMethodSession ls = ((IInputMethodSessionWrapper)
                     session).getInternalInputMethodSession();
+            if (ls == null) {
+                Log.w(TAG, "Session is already finished: " + session);
+                return;
+            }
             mCaller.executeOrSendMessage(mCaller.obtainMessageIO(
                     DO_SET_SESSION_ENABLED, enabled ? 1 : 0, ls));
         } catch (ClassCastException e) {
@@ -291,6 +295,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
         try {
             InputMethodSession ls = ((IInputMethodSessionWrapper)
                     session).getInternalInputMethodSession();
+            if (ls == null) {
+                Log.w(TAG, "Session is already finished: " + session);
+                return;
+            }
             mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REVOKE_SESSION, ls));
         } catch (ClassCastException e) {
             Log.w(TAG, "Incoming session not of correct type: " + session, e);

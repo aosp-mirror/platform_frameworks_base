@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -91,6 +92,8 @@ public class Toast {
         mTN = new TN();
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
+        mTN.mGravity = context.getResources().getInteger(
+                com.android.internal.R.integer.config_toastDefaultGravity);
     }
     
     /**
@@ -323,12 +326,12 @@ public class Toast {
         private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
         final Handler mHandler = new Handler();    
 
-        int mGravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        int mGravity;
         int mX, mY;
         float mHorizontalMargin;
         float mVerticalMargin;
 
-       
+
         View mView;
         View mNextView;
 
@@ -340,13 +343,13 @@ public class Toast {
             final WindowManager.LayoutParams params = mParams;
             params.height = WindowManager.LayoutParams.WRAP_CONTENT;
             params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                    | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
             params.format = PixelFormat.TRANSLUCENT;
             params.windowAnimations = com.android.internal.R.style.Animation_Toast;
             params.type = WindowManager.LayoutParams.TYPE_TOAST;
             params.setTitle("Toast");
+            params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
 
         /**

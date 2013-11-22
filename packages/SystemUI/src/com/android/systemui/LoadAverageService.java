@@ -16,8 +16,6 @@
 
 package com.android.systemui;
 
-import com.android.internal.os.ProcessStats;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -31,20 +29,22 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.android.internal.os.ProcessCpuTracker;
+
 public class LoadAverageService extends Service {
     private View mView;
-    
-    private static final class Stats extends ProcessStats {
+
+    private static final class CpuTracker extends ProcessCpuTracker {
         String mLoadText;
         int mLoadWidth;
-        
+
         private final Paint mPaint;
-        
-        Stats(Paint paint) {
+
+        CpuTracker(Paint paint) {
             super(false);
             mPaint = paint;
         }
-        
+
         @Override
         public void onLoadChanged(float load1, float load5, float load15) {
             mLoadText = load1 + " / " + load5 + " / " + load15;
@@ -56,7 +56,7 @@ public class LoadAverageService extends Service {
             return (int)mPaint.measureText(name);
         }
     }
-    
+
     private class LoadView extends View {
         private Handler mHandler = new Handler() {
             @Override
@@ -70,8 +70,8 @@ public class LoadAverageService extends Service {
             }
         };
 
-        private final Stats mStats;
-        
+        private final CpuTracker mStats;
+
         private Paint mLoadPaint;
         private Paint mAddedPaint;
         private Paint mRemovedPaint;
@@ -150,7 +150,7 @@ public class LoadAverageService extends Service {
             float descent = mLoadPaint.descent();
             mFH = (int)(descent - mAscent + .5f);
 
-            mStats = new Stats(mLoadPaint);
+            mStats = new CpuTracker(mLoadPaint);
             mStats.init();
             updateDisplay();
         }
@@ -179,14 +179,14 @@ public class LoadAverageService extends Service {
             final int W = mNeededWidth;
             final int RIGHT = getWidth()-1;
 
-            final Stats stats = mStats;
+            final CpuTracker stats = mStats;
             final int userTime = stats.getLastUserTime();
             final int systemTime = stats.getLastSystemTime();
             final int iowaitTime = stats.getLastIoWaitTime();
             final int irqTime = stats.getLastIrqTime();
             final int softIrqTime = stats.getLastSoftIrqTime();
             final int idleTime = stats.getLastIdleTime();
-            
+
             final int totalTime = userTime+systemTime+iowaitTime+irqTime+softIrqTime+idleTime;
             if (totalTime == 0) {
                 return;
@@ -226,7 +226,7 @@ public class LoadAverageService extends Service {
 
             int N = stats.countWorkingStats();
             for (int i=0; i<N; i++) {
-                Stats.Stats st = stats.getWorkingStats(i);
+                CpuTracker.Stats st = stats.getWorkingStats(i);
                 y += mFH;
                 top += mFH;
                 bottom += mFH;
@@ -259,17 +259,17 @@ public class LoadAverageService extends Service {
         }
 
         void updateDisplay() {
-            final Stats stats = mStats;
+            final CpuTracker stats = mStats;
             final int NW = stats.countWorkingStats();
 
             int maxWidth = stats.mLoadWidth;
             for (int i=0; i<NW; i++) {
-                Stats.Stats st = stats.getWorkingStats(i);
+                CpuTracker.Stats st = stats.getWorkingStats(i);
                 if (st.nameWidth > maxWidth) {
                     maxWidth = st.nameWidth;
                 }
             }
-            
+
             int neededWidth = mPaddingLeft + mPaddingRight + maxWidth;
             int neededHeight = mPaddingTop + mPaddingBottom + (mFH*(1+NW));
             if (neededWidth != mNeededWidth || neededHeight != mNeededHeight) {

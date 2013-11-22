@@ -44,13 +44,14 @@ void DisplayList::outputLogBuffer(int fd) {
 }
 
 DisplayList::DisplayList(const DisplayListRenderer& recorder) :
-    mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL),
+    mDestroyed(false), mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL),
     mStaticMatrix(NULL), mAnimationMatrix(NULL) {
 
     initFromDisplayListRenderer(recorder);
 }
 
 DisplayList::~DisplayList() {
+    mDestroyed = true;
     clearResources();
 }
 
@@ -63,7 +64,6 @@ void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
 
 void DisplayList::clearResources() {
     mDisplayListData = NULL;
-    mSize = 0; // TODO: shouldn't be needed, WAR possible use after delete
 
     mClipRectOp = NULL;
     mSaveLayerOp = NULL;
@@ -100,6 +100,10 @@ void DisplayList::clearResources() {
         caches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
     }
 
+    for (size_t i = 0; i < mPatchResources.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
+    }
+
     for (size_t i = 0; i < mShaders.size(); i++) {
         caches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
         caches.resourceCache.destructorLocked(mShaders.itemAt(i));
@@ -134,6 +138,7 @@ void DisplayList::clearResources() {
     mBitmapResources.clear();
     mOwnedBitmapResources.clear();
     mFilterResources.clear();
+    mPatchResources.clear();
     mShaders.clear();
     mSourcePaths.clear();
     mPaints.clear();
@@ -169,6 +174,10 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     mSaveLayerOp = new (alloc) SaveLayerOp();
     mSaveOp = new (alloc) SaveOp();
     mRestoreToCountOp = new (alloc) RestoreToCountOp();
+    if (CC_UNLIKELY(!mSaveOp)) { // temporary debug logging
+        ALOGW("Error: %s's SaveOp not allocated, size %d", getName(), mSize);
+        CRASH();
+    }
 
     mFunctorCount = recorder.getFunctorCount();
 
@@ -194,6 +203,13 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     for (size_t i = 0; i < filterResources.size(); i++) {
         SkiaColorFilter* resource = filterResources.itemAt(i);
         mFilterResources.add(resource);
+        caches.resourceCache.incrementRefcountLocked(resource);
+    }
+
+    const Vector<Res_png_9patch*>& patchResources = recorder.getPatchResources();
+    for (size_t i = 0; i < patchResources.size(); i++) {
+        Res_png_9patch* resource = patchResources.itemAt(i);
+        mPatchResources.add(resource);
         caches.resourceCache.incrementRefcountLocked(resource);
     }
 
@@ -342,7 +358,7 @@ void DisplayList::outputViewProperties(const int level) {
     }
     if (mAnimationMatrix) {
         ALOGD("%*sConcatMatrix (animation) %p: " MATRIX_STRING,
-                level * 2, "", mAnimationMatrix, MATRIX_ARGS(mStaticMatrix));
+                level * 2, "", mAnimationMatrix, MATRIX_ARGS(mAnimationMatrix));
     }
     if (mMatrixFlags != 0) {
         if (mMatrixFlags == TRANSLATION) {
@@ -352,6 +368,8 @@ void DisplayList::outputViewProperties(const int level) {
                     level * 2, "", mTransformMatrix, MATRIX_ARGS(mTransformMatrix));
         }
     }
+
+    bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
     if (mAlpha < 1) {
         if (mCaching) {
             ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mAlpha);
@@ -359,15 +377,16 @@ void DisplayList::outputViewProperties(const int level) {
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mAlpha);
         } else {
             int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipToBounds) {
+            if (clipToBoundsNeeded) {
                 flags |= SkCanvas::kClipToLayer_SaveFlag;
+                clipToBoundsNeeded = false; // clipping done by save layer
             }
             ALOGD("%*sSaveLayerAlpha %.2f, %.2f, %.2f, %.2f, %d, 0x%x", level * 2, "",
                     (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
                     (int)(mAlpha * 255), flags);
         }
     }
-    if (mClipToBounds && !mCaching) {
+    if (clipToBoundsNeeded) {
         ALOGD("%*sClipRect %.2f, %.2f, %.2f, %.2f", level * 2, "", 0.0f, 0.0f,
                 (float) mRight - mLeft, (float) mBottom - mTop);
     }
@@ -402,6 +421,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             renderer.concatMatrix(mTransformMatrix);
         }
     }
+    bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
     if (mAlpha < 1) {
         if (mCaching) {
             renderer.setOverrideLayerAlpha(mAlpha);
@@ -412,15 +432,16 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             // have to pass it into this call. In fact, this information might be in the
             // location/size info that we store with the new native transform data.
             int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipToBounds) {
+            if (clipToBoundsNeeded) {
                 saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
+                clipToBoundsNeeded = false; // clipping done by saveLayer
             }
             handler(mSaveLayerOp->reinit(0, 0, mRight - mLeft, mBottom - mTop,
                     mAlpha * 255, SkXfermode::kSrcOver_Mode, saveFlags), PROPERTY_SAVECOUNT,
                     mClipToBounds);
         }
     }
-    if (mClipToBounds && !mCaching) {
+    if (clipToBoundsNeeded) {
         handler(mClipRectOp->reinit(0, 0, mRight - mLeft, mBottom - mTop, SkRegion::kIntersect_Op),
                 PROPERTY_SAVECOUNT, mClipToBounds);
     }
@@ -480,7 +501,11 @@ void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
  */
 template <class T>
 void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
-    if (mSize == 0 || mAlpha <= 0 || CC_UNLIKELY(!mSaveOp)) { // TODO: shouldn't need mSaveOp check
+    if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
+        ALOGW("Error: %s is drawing after destruction, size %d", getName(), mSize);
+        CRASH();
+    }
+    if (mSize == 0 || mAlpha <= 0) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
     }
@@ -513,6 +538,10 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
     int saveCount = renderer.getSaveCount() - 1;
     for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
         DisplayListOp *op = mDisplayListData->displayListOps[i];
+
+#if DEBUG_DISPLAY_LIST
+        op->output(level + 1);
+#endif
 
         logBuffer.writeCommand(level, op->name());
         handler(op, saveCount, mClipToBounds);

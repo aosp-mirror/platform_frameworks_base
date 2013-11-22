@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2013 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<graph>
+    <!-- Packages -->
+    <import package="androidx.media.filterpacks.base"/>
+    <import package="androidx.media.filterpacks.image"/>
+    <import package="androidx.media.filterpacks.video"/>
+    <import package="androidx.media.filterpacks.text" />
+    <import package="androidx.media.filterpacks.numeric" />
+    <import package="androidx.media.filterpacks.face" />
+    <import package="androidx.media.filterpacks.transform" />
+    <import package="androidx.media.filterpacks.performance" />
+    <import package="androidx.media.filterfw.samples.simplecamera" />
+    <import package="androidx.media.filterpacks.histogram" />
+    <import package="androidx.media.filterpacks.colorspace" />
+    <import package="androidx.media.filterpacks.sensors" />
+
+    <!-- Filters -->
+    <filter class="ResizeFilter" name="resize" >
+        <input name="outputWidth" intValue="480" />
+        <input name="outputHeight" intValue="640" />
+    </filter>
+
+    <filter class="Camera2Source" name="camera"/>
+
+    <filter class="BranchFilter" name="mainBranch" />
+    <filter class="BranchFilter" name="preMainBranch" />
+    <filter class="BranchFilter" name="featureBranch" />
+
+    <filter class="SurfaceHolderTarget" name="camViewTarget"/>
+
+    <filter class="ScaleFilter" name="scale" >
+        <input name="scale" floatValue="0.50"/>
+    </filter>
+
+    <filter class="SobelFilter" name="sobel" />
+    <filter class="StatsFilter" name="statsFilter" />
+    <filter class="NormFilter" name="normFilter" />
+    <filter class="TextViewTarget" name="goodOrBadTextView" />
+    <filter class="ToGrayValuesFilter" name="sobelConverter" />
+    <filter class="AverageFilter" name="avgFilter" />
+
+    <var name="startCapture" />
+    <filter class="ImageGoodnessFilter" name="goodnessFilter" >
+        <input name="capturing" varValue="startCapture" />
+    </filter>
+
+    <filter class="ToStringFilter" name="scoreToString" />
+    <filter class="TextViewTarget" name="scoreTextView" />
+
+    <filter class="ExposureFilter" name="exposure" />
+
+    <filter class="TextViewTarget" name="fpsTextView" />
+    <filter class="ToStringFilter" name="throughputToString" />
+
+
+    <filter class="ContrastRatioFilter" name="contrast" />
+
+    <filter class="ScaleFilter" name="secondaryScale" >
+        <input name="scale" floatValue="0.50"/>
+    </filter>
+
+    <filter class="ThroughputFilter" name="throughput" />
+
+    <filter class="NewChromaHistogramFilter" name="histogram" />
+    <filter class="ColorfulnessFilter" name="colorfulness" />
+
+    <filter class="MotionSensorWTime" name="motion" />
+
+    <filter class="AvgBrightnessFilter" name="brightness" />
+
+    <filter class="RotateFilter" name="rotate" />
+
+    <filter class="BrightnessFilter" name="snapBrightness" />
+    <filter class="WaveTriggerFilter" name="snapEffect" />
+    <!-- Connections -->
+    <connect sourceFilter="camera" sourcePort="video"
+        targetFilter="rotate" targetPort="image" />
+
+    <connect sourceFilter="camera" sourcePort="orientation"
+        targetFilter="rotate" targetPort="rotateAngle" />
+
+    <connect sourceFilter="rotate" sourcePort="image"
+        targetFilter="resize" targetPort="image" />
+    <connect sourceFilter="resize" sourcePort="image"
+        targetFilter="preMainBranch" targetPort="input" />
+    <connect sourceFilter="preMainBranch" sourcePort="toMainBranch"
+        targetFilter="scale" targetPort="image" />
+    <connect sourceFilter="scale" sourcePort="image"
+         targetFilter="mainBranch" targetPort="input" />
+
+    <connect sourceFilter="preMainBranch" sourcePort="toGoodnessFilter"
+        targetFilter="goodnessFilter" targetPort="image" />
+    <connect sourceFilter="mainBranch" sourcePort="toFeatureBranch"
+        targetFilter="secondaryScale" targetPort="image" />
+    <connect sourceFilter="secondaryScale" sourcePort="image"
+        targetFilter="featureBranch" targetPort="input" />
+
+    <connect sourceFilter="featureBranch" sourcePort="toSobel"
+         targetFilter="sobel" targetPort="image" />
+
+    <connect sourceFilter="sobel" sourcePort="magnitude"
+         targetFilter="sobelConverter" targetPort="image" />
+
+    <connect sourceFilter="sobelConverter" sourcePort="image"
+         targetFilter="statsFilter" targetPort="buffer" />
+
+    <connect sourceFilter="statsFilter" sourcePort="mean"
+         targetFilter="normFilter" targetPort="x" />
+
+    <connect sourceFilter="statsFilter" sourcePort="stdev"
+         targetFilter="normFilter" targetPort="y" />
+
+    <connect sourceFilter="normFilter" sourcePort="norm"
+         targetFilter="avgFilter" targetPort="sharpness" />
+
+    <connect sourceFilter="avgFilter" sourcePort="avg"
+         targetFilter="goodnessFilter" targetPort="sharpness" />
+
+    <connect sourceFilter="goodnessFilter" sourcePort="goodOrBadPic"
+         targetFilter="goodOrBadTextView" targetPort="text" />
+
+    <connect sourceFilter="featureBranch" sourcePort="toExposure"
+        targetFilter="exposure" targetPort="image" />
+    <connect sourceFilter="exposure" sourcePort="underExposureRating"
+        targetFilter="goodnessFilter" targetPort="underExposure" />
+    <connect sourceFilter="exposure" sourcePort="overExposureRating"
+        targetFilter="goodnessFilter" targetPort="overExposure" />
+
+    <connect sourceFilter="goodnessFilter" sourcePort="score"
+        targetFilter="scoreToString" targetPort="object" />
+    <connect sourceFilter="scoreToString" sourcePort="string"
+        targetFilter="scoreTextView" targetPort="text" />
+
+    <connect sourceFilter="mainBranch" sourcePort="camView"
+        targetFilter="throughput" targetPort="frame" />
+    <connect sourceFilter="throughput" sourcePort="frame"
+        targetFilter="snapBrightness" targetPort="image" />
+    <connect sourceFilter="snapEffect" sourcePort="value"
+        targetFilter="snapBrightness" targetPort="brightness" />
+    <connect sourceFilter="snapBrightness" sourcePort="image"
+        targetFilter="camViewTarget" targetPort="image" />
+    <connect sourceFilter="throughput" sourcePort="throughput"
+        targetFilter="throughputToString" targetPort="object" />
+    <connect sourceFilter="throughputToString" sourcePort="string"
+        targetFilter="fpsTextView" targetPort="text" />
+
+    <connect sourceFilter="featureBranch" sourcePort="contrastRatio"
+        targetFilter="contrast" targetPort="image" />
+    <connect sourceFilter="contrast" sourcePort="contrastRatingToGoodness"
+        targetFilter="goodnessFilter" targetPort="contrastRating" />
+
+    <connect sourceFilter="mainBranch" sourcePort="colorfulness"
+        targetFilter="histogram" targetPort="image" />
+    <connect sourceFilter="histogram" sourcePort="histogram"
+        targetFilter="colorfulness" targetPort="histogram" />
+    <connect sourceFilter="colorfulness" sourcePort="score"
+        targetFilter="goodnessFilter" targetPort="colorfulness" />
+
+    <connect sourceFilter="motion" sourcePort="values"
+        targetFilter="goodnessFilter" targetPort="motionValues" />
+
+    <connect sourceFilter="featureBranch" sourcePort="brightness"
+        targetFilter="brightness" targetPort="image" />
+    <connect sourceFilter="brightness" sourcePort="brightnessRating"
+        targetFilter="goodnessFilter" targetPort="brightness" />
+</graph>
+

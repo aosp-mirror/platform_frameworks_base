@@ -1,0 +1,8 @@
+page.title=Best Practices for Background Jobs
+page.trainingcourse=true
+
+@jd:body
+
+
+<p>These classes show you how to run jobs in the background to boost your
+application's performance and minimize its drain on the battery.</p>

@@ -445,7 +445,10 @@ public final class KeyChain {
             }
             @Override public void onServiceDisconnected(ComponentName name) {}
         };
-        boolean isBound = context.bindService(new Intent(IKeyChainService.class.getName()),
+        Intent intent = new Intent(IKeyChainService.class.getName());
+        ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
+        intent.setComponent(comp);
+        boolean isBound = context.bindService(intent,
                                               keyChainServiceConnection,
                                               Context.BIND_AUTO_CREATE);
         if (!isBound) {

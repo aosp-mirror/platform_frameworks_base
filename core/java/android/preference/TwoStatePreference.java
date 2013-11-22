@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -215,17 +216,17 @@ public abstract class TwoStatePreference extends Preference {
         TextView summaryView = (TextView) view.findViewById(com.android.internal.R.id.summary);
         if (summaryView != null) {
             boolean useDefaultSummary = true;
-            if (mChecked && mSummaryOn != null) {
+            if (mChecked && !TextUtils.isEmpty(mSummaryOn)) {
                 summaryView.setText(mSummaryOn);
                 useDefaultSummary = false;
-            } else if (!mChecked && mSummaryOff != null) {
+            } else if (!mChecked && !TextUtils.isEmpty(mSummaryOff)) {
                 summaryView.setText(mSummaryOff);
                 useDefaultSummary = false;
             }
 
             if (useDefaultSummary) {
                 final CharSequence summary = getSummary();
-                if (summary != null) {
+                if (!TextUtils.isEmpty(summary)) {
                     summaryView.setText(summary);
                     useDefaultSummary = false;
                 }

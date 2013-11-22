@@ -71,7 +71,6 @@ public class NetworkTimeUpdateService {
 
     // NTP lookup is done on this thread and handler
     private Handler mHandler;
-    private HandlerThread mThread;
     private AlarmManager mAlarmManager;
     private PendingIntent mPendingPollIntent;
     private SettingsObserver mSettingsObserver;
@@ -109,14 +108,14 @@ public class NetworkTimeUpdateService {
     }
 
     /** Initialize the receivers and initiate the first NTP request */
-    public void systemReady() {
+    public void systemRunning() {
         registerForTelephonyIntents();
         registerForAlarms();
         registerForConnectivityIntents();
 
-        mThread = new HandlerThread(TAG);
-        mThread.start();
-        mHandler = new MyHandler(mThread.getLooper());
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mHandler = new MyHandler(thread.getLooper());
         // Check the network time on the new thread
         mHandler.obtainMessage(EVENT_POLL_NETWORK_TIME).sendToTarget();
 

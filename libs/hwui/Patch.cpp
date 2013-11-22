@@ -20,9 +20,10 @@
 
 #include <utils/Log.h>
 
-#include "Patch.h"
 #include "Caches.h"
+#include "Patch.h"
 #include "Properties.h"
+#include "UvMapper.h"
 
 namespace android {
 namespace uirenderer {
@@ -31,90 +32,58 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Patch::Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQuads):
-        mXCount(xCount), mYCount(yCount), mEmptyQuads(emptyQuads) {
-    // Initialized with the maximum number of vertices we will need
-    // 2 triangles per patch, 3 vertices per triangle
-    uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
-    mVertices = new TextureVertex[maxVertices];
-    mAllocatedVerticesCount = 0;
-
-    verticesCount = 0;
-    hasEmptyQuads = emptyQuads > 0;
-
-    mColorKey = 0;
-    mXDivs = new int32_t[mXCount];
-    mYDivs = new int32_t[mYCount];
-
-    PATCH_LOGD("    patch: xCount = %d, yCount = %d, emptyQuads = %d, max vertices = %d",
-            xCount, yCount, emptyQuads, maxVertices);
-
-    glGenBuffers(1, &meshBuffer);
+Patch::Patch(): vertices(NULL), verticesCount(0), indexCount(0), hasEmptyQuads(false) {
 }
 
 Patch::~Patch() {
-    delete[] mVertices;
-    delete[] mXDivs;
-    delete[] mYDivs;
-    glDeleteBuffers(1, &meshBuffer);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Patch management
-///////////////////////////////////////////////////////////////////////////////
-
-void Patch::copy(const int32_t* xDivs, const int32_t* yDivs) {
-    memcpy(mXDivs, xDivs, mXCount * sizeof(int32_t));
-    memcpy(mYDivs, yDivs, mYCount * sizeof(int32_t));
-}
-
-void Patch::updateColorKey(const uint32_t colorKey) {
-    mColorKey = colorKey;
-}
-
-bool Patch::matches(const int32_t* xDivs, const int32_t* yDivs,
-        const uint32_t colorKey, const int8_t emptyQuads) {
-
-    bool matches = true;
-
-    if (mEmptyQuads != emptyQuads) {
-        mEmptyQuads = emptyQuads;
-        hasEmptyQuads = emptyQuads > 0;
-        matches = false;
-    }
-
-    if (mColorKey != colorKey) {
-        updateColorKey(colorKey);
-        matches = false;
-    }
-
-    if (memcmp(mXDivs, xDivs, mXCount * sizeof(int32_t))) {
-        memcpy(mXDivs, xDivs, mXCount * sizeof(int32_t));
-        matches = false;
-    }
-
-    if (memcmp(mYDivs, yDivs, mYCount * sizeof(int32_t))) {
-        memcpy(mYDivs, yDivs, mYCount * sizeof(int32_t));
-        matches = false;
-    }
-
-    return matches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Vertices management
 ///////////////////////////////////////////////////////////////////////////////
 
-void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
-        float left, float top, float right, float bottom) {
-    if (hasEmptyQuads) quads.clear();
+uint32_t Patch::getSize() const {
+    return verticesCount * sizeof(TextureVertex);
+}
 
-    // Reset the vertices count here, we will count exactly how many
-    // vertices we actually need when generating the quads
-    verticesCount = 0;
+TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
+        float width, float height, const Res_png_9patch* patch) {
+    UvMapper mapper;
+    return createMesh(bitmapWidth, bitmapHeight, width, height, mapper, patch);
+}
 
-    const uint32_t xStretchCount = (mXCount + 1) >> 1;
-    const uint32_t yStretchCount = (mYCount + 1) >> 1;
+TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
+        float width, float height, const UvMapper& mapper, const Res_png_9patch* patch) {
+    if (vertices) return vertices;
+
+    int8_t emptyQuads = 0;
+    mColors = patch->colors;
+
+    const int8_t numColors = patch->numColors;
+    if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
+        for (int8_t i = 0; i < numColors; i++) {
+            if (mColors[i] == 0x0) {
+                emptyQuads++;
+            }
+        }
+    }
+
+    hasEmptyQuads = emptyQuads > 0;
+
+    uint32_t xCount = patch->numXDivs;
+    uint32_t yCount = patch->numYDivs;
+
+    uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 4;
+    if (maxVertices == 0) return NULL;
+
+    TextureVertex* tempVertices = new TextureVertex[maxVertices];
+    TextureVertex* vertex = tempVertices;
+
+    const int32_t* xDivs = patch->xDivs;
+    const int32_t* yDivs = patch->yDivs;
+
+    const uint32_t xStretchCount = (xCount + 1) >> 1;
+    const uint32_t yStretchCount = (yCount + 1) >> 1;
 
     float stretchX = 0.0f;
     float stretchY = 0.0f;
@@ -124,29 +93,28 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
 
     if (xStretchCount > 0) {
         uint32_t stretchSize = 0;
-        for (uint32_t i = 1; i < mXCount; i += 2) {
-            stretchSize += mXDivs[i] - mXDivs[i - 1];
+        for (uint32_t i = 1; i < xCount; i += 2) {
+            stretchSize += xDivs[i] - xDivs[i - 1];
         }
         const float xStretchTex = stretchSize;
         const float fixed = bitmapWidth - stretchSize;
-        const float xStretch = fmaxf(right - left - fixed, 0.0f);
+        const float xStretch = fmaxf(width - fixed, 0.0f);
         stretchX = xStretch / xStretchTex;
-        rescaleX = fixed == 0.0f ? 0.0f : fminf(fmaxf(right - left, 0.0f) / fixed, 1.0f);
+        rescaleX = fixed == 0.0f ? 0.0f : fminf(fmaxf(width, 0.0f) / fixed, 1.0f);
     }
 
     if (yStretchCount > 0) {
         uint32_t stretchSize = 0;
-        for (uint32_t i = 1; i < mYCount; i += 2) {
-            stretchSize += mYDivs[i] - mYDivs[i - 1];
+        for (uint32_t i = 1; i < yCount; i += 2) {
+            stretchSize += yDivs[i] - yDivs[i - 1];
         }
         const float yStretchTex = stretchSize;
         const float fixed = bitmapHeight - stretchSize;
-        const float yStretch = fmaxf(bottom - top - fixed, 0.0f);
+        const float yStretch = fmaxf(height - fixed, 0.0f);
         stretchY = yStretch / yStretchTex;
-        rescaleY = fixed == 0.0f ? 0.0f : fminf(fmaxf(bottom - top, 0.0f) / fixed, 1.0f);
+        rescaleY = fixed == 0.0f ? 0.0f : fminf(fmaxf(height, 0.0f) / fixed, 1.0f);
     }
 
-    TextureVertex* vertex = mVertices;
     uint32_t quadCount = 0;
 
     float previousStepY = 0.0f;
@@ -155,8 +123,10 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     float y2 = 0.0f;
     float v1 = 0.0f;
 
-    for (uint32_t i = 0; i < mYCount; i++) {
-        float stepY = mYDivs[i];
+    mUvMapper = mapper;
+
+    for (uint32_t i = 0; i < yCount; i++) {
+        float stepY = yDivs[i];
         const float segment = stepY - previousStepY;
 
         if (i & 1) {
@@ -170,15 +140,8 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         v1 += vOffset / bitmapHeight;
 
         if (stepY > 0.0f) {
-#if DEBUG_EXPLODE_PATCHES
-            y1 += i * EXPLODE_GAP;
-            y2 += i * EXPLODE_GAP;
-#endif
-            generateRow(vertex, y1, y2, v1, v2, stretchX, rescaleX, right - left,
-                    bitmapWidth, quadCount);
-#if DEBUG_EXPLODE_PATCHES
-            y2 -= i * EXPLODE_GAP;
-#endif
+            generateRow(xDivs, xCount, vertex, y1, y2, v1, v2, stretchX, rescaleX,
+                    width, bitmapWidth, quadCount);
         }
 
         y1 = y2;
@@ -188,34 +151,25 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     }
 
     if (previousStepY != bitmapHeight) {
-        y2 = bottom - top;
-#if DEBUG_EXPLODE_PATCHES
-        y1 += mYCount * EXPLODE_GAP;
-        y2 += mYCount * EXPLODE_GAP;
-#endif
-        generateRow(vertex, y1, y2, v1, 1.0f, stretchX, rescaleX, right - left,
-                bitmapWidth, quadCount);
+        y2 = height;
+        generateRow(xDivs, xCount, vertex, y1, y2, v1, 1.0f, stretchX, rescaleX,
+                width, bitmapWidth, quadCount);
     }
 
-    if (verticesCount > 0) {
-        Caches& caches = Caches::getInstance();
-        caches.bindMeshBuffer(meshBuffer);
-        if (mAllocatedVerticesCount < verticesCount) {
-            glBufferData(GL_ARRAY_BUFFER, sizeof(TextureVertex) * verticesCount,
-                    mVertices, GL_DYNAMIC_DRAW);
-            mAllocatedVerticesCount = verticesCount;
-        } else {
-            glBufferSubData(GL_ARRAY_BUFFER, 0,
-                    sizeof(TextureVertex) * verticesCount, mVertices);
-        }
-        caches.resetVertexPointers();
+    if (verticesCount == maxVertices) {
+        vertices = tempVertices;
+    } else {
+        vertices = new TextureVertex[verticesCount];
+        memcpy(vertices, tempVertices, verticesCount * sizeof(TextureVertex));
+        delete[] tempVertices;
     }
 
-    PATCH_LOGD("    patch: new vertices count = %d", verticesCount);
+    return vertices;
 }
 
-void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, float v2,
-        float stretchX, float rescaleX, float width, float bitmapWidth, uint32_t& quadCount) {
+void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,
+        float y1, float y2, float v1, float v2, float stretchX, float rescaleX,
+        float width, float bitmapWidth, uint32_t& quadCount) {
     float previousStepX = 0.0f;
 
     float x1 = 0.0f;
@@ -223,8 +177,8 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
     float u1 = 0.0f;
 
     // Generate the row quad by quad
-    for (uint32_t i = 0; i < mXCount; i++) {
-        float stepX = mXDivs[i];
+    for (uint32_t i = 0; i < xCount; i++) {
+        float stepX = xDivs[i];
         const float segment = stepX - previousStepX;
 
         if (i & 1) {
@@ -238,14 +192,7 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
         u1 += uOffset / bitmapWidth;
 
         if (stepX > 0.0f) {
-#if DEBUG_EXPLODE_PATCHES
-            x1 += i * EXPLODE_GAP;
-            x2 += i * EXPLODE_GAP;
-#endif
             generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2, quadCount);
-#if DEBUG_EXPLODE_PATCHES
-            x2 -= i * EXPLODE_GAP;
-#endif
         }
 
         x1 = x2;
@@ -256,10 +203,6 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
 
     if (previousStepX != bitmapWidth) {
         x2 = width;
-#if DEBUG_EXPLODE_PATCHES
-        x1 += mXCount * EXPLODE_GAP;
-        x2 += mXCount * EXPLODE_GAP;
-#endif
         generateQuad(vertex, x1, y1, x2, y2, u1, v1, 1.0f, v2, quadCount);
     }
 }
@@ -275,11 +218,11 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     if (y2 < 0.0f) y2 = 0.0f;
 
     // Skip degenerate and transparent (empty) quads
-    if (((mColorKey >> oldQuadCount) & 0x1) || x1 >= x2 || y1 >= y2) {
+    if ((mColors[oldQuadCount] == 0) || x1 >= x2 || y1 >= y2) {
 #if DEBUG_PATCHES_EMPTY_VERTICES
         PATCH_LOGD("    quad %d (empty)", oldQuadCount);
-        PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.4f, %.4f", x1, y1, u1, v1);
-        PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.4f, %.4f", x2, y2, u2, v2);
+        PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.8f, %.8f", x1, y1, u1, v1);
+        PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.8f, %.8f", x2, y2, u2, v2);
 #endif
         return;
     }
@@ -290,23 +233,20 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
         quads.add(bounds);
     }
 
-    // Left triangle
+    mUvMapper.map(u1, v1, u2, v2);
+
     TextureVertex::set(vertex++, x1, y1, u1, v1);
     TextureVertex::set(vertex++, x2, y1, u2, v1);
     TextureVertex::set(vertex++, x1, y2, u1, v2);
-
-    // Right triangle
-    TextureVertex::set(vertex++, x1, y2, u1, v2);
-    TextureVertex::set(vertex++, x2, y1, u2, v1);
     TextureVertex::set(vertex++, x2, y2, u2, v2);
 
-    // A quad is made of 2 triangles, 6 vertices
-    verticesCount += 6;
+    verticesCount += 4;
+    indexCount += 6;
 
 #if DEBUG_PATCHES_VERTICES
     PATCH_LOGD("    quad %d", oldQuadCount);
-    PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.4f, %.4f", x1, y1, u1, v1);
-    PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.4f, %.4f", x2, y2, u2, v2);
+    PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.8f, %.8f", x1, y1, u1, v1);
+    PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.8f, %.8f", x2, y2, u2, v2);
 #endif
 }
 

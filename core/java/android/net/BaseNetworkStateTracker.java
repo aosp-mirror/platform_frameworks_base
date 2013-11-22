@@ -57,6 +57,10 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
         mLinkCapabilities = new LinkCapabilities();
     }
 
+    protected BaseNetworkStateTracker() {
+        // By default, let the sub classes construct everything
+    }
+
     @Deprecated
     protected Handler getTargetHandler() {
         return mTarget;
@@ -73,31 +77,43 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     }
 
     @Override
-    public final void startMonitoring(Context context, Handler target) {
+    public void startMonitoring(Context context, Handler target) {
         mContext = Preconditions.checkNotNull(context);
         mTarget = Preconditions.checkNotNull(target);
         startMonitoringInternal();
     }
 
-    protected abstract void startMonitoringInternal();
+    protected void startMonitoringInternal() {
+
+    }
 
     @Override
-    public final NetworkInfo getNetworkInfo() {
+    public NetworkInfo getNetworkInfo() {
         return new NetworkInfo(mNetworkInfo);
     }
 
     @Override
-    public final LinkProperties getLinkProperties() {
+    public LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
     }
 
     @Override
-    public final LinkCapabilities getLinkCapabilities() {
+    public LinkCapabilities getLinkCapabilities() {
         return new LinkCapabilities(mLinkCapabilities);
     }
 
     @Override
+    public LinkQualityInfo getLinkQualityInfo() {
+        return null;
+    }
+
+    @Override
     public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         // not implemented
     }
 
@@ -170,5 +186,24 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     @Override
     public void supplyMessenger(Messenger messenger) {
         // not supported on this network
+    }
+
+    @Override
+    public String getNetworkInterfaceName() {
+        if (mLinkProperties != null) {
+            return mLinkProperties.getInterfaceName();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void startSampling(SamplingDataTracker.SamplingSnapshot s) {
+        // nothing to do
+    }
+
+    @Override
+    public void stopSampling(SamplingDataTracker.SamplingSnapshot s) {
+        // nothing to do
     }
 }

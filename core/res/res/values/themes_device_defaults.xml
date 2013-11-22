@@ -216,6 +216,12 @@ easier.
     <style name="Theme.DeviceDefault.NoActionBar.Overscan" parent="Theme.Holo.NoActionBar.Overscan" >
     </style>
 
+    <!-- Variant of {@link #Theme_DeviceDefault} that has no title bar and translucent
+         system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
+         {@link android.R.attr#windowTranslucentNavigation} to true. -->
+    <style name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" parent="Theme.Holo.NoActionBar.TranslucentDecor" >
+    </style>
+
     <!-- Variant of {@link #Theme_DeviceDefault} with a light-colored style -->
     <style name="Theme.DeviceDefault.Light" parent="Theme.Holo.Light" >
         <!-- Text styles -->
@@ -375,6 +381,12 @@ easier.
     to true. -->
     <style name="Theme.DeviceDefault.Light.NoActionBar.Overscan"
            parent="Theme.Holo.Light.NoActionBar.Overscan" >
+    </style>
+    <!-- Variant of {@link #Theme_DeviceDefault_Light} that has no title bar and translucent
+         system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
+         {@link android.R.attr#windowTranslucentNavigation} to true. -->
+    <style name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor"
+           parent="Theme.Holo.Light.NoActionBar.TranslucentDecor" >
     </style>
     <!-- DeviceDefault theme for dialog windows and activities. This changes the window to be
     floating (not fill the entire screen), and puts a frame around its contents. You can set this

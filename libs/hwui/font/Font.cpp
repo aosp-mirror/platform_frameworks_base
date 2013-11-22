@@ -55,6 +55,7 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mStyle = paint->getStyle();
     mStrokeWidth = paint->getStrokeWidth();
     mAntiAliasing = paint->isAntiAlias();
+    mHinting = paint->getHinting();
     mLookupTransform.reset();
     mLookupTransform[SkMatrix::kMScaleX] = roundf(fmaxf(1.0f, matrix[mat4::kScaleX]));
     mLookupTransform[SkMatrix::kMScaleY] = roundf(fmaxf(1.0f, matrix[mat4::kScaleY]));
@@ -80,6 +81,7 @@ hash_t Font::FontDescription::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(mStyle));
     hash = JenkinsHashMix(hash, android::hash_type(mStrokeWidth));
     hash = JenkinsHashMix(hash, int(mAntiAliasing));
+    hash = JenkinsHashMix(hash, android::hash_type(mHinting));
     hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMScaleX]));
     hash = JenkinsHashMix(hash, android::hash_type(mLookupTransform[SkMatrix::kMScaleY]));
     return JenkinsHashWhiten(hash);
@@ -109,6 +111,9 @@ int Font::FontDescription::compare(const Font::FontDescription& lhs,
     if (lhs.mStrokeWidth > rhs.mStrokeWidth) return +1;
 
     deltaInt = int(lhs.mAntiAliasing) - int(rhs.mAntiAliasing);
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = int(lhs.mHinting) - int(rhs.mHinting);
     if (deltaInt != 0) return deltaInt;
 
     if (lhs.mLookupTransform[SkMatrix::kMScaleX] <

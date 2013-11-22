@@ -23,8 +23,8 @@ next.link=platforms.html
     <ul>
       <li><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple
 Screens</a></li>
-      <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
-Screens</a></li>
+      <li><a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing
+        Resources</a></li>
       <li><a href="{@docRoot}design/style/iconography.html">Iconography design guide</a></li>
     </ul>
   </div>

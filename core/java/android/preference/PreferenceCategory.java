@@ -62,4 +62,8 @@ public class PreferenceCategory extends PreferenceGroup {
         return false;
     }
     
+    @Override
+    public boolean shouldDisableDependents() {
+        return !super.isEnabled();
+    }
 }

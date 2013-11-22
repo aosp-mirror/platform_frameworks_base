@@ -16,16 +16,15 @@
 
 package com.android.server.am;
 
-import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Slog;
 
-class StrictModeViolationDialog extends BaseErrorDialog {
+final class StrictModeViolationDialog extends BaseErrorDialog {
     private final static String TAG = "StrictModeViolationDialog";
 
     private final ActivityManagerService mService;
@@ -75,7 +74,7 @@ class StrictModeViolationDialog extends BaseErrorDialog {
         }
 
         setTitle(res.getText(com.android.internal.R.string.aerr_title));
-        getWindow().addFlags(FLAG_SYSTEM_ERROR);
+        getWindow().addPrivateFlags(PRIVATE_FLAG_SYSTEM_ERROR);
         getWindow().setTitle("Strict Mode Violation: " + app.info.processName);
 
         // After the timeout, pretend the user clicked the quit button

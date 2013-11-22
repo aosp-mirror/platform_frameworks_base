@@ -22,6 +22,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests for the various lifecycle events of Animators. This abstract class is subclassed by
@@ -42,12 +43,15 @@ public abstract class EventsTest
     protected static final int ANIM_DELAY = 100;
     protected static final int ANIM_MID_DURATION = ANIM_DURATION / 2;
     protected static final int ANIM_MID_DELAY = ANIM_DELAY / 2;
+    protected static final int ANIM_PAUSE_DURATION = ANIM_DELAY;
+    protected static final int ANIM_PAUSE_DELAY = ANIM_DELAY / 2;
     protected static final int FUTURE_RELEASE_DELAY = 50;
+    protected static final int ANIM_FULL_DURATION_SLOP = 100;
 
     private boolean mStarted;  // tracks whether we've received the onAnimationStart() callback
     protected boolean mRunning;  // tracks whether we've started the animator
-    private boolean mCanceled; // trackes whether we've canceled the animator
-    protected Animator.AnimatorListener mFutureListener; // mechanism for delaying the end of the test
+    private boolean mCanceled; // tracks whether we've canceled the animator
+    protected Animator.AnimatorListener mFutureListener; // mechanism for delaying end of the test
     protected FutureWaiter mFuture; // Mechanism for waiting for the UI test to complete
     private Animator.AnimatorListener mListener; // Listener that handles/tests the events
 
@@ -97,6 +101,48 @@ public abstract class EventsTest
         public void run() {
             try {
                 mAnim.end();
+            } catch (junit.framework.AssertionFailedError e) {
+                mFuture.setException(new RuntimeException(e));
+            }
+        }
+    };
+
+    /**
+     * Pauses the given animator. Used to delay pausing until some later time (after the
+     * animator has started playing).
+     */
+    static class Pauser implements Runnable {
+        Animator mAnim;
+        FutureWaiter mFuture;
+        public Pauser(Animator anim, FutureWaiter future) {
+            mAnim = anim;
+            mFuture = future;
+        }
+        @Override
+        public void run() {
+            try {
+                mAnim.pause();
+            } catch (junit.framework.AssertionFailedError e) {
+                mFuture.setException(new RuntimeException(e));
+            }
+        }
+    };
+
+    /**
+     * Resumes the given animator. Used to delay resuming until some later time (after the
+     * animator has paused for some duration).
+     */
+    static class Resumer implements Runnable {
+        Animator mAnim;
+        FutureWaiter mFuture;
+        public Resumer(Animator anim, FutureWaiter future) {
+            mAnim = anim;
+            mFuture = future;
+        }
+        @Override
+        public void run() {
+            try {
+                mAnim.resume();
             } catch (junit.framework.AssertionFailedError e) {
                 mFuture.setException(new RuntimeException(e));
             }
@@ -555,4 +601,114 @@ public abstract class EventsTest
         mFuture.get(getTimeout(),  TimeUnit.MILLISECONDS);
      }
 
+    /**
+     * Verify that pausing and resuming an animator ends within
+     * the appropriate timeout duration.
+     */
+    @MediumTest
+    public void testPauseResume() throws Exception {
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Handler handler = new Handler();
+                    mAnimator.addListener(mFutureListener);
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Pauser(mAnimator, mFuture), ANIM_PAUSE_DELAY);
+                    handler.postDelayed(new Resumer(mAnimator, mFuture),
+                            ANIM_PAUSE_DELAY + ANIM_PAUSE_DURATION);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(getTimeout() + ANIM_PAUSE_DURATION, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Verify that pausing and resuming a startDelayed animator ends within
+     * the appropriate timeout duration.
+     */
+    @MediumTest
+    public void testPauseResumeDelayed() throws Exception {
+        mAnimator.setStartDelay(ANIM_DELAY);
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Handler handler = new Handler();
+                    mAnimator.addListener(mFutureListener);
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Pauser(mAnimator, mFuture), ANIM_PAUSE_DELAY);
+                    handler.postDelayed(new Resumer(mAnimator, mFuture),
+                            ANIM_PAUSE_DELAY + ANIM_PAUSE_DURATION);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(getTimeout() + ANIM_PAUSE_DURATION + ANIM_FULL_DURATION_SLOP,
+                TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Verify that pausing an animator without resuming it causes a timeout.
+     */
+    @MediumTest
+    public void testPauseTimeout() throws Exception {
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Handler handler = new Handler();
+                    mAnimator.addListener(mFutureListener);
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Pauser(mAnimator, mFuture), ANIM_PAUSE_DELAY);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        try {
+            mFuture.get(getTimeout() + ANIM_PAUSE_DURATION + ANIM_FULL_DURATION_SLOP,
+                    TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            // Expected behavior, swallow the exception
+        }
+    }
+
+    /**
+     * Verify that pausing a startDelayed animator without resuming it causes a timeout.
+     */
+    @MediumTest
+    public void testPauseTimeoutDelayed() throws Exception {
+        mAnimator.setStartDelay(ANIM_DELAY);
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Handler handler = new Handler();
+                    mAnimator.addListener(mFutureListener);
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Pauser(mAnimator, mFuture), ANIM_PAUSE_DELAY);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        try {
+            mFuture.get(getTimeout() + ANIM_PAUSE_DURATION + ANIM_FULL_DURATION_SLOP,
+                    TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            // Expected behavior, swallow the exception
+        }
+    }
 }

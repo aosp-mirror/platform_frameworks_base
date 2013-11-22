@@ -1,0 +1,62 @@
+page.title=Sharing Files with NFC
+page.tags="NfcAdapter","Android Beam","share","file transfer"
+
+trainingnavtop=true
+startpage=true
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 4.1 (API Level 16) or higher</li>
+  <li>At least two NFC-enabled Android devices (NFC is not supported in the emulator)</li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li>
+    <a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal"
+    >Using the External Storage</a>
+  </li>
+</ul>
+
+</div>
+</div>
+
+<p>
+    Android allows you to transfer large files between devices using the Android Beam file transfer
+    feature. This feature has a simple API and allows users to start the transfer process by simply
+    touching devices. In response, Android Beam file transfer automatically copies files from one
+    device to the other and notifies the user when it's finished.
+</p>
+<p>
+    While the Android Beam file transfer API handles large amounts of data, the Android Beam NDEF
+    transfer API introduced in Android 4.0 (API level 14) handles small amounts of data such as
+    URIs or other small messages. In addition, Android Beam is only one of the features available
+    in the Android NFC framework, which allows you to read NDEF messages from NFC tags. To learn
+    more about Android Beam, see the topic
+    <a href="{@docRoot}guide/topics/connectivity/nfc/nfc.html#p2p"
+    >Beaming NDEF Messages to Other Devices</a>. To learn more about the NFC framework, see the
+    <a href="{@docRoot}guide/topics/connectivity/nfc/index.html"
+    >Near Field Communication</a> API guide.
+</p>
+<h2>Lessons</h2>
+<dl>
+    <dt>
+        <b><a href="send-files.html">Sending Files to Another Device</a></b>
+    </dt>
+    <dd>Learn how to set up your app to send files to another device.</dd>
+
+    <dt>
+        <b><a href="receive-files.html">Receiving Files from Another Device</a></b>
+    </dt>
+    <dd>
+        Learn how to set up your app to receive files sent by another device.
+    </dd>
+</dl>
+
+

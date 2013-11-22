@@ -27,7 +27,6 @@
 #include <core/SkPixelRef.h>
 #include <core/SkStream.h>
 #include <core/SkTemplates.h>
-#include <images/SkImageDecoder.h>
 
 #include <androidfw/Asset.h>
 #include <androidfw/AssetManager.h>
@@ -185,7 +184,7 @@ static jint
 nContextCreate(JNIEnv *_env, jobject _this, jint dev, jint ver, jint sdkVer, jint ct)
 {
     LOG_API("nContextCreate");
-    return (jint)rsContextCreate((RsDevice)dev, ver, sdkVer, (RsContextType)ct, false, false);
+    return (jint)rsContextCreate((RsDevice)dev, ver, sdkVer, (RsContextType)ct, 0);
 }
 
 static jint

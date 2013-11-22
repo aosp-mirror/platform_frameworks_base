@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Báo cáo lỗi đã được chụp"</string>
+    <string name="bugreport_finished_text" msgid="3559904746859400732">"Chạm để chia sẻ báo cáo lỗi của bạn"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"Các báo cáo lỗi chứa dữ liệu từ nhiều tệp nhật ký khác nhau của hệ thống, bao gồm cả thông tin cá nhân và riêng tư. Chỉ chia sẻ báo cáo lỗi với các ứng dụng và những người mà bạn tin tưởng."</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Hiển thị thông báo này vào lần tới"</string>
+</resources>

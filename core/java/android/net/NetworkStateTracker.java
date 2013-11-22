@@ -83,7 +83,6 @@ public interface NetworkStateTracker {
      */
     public static final int EVENT_NETWORK_DISCONNECTED = BASE_NETWORK_STATE_TRACKER + 5;
 
-
     /**
      * -------------------------------------------------------------
      * Control Interface
@@ -120,6 +119,12 @@ public interface NetworkStateTracker {
     public LinkCapabilities getLinkCapabilities();
 
     /**
+     * Get interesting information about this network link
+     * @return a copy of link information, null if not available
+     */
+    public LinkQualityInfo getLinkQualityInfo();
+
+    /**
      * Return the system properties name associated with the tcp buffer sizes
      * for this network.
      */
@@ -142,6 +147,11 @@ public interface NetworkStateTracker {
      * Ready to switch on to the network after captive portal check
      */
     public void captivePortalCheckComplete();
+
+    /**
+     * Captive portal check has completed
+     */
+    public void captivePortalCheckCompleted(boolean isCaptive);
 
     /**
      * Turn the wireless radio off for a network.
@@ -229,4 +239,20 @@ public interface NetworkStateTracker {
      * the underlying network specific code.
      */
     public void supplyMessenger(Messenger messenger);
+
+    /*
+     * Network interface name that we'll lookup for sampling data
+     */
+    public String getNetworkInterfaceName();
+
+    /*
+     * Save the starting sample
+     */
+    public void startSampling(SamplingDataTracker.SamplingSnapshot s);
+
+    /*
+     * Save the ending sample
+     */
+    public void stopSampling(SamplingDataTracker.SamplingSnapshot s);
+
 }

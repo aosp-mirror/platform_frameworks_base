@@ -18,17 +18,20 @@ package android.hardware.display;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 
 import java.util.ArrayList;
 
@@ -161,18 +164,18 @@ public final class DisplayManagerGlobal {
      * Gets information about a logical display.
      *
      * The display metrics may be adjusted to provide compatibility
-     * for legacy applications.
+     * for legacy applications or limited screen areas.
      *
      * @param displayId The logical display id.
-     * @param cih The compatibility info, or null if none is required.
+     * @param daj The compatibility info and activityToken.
      * @return The display object, or null if there is no display with the given id.
      */
-    public Display getCompatibleDisplay(int displayId, CompatibilityInfoHolder cih) {
+    public Display getCompatibleDisplay(int displayId, DisplayAdjustments daj) {
         DisplayInfo displayInfo = getDisplayInfo(displayId);
         if (displayInfo == null) {
             return null;
         }
-        return new Display(this, displayId, displayInfo, cih);
+        return new Display(this, displayId, displayInfo, daj);
     }
 
     /**
@@ -182,7 +185,18 @@ public final class DisplayManagerGlobal {
      * @return The display object, or null if there is no display with the given id.
      */
     public Display getRealDisplay(int displayId) {
-        return getCompatibleDisplay(displayId, null);
+        return getCompatibleDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+    }
+
+    /**
+     * Gets information about a logical display without applying any compatibility metrics.
+     *
+     * @param displayId The logical display id.
+     * @param IBinder the activity token for this display.
+     * @return The display object, or null if there is no display with the given id.
+     */
+    public Display getRealDisplay(int displayId, IBinder token) {
+        return getCompatibleDisplay(displayId, new DisplayAdjustments(token));
     }
 
     public void registerDisplayListener(DisplayListener listener, Handler handler) {
@@ -273,6 +287,22 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    public void pauseWifiDisplay() {
+        try {
+            mDm.pauseWifiDisplay();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to pause Wifi display.", ex);
+        }
+    }
+
+    public void resumeWifiDisplay() {
+        try {
+            mDm.resumeWifiDisplay();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to resume Wifi display.", ex);
+        }
+    }
+
     public void disconnectWifiDisplay() {
         try {
             mDm.disconnectWifiDisplay();
@@ -312,6 +342,53 @@ public final class DisplayManagerGlobal {
         } catch (RemoteException ex) {
             Log.e(TAG, "Failed to get Wifi display status.", ex);
             return new WifiDisplayStatus();
+        }
+    }
+
+    public VirtualDisplay createVirtualDisplay(Context context, String name,
+            int width, int height, int densityDpi, Surface surface, int flags) {
+        if (TextUtils.isEmpty(name)) {
+            throw new IllegalArgumentException("name must be non-null and non-empty");
+        }
+        if (width <= 0 || height <= 0 || densityDpi <= 0) {
+            throw new IllegalArgumentException("width, height, and densityDpi must be "
+                    + "greater than 0");
+        }
+        if (surface == null) {
+            throw new IllegalArgumentException("surface must not be null");
+        }
+
+        Binder token = new Binder();
+        int displayId;
+        try {
+            displayId = mDm.createVirtualDisplay(token, context.getPackageName(),
+                    name, width, height, densityDpi, surface, flags);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Could not create virtual display: " + name, ex);
+            return null;
+        }
+        if (displayId < 0) {
+            Log.e(TAG, "Could not create virtual display: " + name);
+            return null;
+        }
+        Display display = getRealDisplay(displayId);
+        if (display == null) {
+            Log.wtf(TAG, "Could not obtain display info for newly created "
+                    + "virtual display: " + name);
+            try {
+                mDm.releaseVirtualDisplay(token);
+            } catch (RemoteException ex) {
+            }
+            return null;
+        }
+        return new VirtualDisplay(this, display, token);
+    }
+
+    public void releaseVirtualDisplay(IBinder token) {
+        try {
+            mDm.releaseVirtualDisplay(token);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to release virtual display.", ex);
         }
     }
 

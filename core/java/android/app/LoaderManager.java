@@ -204,13 +204,13 @@ class LoaderManagerImpl extends LoaderManager {
     // These are the currently active loaders.  A loader is here
     // from the time its load is started until it has been explicitly
     // stopped or restarted by the application.
-    final SparseArray<LoaderInfo> mLoaders = new SparseArray<LoaderInfo>();
+    final SparseArray<LoaderInfo> mLoaders = new SparseArray<LoaderInfo>(0);
 
     // These are previously run loaders.  This list is maintained internally
     // to avoid destroying a loader while an application is still using it.
     // It allows an application to restart a loader, but continue using its
     // previously run loader until the new loader's data is available.
-    final SparseArray<LoaderInfo> mInactiveLoaders = new SparseArray<LoaderInfo>();
+    final SparseArray<LoaderInfo> mInactiveLoaders = new SparseArray<LoaderInfo>(0);
 
     final String mWho;
 

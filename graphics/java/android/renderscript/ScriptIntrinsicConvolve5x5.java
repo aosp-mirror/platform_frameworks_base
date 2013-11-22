@@ -31,7 +31,10 @@ public final class ScriptIntrinsicConvolve5x5 extends ScriptIntrinsic {
     }
 
     /**
-     * Supported elements types are {@link Element#U8_4}
+     * Supported elements types are {@link Element#U8}, {@link
+     * Element#U8_2}, {@link Element#U8_3}, {@link Element#U8_4},
+     * {@link Element#F32}, {@link Element#F32_2}, {@link
+     * Element#F32_3}, and {@link Element#F32_4}
      *
      * The default coefficients are.
      * <code>
@@ -48,6 +51,17 @@ public final class ScriptIntrinsicConvolve5x5 extends ScriptIntrinsic {
      * @return ScriptIntrinsicConvolve5x5
      */
     public static ScriptIntrinsicConvolve5x5 create(RenderScript rs, Element e) {
+        if (!e.isCompatible(Element.U8(rs)) &&
+            !e.isCompatible(Element.U8_2(rs)) &&
+            !e.isCompatible(Element.U8_3(rs)) &&
+            !e.isCompatible(Element.U8_4(rs)) &&
+            !e.isCompatible(Element.F32(rs)) &&
+            !e.isCompatible(Element.F32_2(rs)) &&
+            !e.isCompatible(Element.F32_3(rs)) &&
+            !e.isCompatible(Element.F32_4(rs))) {
+            throw new RSIllegalArgumentException("Unsuported element type.");
+        }
+
         int id = rs.nScriptIntrinsicCreate(4, e.getID(rs));
         return new ScriptIntrinsicConvolve5x5(id, rs);
 

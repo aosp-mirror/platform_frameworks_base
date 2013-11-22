@@ -20,7 +20,9 @@ import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaCrypto;
 import android.media.MediaFormat;
+import android.os.Bundle;
 import android.view.Surface;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
@@ -164,7 +166,8 @@ final public class MediaCodec {
      *
      * The following is a partial list of defined mime types and their semantics:
      * <ul>
-     * <li>"video/x-vnd.on2.vp8" - VPX video (i.e. video in .webm)
+     * <li>"video/x-vnd.on2.vp8" - VP8 video (i.e. video in .webm)
+     * <li>"video/x-vnd.on2.vp9" - VP9 video (i.e. video in .webm)
      * <li>"video/avc" - H.264/AVC video
      * <li>"video/mp4v-es" - MPEG4 video
      * <li>"video/3gpp" - H.263 video
@@ -293,12 +296,36 @@ final public class MediaCodec {
      */
     public native final void flush();
 
+    /**
+     * Thrown when a crypto error occurs while queueing a secure input buffer.
+     */
     public final static class CryptoException extends RuntimeException {
         public CryptoException(int errorCode, String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
         }
 
+        /**
+         * This indicates that no key has been set to perform the requested
+         * decrypt operation.
+         */
+        public static final int ERROR_NO_KEY = 1;
+
+        /**
+         * This indicates that the key used for decryption is no longer
+         * valid due to license term expiration.
+         */
+        public static final int ERROR_KEY_EXPIRED = 2;
+
+        /**
+         * This indicates that a required crypto resource was not able to be
+         * allocated while attempting the requested operation.
+         */
+        public static final int ERROR_RESOURCE_BUSY = 3;
+
+        /**
+         * Retrieve the error code associated with a CryptoException
+         */
         public int getErrorCode() {
             return mErrorCode;
         }
@@ -430,6 +457,9 @@ final public class MediaCodec {
      * @param presentationTimeUs The time at which this buffer should be rendered.
      * @param flags A bitmask of flags {@link #BUFFER_FLAG_SYNC_FRAME},
      *              {@link #BUFFER_FLAG_CODEC_CONFIG} or {@link #BUFFER_FLAG_END_OF_STREAM}.
+     * @throws CryptoException if an error occurs while attempting to decrypt the buffer.
+     *              An error code associated with the exception helps identify the
+     *              reason for the failure.
      */
     public native final void queueSecureInputBuffer(
             int index,
@@ -543,6 +573,52 @@ final public class MediaCodec {
      * or createEncoderByType, what component is chosen is not known beforehand.
      */
     public native final String getName();
+
+    /**
+     * Change a video encoder's target bitrate on the fly. The value is an
+     * Integer object containing the new bitrate in bps.
+     */
+    public static final String PARAMETER_KEY_VIDEO_BITRATE = "video-bitrate";
+
+    /**
+     * Temporarily suspend/resume encoding of input data. While suspended
+     * input data is effectively discarded instead of being fed into the
+     * encoder. This parameter really only makes sense to use with an encoder
+     * in "surface-input" mode, as the client code has no control over the
+     * input-side of the encoder in that case.
+     * The value is an Integer object containing the value 1 to suspend
+     * or the value 0 to resume.
+     */
+    public static final String PARAMETER_KEY_SUSPEND = "drop-input-frames";
+
+    /**
+     * Request that the encoder produce a sync frame "soon".
+     * Provide an Integer with the value 0.
+     */
+    public static final String PARAMETER_KEY_REQUEST_SYNC_FRAME = "request-sync";
+
+    /**
+     * Communicate additional parameter changes to the component instance.
+     */
+    public final void setParameters(Bundle params) {
+        if (params == null) {
+            return;
+        }
+
+        String[] keys = new String[params.size()];
+        Object[] values = new Object[params.size()];
+
+        int i = 0;
+        for (final String key: params.keySet()) {
+            keys[i] = key;
+            values[i] = params.get(key);
+            ++i;
+        }
+
+        setParameters(keys, values);
+    }
+
+    private native final void setParameters(String[] keys, Object[] values);
 
     /**
      * Get the codec info. If the codec was created by createDecoderByType

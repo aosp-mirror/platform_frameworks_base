@@ -17,7 +17,90 @@ offering. </p>
 expand their offering to include Android tablets.</p>
 
 
-<div style="margin-bottom:2em;"><!-- START STORY -->
+<div style="margin-bottom:2em;" id="rememberthemilk"><!-- START STORY -->
+
+<h3>Remember The Milk: Lifting installs with tablet design</h3>
+
+  <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 12px 20px 9px 20px;" src=
+            "//lh3.ggpht.com/xmnal18taauP2mjQFEhr1PhcItQ_W32IRuaD86IoL2U_4E-mfeKiliKtkISgOuA6Ln9n=w124">
+          
+  <div style="list-style: none;height:100%;
+  float: right;
+  border-top: 1px solid #9C0;
+  width: 220px;
+  margin: 4px 20px;padding: .5em;">
+  
+
+    <h5>About the app</h5> 
+    
+    
+    <ul>
+      <li><a href="//play.google.com/store/apps/details?id=com.rememberthemilk.MobileRTM">Remember The Milk</a></li>
+      <li>A feature-packed to-do list app; never forget the milk (or anything else) again</li>
+    </ul>
+
+    <h5>Tablet Results</h5> 
+
+    <ul>
+      <li>83% jump in tablet installs following update </li>
+      <li>Nexus 7 is most popular Android device for app </li>
+      <li>Single APK for phones and tablets</li>
+      </ul>
+    
+    <div style="padding:.5em 0 0 1em;">
+      <a href="//play.google.com/store/apps/details?id=com.rememberthemilk.MobileRTM">
+        <img alt="Android app on Google Play"
+         src="//developer.android.com/images/brand/en_generic_rgb_wo_45.png" />
+      </a>
+      
+    </div>
+  </div>
+
+  <div style="line-height:1.4em;">
+    <p style="margin-top:0;margin-bottom:12px;">When the Android tablet guidelines
+      came out in 2012, the team at Remember The Milk had already been thinking about
+      a redesign for their <a href="//play.google.com/store/apps/details?id=com.rememberthemilk.MobileRTM">feature-packed
+      to-do list app</a>. Omar Kilani, Co-founder of Remember The Milk, explains how
+      <a href="//blog.rememberthemilk.com/2013/04/the-all-new-remember-the-milk-for-android-and-tablets-too/">updating</a>
+      their app to meet the tablet guidelines lead to an 83% jump in tablet installs: </p>
+
+    <p>“We took this as an opportunity to think about how we were going to approach
+      Android tablets differently from a user experience perspective. The guidelines
+      were a helpful resource, and with the extra screen real estate tablets afford,
+      users have the opportunity to see all of their data in context and drill down
+      on more items. All of this is accomplished using a single APK on Play, even though
+      the phone and tablet versions each capture completely different use cases for us.”</p>
+
+    <p>“In the month after updating, we saw our tablet installs on Google Play jump 83%,
+      and the Nexus 7 is now the most popular Android device amongst our users. For us,
+      designing for tablets was an investment that has really paid off.”</p>
+
+    <p>The team also came out with a number of other goodies &mdash; including a new set of
+      widgets and richer notifications, and more ways to provide an immersive experience
+      for their users.</p>
+  </div>
+
+  <div style="clear:both;margin-top:30px;width:auto;">
+  
+    <img src="{@docRoot}images/distribute/rememberthemilk.png">
+
+    <div style="width:600px;margin-top:0px;padding:0 90px;">
+      <p class="image-caption"><span style="font-weight:500;">Tablet redesign led to lift
+      in installs</span>: Following the redesign of the Android app, in part to meet the tablet
+      design criteria, Remember The Milk saw an 83% increase in tablet installs.</p>
+    </div>
+
+  </div>
+
+</div> <!-- END STORY -->
+
+
+<div style="margin-bottom:2em;" id="mint"><!-- START STORY -->
 
 <h3>Mint: More screen real estate = more engagement</h3>
 
@@ -96,7 +179,7 @@ phone apps serve as great complements to each other."</p>
 
   <div style="clear:both;margin-top:40px;width:auto;">
   
-    <a href=""><img src="{@docRoot}images/distribute/mint.png"></a>
+    <img src="{@docRoot}images/distribute/mint.png">
 
     <div style="width:600px;margin-top:0px;padding:0 90px;">
       <p class="image-caption"><span style="font-weight:500;">Making the most of tablet screens</span>: Mint used the extra screen area on tablets to offer quick access to additional tools and information.</p>
@@ -184,7 +267,7 @@ longer and spend more while they’re there, you have a recipe for success.”</
 
   <div style="clear:both;margin-top:40px;width:auto;">
   
-    <a href=""><img src="{@docRoot}images/distribute/tinyvillage.png"></a>
+    <img src="{@docRoot}images/distribute/tinyvillage.png">
 
     <div style="width:600px;margin-top:0px;padding:0 90px;">
       <p class="image-caption"><span style="font-weight:500;">More monetization
@@ -268,7 +351,7 @@ tablets continues to pay off.”</p>
 
   <div style="clear:both;margin-top:40px;width:auto;">
   
-    <a href=""><img src="{@docRoot}images/distribute/instapaper.png"></a>
+    <img src="{@docRoot}images/distribute/instapaper.png">
 
     <div style="width:600px;margin-top:0px;padding:0 90px;">
       <p class="image-caption"><span style="font-weight:500;">Popular with

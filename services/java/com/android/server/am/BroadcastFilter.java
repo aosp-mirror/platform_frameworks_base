@@ -22,7 +22,7 @@ import android.util.Printer;
 
 import java.io.PrintWriter;
 
-class BroadcastFilter extends IntentFilter {
+final class BroadcastFilter extends IntentFilter {
     // Back-pointer to the list this filter is in.
     final ReceiverList receiverList;
     final String packageName;

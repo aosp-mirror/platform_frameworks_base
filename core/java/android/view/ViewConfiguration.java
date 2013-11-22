@@ -97,6 +97,13 @@ public class ViewConfiguration {
     private static final int DOUBLE_TAP_TIMEOUT = 300;
 
     /**
+     * Defines the minimum duration in milliseconds between the first tap's up event and
+     * the second tap's down event for an interaction to be considered a
+     * double-tap.
+     */
+    private static final int DOUBLE_TAP_MIN_TIME = 40;
+
+    /**
      * Defines the maximum duration in milliseconds between a touch pad
      * touch and release for a given touch to be considered a tap (click) as
      * opposed to a hover movement gesture.
@@ -291,7 +298,7 @@ public class ViewConfiguration {
         if (!sHasPermanentMenuKeySet) {
             IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
             try {
-                sHasPermanentMenuKey = !wm.hasSystemNavBar() && !wm.hasNavigationBar();
+                sHasPermanentMenuKey = !wm.hasNavigationBar();
                 sHasPermanentMenuKeySet = true;
             } catch (RemoteException ex) {
                 sHasPermanentMenuKey = false;
@@ -433,6 +440,17 @@ public class ViewConfiguration {
      */
     public static int getDoubleTapTimeout() {
         return DOUBLE_TAP_TIMEOUT;
+    }
+
+    /**
+     * @return the minimum duration in milliseconds between the first tap's
+     * up event and the second tap's down event for an interaction to be considered a
+     * double-tap.
+     *
+     * @hide
+     */
+    public static int getDoubleTapMinTime() {
+        return DOUBLE_TAP_MIN_TIME;
     }
 
     /**

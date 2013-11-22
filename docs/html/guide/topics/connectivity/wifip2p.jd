@@ -1,5 +1,5 @@
-page.title=Wi-Fi Direct
-page.tags="wireless","WifiP2pManager"
+page.title=Wi-Fi Peer-to-Peer
+page.tags="wireless","WifiP2pManager","Wi-Fi Direct","WiFi Direct","P2P","Wi-Fi P2P","WiFi P2P"
 
 @jd:body
 
@@ -9,10 +9,10 @@ page.tags="wireless","WifiP2pManager"
 
       <ol>
         <li><a href="#api">API Overview</a></li>
-        <li><a href="#creating-br">Creating a Broadcast Receiver for Wi-Fi Direct Intents</a></li>
+        <li><a href="#creating-br">Creating a Broadcast Receiver for Wi-Fi P2P Intents</a></li>
 
         <li>
-          <a href="#creating-app">Creating a Wi-Fi Direct Application</a>
+          <a href="#creating-app">Creating a Wi-Fi P2P Application</a>
 
           <ol>
             <li><a href="#setup">Initial setup</a></li>
@@ -25,21 +25,24 @@ page.tags="wireless","WifiP2pManager"
           </ol>
         </li>
       </ol>
-      <h2>Related Samples</h2>
-      <ol>
-        <li><a href="{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a></li>
-      </ol>
+    <h2>See also</h2>
+    <ul>
+      <li><a href="{@docRoot}training/connect-devices-wirelessly/wifi-direct.html">Creating
+        P2P Connections with Wi-Fi</a></li>
+    </ul>
     </div>
   </div>
 
-  <p>Wi-Fi Direct allows Android 4.0 (API level 14) or later devices with the appropriate hardware
-  to connect directly to each other via Wi-Fi without an intermediate access point.
-  Using these APIs, you can discover and connect to other devices when each device supports Wi-Fi Direct,
-  then communicate over a speedy connection across distances much longer than a Bluetooth connection.
-  This is useful for applications that share data among users, such as a multiplayer game or
-  a photo sharing application.</p>
 
-  <p>The Wi-Fi Direct APIs consist of the following main parts:</p>
+<p>Wi-Fi peer-to-peer (P2P) allows Android 4.0 (API level 14) or later devices with the appropriate
+hardware to connect directly to each other via Wi-Fi without an intermediate access point (Android's
+Wi-Fi P2P framework complies with the Wi-Fi Alliance's Wi-Fi Direct&trade; certification program).
+Using these APIs, you can discover and connect to other devices when each device supports Wi-Fi P2P,
+then communicate over a speedy connection across distances much longer than a Bluetooth connection.
+This is useful for applications that share data among users, such as a multiplayer game or
+a photo sharing application.</p>
+
+  <p>The Wi-Fi P2P APIs consist of the following main parts:</p>
 
   <ul>
     <li>Methods that allow you to discover, request, and connect to peers are defined
@@ -50,7 +53,7 @@ page.tags="wireless","WifiP2pManager"
     android.net.wifi.p2p.WifiP2pManager} methods, each method can receive a specific listener
     passed in as a parameter.</li>
 
-    <li>Intents that notify you of specific events detected by the Wi-Fi Direct framework,
+    <li>Intents that notify you of specific events detected by the Wi-Fi P2P framework,
     such as a dropped connection or a newly discovered peer.</li>
   </ul>
 
@@ -70,7 +73,7 @@ page.tags="wireless","WifiP2pManager"
   the Wi-Fi hardware on your device to do things like discover and connect to peers. The following actions
   are available:</p>
 
-<p class="table-caption"><strong>Table 1.</strong>Wi-Fi Direct Methods</p>
+<p class="table-caption"><strong>Table 1.</strong>Wi-Fi P2P Methods</p>
 
    <table>
         <tr>
@@ -80,7 +83,7 @@ page.tags="wireless","WifiP2pManager"
 
 	<tr>
 	  <td>{@link android.net.wifi.p2p.WifiP2pManager#initialize initialize()}</td>
-	  <td>Registers the application with the Wi-Fi framework. This must be called before calling any other Wi-Fi Direct method.</td>
+	  <td>Registers the application with the Wi-Fi framework. This must be called before calling any other Wi-Fi P2P method.</td>
 	</tr>
 
 	<tr>
@@ -126,12 +129,12 @@ page.tags="wireless","WifiP2pManager"
 
 
  <p>{@link android.net.wifi.p2p.WifiP2pManager} methods let you pass in a listener,
-  so that the Wi-Fi Direct framework can notify your
+  so that the Wi-Fi P2P framework can notify your
   activity of the status of a call. The available listener interfaces and the
   corresponding {@link android.net.wifi.p2p.WifiP2pManager} method calls that use the listeners
   are described in the following table:</p>
 
- <p class="table-caption"><strong>Table 2.</strong> Wi-Fi Direct Listeners</p>
+ <p class="table-caption"><strong>Table 2.</strong> Wi-Fi P2P Listeners</p>
  
  <table>
     <tr>
@@ -168,12 +171,12 @@ page.tags="wireless","WifiP2pManager"
     </tr>
   </table>
 
-<p>The Wi-Fi Direct APIs define intents that are broadcast when certain Wi-Fi Direct events happen,
+<p>The Wi-Fi P2P APIs define intents that are broadcast when certain Wi-Fi P2P events happen,
   such as when a new peer is discovered or when a device's Wi-Fi state changes. You can register
   to receive these intents in your application by <a href="#creating-br">creating a broadcast
   receiver</a> that handles these intents:</p>
 
-<p class="table-caption"><strong>Table 3.</strong> Wi-Fi Direct Intents</p>
+<p class="table-caption"><strong>Table 3.</strong> Wi-Fi P2P Intents</p>
 
     <table>
     <tr>
@@ -194,7 +197,7 @@ page.tags="wireless","WifiP2pManager"
       </tr>
       <tr>
         <td>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_CHANGED_ACTION}</td>
-        <td>Broadcast when Wi-Fi Direct is enabled or disabled on the device.</td>
+        <td>Broadcast when Wi-Fi P2P is enabled or disabled on the device.</td>
       </tr>
       <tr>
         <td>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_THIS_DEVICE_CHANGED_ACTION}</td>
@@ -204,11 +207,11 @@ page.tags="wireless","WifiP2pManager"
 
 
 
-  <h2 id="creating-br">Creating a Broadcast Receiver for Wi-Fi Direct Intents</h2>
+  <h2 id="creating-br">Creating a Broadcast Receiver for Wi-Fi P2P Intents</h2>
 
   <p>A broadcast receiver allows you to receive intents broadcast by the Android system,
   so that your application can respond to events that you are interested in. The basic steps
-  for creating a broadcast receiver to handle Wi-Fi Direct intents are as follows:</p>
+  for creating a broadcast receiver to handle Wi-Fi P2P intents are as follows:</p>
 
   <ol>
     <li>Create a class that extends the {@link android.content.BroadcastReceiver} class. For the
@@ -267,17 +270,17 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 }
 </pre>
 
-  <h2 id="creating-app">Creating a Wi-Fi Direct Application</h2>
+  <h2 id="creating-app">Creating a Wi-Fi P2P Application</h2>
 
-  <p>Creating a Wi-Fi Direct application involves creating and registering a
+  <p>Creating a Wi-Fi P2P application involves creating and registering a
   broadcast receiver for your application, discovering peers, connecting to a peer, and
   transferring data to a peer. The following sections describe how to do this.</p>
 
   <h3 id="setup">Initial setup</h3>
-  <p>Before using the Wi-Fi Direct APIs, you must ensure that your application can access
-  the hardware and that the device supports the Wi-Fi Direct protocol. If Wi-Fi Direct is supported,
+  <p>Before using the Wi-Fi P2P APIs, you must ensure that your application can access
+  the hardware and that the device supports the Wi-Fi P2P protocol. If Wi-Fi P2P is supported,
   you can obtain an instance of {@link android.net.wifi.p2p.WifiP2pManager}, create and register
-  your broadcast receiver, and begin using the Wi-Fi Direct APIs.</p>
+  your broadcast receiver, and begin using the Wi-Fi P2P APIs.</p>
   <ol>
     <li>
       <p>Request permission to use the Wi-Fi hardware on the device and also declare
@@ -292,10 +295,10 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 </pre>
     </li>
 
-    <li>Check to see if Wi-Fi Direct is on and supported. A good place to check this is in your
+    <li>Check to see if Wi-Fi P2P is on and supported. A good place to check this is in your
     broadcast receiver when it receives the {@link
     android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_CHANGED_ACTION} intent. Notify your
-    activity of the Wi-Fi Direct state and react accordingly:
+    activity of the Wi-Fi P2P state and react accordingly:
 <pre>
 &#064;Override
 public void onReceive(Context context, Intent intent) {
@@ -304,9 +307,9 @@ public void onReceive(Context context, Intent intent) {
     if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
         int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
         if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-            // Wifi Direct is enabled
+            // Wifi P2P is enabled
         } else {
-            // Wi-Fi Direct is not enabled
+            // Wi-Fi P2P is not enabled
         }
     }
     ...
@@ -315,10 +318,10 @@ public void onReceive(Context context, Intent intent) {
     </li>
 
     <li>In your activity's {@link android.app.Activity#onCreate onCreate()} method, obtain an instance of {@link
-    android.net.wifi.p2p.WifiP2pManager} and register your application with the Wi-Fi Direct
+    android.net.wifi.p2p.WifiP2pManager} and register your application with the Wi-Fi P2P
     framework by calling {@link android.net.wifi.p2p.WifiP2pManager#initialize initialize()}. This
     method returns a {@link android.net.wifi.p2p.WifiP2pManager.Channel}, which is used to connect
-    your application to the Wi-Fi Direct framework. You should also create an instance of your
+    your application to the Wi-Fi P2P framework. You should also create an instance of your
     broadcast receiver with the {@link
     android.net.wifi.p2p.WifiP2pManager} and {@link android.net.wifi.p2p.WifiP2pManager.Channel}
     objects along with a reference to your activity. This allows your broadcast receiver to notify
@@ -376,11 +379,11 @@ protected void onPause() {
 </pre>
 
       <p>When you have obtained a {@link android.net.wifi.p2p.WifiP2pManager.Channel} and
-      set up a broadcast receiver, your application can make Wi-Fi Direct method calls and receive
-      Wi-Fi Direct intents.</p>
+      set up a broadcast receiver, your application can make Wi-Fi P2P method calls and receive
+      Wi-Fi P2P intents.</p>
     </li>
 
-    <p>You can now implement your application and use the Wi-Fi Direct features by calling the
+    <p>You can now implement your application and use the Wi-Fi P2P features by calling the
     methods in {@link android.net.wifi.p2p.WifiP2pManager}. The next sections describe how to do common actions
     such as discovering and connecting to peers.</p>
   </ol>
@@ -492,10 +495,10 @@ mManager.connect(mChannel, config, new ActionListener() {
   </ol>
 
   <p>The following example, modified from the <a href=
-  "{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample, shows you how
+  "{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi P2P Demo</a> sample, shows you how
   to create this client-server socket communication and transfer JPEG images from a client
   to a server with a service. For a complete working example, compile and run the <a href=
-  "{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample.</p>
+  "{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi P2P Demo</a> sample.</p>
 <pre>
 public static class FileServerAsyncTask extends AsyncTask<Void, Void, String> {
 

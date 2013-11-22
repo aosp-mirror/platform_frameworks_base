@@ -1,9 +1,9 @@
-page.title=Sending Content to Other Apps
-parent.title=Sharing Content
+page.title=Sending Simple Data to Other Apps
+parent.title=Sharing Simple Data
 parent.link=index.html
 
 trainingnavtop=true
-next.title=Receiving Content from Other Apps
+next.title=Receiving Simple Data from Other Apps
 next.link=receive.html
 
 @jd:body
@@ -29,22 +29,22 @@ Intent Filters</a></li>
 </div>
 </div>
 
-<p>When you construct an intent, you must specify the action you want the intent to "trigger." 
-Android defines several actions, including {@link android.content.Intent#ACTION_SEND} which, as 
-you can probably guess, indicates that the intent is sending data from one activity to another, 
-even across process boundaries. To send data to another activity, all you need to do is specify 
-the data and its type, the system will identify compatible receiving activities and display them 
-to the user (if there are multiple options) or immediately start the activity (if there is only 
-one option). Similarly, you can advertise the data types that your activities support receiving 
+<p>When you construct an intent, you must specify the action you want the intent to "trigger."
+Android defines several actions, including {@link android.content.Intent#ACTION_SEND} which, as
+you can probably guess, indicates that the intent is sending data from one activity to another,
+even across process boundaries. To send data to another activity, all you need to do is specify
+the data and its type, the system will identify compatible receiving activities and display them
+to the user (if there are multiple options) or immediately start the activity (if there is only
+one option). Similarly, you can advertise the data types that your activities support receiving
 from other applications by specifying them in your manifest.</p>
 
-<p>Sending and receiving data between applications with intents is most commonly used for social 
-sharing of content. Intents allow users to share information quickly and easily, using their 
+<p>Sending and receiving data between applications with intents is most commonly used for social
+sharing of content. Intents allow users to share information quickly and easily, using their
 favorite applications.</p>
 
-<p><strong>Note:</strong> The best way to add a share action item to an 
-{@link android.app.ActionBar} is to use {@link android.widget.ShareActionProvider}, which became 
-available in API level 14. {@link android.widget.ShareActionProvider} is discussed in the lesson 
+<p><strong>Note:</strong> The best way to add a share action item to an
+{@link android.app.ActionBar} is to use {@link android.widget.ShareActionProvider}, which became
+available in API level 14. {@link android.widget.ShareActionProvider} is discussed in the lesson
 about <a href="shareaction.html">Adding an Easy Share Action</a>.</p>
 
 
@@ -58,10 +58,10 @@ on a handset.
 </p>
 </div>
 
-<p>The most straightforward and common use of the {@link android.content.Intent#ACTION_SEND} 
-action is sending text content from one activity to another. For example, the built-in Browser 
-app can share the URL of the currently-displayed page as text with any application. This is useful 
-for sharing an article or website with friends via email or social networking. Here is the code to 
+<p>The most straightforward and common use of the {@link android.content.Intent#ACTION_SEND}
+action is sending text content from one activity to another. For example, the built-in Browser
+app can share the URL of the currently-displayed page as text with any application. This is useful
+for sharing an article or website with friends via email or social networking. Here is the code to
 implement this type of sharing:</p>
 
 <pre>
@@ -72,12 +72,12 @@ sendIntent.setType(&quot;text/plain&quot;);
 startActivity(sendIntent);
 </pre>
 
-<p>If there's an installed application with a filter that matches 
-{@link android.content.Intent#ACTION_SEND} and MIME type text/plain, the Android system will run 
-it; if more than one application matches, the system displays a disambiguation dialog (a "chooser") 
-that allows the user to choose an app. If you call 
+<p>If there's an installed application with a filter that matches
+{@link android.content.Intent#ACTION_SEND} and MIME type text/plain, the Android system will run
+it; if more than one application matches, the system displays a disambiguation dialog (a "chooser")
+that allows the user to choose an app. If you call
 {@link android.content.Intent#createChooser(android.content.Intent, CharSequence)
-Intent.createChooser()} 
+Intent.createChooser()}
 for the intent, Android will <strong>always</strong> display the chooser. This has some
 advantages:</p>
 
@@ -100,17 +100,17 @@ startActivity(<strong>Intent.createChooser(sendIntent, getResources().getText(R.
 
 <p>The resulting dialog is shown in figure 1.</p>
 
-<p>Optionally, you can set some standard extras for the intent: 
-{@link android.content.Intent#EXTRA_EMAIL}, {@link android.content.Intent#EXTRA_CC}, 
-{@link android.content.Intent#EXTRA_BCC}, {@link android.content.Intent#EXTRA_SUBJECT}. However, 
-if the receiving application is not designed to use them, nothing will happen. You can use 
-custom extras as well, but there's no effect unless the receiving application understands them. 
+<p>Optionally, you can set some standard extras for the intent:
+{@link android.content.Intent#EXTRA_EMAIL}, {@link android.content.Intent#EXTRA_CC},
+{@link android.content.Intent#EXTRA_BCC}, {@link android.content.Intent#EXTRA_SUBJECT}. However,
+if the receiving application is not designed to use them, nothing will happen. You can use
+custom extras as well, but there's no effect unless the receiving application understands them.
 Typically, you'd use custom extras defined by the receiving application itself.</p>
 
-<p class="note"><strong>Note:</strong> Some e-mail applications, such as Gmail, expect a 
-{@link java.lang.String String[]} for extras like {@link android.content.Intent#EXTRA_EMAIL} and 
-{@link android.content.Intent#EXTRA_CC}, use 
-{@link android.content.Intent#putExtra(String,String[]) putExtra(String, String[])} to add these 
+<p class="note"><strong>Note:</strong> Some e-mail applications, such as Gmail, expect a
+{@link java.lang.String String[]} for extras like {@link android.content.Intent#EXTRA_EMAIL} and
+{@link android.content.Intent#EXTRA_CC}, use
+{@link android.content.Intent#putExtra(String,String[]) putExtra(String, String[])} to add these
 to your intent.</p>
 
 
@@ -134,34 +134,26 @@ startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.
   <li>You can use a MIME type of {@code "*/*"}, but this will only match activities that are able to
 handle generic data streams.</li>
   <li>The receiving application needs permission to access the data the {@link android.net.Uri}
-points to. There are a number of ways to handle this:
+points to. The recommended ways to do this are:
   <ul>
-    <li>Write the data to a file on external/shared storage (such as the SD card), which all apps
-can read. Use {@link android.net.Uri#fromFile(java.io.File) Uri.fromFile()} to create the
-{@link android.net.Uri} that can be passed to the share intent. However, keep in mind that not
-all applications process a {@code file://} style {@link android.net.Uri}.</li>
-    <li>Write the data to a file in your own application directory using {@link
-android.content.Context#openFileOutput(java.lang.String, int) openFileOutput()} with mode {@link
-android.content.Context#MODE_WORLD_READABLE} after which {@link
-android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()} can be used to
-return a {@link java.io.File}. As with the previous option, {@link
-android.net.Uri#fromFile(java.io.File) Uri.fromFile()} will create a {@code file://} style {@link
-android.net.Uri} for your share intent.</li>
-    <li>Media files like images, videos and audio can be scanned and added to the system {@link
-android.provider.MediaStore} using {@link
+    <li>Store the data in your own {@link android.content.ContentProvider}, making sure that other
+apps have the correct permission to access your provider. The preferred mechanism for providing
+access is to use <a
+href="{@docRoot}guide/topics/security/permissions.html#uri">per-URI permissions</a> which are
+temporary and only grant access to the receiving application. An easy way to create a
+{@link android.content.ContentProvider} like this is to use the
+{@link android.support.v4.content.FileProvider} helper class.</li>
+    <li>Use the system {@link android.provider.MediaStore}. The {@link android.provider.MediaStore}
+is primarily aimed at video, audio and image MIME types, however beginning with Android 3.0 (API
+level 11) it can also store non-media types (see
+{@link android.provider.MediaStore.Files MediaStore.Files} for more info). Files can be inserted
+into the {@link android.provider.MediaStore} using {@link
 android.media.MediaScannerConnection#scanFile(android.content.Context, java.lang.String[],
-java.lang.String[], android.media.MediaScannerConnection.OnScanCompletedListener) scanFile()}. The
-{@link
-android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String,
-android.net.Uri) onScanCompleted()} callback returns a {@code content://} style {@link
-android.net.Uri} suitable for including in your share intent.</li>
-    <li>Images can be inserted into the system {@link android.provider.MediaStore} using {@link
-android.provider.MediaStore.Images.Media#insertImage(android.content.ContentResolver,
-android.graphics.Bitmap, java.lang.String, java.lang.String) insertImage()} which will return a
-{@code content://} style {@link android.net.Uri} suitable for including in a share intent.</li>
-    <li>Store the data in your own {@link android.content.ContentProvider}, make sure that other
-apps have the correct permission to access your provider (or use <a
-href="{@docRoot}guide/topics/security/security.html#uri">per-URI permissions</a>).</li>
+java.lang.String[], android.media.MediaScannerConnection.OnScanCompletedListener) scanFile()} after
+which a {@code content://} style {@link android.net.Uri} suitable for sharing is passed to the
+provided {@link android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(
+java.lang.String, android.net.Uri) onScanCompleted()} callback. Note that once added to the system
+{@link android.provider.MediaStore} the content is accessible to any app on the device.</li>
   </ul>
   </li>
 </ul>

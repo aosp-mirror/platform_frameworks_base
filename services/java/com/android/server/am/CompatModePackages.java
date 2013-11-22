@@ -15,7 +15,6 @@ import com.android.internal.util.FastXmlSerializer;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.res.CompatibilityInfo;
@@ -26,7 +25,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
-public class CompatModePackages {
+public final class CompatModePackages {
     private final String TAG = ActivityManagerService.TAG;
     private final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
 
@@ -166,7 +165,7 @@ public class CompatModePackages {
     }
 
     public boolean getFrontActivityAskCompatModeLocked() {
-        ActivityRecord r = mService.mMainStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r == null) {
             return false;
         }
@@ -178,7 +177,7 @@ public class CompatModePackages {
     }
 
     public void setFrontActivityAskCompatModeLocked(boolean ask) {
-        ActivityRecord r = mService.mMainStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r != null) {
             setPackageAskCompatModeLocked(r.packageName, ask);
         }
@@ -200,7 +199,7 @@ public class CompatModePackages {
     }
 
     public int getFrontActivityScreenCompatModeLocked() {
-        ActivityRecord r = mService.mMainStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r == null) {
             return ActivityManager.COMPAT_MODE_UNKNOWN;
         }
@@ -208,7 +207,7 @@ public class CompatModePackages {
     }
 
     public void setFrontActivityScreenCompatModeLocked(int mode) {
-        ActivityRecord r = mService.mMainStack.topRunningActivityLocked(null);
+        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked(null);
         if (r == null) {
             Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
             return;
@@ -295,25 +294,13 @@ public class CompatModePackages {
             Message msg = mHandler.obtainMessage(MSG_WRITE);
             mHandler.sendMessageDelayed(msg, 10000);
 
-            ActivityRecord starting = mService.mMainStack.topRunningActivityLocked(null);
-
-            // All activities that came from the package must be
-            // restarted as if there was a config change.
-            for (int i=mService.mMainStack.mHistory.size()-1; i>=0; i--) {
-                ActivityRecord a = (ActivityRecord)mService.mMainStack.mHistory.get(i);
-                if (a.info.packageName.equals(packageName)) {
-                    a.forceNewConfig = true;
-                    if (starting != null && a == starting && a.visible) {
-                        a.startFreezingScreenLocked(starting.app,
-                                ActivityInfo.CONFIG_SCREEN_LAYOUT);
-                    }
-                }
-            }
+            final ActivityStack stack = mService.getFocusedStack();
+            ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.
             for (int i=mService.mLruProcesses.size()-1; i>=0; i--) {
                 ProcessRecord app = mService.mLruProcesses.get(i);
-                if (!app.pkgList.contains(packageName)) {
+                if (!app.pkgList.containsKey(packageName)) {
                     continue;
                 }
                 try {
@@ -327,10 +314,10 @@ public class CompatModePackages {
             }
 
             if (starting != null) {
-                mService.mMainStack.ensureActivityConfigurationLocked(starting, 0);
+                stack.ensureActivityConfigurationLocked(starting, 0);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
-                mService.mMainStack.ensureActivitiesVisibleLocked(starting, 0);
+                stack.ensureActivitiesVisibleLocked(starting, 0);
             }
         }
     }

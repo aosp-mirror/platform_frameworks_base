@@ -1,0 +1,6 @@
+<transitionManager xmlns:android="http://schemas.android.com/apk/res/android">
+    <transition android:fromScene="@layout/search_screen" android:toScene="@layout/results_screen"
+                android:transition="@transition/mover_fader"/>
+    <transition android:fromScene="@layout/results_screen" android:toScene="@layout/search_screen"
+                android:transition="@transition/mover_fader"/>
+</transitionManager>

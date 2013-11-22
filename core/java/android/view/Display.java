@@ -16,10 +16,12 @@
 
 package android.view;
 
+import android.content.res.CompatibilityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -57,7 +59,9 @@ public final class Display {
     private final int mFlags;
     private final int mType;
     private final String mAddress;
-    private final CompatibilityInfoHolder mCompatibilityInfo;
+    private final int mOwnerUid;
+    private final String mOwnerPackageName;
+    private final DisplayAdjustments mDisplayAdjustments;
 
     private DisplayInfo mDisplayInfo; // never null
     private boolean mIsValid;
@@ -143,6 +147,27 @@ public final class Display {
     public static final int FLAG_SECURE = 1 << 1;
 
     /**
+     * Display flag: Indicates that the display is private.  Only the application that
+     * owns the display can create windows on it.
+     *
+     * @see #getFlags
+     */
+    public static final int FLAG_PRIVATE = 1 << 2;
+
+    /**
+     * Display flag: Indicates that the display is a presentation display.
+     * <p>
+     * This flag identifies secondary displays that are suitable for
+     * use as presentation displays such as HDMI or Wireless displays.  Applications
+     * may automatically project their content to presentation displays to provide
+     * richer second screen experiences.
+     * </p>
+     *
+     * @see #getFlags
+     */
+    public static final int FLAG_PRESENTATION = 1 << 3;
+
+    /**
      * Display type: Unknown display type.
      * @hide
      */
@@ -173,6 +198,12 @@ public final class Display {
     public static final int TYPE_OVERLAY = 4;
 
     /**
+     * Display type: Virtual display.
+     * @hide
+     */
+    public static final int TYPE_VIRTUAL = 5;
+
+    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * or {@link android.hardware.display.DisplayManager#getDisplay}
@@ -182,11 +213,11 @@ public final class Display {
      */
     public Display(DisplayManagerGlobal global,
             int displayId, DisplayInfo displayInfo /*not null*/,
-            CompatibilityInfoHolder compatibilityInfo) {
+            DisplayAdjustments daj) {
         mGlobal = global;
         mDisplayId = displayId;
         mDisplayInfo = displayInfo;
-        mCompatibilityInfo = compatibilityInfo;
+        mDisplayAdjustments = new DisplayAdjustments(daj);
         mIsValid = true;
 
         // Cache properties that cannot change as long as the display is valid.
@@ -194,6 +225,8 @@ public final class Display {
         mFlags = displayInfo.flags;
         mType = displayInfo.type;
         mAddress = displayInfo.address;
+        mOwnerUid = displayInfo.ownerUid;
+        mOwnerPackageName = displayInfo.ownerPackageName;
     }
 
     /**
@@ -262,6 +295,7 @@ public final class Display {
      *
      * @see #FLAG_SUPPORTS_PROTECTED_BUFFERS
      * @see #FLAG_SECURE
+     * @see #FLAG_PRIVATE
      */
     public int getFlags() {
         return mFlags;
@@ -277,6 +311,7 @@ public final class Display {
      * @see #TYPE_HDMI
      * @see #TYPE_WIFI
      * @see #TYPE_OVERLAY
+     * @see #TYPE_VIRTUAL
      * @hide
      */
     public int getType() {
@@ -295,13 +330,39 @@ public final class Display {
     }
 
     /**
-     * Gets the compatibility info used by this display instance.
+     * Gets the UID of the application that owns this display, or zero if it is
+     * owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
      *
-     * @return The compatibility info holder, or null if none is required.
      * @hide
      */
-    public CompatibilityInfoHolder getCompatibilityInfo() {
-        return mCompatibilityInfo;
+    public int getOwnerUid() {
+        return mOwnerUid;
+    }
+
+    /**
+     * Gets the package name of the application that owns this display, or null if it is
+     * owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
+     *
+     * @hide
+     */
+    public String getOwnerPackageName() {
+        return mOwnerPackageName;
+    }
+
+    /**
+     * Gets the compatibility info used by this display instance.
+     *
+     * @return The display adjustments holder, or null if none is required.
+     * @hide
+     */
+    public DisplayAdjustments getDisplayAdjustments() {
+        return mDisplayAdjustments;
     }
 
     /**
@@ -342,7 +403,7 @@ public final class Display {
     public void getSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             outSize.x = mTempMetrics.widthPixels;
             outSize.y = mTempMetrics.heightPixels;
         }
@@ -357,7 +418,7 @@ public final class Display {
     public void getRectSize(Rect outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             outSize.set(0, 0, mTempMetrics.widthPixels, mTempMetrics.heightPixels);
         }
     }
@@ -522,7 +583,7 @@ public final class Display {
     public void getMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(outMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(outMetrics, mDisplayAdjustments);
         }
     }
 
@@ -560,8 +621,26 @@ public final class Display {
     public void getRealMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getLogicalMetrics(outMetrics, null);
+            mDisplayInfo.getLogicalMetrics(outMetrics,
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
+                    mDisplayAdjustments.getActivityToken());
         }
+    }
+
+    /**
+     * Returns true if the specified UID has access to this display.
+     * @hide
+     */
+    public boolean hasAccess(int uid) {
+        return Display.hasAccess(uid, mFlags, mOwnerUid);
+    }
+
+    /** @hide */
+    public static boolean hasAccess(int uid, int flags, int ownerUid) {
+        return (flags & Display.FLAG_PRIVATE) == 0
+                || uid == ownerUid
+                || uid == Process.SYSTEM_UID
+                || uid == 0;
     }
 
     private void updateDisplayInfoLocked() {
@@ -591,7 +670,7 @@ public final class Display {
         long now = SystemClock.uptimeMillis();
         if (now > mLastCachedAppSizeUpdate + CACHED_APP_SIZE_DURATION_MILLIS) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             mCachedAppWidthCompat = mTempMetrics.widthPixels;
             mCachedAppHeightCompat = mTempMetrics.heightPixels;
             mLastCachedAppSizeUpdate = now;
@@ -603,7 +682,7 @@ public final class Display {
     public String toString() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             return "Display id " + mDisplayId + ": " + mDisplayInfo
                     + ", " + mTempMetrics + ", isValid=" + mIsValid;
         }
@@ -624,6 +703,8 @@ public final class Display {
                 return "WIFI";
             case TYPE_OVERLAY:
                 return "OVERLAY";
+            case TYPE_VIRTUAL:
+                return "VIRTUAL";
             default:
                 return Integer.toString(type);
         }

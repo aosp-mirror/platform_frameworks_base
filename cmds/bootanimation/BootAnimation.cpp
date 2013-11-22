@@ -44,7 +44,7 @@
 
 #include <core/SkBitmap.h>
 #include <core/SkStream.h>
-#include <images/SkImageDecoder.h>
+#include <core/SkImageDecoder.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>

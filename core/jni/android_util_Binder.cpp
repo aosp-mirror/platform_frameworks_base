@@ -35,7 +35,7 @@
 #include <utils/SystemClock.h>
 #include <utils/List.h>
 #include <utils/KeyedVector.h>
-#include <cutils/logger.h>
+#include <log/logger.h>
 #include <binder/Parcel.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
@@ -986,6 +986,7 @@ static bool push_eventlog_int(char** pos, const char* end, jint val) {
 }
 
 // From frameworks/base/core/java/android/content/EventLogTags.logtags:
+#define ENABLE_BINDER_SAMPLE 0
 #define LOGTAG_BINDER_OPERATION 52004
 
 static void conditionally_log_binder_call(int64_t start_millis,
@@ -1063,6 +1064,7 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
     ALOGV("Java code calling transact on %p in Java object %p with code %d\n",
             target, obj, code);
 
+#if ENABLE_BINDER_SAMPLE
     // Only log the binder call duration for things on the Java-level main thread.
     // But if we don't
     const bool time_binder_calls = should_time_binder_calls();
@@ -1071,12 +1073,15 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
     if (time_binder_calls) {
         start_millis = uptimeMillis();
     }
+#endif
     //printf("Transact from Java code to %p sending: ", target); data->print();
     status_t err = target->transact(code, *data, reply, flags);
     //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
+#if ENABLE_BINDER_SAMPLE
     if (time_binder_calls) {
         conditionally_log_binder_call(start_millis, target, code);
     }
+#endif
 
     if (err == NO_ERROR) {
         return JNI_TRUE;

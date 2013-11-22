@@ -57,7 +57,7 @@ public class ObbBackupService extends Service {
                 int token, IBackupManager callbackBinder) {
             final FileDescriptor outFd = data.getFileDescriptor();
             try {
-                File obbDir = Environment.getExternalStorageAppObbDirectory(packageName);
+                File obbDir = Environment.buildExternalStorageAppObbDirs(packageName)[0];
                 if (obbDir != null) {
                     if (obbDir.exists()) {
                         ArrayList<File> obbList = allFileContents(obbDir);
@@ -106,7 +106,7 @@ public class ObbBackupService extends Service {
                 long fileSize, int type, String path, long mode, long mtime,
                 int token, IBackupManager callbackBinder) {
             try {
-                File outFile = Environment.getExternalStorageAppObbDirectory(packageName);
+                File outFile = Environment.buildExternalStorageAppObbDirs(packageName)[0];
                 if (outFile != null) {
                     outFile = new File(outFile, path);
                 }

@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>PlusShare | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -659,6 +666,9 @@ Summary:
   
 
 
+  &#124; <a href="#promethods">Protected Methods</a>
+  
+
 
   &#124; <a href="#inhmethods">Inherited Methods</a>
 
@@ -687,7 +697,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -707,7 +717,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -799,14 +809,14 @@ Summary:
 
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CALL_TO_ACTION">EXTRA_CALL_TO_ACTION</a></td>
         <td class="jd-descrcol" width="100%">Used as a bundle extra field to describe a call-to-action button for a post on Google+.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CONTENT_DEEP_LINK_ID">EXTRA_CONTENT_DEEP_LINK_ID</a></td>
         <td class="jd-descrcol" width="100%">Used as a string extra field in <code><a href="/reference/android/content/Intent.html#ACTION_SEND">ACTION_SEND</a></code> intents to
  specify a resource to be shared on Google+.</td>
@@ -814,7 +824,7 @@ Summary:
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CONTENT_DEEP_LINK_METADATA">EXTRA_CONTENT_DEEP_LINK_METADATA</a></td>
         <td class="jd-descrcol" width="100%">Used as a bundle extra field in <code><a href="/reference/android/content/Intent.html#ACTION_SEND">ACTION_SEND</a></code> intents to
  describe a resource to be shared on Google+.</td>
@@ -822,70 +832,70 @@ Summary:
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_CONTENT_URL">EXTRA_CONTENT_URL</a></td>
         <td class="jd-descrcol" width="100%">This is a URL for the content of the post.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_IS_INTERACTIVE_POST">EXTRA_IS_INTERACTIVE_POST</a></td>
         <td class="jd-descrcol" width="100%">Extra indicating that this is an interactive post.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#EXTRA_SENDER_ID">EXTRA_SENDER_ID</a></td>
         <td class="jd-descrcol" width="100%">The ID of the sender on Google+.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CALL_TO_ACTION_DEEP_LINK_ID">KEY_CALL_TO_ACTION_DEEP_LINK_ID</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> deep-link ID of the call-to-action button.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CALL_TO_ACTION_LABEL">KEY_CALL_TO_ACTION_LABEL</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> label placeholder text of the call-to-action button.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CALL_TO_ACTION_URL">KEY_CALL_TO_ACTION_URL</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> URL of the call-to-action button.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CONTENT_DEEP_LINK_METADATA_DESCRIPTION">KEY_CONTENT_DEEP_LINK_METADATA_DESCRIPTION</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> description of the resource shared on Google+.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CONTENT_DEEP_LINK_METADATA_THUMBNAIL_URL">KEY_CONTENT_DEEP_LINK_METADATA_THUMBNAIL_URL</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> thumbnail URL of the resource shared on Google+.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#KEY_CONTENT_DEEP_LINK_METADATA_TITLE">KEY_CONTENT_DEEP_LINK_METADATA_TITLE</a></td>
         <td class="jd-descrcol" width="100%">Bundle key used for the <code><a href="/reference/java/lang/String.html">String</a></code> title of the resource shared on Google+.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html#PARAM_CONTENT_DEEP_LINK_ID">PARAM_CONTENT_DEEP_LINK_ID</a></td>
         <td class="jd-descrcol" width="100%">The query parameter containing the deep-link ID.</td>
     </tr>
@@ -954,7 +964,7 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.html#createPerson(java.lang.String, java.lang.String)">createPerson</a></span>(<a href="/reference/java/lang/String.html">String</a> id, <a href="/reference/java/lang/String.html">String</a> displayName)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.html#createPerson(java.lang.String, java.lang.String)">createPerson</a></span>(String id, String displayName)</nobr>
         
         <div class="jd-descrdiv">Creates a person to use as a recipient with the given ID and display name.</div>
   
@@ -969,10 +979,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.html#getDeepLinkId(android.content.Intent)">getDeepLinkId</a></span>(<a href="/reference/android/content/Intent.html">Intent</a> intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.html#getDeepLinkId(android.content.Intent)">getDeepLinkId</a></span>(Intent intent)</nobr>
         
         <div class="jd-descrdiv">Get the incoming deep link.</div>
   
@@ -983,6 +993,33 @@ Summary:
 </table>
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="promethods" class="jd-sumtable"><tr><th colspan="12">Protected Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.html#isDeepLinkIdValid(java.lang.String)">isDeepLinkIdValid</a></span>(String deepLinkId)</nobr>
+        
+        <div class="jd-descrdiv">Determine if the deep-link ID is valid.</div>
+  
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -1002,7 +1039,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1021,7 +1058,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1040,7 +1077,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1069,7 +1106,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1133,7 +1170,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1232,7 +1269,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_CALL_TO_ACTION
     </h4>
@@ -1270,7 +1307,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_CONTENT_DEEP_LINK_ID
     </h4>
@@ -1309,7 +1346,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_CONTENT_DEEP_LINK_METADATA
     </h4>
@@ -1349,7 +1386,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_CONTENT_URL
     </h4>
@@ -1387,7 +1424,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_IS_INTERACTIVE_POST
     </h4>
@@ -1425,7 +1462,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_SENDER_ID
     </h4>
@@ -1467,7 +1504,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_CALL_TO_ACTION_DEEP_LINK_ID
     </h4>
@@ -1506,7 +1543,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_CALL_TO_ACTION_LABEL
     </h4>
@@ -1545,7 +1582,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_CALL_TO_ACTION_URL
     </h4>
@@ -1584,7 +1621,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_CONTENT_DEEP_LINK_METADATA_DESCRIPTION
     </h4>
@@ -1623,7 +1660,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_CONTENT_DEEP_LINK_METADATA_THUMBNAIL_URL
     </h4>
@@ -1662,7 +1699,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_CONTENT_DEEP_LINK_METADATA_TITLE
     </h4>
@@ -1701,7 +1738,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         PARAM_CONTENT_DEEP_LINK_ID
     </h4>
@@ -1803,7 +1840,7 @@ From class
         <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>
       </span>
       <span class="sympad">createPerson</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> id, <a href="/reference/java/lang/String.html">String</a> displayName)</span>
+      <span class="normal">(String id, String displayName)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1844,10 +1881,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDeepLinkId</span>
-      <span class="normal">(<a href="/reference/android/content/Intent.html">Intent</a> intent)</span>
+      <span class="normal">(Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1881,6 +1918,45 @@ From class
 
 
 <!-- ========= METHOD DETAIL ======== -->
+
+<h2>Protected Methods</h2>
+
+
+
+<A NAME="isDeepLinkIdValid(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+        static 
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isDeepLinkIdValid</span>
+      <span class="normal">(String deepLinkId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Determine if the deep-link ID is valid.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>True if the provided deep-link ID is valid.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 
 
 

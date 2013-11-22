@@ -127,19 +127,40 @@ public class TelephonyManager {
 
     /**
      * The Phone app sends this intent when a user opts to respond-via-message during an incoming
-     * call. By default, the MMS app consumes this message and sends a text message to the caller. A
-     * third party app can provide this functionality in lieu of MMS app by consuming this Intent
-     * and sending the message using their own messaging system.  The intent contains a URI
-     * describing the recipient, and an EXTRA containing the message itself.
-     * <p class="note"><strong>Note:</strong>
-     * The intent-filter which consumes this Intent needs to be in a service which requires the
-     * permission {@link android.Manifest.permission#SEND_RESPOND_VIA_MESSAGE}.</p>
+     * call. By default, the device's default SMS app consumes this message and sends a text message
+     * to the caller. A third party app can also provide this functionality by consuming this Intent
+     * with a {@link android.app.Service} and sending the message using its own messaging system.
+     * <p>The intent contains a URI (available from {@link android.content.Intent#getData})
+     * describing the recipient, using either the {@code sms:}, {@code smsto:}, {@code mms:},
+     * or {@code mmsto:} URI schema. Each of these URI schema carry the recipient information the
+     * same way: the path part of the URI contains the recipient's phone number or a comma-separated
+     * set of phone numbers if there are multiple recipients. For example, {@code
+     * smsto:2065551234}.</p>
      *
-     * <p>
-     * {@link android.content.Intent#getData} is a URI describing the recipient of the message.
-     * <p>
-     * The {@link android.content.Intent#EXTRA_TEXT} extra contains the message
-     * to send.
+     * <p>The intent may also contain extras for the message text (in {@link
+     * android.content.Intent#EXTRA_TEXT}) and a message subject
+     * (in {@link android.content.Intent#EXTRA_SUBJECT}).</p>
+     *
+     * <p class="note"><strong>Note:</strong>
+     * The intent-filter that consumes this Intent needs to be in a {@link android.app.Service}
+     * that requires the
+     * permission {@link android.Manifest.permission#SEND_RESPOND_VIA_MESSAGE}.</p>
+     * <p>For example, the service that receives this intent can be declared in the manifest file
+     * with an intent filter like this:</p>
+     * <pre>
+     * &lt;!-- Service that delivers SMS messages received from the phone "quick response" -->
+     * &lt;service android:name=".HeadlessSmsSendService"
+     *          android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
+     *          android:exported="true" >
+     *   &lt;intent-filter>
+     *     &lt;action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+     *     &lt;category android:name="android.intent.category.DEFAULT" />
+     *     &lt;data android:scheme="sms" />
+     *     &lt;data android:scheme="smsto" />
+     *     &lt;data android:scheme="mms" />
+     *     &lt;data android:scheme="mmsto" />
+     *   &lt;/intent-filter>
+     * &lt;/service></pre>
      * <p>
      * Output: nothing.
      */
@@ -309,7 +330,7 @@ public class TelephonyManager {
      */
     public List<NeighboringCellInfo> getNeighboringCellInfo() {
         try {
-            return getITelephony().getNeighboringCellInfo(mContext.getBasePackageName());
+            return getITelephony().getNeighboringCellInfo(mContext.getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -412,12 +433,12 @@ public class TelephonyManager {
         case RILConstants.NETWORK_MODE_GSM_UMTS:
         case RILConstants.NETWORK_MODE_LTE_GSM_WCDMA:
         case RILConstants.NETWORK_MODE_LTE_WCDMA:
+        case RILConstants.NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
             return PhoneConstants.PHONE_TYPE_GSM;
 
         // Use CDMA Phone for the global mode including CDMA
         case RILConstants.NETWORK_MODE_GLOBAL:
         case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
-        case RILConstants.NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
             return PhoneConstants.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_LTE_ONLY:
@@ -1399,5 +1420,23 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
+    }
+
+    /**
+     * Returns the MMS user agent.
+     */
+    public String getMmsUserAgent() {
+        if (mContext == null) return null;
+        return mContext.getResources().getString(
+                com.android.internal.R.string.config_mms_user_agent);
+    }
+
+    /**
+     * Returns the MMS user agent profile URL.
+     */
+    public String getMmsUAProfUrl() {
+        if (mContext == null) return null;
+        return mContext.getResources().getString(
+                com.android.internal.R.string.config_mms_user_agent_profile_url);
     }
 }

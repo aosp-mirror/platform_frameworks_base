@@ -30,6 +30,88 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 22.2.1</a> <em>(September 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 16 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that this version of SDK Tools is
+          designed for use with ADT 22.2.1 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 22.2.1.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed problem with templates that causes the new project wizard to hang.
+         (<a href="http://b.android.com/60149">Issue 60149</a>)</li>
+        <li>Fixed crash when using the lint command line tool because of mis-matched library
+          dependency. (<a href="http://b.android.com/60190">Issue 60190</a>)</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 22.2</a> <em>(September 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 16 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that this version of SDK Tools is
+          designed for use with ADT 22.2 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 22.2.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Updated build tools to allow use of RenderScript on older versions of Android
+         using new features in the
+         <a href="{@docRoot}tools/support-library/features.html#v8">Support Library</a>.</li>
+        <li>Moved the Systrace tool to the {@code &gt;sdk&lt;/platform-tools/} directory. </li>
+        <li>Modified <a href="{@docRoot}tools/help/gltracer.html">Tracer for OpenGL ES</a> to
+          support OpenGL ES 3.0.</li>
+        <li>Lint
+          <ul>
+            <li>Fixed problem with lint not detecting custom namespaces.
+              (<a href="http://b.android.com/55673">Issue 55673</a>)</li>
+            <li>Fixed problem with the XML report including invalid characters.
+              (<a href="http://b.android.com/56205">Issue 56205</a>)</li>
+            <li>Fixed command-line execution of lint to work in headless mode to support execution
+              by build servers. (<a href="http://b.android.com/55820">Issue 55820</a>)</li>
+          </ul>
+        </li>
+        <li>Improved support for path names with spaces in the Windows command-line tools.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.0.5</a> <em>(July 2013)</em>
   </p>
 
@@ -55,10 +137,10 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     <dt>General Notes:</dt>
     <dd>
       <ul>
-        <li>Fixed Renderscript compilation issue for Windows platforms with ant.</li>
+        <li>Fixed RenderScript compilation issue for Windows platforms with ant.</li>
         <li>Updated <a href="{@docRoot}tools/help/systrace.html">Systrace</a> to work with the
           Android 4.3 platform image.</li>
-        <li>Fixed packaging of Renderscript compiler.</li>
+        <li>Fixed packaging of RenderScript compiler.</li>
         <li>Build tools 18.0.0 is obsolete and 18.0.1 should be used instead.</li>
       </ul>
     </dd>
@@ -95,7 +177,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     <dt>General Notes:</dt>
     <dd>
       <ul>
-        <li>Fixed problem with compiling Renderscript code.</li>
+        <li>Fixed problem with compiling RenderScript code.</li>
       </ul>
     </dd>
     </dl>
@@ -274,17 +356,17 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
           </ul>
         </li>
 
-        <li>Renderscript
+        <li>RenderScript
           <ul>
             <li>Added support for
               <a href="{@docRoot}guide/topics/renderscript/compute.html#filterscript">Filterscript</a>
               compilation.</li>
-            <li>Added new project setting to control the Renderscript compilation target separately
+            <li>Added new project setting to control the RenderScript compilation target separately
               from an Android project. Adding the following line to a {@code project.properties}
-              file causes Renderscript code to be compiled for Android API Level 17, while the
+              file causes RenderScript code to be compiled for Android API Level 17, while the
               containing application can target a different (lower) API level:
               <pre>renderscript.target = 17</pre>
-              Previously, the Renderscript compilation target was tied to the
+              Previously, the RenderScript compilation target was tied to the
               {@code android:minSdkVersion} setting in the manifest.
               (<a href="http://code.google.com/p/android/issues/detail?id=40487">Issue 40487</a>)
             </li>
@@ -483,7 +565,7 @@ with GPU acceleration.</li>
         <li>Improved resize algorithm for better rendering on scaled emulator windows.</li>
         <li>Fixed a bug in the {@code lint} check for unprotected broadcast receivers to ignore
 unprotected receivers for default Android actions.</li>
-        <li>Fixed build issue for projects using Renderscript.</li>
+        <li>Fixed build issue for projects using RenderScript.</li>
         <li>Fixed memory leak in the emulator.</li>
       </ul>
     </dd>
@@ -823,7 +905,7 @@ ignore attribute. (<a
     <li>Fixed emulator crash on Linux due to improper webcam detection
     (<a href="http://code.google.com/p/android/issues/detail?id=20952">Issue 20952</a>).</li>
     <li>Fixed emulator issue when using the <code>-wipe-data</code> argument.</li>
-    <li>Fixed build issue when using Renderscript in projects that target API levels 11-13
+    <li>Fixed build issue when using RenderScript in projects that target API levels 11-13
     (<a href="http://code.google.com/p/android/issues/detail?id=21006">Issue 21006</a>).</li>
     <li>Fixed issue when creating an AVD using the GoogleTV addon
     (<a href="http://code.google.com/p/android/issues/detail?id=20963">Issue 20963</a>).</li>

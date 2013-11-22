@@ -860,13 +860,13 @@ screenshots or on a non-secure display output, even when mirrored.</p>
 
 <h3 id="42-wireless-display">Wireless display</h3>
 
-<p>Starting in Android 4.2, users on supported devices can connect to an
-external display over Wi-Fi, using <a
-href="http://www.wi-fi.org/wi-fi-certified-miracast%E2%84%A2">Miracast</a>, a
-peer-to-peer wireless display standard created by the <a
-href="http://www.wi-fi.org/">Wi-Fi Alliance</a>. When a wireless display is
-connected, users can stream any type of content to the big screen, including
-photos, games, maps, and more.</p>
+<p>Starting in Android 4.2, users on supported devices can connect to an external display over
+Wi-Fi, using Wi-Fi Display (a peer-to-peer wireless display solution that complies with the
+<a href="http://www.wi-fi.org/wi-fi-certified-miracast%E2%84%A2"
+ class="external-link">Miracast&trade;</a> certification
+program). When a wireless display is connected, users can stream any type of content to the big
+screen, including photos, games, maps, and more.</p>
+
 
 <p>Apps can take advantage of <strong>wireless displays</strong> in the same way as they do other
 external displays and no extra work is needed. The system manages the network
@@ -1455,15 +1455,22 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <p>You can take advantage of this API to build new features into your apps. For example, you could let users connect to a webcam, a printer, or an app on another mobile device that supports Wi-Fi peer-to-peer connections.  </p>
 
-<h3>Wi-Fi Direct Service Discovery</h3>
+<h3>Wi-Fi P2P Service Discovery</h3>
 
-<p>Ice Cream Sandwich introduced support for Wi-Fi Direct, a technology that lets apps <strong>discover and pair directly</strong>, over a high-bandwidth peer-to-peer connection. Wi-Fi Direct is an ideal way to share media, photos, files and other types of data and sessions, even where there is no cell network or Wi-Fi available.</p>
+<p><a href="{@docRoot}about/versions/android-4.0-highlights.html">Ice Cream Sandwich</a> introduced
+support for Wi-Fi Peer-to-Peer (P2P), a technology that lets apps <strong>discover and pair
+directly</strong>, over a high-bandwidth peer-to-peer connection (in compliance with the Wi-Fi
+Alliance's <a href="http://www.wi-fi.org/discover-and-learn/wi-fi-direct"
+ class="external-link">Wi-Fi Direct&trade;</a>
+certification program). Wi-Fi P2P is an ideal way to share media, photos, files and other types of
+data and sessions, even where there is no cell network or Wi-Fi available.</p>
 
-<p>Android 4.1 takes Wi-Fi Direct further, adding API support for <strong>pre-associated service discovery</strong>. Pre-associated service discovery lets your apps get more useful information from nearby devices about the services they support, before they attempt to connect.  Apps can initiate discovery for a specific service and filter the list of discovered devices to those that actually support the target service or application.</p>
 
-<p>For example, this means that your app could discover only devices that are “printers” or that have a specific game available, instead of discovering all nearby Wi-Fi Direct devices. On the other hand, your app can advertise the service it provides to other devices, which can discover it and then negotiate a connection. This greatly simplifies discovery and pairing for users and lets apps take advantage of Wi-Fi Direct more effectively.</p>
+<p>Android 4.1 takes Wi-Fi P2P further, adding API support for <strong>pre-associated service discovery</strong>. Pre-associated service discovery lets your apps get more useful information from nearby devices about the services they support, before they attempt to connect.  Apps can initiate discovery for a specific service and filter the list of discovered devices to those that actually support the target service or application.</p>
 
-<p>With Wi-Fi Direct service discovery, you can create apps and <strong>multiplayer games</strong> that can share photos, videos, gameplay, scores, or almost anything else &mdash; all without requiring any Internet or mobile network. Your users can connect using only a direct p2p connection, which avoids using mobile bandwidth.</p>
+<p>For example, this means that your app could discover only devices that are “printers” or that have a specific game available, instead of discovering all nearby Wi-Fi P2P devices. On the other hand, your app can advertise the service it provides to other devices, which can discover it and then negotiate a connection. This greatly simplifies discovery and pairing for users and lets apps take advantage of Wi-Fi P2P more effectively.</p>
+
+<p>With Wi-Fi P2P service discovery, you can create apps and <strong>multiplayer games</strong> that can share photos, videos, gameplay, scores, or almost anything else &mdash; all without requiring any Internet or mobile network. Your users can connect using only a direct p2p connection, which avoids using mobile bandwidth.</p>
 
 <h3>Network Bandwidth Management</h3>
 

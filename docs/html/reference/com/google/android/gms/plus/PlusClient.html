@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>PlusClient | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -691,7 +698,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -716,7 +723,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -843,21 +850,6 @@ Summary:
          
         
         interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html">PlusClient.OnPersonLoadedListener</a></td>
-      <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></code>.
-</em>&nbsp;</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
-        interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OrderBy.html">PlusClient.OrderBy</a></td>
       <td class="jd-descrcol" width="100%">Constants to declare the order to return people in.&nbsp;</td>
     </tr>
@@ -882,9 +874,9 @@ Summary:
 
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.html#KEY_REQUEST_VISIBLE_ACTIVITIES">KEY_REQUEST_VISIBLE_ACTIVITIES</a></td>
-        <td class="jd-descrcol" width="100%">Bundle key for specifying which user's app activity (moment) types can be written to Google.</td>
+        <td class="jd-descrcol" width="100%">See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></code>.</td>
     </tr>
     
     
@@ -973,7 +965,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#getAccountName()">getAccountName</a></span>()</nobr>
@@ -1087,7 +1079,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener, int, java.lang.String, android.net.Uri, java.lang.String, java.lang.String)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, <a href="/reference/java/lang/String.html">String</a> pageToken, <a href="/reference/android/net/Uri.html">Uri</a> targetUrl, <a href="/reference/java/lang/String.html">String</a> type, <a href="/reference/java/lang/String.html">String</a> userId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener, int, java.lang.String, android.net.Uri, java.lang.String, java.lang.String)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, String pageToken, Uri targetUrl, String type, String userId)</nobr>
         
         <div class="jd-descrdiv">List all of the moments for a particular user.</div>
   
@@ -1123,7 +1115,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, <a href="/reference/java/util/Collection.html">Collection</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; personIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, Collection&lt;String&gt; personIds)</nobr>
         
         <div class="jd-descrdiv">Loads a list of specified people.</div>
   
@@ -1141,7 +1133,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String...</a> personIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String... personIds)</nobr>
         
         <div class="jd-descrdiv">Helper method for
  <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople(PlusClient.OnPeopleLoadedListener, java.util.Collection)</a></code>.</div>
@@ -1160,88 +1152,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection)</nobr>
-        
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople(PlusClient.OnPeopleLoadedListener, int, String)</a></code>.
-</em></div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, int, int, java.lang.String)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection, int orderBy, int maxResults, <a href="/reference/java/lang/String.html">String</a> pageToken)</nobr>
-        
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople(PlusClient.OnPeopleLoadedListener, int, String)</a></code>.
-</em></div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPerson(com.google.android.gms.plus.PlusClient.OnPersonLoadedListener, java.lang.String)">loadPerson</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html">PlusClient.OnPersonLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> userId)</nobr>
-        
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople(PlusClient.OnPeopleLoadedListener, java.util.Collection)</a></code>.
-</em></div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> pageToken)</nobr>
-        
-        <div class="jd-descrdiv">Loads the list of visible people in the user's circles.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int orderBy, <a href="/reference/java/lang/String.html">String</a> pageToken)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String pageToken)</nobr>
         
         <div class="jd-descrdiv">Loads the list of visible people in the user's circles.</div>
   
@@ -1250,6 +1161,24 @@ Summary:
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int orderBy, String pageToken)</nobr>
+        
+        <div class="jd-descrdiv">Loads the list of visible people in the user's circles.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1267,7 +1196,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1286,7 +1215,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1296,7 +1225,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#removeMoment(java.lang.String)">removeMoment</a></span>(<a href="/reference/java/lang/String.html">String</a> momentId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#removeMoment(java.lang.String)">removeMoment</a></span>(String momentId)</nobr>
         
         <div class="jd-descrdiv">Delete a moment.</div>
   
@@ -1304,7 +1233,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1322,7 +1251,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1340,7 +1269,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1358,7 +1287,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1398,7 +1327,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1417,7 +1346,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1436,7 +1365,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1465,7 +1394,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1529,7 +1458,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1838,7 +1767,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_REQUEST_VISIBLE_ACTIVITIES
     </h4>
@@ -1850,23 +1779,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Bundle key for specifying which user's app activity (moment) types can be written to Google.
- The list of activity types are represented as a space-separated string passed in the extras
- Bundle when calling <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code>.
-
- <p>
- This bundle key should be included in the extras Bundle when calling
- <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code> and should only be used when
- requesting the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope.
-
- See <a href="https://developers.google.com/+/api/moment-types">Types of moments</a>
- for the full list of valid activity types. Example usage:
- <pre>
-     Bundle bundle = new Bundle();
-     bundle.putString(PlusClient.KEY_REQUEST_VISIBLE_ACTIVITIES,
-              "http://schemas.google.com/AddActivity http://schemas.google.com/BuyActivity");
-     String token = GoogleAuthUtil.getToken(context, accountName, Scopes.PLUS_LOGIN, bundle);
- </pre>
+  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></code>.
 </p></div>
 
     
@@ -2015,7 +1928,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getAccountName</span>
       <span class="normal">()</span>
@@ -2039,7 +1952,7 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/SecurityException.html">SecurityException</a></td>
+            <th>SecurityException</td>
             <td>If your app doesn't have the
          <code><a href="/reference/android/Manifest.permission.html#GET_ACCOUNTS">GET_ACCOUNTS</a></code> permission.
 </td>
@@ -2265,7 +2178,7 @@ From interface
         void
       </span>
       <span class="sympad">loadMoments</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, <a href="/reference/java/lang/String.html">String</a> pageToken, <a href="/reference/android/net/Uri.html">Uri</a> targetUrl, <a href="/reference/java/lang/String.html">String</a> type, <a href="/reference/java/lang/String.html">String</a> userId)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, String pageToken, Uri targetUrl, String type, String userId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2380,7 +2293,7 @@ From interface
         void
       </span>
       <span class="sympad">loadPeople</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, <a href="/reference/java/util/Collection.html">Collection</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; personIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, Collection&lt;String&gt; personIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2432,7 +2345,7 @@ From interface
         void
       </span>
       <span class="sympad">loadPeople</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String...</a> personIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String... personIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2445,108 +2358,6 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p>Helper method for
  <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople(PlusClient.OnPeopleLoadedListener, java.util.Collection)</a></code>.
 </p></div>
-
-    </div>
-</div>
-
-
-<A NAME="loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">loadPeople</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople(PlusClient.OnPeopleLoadedListener, int, String)</a></code>.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, int, int, java.lang.String)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">loadPeople</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int collection, int orderBy, int maxResults, <a href="/reference/java/lang/String.html">String</a> pageToken)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople(PlusClient.OnPeopleLoadedListener, int, String)</a></code>.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="loadPerson(com.google.android.gms.plus.PlusClient.OnPersonLoadedListener, java.lang.String)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">loadPerson</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html">PlusClient.OnPersonLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> userId)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople(PlusClient.OnPeopleLoadedListener, java.util.Collection)</a></code>.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2565,7 +2376,7 @@ From interface
         void
       </span>
       <span class="sympad">loadVisiblePeople</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> pageToken)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String pageToken)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2581,7 +2392,7 @@ From interface
  <p>
  Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
  <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
- To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(PlusClient.OnPeopleLoadedListener, int)</a></code> method.
+ To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> method.
  <p>
  This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
  OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code></p></div>
@@ -2614,7 +2425,7 @@ From interface
         void
       </span>
       <span class="sympad">loadVisiblePeople</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int orderBy, <a href="/reference/java/lang/String.html">String</a> pageToken)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int orderBy, String pageToken)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2630,7 +2441,7 @@ From interface
  <p>
  Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
  <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
- To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(PlusClient.OnPeopleLoadedListener, int)</a></code> method.
+ To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> method.
  <p>
  This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
  OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code></p></div>
@@ -2773,7 +2584,7 @@ From interface
         void
       </span>
       <span class="sympad">removeMoment</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> momentId)</span>
+      <span class="normal">(String momentId)</span>
     </h4>
       <div class="api-level">
         <div></div>

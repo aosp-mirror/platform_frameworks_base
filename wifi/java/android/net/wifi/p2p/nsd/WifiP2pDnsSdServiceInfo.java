@@ -127,7 +127,7 @@ public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
         sb.append(" ");
 
         byte[] data = instanceName.getBytes();
-        sb.append(String.format("%02x", data.length));
+        sb.append(String.format(Locale.US, "%02x", data.length));
         sb.append(WifiP2pServiceInfo.bin2HexStr(data));
         // This is the start point of this response.
         // Therefore, it indicates the request domain name.
@@ -187,8 +187,8 @@ public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
             dnsName = dnsName.toLowerCase(Locale.ROOT); // TODO: is this right?
         }
         sb.append(compressDnsName(dnsName));
-        sb.append(String.format("%04x", dnsType));
-        sb.append(String.format("%02x", version));
+        sb.append(String.format(Locale.US, "%04x", dnsType));
+        sb.append(String.format(Locale.US, "%02x", version));
 
         return sb.toString();
     }
@@ -215,7 +215,7 @@ public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
             int i = dnsName.indexOf('.');
             if (i == -1) {
                 if (dnsName.length() > 0) {
-                    sb.append(String.format("%02x", dnsName.length()));
+                    sb.append(String.format(Locale.US, "%02x", dnsName.length()));
                     sb.append(WifiP2pServiceInfo.bin2HexStr(dnsName.getBytes()));
                 }
                 // for a sequence of labels ending in a zero octet
@@ -225,7 +225,7 @@ public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
 
             String name = dnsName.substring(0, i);
             dnsName = dnsName.substring(i + 1);
-            sb.append(String.format("%02x", name.length()));
+            sb.append(String.format(Locale.US, "%02x", name.length()));
             sb.append(WifiP2pServiceInfo.bin2HexStr(name.getBytes()));
         }
         return sb.toString();

@@ -47,19 +47,21 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Caches::Caches(): Singleton<Caches>(), mExtensions(Extensions::getInstance()), mInitialized(false) {
+Caches::Caches(): Singleton<Caches>(),
+        mExtensions(Extensions::getInstance()), mInitialized(false) {
     init();
     initFont();
     initConstraints();
     initProperties();
+    initStaticProperties();
     initExtensions();
 
     mDebugLevel = readDebugLevel();
     ALOGD("Enabling debug mode %d", mDebugLevel);
 }
 
-void Caches::init() {
-    if (mInitialized) return;
+bool Caches::init() {
+    if (mInitialized) return false;
 
     glGenBuffers(1, &meshBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
@@ -82,6 +84,7 @@ void Caches::init() {
     mTextureUnit = 0;
 
     mRegionMesh = NULL;
+    mMeshIndices = 0;
 
     blend = false;
     lastSrcMode = GL_ZERO;
@@ -94,7 +97,13 @@ void Caches::init() {
     debugOverdraw = false;
     debugStencilClip = kStencilHide;
 
+    patchCache.init(*this);
+
     mInitialized = true;
+
+    resetBoundTextures();
+
+    return true;
 }
 
 void Caches::initFont() {
@@ -132,6 +141,18 @@ void Caches::initConstraints() {
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 }
 
+void Caches::initStaticProperties() {
+    gpuPixelBuffersEnabled = false;
+
+    // OpenGL ES 3.0+ specific features
+    if (mExtensions.hasPixelBufferObjects()) {
+        char property[PROPERTY_VALUE_MAX];
+        if (property_get(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, property, "true") > 0) {
+            gpuPixelBuffersEnabled = !strcmp(property, "true");
+        }
+    }
+}
+
 bool Caches::initProperties() {
     bool prevDebugLayersUpdates = debugLayersUpdates;
     bool prevDebugOverdraw = debugOverdraw;
@@ -145,11 +166,16 @@ bool Caches::initProperties() {
         debugLayersUpdates = false;
     }
 
+    debugOverdraw = false;
     if (property_get(PROPERTY_DEBUG_OVERDRAW, property, NULL) > 0) {
         INIT_LOGD("  Overdraw debug enabled: %s", property);
-        debugOverdraw = !strcmp(property, "true");
-    } else {
-        debugOverdraw = false;
+        if (!strcmp(property, "show")) {
+            debugOverdraw = true;
+            mOverdrawDebugColorSet = kColorSet_Default;
+        } else if (!strcmp(property, "show_deuteranomaly")) {
+            debugOverdraw = true;
+            mOverdrawDebugColorSet = kColorSet_Deuteranomaly;
+        }
     }
 
     // See Properties.h for valid values
@@ -191,8 +217,9 @@ void Caches::terminate() {
     glDeleteBuffers(1, &meshBuffer);
     mCurrentBuffer = 0;
 
-    glDeleteBuffers(1, &mRegionMeshIndices);
+    glDeleteBuffers(1, &mMeshIndices);
     delete[] mRegionMesh;
+    mMeshIndices = 0;
     mRegionMesh = NULL;
 
     fboCache.clear();
@@ -200,12 +227,28 @@ void Caches::terminate() {
     programCache.clear();
     currentProgram = NULL;
 
+    assetAtlas.terminate();
+
+    patchCache.clear();
+
+    clearGarbage();
+
     mInitialized = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 ///////////////////////////////////////////////////////////////////////////////
+
+uint32_t Caches::getOverdrawColor(uint32_t amount) const {
+    static uint32_t sOverdrawColors[2][4] = {
+            { 0x2f0000ff, 0x2f00ff00, 0x3fff0000, 0x7fff0000 },
+            { 0x2f0000ff, 0x4fffff00, 0x5fff8ad8, 0x7fff0000 }
+    };
+    if (amount < 1) amount = 1;
+    if (amount > 4) amount = 4;
+    return sOverdrawColors[mOverdrawDebugColorSet][amount - 1];
+}
 
 void Caches::dumpMemoryUsage() {
     String8 stringLog;
@@ -227,15 +270,19 @@ void Caches::dumpMemoryUsage(String8 &log) {
             pathCache.getSize(), pathCache.getMaxSize());
     log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
+    log.appendFormat("  PatchCache           %8d / %8d\n",
+            patchCache.getSize(), patchCache.getMaxSize());
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        const uint32_t size = fontRenderer->getFontRendererSize(i);
-        log.appendFormat("  FontRenderer %d       %8d / %8d\n", i, size, size);
+        const uint32_t sizeA8 = fontRenderer->getFontRendererSize(i, GL_ALPHA);
+        const uint32_t sizeRGBA = fontRenderer->getFontRendererSize(i, GL_RGBA);
+        log.appendFormat("  FontRenderer %d A8    %8d / %8d\n", i, sizeA8, sizeA8);
+        log.appendFormat("  FontRenderer %d RGBA  %8d / %8d\n", i, sizeRGBA, sizeRGBA);
+        log.appendFormat("  FontRenderer %d total %8d / %8d\n", i, sizeA8 + sizeRGBA,
+                sizeA8 + sizeRGBA);
     }
     log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n",
             fboCache.getSize(), fboCache.getMaxSize());
-    log.appendFormat("  PatchCache           %8d / %8d\n",
-            patchCache.getSize(), patchCache.getMaxSize());
 
     uint32_t total = 0;
     total += textureCache.getSize();
@@ -244,8 +291,10 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += gradientCache.getSize();
     total += pathCache.getSize();
     total += dropShadowCache.getSize();
+    total += patchCache.getSize();
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        total += fontRenderer->getFontRendererSize(i);
+        total += fontRenderer->getFontRendererSize(i, GL_ALPHA);
+        total += fontRenderer->getFontRendererSize(i, GL_RGBA);
     }
 
     log.appendFormat("Total memory usage:\n");
@@ -259,6 +308,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
 void Caches::clearGarbage() {
     textureCache.clearGarbage();
     pathCache.clearGarbage();
+    patchCache.clearGarbage();
 
     Vector<DisplayList*> displayLists;
     Vector<Layer*> layers;
@@ -298,6 +348,11 @@ void Caches::deleteDisplayListDeferred(DisplayList* displayList) {
 void Caches::flush(FlushMode mode) {
     FLUSH_LOGD("Flushing caches (mode %d)", mode);
 
+    // We must stop tasks before clearing caches
+    if (mode > kFlushMode_Layers) {
+        tasks.stop();
+    }
+
     switch (mode) {
         case kFlushMode_Full:
             textureCache.clear();
@@ -305,13 +360,13 @@ void Caches::flush(FlushMode mode) {
             dropShadowCache.clear();
             gradientCache.clear();
             fontRenderer->clear();
+            fboCache.clear();
             dither.clear();
             // fall through
         case kFlushMode_Moderate:
             fontRenderer->flush();
             textureCache.flush();
             pathCache.clear();
-            tasks.stop();
             // fall through
         case kFlushMode_Layers:
             layerCache.clear();
@@ -355,6 +410,32 @@ bool Caches::bindIndicesBuffer(const GLuint buffer) {
         return true;
     }
     return false;
+}
+
+bool Caches::bindIndicesBuffer() {
+    if (!mMeshIndices) {
+        uint16_t* regionIndices = new uint16_t[gMaxNumberOfQuads * 6];
+        for (uint32_t i = 0; i < gMaxNumberOfQuads; i++) {
+            uint16_t quad = i * 4;
+            int index = i * 6;
+            regionIndices[index    ] = quad;       // top-left
+            regionIndices[index + 1] = quad + 1;   // top-right
+            regionIndices[index + 2] = quad + 2;   // bottom-left
+            regionIndices[index + 3] = quad + 2;   // bottom-left
+            regionIndices[index + 4] = quad + 1;   // top-right
+            regionIndices[index + 5] = quad + 3;   // bottom-right
+        }
+
+        glGenBuffers(1, &mMeshIndices);
+        bool force = bindIndicesBuffer(mMeshIndices);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, gMaxNumberOfQuads * 6 * sizeof(uint16_t),
+                regionIndices, GL_STATIC_DRAW);
+
+        delete[] regionIndices;
+        return force;
+    }
+
+    return bindIndicesBuffer(mMeshIndices);
 }
 
 bool Caches::unbindIndicesBuffer() {
@@ -439,6 +520,50 @@ void Caches::activeTexture(GLuint textureUnit) {
         glActiveTexture(gTextureUnits[textureUnit]);
         mTextureUnit = textureUnit;
     }
+}
+
+void Caches::resetActiveTexture() {
+    mTextureUnit = -1;
+}
+
+void Caches::bindTexture(GLuint texture) {
+    if (mBoundTextures[mTextureUnit] != texture) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        mBoundTextures[mTextureUnit] = texture;
+    }
+}
+
+void Caches::bindTexture(GLenum target, GLuint texture) {
+    if (mBoundTextures[mTextureUnit] != texture) {
+        glBindTexture(target, texture);
+        mBoundTextures[mTextureUnit] = texture;
+    }
+}
+
+void Caches::deleteTexture(GLuint texture) {
+    // When glDeleteTextures() is called on a currently bound texture,
+    // OpenGL ES specifies that the texture is then considered unbound
+    // Consider the following series of calls:
+    //
+    // glGenTextures -> creates texture name 2
+    // glBindTexture(2)
+    // glDeleteTextures(2) -> 2 is now unbound
+    // glGenTextures -> can return 2 again
+    //
+    // If we don't call glBindTexture(2) after the second glGenTextures
+    // call, any texture operation will be performed on the default
+    // texture (name=0)
+
+    for (int i = 0; i < REQUIRED_TEXTURE_UNITS_COUNT; i++) {
+        if (mBoundTextures[i] == texture) {
+            mBoundTextures[i] = 0;
+        }
+    }
+    glDeleteTextures(1, &texture);
+}
+
+void Caches::resetBoundTextures() {
+    memset(mBoundTextures, 0, REQUIRED_TEXTURE_UNITS_COUNT * sizeof(GLuint));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -545,28 +670,7 @@ void Caches::unregisterFunctors(uint32_t functorCount) {
 TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
     if (!mRegionMesh) {
-        mRegionMesh = new TextureVertex[REGION_MESH_QUAD_COUNT * 4];
-
-        uint16_t* regionIndices = new uint16_t[REGION_MESH_QUAD_COUNT * 6];
-        for (int i = 0; i < REGION_MESH_QUAD_COUNT; i++) {
-            uint16_t quad = i * 4;
-            int index = i * 6;
-            regionIndices[index    ] = quad;       // top-left
-            regionIndices[index + 1] = quad + 1;   // top-right
-            regionIndices[index + 2] = quad + 2;   // bottom-left
-            regionIndices[index + 3] = quad + 2;   // bottom-left
-            regionIndices[index + 4] = quad + 1;   // top-right
-            regionIndices[index + 5] = quad + 3;   // bottom-right
-        }
-
-        glGenBuffers(1, &mRegionMeshIndices);
-        bindIndicesBuffer(mRegionMeshIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, REGION_MESH_QUAD_COUNT * 6 * sizeof(uint16_t),
-                regionIndices, GL_STATIC_DRAW);
-
-        delete[] regionIndices;
-    } else {
-        bindIndicesBuffer(mRegionMeshIndices);
+        mRegionMesh = new TextureVertex[gMaxNumberOfQuads * 4];
     }
 
     return mRegionMesh;

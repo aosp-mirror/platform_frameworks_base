@@ -48,7 +48,7 @@ public class ClipRegion2Activity extends Activity {
     }
 
     public static class RegionView extends FrameLayout {
-        private final Region mRegion = new Region();
+        private Region mRegion = new Region();
         private float mClipPosition = 0.0f;
 
         public RegionView(Context c) {
@@ -69,9 +69,7 @@ public class ClipRegion2Activity extends Activity {
 
             canvas.save();
 
-            mRegion.setEmpty();
-            mRegion.op(0, 0, getWidth(), getHeight(),
-                    Region.Op.REPLACE);
+            mRegion.set(0, 0, getWidth(), getHeight());
             mRegion.op(getWidth() / 4, getHeight() / 4, 3 * getWidth() / 4, 3 * getHeight() / 4,
                     Region.Op.DIFFERENCE);
 

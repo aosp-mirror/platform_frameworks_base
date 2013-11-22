@@ -37,4 +37,13 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata">SaskTel Tethering,inet.stm.sk.ca,,,,,,,,,302,780,,DUN</string>
 
+    <!-- Don't use roaming icon for considered operators -->
+    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>302</item>
+    </string-array>
+
+    <!-- Configure mobile network MTU. Carrier specific value is set here.
+    -->
+    <integer name="config_mobile_mtu">1358</integer>
+
 </resources>

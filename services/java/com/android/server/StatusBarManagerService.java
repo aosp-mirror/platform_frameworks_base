@@ -399,6 +399,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         mCurrentUserId = newUserId;
     }
 
+    @Override
+    public void setWindowState(int window, int state) {
+        if (mBar != null) {
+            try {
+                mBar.setWindowState(window, state);
+            } catch (RemoteException ex) {}
+        }
+    }
+
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR,
                 "StatusBarManagerService");

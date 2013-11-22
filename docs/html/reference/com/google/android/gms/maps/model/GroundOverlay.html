@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>GroundOverlay | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -678,7 +685,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -698,7 +705,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -849,7 +856,7 @@ Summary:
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#equals(java.lang.Object)">equals</a></span>(<a href="/reference/java/lang/Object.html">Object</a> other)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#equals(java.lang.Object)">equals</a></span>(Object other)</nobr>
         
   </td></tr>
 
@@ -916,7 +923,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getId()">getId</a></span>()</nobr>
@@ -1218,7 +1225,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1237,7 +1244,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1256,7 +1263,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1285,7 +1292,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1349,7 +1356,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1466,7 +1473,7 @@ From class
         boolean
       </span>
       <span class="sympad">equals</span>
-      <span class="normal">(<a href="/reference/java/lang/Object.html">Object</a> other)</span>
+      <span class="normal">(Object other)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1594,7 +1601,7 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getId</span>
       <span class="normal">()</span>
@@ -1607,12 +1614,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets this ground overlay's id.
- <p>
- When a map is restored from a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code>, ground overlays that were on that
- map are also restored. However, those ground overlays will then be represented by different
- <code>GroundOverlay</code> objects. A ground overlay's id can be used to retrieve the new
- instance of a <code>GroundOverlay</code> object after such restoration.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Gets this ground overlay's id.  The id will be unique amongst all GroundOverlays on a map.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>this ground overlay's id.

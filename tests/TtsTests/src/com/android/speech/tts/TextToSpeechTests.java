@@ -70,6 +70,8 @@ public class TextToSpeechTests extends InstrumentationTestCase {
         // Test 1 :Tests that calls to onLoadLanguage( ) are delegated through to the
         // service without any caching or intermediate steps.
         mTts.setLanguage(new Locale("eng", "USA", "variant"));
+        LittleMock.verify(delegate, LittleMock.times(1)).onIsLanguageAvailable(
+                "eng", "USA", "variant");
         LittleMock.verify(delegate, LittleMock.times(1)).onLoadLanguage(
                 "eng", "USA", "variant");
     }
@@ -82,6 +84,8 @@ public class TextToSpeechTests extends InstrumentationTestCase {
         // Test 2 : Tests that when the language is successfully set
         // like above (returns LANG_COUNTRY_AVAILABLE). That the
         // request language changes from that point on.
+        LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).when(delegate).onIsLanguageAvailable(
+                "eng", "USA", "variant");
         LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).when(delegate).onLoadLanguage(
                 "eng", "USA", "variant");
         mTts.setLanguage(new Locale("eng", "USA", "variant"));
@@ -103,6 +107,8 @@ public class TextToSpeechTests extends InstrumentationTestCase {
         // TEST 3 : Tests that the language that is set does not change when the
         // engine reports it could not load the specified language.
         LittleMock.doReturn(TextToSpeech.LANG_NOT_SUPPORTED).when(
+                delegate).onIsLanguageAvailable("fra", "FRA", "");
+        LittleMock.doReturn(TextToSpeech.LANG_NOT_SUPPORTED).when(
                 delegate).onLoadLanguage("fra", "FRA", "");
         mTts.setLanguage(Locale.FRANCE);
         blockingCallSpeak("le fou barre", delegate);
@@ -114,38 +120,6 @@ public class TextToSpeechTests extends InstrumentationTestCase {
         assertEquals("eng", req2.getValue().getLanguage());
         assertEquals("USA", req2.getValue().getCountry());
         assertEquals("", req2.getValue().getVariant());
-    }
-
-
-    public void testGetLanguage_invalidReturnValues() {
-        IDelegate delegate = LittleMock.mock(IDelegate.class);
-        MockableTextToSpeechService.setMocker(delegate);
-
-        // Test1: Simple end to end test. Ensure that bad return values
-        // are dealt with appropriately.
-        LittleMock.doReturn(null).when(delegate).onGetLanguage();
-        Locale returnVal = mTts.getLanguage();
-        assertNull(returnVal);
-
-
-        // Bad value 2. An array of length < 3.
-        LittleMock.doReturn(new String[] {"eng", "usa"}).when(delegate).onGetLanguage();
-        returnVal = mTts.getLanguage();
-        assertNull(returnVal);
-    }
-
-    public void testGetLanguage_validReturnValues() {
-        IDelegate delegate = LittleMock.mock(IDelegate.class);
-        MockableTextToSpeechService.setMocker(delegate);
-
-        // A correct value.
-        LittleMock.doReturn(new String[] {"eng", "usa", ""}).when(delegate).onGetLanguage();
-        Locale returnVal = mTts.getLanguage();
-
-        // Note: This is not the same as Locale.US . Well tough luck for
-        // being the only component of the entire framework that standardized
-        // three letter country and language codes.
-        assertEquals(new Locale("eng", "USA", ""), returnVal);
     }
 
     public void testIsLanguageAvailable() {

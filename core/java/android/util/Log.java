@@ -17,6 +17,7 @@
 package android.util;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -83,14 +84,14 @@ public final class Log {
     public static final int ASSERT = 7;
 
     /**
-     * Exception class used to capture a stack trace in {@link #wtf()}.
+     * Exception class used to capture a stack trace in {@link #wtf}.
      */
     private static class TerribleFailure extends Exception {
         TerribleFailure(String msg, Throwable cause) { super(msg, cause); }
     }
 
     /**
-     * Interface to handle terrible failures from {@link #wtf()}.
+     * Interface to handle terrible failures from {@link #wtf}.
      *
      * @hide
      */
@@ -252,7 +253,16 @@ public final class Log {
      * @param msg The message you would like logged.
      */
     public static int wtf(String tag, String msg) {
-        return wtf(tag, msg, null);
+        return wtf(LOG_ID_MAIN, tag, msg, null, false);
+    }
+
+    /**
+     * Like {@link #wtf(String, String)}, but also writes to the log the full
+     * call stack.
+     * @hide
+     */
+    public static int wtfStack(String tag, String msg) {
+        return wtf(LOG_ID_MAIN, tag, msg, null, true);
     }
 
     /**
@@ -262,7 +272,7 @@ public final class Log {
      * @param tr An exception to log.
      */
     public static int wtf(String tag, Throwable tr) {
-        return wtf(tag, tr.getMessage(), tr);
+        return wtf(LOG_ID_MAIN, tag, tr.getMessage(), tr, false);
     }
 
     /**
@@ -273,8 +283,13 @@ public final class Log {
      * @param tr An exception to log.  May be null.
      */
     public static int wtf(String tag, String msg, Throwable tr) {
+        return wtf(LOG_ID_MAIN, tag, msg, tr, false);
+    }
+
+    static int wtf(int logId, String tag, String msg, Throwable tr, boolean localStack) {
         TerribleFailure what = new TerribleFailure(msg, tr);
-        int bytes = println_native(LOG_ID_MAIN, ASSERT, tag, msg + '\n' + getStackTraceString(tr));
+        int bytes = println_native(logId, ASSERT, tag, msg + '\n'
+                + getStackTraceString(localStack ? what : tr));
         sWtfHandler.onTerribleFailure(tag, what);
         return bytes;
     }
@@ -315,8 +330,9 @@ public final class Log {
         }
 
         StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
+        PrintWriter pw = new FastPrintWriter(sw, false, 256);
         tr.printStackTrace(pw);
+        pw.flush();
         return sw.toString();
     }
 

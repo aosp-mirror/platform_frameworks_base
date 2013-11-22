@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
+import android.hardware.display.WifiDisplaySessionInfo;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.RemoteDisplay;
 import android.os.Handler;
@@ -45,6 +46,8 @@ import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 import libcore.util.Objects;
 
@@ -88,8 +91,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     private int mScanState;
     private int mActiveDisplayState;
     private WifiDisplay mActiveDisplay;
+    private WifiDisplay[] mDisplays = WifiDisplay.EMPTY_ARRAY;
     private WifiDisplay[] mAvailableDisplays = WifiDisplay.EMPTY_ARRAY;
     private WifiDisplay[] mRememberedDisplays = WifiDisplay.EMPTY_ARRAY;
+    private WifiDisplaySessionInfo mSessionInfo;
 
     private boolean mPendingStatusChangeBroadcast;
     private boolean mPendingNotificationUpdate;
@@ -116,6 +121,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         pw.println("mScanState=" + mScanState);
         pw.println("mActiveDisplayState=" + mActiveDisplayState);
         pw.println("mActiveDisplay=" + mActiveDisplay);
+        pw.println("mDisplays=" + Arrays.toString(mDisplays));
         pw.println("mAvailableDisplays=" + Arrays.toString(mAvailableDisplays));
         pw.println("mRememberedDisplays=" + Arrays.toString(mRememberedDisplays));
         pw.println("mPendingStatusChangeBroadcast=" + mPendingStatusChangeBroadcast);
@@ -200,6 +206,36 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         return false;
     }
 
+    public void requestPauseLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "requestPauseLocked");
+        }
+
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDisplayController != null) {
+                    mDisplayController.requestPause();
+                }
+            }
+        });
+      }
+
+    public void requestResumeLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "requestResumeLocked");
+        }
+
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDisplayController != null) {
+                    mDisplayController.requestResume();
+                }
+            }
+        });
+    }
+
     public void requestDisconnectLocked() {
         if (DEBUG) {
             Slog.d(TAG, "requestDisconnectedLocked");
@@ -229,7 +265,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         WifiDisplay display = mPersistentDataStore.getRememberedWifiDisplay(address);
         if (display != null && !Objects.equal(display.getDeviceAlias(), alias)) {
-            display = new WifiDisplay(address, display.getDeviceName(), alias);
+            display = new WifiDisplay(address, display.getDeviceName(), alias,
+                    false, false, false);
             if (mPersistentDataStore.rememberWifiDisplay(display)) {
                 mPersistentDataStore.saveIfNeeded();
                 updateRememberedDisplaysLocked();
@@ -262,7 +299,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         if (mCurrentStatus == null) {
             mCurrentStatus = new WifiDisplayStatus(
                     mFeatureState, mScanState, mActiveDisplayState,
-                    mActiveDisplay, mAvailableDisplays, mRememberedDisplays);
+                    mActiveDisplay, mDisplays, mSessionInfo);
         }
 
         if (DEBUG) {
@@ -271,10 +308,36 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         return mCurrentStatus;
     }
 
+    private void updateDisplaysLocked() {
+        List<WifiDisplay> displays = new ArrayList<WifiDisplay>(
+                mAvailableDisplays.length + mRememberedDisplays.length);
+        boolean[] remembered = new boolean[mAvailableDisplays.length];
+        for (WifiDisplay d : mRememberedDisplays) {
+            boolean available = false;
+            for (int i = 0; i < mAvailableDisplays.length; i++) {
+                if (d.equals(mAvailableDisplays[i])) {
+                    remembered[i] = available = true;
+                    break;
+                }
+            }
+            if (!available) {
+                displays.add(new WifiDisplay(d.getDeviceAddress(), d.getDeviceName(),
+                        d.getDeviceAlias(), false, false, true));
+            }
+        }
+        for (int i = 0; i < mAvailableDisplays.length; i++) {
+            WifiDisplay d = mAvailableDisplays[i];
+            displays.add(new WifiDisplay(d.getDeviceAddress(), d.getDeviceName(),
+                    d.getDeviceAlias(), true, d.canConnect(), remembered[i]));
+        }
+        mDisplays = displays.toArray(WifiDisplay.EMPTY_ARRAY);
+    }
+
     private void updateRememberedDisplaysLocked() {
         mRememberedDisplays = mPersistentDataStore.getRememberedWifiDisplays();
         mActiveDisplay = mPersistentDataStore.applyWifiDisplayAlias(mActiveDisplay);
         mAvailableDisplays = mPersistentDataStore.applyWifiDisplayAliases(mAvailableDisplays);
+        updateDisplaysLocked();
     }
 
     private void fixRememberedDisplayNamesFromAvailableDisplaysLocked() {
@@ -321,7 +384,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         }
 
         boolean secure = (flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0;
-        int deviceFlags = 0;
+        int deviceFlags = DisplayDeviceInfo.FLAG_PRESENTATION;
         if (secure) {
             deviceFlags |= DisplayDeviceInfo.FLAG_SECURE;
             if (mSupportsProtectedBuffers) {
@@ -343,7 +406,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
     private void removeDisplayDeviceLocked() {
         if (mDisplayDevice != null) {
-            mDisplayDevice.clearSurfaceLocked();
+            mDisplayDevice.destroyLocked();
             sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_REMOVED);
             mDisplayDevice = null;
 
@@ -487,11 +550,18 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 availableDisplays = mPersistentDataStore.applyWifiDisplayAliases(
                         availableDisplays);
 
-                if (mScanState != WifiDisplayStatus.SCAN_STATE_NOT_SCANNING
-                        || !Arrays.equals(mAvailableDisplays, availableDisplays)) {
+                // check if any of the available displays changed canConnect status
+                boolean changed = !Arrays.equals(mAvailableDisplays, availableDisplays);
+                for (int i = 0; !changed && i<availableDisplays.length; i++) {
+                    changed = availableDisplays[i].canConnect()
+                            != mAvailableDisplays[i].canConnect();
+                }
+
+                if (mScanState != WifiDisplayStatus.SCAN_STATE_NOT_SCANNING || changed) {
                     mScanState = WifiDisplayStatus.SCAN_STATE_NOT_SCANNING;
                     mAvailableDisplays = availableDisplays;
                     fixRememberedDisplayNamesFromAvailableDisplaysLocked();
+                    updateDisplaysLocked();
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -538,6 +608,14 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                     mActiveDisplay = display;
                     scheduleStatusChangedBroadcastLocked();
                 }
+            }
+        }
+
+        @Override
+        public void onDisplaySessionInfo(WifiDisplaySessionInfo sessionInfo) {
+            synchronized (getSyncRoot()) {
+                mSessionInfo = sessionInfo;
+                scheduleStatusChangedBroadcastLocked();
             }
         }
 
@@ -595,9 +673,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             mSurface = surface;
         }
 
-        public void clearSurfaceLocked() {
-            mSurface = null;
-            sendTraversalRequestLocked();
+        public void destroyLocked() {
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
+            }
+            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         public void setNameLocked(String name) {
@@ -607,7 +688,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         @Override
         public void performTraversalInTransactionLocked() {
-            setSurfaceInTransactionLocked(mSurface);
+            if (mSurface != null) {
+                setSurfaceInTransactionLocked(mSurface);
+            }
         }
 
         @Override

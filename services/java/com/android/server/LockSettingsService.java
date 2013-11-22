@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -27,6 +28,9 @@ import static android.Manifest.permission.READ_PROFILE;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.media.AudioManager;
+import android.media.AudioService;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -36,7 +40,9 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
+import android.security.KeyStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.widget.ILockSettings;
@@ -57,6 +63,7 @@ import java.util.List;
  */
 public class LockSettingsService extends ILockSettings.Stub {
 
+    private static final String PERMISSION = "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE";
     private final DatabaseHelper mOpenHelper;
     private static final String TAG = "LockSettingsService";
 
@@ -74,11 +81,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String LOCK_PASSWORD_FILE = "password.key";
 
     private final Context mContext;
+    private LockPatternUtils mLockPatternUtils;
 
     public LockSettingsService(Context context) {
         mContext = context;
         // Open the database
         mOpenHelper = new DatabaseHelper(mContext);
+
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     public void systemReady() {
@@ -143,20 +153,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private static final void checkWritePermission(int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("uid=" + callingUid
-                    + " not authorized to write lock settings");
-        }
+    private final void checkWritePermission(int userId) {
+        mContext.checkCallingOrSelfPermission(PERMISSION);
     }
 
-    private static final void checkPasswordReadPermission(int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("uid=" + callingUid
-                    + " not authorized to read lock password");
-        }
+    private final void checkPasswordReadPermission(int userId) {
+        mContext.checkCallingOrSelfPermission(PERMISSION);
     }
 
     private final void checkReadPermission(String requestedKey, int userId) {
@@ -257,15 +259,42 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new File(getLockPatternFilename(userId)).length() > 0;
     }
 
+    private void maybeUpdateKeystore(String password, int userId) {
+        if (userId == UserHandle.USER_OWNER) {
+            final KeyStore keyStore = KeyStore.getInstance();
+            // Conditionally reset the keystore if empty. If non-empty, we are just
+            // switching key guard type
+            if (TextUtils.isEmpty(password) && keyStore.isEmpty()) {
+                keyStore.reset();
+            } else {
+                // Update the keystore password
+                keyStore.password(password);
+            }
+        }
+    }
+
     @Override
-    public void setLockPattern(byte[] hash, int userId) throws RemoteException {
+    public void setLockPattern(String pattern, int userId) throws RemoteException {
         checkWritePermission(userId);
 
+        maybeUpdateKeystore(pattern, userId);
+
+        final byte[] hash = LockPatternUtils.patternToHash(
+                LockPatternUtils.stringToPattern(pattern));
         writeFile(getLockPatternFilename(userId), hash);
     }
 
     @Override
-    public boolean checkPattern(byte[] hash, int userId) throws RemoteException {
+    public void setLockPassword(String password, int userId) throws RemoteException {
+        checkWritePermission(userId);
+
+        maybeUpdateKeystore(password, userId);
+
+        writeFile(getLockPasswordFilename(userId), mLockPatternUtils.passwordToHash(password));
+    }
+
+    @Override
+    public boolean checkPattern(String pattern, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
         try {
             // Read all the bytes from the file
@@ -277,25 +306,23 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return true;
             }
             // Compare the hash from the file with the entered pattern's hash
-            return Arrays.equals(stored, hash);
+            final byte[] hash = LockPatternUtils.patternToHash(
+                    LockPatternUtils.stringToPattern(pattern));
+            final boolean matched = Arrays.equals(stored, hash);
+            if (matched && !TextUtils.isEmpty(pattern)) {
+                maybeUpdateKeystore(pattern, userId);
+            }
+            return matched;
         } catch (FileNotFoundException fnfe) {
             Slog.e(TAG, "Cannot read file " + fnfe);
-            return true;
         } catch (IOException ioe) {
             Slog.e(TAG, "Cannot read file " + ioe);
-            return true;
         }
+        return true;
     }
 
     @Override
-    public void setLockPassword(byte[] hash, int userId) throws RemoteException {
-        checkWritePermission(userId);
-
-        writeFile(getLockPasswordFilename(userId), hash);
-    }
-
-    @Override
-    public boolean checkPassword(byte[] hash, int userId) throws RemoteException {
+    public boolean checkPassword(String password, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
 
         try {
@@ -308,14 +335,18 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return true;
             }
             // Compare the hash from the file with the entered password's hash
-            return Arrays.equals(stored, hash);
+            final byte[] hash = mLockPatternUtils.passwordToHash(password);
+            final boolean matched = Arrays.equals(stored, hash);
+            if (matched && !TextUtils.isEmpty(password)) {
+                maybeUpdateKeystore(password, userId);
+            }
+            return matched;
         } catch (FileNotFoundException fnfe) {
             Slog.e(TAG, "Cannot read file " + fnfe);
-            return true;
         } catch (IOException ioe) {
             Slog.e(TAG, "Cannot read file " + ioe);
-            return true;
         }
+        return true;
     }
 
     @Override
@@ -398,7 +429,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         private static final String TAG = "LockSettingsDB";
         private static final String DATABASE_NAME = "locksettings.db";
 
-        private static final int DATABASE_VERSION = 1;
+        private static final int DATABASE_VERSION = 2;
 
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -431,7 +462,44 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-            // Nothing yet
+            int upgradeVersion = oldVersion;
+            if (upgradeVersion == 1) {
+                // Set the initial value for {@link LockPatternUtils#LOCKSCREEN_WIDGETS_ENABLED}
+                // during upgrade based on whether each user previously had widgets in keyguard.
+                maybeEnableWidgetSettingForUsers(db);
+                upgradeVersion = 2;
+            }
+
+            if (upgradeVersion != DATABASE_VERSION) {
+                Log.w(TAG, "Failed to upgrade database!");
+            }
+        }
+
+        private void maybeEnableWidgetSettingForUsers(SQLiteDatabase db) {
+            final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+            final ContentResolver cr = mContext.getContentResolver();
+            final List<UserInfo> users = um.getUsers();
+            for (int i = 0; i < users.size(); i++) {
+                final int userId = users.get(i).id;
+                final boolean enabled = mLockPatternUtils.hasWidgetsEnabledInKeyguard(userId);
+                Log.v(TAG, "Widget upgrade uid=" + userId + ", enabled="
+                        + enabled + ", w[]=" + mLockPatternUtils.getAppWidgets());
+                loadSetting(db, LockPatternUtils.LOCKSCREEN_WIDGETS_ENABLED, userId, enabled);
+            }
+        }
+
+        private void loadSetting(SQLiteDatabase db, String key, int userId, boolean value) {
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement(
+                        "INSERT OR REPLACE INTO locksettings(name,user,value) VALUES(?,?,?);");
+                stmt.bindString(1, key);
+                stmt.bindLong(2, userId);
+                stmt.bindLong(3, value ? 1 : 0);
+                stmt.execute();
+            } finally {
+                if (stmt != null) stmt.close();
+            }
         }
     }
 

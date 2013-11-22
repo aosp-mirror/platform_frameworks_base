@@ -24,16 +24,16 @@ import java.util.HashSet;
  * This class keeps track of calls to getTasks() that are still
  * waiting for thumbnail images.
  */
-class PendingThumbnailsRecord
+final class PendingThumbnailsRecord
 {
     final IThumbnailReceiver receiver;   // who is waiting.
-    HashSet pendingRecords; // HistoryRecord objects we still wait for.
+    final HashSet<ActivityRecord> pendingRecords; // HistoryRecord objects we still wait for.
     boolean finished;       // Is pendingRecords empty?
 
     PendingThumbnailsRecord(IThumbnailReceiver _receiver)
     {
         receiver = _receiver;
-        pendingRecords = new HashSet();
+        pendingRecords = new HashSet<ActivityRecord>();
         finished = false;
     }
 }

@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>LeaderboardScore | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -784,7 +791,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getDisplayRank(android.database.CharArrayBuffer)">getDisplayRank</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getDisplayRank(android.database.CharArrayBuffer)">getDisplayRank</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Load the formatted display rank into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
   
@@ -799,7 +806,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getDisplayRank()">getDisplayRank</a></span>()</nobr>
@@ -817,7 +824,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getDisplayScore()">getDisplayScore</a></span>()</nobr>
@@ -838,7 +845,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getDisplayScore(android.database.CharArrayBuffer)">getDisplayScore</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getDisplayScore(android.database.CharArrayBuffer)">getDisplayScore</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Loads the formatted display score into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
   
@@ -907,7 +914,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getScoreHolderDisplayName()">getScoreHolderDisplayName</a></span>()</nobr>
@@ -928,7 +935,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getScoreHolderDisplayName(android.database.CharArrayBuffer)">getScoreHolderDisplayName</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getScoreHolderDisplayName(android.database.CharArrayBuffer)">getScoreHolderDisplayName</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Load the display name of the player who scored this score into the provided
  <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
@@ -944,7 +951,7 @@ Summary:
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getScoreHolderHiResImageUri()">getScoreHolderHiResImageUri</a></span>()</nobr>
@@ -962,7 +969,7 @@ Summary:
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html#getScoreHolderIconImageUri()">getScoreHolderIconImageUri</a></span>()</nobr>
@@ -1121,7 +1128,7 @@ From interface
         void
       </span>
       <span class="sympad">getDisplayRank</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1157,7 +1164,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDisplayRank</span>
       <span class="normal">()</span>
@@ -1192,7 +1199,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDisplayScore</span>
       <span class="normal">()</span>
@@ -1230,7 +1237,7 @@ From interface
         void
       </span>
       <span class="sympad">getDisplayScore</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1374,7 +1381,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getScoreHolderDisplayName</span>
       <span class="normal">()</span>
@@ -1412,7 +1419,7 @@ From interface
         void
       </span>
       <span class="sympad">getScoreHolderDisplayName</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1449,7 +1456,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/android/net/Uri.html">Uri</a>
+        Uri
       </span>
       <span class="sympad">getScoreHolderHiResImageUri</span>
       <span class="normal">()</span>
@@ -1487,7 +1494,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/android/net/Uri.html">Uri</a>
+        Uri
       </span>
       <span class="sympad">getScoreHolderIconImageUri</span>
       <span class="normal">()</span>

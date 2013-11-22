@@ -208,8 +208,21 @@ public abstract class DisplayList {
      * {@link #isValid()} will return false.
      *
      * @see #isValid()
+     * @see #reset()
      */
     public abstract void clear();
+
+
+    /**
+     * Reset native resources. This is called when cleaning up the state of display lists
+     * during destruction of hardware resources, to ensure that we do not hold onto
+     * obsolete resources after related resources are gone.
+     *
+     * @see #clear()
+     *
+     * @hide
+     */
+    public abstract void reset();
 
     /**
      * Sets the dirty flag. When a display list is dirty, {@link #clear()} should
@@ -670,13 +683,4 @@ public abstract class DisplayList {
      * @see View#offsetTopAndBottom(int)
      */
     public abstract void offsetTopAndBottom(float offset);
-
-    /**
-     * Reset native resources. This is called when cleaning up the state of display lists
-     * during destruction of hardware resources, to ensure that we do not hold onto
-     * obsolete resources after related resources are gone.
-     *
-     * @hide
-     */
-    public abstract void reset();
 }

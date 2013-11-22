@@ -1,0 +1,312 @@
+page.title=Scheduling Repeating Alarms
+parent.title=Using Wake Locks
+parent.link=index.html
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#set">Set a Repeating Alarm</a></li>
+  <li><a href="#cancel">Cancel an Alarm</a></li>
+  <li><a href="#boot">Start an Alarm When the Device Boots</a></li>
+</ol>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/Scheduler.zip"
+class="button">Download the sample</a>
+ <p class="filename">Scheduler.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Alarms (based on the {@link android.app.AlarmManager} class) give you a way to perform
+time-based operations outside the lifetime of your application.
+For example, you could use an alarm to initiate a long-running operation, such
+as starting a service once a day to download a weather forecast.</p>
+
+<p>Alarms have these characteristics:</p>
+<ul>
+
+<li>They let you fire Intents at set times and/or intervals.</li>
+
+<li>You can use them in conjunction with broadcast receivers to start services and perform
+other operations.</li>
+
+<li>They operate outside of your application, so you can use them to trigger events or
+actions even when your app is not running, and even if the device itself is asleep.</li>
+
+<li>They help you to minimize your app's resource requirements. You can schedule operations
+without relying on timers or continuously running background services.</li>
+
+</ul>
+
+<p class="note"><strong>Note:</strong> For timing operations that are guaranteed to occur
+<em>during</em> the lifetime of your application,
+instead consider using the {@link android.os.Handler} class in conjunction with
+{@link java.util.Timer} and {@link java.lang.Thread}. This approach gives Android better
+control over system resources.</p>
+
+<h2 id="set">Set a Repeating Alarm</h2>
+
+<p>As described above, repeating alarms are a good choice for scheduling regular events or
+data lookups. A repeating alarm has the following characteristics:</p>
+
+<ul>
+<li>A alarm type. For more discussion, see <a href="#type">Choose an alarm type</a>.</li>
+<li>A trigger time. If the trigger time you specify is in the past, the alarm triggers
+immediately.</li>
+<li>The alarm's interval. For example, once a day, every hour, every 5 seconds, and so on.</li>
+<li>A pending intent that fires when the alarm is triggered. When you set a second alarm
+that uses the same pending intent, it replaces the original alarm.</li>
+</ul>
+
+<p>Every choice you make in designing your repeating alarm can have consequences in how your
+app uses (or abuses) system resources. Even a carefully managed alarm can have a major impact
+on battery life. Follow these guidelines as you design your app:</p>
+
+<ul>
+<li>Keep your alarm frequency to a minimum.</li>
+<li>Don't wake up the device unnecessarily (this behavior is determined by the alarm type,
+as described in <a href="#type">Choose an alarm type</a>).</li>
+<li>Don't make your alarm's trigger time any more precise than it has to be:
+
+<ul>
+<li>Use {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()} instead
+of {@link android.app.AlarmManager#setRepeating setRepeating()} whenever possible.
+When you use {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()},
+Android synchronizes multiple inexact repeating alarms and fires
+them at the same time. This reduces the drain on the battery.</li>
+<li>If your alarm's behavior is based on an interval (for example, your alarm
+fires once an hour) rather than a precise trigger time (for example, your alarm fires at
+7 a.m. sharp and every 20 minutes after that), use an {@code ELAPSED_REALTIME}
+alarm type.</li>
+</ul></li>
+
+</ul>
+
+<h3 id="type">Choose an alarm type</h3>
+
+<p>One of the first considerations in using a repeating alarm is what its type should be.</p>
+
+
+<p>There are two general clock types for alarms: "elapsed real time" and "real time clock"
+(RTC).
+Elapsed real time uses the "time since system boot" as a
+reference, and real time clock uses UTC (wall clock) time. This means that
+elapsed real time is suited to setting an alarm based on the passage of time (for
+example, an alarm that fires every 30 seconds) since it isn't affected by
+time zone/locale. The real time clock type is better suited for alarms that are dependent
+on current locale.</p>
+
+<p>Both types have a "wakeup" version, which says to wake up the device's CPU if the
+screen is off. This ensures that the alarm will fire at the scheduled time. This is useful
+if your app has a time dependency&mdash;for example, if it has a limited window to perform a
+particular operation. If you don't use the wakeup version of your alarm type, then
+all the repeating alarms will fire when your device is next awake.</p>
+
+<p>If you simply need your alarm to fire at a particular interval (for example, every half
+hour), use one of the elapsed real time types. In general, this is the better choice.</p>
+
+<p>If you need your alarm to fire at a particular time of day,
+then choose one of the clock-based real time clock types. Note, however, that this approach can
+have some drawbacks&mdash;the app may not translate well to other locales, and if the user
+changes the device's time setting, it could cause unexpected behavior in your app.</p>
+
+<p>Here is the list of types:</p>
+
+<ul>
+
+<li>{@link android.app.AlarmManager#ELAPSED_REALTIME}&mdash;Fires the pending intent based
+on the amount of time since the  device was booted, but doesn't wake up the device. The
+elapsed time includes any time during which the device was asleep.</li>
+
+<li>{@link android.app.AlarmManager#ELAPSED_REALTIME_WAKEUP}&mdash;Wakes up the device and
+fires the pending intent after the specified length of time has elapsed since device
+boot.</li>
+
+<li>{@link android.app.AlarmManager#RTC}&mdash;Fires the pending intent
+at the specified time but does not wake up the device.</li>
+
+<li>{@link android.app.AlarmManager#RTC_WAKEUP}&mdash;Wakes up the
+device to fire the pending intent at the specified time.</li>
+</ul>
+
+<h4>ELAPSED_REALTIME_WAKEUP examples</h3>
+
+<p>Here are some examples of using {@link android.app.AlarmManager#ELAPSED_REALTIME_WAKEUP}.
+</p>
+
+<p>Wake up the device to fire the alarm in 30 minutes, and every 30 minutes
+after that:</p>
+
+<pre>
+// Hopefully your alarm will have a lower frequency than this!
+alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        AlarmManager.INTERVAL_HALF_HOUR,
+        AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);</pre>
+
+<p>Wake up the device to fire a one-time (non-repeating) alarm in one minute:</p>
+
+<pre>private AlarmManager alarmMgr;
+private PendingIntent alarmIntent;
+...
+alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+Intent intent = new Intent(context, AlarmReceiver.class);
+alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        SystemClock.elapsedRealtime() +
+        60 * 1000, alarmIntent);</pre>
+
+
+<h4>RTC examples</h3>
+
+<p>Here are some examples of using {@link android.app.AlarmManager#RTC_WAKEUP}.</p>
+
+<p>Wake up the device to fire the alarm at approximately 2:00 p.m., and repeat once a day
+at the same time:</p>
+
+<pre>// Set the alarm to start at approximately 2:00 p.m.
+Calendar calendar = Calendar.getInstance();
+calendar.setTimeInMillis(System.currentTimeMillis());
+calendar.set(Calendar.HOUR_OF_DAY, 14);
+
+// With setInexactRepeating(), you have to use one of the AlarmManager interval
+// constants--in this case, AlarmManager.INTERVAL_DAY.
+alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+        AlarmManager.INTERVAL_DAY, alarmIntent);</pre>
+
+<p>Wake up the device to fire the alarm at precisely 8:30 a.m., and every 20 minutes
+thereafter:</p>
+
+<pre>private AlarmManager alarmMgr;
+private PendingIntent alarmIntent;
+...
+alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+Intent intent = new Intent(context, AlarmReceiver.class);
+alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+// Set the alarm to start at 8:30 a.m.
+Calendar calendar = Calendar.getInstance();
+calendar.setTimeInMillis(System.currentTimeMillis());
+calendar.set(Calendar.HOUR_OF_DAY, 8);
+calendar.set(Calendar.MINUTE, 30);
+
+// setRepeating() lets you specify a precise custom interval--in this case,
+// 20 minutes.
+alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+        1000 * 60 * 20, alarmIntent);</pre>
+
+<h3>Decide how precise your alarm needs to be</h3>
+
+<p>As described above, choosing the alarm type is often the first step in creating an alarm.
+A further distinction is how precise you need your alarm to be. For most apps,
+{@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()} is the right
+choice.
+When you use this method, Android synchronizes multiple inexact repeating alarms and fires
+them at the same time. This reduces the drain on the battery.</p>
+
+<p>For the rare app that has rigid time requirements&mdash;for example, the alarm needs to
+fire precisely at 8:30 a.m., and every hour on the hour
+thereafter&mdash;use {@link android.app.AlarmManager#setRepeating setRepeating()}. But you
+should avoid using exact alarms if possible.</p>
+
+<p>With {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()},
+you can't specify a custom interval the way you can with
+{@link android.app.AlarmManager#setRepeating setRepeating()}. You have to use one of the
+interval constants, such as {@link android.app.AlarmManager#INTERVAL_FIFTEEN_MINUTES},
+{@link android.app.AlarmManager#INTERVAL_DAY}, and so on. See {@link android.app.AlarmManager}
+for the complete list.
+</p>
+
+<h2 id="cancel">Cancel an Alarm</h2>
+
+<p>Depending on your app, you may want to include the ability to cancel the alarm.
+To cancel an alarm, call {@link android.app.AlarmManager#cancel cancel()} on the Alarm
+Manager, passing in the {@link android.app.PendingIntent} you no longer want to fire. For
+example:</p>
+
+<pre>// If the alarm has been set, cancel it.
+if (alarmMgr!= null) {
+    alarmMgr.cancel(alarmIntent);
+}</pre>
+
+<h2 id="boot">Start an Alarm When the Device Boots</h2>
+
+<p>By default, all alarms are canceled when a device shuts down.
+To prevent this from happening, you can design your application
+to automatically restart a repeating alarm if the user reboots the device. This ensures
+that the {@link android.app.AlarmManager} will continue doing its task without the user
+needing to manually restart the alarm.</p>
+
+
+<p>Here are the steps:</p>
+<ol>
+<li>Set the <a href="{@docRoot}reference/android/Manifest.permission.html#RECEIVE_BOOT_COMPLETED">
+{@code RECEIVE_BOOT_COMPLETED}</a> permission in your application's manifest. This allows
+your app to receive the
+{@link android.content.Intent#ACTION_BOOT_COMPLETED} that is broadcast after the system
+finishes booting (this only works if the app has already been launched by the user at least once):
+<pre>
+&lt;uses-permission android:name=&quot;android.permission.RECEIVE_BOOT_COMPLETED&quot;/&gt;</pre>
+</li>
+
+<li>Implement a {@link android.content.BroadcastReceiver} to receive the broadcast:
+<pre>public class SampleBootReceiver extends BroadcastReceiver {
+
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().equals(&quot;android.intent.action.BOOT_COMPLETED&quot;)) {
+            // Set the alarm here.
+        }
+    }
+}</pre></li>
+
+<li>Add the receiver to your app's manifest file with an intent filter that filters on
+the {@link android.content.Intent#ACTION_BOOT_COMPLETED} action:
+
+<pre>&lt;receiver android:name=&quot;.SampleBootReceiver&quot;
+        android:enabled=&quot;false&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.BOOT_COMPLETED&quot;&gt;&lt;/action&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;</pre>
+
+
+<p>Notice that in the manifest, the boot receiver is set to
+{@code android:enabled=&quot;false&quot;}. This means that the receiver will not be called
+unless the application explicitly enables it. This prevents the boot receiver from being
+called unnecessarily. You can enable a receiver (for example, if the user sets an alarm)
+as follows:</p>
+
+<pre>ComponentName receiver = new ComponentName(context, SampleBootReceiver.class);
+PackageManager pm = context.getPackageManager();
+
+pm.setComponentEnabledSetting(receiver,
+        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+        PackageManager.DONT_KILL_APP);
+</pre>
+
+<p>Once you enable the receiver this way, it will stay enabled, even if the user reboots
+the device. In other words, programmatically enabling the receiver overrides the
+manifest setting, even across reboots. The receiver will stay enabled until your app disables it.
+You can disable a receiver (for example, if the user cancels an alarm) as follows:</p>
+
+<pre>ComponentName receiver = new ComponentName(context, SampleBootReceiver.class);
+PackageManager pm = context.getPackageManager();
+
+pm.setComponentEnabledSetting(receiver,
+        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+        PackageManager.DONT_KILL_APP);</pre>
+
+</li>
+</ol>

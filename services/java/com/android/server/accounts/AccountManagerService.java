@@ -47,6 +47,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -56,10 +57,10 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -74,6 +75,7 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.FgThread;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -113,7 +115,6 @@ public class AccountManagerService
     private final PackageManager mPackageManager;
     private UserManager mUserManager;
 
-    private HandlerThread mMessageThread;
     private final MessageHandler mMessageHandler;
 
     // Messages that can be sent on mHandler
@@ -234,9 +235,7 @@ public class AccountManagerService
         mContext = context;
         mPackageManager = packageManager;
 
-        mMessageThread = new HandlerThread("AccountManagerService");
-        mMessageThread.start();
-        mMessageHandler = new MessageHandler(mMessageThread.getLooper());
+        mMessageHandler = new MessageHandler(FgThread.get().getLooper());
 
         mAuthenticatorCache = authenticatorCache;
         mAuthenticatorCache.setListener(this, null /* Handler */);
@@ -269,6 +268,21 @@ public class AccountManagerService
         }, UserHandle.ALL, userFilter, null, null);
     }
 
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+            throws RemoteException {
+        try {
+            return super.onTransact(code, data, reply, flags);
+        } catch (RuntimeException e) {
+            // The account manager only throws security exceptions, so let's
+            // log all others.
+            if (!(e instanceof SecurityException)) {
+                Slog.wtf(TAG, "Account Manager Crash", e);
+            }
+            throw e;
+        }
+    }
+
     public void systemReady() {
     }
 
@@ -279,17 +293,16 @@ public class AccountManagerService
         return mUserManager;
     }
 
-    private UserAccounts initUser(int userId) {
-        synchronized (mUsers) {
-            UserAccounts accounts = mUsers.get(userId);
-            if (accounts == null) {
-                accounts = new UserAccounts(mContext, userId);
-                mUsers.append(userId, accounts);
-                purgeOldGrants(accounts);
-                validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
-            }
-            return accounts;
+    /* Caller should lock mUsers */
+    private UserAccounts initUserLocked(int userId) {
+        UserAccounts accounts = mUsers.get(userId);
+        if (accounts == null) {
+            accounts = new UserAccounts(mContext, userId);
+            mUsers.append(userId, accounts);
+            purgeOldGrants(accounts);
+            validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
         }
+        return accounts;
     }
 
     private void purgeOldGrantsAll() {
@@ -413,7 +426,7 @@ public class AccountManagerService
         synchronized (mUsers) {
             UserAccounts accounts = mUsers.get(userId);
             if (accounts == null) {
-                accounts = initUser(userId);
+                accounts = initUserLocked(userId);
                 mUsers.append(userId, accounts);
             }
             return accounts;
@@ -583,15 +596,18 @@ public class AccountManagerService
         try {
             new Session(fromAccounts, null, account.type, false,
                     false /* stripAuthTokenFromResult */) {
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAccountCredentialsForClone"
                             + ", " + account.type;
                 }
 
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.getAccountCredentialsForCloning(this, account);
                 }
 
+                @Override
                 public void onResult(Bundle result) {
                     if (result != null) {
                         if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
@@ -616,11 +632,13 @@ public class AccountManagerService
         try {
             new Session(targetUser, null, account.type, false,
                     false /* stripAuthTokenFromResult */) {
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAccountCredentialsForClone"
                             + ", " + account.type;
                 }
 
+                @Override
                 public void run() throws RemoteException {
                     // Confirm that the owner's account still exists before this step.
                     UserAccounts owner = getUserAccounts(UserHandle.USER_OWNER);
@@ -635,6 +653,7 @@ public class AccountManagerService
                     }
                 }
 
+                @Override
                 public void onResult(Bundle result) {
                     if (result != null) {
                         if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
@@ -649,6 +668,7 @@ public class AccountManagerService
                     }
                 }
 
+                @Override
                 public void onError(int errorCode, String errorMessage) {
                     super.onError(errorCode,  errorMessage);
                     // TODO: Show error notification to user
@@ -777,6 +797,7 @@ public class AccountManagerService
             mAccount = account;
         }
 
+        @Override
         public void run() throws RemoteException {
             try {
                 mAuthenticator.hasFeatures(this, mAccount, mFeatures);
@@ -785,6 +806,7 @@ public class AccountManagerService
             }
         }
 
+        @Override
         public void onResult(Bundle result) {
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
@@ -810,6 +832,7 @@ public class AccountManagerService
             }
         }
 
+        @Override
         protected String toDebugString(long now) {
             return super.toDebugString(now) + ", hasFeatures"
                     + ", " + mAccount
@@ -866,15 +889,18 @@ public class AccountManagerService
             mAccount = account;
         }
 
+        @Override
         protected String toDebugString(long now) {
             return super.toDebugString(now) + ", removeAccount"
                     + ", account " + mAccount;
         }
 
+        @Override
         public void run() throws RemoteException {
             mAuthenticator.getAccountRemovalAllowed(this, mAccount);
         }
 
+        @Override
         public void onResult(Bundle result) {
             if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)
                     && !result.containsKey(AccountManager.KEY_INTENT)) {
@@ -1215,16 +1241,19 @@ public class AccountManagerService
         try {
             new Session(accounts, response, accountType, false,
                     false /* stripAuthTokenFromResult */) {
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAuthTokenLabel"
                             + ", " + accountType
                             + ", authTokenType " + authTokenType;
                 }
 
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.getAuthTokenLabel(this, authTokenType);
                 }
 
+                @Override
                 public void onResult(Bundle result) {
                     if (result != null) {
                         String label = result.getString(AccountManager.KEY_AUTH_TOKEN_LABEL);
@@ -1302,6 +1331,7 @@ public class AccountManagerService
 
             new Session(accounts, response, account.type, expectActivityLaunch,
                     false /* stripAuthTokenFromResult */) {
+                @Override
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", getAuthToken"
@@ -1311,6 +1341,7 @@ public class AccountManagerService
                             + ", notifyOnAuthFailure " + notifyOnAuthFailure;
                 }
 
+                @Override
                 public void run() throws RemoteException {
                     // If the caller doesn't have permission then create and return the
                     // "grant permission" intent instead of the "getAuthToken" intent.
@@ -1321,6 +1352,7 @@ public class AccountManagerService
                     }
                 }
 
+                @Override
                 public void onResult(Bundle result) {
                     if (result != null) {
                         if (result.containsKey(AccountManager.KEY_AUTH_TOKEN_LABEL)) {
@@ -1485,11 +1517,13 @@ public class AccountManagerService
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
                             options);
                 }
 
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", addAccount"
                             + ", accountType " + accountType
@@ -1510,7 +1544,10 @@ public class AccountManagerService
             int userId) {
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && Binder.getCallingUid() != Process.myUid()) {
+                && Binder.getCallingUid() != Process.myUid()
+                && mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                    != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("User " + UserHandle.getCallingUserId()
                     + " trying to confirm account credentials for " + userId);
         }
@@ -1530,9 +1567,11 @@ public class AccountManagerService
         try {
             new Session(accounts, response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.confirmCredentials(this, account, options);
                 }
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", confirmCredentials"
                             + ", " + account;
@@ -1563,9 +1602,11 @@ public class AccountManagerService
         try {
             new Session(accounts, response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
                 }
+                @Override
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", updateCredentials"
@@ -1596,9 +1637,11 @@ public class AccountManagerService
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.editProperties(this, mAccountType);
                 }
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", editProperties"
                             + ", accountType " + accountType;
@@ -1624,6 +1667,7 @@ public class AccountManagerService
             mFeatures = features;
         }
 
+        @Override
         public void run() throws RemoteException {
             synchronized (mAccounts.cacheLock) {
                 mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType, mCallingUid,
@@ -1661,6 +1705,7 @@ public class AccountManagerService
             }
         }
 
+        @Override
         public void onResult(Bundle result) {
             mNumResults++;
             if (result == null) {
@@ -1699,6 +1744,7 @@ public class AccountManagerService
         }
 
 
+        @Override
         protected String toDebugString(long now) {
             return super.toDebugString(now) + ", getAccountsByTypeAndFeatures"
                     + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
@@ -1751,16 +1797,14 @@ public class AccountManagerService
 
     private AccountAndUser[] getAccounts(int[] userIds) {
         final ArrayList<AccountAndUser> runningAccounts = Lists.newArrayList();
-        synchronized (mUsers) {
-            for (int userId : userIds) {
-                UserAccounts userAccounts = getUserAccounts(userId);
-                if (userAccounts == null) continue;
-                synchronized (userAccounts.cacheLock) {
-                    Account[] accounts = getAccountsFromCacheLocked(userAccounts, null,
-                            Binder.getCallingUid(), null);
-                    for (int a = 0; a < accounts.length; a++) {
-                        runningAccounts.add(new AccountAndUser(accounts[a], userId));
-                    }
+        for (int userId : userIds) {
+            UserAccounts userAccounts = getUserAccounts(userId);
+            if (userAccounts == null) continue;
+            synchronized (userAccounts.cacheLock) {
+                Account[] accounts = getAccountsFromCacheLocked(userAccounts, null,
+                        Binder.getCallingUid(), null);
+                for (int a = 0; a < accounts.length; a++) {
+                    runningAccounts.add(new AccountAndUser(accounts[a], userId));
                 }
             }
         }
@@ -1779,7 +1823,10 @@ public class AccountManagerService
         int callingUid = Binder.getCallingUid();
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && callingUid != Process.myUid()) {
+                && callingUid != Process.myUid()
+                && mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                    != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("User " + UserHandle.getCallingUserId()
                     + " trying to get account for " + userId);
         }
@@ -2108,9 +2155,36 @@ public class AccountManagerService
             }
         }
 
+        @Override
         public void onResult(Bundle result) {
             mNumResults++;
-            if (result != null && !TextUtils.isEmpty(result.getString(AccountManager.KEY_AUTHTOKEN))) {
+            Intent intent = null;
+            if (result != null
+                    && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+                /*
+                 * The Authenticator API allows third party authenticators to
+                 * supply arbitrary intents to other apps that they can run,
+                 * this can be very bad when those apps are in the system like
+                 * the System Settings.
+                 */
+                int authenticatorUid = Binder.getCallingUid();
+                long bid = Binder.clearCallingIdentity();
+                try {
+                    PackageManager pm = mContext.getPackageManager();
+                    ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
+                    int targetUid = resolveInfo.activityInfo.applicationInfo.uid;
+                    if (PackageManager.SIGNATURE_MATCH !=
+                            pm.checkSignatures(authenticatorUid, targetUid)) {
+                        throw new SecurityException(
+                                "Activity to be started with KEY_INTENT must " +
+                               "share Authenticator's signatures");
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(bid);
+                }
+            }
+            if (result != null
+                    && !TextUtils.isEmpty(result.getString(AccountManager.KEY_AUTHTOKEN))) {
                 String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
                 String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
                 if (!TextUtils.isEmpty(accountName) && !TextUtils.isEmpty(accountType)) {
@@ -2220,6 +2294,7 @@ public class AccountManagerService
             super(looper);
         }
 
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_TIMED_OUT:
@@ -2537,7 +2612,7 @@ public class AccountManagerService
         return userId;
     }
 
-    private boolean inSystemImage(int callingUid) {
+    private boolean isPrivileged(int callingUid) {
         final int callingUserId = UserHandle.getUserId(callingUid);
 
         final PackageManager userPackageManager;
@@ -2553,7 +2628,7 @@ public class AccountManagerService
             try {
                 PackageInfo packageInfo = userPackageManager.getPackageInfo(name, 0 /* flags */);
                 if (packageInfo != null
-                        && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -2564,7 +2639,7 @@ public class AccountManagerService
     }
 
     private boolean permissionIsGranted(Account account, String authTokenType, int callerUid) {
-        final boolean inSystemImage = inSystemImage(callerUid);
+        final boolean isPrivileged = isPrivileged(callerUid);
         final boolean fromAuthenticator = account != null
                 && hasAuthenticatorUid(account.type, callerUid);
         final boolean hasExplicitGrants = account != null
@@ -2575,7 +2650,7 @@ public class AccountManagerService
                     + ": is authenticator? " + fromAuthenticator
                     + ", has explicit permission? " + hasExplicitGrants);
         }
-        return fromAuthenticator || hasExplicitGrants || inSystemImage;
+        return fromAuthenticator || hasExplicitGrants || isPrivileged;
     }
 
     private boolean hasAuthenticatorUid(String accountType, int callingUid) {
@@ -2785,7 +2860,8 @@ public class AccountManagerService
                 || callingUid == Process.myUid()) {
             return unfiltered;
         }
-        if (mUserManager.getUserInfo(userAccounts.userId).isRestricted()) {
+        UserInfo user = mUserManager.getUserInfo(userAccounts.userId);
+        if (user != null && user.isRestricted()) {
             String[] packages = mPackageManager.getPackagesForUid(callingUid);
             // If any of the packages is a white listed package, return the full set,
             // otherwise return non-shared accounts only.

@@ -1,8 +1,8 @@
 page.title=Installing the Eclipse Plugin
-adt.zip.version=22.0.5
-adt.zip.download=ADT-22.0.5.zip
-adt.zip.bytes=16839757
-adt.zip.checksum=1097fccf32063e3638a9d27aa0f295ca
+adt.zip.version=22.2.1
+adt.zip.download=ADT-22.2.1.zip
+adt.zip.bytes=14476845
+adt.zip.checksum=97176754a1e86adf2e5e05f44dc7229e
 
 @jd:body
 

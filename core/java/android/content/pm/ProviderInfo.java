@@ -19,6 +19,7 @@ package android.content.pm;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
+import android.util.Printer;
 
 /**
  * Holds information about a specific
@@ -112,7 +113,13 @@ public final class ProviderInfo extends ComponentInfo
         flags = orig.flags;
         isSyncable = orig.isSyncable;
     }
-    
+
+    public void dump(Printer pw, String prefix) {
+        super.dumpFront(pw, prefix);
+        pw.println(prefix + "authority=" + authority);
+        pw.println(prefix + "flags=0x" + Integer.toHexString(flags));
+    }
+
     public int describeContents() {
         return 0;
     }

@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.location.IFusedGeofenceHardware;
 import android.location.IGpsGeofenceHardware;
 import android.os.Binder;
 import android.os.IBinder;
@@ -66,6 +67,10 @@ public class GeofenceHardwareService extends Service {
     private IBinder mBinder = new IGeofenceHardware.Stub() {
         public void setGpsGeofenceHardware(IGpsGeofenceHardware service) {
             mGeofenceHardwareImpl.setGpsHardwareGeofence(service);
+        }
+
+        public void setFusedGeofenceHardware(IFusedGeofenceHardware service) {
+            mGeofenceHardwareImpl.setFusedGeofenceHardware(service);
         }
 
         public int[] getMonitoringTypes() {

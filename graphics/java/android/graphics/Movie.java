@@ -16,12 +16,13 @@
 
 package android.graphics;
 
+import android.content.res.AssetManager;
 import java.io.InputStream;
 import java.io.FileInputStream;
 
 public class Movie {
     private final int mNativeMovie;
-    
+
     private Movie(int nativeMovie) {
         if (nativeMovie == 0) {
             throw new RuntimeException("native movie creation failed");
@@ -42,7 +43,20 @@ public class Movie {
         draw(canvas, x, y, null);
     }
 
-    public static native Movie decodeStream(InputStream is);
+    public static Movie decodeStream(InputStream is) {
+        if (is == null) {
+            return null;
+        }
+        if (is instanceof AssetManager.AssetInputStream) {
+            final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+            return nativeDecodeAsset(asset);
+        }
+
+        return nativeDecodeStream(is);
+    }
+
+    private static native Movie nativeDecodeAsset(int asset);
+    private static native Movie nativeDecodeStream(InputStream is);
     public static native Movie decodeByteArray(byte[] data, int offset,
                                                int length);
 

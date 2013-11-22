@@ -1,6 +1,6 @@
 page.title=Connectivity
 page.landing=true
-page.landing.intro=Android provides rich APIs to let your app connect and interact with other devices over Bluetooth, NFC, Wi-Fi Direct, USB, and SIP, in addition to standard network connections.
+page.landing.intro=Android provides rich APIs to let your app connect and interact with other devices over Bluetooth, NFC, Wi-Fi P2P, USB, and SIP, in addition to standard network connections.
 page.landing.image=images/develop/connectivity.png
 
 @jd:body

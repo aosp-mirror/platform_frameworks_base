@@ -20,10 +20,10 @@
 #ifndef __LIBS_ASSETDIR_H
 #define __LIBS_ASSETDIR_H
 
+#include <androidfw/misc.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 #include <utils/SortedVector.h>
-#include <utils/misc.h>
 #include <sys/types.h>
 
 namespace android {

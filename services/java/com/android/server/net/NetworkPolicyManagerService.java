@@ -274,7 +274,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final RemoteCallbackList<INetworkPolicyListener> mListeners = new RemoteCallbackList<
             INetworkPolicyListener>();
 
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
 
     private final AtomicFile mPolicyFile;
@@ -306,9 +305,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNetworkManager = checkNotNull(networkManagement, "missing networkManagement");
         mTime = checkNotNull(time, "missing TrustedTime");
 
-        mHandlerThread = new HandlerThread(TAG);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mHandler = new Handler(thread.getLooper(), mHandlerCallback);
 
         mSuppressDefaultPolicy = suppressDefaultPolicy;
 

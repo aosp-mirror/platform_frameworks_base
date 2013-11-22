@@ -15,41 +15,8 @@
 # This is the list of framework provided keylayouts and key character maps to include.
 # Used by Android.mk and keyboards.mk.
 
-keylayouts := \
-    Generic.kl \
-    AVRCP.kl \
-    qwerty.kl \
-    Vendor_045e_Product_028e.kl \
-    Vendor_046d_Product_c216.kl \
-    Vendor_046d_Product_c294.kl \
-    Vendor_046d_Product_c299.kl \
-    Vendor_046d_Product_c532.kl \
-    Vendor_054c_Product_0268.kl \
-    Vendor_05ac_Product_0239.kl \
-    Vendor_22b8_Product_093d.kl \
-    Vendor_0079_Product_0011.kl \
-    Vendor_046d_Product_c219.kl \
-    Vendor_046d_Product_c21f.kl \
-    Vendor_0583_Product_2060.kl \
-    Vendor_1038_Product_1412.kl \
-    Vendor_12bd_Product_d015.kl \
-    Vendor_1689_Product_fd00.kl \
-    Vendor_1689_Product_fd01.kl \
-    Vendor_1689_Product_fe00.kl \
-    Vendor_1bad_Product_f016.kl \
-    Vendor_1bad_Product_f023.kl \
-    Vendor_1bad_Product_f027.kl \
-    Vendor_1bad_Product_f036.kl \
-    Vendor_1d79_Product_0009.kl \
-    Vendor_2378_Product_100a.kl
+framework_keylayouts := $(wildcard $(LOCAL_PATH)/*.kl)
 
-keycharmaps := \
-    Generic.kcm \
-    Virtual.kcm \
-    qwerty.kcm \
-    qwerty2.kcm
+framework_keycharmaps := $(wildcard $(LOCAL_PATH)/*.kcm)
 
-keyconfigs := \
-    qwerty.idc \
-    qwerty2.idc
-
+framework_keyconfigs := $(wildcard $(LOCAL_PATH)/*.idc)

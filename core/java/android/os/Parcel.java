@@ -17,6 +17,7 @@
 package android.os;
 
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -177,6 +178,7 @@ import java.util.Set;
  */
 public final class Parcel {
     private static final boolean DEBUG_RECYCLE = false;
+    private static final boolean DEBUG_ARRAY_MAP = false;
     private static final String TAG = "Parcel";
 
     @SuppressWarnings({"UnusedDeclaration"})
@@ -227,6 +229,7 @@ public final class Parcel {
     private static final int EX_ILLEGAL_ARGUMENT = -3;
     private static final int EX_NULL_POINTER = -4;
     private static final int EX_ILLEGAL_STATE = -5;
+    private static final int EX_NETWORK_MAIN_THREAD = -6;
     private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
 
     private static native int nativeDataSize(int nativePtr);
@@ -572,7 +575,7 @@ public final class Parcel {
      * allows you to avoid mysterious type errors at the point of marshalling.
      */
     public final void writeMap(Map val) {
-        writeMapInternal((Map<String,Object>) val);
+        writeMapInternal((Map<String, Object>) val);
     }
 
     /**
@@ -589,6 +592,30 @@ public final class Parcel {
         for (Map.Entry<String,Object> e : entries) {
             writeValue(e.getKey());
             writeValue(e.getValue());
+        }
+    }
+
+    /**
+     * Flatten an ArrayMap into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.  The Map keys must be String objects.
+     */
+    /* package */ void writeArrayMapInternal(ArrayMap<String,Object> val) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        final int N = val.size();
+        writeInt(N);
+        if (DEBUG_ARRAY_MAP) {
+            RuntimeException here =  new RuntimeException("here");
+            here.fillInStackTrace();
+            Log.d(TAG, "Writing " + N + " ArrayMap entries", here);
+        }
+        for (int i=0; i<N; i++) {
+            if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Write #" + i + ": key=0x"
+                    + (val.keyAt(i) != null ? val.keyAt(i).hashCode() : 0) + " " + val.keyAt(i));
+            writeValue(val.keyAt(i));
+            writeValue(val.valueAt(i));
         }
     }
 
@@ -1303,6 +1330,7 @@ public final class Parcel {
      * <li>{@link IllegalStateException}
      * <li>{@link NullPointerException}
      * <li>{@link SecurityException}
+     * <li>{@link NetworkOnMainThreadException}
      * </ul>
      * 
      * @param e The Exception to be written.
@@ -1322,6 +1350,8 @@ public final class Parcel {
             code = EX_NULL_POINTER;
         } else if (e instanceof IllegalStateException) {
             code = EX_ILLEGAL_STATE;
+        } else if (e instanceof NetworkOnMainThreadException) {
+            code = EX_NETWORK_MAIN_THREAD;
         }
         writeInt(code);
         StrictMode.clearGatheredViolations();
@@ -1437,6 +1467,8 @@ public final class Parcel {
                 throw new NullPointerException(msg);
             case EX_ILLEGAL_STATE:
                 throw new IllegalStateException(msg);
+            case EX_NETWORK_MAIN_THREAD:
+                throw new NetworkOnMainThreadException();
         }
         throw new RuntimeException("Unknown exception code: " + code
                 + " msg " + msg);
@@ -1500,6 +1532,11 @@ public final class Parcel {
     public final ParcelFileDescriptor readFileDescriptor() {
         FileDescriptor fd = nativeReadFileDescriptor(mNativePtr);
         return fd != null ? new ParcelFileDescriptor(fd) : null;
+    }
+
+    /** {@hide} */
+    public final FileDescriptor readRawFileDescriptor() {
+        return nativeReadFileDescriptor(mNativePtr);
     }
 
     /*package*/ static native FileDescriptor openFileDescriptor(String file,
@@ -1573,6 +1610,7 @@ public final class Parcel {
     public final Bundle readBundle(ClassLoader loader) {
         int length = readInt();
         if (length < 0) {
+            if (Bundle.DEBUG) Log.d(TAG, "null bundle: length=" + length);
             return null;
         }
         
@@ -2252,6 +2290,40 @@ public final class Parcel {
         ClassLoader loader) {
         while (N > 0) {
             Object key = readValue(loader);
+            Object value = readValue(loader);
+            outVal.put(key, value);
+            N--;
+        }
+    }
+
+    /* package */ void readArrayMapInternal(ArrayMap outVal, int N,
+        ClassLoader loader) {
+        if (DEBUG_ARRAY_MAP) {
+            RuntimeException here =  new RuntimeException("here");
+            here.fillInStackTrace();
+            Log.d(TAG, "Reading " + N + " ArrayMap entries", here);
+        }
+        while (N > 0) {
+            Object key = readValue(loader);
+            if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Read #" + (N-1) + ": key=0x"
+                    + (key != null ? key.hashCode() : 0) + " " + key);
+            Object value = readValue(loader);
+            outVal.append(key, value);
+            N--;
+        }
+    }
+
+    /* package */ void readArrayMapSafelyInternal(ArrayMap outVal, int N,
+        ClassLoader loader) {
+        if (DEBUG_ARRAY_MAP) {
+            RuntimeException here =  new RuntimeException("here");
+            here.fillInStackTrace();
+            Log.d(TAG, "Reading safely " + N + " ArrayMap entries", here);
+        }
+        while (N > 0) {
+            Object key = readValue(loader);
+            if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Read safe #" + (N-1) + ": key=0x"
+                    + (key != null ? key.hashCode() : 0) + " " + key);
             Object value = readValue(loader);
             outVal.put(key, value);
             N--;

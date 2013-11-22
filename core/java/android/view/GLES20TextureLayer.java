@@ -63,12 +63,17 @@ class GLES20TextureLayer extends GLES20Layer {
     }
 
     @Override
+    HardwareCanvas start(Canvas currentCanvas, Rect dirty) {
+        return null;
+    }
+
+    @Override
     void end(Canvas currentCanvas) {
     }
 
     SurfaceTexture getSurfaceTexture() {
         if (mSurface == null) {
-            mSurface = new SurfaceTexture(mTexture, false);
+            mSurface = new SurfaceTexture(mTexture);
         }
         return mSurface;
     }

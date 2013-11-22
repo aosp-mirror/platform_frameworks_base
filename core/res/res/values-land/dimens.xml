@@ -61,4 +61,6 @@
     Landscape's layout allows this to be smaller than for portrait. -->
     <dimen name="kg_squashed_layout_threshold">400dp</dimen>
 
+    <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
+    <dimen name="immersive_mode_cling_width">380dp</dimen>
 </resources>

@@ -22,13 +22,13 @@
 
 #include <androidfw/Asset.h>
 #include <androidfw/AssetDir.h>
+#include <androidfw/ZipFileRO.h>
 #include <utils/KeyedVector.h>
 #include <utils/SortedVector.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
 #include <utils/threads.h>
 #include <utils/Vector.h>
-#include <utils/ZipFileRO.h>
 
 /*
  * Native-app access is via the opaque typedef struct AAssetManager in the C namespace.

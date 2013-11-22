@@ -78,6 +78,22 @@ public final class Slog {
                 msg + '\n' + Log.getStackTraceString(tr));
     }
 
+    public static int wtf(String tag, String msg) {
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false);
+    }
+
+    public static int wtfStack(String tag, String msg) {
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, true);
+    }
+
+    public static int wtf(String tag, Throwable tr) {
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, tr.getMessage(), tr, false);
+    }
+
+    public static int wtf(String tag, String msg, Throwable tr) {
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false);
+    }
+
     public static int println(int priority, String tag, String msg) {
         return Log.println_native(Log.LOG_ID_SYSTEM, priority, tag, msg);
     }

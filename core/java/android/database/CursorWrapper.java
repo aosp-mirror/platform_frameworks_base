@@ -194,6 +194,10 @@ public class CursorWrapper implements Cursor {
         mCursor.setNotificationUri(cr, uri);        
     }
 
+    public Uri getNotificationUri() {
+        return mCursor.getNotificationUri();
+    }
+
     public void unregisterContentObserver(ContentObserver observer) {
         mCursor.unregisterContentObserver(observer);        
     }

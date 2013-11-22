@@ -16,9 +16,6 @@
 
 package com.android.systemui.settings;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,9 +23,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.systemui.SystemUI;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class SettingsUI extends SystemUI {
     private static final String TAG = "SettingsUI";
@@ -42,7 +42,7 @@ public class SettingsUI extends SystemUI {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG)) {
-                if (DEBUG) Slog.d(TAG, "showing brightness dialog");
+                if (DEBUG) Log.d(TAG, "showing brightness dialog");
 
                 if (mBrightnessDialog == null) {
                     mBrightnessDialog = new BrightnessDialog(mContext);
@@ -59,7 +59,7 @@ public class SettingsUI extends SystemUI {
                 }
 
             } else {
-                Slog.w(TAG, "unknown intent: " + intent);
+                Log.w(TAG, "unknown intent: " + intent);
             }
         }
     };

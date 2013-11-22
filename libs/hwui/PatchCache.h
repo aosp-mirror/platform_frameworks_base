@@ -17,10 +17,16 @@
 #ifndef ANDROID_HWUI_PATCH_CACHE_H
 #define ANDROID_HWUI_PATCH_CACHE_H
 
-#include <utils/KeyedVector.h>
+#include <GLES2/gl2.h>
 
+#include <utils/LruCache.h>
+
+#include <androidfw/ResourceTypes.h>
+
+#include "AssetAtlas.h"
 #include "Debug.h"
 #include "Patch.h"
+#include "utils/Pair.h"
 
 namespace android {
 namespace uirenderer {
@@ -40,44 +46,63 @@ namespace uirenderer {
 // Cache
 ///////////////////////////////////////////////////////////////////////////////
 
+class Caches;
+
 class PatchCache {
 public:
     PatchCache();
-    PatchCache(uint32_t maxCapacity);
     ~PatchCache();
+    void init(Caches& caches);
 
-    Patch* get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-            const float pixelWidth, const float pixelHeight,
-            const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
-            const uint32_t width, const uint32_t height, const int8_t numColors);
+    const Patch* get(const AssetAtlas::Entry* entry,
+            const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+            const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch);
     void clear();
 
     uint32_t getSize() const {
-        return mCache.size();
+        return mSize;
     }
 
     uint32_t getMaxSize() const {
-        return mMaxEntries;
+        return mMaxSize;
     }
 
-private:
+    GLuint getMeshBuffer() const {
+        return mMeshBuffer;
+    }
+
+    uint32_t getGenerationId() const {
+        return mGenerationId;
+    }
+
     /**
-     * Description of a patch.
+     * Removes the entries associated with the specified 9-patch. This is meant
+     * to be called from threads that are not the EGL context thread (GC thread
+     * on the VM side for instance.)
      */
+    void removeDeferred(Res_png_9patch* patch);
+
+    /**
+     * Process deferred removals.
+     */
+    void clearGarbage();
+
+
+private:
     struct PatchDescription {
-        PatchDescription(): bitmapWidth(0), bitmapHeight(0), pixelWidth(0), pixelHeight(0),
-                xCount(0), yCount(0), emptyCount(0), colorKey(0) {
+        PatchDescription(): mPatch(NULL), mBitmapWidth(0), mBitmapHeight(0),
+                mPixelWidth(0), mPixelHeight(0) {
         }
 
         PatchDescription(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
-                const float pixelWidth, const float pixelHeight,
-                const uint32_t xCount, const uint32_t yCount,
-                const int8_t emptyCount, const uint32_t colorKey):
-                bitmapWidth(bitmapWidth), bitmapHeight(bitmapHeight),
-                pixelWidth(pixelWidth), pixelHeight(pixelHeight),
-                xCount(xCount), yCount(yCount),
-                emptyCount(emptyCount), colorKey(colorKey) {
+                const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch):
+                mPatch(patch), mBitmapWidth(bitmapWidth), mBitmapHeight(bitmapHeight),
+                mPixelWidth(pixelWidth), mPixelHeight(pixelHeight) {
         }
+
+        hash_t hash() const;
+
+        const Res_png_9patch* getPatch() const { return mPatch; }
 
         static int compare(const PatchDescription& lhs, const PatchDescription& rhs);
 
@@ -99,21 +124,63 @@ private:
             return PatchDescription::compare(lhs, rhs);
         }
 
+        friend inline hash_t hash_type(const PatchDescription& entry) {
+            return entry.hash();
+        }
+
     private:
-        uint32_t bitmapWidth;
-        uint32_t bitmapHeight;
-        float pixelWidth;
-        float pixelHeight;
-        uint32_t xCount;
-        uint32_t yCount;
-        int8_t emptyCount;
-        uint32_t colorKey;
+        const Res_png_9patch* mPatch;
+        uint32_t mBitmapWidth;
+        uint32_t mBitmapHeight;
+        float mPixelWidth;
+        float mPixelHeight;
 
     }; // struct PatchDescription
 
-    uint32_t mMaxEntries;
-    KeyedVector<PatchDescription, Patch*> mCache;
+    /**
+     * A buffer block represents an empty range in the mesh buffer
+     * that can be used to store vertices.
+     *
+     * The patch cache maintains a linked-list of buffer blocks
+     * to track available regions of memory in the VBO.
+     */
+    struct BufferBlock {
+        BufferBlock(uint32_t offset, uint32_t size): offset(offset), size(size), next(NULL) {
+        }
 
+        uint32_t offset;
+        uint32_t size;
+
+        BufferBlock* next;
+    }; // struct BufferBlock
+
+    typedef Pair<const PatchDescription*, Patch*> patch_pair_t;
+
+    void clearCache();
+    void createVertexBuffer();
+
+    void setupMesh(Patch* newMesh, TextureVertex* vertices);
+
+    void remove(Vector<patch_pair_t>& patchesToRemove, Res_png_9patch* patch);
+
+#if DEBUG_PATCHES
+    void dumpFreeBlocks(const char* prefix);
+#endif
+
+    uint32_t mMaxSize;
+    uint32_t mSize;
+
+    LruCache<PatchDescription, Patch*> mCache;
+
+    GLuint mMeshBuffer;
+    // First available free block inside the mesh buffer
+    BufferBlock* mFreeBlocks;
+
+    uint32_t mGenerationId;
+
+    // Garbage tracking, required to handle GC events on the VM side
+    Vector<Res_png_9patch*> mGarbage;
+    mutable Mutex mLock;
 }; // class PatchCache
 
 }; // namespace uirenderer

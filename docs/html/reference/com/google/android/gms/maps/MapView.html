@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>MapView | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -761,7 +768,7 @@ Summary:
   
 
   
-    extends <a href="/reference/android/widget/FrameLayout.html">FrameLayout</a><br/>
+    extends FrameLayout<br/>
   
   
   
@@ -781,7 +788,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="5" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="5" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -789,7 +796,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="4" class="jd-inheritance-class-cell"><a href="/reference/android/view/View.html">android.view.View</a></td>
+        <td colspan="4" class="jd-inheritance-class-cell">android.view.View</td>
     </tr>
     
 
@@ -799,7 +806,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="3" class="jd-inheritance-class-cell"><a href="/reference/android/view/ViewGroup.html">android.view.ViewGroup</a></td>
+        <td colspan="3" class="jd-inheritance-class-cell">android.view.ViewGroup</td>
     </tr>
     
 
@@ -811,7 +818,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/android/widget/FrameLayout.html">android.widget.FrameLayout</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">android.widget.FrameLayout</td>
     </tr>
     
 
@@ -1393,7 +1400,7 @@ android.view.View
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">VIEW_LOG_TAG</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
@@ -1464,7 +1471,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ALPHA</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1783,7 +1790,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ROTATION</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1794,7 +1801,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ROTATION_X</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1805,7 +1812,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ROTATION_Y</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1816,7 +1823,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">SCALE_X</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1827,7 +1834,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">SCALE_Y</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1860,7 +1867,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">TRANSLATION_X</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1871,7 +1878,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">TRANSLATION_Y</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1893,7 +1900,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">X</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1904,7 +1911,7 @@ android.view.View
           public
           static
           final
-          Property&lt;<a href="/reference/android/view/View.html">View</a>,&nbsp;<a href="/reference/java/lang/Float.html">Float</a>&gt;</nobr></td>
+          Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">Y</td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -1949,7 +1956,7 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context)">MapView</a></span>(<a href="/reference/android/content/Context.html">Context</a> context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context)">MapView</a></span>(Context context)</nobr>
         
   </td></tr>
 
@@ -1965,7 +1972,7 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context, android.util.AttributeSet)">MapView</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/android/util/AttributeSet.html">AttributeSet</a> attrs)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context, android.util.AttributeSet)">MapView</a></span>(Context context, AttributeSet attrs)</nobr>
         
   </td></tr>
 
@@ -1981,7 +1988,7 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context, android.util.AttributeSet, int)">MapView</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/android/util/AttributeSet.html">AttributeSet</a> attrs, int defStyle)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context, android.util.AttributeSet, int)">MapView</a></span>(Context context, AttributeSet attrs, int defStyle)</nobr>
         
   </td></tr>
 
@@ -1997,7 +2004,7 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context, com.google.android.gms.maps.GoogleMapOptions)">MapView</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a> options)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#MapView(android.content.Context, com.google.android.gms.maps.GoogleMapOptions)">MapView</a></span>(Context context, <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a> options)</nobr>
         
   </td></tr>
 
@@ -2044,7 +2051,7 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onCreate(android.os.Bundle)">onCreate</a></span>(<a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onCreate(android.os.Bundle)">onCreate</a></span>(Bundle savedInstanceState)</nobr>
         
         <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
   
@@ -2134,7 +2141,7 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onSaveInstanceState(android.os.Bundle)">onSaveInstanceState</a></span>(<a href="/reference/android/os/Bundle.html">Bundle</a> outState)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapView.html#onSaveInstanceState(android.os.Bundle)">onSaveInstanceState</a></span>(Bundle outState)</nobr>
         
         <div class="jd-descrdiv">You must call this method from the parent Activity/Fragment's corresponding method.</div>
   
@@ -2164,7 +2171,7 @@ android.view.View
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/android/widget/FrameLayout.html">android.widget.FrameLayout</a>
+  android.widget.FrameLayout
 
 <div id="inherited-methods-android.widget.FrameLayout">
   <div id="inherited-methods-android.widget.FrameLayout-list"
@@ -2186,7 +2193,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkLayoutParams</span>(<a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg0)</nobr>
+        <span class="sympad">checkLayoutParams</span>(ViewGroup.LayoutParams arg0)</nobr>
         
   </td></tr>
 
@@ -2202,7 +2209,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">draw</span>(<a href="/reference/android/graphics/Canvas.html">Canvas</a> arg0)</nobr>
+        <span class="sympad">draw</span>(Canvas arg0)</nobr>
         
   </td></tr>
 
@@ -2234,7 +2241,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">gatherTransparentRegion</span>(<a href="/reference/android/graphics/Region.html">Region</a> arg0)</nobr>
+        <span class="sympad">gatherTransparentRegion</span>(Region arg0)</nobr>
         
   </td></tr>
 
@@ -2247,7 +2254,7 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a></nobr>
+            ViewGroup.LayoutParams</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">generateDefaultLayoutParams</span>()</nobr>
@@ -2263,10 +2270,10 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a></nobr>
+            ViewGroup.LayoutParams</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">generateLayoutParams</span>(<a href="/reference/android/util/AttributeSet.html">AttributeSet</a> arg0)</nobr>
+        <span class="sympad">generateLayoutParams</span>(AttributeSet arg0)</nobr>
         
   </td></tr>
 
@@ -2279,10 +2286,10 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a></nobr>
+            ViewGroup.LayoutParams</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">generateLayoutParams</span>(<a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg0)</nobr>
+        <span class="sympad">generateLayoutParams</span>(ViewGroup.LayoutParams arg0)</nobr>
         
   </td></tr>
 
@@ -2311,7 +2318,7 @@ From class
             
             
             
-            <a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a></nobr>
+            Drawable</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getForeground</span>()</nobr>
@@ -2378,7 +2385,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInitializeAccessibilityEvent</span>(<a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg0)</nobr>
+        <span class="sympad">onInitializeAccessibilityEvent</span>(AccessibilityEvent arg0)</nobr>
         
   </td></tr>
 
@@ -2458,7 +2465,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setForeground</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">setForeground</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -2522,7 +2529,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">verifyDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">verifyDrawable</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -2542,7 +2549,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/android/view/ViewGroup.html">android.view.ViewGroup</a>
+  android.view.ViewGroup
 
 <div id="inherited-methods-android.view.ViewGroup">
   <div id="inherited-methods-android.view.ViewGroup-list"
@@ -2564,7 +2571,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addChildrenForAccessibility</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0)</nobr>
+        <span class="sympad">addChildrenForAccessibility</span>(ArrayList&lt;View&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -2580,7 +2587,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addFocusables</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0, int arg1, int arg2)</nobr>
+        <span class="sympad">addFocusables</span>(ArrayList&lt;View&gt; arg0, int arg1, int arg2)</nobr>
         
   </td></tr>
 
@@ -2612,7 +2619,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addTouchables</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0)</nobr>
+        <span class="sympad">addTouchables</span>(ArrayList&lt;View&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -2628,7 +2635,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addView</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg2)</nobr>
+        <span class="sympad">addView</span>(View arg0, int arg1, ViewGroup.LayoutParams arg2)</nobr>
         
   </td></tr>
 
@@ -2644,7 +2651,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addView</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg1)</nobr>
+        <span class="sympad">addView</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
         
   </td></tr>
 
@@ -2660,7 +2667,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addView</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">addView</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -2676,7 +2683,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addView</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">addView</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2692,7 +2699,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addView</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1, int arg2)</nobr>
+        <span class="sympad">addView</span>(View arg0, int arg1, int arg2)</nobr>
         
   </td></tr>
 
@@ -2708,7 +2715,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addViewInLayout</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg2, boolean arg3)</nobr>
+        <span class="sympad">addViewInLayout</span>(View arg0, int arg1, ViewGroup.LayoutParams arg2, boolean arg3)</nobr>
         
   </td></tr>
 
@@ -2724,7 +2731,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addViewInLayout</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg2)</nobr>
+        <span class="sympad">addViewInLayout</span>(View arg0, int arg1, ViewGroup.LayoutParams arg2)</nobr>
         
   </td></tr>
 
@@ -2740,7 +2747,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">attachLayoutAnimationParameters</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg1, int arg2, int arg3)</nobr>
+        <span class="sympad">attachLayoutAnimationParameters</span>(View arg0, ViewGroup.LayoutParams arg1, int arg2, int arg3)</nobr>
         
   </td></tr>
 
@@ -2756,7 +2763,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">attachViewToParent</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg2)</nobr>
+        <span class="sympad">attachViewToParent</span>(View arg0, int arg1, ViewGroup.LayoutParams arg2)</nobr>
         
   </td></tr>
 
@@ -2772,7 +2779,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">bringChildToFront</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">bringChildToFront</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2804,7 +2811,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkLayoutParams</span>(<a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg0)</nobr>
+        <span class="sympad">checkLayoutParams</span>(ViewGroup.LayoutParams arg0)</nobr>
         
   </td></tr>
 
@@ -2820,7 +2827,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">childDrawableStateChanged</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">childDrawableStateChanged</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2836,7 +2843,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">cleanupLayoutState</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">cleanupLayoutState</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2852,7 +2859,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clearChildFocus</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">clearChildFocus</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2932,7 +2939,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">detachViewFromParent</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">detachViewFromParent</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2980,7 +2987,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchConfigurationChanged</span>(<a href="/reference/android/content/res/Configuration.html">Configuration</a> arg0)</nobr>
+        <span class="sympad">dispatchConfigurationChanged</span>(Configuration arg0)</nobr>
         
   </td></tr>
 
@@ -3028,7 +3035,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchDraw</span>(<a href="/reference/android/graphics/Canvas.html">Canvas</a> arg0)</nobr>
+        <span class="sympad">dispatchDraw</span>(Canvas arg0)</nobr>
         
   </td></tr>
 
@@ -3044,7 +3051,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchFreezeSelfOnly</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">dispatchFreezeSelfOnly</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -3060,7 +3067,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchGenericFocusedEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchGenericFocusedEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3076,7 +3083,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchGenericPointerEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchGenericPointerEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3092,7 +3099,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchHoverEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchHoverEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3108,7 +3115,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchKeyEvent</span>(<a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchKeyEvent</span>(KeyEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3124,7 +3131,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchKeyEventPreIme</span>(<a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchKeyEventPreIme</span>(KeyEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3140,7 +3147,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchKeyShortcutEvent</span>(<a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchKeyShortcutEvent</span>(KeyEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3156,7 +3163,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchRestoreInstanceState</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">dispatchRestoreInstanceState</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -3172,7 +3179,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchSaveInstanceState</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">dispatchSaveInstanceState</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -3252,7 +3259,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchThawSelfOnly</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">dispatchThawSelfOnly</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -3268,7 +3275,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchTouchEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchTouchEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3284,7 +3291,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchTrackballEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchTrackballEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -3300,7 +3307,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchUnhandledMove</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">dispatchUnhandledMove</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -3316,7 +3323,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchVisibilityChanged</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">dispatchVisibilityChanged</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -3380,7 +3387,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">drawChild</span>(<a href="/reference/android/graphics/Canvas.html">Canvas</a> arg0, <a href="/reference/android/view/View.html">View</a> arg1, long arg2)</nobr>
+        <span class="sympad">drawChild</span>(Canvas arg0, View arg1, long arg2)</nobr>
         
   </td></tr>
 
@@ -3412,7 +3419,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">endViewTransition</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">endViewTransition</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -3425,7 +3432,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">findFocus</span>()</nobr>
@@ -3444,7 +3451,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">findViewsWithText</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0, <a href="/reference/java/lang/CharSequence.html">CharSequence</a> arg1, int arg2)</nobr>
+        <span class="sympad">findViewsWithText</span>(ArrayList&lt;View&gt; arg0, CharSequence arg1, int arg2)</nobr>
         
   </td></tr>
 
@@ -3460,7 +3467,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">fitSystemWindows</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">fitSystemWindows</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -3473,10 +3480,10 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">focusSearch</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">focusSearch</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -3492,7 +3499,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">focusableViewAvailable</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">focusableViewAvailable</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -3508,7 +3515,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">gatherTransparentRegion</span>(<a href="/reference/android/graphics/Region.html">Region</a> arg0)</nobr>
+        <span class="sympad">gatherTransparentRegion</span>(Region arg0)</nobr>
         
   </td></tr>
 
@@ -3521,7 +3528,7 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a></nobr>
+            ViewGroup.LayoutParams</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">generateDefaultLayoutParams</span>()</nobr>
@@ -3537,10 +3544,10 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a></nobr>
+            ViewGroup.LayoutParams</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">generateLayoutParams</span>(<a href="/reference/android/util/AttributeSet.html">AttributeSet</a> arg0)</nobr>
+        <span class="sympad">generateLayoutParams</span>(AttributeSet arg0)</nobr>
         
   </td></tr>
 
@@ -3553,10 +3560,10 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a></nobr>
+            ViewGroup.LayoutParams</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">generateLayoutParams</span>(<a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg0)</nobr>
+        <span class="sympad">generateLayoutParams</span>(ViewGroup.LayoutParams arg0)</nobr>
         
   </td></tr>
 
@@ -3569,7 +3576,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getChildAt</span>(int arg0)</nobr>
@@ -3636,7 +3643,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getChildStaticTransformation</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/animation/Transformation.html">Transformation</a> arg1)</nobr>
+        <span class="sympad">getChildStaticTransformation</span>(View arg0, Transformation arg1)</nobr>
         
   </td></tr>
 
@@ -3652,7 +3659,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getChildVisibleRect</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1, <a href="/reference/android/graphics/Point.html">Point</a> arg2)</nobr>
+        <span class="sympad">getChildVisibleRect</span>(View arg0, Rect arg1, Point arg2)</nobr>
         
   </td></tr>
 
@@ -3681,7 +3688,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getFocusedChild</span>()</nobr>
@@ -3697,7 +3704,7 @@ From class
             
             
             
-            <a href="/reference/android/view/animation/LayoutAnimationController.html">LayoutAnimationController</a></nobr>
+            LayoutAnimationController</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getLayoutAnimation</span>()</nobr>
@@ -3713,7 +3720,7 @@ From class
             
             
             
-            <a href="/reference/android/view/animation/Animation.AnimationListener.html">Animation.AnimationListener</a></nobr>
+            Animation.AnimationListener</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getLayoutAnimationListener</span>()</nobr>
@@ -3796,7 +3803,7 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">indexOfChild</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">indexOfChild</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -3812,7 +3819,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidateChild</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">invalidateChild</span>(View arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -3825,10 +3832,10 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewParent.html">ViewParent</a></nobr>
+            ViewParent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidateChildInParent</span>(int[] arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">invalidateChildInParent</span>(int[] arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -3956,7 +3963,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">measureChild</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1, int arg2)</nobr>
+        <span class="sympad">measureChild</span>(View arg0, int arg1, int arg2)</nobr>
         
   </td></tr>
 
@@ -3972,7 +3979,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">measureChildWithMargins</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1, int arg2, int arg3, int arg4)</nobr>
+        <span class="sympad">measureChildWithMargins</span>(View arg0, int arg1, int arg2, int arg3, int arg4)</nobr>
         
   </td></tr>
 
@@ -4004,7 +4011,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">offsetDescendantRectToMyCoords</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">offsetDescendantRectToMyCoords</span>(View arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -4020,7 +4027,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">offsetRectIntoDescendantCoords</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">offsetRectIntoDescendantCoords</span>(View arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -4084,7 +4091,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInterceptHoverEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">onInterceptHoverEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -4100,7 +4107,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInterceptTouchEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">onInterceptTouchEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -4132,7 +4139,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onRequestFocusInDescendants</span>(int arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">onRequestFocusInDescendants</span>(int arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -4148,7 +4155,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onRequestSendAccessibilityEvent</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg1)</nobr>
+        <span class="sympad">onRequestSendAccessibilityEvent</span>(View arg0, AccessibilityEvent arg1)</nobr>
         
   </td></tr>
 
@@ -4164,7 +4171,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">recomputeViewAttributes</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">recomputeViewAttributes</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -4212,7 +4219,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">removeDetachedView</span>(<a href="/reference/android/view/View.html">View</a> arg0, boolean arg1)</nobr>
+        <span class="sympad">removeDetachedView</span>(View arg0, boolean arg1)</nobr>
         
   </td></tr>
 
@@ -4228,7 +4235,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">removeView</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">removeView</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -4260,7 +4267,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">removeViewInLayout</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">removeViewInLayout</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -4308,7 +4315,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestChildFocus</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/View.html">View</a> arg1)</nobr>
+        <span class="sympad">requestChildFocus</span>(View arg0, View arg1)</nobr>
         
   </td></tr>
 
@@ -4324,7 +4331,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestChildRectangleOnScreen</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1, boolean arg2)</nobr>
+        <span class="sympad">requestChildRectangleOnScreen</span>(View arg0, Rect arg1, boolean arg2)</nobr>
         
   </td></tr>
 
@@ -4356,7 +4363,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestFocus</span>(int arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">requestFocus</span>(int arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -4372,7 +4379,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestSendAccessibilityEvent</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg1)</nobr>
+        <span class="sympad">requestSendAccessibilityEvent</span>(View arg0, AccessibilityEvent arg1)</nobr>
         
   </td></tr>
 
@@ -4388,7 +4395,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestTransparentRegion</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">requestTransparentRegion</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -4564,7 +4571,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setLayoutAnimation</span>(<a href="/reference/android/view/animation/LayoutAnimationController.html">LayoutAnimationController</a> arg0)</nobr>
+        <span class="sympad">setLayoutAnimation</span>(LayoutAnimationController arg0)</nobr>
         
   </td></tr>
 
@@ -4580,7 +4587,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setLayoutAnimationListener</span>(<a href="/reference/android/view/animation/Animation.AnimationListener.html">Animation.AnimationListener</a> arg0)</nobr>
+        <span class="sympad">setLayoutAnimationListener</span>(Animation.AnimationListener arg0)</nobr>
         
   </td></tr>
 
@@ -4628,7 +4635,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setOnHierarchyChangeListener</span>(<a href="/reference/android/view/ViewGroup.OnHierarchyChangeListener.html">ViewGroup.OnHierarchyChangeListener</a> arg0)</nobr>
+        <span class="sympad">setOnHierarchyChangeListener</span>(ViewGroup.OnHierarchyChangeListener arg0)</nobr>
         
   </td></tr>
 
@@ -4708,7 +4715,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">showContextMenuForChild</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">showContextMenuForChild</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -4724,7 +4731,7 @@ From class
             ActionMode</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActionModeForChild</span>(<a href="/reference/android/view/View.html">View</a> arg0, ActionMode.Callback arg1)</nobr>
+        <span class="sympad">startActionModeForChild</span>(View arg0, ActionMode.Callback arg1)</nobr>
         
   </td></tr>
 
@@ -4756,7 +4763,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startViewTransition</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">startViewTransition</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -4772,7 +4779,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">updateViewLayout</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg1)</nobr>
+        <span class="sympad">updateViewLayout</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
         
   </td></tr>
 
@@ -4792,7 +4799,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/android/view/View.html">android.view.View</a>
+  android.view.View
 
 <div id="inherited-methods-android.view.View">
   <div id="inherited-methods-android.view.View-list"
@@ -4814,7 +4821,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addChildrenForAccessibility</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0)</nobr>
+        <span class="sympad">addChildrenForAccessibility</span>(ArrayList&lt;View&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -4830,7 +4837,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addFocusables</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0, int arg1, int arg2)</nobr>
+        <span class="sympad">addFocusables</span>(ArrayList&lt;View&gt; arg0, int arg1, int arg2)</nobr>
         
   </td></tr>
 
@@ -4846,7 +4853,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addFocusables</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0, int arg1)</nobr>
+        <span class="sympad">addFocusables</span>(ArrayList&lt;View&gt; arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -4894,7 +4901,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addTouchables</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0)</nobr>
+        <span class="sympad">addTouchables</span>(ArrayList&lt;View&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -4926,7 +4933,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">announceForAccessibility</span>(<a href="/reference/java/lang/CharSequence.html">CharSequence</a> arg0)</nobr>
+        <span class="sympad">announceForAccessibility</span>(CharSequence arg0)</nobr>
         
   </td></tr>
 
@@ -5118,7 +5125,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkInputConnectionProxy</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">checkInputConnectionProxy</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -5310,7 +5317,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">createContextMenu</span>(<a href="/reference/android/view/ContextMenu.html">ContextMenu</a> arg0)</nobr>
+        <span class="sympad">createContextMenu</span>(ContextMenu arg0)</nobr>
         
   </td></tr>
 
@@ -5342,7 +5349,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchConfigurationChanged</span>(<a href="/reference/android/content/res/Configuration.html">Configuration</a> arg0)</nobr>
+        <span class="sympad">dispatchConfigurationChanged</span>(Configuration arg0)</nobr>
         
   </td></tr>
 
@@ -5390,7 +5397,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchDraw</span>(<a href="/reference/android/graphics/Canvas.html">Canvas</a> arg0)</nobr>
+        <span class="sympad">dispatchDraw</span>(Canvas arg0)</nobr>
         
   </td></tr>
 
@@ -5406,7 +5413,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchGenericFocusedEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchGenericFocusedEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5422,7 +5429,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchGenericMotionEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchGenericMotionEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5438,7 +5445,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchGenericPointerEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchGenericPointerEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5454,7 +5461,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchHoverEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchHoverEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5470,7 +5477,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchKeyEvent</span>(<a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchKeyEvent</span>(KeyEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5486,7 +5493,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchKeyEventPreIme</span>(<a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchKeyEventPreIme</span>(KeyEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5502,7 +5509,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchKeyShortcutEvent</span>(<a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchKeyShortcutEvent</span>(KeyEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5518,7 +5525,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchPopulateAccessibilityEvent</span>(<a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchPopulateAccessibilityEvent</span>(AccessibilityEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5534,7 +5541,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchRestoreInstanceState</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">dispatchRestoreInstanceState</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -5550,7 +5557,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchSaveInstanceState</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">dispatchSaveInstanceState</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -5630,7 +5637,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchTouchEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchTouchEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5646,7 +5653,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchTrackballEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">dispatchTrackballEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -5662,7 +5669,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchUnhandledMove</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">dispatchUnhandledMove</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -5678,7 +5685,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchVisibilityChanged</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">dispatchVisibilityChanged</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -5742,7 +5749,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">draw</span>(<a href="/reference/android/graphics/Canvas.html">Canvas</a> arg0)</nobr>
+        <span class="sympad">draw</span>(Canvas arg0)</nobr>
         
   </td></tr>
 
@@ -5771,7 +5778,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">findFocus</span>()</nobr>
@@ -5787,7 +5794,7 @@ From class
             final
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">findViewById</span>(int arg0)</nobr>
@@ -5803,10 +5810,10 @@ From class
             final
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">findViewWithTag</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">findViewWithTag</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -5822,7 +5829,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">findViewsWithText</span>(<a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt; arg0, <a href="/reference/java/lang/CharSequence.html">CharSequence</a> arg1, int arg2)</nobr>
+        <span class="sympad">findViewsWithText</span>(ArrayList&lt;View&gt; arg0, CharSequence arg1, int arg2)</nobr>
         
   </td></tr>
 
@@ -5838,7 +5845,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">fitSystemWindows</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">fitSystemWindows</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -5851,7 +5858,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">focusSearch</span>(int arg0)</nobr>
@@ -5915,7 +5922,7 @@ From class
             
             
             
-            <a href="/reference/android/view/animation/Animation.html">Animation</a></nobr>
+            Animation</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getAnimation</span>()</nobr>
@@ -5931,7 +5938,7 @@ From class
             
             
             
-            <a href="/reference/android/os/IBinder.html">IBinder</a></nobr>
+            IBinder</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getApplicationWindowToken</span>()</nobr>
@@ -5947,7 +5954,7 @@ From class
             
             
             
-            <a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a></nobr>
+            Drawable</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getBackground</span>()</nobr>
@@ -6043,7 +6050,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/CharSequence.html">CharSequence</a></nobr>
+            CharSequence</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getContentDescription</span>()</nobr>
@@ -6059,7 +6066,7 @@ From class
             final
             
             
-            <a href="/reference/android/content/Context.html">Context</a></nobr>
+            Context</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getContext</span>()</nobr>
@@ -6075,7 +6082,7 @@ From class
             
             
             
-            <a href="/reference/android/view/ContextMenu.ContextMenuInfo.html">ContextMenu.ContextMenuInfo</a></nobr>
+            ContextMenu.ContextMenuInfo</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getContextMenuInfo</span>()</nobr>
@@ -6123,7 +6130,7 @@ From class
             
             
             
-            <a href="/reference/android/graphics/Bitmap.html">Bitmap</a></nobr>
+            Bitmap</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getDrawingCache</span>(boolean arg0)</nobr>
@@ -6139,7 +6146,7 @@ From class
             
             
             
-            <a href="/reference/android/graphics/Bitmap.html">Bitmap</a></nobr>
+            Bitmap</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getDrawingCache</span>()</nobr>
@@ -6190,7 +6197,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getDrawingRect</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">getDrawingRect</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -6251,7 +6258,7 @@ From class
             
             
             
-            <a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt;</nobr>
+            ArrayList&lt;View&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getFocusables</span>(int arg0)</nobr>
@@ -6270,7 +6277,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getFocusedRect</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">getFocusedRect</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -6286,7 +6293,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getGlobalVisibleRect</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0, <a href="/reference/android/graphics/Point.html">Point</a> arg1)</nobr>
+        <span class="sympad">getGlobalVisibleRect</span>(Rect arg0, Point arg1)</nobr>
         
   </td></tr>
 
@@ -6302,7 +6309,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getGlobalVisibleRect</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">getGlobalVisibleRect</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -6315,7 +6322,7 @@ From class
             
             
             
-            <a href="/reference/android/os/Handler.html">Handler</a></nobr>
+            Handler</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getHandler</span>()</nobr>
@@ -6350,7 +6357,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getHitRect</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">getHitRect</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -6443,7 +6450,7 @@ From class
             
             
             
-            <a href="/reference/android/view/KeyEvent.DispatcherState.html">KeyEvent.DispatcherState</a></nobr>
+            KeyEvent.DispatcherState</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getKeyDispatcherState</span>()</nobr>
@@ -6475,7 +6482,7 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a></nobr>
+            ViewGroup.LayoutParams</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getLayoutParams</span>()</nobr>
@@ -6542,7 +6549,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getLocalVisibleRect</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">getLocalVisibleRect</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -6587,7 +6594,7 @@ From class
             
             
             
-            <a href="/reference/android/graphics/Matrix.html">Matrix</a></nobr>
+            Matrix</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getMatrix</span>()</nobr>
@@ -6795,7 +6802,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.OnFocusChangeListener.html">View.OnFocusChangeListener</a></nobr>
+            View.OnFocusChangeListener</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getOnFocusChangeListener</span>()</nobr>
@@ -6891,7 +6898,7 @@ From class
             final
             
             
-            <a href="/reference/android/view/ViewParent.html">ViewParent</a></nobr>
+            ViewParent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getParent</span>()</nobr>
@@ -6907,7 +6914,7 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewParent.html">ViewParent</a></nobr>
+            ViewParent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getParentForAccessibility</span>()</nobr>
@@ -6955,7 +6962,7 @@ From class
             
             
             
-            <a href="/reference/android/content/res/Resources.html">Resources</a></nobr>
+            Resources</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getResources</span>()</nobr>
@@ -7019,7 +7026,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getRootView</span>()</nobr>
@@ -7275,7 +7282,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTag</span>(int arg0)</nobr>
@@ -7291,7 +7298,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTag</span>()</nobr>
@@ -7355,7 +7362,7 @@ From class
             
             
             
-            <a href="/reference/android/view/TouchDelegate.html">TouchDelegate</a></nobr>
+            TouchDelegate</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTouchDelegate</span>()</nobr>
@@ -7371,7 +7378,7 @@ From class
             
             
             
-            <a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/android/view/View.html">View</a>&gt;</nobr>
+            ArrayList&lt;View&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTouchables</span>()</nobr>
@@ -7467,7 +7474,7 @@ From class
             
             
             
-            <a href="/reference/android/view/ViewTreeObserver.html">ViewTreeObserver</a></nobr>
+            ViewTreeObserver</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getViewTreeObserver</span>()</nobr>
@@ -7547,7 +7554,7 @@ From class
             
             
             
-            <a href="/reference/android/os/IBinder.html">IBinder</a></nobr>
+            IBinder</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getWindowToken</span>()</nobr>
@@ -7582,7 +7589,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getWindowVisibleDisplayFrame</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">getWindowVisibleDisplayFrame</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -7723,10 +7730,10 @@ From class
             
             static
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">inflate</span>(<a href="/reference/android/content/Context.html">Context</a> arg0, int arg1, <a href="/reference/android/view/ViewGroup.html">ViewGroup</a> arg2)</nobr>
+        <span class="sympad">inflate</span>(Context arg0, int arg1, ViewGroup arg2)</nobr>
         
   </td></tr>
 
@@ -7742,7 +7749,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">initializeFadingEdge</span>(<a href="/reference/android/content/res/TypedArray.html">TypedArray</a> arg0)</nobr>
+        <span class="sympad">initializeFadingEdge</span>(TypedArray arg0)</nobr>
         
   </td></tr>
 
@@ -7758,7 +7765,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">initializeScrollbars</span>(<a href="/reference/android/content/res/TypedArray.html">TypedArray</a> arg0)</nobr>
+        <span class="sympad">initializeScrollbars</span>(TypedArray arg0)</nobr>
         
   </td></tr>
 
@@ -7774,7 +7781,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidate</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">invalidate</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -7822,7 +7829,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidateDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">invalidateDrawable</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -8478,7 +8485,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onConfigurationChanged</span>(<a href="/reference/android/content/res/Configuration.html">Configuration</a> arg0)</nobr>
+        <span class="sympad">onConfigurationChanged</span>(Configuration arg0)</nobr>
         
   </td></tr>
 
@@ -8494,7 +8501,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateContextMenu</span>(<a href="/reference/android/view/ContextMenu.html">ContextMenu</a> arg0)</nobr>
+        <span class="sympad">onCreateContextMenu</span>(ContextMenu arg0)</nobr>
         
   </td></tr>
 
@@ -8523,10 +8530,10 @@ From class
             
             
             
-            <a href="/reference/android/view/inputmethod/InputConnection.html">InputConnection</a></nobr>
+            InputConnection</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateInputConnection</span>(<a href="/reference/android/view/inputmethod/EditorInfo.html">EditorInfo</a> arg0)</nobr>
+        <span class="sympad">onCreateInputConnection</span>(EditorInfo arg0)</nobr>
         
   </td></tr>
 
@@ -8590,7 +8597,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onDraw</span>(<a href="/reference/android/graphics/Canvas.html">Canvas</a> arg0)</nobr>
+        <span class="sympad">onDraw</span>(Canvas arg0)</nobr>
         
   </td></tr>
 
@@ -8606,7 +8613,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onDrawScrollBars</span>(<a href="/reference/android/graphics/Canvas.html">Canvas</a> arg0)</nobr>
+        <span class="sympad">onDrawScrollBars</span>(Canvas arg0)</nobr>
         
   </td></tr>
 
@@ -8622,7 +8629,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onFilterTouchEventForSecurity</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">onFilterTouchEventForSecurity</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -8670,7 +8677,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onFocusChanged</span>(boolean arg0, int arg1, <a href="/reference/android/graphics/Rect.html">Rect</a> arg2)</nobr>
+        <span class="sympad">onFocusChanged</span>(boolean arg0, int arg1, Rect arg2)</nobr>
         
   </td></tr>
 
@@ -8686,7 +8693,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onGenericMotionEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">onGenericMotionEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -8718,7 +8725,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onHoverEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">onHoverEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -8734,7 +8741,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInitializeAccessibilityEvent</span>(<a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg0)</nobr>
+        <span class="sympad">onInitializeAccessibilityEvent</span>(AccessibilityEvent arg0)</nobr>
         
   </td></tr>
 
@@ -8766,7 +8773,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyDown</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyDown</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -8782,7 +8789,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyLongPress</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyLongPress</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -8798,7 +8805,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyMultiple</span>(int arg0, int arg1, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg2)</nobr>
+        <span class="sympad">onKeyMultiple</span>(int arg0, int arg1, KeyEvent arg2)</nobr>
         
   </td></tr>
 
@@ -8814,7 +8821,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyPreIme</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyPreIme</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -8830,7 +8837,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyShortcut</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyShortcut</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -8846,7 +8853,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyUp</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyUp</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -8910,7 +8917,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onPopulateAccessibilityEvent</span>(<a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg0)</nobr>
+        <span class="sympad">onPopulateAccessibilityEvent</span>(AccessibilityEvent arg0)</nobr>
         
   </td></tr>
 
@@ -8926,7 +8933,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onRestoreInstanceState</span>(<a href="/reference/android/os/Parcelable.html">Parcelable</a> arg0)</nobr>
+        <span class="sympad">onRestoreInstanceState</span>(Parcelable arg0)</nobr>
         
   </td></tr>
 
@@ -8939,7 +8946,7 @@ From class
             
             
             
-            <a href="/reference/android/os/Parcelable.html">Parcelable</a></nobr>
+            Parcelable</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onSaveInstanceState</span>()</nobr>
@@ -9038,7 +9045,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onTouchEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">onTouchEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -9054,7 +9061,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onTrackballEvent</span>(<a href="/reference/android/view/MotionEvent.html">MotionEvent</a> arg0)</nobr>
+        <span class="sympad">onTrackballEvent</span>(MotionEvent arg0)</nobr>
         
   </td></tr>
 
@@ -9070,7 +9077,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onVisibilityChanged</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">onVisibilityChanged</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -9150,7 +9157,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">performAccessibilityAction</span>(int arg0, <a href="/reference/android/os/Bundle.html">Bundle</a> arg1)</nobr>
+        <span class="sympad">performAccessibilityAction</span>(int arg0, Bundle arg1)</nobr>
         
   </td></tr>
 
@@ -9246,7 +9253,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">post</span>(<a href="/reference/java/lang/Runnable.html">Runnable</a> arg0)</nobr>
+        <span class="sympad">post</span>(Runnable arg0)</nobr>
         
   </td></tr>
 
@@ -9262,7 +9269,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">postDelayed</span>(<a href="/reference/java/lang/Runnable.html">Runnable</a> arg0, long arg1)</nobr>
+        <span class="sympad">postDelayed</span>(Runnable arg0, long arg1)</nobr>
         
   </td></tr>
 
@@ -9374,7 +9381,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">postOnAnimation</span>(<a href="/reference/java/lang/Runnable.html">Runnable</a> arg0)</nobr>
+        <span class="sympad">postOnAnimation</span>(Runnable arg0)</nobr>
         
   </td></tr>
 
@@ -9390,7 +9397,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">postOnAnimationDelayed</span>(<a href="/reference/java/lang/Runnable.html">Runnable</a> arg0, long arg1)</nobr>
+        <span class="sympad">postOnAnimationDelayed</span>(Runnable arg0, long arg1)</nobr>
         
   </td></tr>
 
@@ -9422,7 +9429,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">removeCallbacks</span>(<a href="/reference/java/lang/Runnable.html">Runnable</a> arg0)</nobr>
+        <span class="sympad">removeCallbacks</span>(Runnable arg0)</nobr>
         
   </td></tr>
 
@@ -9486,7 +9493,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestFocus</span>(int arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">requestFocus</span>(int arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -9566,7 +9573,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestRectangleOnScreen</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0)</nobr>
+        <span class="sympad">requestRectangleOnScreen</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -9582,7 +9589,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestRectangleOnScreen</span>(<a href="/reference/android/graphics/Rect.html">Rect</a> arg0, boolean arg1)</nobr>
+        <span class="sympad">requestRectangleOnScreen</span>(Rect arg0, boolean arg1)</nobr>
         
   </td></tr>
 
@@ -9630,7 +9637,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">restoreHierarchyState</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">restoreHierarchyState</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -9646,7 +9653,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">saveHierarchyState</span>(<a href="/reference/android/util/SparseArray.html">SparseArray</a>&lt;<a href="/reference/android/os/Parcelable.html">Parcelable</a>&gt; arg0)</nobr>
+        <span class="sympad">saveHierarchyState</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -9662,7 +9669,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">scheduleDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0, <a href="/reference/java/lang/Runnable.html">Runnable</a> arg1, long arg2)</nobr>
+        <span class="sympad">scheduleDrawable</span>(Drawable arg0, Runnable arg1, long arg2)</nobr>
         
   </td></tr>
 
@@ -9726,7 +9733,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">sendAccessibilityEventUnchecked</span>(<a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg0)</nobr>
+        <span class="sympad">sendAccessibilityEventUnchecked</span>(AccessibilityEvent arg0)</nobr>
         
   </td></tr>
 
@@ -9790,7 +9797,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setAnimation</span>(<a href="/reference/android/view/animation/Animation.html">Animation</a> arg0)</nobr>
+        <span class="sympad">setAnimation</span>(Animation arg0)</nobr>
         
   </td></tr>
 
@@ -9806,7 +9813,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setBackground</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">setBackground</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -9838,7 +9845,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setBackgroundDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">setBackgroundDrawable</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -9918,7 +9925,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setContentDescription</span>(<a href="/reference/java/lang/CharSequence.html">CharSequence</a> arg0)</nobr>
+        <span class="sympad">setContentDescription</span>(CharSequence arg0)</nobr>
         
   </td></tr>
 
@@ -10222,7 +10229,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setLayerType</span>(int arg0, <a href="/reference/android/graphics/Paint.html">Paint</a> arg1)</nobr>
+        <span class="sympad">setLayerType</span>(int arg0, Paint arg1)</nobr>
         
   </td></tr>
 
@@ -10238,7 +10245,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setLayoutParams</span>(<a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg0)</nobr>
+        <span class="sympad">setLayoutParams</span>(ViewGroup.LayoutParams arg0)</nobr>
         
   </td></tr>
 
@@ -10414,7 +10421,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setOnClickListener</span>(<a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a> arg0)</nobr>
+        <span class="sympad">setOnClickListener</span>(View.OnClickListener arg0)</nobr>
         
   </td></tr>
 
@@ -10430,7 +10437,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setOnCreateContextMenuListener</span>(<a href="/reference/android/view/View.OnCreateContextMenuListener.html">View.OnCreateContextMenuListener</a> arg0)</nobr>
+        <span class="sympad">setOnCreateContextMenuListener</span>(View.OnCreateContextMenuListener arg0)</nobr>
         
   </td></tr>
 
@@ -10462,7 +10469,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setOnFocusChangeListener</span>(<a href="/reference/android/view/View.OnFocusChangeListener.html">View.OnFocusChangeListener</a> arg0)</nobr>
+        <span class="sympad">setOnFocusChangeListener</span>(View.OnFocusChangeListener arg0)</nobr>
         
   </td></tr>
 
@@ -10510,7 +10517,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setOnKeyListener</span>(<a href="/reference/android/view/View.OnKeyListener.html">View.OnKeyListener</a> arg0)</nobr>
+        <span class="sympad">setOnKeyListener</span>(View.OnKeyListener arg0)</nobr>
         
   </td></tr>
 
@@ -10526,7 +10533,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setOnLongClickListener</span>(<a href="/reference/android/view/View.OnLongClickListener.html">View.OnLongClickListener</a> arg0)</nobr>
+        <span class="sympad">setOnLongClickListener</span>(View.OnLongClickListener arg0)</nobr>
         
   </td></tr>
 
@@ -10558,7 +10565,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setOnTouchListener</span>(<a href="/reference/android/view/View.OnTouchListener.html">View.OnTouchListener</a> arg0)</nobr>
+        <span class="sympad">setOnTouchListener</span>(View.OnTouchListener arg0)</nobr>
         
   </td></tr>
 
@@ -10958,7 +10965,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setTag</span>(int arg0, <a href="/reference/java/lang/Object.html">Object</a> arg1)</nobr>
+        <span class="sympad">setTag</span>(int arg0, Object arg1)</nobr>
         
   </td></tr>
 
@@ -10974,7 +10981,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setTag</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">setTag</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -11006,7 +11013,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setTouchDelegate</span>(<a href="/reference/android/view/TouchDelegate.html">TouchDelegate</a> arg0)</nobr>
+        <span class="sympad">setTouchDelegate</span>(TouchDelegate arg0)</nobr>
         
   </td></tr>
 
@@ -11214,7 +11221,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startAnimation</span>(<a href="/reference/android/view/animation/Animation.html">Animation</a> arg0)</nobr>
+        <span class="sympad">startAnimation</span>(Animation arg0)</nobr>
         
   </td></tr>
 
@@ -11230,7 +11237,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startDrag</span>(ClipData arg0, View.DragShadowBuilder arg1, <a href="/reference/java/lang/Object.html">Object</a> arg2, int arg3)</nobr>
+        <span class="sympad">startDrag</span>(ClipData arg0, View.DragShadowBuilder arg1, Object arg2, int arg3)</nobr>
         
   </td></tr>
 
@@ -11246,7 +11253,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">unscheduleDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">unscheduleDrawable</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -11262,7 +11269,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">unscheduleDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0, <a href="/reference/java/lang/Runnable.html">Runnable</a> arg1)</nobr>
+        <span class="sympad">unscheduleDrawable</span>(Drawable arg0, Runnable arg1)</nobr>
         
   </td></tr>
 
@@ -11278,7 +11285,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">verifyDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">verifyDrawable</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -11330,7 +11337,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -11349,7 +11356,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -11368,7 +11375,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -11397,7 +11404,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -11461,7 +11468,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -11532,7 +11539,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/graphics/drawable/Drawable.Callback.html">android.graphics.drawable.Drawable.Callback</a>
+  android.graphics.drawable.Drawable.Callback
 
 <div id="inherited-methods-android.graphics.drawable.Drawable.Callback">
   <div id="inherited-methods-android.graphics.drawable.Drawable.Callback-list"
@@ -11554,7 +11561,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidateDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0)</nobr>
+        <span class="sympad">invalidateDrawable</span>(Drawable arg0)</nobr>
         
   </td></tr>
 
@@ -11570,7 +11577,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">scheduleDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0, <a href="/reference/java/lang/Runnable.html">Runnable</a> arg1, long arg2)</nobr>
+        <span class="sympad">scheduleDrawable</span>(Drawable arg0, Runnable arg1, long arg2)</nobr>
         
   </td></tr>
 
@@ -11586,7 +11593,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">unscheduleDrawable</span>(<a href="/reference/android/graphics/drawable/Drawable.html">Drawable</a> arg0, <a href="/reference/java/lang/Runnable.html">Runnable</a> arg1)</nobr>
+        <span class="sympad">unscheduleDrawable</span>(Drawable arg0, Runnable arg1)</nobr>
         
   </td></tr>
 
@@ -11606,7 +11613,7 @@ From interface
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/view/KeyEvent.Callback.html">android.view.KeyEvent.Callback</a>
+  android.view.KeyEvent.Callback
 
 <div id="inherited-methods-android.view.KeyEvent.Callback">
   <div id="inherited-methods-android.view.KeyEvent.Callback-list"
@@ -11628,7 +11635,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyDown</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyDown</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -11644,7 +11651,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyLongPress</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyLongPress</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -11660,7 +11667,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyMultiple</span>(int arg0, int arg1, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg2)</nobr>
+        <span class="sympad">onKeyMultiple</span>(int arg0, int arg1, KeyEvent arg2)</nobr>
         
   </td></tr>
 
@@ -11676,7 +11683,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyUp</span>(int arg0, <a href="/reference/android/view/KeyEvent.html">KeyEvent</a> arg1)</nobr>
+        <span class="sympad">onKeyUp</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 
@@ -11696,7 +11703,7 @@ From interface
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/view/ViewManager.html">android.view.ViewManager</a>
+  android.view.ViewManager
 
 <div id="inherited-methods-android.view.ViewManager">
   <div id="inherited-methods-android.view.ViewManager-list"
@@ -11718,7 +11725,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addView</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg1)</nobr>
+        <span class="sympad">addView</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
         
   </td></tr>
 
@@ -11734,7 +11741,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">removeView</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">removeView</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -11750,7 +11757,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">updateViewLayout</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/ViewGroup.LayoutParams.html">ViewGroup.LayoutParams</a> arg1)</nobr>
+        <span class="sympad">updateViewLayout</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
         
   </td></tr>
 
@@ -11770,7 +11777,7 @@ From interface
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/view/ViewParent.html">android.view.ViewParent</a>
+  android.view.ViewParent
 
 <div id="inherited-methods-android.view.ViewParent">
   <div id="inherited-methods-android.view.ViewParent-list"
@@ -11792,7 +11799,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">bringChildToFront</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">bringChildToFront</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -11808,7 +11815,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">childDrawableStateChanged</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">childDrawableStateChanged</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -11824,7 +11831,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clearChildFocus</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">clearChildFocus</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -11840,7 +11847,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">createContextMenu</span>(<a href="/reference/android/view/ContextMenu.html">ContextMenu</a> arg0)</nobr>
+        <span class="sympad">createContextMenu</span>(ContextMenu arg0)</nobr>
         
   </td></tr>
 
@@ -11853,10 +11860,10 @@ From interface
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">focusSearch</span>(<a href="/reference/android/view/View.html">View</a> arg0, int arg1)</nobr>
+        <span class="sympad">focusSearch</span>(View arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -11872,7 +11879,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">focusableViewAvailable</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">focusableViewAvailable</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -11888,7 +11895,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getChildVisibleRect</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1, <a href="/reference/android/graphics/Point.html">Point</a> arg2)</nobr>
+        <span class="sympad">getChildVisibleRect</span>(View arg0, Rect arg1, Point arg2)</nobr>
         
   </td></tr>
 
@@ -11901,7 +11908,7 @@ From interface
             
             
             
-            <a href="/reference/android/view/ViewParent.html">ViewParent</a></nobr>
+            ViewParent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getParent</span>()</nobr>
@@ -11917,7 +11924,7 @@ From interface
             
             
             
-            <a href="/reference/android/view/ViewParent.html">ViewParent</a></nobr>
+            ViewParent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getParentForAccessibility</span>()</nobr>
@@ -11936,7 +11943,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidateChild</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">invalidateChild</span>(View arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -11949,10 +11956,10 @@ From interface
             
             
             
-            <a href="/reference/android/view/ViewParent.html">ViewParent</a></nobr>
+            ViewParent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidateChildInParent</span>(int[] arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1)</nobr>
+        <span class="sympad">invalidateChildInParent</span>(int[] arg0, Rect arg1)</nobr>
         
   </td></tr>
 
@@ -11984,7 +11991,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">recomputeViewAttributes</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">recomputeViewAttributes</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -12000,7 +12007,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestChildFocus</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/View.html">View</a> arg1)</nobr>
+        <span class="sympad">requestChildFocus</span>(View arg0, View arg1)</nobr>
         
   </td></tr>
 
@@ -12016,7 +12023,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestChildRectangleOnScreen</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/graphics/Rect.html">Rect</a> arg1, boolean arg2)</nobr>
+        <span class="sympad">requestChildRectangleOnScreen</span>(View arg0, Rect arg1, boolean arg2)</nobr>
         
   </td></tr>
 
@@ -12080,7 +12087,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestSendAccessibilityEvent</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg1)</nobr>
+        <span class="sympad">requestSendAccessibilityEvent</span>(View arg0, AccessibilityEvent arg1)</nobr>
         
   </td></tr>
 
@@ -12096,7 +12103,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">requestTransparentRegion</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">requestTransparentRegion</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -12112,7 +12119,7 @@ From interface
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">showContextMenuForChild</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">showContextMenuForChild</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -12128,7 +12135,7 @@ From interface
             ActionMode</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActionModeForChild</span>(<a href="/reference/android/view/View.html">View</a> arg0, ActionMode.Callback arg1)</nobr>
+        <span class="sympad">startActionModeForChild</span>(View arg0, ActionMode.Callback arg1)</nobr>
         
   </td></tr>
 
@@ -12148,7 +12155,7 @@ From interface
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/view/accessibility/AccessibilityEventSource.html">android.view.accessibility.AccessibilityEventSource</a>
+  android.view.accessibility.AccessibilityEventSource
 
 <div id="inherited-methods-android.view.accessibility.AccessibilityEventSource">
   <div id="inherited-methods-android.view.accessibility.AccessibilityEventSource-list"
@@ -12186,7 +12193,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">sendAccessibilityEventUnchecked</span>(<a href="/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> arg0)</nobr>
+        <span class="sympad">sendAccessibilityEventUnchecked</span>(AccessibilityEvent arg0)</nobr>
         
   </td></tr>
 
@@ -12244,7 +12251,7 @@ From interface
         
       </span>
       <span class="sympad">MapView</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context)</span>
+      <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12273,7 +12280,7 @@ From interface
         
       </span>
       <span class="sympad">MapView</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/android/util/AttributeSet.html">AttributeSet</a> attrs)</span>
+      <span class="normal">(Context context, AttributeSet attrs)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12302,7 +12309,7 @@ From interface
         
       </span>
       <span class="sympad">MapView</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/android/util/AttributeSet.html">AttributeSet</a> attrs, int defStyle)</span>
+      <span class="normal">(Context context, AttributeSet attrs, int defStyle)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12331,7 +12338,7 @@ From interface
         
       </span>
       <span class="sympad">MapView</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a> options)</span>
+      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a> options)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12411,7 +12418,7 @@ From interface
         void
       </span>
       <span class="sympad">onCreate</span>
-      <span class="normal">(<a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</span>
+      <span class="normal">(Bundle savedInstanceState)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12581,7 +12588,7 @@ From interface
         void
       </span>
       <span class="sympad">onSaveInstanceState</span>
-      <span class="normal">(<a href="/reference/android/os/Bundle.html">Bundle</a> outState)</span>
+      <span class="normal">(Bundle outState)</span>
     </h4>
       <div class="api-level">
         <div></div>

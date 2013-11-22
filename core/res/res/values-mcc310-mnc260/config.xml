@@ -37,4 +37,8 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata">T-Mobile Tethering,pcweb.tmobile.com,,,,,,,,,310,260,,DUN</string>
 
+    <!-- Configure mobile network MTU. Carrier specific value is set here.
+    -->
+    <integer name="config_mobile_mtu">1440</integer>
+
 </resources>

@@ -20,6 +20,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.server.location.ComprehensiveCountryDetector;
 
 import android.content.Context;
@@ -29,8 +30,6 @@ import android.location.ICountryDetector;
 import android.location.ICountryListener;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -98,11 +97,12 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     }
 
     @Override
-    public Country detectCountry() throws RemoteException {
+    public Country detectCountry() {
         if (!mSystemReady) {
-            throw new RemoteException();
+            return null;   // server not yet active
+        } else {
+            return mCountryDetector.detectCountry();
         }
-        return mCountryDetector.detectCountry();
     }
 
     /**
@@ -167,10 +167,9 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
         }
     }
 
-    void systemReady() {
+    void systemRunning() {
         // Shall we wait for the initialization finish.
-        Thread thread = new Thread(this, "CountryDetectorService");
-        thread.start();
+        BackgroundThread.getHandler().post(this);
     }
 
     private void initialize() {
@@ -187,12 +186,9 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     }
 
     public void run() {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        Looper.prepare();
         mHandler = new Handler();
         initialize();
         mSystemReady = true;
-        Looper.loop();
     }
 
     protected void setCountryListener(final CountryListener listener) {

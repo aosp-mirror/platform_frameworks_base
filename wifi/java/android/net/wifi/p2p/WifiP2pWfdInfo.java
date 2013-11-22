@@ -19,6 +19,8 @@ package android.net.wifi.p2p;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import java.util.Locale;
+
 /**
  * A class representing Wifi Display information for a device
  * @hide
@@ -135,7 +137,8 @@ public class WifiP2pWfdInfo implements Parcelable {
     }
 
     public String getDeviceInfoHex() {
-        return String.format("%04x%04x%04x%04x", 6, mDeviceInfo, mCtrlPort, mMaxThroughput);
+        return String.format(
+                Locale.US, "%04x%04x%04x%04x", 6, mDeviceInfo, mCtrlPort, mMaxThroughput);
     }
 
     public String toString() {

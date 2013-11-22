@@ -1,6 +1,18 @@
 page.title=Device Monitor
 @jd:body
 
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>See also</h2>
+
+      <ol>
+        <li><a href="{@docRoot}tools/debugging/debugging-memory.html"
+          >Investigating Your RAM Usage</a></li>
+      </ol>
+    </div>
+  </div>
+
+
 <p>Android Device Monitor is a stand-alone tool that provides a graphical user interface for
 several Android application debugging and analysis tools. The Monitor tool does not
 require installation of a integrated development environment, such as Eclipse, and encapsulates the
@@ -14,6 +26,7 @@ following tools:</p>
   <li>Pixel Perfect magnification viewer</li>
 </ul>
 
+
 <h2 id="usage">Usage</h2>
 
 <p>To start Device Monitor, enter the following command from the SDK <code>tools/</code>
@@ -22,3 +35,7 @@ directory:</p>
 
 <p>Start an Android emulator or connect an Android device via USB cable, and connect Device
 Monitor to the device by selecting it in the <strong>Devices</strong> window.</p>
+
+<p class="note"><strong>Note:</strong> Only one debugger can be connected to your device at a time.
+If you're using ADT, you may need to close the debugging tool before launching the Device Monitor
+in order for the device to be fully debuggable.</p>

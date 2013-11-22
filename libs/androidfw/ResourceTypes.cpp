@@ -24,7 +24,6 @@
 #include <utils/Log.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
-#include <utils/TextOutput.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +35,7 @@
 #define INT32_MAX ((int32_t)(2147483647))
 #endif
 
-#define POOL_NOISY(x) //x
+#define STRING_POOL_NOISY(x) //x
 #define XML_NOISY(x) //x
 #define TABLE_NOISY(x) //x
 #define TABLE_GETENTRY(x) //x
@@ -379,7 +378,6 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         size_t charSize;
         if (mHeader->flags&ResStringPool_header::UTF8_FLAG) {
             charSize = sizeof(uint8_t);
-            mCache = (char16_t**)calloc(mHeader->stringCount, sizeof(char16_t**));
         } else {
             charSize = sizeof(char16_t);
         }
@@ -594,6 +592,23 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                 if ((uint32_t)(u8str+u8len-strings) < mStringPoolSize) {
                     AutoMutex lock(mDecodeLock);
 
+                    if (mCache == NULL) {
+#ifndef HAVE_ANDROID_OS
+                        STRING_POOL_NOISY(ALOGI("CREATING STRING CACHE OF %d bytes",
+                                mHeader->stringCount*sizeof(char16_t**)));
+#else
+                        // We do not want to be in this case when actually running Android.
+                        ALOGW("CREATING STRING CACHE OF %d bytes",
+                                mHeader->stringCount*sizeof(char16_t**));
+#endif
+                        mCache = (char16_t**)calloc(mHeader->stringCount, sizeof(char16_t**));
+                        if (mCache == NULL) {
+                            ALOGW("No memory trying to allocate decode cache table of %d bytes\n",
+                                    (int)(mHeader->stringCount*sizeof(char16_t**)));
+                            return NULL;
+                        }
+                    }
+
                     if (mCache[idx] != NULL) {
                         return mCache[idx];
                     }
@@ -613,6 +628,7 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                         return NULL;
                     }
 
+                    STRING_POOL_NOISY(ALOGI("Caching UTF8 string: %s", u8str));
                     utf8_to_utf16(u8str, u8len, u16str);
                     mCache[idx] = u16str;
                     return u16str;
@@ -634,20 +650,20 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
 {
     if (mError == NO_ERROR && idx < mHeader->stringCount) {
-        const bool isUTF8 = (mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0;
-        const uint32_t off = mEntries[idx]/(isUTF8?sizeof(char):sizeof(char16_t));
+        if ((mHeader->flags&ResStringPool_header::UTF8_FLAG) == 0) {
+            return NULL;
+        }
+        const uint32_t off = mEntries[idx]/sizeof(char);
         if (off < (mStringPoolSize-1)) {
-            if (isUTF8) {
-                const uint8_t* strings = (uint8_t*)mStrings;
-                const uint8_t* str = strings+off;
-                *outLen = decodeLength(&str);
-                size_t encLen = decodeLength(&str);
-                if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
-                    return (const char*)str;
-                } else {
-                    ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
-                            (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
-                }
+            const uint8_t* strings = (uint8_t*)mStrings;
+            const uint8_t* str = strings+off;
+            *outLen = decodeLength(&str);
+            size_t encLen = decodeLength(&str);
+            if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
+                return (const char*)str;
+            } else {
+                ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
+                        (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
             }
         } else {
             ALOGW("Bad string block: string #%d entry is at %d, past end at %d\n",
@@ -696,45 +712,104 @@ ssize_t ResStringPool::indexOfString(const char16_t* str, size_t strLen) const
 
     size_t len;
 
-    // TODO optimize searching for UTF-8 strings taking into account
-    // the cache fill to determine when to convert the searched-for
-    // string key to UTF-8.
+    if ((mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0) {
+        STRING_POOL_NOISY(ALOGI("indexOfString UTF-8: %s", String8(str, strLen).string()));
 
-    if (mHeader->flags&ResStringPool_header::SORTED_FLAG) {
-        // Do a binary search for the string...
-        ssize_t l = 0;
-        ssize_t h = mHeader->stringCount-1;
+        // The string pool contains UTF 8 strings; we don't want to cause
+        // temporary UTF-16 strings to be created as we search.
+        if (mHeader->flags&ResStringPool_header::SORTED_FLAG) {
+            // Do a binary search for the string...  this is a little tricky,
+            // because the strings are sorted with strzcmp16().  So to match
+            // the ordering, we need to convert strings in the pool to UTF-16.
+            // But we don't want to hit the cache, so instead we will have a
+            // local temporary allocation for the conversions.
+            char16_t* convBuffer = (char16_t*)malloc(strLen+4);
+            ssize_t l = 0;
+            ssize_t h = mHeader->stringCount-1;
 
-        ssize_t mid;
-        while (l <= h) {
-            mid = l + (h - l)/2;
-            const char16_t* s = stringAt(mid, &len);
-            int c = s ? strzcmp16(s, len, str, strLen) : -1;
-            POOL_NOISY(printf("Looking for %s, at %s, cmp=%d, l/mid/h=%d/%d/%d\n",
-                         String8(str).string(),
-                         String8(s).string(),
-                         c, (int)l, (int)mid, (int)h));
-            if (c == 0) {
-                return mid;
-            } else if (c < 0) {
-                l = mid + 1;
-            } else {
-                h = mid - 1;
+            ssize_t mid;
+            while (l <= h) {
+                mid = l + (h - l)/2;
+                const uint8_t* s = (const uint8_t*)string8At(mid, &len);
+                int c;
+                if (s != NULL) {
+                    char16_t* end = utf8_to_utf16_n(s, len, convBuffer, strLen+3);
+                    *end = 0;
+                    c = strzcmp16(convBuffer, end-convBuffer, str, strLen);
+                } else {
+                    c = -1;
+                }
+                STRING_POOL_NOISY(ALOGI("Looking at %s, cmp=%d, l/mid/h=%d/%d/%d\n",
+                             (const char*)s, c, (int)l, (int)mid, (int)h));
+                if (c == 0) {
+                    STRING_POOL_NOISY(ALOGI("MATCH!"));
+                    free(convBuffer);
+                    return mid;
+                } else if (c < 0) {
+                    l = mid + 1;
+                } else {
+                    h = mid - 1;
+                }
+            }
+            free(convBuffer);
+        } else {
+            // It is unusual to get the ID from an unsorted string block...
+            // most often this happens because we want to get IDs for style
+            // span tags; since those always appear at the end of the string
+            // block, start searching at the back.
+            String8 str8(str, strLen);
+            const size_t str8Len = str8.size();
+            for (int i=mHeader->stringCount-1; i>=0; i--) {
+                const char* s = string8At(i, &len);
+                STRING_POOL_NOISY(ALOGI("Looking at %s, i=%d\n",
+                             String8(s).string(),
+                             i));
+                if (s && str8Len == len && memcmp(s, str8.string(), str8Len) == 0) {
+                    STRING_POOL_NOISY(ALOGI("MATCH!"));
+                    return i;
+                }
             }
         }
+
     } else {
-        // It is unusual to get the ID from an unsorted string block...
-        // most often this happens because we want to get IDs for style
-        // span tags; since those always appear at the end of the string
-        // block, start searching at the back.
-        for (int i=mHeader->stringCount-1; i>=0; i--) {
-            const char16_t* s = stringAt(i, &len);
-            POOL_NOISY(printf("Looking for %s, at %s, i=%d\n",
-                         String8(str, strLen).string(),
-                         String8(s).string(),
-                         i));
-            if (s && strzcmp16(s, len, str, strLen) == 0) {
-                return i;
+        STRING_POOL_NOISY(ALOGI("indexOfString UTF-16: %s", String8(str, strLen).string()));
+
+        if (mHeader->flags&ResStringPool_header::SORTED_FLAG) {
+            // Do a binary search for the string...
+            ssize_t l = 0;
+            ssize_t h = mHeader->stringCount-1;
+
+            ssize_t mid;
+            while (l <= h) {
+                mid = l + (h - l)/2;
+                const char16_t* s = stringAt(mid, &len);
+                int c = s ? strzcmp16(s, len, str, strLen) : -1;
+                STRING_POOL_NOISY(ALOGI("Looking at %s, cmp=%d, l/mid/h=%d/%d/%d\n",
+                             String8(s).string(),
+                             c, (int)l, (int)mid, (int)h));
+                if (c == 0) {
+                    STRING_POOL_NOISY(ALOGI("MATCH!"));
+                    return mid;
+                } else if (c < 0) {
+                    l = mid + 1;
+                } else {
+                    h = mid - 1;
+                }
+            }
+        } else {
+            // It is unusual to get the ID from an unsorted string block...
+            // most often this happens because we want to get IDs for style
+            // span tags; since those always appear at the end of the string
+            // block, start searching at the back.
+            for (int i=mHeader->stringCount-1; i>=0; i--) {
+                const char16_t* s = stringAt(i, &len);
+                STRING_POOL_NOISY(ALOGI("Looking at %s, i=%d\n",
+                             String8(s).string(),
+                             i));
+                if (s && strLen == len && strzcmp16(s, len, str, strLen) == 0) {
+                    STRING_POOL_NOISY(ALOGI("MATCH!"));
+                    return i;
+                }
             }
         }
     }
@@ -937,6 +1012,14 @@ const uint16_t* ResXMLParser::getAttributeNamespace(size_t idx, size_t* outLen) 
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
 }
 
+const char* ResXMLParser::getAttributeNamespace8(size_t idx, size_t* outLen) const
+{
+    int32_t id = getAttributeNamespaceID(idx);
+    //printf("attribute namespace=%d  idx=%d  event=%p\n", id, idx, mEventCode);
+    //XML_NOISY(printf("getAttributeNamespace 0x%x=0x%x\n", idx, id));
+    return id >= 0 ? mTree.mStrings.string8At(id, outLen) : NULL;
+}
+
 int32_t ResXMLParser::getAttributeNameID(size_t idx) const
 {
     if (mEventCode == START_TAG) {
@@ -958,6 +1041,14 @@ const uint16_t* ResXMLParser::getAttributeName(size_t idx, size_t* outLen) const
     //printf("attribute name=%d  idx=%d  event=%p\n", id, idx, mEventCode);
     //XML_NOISY(printf("getAttributeName 0x%x=0x%x\n", idx, id));
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
+}
+
+const char* ResXMLParser::getAttributeName8(size_t idx, size_t* outLen) const
+{
+    int32_t id = getAttributeNameID(idx);
+    //printf("attribute name=%d  idx=%d  event=%p\n", id, idx, mEventCode);
+    //XML_NOISY(printf("getAttributeName 0x%x=0x%x\n", idx, id));
+    return id >= 0 ? mTree.mStrings.string8At(id, outLen) : NULL;
 }
 
 uint32_t ResXMLParser::getAttributeNameResID(size_t idx) const
@@ -1049,22 +1140,67 @@ ssize_t ResXMLParser::indexOfAttribute(const char16_t* ns, size_t nsLen,
                                        const char16_t* attr, size_t attrLen) const
 {
     if (mEventCode == START_TAG) {
+        if (attr == NULL) {
+            return NAME_NOT_FOUND;
+        }
         const size_t N = getAttributeCount();
-        for (size_t i=0; i<N; i++) {
-            size_t curNsLen, curAttrLen;
-            const char16_t* curNs = getAttributeNamespace(i, &curNsLen);
-            const char16_t* curAttr = getAttributeName(i, &curAttrLen);
-            //printf("%d: ns=%p attr=%p curNs=%p curAttr=%p\n",
-            //       i, ns, attr, curNs, curAttr);
-            //printf(" --> attr=%s, curAttr=%s\n",
-            //       String8(attr).string(), String8(curAttr).string());
-            if (attr && curAttr && (strzcmp16(attr, attrLen, curAttr, curAttrLen) == 0)) {
-                if (ns == NULL) {
-                    if (curNs == NULL) return i;
-                } else if (curNs != NULL) {
-                    //printf(" --> ns=%s, curNs=%s\n",
-                    //       String8(ns).string(), String8(curNs).string());
-                    if (strzcmp16(ns, nsLen, curNs, curNsLen) == 0) return i;
+        if (mTree.mStrings.isUTF8()) {
+            String8 ns8, attr8;
+            if (ns != NULL) {
+                ns8 = String8(ns, nsLen);
+            }
+            attr8 = String8(attr, attrLen);
+            STRING_POOL_NOISY(ALOGI("indexOfAttribute UTF8 %s (%d) / %s (%d)", ns8.string(), nsLen,
+                    attr8.string(), attrLen));
+            for (size_t i=0; i<N; i++) {
+                size_t curNsLen = 0, curAttrLen = 0;
+                const char* curNs = getAttributeNamespace8(i, &curNsLen);
+                const char* curAttr = getAttributeName8(i, &curAttrLen);
+                STRING_POOL_NOISY(ALOGI("  curNs=%s (%d), curAttr=%s (%d)", curNs, curNsLen,
+                        curAttr, curAttrLen));
+                if (curAttr != NULL && curNsLen == nsLen && curAttrLen == attrLen
+                        && memcmp(attr8.string(), curAttr, attrLen) == 0) {
+                    if (ns == NULL) {
+                        if (curNs == NULL) {
+                            STRING_POOL_NOISY(ALOGI("  FOUND!"));
+                            return i;
+                        }
+                    } else if (curNs != NULL) {
+                        //printf(" --> ns=%s, curNs=%s\n",
+                        //       String8(ns).string(), String8(curNs).string());
+                        if (memcmp(ns8.string(), curNs, nsLen) == 0) {
+                            STRING_POOL_NOISY(ALOGI("  FOUND!"));
+                            return i;
+                        }
+                    }
+                }
+            }
+        } else {
+            STRING_POOL_NOISY(ALOGI("indexOfAttribute UTF16 %s (%d) / %s (%d)",
+                    String8(ns, nsLen).string(), nsLen,
+                    String8(attr, attrLen).string(), attrLen));
+            for (size_t i=0; i<N; i++) {
+                size_t curNsLen = 0, curAttrLen = 0;
+                const char16_t* curNs = getAttributeNamespace(i, &curNsLen);
+                const char16_t* curAttr = getAttributeName(i, &curAttrLen);
+                STRING_POOL_NOISY(ALOGI("  curNs=%s (%d), curAttr=%s (%d)",
+                        String8(curNs, curNsLen).string(), curNsLen,
+                        String8(curAttr, curAttrLen).string(), curAttrLen));
+                if (curAttr != NULL && curNsLen == nsLen && curAttrLen == attrLen
+                        && (memcmp(attr, curAttr, attrLen*sizeof(char16_t)) == 0)) {
+                    if (ns == NULL) {
+                        if (curNs == NULL) {
+                            STRING_POOL_NOISY(ALOGI("  FOUND!"));
+                            return i;
+                        }
+                    } else if (curNs != NULL) {
+                        //printf(" --> ns=%s, curNs=%s\n",
+                        //       String8(ns).string(), String8(curNs).string());
+                        if (memcmp(ns, curNs, nsLen*sizeof(char16_t)) == 0) {
+                            STRING_POOL_NOISY(ALOGI("  FOUND!"));
+                            return i;
+                        }
+                    }
                 }
             }
         }
@@ -2941,7 +3077,7 @@ void ResTable::uninit()
     mHeaders.clear();
 }
 
-bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
+bool ResTable::getResourceName(uint32_t resID, bool allowUtf8, resource_name* outName) const
 {
     if (mError != NO_ERROR) {
         return false;
@@ -2981,13 +3117,28 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
 
         outName->package = grp->name.string();
         outName->packageLen = grp->name.size();
-        outName->type = grp->basePackage->typeStrings.stringAt(t, &outName->typeLen);
-        outName->name = grp->basePackage->keyStrings.stringAt(
-            dtohl(entry->key.index), &outName->nameLen);
-
-        // If we have a bad index for some reason, we should abort.
-        if (outName->type == NULL || outName->name == NULL) {
-            return false;
+        if (allowUtf8) {
+            outName->type8 = grp->basePackage->typeStrings.string8At(t, &outName->typeLen);
+            outName->name8 = grp->basePackage->keyStrings.string8At(
+                dtohl(entry->key.index), &outName->nameLen);
+        } else {
+            outName->type8 = NULL;
+            outName->name8 = NULL;
+        }
+        if (outName->type8 == NULL) {
+            outName->type = grp->basePackage->typeStrings.stringAt(t, &outName->typeLen);
+            // If we have a bad index for some reason, we should abort.
+            if (outName->type == NULL) {
+                return false;
+            }
+        }
+        if (outName->name8 == NULL) {
+            outName->name = grp->basePackage->keyStrings.stringAt(
+                dtohl(entry->key.index), &outName->nameLen);
+            // If we have a bad index for some reason, we should abort.
+            if (outName->name == NULL) {
+                return false;
+            }
         }
 
         return true;
@@ -4486,7 +4637,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
             while (cnt > 0) {
                 if (!Res_INTERNALID(bag->map.name.ident)) {
                     //printf("Trying attr #%08x\n", bag->map.name.ident);
-                    if (getResourceName(bag->map.name.ident, &rname)) {
+                    if (getResourceName(bag->map.name.ident, false, &rname)) {
                         #if 0
                         printf("Matching %s against %s (0x%08x)\n",
                                String8(s, len).string(),
@@ -4539,7 +4690,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
                 for (i=0; i<cnt; i++, bagi++) {
                     if (!Res_INTERNALID(bagi->map.name.ident)) {
                         //printf("Trying attr #%08x\n", bagi->map.name.ident);
-                        if (getResourceName(bagi->map.name.ident, &rname)) {
+                        if (getResourceName(bagi->map.name.ident, false, &rname)) {
                             #if 0
                             printf("Matching %s against %s (0x%08x)\n",
                                    String8(start,pos-start).string(),
@@ -5217,7 +5368,7 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
                 | (0x00ff0000 & ((typeIndex+1)<<16))
                 | (0x0000ffff & (entryIndex));
             resource_name resName;
-            if (!this->getResourceName(resID, &resName)) {
+            if (!this->getResourceName(resID, true, &resName)) {
                 ALOGW("idmap: resource 0x%08x has spec but lacks values, skipping\n", resID);
                 // add dummy value, or trimming leading/trailing zeroes later will fail
                 vector.push(0);
@@ -5324,13 +5475,12 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
 }
 
 
-#ifndef HAVE_ANDROID_OS
 #define CHAR16_TO_CSTR(c16, len) (String8(String16(c16,len)).string())
 
 #define CHAR16_ARRAY_EQ(constant, var, len) \
         ((len == (sizeof(constant)/sizeof(constant[0]))) && (0 == memcmp((var), (constant), (len))))
 
-void print_complex(uint32_t complex, bool isFraction)
+static void print_complex(uint32_t complex, bool isFraction)
 {
     const float MANTISSA_MULT =
         1.0f / (1<<Res_value::COMPLEX_MANTISSA_SHIFT);
@@ -5485,12 +5635,23 @@ void ResTable::print(bool inclValues) const
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
                         resource_name resName;
-                        if (this->getResourceName(resID, &resName)) {
+                        if (this->getResourceName(resID, true, &resName)) {
+                            String8 type8;
+                            String8 name8;
+                            if (resName.type8 != NULL) {
+                                type8 = String8(resName.type8, resName.typeLen);
+                            } else {
+                                type8 = String8(resName.type, resName.typeLen);
+                            }
+                            if (resName.name8 != NULL) {
+                                name8 = String8(resName.name8, resName.nameLen);
+                            } else {
+                                name8 = String8(resName.name, resName.nameLen);
+                            }
                             printf("      spec resource 0x%08x %s:%s/%s: flags=0x%08x\n",
                                 resID,
                                 CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                                CHAR16_TO_CSTR(resName.type, resName.typeLen),
-                                CHAR16_TO_CSTR(resName.name, resName.nameLen),
+                                type8.string(), name8.string(),
                                 dtohl(typeConfigs->typeSpecFlags[entryIndex]));
                         } else {
                             printf("      INVALID TYPE CONFIG FOR RESOURCE 0x%08x\n", resID);
@@ -5533,11 +5694,22 @@ void ResTable::print(bool inclValues) const
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
                         resource_name resName;
-                        if (this->getResourceName(resID, &resName)) {
+                        if (this->getResourceName(resID, true, &resName)) {
+                            String8 type8;
+                            String8 name8;
+                            if (resName.type8 != NULL) {
+                                type8 = String8(resName.type8, resName.typeLen);
+                            } else {
+                                type8 = String8(resName.type, resName.typeLen);
+                            }
+                            if (resName.name8 != NULL) {
+                                name8 = String8(resName.name8, resName.nameLen);
+                            } else {
+                                name8 = String8(resName.name, resName.nameLen);
+                            }
                             printf("        resource 0x%08x %s:%s/%s: ", resID,
                                     CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                                    CHAR16_TO_CSTR(resName.type, resName.typeLen),
-                                    CHAR16_TO_CSTR(resName.name, resName.nameLen));
+                                    type8.string(), name8.string());
                         } else {
                             printf("        INVALID RESOURCE 0x%08x: ", resID);
                         }
@@ -5620,7 +5792,5 @@ void ResTable::print(bool inclValues) const
         }
     }
 }
-
-#endif // HAVE_ANDROID_OS
 
 }   // namespace android

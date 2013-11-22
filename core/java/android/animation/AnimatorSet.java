@@ -455,6 +455,36 @@ public final class AnimatorSet extends Animator {
         }
     }
 
+    @Override
+    public void pause() {
+        boolean previouslyPaused = mPaused;
+        super.pause();
+        if (!previouslyPaused && mPaused) {
+            if (mDelayAnim != null) {
+                mDelayAnim.pause();
+            } else {
+                for (Node node : mNodes) {
+                    node.animation.pause();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void resume() {
+        boolean previouslyPaused = mPaused;
+        super.resume();
+        if (previouslyPaused && !mPaused) {
+            if (mDelayAnim != null) {
+                mDelayAnim.resume();
+            } else {
+                for (Node node : mNodes) {
+                    node.animation.resume();
+                }
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -467,6 +497,7 @@ public final class AnimatorSet extends Animator {
     public void start() {
         mTerminated = false;
         mStarted = true;
+        mPaused = false;
 
         if (mDuration >= 0) {
             // If the duration was set on this AnimatorSet, pass it along to all child animations
@@ -549,6 +580,7 @@ public final class AnimatorSet extends Animator {
                             mPlayingSet.add(node.animation);
                         }
                     }
+                    mDelayAnim = null;
                 }
             });
             mDelayAnim.start();
@@ -787,6 +819,7 @@ public final class AnimatorSet extends Animator {
                         }
                     }
                     mAnimatorSet.mStarted = false;
+                    mAnimatorSet.mPaused = false;
                 }
             }
         }

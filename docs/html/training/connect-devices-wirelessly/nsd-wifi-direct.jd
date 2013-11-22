@@ -1,7 +1,4 @@
-page.title=Using Wi-Fi Direct for Service Discovery
-parent.title=Connecting Devices Wirelessly
-parent.link=index.html
-
+page.title=Using Wi-Fi P2P for Service Discovery
 trainingnavtop=true
 
 @jd:body
@@ -26,23 +23,23 @@ trainingnavtop=true
 <p>The first lesson in this class, <a href="nsd.html">Using Network Service
   Discovery</a>, showed you
 how to discover services that are connected to a local network. However, using
-Wi-Fi Direct&trad; Service Discovery allows you to discover the services of nearby devices directly,
-without being connected to a network.  You can also advertise the services
+Wi-Fi Peer-to-Peer (P2P) Service Discovery allows you to discover the services of nearby devices
+directly, without being connected to a network.  You can also advertise the services
 running on your device.  These capabilities help you communicate between apps,
 even when no local network or hotspot is available.</p>
 <p>While this set of APIs is similar in purpose to the Network Service Discovery
 APIs outlined in a previous lesson, implementing them in code is very different.
 This lesson shows you how to discover services available from other devices,
-using Wi-Fi Direct&trade;. The lesson assumes that you're already familiar with the
-<a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi Direct</a> API.</p>
+using Wi-Fi P2P. The lesson assumes that you're already familiar with the
+<a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi P2P</a> API.</p>
 
 
 <h2 id="manifest">Set Up the Manifest</h2>
-<p>In order to use Wi-Fi Direct, add the {@link
+<p>In order to use Wi-Fi P2P, add the {@link
 android.Manifest.permission#CHANGE_WIFI_STATE}, {@link
 android.Manifest.permission#ACCESS_WIFI_STATE},
 and {@link android.Manifest.permission#INTERNET}
-permissions to your manifest.  Even though Wi-Fi Direct doesn't require an
+permissions to your manifest.  Even though Wi-Fi P2P doesn't require an
 Internet connection, it uses standard Java sockets, and using these in Android
 requires the requested permissions.</p>
 
@@ -244,7 +241,7 @@ provided by the method hints at the problem.  Here are the possible error values
 and what they mean</p>
 <dl>
   <dt> {@link android.net.wifi.p2p.WifiP2pManager#P2P_UNSUPPORTED}</dt>
-  <dd> Wi-Fi Direct isn't supported on the device running the app.</dd>
+  <dd> Wi-Fi P2P isn't supported on the device running the app.</dd>
   <dt> {@link android.net.wifi.p2p.WifiP2pManager#BUSY}</dt>
   <dd> The system is to busy to process the request.</dd>
   <dt> {@link android.net.wifi.p2p.WifiP2pManager#ERROR}</dt>

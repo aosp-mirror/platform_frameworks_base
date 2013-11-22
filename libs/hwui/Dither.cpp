@@ -24,12 +24,15 @@ namespace uirenderer {
 // Lifecycle
 ///////////////////////////////////////////////////////////////////////////////
 
+Dither::Dither(): mCaches(NULL), mInitialized(false), mDitherTexture(0) {
+}
+
 void Dither::bindDitherTexture() {
     if (!mInitialized) {
-        bool useFloatTexture = Extensions::getInstance().getMajorGlVersion() >= 3;
+        bool useFloatTexture = Extensions::getInstance().hasFloatTextures();
 
         glGenTextures(1, &mDitherTexture);
-        glBindTexture(GL_TEXTURE_2D, mDitherTexture);
+        mCaches->bindTexture(mDitherTexture);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -68,13 +71,13 @@ void Dither::bindDitherTexture() {
 
         mInitialized = true;
     } else {
-        glBindTexture(GL_TEXTURE_2D, mDitherTexture);
+        mCaches->bindTexture(mDitherTexture);
     }
 }
 
 void Dither::clear() {
     if (mInitialized) {
-        glDeleteTextures(1, &mDitherTexture);
+        mCaches->deleteTexture(mDitherTexture);
         mInitialized = false;
     }
 }
@@ -84,8 +87,10 @@ void Dither::clear() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Dither::setupProgram(Program* program, GLuint* textureUnit) {
+    if (!mCaches) mCaches = &Caches::getInstance();
+
     GLuint textureSlot = (*textureUnit)++;
-    Caches::getInstance().activeTexture(textureSlot);
+    mCaches->activeTexture(textureSlot);
 
     bindDitherTexture();
 

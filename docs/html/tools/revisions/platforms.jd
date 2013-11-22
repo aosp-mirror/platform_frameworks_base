@@ -22,20 +22,31 @@ Highlights and APIs</a></li>
 
 
 
-<p>To develop an Android app, you must install at least one Android platform from the SDK Manager
-against which you can compile your app. Often, any given version of the Android will be revised
-with bug fixes or other changes, as denoted by the revision number. Below, you'll find the
-release notes for each version of the platform and the subsequent revisions to the platform
-version.</p>
+<p>This document provides information about Android platform releases. In order to compile your
+application against a particular platform release, you must download and install the SDK Platform
+for that release. If you want to test your application on an emulator, you must also download at
+least one system image for that platform release.</p>
 
-<p>To determine what revision of an Android platform you have installed, refer to the
-<strong>Installed Packages</strong> listing in the Android
+<p>Each platform release includes system images that support a specific processor architecture,
+such as ARM EABI, Intel x86 or MIPS. Platform releases also include a system image that contains
+Google APIs. The <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> lists available
+platform system images under each platform version header, for example:</p>
+
+<ul>
+  <li>ARM EABI v7a System Image</li>
+  <li>Intel x86 Atom System Image</li>
+  <li>MIPS System Image</li>
+  <li>Google APIs</li>
+</ul>
+
+<p>To determine what revisions of an Android platform you have installed, refer to the
+<em>Packages</em> listing in the Android
 <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</p>
 
 <p class="caution"><strong>Important:</strong> To download the most recent Android
-system components from the Android SDK Manager, you must first update the SDK Tools to
-revision 22 or later and restart the SDK Manager. If you do not,
-the latest Android system components will not be available for download.</p>
+system components from the Android SDK Manager, you must first update the SDK Tools to the
+most recent release and restart the SDK Manager. If you do not, the latest Android system
+components will not be available for download.</p>
 
 
 
@@ -46,6 +57,25 @@ the latest Android system components will not be available for download.</p>
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Maintenance update. The system version is 4.3.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>Android SDK Platform-tools r18 or higher is required.</dd>
+      <dd>Android SDK Tools 22.0.4 or higher is recommended.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
   </p>
 
@@ -60,6 +90,54 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
 
   </div>
 </div>
+
+<h3 id="">Google APIs System Image</h3>
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 3</a> <em>(September 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Maintenance update. This release includes
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 3.2.65,
+    allowing you to test your application in an emulator using the latest Google Play services.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Maintenance update. This release includes
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 3.2.25,
+    allowing you to test your application in an emulator using the latest Google Play services.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release. This release includes
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 3.1.58.</p>
+
+  </div>
+</div>
+
+
 
 
 <h2 id="4.2">Android 4.2</h2>

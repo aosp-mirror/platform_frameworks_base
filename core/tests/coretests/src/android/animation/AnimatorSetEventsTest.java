@@ -37,14 +37,12 @@ public class AnimatorSetEventsTest extends EventsTest {
         button = (Button) getActivity().findViewById(R.id.animatingButton);
         mAnimator = new AnimatorSet();
         ((AnimatorSet)mAnimator).playSequentially(xAnim, yAnim);
-
         super.setUp();
     }
 
     @Override
     protected long getTimeout() {
-        return (xAnim.getDuration() + yAnim.getDuration()) +
-                (xAnim.getStartDelay() + yAnim.getStartDelay()) +
+        return (2 * mAnimator.getDuration()) + (2 * mAnimator.getStartDelay()) +
                 ANIM_DELAY + FUTURE_RELEASE_DELAY;
     }
 

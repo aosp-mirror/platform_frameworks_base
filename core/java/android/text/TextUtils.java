@@ -19,6 +19,8 @@ package android.text;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
+import android.provider.Settings;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
@@ -1743,8 +1745,10 @@ public class TextUtils {
                 return View.LAYOUT_DIRECTION_RTL;
             }
         }
-
-        return View.LAYOUT_DIRECTION_LTR;
+        // If forcing into RTL layout mode, return RTL as default, else LTR
+        return SystemProperties.getBoolean(Settings.Global.DEVELOPMENT_FORCE_RTL, false)
+                ? View.LAYOUT_DIRECTION_RTL
+                : View.LAYOUT_DIRECTION_LTR;
     }
 
     /**

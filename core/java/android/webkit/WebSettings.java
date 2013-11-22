@@ -33,14 +33,17 @@ public abstract class WebSettings {
     /**
      * Enum for controlling the layout of html.
      * <ul>
-     *   <li>NORMAL means no rendering changes.</li>
+     *   <li>NORMAL means no rendering changes. This is the recommended choice for maximum
+     *       compatibility across different platforms and Android versions.</li>
      *   <li>SINGLE_COLUMN moves all content into one column that is the width of the
      *       view.</li>
-     *   <li>NARROW_COLUMNS makes all columns no wider than the screen if possible.</li>
+     *   <li>NARROW_COLUMNS makes all columns no wider than the screen if possible. Only use
+     *       this for API levels prior to {@link android.os.Build.VERSION_CODES#KITKAT}.</li>
      *   <li>TEXT_AUTOSIZING boosts font size of paragraphs based on heuristics to make
      *       the text readable when viewing a wide-viewport layout in the overview mode.
      *       It is recommended to enable zoom support {@link #setSupportZoom} when
-     *       using this mode.</li>
+     *       using this mode. Supported from API level
+     *       {@link android.os.Build.VERSION_CODES#KITKAT}</li>
      * </ul>
      */
     // XXX: These must match LayoutAlgorithm in Settings.h in WebCore.
@@ -51,10 +54,11 @@ public abstract class WebSettings {
          */
         @Deprecated
         SINGLE_COLUMN,
-        NARROW_COLUMNS,
         /**
-         * @hide
+         * @deprecated This algorithm is now obsolete.
          */
+        @Deprecated
+        NARROW_COLUMNS,
         TEXT_AUTOSIZING
     }
 
@@ -333,8 +337,11 @@ public abstract class WebSettings {
     }
 
     /**
-     * Sets whether the WebView loads pages in overview mode. The default is
-     * false.
+     * Sets whether the WebView loads pages in overview mode, that is,
+     * zooms out the content to fit on screen by width. This setting is
+     * taken into account when the content width is greater than the width
+     * of the WebView control, for example, when {@link #getUseWideViewPort}
+     * is enabled. The default is false.
      */
     public void setLoadWithOverviewMode(boolean overview) {
         throw new MustOverrideException();
@@ -500,8 +507,17 @@ public abstract class WebSettings {
      * Sets the default zoom density of the page. This must be called from the UI
      * thread. The default is {@link ZoomDensity#MEDIUM}.
      *
+     * This setting is not recommended for use in new applications.  If the WebView
+     * is utilized to display mobile-oriented pages, the desired effect can be achieved by
+     * adjusting 'width' and 'initial-scale' attributes of page's 'meta viewport'
+     * tag. For pages lacking the tag, {@link android.webkit.WebView#setInitialScale}
+     * and {@link #setUseWideViewPort} can be used.
+     *
      * @param zoom the zoom density
+     * @deprecated This method is no longer supported, see the function documentation for
+     *             recommended alternatives.
      */
+    @Deprecated
     public void setDefaultZoom(ZoomDensity zoom) {
         throw new MustOverrideException();
     }
@@ -510,8 +526,11 @@ public abstract class WebSettings {
      * Gets the default zoom density of the page. This should be called from
      * the UI thread.
      *
+     * This setting is not recommended for use in new applications.
+     *
      * @return the zoom density
      * @see #setDefaultZoom
+     * @deprecated Will only return the default value.
      */
     public ZoomDensity getDefaultZoom() {
         throw new MustOverrideException();
@@ -1048,10 +1067,13 @@ public abstract class WebSettings {
      *
      * @param databasePath a path to the directory where databases should be
      *                     saved.
+     * @deprecated Database paths are managed by the implementation and calling this method
+     *             will have no effect.
      */
     // This will update WebCore when the Sync runs in the C++ side.
     // Note that the WebCore Database Tracker only allows the path to be set
     // once.
+    @Deprecated
     public synchronized void setDatabasePath(String databasePath) {
         throw new MustOverrideException();
     }
@@ -1150,7 +1172,9 @@ public abstract class WebSettings {
      *
      * @return the String path to the database storage API databases
      * @see #setDatabasePath
+     * @deprecated Database paths are managed by the implementation this method is obsolete.
      */
+    @Deprecated
     public synchronized String getDatabasePath() {
         throw new MustOverrideException();
     }

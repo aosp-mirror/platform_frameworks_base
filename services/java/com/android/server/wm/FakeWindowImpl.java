@@ -40,8 +40,8 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
 
     public FakeWindowImpl(WindowManagerService service,
             Looper looper, InputEventReceiver.Factory inputEventReceiverFactory,
-            String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
-            boolean hasFocus, boolean touchFullscreen) {
+            String name, int windowType, int layoutParamsFlags, int layoutParamsPrivateFlags,
+            boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen) {
         mService = service;
 
         InputChannel[] channels = InputChannel.openInputChannelPair(name);
@@ -63,6 +63,7 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
         mWindowLayer = getLayerLw(windowType);
         mWindowHandle.layer = mWindowLayer;
         mWindowHandle.layoutParamsFlags = layoutParamsFlags;
+        mWindowHandle.layoutParamsPrivateFlags = layoutParamsPrivateFlags;
         mWindowHandle.layoutParamsType = windowType;
         mWindowHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;

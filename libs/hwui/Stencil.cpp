@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Debug.h"
 #include "Extensions.h"
 #include "Properties.h"
 #include "Stencil.h"

@@ -9,6 +9,7 @@ LOCAL_JAVA_LIBRARIES := telephony-common
 
 LOCAL_PACKAGE_NAME := SettingsProvider
 LOCAL_CERTIFICATE := platform
+LOCAL_PRIVILEGED_MODULE := true
 
 include $(BUILD_PACKAGE)
 

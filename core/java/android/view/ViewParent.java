@@ -148,9 +148,11 @@ public interface ViewParent {
     /**
      * Change the z order of the child so it's on top of all other children.
      * This ordering change may affect layout, if this container
-     * uses an order-dependent layout scheme (e.g., LinearLayout). This
+     * uses an order-dependent layout scheme (e.g., LinearLayout). Prior
+     * to {@link android.os.Build.VERSION_CODES#KITKAT} this
      * method should be followed by calls to {@link #requestLayout()} and
-     * {@link View#invalidate()} on this parent.
+     * {@link View#invalidate()} on this parent to force the parent to redraw
+     * with the new child ordering.
      * 
      * @param child The child to bring to the top of the z order
      */
@@ -269,10 +271,25 @@ public interface ViewParent {
     /**
      * Called when a child view now has or no longer is tracking transient state.
      *
+     * <p>"Transient state" is any state that a View might hold that is not expected to
+     * be reflected in the data model that the View currently presents. This state only
+     * affects the presentation to the user within the View itself, such as the current
+     * state of animations in progress or the state of a text selection operation.</p>
+     *
+     * <p>Transient state is useful for hinting to other components of the View system
+     * that a particular view is tracking something complex but encapsulated.
+     * A <code>ListView</code> for example may acknowledge that list item Views
+     * with transient state should be preserved within their position or stable item ID
+     * instead of treating that view as trivially replaceable by the backing adapter.
+     * This allows adapter implementations to be simpler instead of needing to track
+     * the state of item view animations in progress such that they could be restored
+     * in the event of an unexpected recycling and rebinding of attached item views.</p>
+     *
+     * <p>This method is called on a parent view when a child view or a view within
+     * its subtree begins or ends tracking of internal transient state.</p>
+     *
      * @param child Child view whose state has changed
      * @param hasTransientState true if this child has transient state
-     *
-     * @hide
      */
     public void childHasTransientStateChanged(View child, boolean hasTransientState);
 
@@ -292,21 +309,27 @@ public interface ViewParent {
     public ViewParent getParentForAccessibility();
 
     /**
-     * A child notifies its parent that its state for accessibility has changed.
-     * That is some of the child properties reported to accessibility services has
-     * changed, hence the interested services have to be notified for the new state.
-     *
-     * @hide
+     * Notifies a view parent that the accessibility state of one of its
+     * descendants has changed and that the structure of the subtree is
+     * different.
+     * @param child The direct child whose subtree has changed.
+     * @param source The descendant view that changed.
+     * @param changeType A bit mask of the types of changes that occurred. One
+     *            or more of:
+     *            <ul>
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
+     *            </ul>
      */
-    public void childAccessibilityStateChanged(View child);
+    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType);
 
     /**
      * Tells if this view parent can resolve the layout direction.
      * See {@link View#setLayoutDirection(int)}
      *
      * @return True if this view parent can resolve the layout direction.
-     *
-     * @hide
      */
     public boolean canResolveLayoutDirection();
 
@@ -315,8 +338,6 @@ public interface ViewParent {
      * See {@link View#setLayoutDirection(int)}
      *
      * @return True if this view parent layout direction is resolved.
-     *
-     * @hide
      */
     public boolean isLayoutDirectionResolved();
 
@@ -325,8 +346,6 @@ public interface ViewParent {
      *
      * @return {@link View#LAYOUT_DIRECTION_RTL} if the layout direction is RTL or returns
      * {@link View#LAYOUT_DIRECTION_LTR} if the layout direction is not RTL.
-     *
-     * @hide
      */
     public int getLayoutDirection();
 
@@ -335,8 +354,6 @@ public interface ViewParent {
      * See {@link View#setTextDirection(int)}
      *
      * @return True if this view parent can resolve the text direction.
-     *
-     * @hide
      */
     public boolean canResolveTextDirection();
 
@@ -345,8 +362,6 @@ public interface ViewParent {
      * See {@link View#setTextDirection(int)}
      *
      * @return True if this view parent text direction is resolved.
-     *
-     * @hide
      */
     public boolean isTextDirectionResolved();
 
@@ -360,8 +375,6 @@ public interface ViewParent {
      * {@link View#TEXT_DIRECTION_LTR},
      * {@link View#TEXT_DIRECTION_RTL},
      * {@link View#TEXT_DIRECTION_LOCALE}
-     *
-     * @hide
      */
     public int getTextDirection();
 
@@ -370,8 +383,6 @@ public interface ViewParent {
      * See {@link View#setTextAlignment(int)}
      *
      * @return True if this view parent can resolve the text alignment.
-     *
-     * @hide
      */
     public boolean canResolveTextAlignment();
 
@@ -380,8 +391,6 @@ public interface ViewParent {
      * See {@link View#setTextAlignment(int)}
      *
      * @return True if this view parent text alignment is resolved.
-     *
-     * @hide
      */
     public boolean isTextAlignmentResolved();
 
@@ -396,8 +405,6 @@ public interface ViewParent {
      * {@link View#TEXT_ALIGNMENT_TEXT_END},
      * {@link View#TEXT_ALIGNMENT_VIEW_START},
      * {@link View#TEXT_ALIGNMENT_VIEW_END}
-     *
-     * @hide
      */
     public int getTextAlignment();
 }

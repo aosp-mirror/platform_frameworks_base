@@ -471,8 +471,7 @@ public class CompatibilityInfo implements Parcelable {
      * Compute the frame Rect for applications runs under compatibility mode.
      *
      * @param dm the display metrics used to compute the frame size.
-     * @param orientation the orientation of the screen.
-     * @param outRect the output parameter which will contain the result.
+     * @param outDm If non-null the width and height will be set to their scaled values.
      * @return Returns the scaling factor for the window.
      */
     public static float computeCompatibleScaling(DisplayMetrics dm, DisplayMetrics outDm) {
@@ -518,6 +517,9 @@ public class CompatibilityInfo implements Parcelable {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
         try {
             CompatibilityInfo oc = (CompatibilityInfo)o;
             if (mCompatibilityFlags != oc.mCompatibilityFlags) return false;
@@ -579,10 +581,12 @@ public class CompatibilityInfo implements Parcelable {
 
     public static final Parcelable.Creator<CompatibilityInfo> CREATOR
             = new Parcelable.Creator<CompatibilityInfo>() {
+        @Override
         public CompatibilityInfo createFromParcel(Parcel source) {
             return new CompatibilityInfo(source);
         }
 
+        @Override
         public CompatibilityInfo[] newArray(int size) {
             return new CompatibilityInfo[size];
         }

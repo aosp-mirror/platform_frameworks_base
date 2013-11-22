@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.LogWriter;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -583,8 +584,9 @@ final class BackStackRecord extends FragmentTransaction implements
         if (FragmentManagerImpl.DEBUG) {
             Log.v(TAG, "Commit: " + this);
             LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
-            PrintWriter pw = new PrintWriter(logw);
+            PrintWriter pw = new FastPrintWriter(logw, false, 1024);
             dump("  ", null, pw, null);
+            pw.flush();
         }
         mCommitted = true;
         if (mAddToBackStack) {
@@ -691,8 +693,9 @@ final class BackStackRecord extends FragmentTransaction implements
         if (FragmentManagerImpl.DEBUG) {
             Log.v(TAG, "popFromBackStack: " + this);
             LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
-            PrintWriter pw = new PrintWriter(logw);
+            PrintWriter pw = new FastPrintWriter(logw, false, 1024);
             dump("  ", null, pw, null);
+            pw.flush();
         }
 
         bumpBackStackNesting(-1);

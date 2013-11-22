@@ -18,37 +18,24 @@ package android.net;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.net.ProxyProperties;
-import android.os.Handler;
-import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.provider.Settings;
 import android.util.Log;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ProxySelector;
-import java.net.SocketAddress;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import junit.framework.Assert;
-
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.impl.conn.ProxySelectorRoutePlanner;
 import org.apache.http.protocol.HttpContext;
+
+import java.net.InetSocketAddress;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A convenience class for accessing the user and default proxy
@@ -59,6 +46,8 @@ public final class Proxy {
     // Set to true to enable extra debugging.
     private static final boolean DEBUG = false;
     private static final String TAG = "Proxy";
+
+    private static final ProxySelector sDefaultProxySelector;
 
     /**
      * Used to notify an app that's caching the default connection proxy
@@ -96,6 +85,7 @@ public final class Proxy {
     static {
         HOSTNAME_PATTERN = Pattern.compile(HOSTNAME_REGEXP);
         EXCLLIST_PATTERN = Pattern.compile(EXCLLIST_REGEXP);
+        sDefaultProxySelector = ProxySelector.getDefault();
     }
 
     /**
@@ -325,16 +315,19 @@ public final class Proxy {
         String host = null;
         String port = null;
         String exclList = null;
+        String pacFileUrl = null;
         if (p != null) {
             host = p.getHost();
             port = Integer.toString(p.getPort());
             exclList = p.getExclusionList();
+            pacFileUrl = p.getPacFileUrl();
         }
-        setHttpProxySystemProperty(host, port, exclList);
+        setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
     }
 
     /** @hide */
-    public static final void setHttpProxySystemProperty(String host, String port, String exclList) {
+    public static final void setHttpProxySystemProperty(String host, String port, String exclList,
+            String pacFileUrl) {
         if (exclList != null) exclList = exclList.replace(",", "|");
         if (false) Log.d(TAG, "setHttpProxySystemProperty :"+host+":"+port+" - "+exclList);
         if (host != null) {
@@ -357,6 +350,11 @@ public final class Proxy {
         } else {
             System.clearProperty("http.nonProxyHosts");
             System.clearProperty("https.nonProxyHosts");
+        }
+        if (!TextUtils.isEmpty(pacFileUrl)) {
+            ProxySelector.setDefault(new PacProxySelector());
+        } else {
+            ProxySelector.setDefault(sDefaultProxySelector);
         }
     }
 }

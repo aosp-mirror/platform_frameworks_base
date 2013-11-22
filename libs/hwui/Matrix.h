@@ -26,6 +26,12 @@
 namespace android {
 namespace uirenderer {
 
+#define MATRIX_STRING "[%.2f %.2f %.2f] [%.2f %.2f %.2f] [%.2f %.2f %.2f]"
+#define MATRIX_ARGS(m) \
+    (m)->get(0), (m)->get(1), (m)->get(2), \
+    (m)->get(3), (m)->get(4), (m)->get(5), \
+    (m)->get(6), (m)->get(7), (m)->get(8)
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,7 +124,7 @@ public:
 
     void loadOrtho(float left, float right, float bottom, float top, float near, float far);
 
-    uint32_t getType() const;
+    uint8_t getType() const;
 
     void multiply(const Matrix4& v) {
         Matrix4 u;
@@ -128,10 +134,27 @@ public:
 
     void multiply(float v);
 
-    void translate(float x, float y, float z) {
-        Matrix4 u;
-        u.loadTranslate(x, y, z);
-        multiply(u);
+    void translate(float x, float y) {
+        if ((getType() & sGeometryMask) <= kTypeTranslate) {
+            data[kTranslateX] += x;
+            data[kTranslateY] += y;
+        } else {
+            // Doing a translation will only affect the translate bit of the type
+            // Save the type
+            uint8_t type = mType;
+
+            Matrix4 u;
+            u.loadTranslate(x, y, 0.0f);
+            multiply(u);
+
+            // Restore the type and fix the translate bit
+            mType = type;
+            if (data[kTranslateX] != 0.0f || data[kTranslateY] != 0.0f) {
+                mType |= kTypeTranslate;
+            } else {
+                mType &= ~kTypeTranslate;
+            }
+        }
     }
 
     void scale(float sx, float sy, float sz) {
@@ -160,6 +183,7 @@ public:
     bool isIdentity() const;
     bool isPerspective() const;
     bool rectToRect() const;
+    bool positiveScale() const;
 
     bool changesBounds() const;
 
@@ -179,7 +203,7 @@ public:
     static const Matrix4& identity();
 
 private:
-    mutable uint32_t mType;
+    mutable uint8_t mType;
 
     inline float get(int i, int j) const {
         return data[i * 4 + j];
@@ -189,7 +213,7 @@ private:
         data[i * 4 + j] = v;
     }
 
-    uint32_t getGeometryType() const;
+    uint8_t getGeometryType() const;
 
 }; // class Matrix4
 

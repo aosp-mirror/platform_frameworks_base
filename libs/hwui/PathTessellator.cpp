@@ -66,11 +66,11 @@ void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint
     }
 }
 
-inline void copyVertex(Vertex* destPtr, const Vertex* srcPtr) {
+inline static void copyVertex(Vertex* destPtr, const Vertex* srcPtr) {
     Vertex::set(destPtr, srcPtr->position[0], srcPtr->position[1]);
 }
 
-inline void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr) {
+inline static void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr) {
     AlphaVertex::set(destPtr, srcPtr->position[0], srcPtr->position[1], srcPtr->alpha);
 }
 
@@ -84,7 +84,7 @@ inline void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr) {
  *
  * NOTE: assumes angles between normals 90 degrees or less
  */
-inline vec2 totalOffsetFromNormals(const vec2& normalA, const vec2& normalB) {
+inline static vec2 totalOffsetFromNormals(const vec2& normalA, const vec2& normalB) {
     return (normalA + normalB) / (1 + fabs(normalA.dot(normalB)));
 }
 
@@ -224,6 +224,20 @@ void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Ver
     DEBUG_DUMP_BUFFER();
 }
 
+static inline void storeBeginEnd(const PaintInfo& paintInfo, const Vertex& center,
+        const vec2& normal, Vertex* buffer, int& currentIndex, bool begin) {
+    vec2 strokeOffset = normal;
+    paintInfo.scaleOffsetForStrokeWidth(strokeOffset);
+
+    vec2 referencePoint(center.position[0], center.position[1]);
+    if (paintInfo.cap == SkPaint::kSquare_Cap) {
+        referencePoint += vec2(-strokeOffset.y, strokeOffset.x) * (begin ? -1 : 1);
+    }
+
+    Vertex::set(&buffer[currentIndex++], referencePoint + strokeOffset);
+    Vertex::set(&buffer[currentIndex++], referencePoint - strokeOffset);
+}
+
 /**
  * Fills a vertexBuffer with non-alpha vertices similar to getStrokeVerticesFromPerimeter, except:
  *
@@ -235,19 +249,17 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
         const Vector<Vertex>& vertices, VertexBuffer& vertexBuffer) {
     const int extra = paintInfo.capExtraDivisions();
     const int allocSize = (vertices.size() + extra) * 2;
-
     Vertex* buffer = vertexBuffer.alloc<Vertex>(allocSize);
 
+    const int lastIndex = vertices.size() - 1;
     if (extra > 0) {
         // tessellate both round caps
-        const int last = vertices.size() - 1;
         float beginTheta = atan2(
-                - (vertices[0].position[0] - vertices[1].position[0]),
-                vertices[0].position[1] - vertices[1].position[1]);
+                    - (vertices[0].position[0] - vertices[1].position[0]),
+                    vertices[0].position[1] - vertices[1].position[1]);
         float endTheta = atan2(
-                - (vertices[last].position[0] - vertices[last - 1].position[0]),
-                vertices[last].position[1] - vertices[last - 1].position[1]);
-
+                    - (vertices[lastIndex].position[0] - vertices[lastIndex - 1].position[0]),
+                    vertices[lastIndex].position[1] - vertices[lastIndex - 1].position[1]);
         const float dTheta = PI / (extra + 1);
         const float radialScale = 2.0f / (1 + cos(dTheta));
 
@@ -270,56 +282,45 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
             vec2 endRadialOffset(cos(endTheta), sin(endTheta));
             paintInfo.scaleOffsetForStrokeWidth(endRadialOffset);
             Vertex::set(&buffer[allocSize - 1 - capOffset],
-                    vertices[last].position[0] + endRadialOffset.x,
-                    vertices[last].position[1] + endRadialOffset.y);
+                    vertices[lastIndex].position[0] + endRadialOffset.x,
+                    vertices[lastIndex].position[1] + endRadialOffset.y);
         }
     }
 
     int currentIndex = extra;
-    const Vertex* current = &(vertices[0]);
-    vec2 lastNormal;
-    for (unsigned int i = 0; i < vertices.size() - 1; i++) {
+    const Vertex* last = &(vertices[0]);
+    const Vertex* current = &(vertices[1]);
+    vec2 lastNormal(current->position[1] - last->position[1],
+                last->position[0] - current->position[0]);
+    lastNormal.normalize();
+
+    storeBeginEnd(paintInfo, vertices[0], lastNormal, buffer, currentIndex, true);
+
+    for (unsigned int i = 1; i < vertices.size() - 1; i++) {
         const Vertex* next = &(vertices[i + 1]);
         vec2 nextNormal(next->position[1] - current->position[1],
                 current->position[0] - next->position[0]);
         nextNormal.normalize();
 
-        vec2 totalOffset;
-        if (i == 0) {
-            totalOffset = nextNormal;
-        } else {
-            totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
-        }
-        paintInfo.scaleOffsetForStrokeWidth(totalOffset);
+        vec2 strokeOffset  = totalOffsetFromNormals(lastNormal, nextNormal);
+        paintInfo.scaleOffsetForStrokeWidth(strokeOffset);
 
-        Vertex::set(&buffer[currentIndex++],
-                current->position[0] + totalOffset.x,
-                current->position[1] + totalOffset.y);
-
-        Vertex::set(&buffer[currentIndex++],
-                current->position[0] - totalOffset.x,
-                current->position[1] - totalOffset.y);
+        vec2 center(current->position[0], current->position[1]);
+        Vertex::set(&buffer[currentIndex++], center + strokeOffset);
+        Vertex::set(&buffer[currentIndex++], center - strokeOffset);
 
         current = next;
         lastNormal = nextNormal;
     }
 
-    vec2 totalOffset = lastNormal;
-    paintInfo.scaleOffsetForStrokeWidth(totalOffset);
-
-    Vertex::set(&buffer[currentIndex++],
-            current->position[0] + totalOffset.x,
-            current->position[1] + totalOffset.y);
-    Vertex::set(&buffer[currentIndex++],
-            current->position[0] - totalOffset.x,
-            current->position[1] - totalOffset.y);
+    storeBeginEnd(paintInfo, vertices[lastIndex], lastNormal, buffer, currentIndex, false);
 
     DEBUG_DUMP_BUFFER();
 }
 
 /**
  * Populates a vertexBuffer with AlphaVertices to create an anti-aliased fill shape tessellation
- * 
+ *
  * 1 - create the AA perimeter of unit width, by zig-zagging at each point around the perimeter of
  * the shape (using 2 * perimeter.size() vertices)
  *
@@ -389,7 +390,7 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
  * For explanation of constants and general methodoloyg, see comments for
  * getStrokeVerticesFromUnclosedVerticesAA() below.
  */
-inline void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& vertices,
+inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& vertices,
         AlphaVertex* buffer, bool isFirst, vec2 normal, int offset) {
     const int extra = paintInfo.capExtraDivisions();
     const int extraOffset = (extra + 1) / 2;
@@ -772,11 +773,67 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
     }
 }
 
+static void expandRectToCoverVertex(SkRect& rect, float x, float y) {
+    rect.fLeft = fminf(rect.fLeft, x);
+    rect.fTop = fminf(rect.fTop, y);
+    rect.fRight = fmaxf(rect.fRight, x);
+    rect.fBottom = fmaxf(rect.fBottom, y);
+}
 static void expandRectToCoverVertex(SkRect& rect, const Vertex& vertex) {
-    rect.fLeft = fminf(rect.fLeft, vertex.position[0]);
-    rect.fTop = fminf(rect.fTop, vertex.position[1]);
-    rect.fRight = fmaxf(rect.fRight, vertex.position[0]);
-    rect.fBottom = fmaxf(rect.fBottom, vertex.position[1]);
+    expandRectToCoverVertex(rect, vertex.position[0], vertex.position[1]);
+}
+
+template <class TYPE>
+static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
+        const float* points, int count, SkRect& bounds) {
+    bounds.set(points[0], points[1], points[0], points[1]);
+
+    int numPoints = count / 2;
+    int verticesPerPoint = srcBuffer.getVertexCount();
+    dstBuffer.alloc<TYPE>(numPoints * verticesPerPoint + (numPoints - 1) * 2);
+
+    for (int i = 0; i < count; i += 2) {
+        expandRectToCoverVertex(bounds, points[i + 0], points[i + 1]);
+        dstBuffer.copyInto<TYPE>(srcBuffer, points[i + 0], points[i + 1]);
+    }
+    dstBuffer.createDegenerateSeparators<TYPE>(verticesPerPoint);
+}
+
+void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* paint,
+        const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
+    const PaintInfo paintInfo(paint, transform);
+
+    // determine point shape
+    SkPath path;
+    float radius = paintInfo.halfStrokeWidth;
+    if (radius == 0.0f) radius = 0.25f;
+
+    if (paintInfo.cap == SkPaint::kRound_Cap) {
+        path.addCircle(0, 0, radius);
+    } else {
+        path.addRect(-radius, -radius, radius, radius);
+    }
+
+    // calculate outline
+    Vector<Vertex> outlineVertices;
+    approximatePathOutlineVertices(path, true,
+            paintInfo.inverseScaleX * paintInfo.inverseScaleX,
+            paintInfo.inverseScaleY * paintInfo.inverseScaleY, outlineVertices);
+
+    if (!outlineVertices.size()) return;
+
+    // tessellate, then duplicate outline across points
+    int numPoints = count / 2;
+    VertexBuffer tempBuffer;
+    if (!paintInfo.isAA) {
+        getFillVerticesFromPerimeter(outlineVertices, tempBuffer);
+        instanceVertices<Vertex>(tempBuffer, vertexBuffer, points, count, bounds);
+    } else {
+        getFillVerticesFromPerimeterAA(paintInfo, outlineVertices, tempBuffer);
+        instanceVertices<AlphaVertex>(tempBuffer, vertexBuffer, points, count, bounds);
+    }
+
+    expandBoundsForStroke(bounds, paint, true); // force-expand bounds to incorporate stroke
 }
 
 void PathTessellator::tessellateLines(const float* points, int count, SkPaint* paint,

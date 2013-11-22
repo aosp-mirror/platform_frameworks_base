@@ -78,7 +78,7 @@ GradientCache::GradientCache():
     mCache.setOnEntryRemovedListener(this);
 
     const Extensions& extensions = Extensions::getInstance();
-    mUseFloatTexture = extensions.getMajorGlVersion() >= 3;
+    mUseFloatTexture = extensions.hasFloatTextures();
     mHasNpot = extensions.hasNPot();
 }
 
@@ -120,7 +120,7 @@ void GradientCache::operator()(GradientCacheEntry& shader, Texture*& texture) {
         const uint32_t size = texture->width * texture->height * bytesPerPixel();
         mSize -= size;
 
-        glDeleteTextures(1, &texture->id);
+        texture->deleteTexture();
         delete texture;
     }
 }
@@ -173,7 +173,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     GradientInfo info;
     getGradientInfo(colors, count, info);
 
-    Texture* texture = new Texture;
+    Texture* texture = new Texture();
     texture->width = info.width;
     texture->height = 2;
     texture->blend = info.hasAlpha;
@@ -286,7 +286,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
     glGenTextures(1, &texture->id);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    Caches::getInstance().bindTexture(texture->id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     if (mUseFloatTexture) {

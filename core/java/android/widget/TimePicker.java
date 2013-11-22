@@ -22,10 +22,12 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.EditorInfo;
@@ -105,6 +107,9 @@ public class TimePicker extends FrameLayout {
 
     private Locale mCurrentLocale;
 
+    private boolean mHourWithTwoDigit;
+    private char mHourFormat;
+
     /**
      * The callback interface used to indicate the time has been adjusted.
      */
@@ -164,7 +169,7 @@ public class TimePicker extends FrameLayout {
         // divider (only for the new widget style)
         mDivider = (TextView) findViewById(R.id.divider);
         if (mDivider != null) {
-            mDivider.setText(R.string.time_picker_separator);
+            setDividerText();
         }
 
         // minute
@@ -235,6 +240,24 @@ public class TimePicker extends FrameLayout {
             mAmPmSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
         }
 
+        if (isAmPmAtStart()) {
+            // Move the am/pm view to the beginning
+            ViewGroup amPmParent = (ViewGroup) findViewById(R.id.timePickerLayout);
+            amPmParent.removeView(amPmView);
+            amPmParent.addView(amPmView, 0);
+            // Swap layout margins if needed. They may be not symmetrical (Old Standard Theme for
+            // example and not for Holo Theme)
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) amPmView.getLayoutParams();
+            final int startMargin = lp.getMarginStart();
+            final int endMargin = lp.getMarginEnd();
+            if (startMargin != endMargin) {
+                lp.setMarginStart(endMargin);
+                lp.setMarginEnd(startMargin);
+            }
+        }
+
+        getHourFormatData();
+
         // update controls to initial state
         updateHourControl();
         updateMinuteControl();
@@ -257,6 +280,35 @@ public class TimePicker extends FrameLayout {
         if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
+    }
+
+    private void getHourFormatData() {
+        final Locale defaultLocale = Locale.getDefault();
+        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(defaultLocale,
+                (mIs24HourView) ? "Hm" : "hm");
+        final int lengthPattern = bestDateTimePattern.length();
+        mHourWithTwoDigit = false;
+        char hourFormat = '\0';
+        // Check if the returned pattern is single or double 'H', 'h', 'K', 'k'. We also save
+        // the hour format that we found.
+        for (int i = 0; i < lengthPattern; i++) {
+            final char c = bestDateTimePattern.charAt(i);
+            if (c == 'H' || c == 'h' || c == 'K' || c == 'k') {
+                mHourFormat = c;
+                if (i + 1 < lengthPattern && c == bestDateTimePattern.charAt(i + 1)) {
+                    mHourWithTwoDigit = true;
+                }
+                break;
+            }
+        }
+    }
+
+    private boolean isAmPmAtStart() {
+        final Locale defaultLocale = Locale.getDefault();
+        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(defaultLocale,
+                "hm" /* skeleton */);
+
+        return bestDateTimePattern.startsWith("a");
     }
 
     @Override
@@ -391,6 +443,10 @@ public class TimePicker extends FrameLayout {
      * Set the current hour.
      */
     public void setCurrentHour(Integer currentHour) {
+        setCurrentHour(currentHour, true);
+    }
+
+    private void setCurrentHour(Integer currentHour, boolean notifyTimeChanged) {
         // why was Integer used in the first place?
         if (currentHour == null || currentHour == getCurrentHour()) {
             return;
@@ -411,7 +467,9 @@ public class TimePicker extends FrameLayout {
             updateAmPmControl();
         }
         mHourSpinner.setValue(currentHour);
-        onTimeChanged();
+        if (notifyTimeChanged) {
+            onTimeChanged();
+        }
     }
 
     /**
@@ -423,12 +481,16 @@ public class TimePicker extends FrameLayout {
         if (mIs24HourView == is24HourView) {
             return;
         }
-        mIs24HourView = is24HourView;
-        // cache the current hour since spinner range changes
+        // cache the current hour since spinner range changes and BEFORE changing mIs24HourView!!
         int currentHour = getCurrentHour();
+        // Order is important here.
+        mIs24HourView = is24HourView;
+        getHourFormatData();
         updateHourControl();
-        // set value after spinner range is updated
-        setCurrentHour(currentHour);
+        // set value after spinner range is updated - be aware that because mIs24HourView has
+        // changed then getCurrentHour() is not equal to the currentHour we cached before so
+        // explicitly ask for *not* propagating any onTimeChanged()
+        setCurrentHour(currentHour, false /* no onTimeChanged() */);
         updateMinuteControl();
         updateAmPmControl();
     }
@@ -456,6 +518,38 @@ public class TimePicker extends FrameLayout {
         }
         mMinuteSpinner.setValue(currentMinute);
         onTimeChanged();
+    }
+
+    /**
+     * The time separator is defined in the Unicode CLDR and cannot be supposed to be ":".
+     *
+     * See http://unicode.org/cldr/trac/browser/trunk/common/main
+     *
+     * We pass the correct "skeleton" depending on 12 or 24 hours view and then extract the
+     * separator as the character which is just after the hour marker in the returned pattern.
+     */
+    private void setDividerText() {
+        final Locale defaultLocale = Locale.getDefault();
+        final String skeleton = (mIs24HourView) ? "Hm" : "hm";
+        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(defaultLocale,
+                skeleton);
+        final String separatorText;
+        int hourIndex = bestDateTimePattern.lastIndexOf('H');
+        if (hourIndex == -1) {
+            hourIndex = bestDateTimePattern.lastIndexOf('h');
+        }
+        if (hourIndex == -1) {
+            // Default case
+            separatorText = ":";
+        } else {
+            int minuteIndex = bestDateTimePattern.indexOf('m', hourIndex + 1);
+            if  (minuteIndex == -1) {
+                separatorText = Character.toString(bestDateTimePattern.charAt(hourIndex + 1));
+            } else {
+                separatorText = bestDateTimePattern.substring(hourIndex + 1, minuteIndex);
+            }
+        }
+        mDivider.setText(separatorText);
     }
 
     @Override
@@ -500,14 +594,25 @@ public class TimePicker extends FrameLayout {
 
     private void updateHourControl() {
         if (is24HourView()) {
-            mHourSpinner.setMinValue(0);
-            mHourSpinner.setMaxValue(23);
-            mHourSpinner.setFormatter(NumberPicker.getTwoDigitFormatter());
+            // 'k' means 1-24 hour
+            if (mHourFormat == 'k') {
+                mHourSpinner.setMinValue(1);
+                mHourSpinner.setMaxValue(24);
+            } else {
+                mHourSpinner.setMinValue(0);
+                mHourSpinner.setMaxValue(23);
+            }
         } else {
-            mHourSpinner.setMinValue(1);
-            mHourSpinner.setMaxValue(12);
-            mHourSpinner.setFormatter(null);
+            // 'K' means 0-11 hour
+            if (mHourFormat == 'K') {
+                mHourSpinner.setMinValue(0);
+                mHourSpinner.setMaxValue(11);
+            } else {
+                mHourSpinner.setMinValue(1);
+                mHourSpinner.setMaxValue(12);
+            }
         }
+        mHourSpinner.setFormatter(mHourWithTwoDigit ? NumberPicker.getTwoDigitFormatter() : null);
     }
 
     private void updateMinuteControl() {

@@ -9,8 +9,8 @@ page.title=Ads
     <li><a href="#context">Context and Behavior</a></li>
     <li><a href="#disclosure" style="clear:right">Disclosure</a></li>
     <li><a href="#impersonation">Impersonation of System UI</a></li>
-    <li><a href="#adwalls">Adwalls</a></li>
-    <li><a href="#interfering" style="clear:right;">Interference with Ads and Websites</a></li>
+    <li><a href="#adwalls">Adwalls and Interstitial Ads</a></li>
+    <li><a href="#interfering" style="clear:right;">Interference with Apps and Third-Party Ads</a></li>
   </ol>
 
   <h2>More Resources</h2>
@@ -130,22 +130,20 @@ page.title=Ads
   </li>
 
   <li>
-    <strong>Make sure app origin is clear</strong>&mdash;When you display an
-    ad, it must be clear to the user that the ad has originated from your app.
-    If you show the ad in your app's UI while your app has focus, the user
-    understands the ad origin without explicit attribution. However, if you
-    display the ad outside of your app, such as in a notification, you must
-    explicitly indicate the origin.
-  </li>
-
-  <li>
     <strong>Don't make changes outside of the app without consent</strong>
    &mdash;Ads must not make changes outside of the app without the user's
-    full knowledge and consent. For example, ads should not install shortcuts,
-    bookmarks, or icons, or change default settings without user consent.
+    full knowledge and consent.
   </li>
 
   <li>
+  <div class="example-block bad" style="width:360px;margin:1em 0 0 2em;">
+    <div class="heading">Ads through system-level notifications</div>
+    <img src="{@docRoot}images/gp-policy-ads-notif-attr-violation.png">
+  </div>
+  <div class="example-block good" style="width:360px;margin:.5em 0 0 2em;">
+    <div class="heading">Notification that's part of the app's feature set</div>
+    <img src="{@docRoot}images/gp-policy-ads-notif-attr.png">
+  </div>
     <strong>Changes outside the app must be reversible</strong>&mdash;If an
     ad makes changes outside the app as described above, the changes (and
     origin app) must be evident and easily reversible. For example, the user
@@ -154,50 +152,30 @@ page.title=Ads
   </li>
 
   <li>
-    <strong>Notification ads require user opt-in</strong>&mdash;Your app
-    should not create <a href=
+    <strong>Notification ads are prohibited</strong>&mdash;Your app
+    should not create system-level <a href=
     "{@docRoot}design/patterns/notifications.html">notifications</a>
-    containing ads unless the user has specifically opted-in to this behavior
-    and is able to easily opt-out.
+    containing ads unless the notifications are part of the explicit
+    feature set of the app.
   </li>
 
   <li>
-    <strong>Use low priority for notification ads</strong>&mdash;Always
-    assign your notification ads <a href="
-    {@docRoot}reference/android/app/Notification.html#PRIORITY_LOW">low
-    priority</a> (for API level 16 and above).
+    <strong>Don't add shortcuts, bookmarks, or icons</strong>&mdash;Your app
+    and its ads must not add homescreen shortcuts, browser bookmarks, or icons
+    on the user's device as a service to third parties or for advertising 
+    purposes.
   </li>
 </ul>
 
-<div class="example-block bad" style="width:400px;margin:.5em 0 0 2em;">
-    <div class="heading">Does not fully indicate origin app</div>
-    <img src="{@docRoot}images/gp-policy-ads-notif-attr-violation.png">
-</div>
-<div class="example-block good" style="width:400px;margin:.5em 0 0 2em;">
-    <div class="heading">Indicates origin app by name and icon</div>
-    <img src="{@docRoot}images/gp-policy-ads-notif-attr.png">
-</div>
-
 <p>
-  In particular, note that notification ads must clearly identify your app as
-  the ad origin. If your app sends notification ads that do not sufficiently
-  identify your app as the origin, the app will be in violation of policy.
+  Above right is an example notification ad that violates ad policy by
+  providing ads through system level notification.
 </p>
-
 <p>
-  To identify your app as the origin, you should display the <strong>app's full
-  name and and icon</strong> in the notification to provide the clearest
-  identification and best policy compliance. Displaying a partial app name can
-  also be sufficient, provided the name unambiguously identifies your app.
+  Below right, the notification ad complies with policy because the
+  nature of the notification is part of the explicit feature set of the app,
+  and it also provides attribution of the origin app. 
 </p>
-
-<p>
-  Above right is an example notification ad that violates ad policy by not
-  providing attribution of the origin app. Below right, the notification ads
-  comply with policy by providing both the app icon and full app name (in this
-  case, "Turtle Test").
-</p>
-
 
 <h2 id="disclosure" style="clear:right">Disclosure of Ads to Users</h2>
 
@@ -218,6 +196,14 @@ page.title=Ads
   </li>
 
   <li>
+    <div class="example-block good" style="width:213px;margin-left:.5em;">
+      <div class="heading">Disclosure in Terms</div>
+      <img src="{@docRoot}images/gp-policy-ads-terms.png">
+    </div>
+    <div class="example-block bad" style="width:213px;">
+      <div class="heading">Disclosure is hidden</div>
+      <img src="{@docRoot}images/gp-policy-ads-eula-violation.png">
+    </div>
     <strong>Make sure users know</strong>&mdash;Present your ads disclosure
     is an easy-to-see location, rather than hiding it where users are not
     likely to find it.
@@ -240,53 +226,40 @@ page.title=Ads
 </p>
 
 <p>
-  If your app adds homescreen icons and/or browser bookmarks, an acceptable
-  practice for revealing that behavior is to provide a disclosure in both the
-  app description and an opt-in EULA on app launch. This ensures that the
-  behaviors are clearly explained to the user up-front and requires the user’s
-  consent in a pop-up EULA to continue using the app.
-</p>
-
-<div class="example-block good" style="width:213px;margin-right:2em;">
-  <div class="heading">Disclosure in Terms</div>
-  <img src="{@docRoot}images/gp-policy-ads-terms.png">
-</div>
-
-<div class="example-block good" style="width:213px;">
-  <div class="heading">Disclosure in EULA</div>
-  <img src="{@docRoot}images/gp-policy-ads-eula.png">
-</div>
-
-<div class="example-block bad" style="width:213px;margin-left:0em;">
-  <div class="heading">Disclosure is hidden</div>
-  <img src="{@docRoot}images/gp-policy-ads-eula-violation.png">
-</div>
-
-<p style="clear:right">
   Above left is an example of ads disclosure that is hidden in a long EULA. The
   disclosure information itself is not clearly indicated in the document text
   and it's not visible unless the user happens to scroll down far enough in the
-  EULA. Above middle and right show two alternative approaches that
-  present the disclosure in an obvious and clear manner at the top of a
-  EULA and in a dedicated Terms agreement. 
+  EULA. 
+</p>
+<p>
+  Above right shows an approach that presents the disclosure in an obvious
+  and clear manner in a EULA and a dedicated Terms agreement. 
 </p>
 
 
 <h2 id="impersonation">Impersonation of System UI</h2>
 
-<div class="example-block bad">
-  <div class="heading">Ad impersonates system dialog</div>
-  <img src="{@docRoot}images/gp-policy-ads-impersonate-violation.png">
-</div>
+
+
+
+
+
+
 
 <p>
-  Your app must not display any ad that attempts to impersonate or represent a
+  Ads must not simulate or impersonate the user interface of any app, or
+  notification and warning elements of an operating system. Your app must not
+  display any ad that attempts to impersonate or represent a
   system function or UI component. If such an ad is displayed in your app, your
   app will be in violation of policy and subject to suspension. Here are some
   guidelines:
 </p>
 
-<ul>
+<ul>  
+  <li>
+    <strong>No fake app UI notifications</strong>&mdash;Ads should not impersonate
+    the interface of an application for advertising purposes.
+  </li>
   <li>
     <strong>No fake system dialogs or warnings</strong>&mdash;Any ad that
     presents itself as a system dialog or warning and asks for user input is in
@@ -299,23 +272,26 @@ page.title=Ads
   </li>
 </ul>
 
-<p>
-  At right is an example of a pop-up ad impersonating a system dialog, warning
-  the user about viruses. This is a violation of policy.
+<div class="example-block bad" style="width:213px;">
+  <div class="heading">Ad impersonates app UI</div>
+  <img src="{@docRoot}images/gp-policy-ads-impersonate-violation-app-ui.png">
+</div>
+<div class="example-block bad" style="width:213px;">
+  <div class="heading">Ad impersonates system warning</div>
+  <img src="{@docRoot}images/gp-policy-ads-impersonate-violation-sys-warning.png">
+</div>
+<div class="example-block bad" style="width:213px;">
+  <div class="heading">Ad impersonates system dialog</div>
+  <img src="{@docRoot}images/gp-policy-ads-impersonate-violation.png">
+</div>
+<p style="clear:both">
+  Above are examples of impersonations &mdash; a pop-up ad that impersonates a
+  system dialog, an ad that impersonates a system warning, and an ad that impersonates
+  an application UI. All of these are in violation of policy.
 </p>
 
 
-<h2 id="adwalls">Adwalls</h2>
-
-<div class="example-block good" style="width:213px;">
-  <div class="heading">Adwall lets user cancel</div>
-  <img src="{@docRoot}images/gp-policy-ads-paywall.png">
-</div>
-
-<div class="example-block bad" style="width:213px;">
-  <div class="heading">Adwall forces user action</div>
-  <img src="{@docRoot}images/gp-policy-ads-paywall-violation.png">
-</div>
+<h2 id="adwalls">Adwalls and Interstitial Ads</h2>
 
 <p>
   If your app uses adwalls to drive affiliate traffic, those adwalls must not
@@ -330,23 +306,45 @@ page.title=Ads
 
 <p>
   For this reason, <strong>all adwalls must give the user the option to
-  cancel</strong> or otherwise dismiss the ad without penalty.
+  cancel</strong> or otherwise dismiss the ad without penalty. Interstitial ads
+  may only be displayed inside of the app they came with. Forcing the user to
+  click on ads or submit personal information for advertising purposes in order
+  to fully use an app is prohibited.
 </p>
 
-<p>
-  At right is an example of an app that requires the user to click through the
+<div class="example-block bad" style="width:213px;">
+  <div class="heading">Interstitial, modal ad</div>
+  <img src="{@docRoot}images/gp-policy-ads-interstitial-violation.png">
+</div>
+
+<div class="example-block good" style="width:213px;">
+  <div class="heading">Adwall lets user cancel</div>
+  <img src="{@docRoot}images/gp-policy-ads-paywall.png">
+</div>
+
+<div class="example-block bad" style="width:213px;">
+  <div class="heading">Adwall forces user action</div>
+  <img src="{@docRoot}images/gp-policy-ads-paywall-violation.png">
+</div>
+
+<p style="clear:both">
+  At left is an example of an app that requires the user to click through the
   ad to fully use the app. This is a violation of policy.
 </p>
 
 <p>
-  The adjacent example demonstrates an adequate option to let the user dismiss
-  the ad wall easily by cancelling.
+  The center example demonstrates an adequate option to let the user dismiss
+  the ad wall easily by cancelling. This is not a violation of policy.
 </p>
 
+<p>
+  At right is an example of an interstitial, modal ad that is displayed outside
+  of the app. This is a violation of policy.
+</p>
 
-<h2 id="interfering" style="clear:right;">Interference with Third-party Ads and Websites</h2>
+<h2 id="interfering" style="clear:right;">Interfering with Apps and Third-Party Ads</h2>
 
 <p>
-  Ads associated with your app <strong>must not interfere</strong> with any
-  other ads originating in other applications.
+  Ads associated with your app <strong>must not interfere</strong> with other
+  apps or their ads.
 </p>

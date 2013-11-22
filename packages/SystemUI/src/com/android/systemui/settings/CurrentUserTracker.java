@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.UserHandle;
 
 public abstract class CurrentUserTracker extends BroadcastReceiver {
 
@@ -54,4 +55,8 @@ public abstract class CurrentUserTracker extends BroadcastReceiver {
     }
 
     public abstract void onUserSwitched(int newUserId);
+
+    public boolean isCurrentUserOwner() {
+        return mCurrentUserId == UserHandle.USER_OWNER;
+    }
 }

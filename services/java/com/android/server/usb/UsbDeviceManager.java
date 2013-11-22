@@ -32,11 +32,9 @@ import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
@@ -48,6 +46,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.FgThread;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -57,6 +56,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -158,11 +158,7 @@ public class UsbDeviceManager {
 
         readOemUsbOverrideConfig();
 
-        // create a thread for our Handler
-        HandlerThread thread = new HandlerThread("UsbDeviceManager",
-                Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-        mHandler = new UsbHandler(thread.getLooper());
+        mHandler = new UsbHandler(FgThread.get().getLooper());
 
         if (nativeIsStartRequested()) {
             if (DEBUG) Slog.d(TAG, "accessory attached at boot");
@@ -245,7 +241,7 @@ public class UsbDeviceManager {
         for (int i = 0; i < serialLength; i++) {
             address[i % (ETH_ALEN - 1) + 1] ^= (int)serial.charAt(i);
         }
-        String addrString = String.format("%02X:%02X:%02X:%02X:%02X:%02X",
+        String addrString = String.format(Locale.US, "%02X:%02X:%02X:%02X:%02X:%02X",
             address[0], address[1], address[2], address[3], address[4], address[5]);
         try {
             FileUtils.stringToFile(RNDIS_ETH_ADDR_PATH, addrString);

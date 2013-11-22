@@ -1057,7 +1057,7 @@ an “impossible” state.</p>
 fix them.  Before we do that, we need to discuss the use of a basic language
 feature.</p>
 
-<h4 id="volatile">C/C+++ and "volatile"</h4>
+<h4 id="volatile">C/C++ and "volatile"</h4>
 
 <p>When writing single-threaded code, declaring a variable “volatile” can be
 very useful.  The compiler will not omit or reorder accesses to volatile

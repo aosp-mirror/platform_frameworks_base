@@ -22,15 +22,14 @@ import android.content.Intent;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.Base64;
+import com.android.server.FgThread;
 
 import java.lang.Thread;
 import java.io.File;
@@ -54,7 +53,6 @@ public class UsbDebuggingManager implements Runnable {
 
     private final Context mContext;
     private final Handler mHandler;
-    private final HandlerThread mHandlerThread;
     private Thread mThread;
     private boolean mAdbEnabled = false;
     private String mFingerprints;
@@ -62,9 +60,7 @@ public class UsbDebuggingManager implements Runnable {
     private OutputStream mOutputStream = null;
 
     public UsbDebuggingManager(Context context) {
-        mHandlerThread = new HandlerThread("UsbDebuggingHandler");
-        mHandlerThread.start();
-        mHandler = new UsbDebuggingHandler(mHandlerThread.getLooper());
+        mHandler = new UsbDebuggingHandler(FgThread.get().getLooper());
         mContext = context;
     }
 
@@ -165,7 +161,7 @@ public class UsbDebuggingManager implements Runnable {
 
                     mAdbEnabled = true;
 
-                    mThread = new Thread(UsbDebuggingManager.this);
+                    mThread = new Thread(UsbDebuggingManager.this, TAG);
                     mThread.start();
 
                     break;

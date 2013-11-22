@@ -16,8 +16,11 @@
 
 package android.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.RemoteException;
+import android.os.WorkSource;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -52,6 +55,8 @@ import android.os.RemoteException;
  */
 public class AlarmManager
 {
+    private static final String TAG = "AlarmManager";
+
     /**
      * Alarm time in {@link System#currentTimeMillis System.currentTimeMillis()}
      * (wall clock time in UTC), which will wake up the device when
@@ -80,17 +85,33 @@ public class AlarmManager
      */
     public static final int ELAPSED_REALTIME = 3;
 
+    /** @hide */
+    public static final long WINDOW_EXACT = 0;
+    /** @hide */
+    public static final long WINDOW_HEURISTIC = -1;
+
     private final IAlarmManager mService;
+    private final boolean mAlwaysExact;
+
 
     /**
      * package private on purpose
      */
-    AlarmManager(IAlarmManager service) {
+    AlarmManager(IAlarmManager service, Context ctx) {
         mService = service;
+
+        final int sdkVersion = ctx.getApplicationInfo().targetSdkVersion;
+        mAlwaysExact = (sdkVersion < Build.VERSION_CODES.KITKAT);
     }
-    
+
+    private long legacyExactLength() {
+        return (mAlwaysExact ? WINDOW_EXACT : WINDOW_HEURISTIC);
+    }
+
     /**
-     * Schedule an alarm.  <b>Note: for timing operations (ticks, timeouts,
+     * TBW: discussion of fuzzy nature of alarms in KLP+.
+     *
+     * <p>Schedule an alarm.  <b>Note: for timing operations (ticks, timeouts,
      * etc) it is easier and much more efficient to use
      * {@link android.os.Handler}.</b>  If there is already an alarm scheduled
      * for the same IntentSender, it will first be canceled.
@@ -122,7 +143,9 @@ public class AlarmManager
      * IntentSender.getBroadcast()}.
      *
      * @see android.os.Handler
+     * @see #setExact
      * @see #setRepeating
+     * @see #setWindow
      * @see #cancel
      * @see android.content.Context#sendBroadcast
      * @see android.content.Context#registerReceiver
@@ -133,10 +156,7 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void set(int type, long triggerAtMillis, PendingIntent operation) {
-        try {
-            mService.set(type, triggerAtMillis, operation);
-        } catch (RemoteException ex) {
-        }
+        setImpl(type, triggerAtMillis, legacyExactLength(), 0, operation, null);
     }
 
     /**
@@ -177,6 +197,8 @@ public class AlarmManager
      *
      * @see android.os.Handler
      * @see #set
+     * @see #setExact
+     * @see #setWindow
      * @see #cancel
      * @see android.content.Context#sendBroadcast
      * @see android.content.Context#registerReceiver
@@ -188,22 +210,113 @@ public class AlarmManager
      */
     public void setRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, operation, null);
+    }
+
+    /**
+     * Schedule an alarm to be delivered within a given window of time.
+     *
+     * TBW: clean up these docs
+     *
+     * @param type One of ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC or
+     *        RTC_WAKEUP.
+     * @param windowStartMillis The earliest time, in milliseconds, that the alarm should
+     *        be delivered, expressed in the appropriate clock's units (depending on the alarm
+     *        type).
+     * @param windowLengthMillis The length of the requested delivery window,
+     *        in milliseconds.  The alarm will be delivered no later than this many
+     *        milliseconds after the windowStartMillis time.  Note that this parameter
+     *        is a <i>duration,</i> not the timestamp of the end of the window.
+     * @param operation Action to perform when the alarm goes off;
+     *        typically comes from {@link PendingIntent#getBroadcast
+     *        IntentSender.getBroadcast()}.
+     *
+     * @see #set
+     * @see #setExact
+     * @see #setRepeating
+     * @see #cancel
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     * @see #ELAPSED_REALTIME
+     * @see #ELAPSED_REALTIME_WAKEUP
+     * @see #RTC
+     * @see #RTC_WAKEUP
+     */
+    public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
+            PendingIntent operation) {
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, operation, null);
+    }
+
+    /**
+     * TBW: new 'exact' alarm that must be delivered as nearly as possible
+     * to the precise time specified.
+     */
+    public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null);
+    }
+
+    /** @hide */
+    public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
+            PendingIntent operation, WorkSource workSource) {
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, operation, workSource);
+    }
+
+    private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
+            PendingIntent operation, WorkSource workSource) {
+        if (triggerAtMillis < 0) {
+            /* NOTYET
+            if (mAlwaysExact) {
+                // Fatal error for KLP+ apps to use negative trigger times
+                throw new IllegalArgumentException("Invalid alarm trigger time "
+                        + triggerAtMillis);
+            }
+            */
+            triggerAtMillis = 0;
+        }
+
         try {
-            mService.setRepeating(type, triggerAtMillis, intervalMillis, operation);
+            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation,
+                    workSource);
         } catch (RemoteException ex) {
         }
     }
 
     /**
-     * Available inexact recurrence intervals recognized by
-     * {@link #setInexactRepeating(int, long, long, PendingIntent)} 
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
      */
+    @Deprecated
     public static final long INTERVAL_FIFTEEN_MINUTES = 15 * 60 * 1000;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_HALF_HOUR = 2*INTERVAL_FIFTEEN_MINUTES;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_HOUR = 2*INTERVAL_HALF_HOUR;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_HALF_DAY = 12*INTERVAL_HOUR;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_DAY = 2*INTERVAL_HALF_DAY;
-    
+
     /**
      * Schedule a repeating alarm that has inexact trigger time requirements;
      * for example, an alarm that repeats every hour, but not necessarily at
@@ -236,6 +349,8 @@ public class AlarmManager
      * typically comes from {@link PendingIntent#getBroadcast
      * IntentSender.getBroadcast()}.
      *
+     * @deprecated As of API 19, all repeating alarms are inexact.
+     *
      * @see android.os.Handler
      * @see #set
      * @see #cancel
@@ -252,12 +367,10 @@ public class AlarmManager
      * @see #INTERVAL_HALF_DAY
      * @see #INTERVAL_DAY
      */
+    @Deprecated
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        try {
-            mService.setInexactRepeating(type, triggerAtMillis, intervalMillis, operation);
-        } catch (RemoteException ex) {
-        }
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation, null);
     }
     
     /**

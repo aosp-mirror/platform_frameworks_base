@@ -8,4 +8,5 @@ package="com.android.soundpooltest">
             </intent-filter>
         </activity>
     </application>
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
 </manifest>

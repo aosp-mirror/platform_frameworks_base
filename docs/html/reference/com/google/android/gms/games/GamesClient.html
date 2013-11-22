@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>GamesClient | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -691,7 +698,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -716,7 +723,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -807,42 +814,42 @@ Summary:
 
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_EXCLUSIVE_BIT_MASK">EXTRA_EXCLUSIVE_BIT_MASK</a></td>
         <td class="jd-descrcol" width="100%">Used to bundle the exclusive bit mask of the player for auto-match criteria.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_INVITATION">EXTRA_INVITATION</a></td>
         <td class="jd-descrcol" width="100%">Used to return an <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></td>
         <td class="jd-descrcol" width="100%">Used to return the maximum number of players that should be added to a room by auto-matching.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></td>
         <td class="jd-descrcol" width="100%">Used to return the minimum number of players that should be added to a room by auto-matching.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></td>
         <td class="jd-descrcol" width="100%">Used to return a list of player IDs.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_ROOM">EXTRA_ROOM</a></td>
         <td class="jd-descrcol" width="100%">Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></code>.</td>
     </tr>
@@ -1152,7 +1159,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#declineRoomInvitation(java.lang.String)">declineRoomInvitation</a></span>(<a href="/reference/java/lang/String.html">String</a> invitationId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#declineRoomInvitation(java.lang.String)">declineRoomInvitation</a></span>(String invitationId)</nobr>
         
         <div class="jd-descrdiv">Decline an invitation for a real-time room.</div>
   
@@ -1188,7 +1195,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#dismissRoomInvitation(java.lang.String)">dismissRoomInvitation</a></span>(<a href="/reference/java/lang/String.html">String</a> invitationId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#dismissRoomInvitation(java.lang.String)">dismissRoomInvitation</a></span>(String invitationId)</nobr>
         
         <div class="jd-descrdiv">Dismiss an invitation to a real-time room.</div>
   
@@ -1203,7 +1210,7 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getAchievementsIntent()">getAchievementsIntent</a></span>()</nobr>
@@ -1221,7 +1228,7 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getAllLeaderboardsIntent()">getAllLeaderboardsIntent</a></span>()</nobr>
@@ -1239,7 +1246,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getAppId()">getAppId</a></span>()</nobr>
@@ -1257,7 +1264,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getCurrentAccountName()">getCurrentAccountName</a></span>()</nobr>
@@ -1307,7 +1314,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getCurrentPlayerId()">getCurrentPlayerId</a></span>()</nobr>
@@ -1323,7 +1330,7 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getInvitationInboxIntent()">getInvitationInboxIntent</a></span>()</nobr>
@@ -1341,10 +1348,10 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getLeaderboardIntent(java.lang.String)">getLeaderboardIntent</a></span>(<a href="/reference/java/lang/String.html">String</a> leaderboardId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getLeaderboardIntent(java.lang.String)">getLeaderboardIntent</a></span>(String leaderboardId)</nobr>
         
         <div class="jd-descrdiv">Gets an intent to show a leaderboard for a game.</div>
   
@@ -1362,7 +1369,7 @@ Summary:
             <a href="/reference/com/google/android/gms/games/RealTimeSocket.html">RealTimeSocket</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getRealTimeSocketForParticipant(java.lang.String, java.lang.String)">getRealTimeSocketForParticipant</a></span>(<a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/lang/String.html">String</a> participantId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getRealTimeSocketForParticipant(java.lang.String, java.lang.String)">getRealTimeSocketForParticipant</a></span>(String roomId, String participantId)</nobr>
         
         <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html">RealTimeSocket</a></code> for carrying network traffic to the given peer.</div>
   
@@ -1377,7 +1384,7 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getRealTimeWaitingRoomIntent(com.google.android.gms.games.multiplayer.realtime.Room, int)">getRealTimeWaitingRoomIntent</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, int minParticipantsToStart)</nobr>
@@ -1396,7 +1403,7 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getSelectPlayersIntent(int, int)">getSelectPlayersIntent</a></span>(int minPlayers, int maxPlayers)</nobr>
@@ -1414,7 +1421,7 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getSettingsIntent()">getSettingsIntent</a></span>()</nobr>
@@ -1436,7 +1443,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#incrementAchievement(java.lang.String, int)">incrementAchievement</a></span>(<a href="/reference/java/lang/String.html">String</a> id, int numSteps)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#incrementAchievement(java.lang.String, int)">incrementAchievement</a></span>(String id, int numSteps)</nobr>
         
         <div class="jd-descrdiv">Increments an achievement by the given number of steps.</div>
   
@@ -1454,7 +1461,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#incrementAchievementImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String, int)">incrementAchievementImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> id, int numSteps)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#incrementAchievementImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String, int)">incrementAchievementImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id, int numSteps)</nobr>
         
         <div class="jd-descrdiv">Increments an achievement by the given number of steps.</div>
   
@@ -1565,7 +1572,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveRoom(com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener, java.lang.String)">leaveRoom</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html">RoomUpdateListener</a> listener, <a href="/reference/java/lang/String.html">String</a> roomId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveRoom(com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener, java.lang.String)">leaveRoom</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html">RoomUpdateListener</a> listener, String roomId)</nobr>
         
         <div class="jd-descrdiv">Leave the specified room.</div>
   
@@ -1583,24 +1590,6 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener)">loadAchievements</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">Asynchronously load achievement data for the currently signed in player.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener, boolean)">loadAchievements</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load achievement data for the currently signed in player.</div>
@@ -1609,7 +1598,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1627,7 +1616,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1646,7 +1635,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1664,24 +1653,6 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId)</nobr>
-        
-        <div class="jd-descrdiv">Asynchronously load a specific leaderboard's metadata for this game.</div>
-  
-  </td></tr>
-
-
-	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1692,7 +1663,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load the list of leaderboard metadata for this game.</div>
   
@@ -1710,6 +1681,69 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId)</nobr>
+        
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
+ instead.
+</em></div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.
+</em></div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId, boolean forceReload)</nobr>
+        
+        <div class="jd-descrdiv">Asynchronously load a specific leaderboard's metadata for this game.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadMoreInvitablePlayers(com.google.android.gms.games.OnPlayersLoadedListener, int)">loadMoreInvitablePlayers</a></span>(<a href="/reference/com/google/android/gms/games/OnPlayersLoadedListener.html">OnPlayersLoadedListener</a> listener, int pageSize)</nobr>
         
         <div class="jd-descrdiv">Asynchronously loads an additional page of invitable players.</div>
@@ -1718,7 +1752,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1736,7 +1770,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1746,7 +1780,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadPlayer(com.google.android.gms.games.OnPlayersLoadedListener, java.lang.String)">loadPlayer</a></span>(<a href="/reference/com/google/android/gms/games/OnPlayersLoadedListener.html">OnPlayersLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> playerId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadPlayer(com.google.android.gms.games.OnPlayersLoadedListener, java.lang.String)">loadPlayer</a></span>(<a href="/reference/com/google/android/gms/games/OnPlayersLoadedListener.html">OnPlayersLoadedListener</a> listener, String playerId)</nobr>
         
         <div class="jd-descrdiv">Asynchronously loads the profile for the requested player ID.</div>
   
@@ -1754,24 +1788,6 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadPlayerCenteredScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int, boolean)">loadPlayerCenteredScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</nobr>
-        
-        <div class="jd-descrdiv">Asynchronously load the player-centered page of scores for a given leaderboard.</div>
-  
-  </td></tr>
-
-
-	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1782,7 +1798,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadPlayerCenteredScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int)">loadPlayerCenteredScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadPlayerCenteredScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int, boolean)">loadPlayerCenteredScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load the player-centered page of scores for a given leaderboard.</div>
   
@@ -1800,9 +1816,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadTopScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int)">loadTopScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadPlayerCenteredScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int)">loadPlayerCenteredScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously load the top page of scores for a given leaderboard.</div>
+        <div class="jd-descrdiv">Asynchronously load the player-centered page of scores for a given leaderboard.</div>
   
   </td></tr>
 
@@ -1818,7 +1834,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadTopScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int, boolean)">loadTopScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadTopScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int)">loadTopScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load the top page of scores for a given leaderboard.</div>
   
@@ -1827,6 +1843,24 @@ Summary:
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadTopScores(com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener, java.lang.String, int, int, int, boolean)">loadTopScores</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</nobr>
+        
+        <div class="jd-descrdiv">Asynchronously load the top page of scores for a given leaderboard.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1844,7 +1878,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1862,7 +1896,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1881,7 +1915,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1899,6 +1933,24 @@ Summary:
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#revealAchievement(java.lang.String)">revealAchievement</a></span>(String id)</nobr>
+        
+        <div class="jd-descrdiv">Reveal a hidden achievement to the currently signed in player.</div>
+  
+  </td></tr>
+
+
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1909,7 +1961,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#revealAchievement(java.lang.String)">revealAchievement</a></span>(<a href="/reference/java/lang/String.html">String</a> id)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#revealAchievementImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String)">revealAchievementImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id)</nobr>
         
         <div class="jd-descrdiv">Reveal a hidden achievement to the currently signed in player.</div>
   
@@ -1924,28 +1976,10 @@ Summary:
             
             
             
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#revealAchievementImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String)">revealAchievementImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> id)</nobr>
-        
-        <div class="jd-descrdiv">Reveal a hidden achievement to the currently signed in player.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendReliableRealTimeMessage(com.google.android.gms.games.multiplayer.realtime.RealTimeReliableMessageSentListener, byte[], java.lang.String, java.lang.String)">sendReliableRealTimeMessage</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeReliableMessageSentListener.html">RealTimeReliableMessageSentListener</a> listener, byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/lang/String.html">String</a> recipientParticipantId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendReliableRealTimeMessage(com.google.android.gms.games.multiplayer.realtime.RealTimeReliableMessageSentListener, byte[], java.lang.String, java.lang.String)">sendReliableRealTimeMessage</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeReliableMessageSentListener.html">RealTimeReliableMessageSentListener</a> listener, byte[] messageData, String roomId, String recipientParticipantId)</nobr>
         
         <div class="jd-descrdiv">Send a message to a participant in a real-time room reliably.</div>
   
@@ -1953,7 +1987,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1963,7 +1997,7 @@ Summary:
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.util.List<java.lang.String>)">sendUnreliableRealTimeMessage</a></span>(byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; recipientParticipantIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.util.List<java.lang.String>)">sendUnreliableRealTimeMessage</a></span>(byte[] messageData, String roomId, List&lt;String&gt; recipientParticipantIds)</nobr>
         
         <div class="jd-descrdiv">Send a message to one or more participants in a real-time room.</div>
   
@@ -1971,24 +2005,6 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.lang.String)">sendUnreliableRealTimeMessage</a></span>(byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/lang/String.html">String</a> recipientParticipantId)</nobr>
-        
-        <div class="jd-descrdiv">Send a message to a participant in a real-time room.</div>
-  
-  </td></tr>
-
-
-	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1999,7 +2015,25 @@ Summary:
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessageToAll(byte[], java.lang.String)">sendUnreliableRealTimeMessageToAll</a></span>(byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.lang.String)">sendUnreliableRealTimeMessage</a></span>(byte[] messageData, String roomId, String recipientParticipantId)</nobr>
+        
+        <div class="jd-descrdiv">Send a message to a participant in a real-time room.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessageToAll(byte[], java.lang.String)">sendUnreliableRealTimeMessageToAll</a></span>(byte[] messageData, String roomId)</nobr>
         
         <div class="jd-descrdiv">Send a message to all participants in a real-time room.</div>
   
@@ -2007,7 +2041,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2026,7 +2060,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2045,7 +2079,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2055,7 +2089,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setViewForPopups(android.view.View)">setViewForPopups</a></span>(<a href="/reference/android/view/View.html">View</a> gamesContentView)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setViewForPopups(android.view.View)">setViewForPopups</a></span>(View gamesContentView)</nobr>
         
         <div class="jd-descrdiv">Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.</div>
   
@@ -2063,7 +2097,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2081,7 +2115,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2099,24 +2133,6 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScore(java.lang.String, long)">submitScore</a></span>(<a href="/reference/java/lang/String.html">String</a> leaderboardId, long score)</nobr>
-        
-        <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
-  
-  </td></tr>
-
-
-	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -2127,7 +2143,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScoreImmediate(com.google.android.gms.games.leaderboard.OnScoreSubmittedListener, java.lang.String, long)">submitScoreImmediate</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, long score)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScore(java.lang.String, long)">submitScore</a></span>(String leaderboardId, long score)</nobr>
         
         <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
   
@@ -2145,9 +2161,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unlockAchievement(java.lang.String)">unlockAchievement</a></span>(<a href="/reference/java/lang/String.html">String</a> id)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScoreImmediate(com.google.android.gms.games.leaderboard.OnScoreSubmittedListener, java.lang.String, long)">submitScoreImmediate</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a> listener, String leaderboardId, long score)</nobr>
         
-        <div class="jd-descrdiv">Unlock an achievement for the currently signed in player.</div>
+        <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
   
   </td></tr>
 
@@ -2163,7 +2179,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unlockAchievementImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String)">unlockAchievementImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> id)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unlockAchievement(java.lang.String)">unlockAchievement</a></span>(String id)</nobr>
         
         <div class="jd-descrdiv">Unlock an achievement for the currently signed in player.</div>
   
@@ -2172,6 +2188,24 @@ Summary:
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unlockAchievementImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String)">unlockAchievementImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id)</nobr>
+        
+        <div class="jd-descrdiv">Unlock an achievement for the currently signed in player.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2189,7 +2223,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2207,7 +2241,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2247,7 +2281,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -2266,7 +2300,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -2285,7 +2319,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -2314,7 +2348,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -2378,7 +2412,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -2687,7 +2721,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_EXCLUSIVE_BIT_MASK
     </h4>
@@ -2725,7 +2759,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_INVITATION
     </h4>
@@ -2764,7 +2798,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_MAX_AUTOMATCH_PLAYERS
     </h4>
@@ -2807,7 +2841,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_MIN_AUTOMATCH_PLAYERS
     </h4>
@@ -2850,7 +2884,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_PLAYERS
     </h4>
@@ -2893,7 +2927,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         EXTRA_ROOM
     </h4>
@@ -4152,7 +4186,7 @@ From interface
         void
       </span>
       <span class="sympad">declineRoomInvitation</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> invitationId)</span>
+      <span class="normal">(String invitationId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -4221,7 +4255,7 @@ From interface
         void
       </span>
       <span class="sympad">dismissRoomInvitation</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> invitationId)</span>
+      <span class="normal">(String invitationId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -4258,7 +4292,7 @@ From interface
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getAchievementsIntent</span>
       <span class="normal">()</span>
@@ -4299,7 +4333,7 @@ From interface
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getAllLeaderboardsIntent</span>
       <span class="normal">()</span>
@@ -4339,7 +4373,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getAppId</span>
       <span class="normal">()</span>
@@ -4373,7 +4407,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getCurrentAccountName</span>
       <span class="normal">()</span>
@@ -4394,13 +4428,14 @@ From interface
  your manifest in order to use this method.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Account name for the currently selected account.</li></ul>
+      <ul class="nolist"><li>Account name for the currently selected account. May be null if an error occurred
+         while communicating with the games service.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/SecurityException.html">SecurityException</a></td>
+            <th>SecurityException</td>
             <td>If your app doesn't have the
              <code><a href="/reference/android/Manifest.permission.html#GET_ACCOUNTS">GET_ACCOUNTS</a></code> permission.
 </td>
@@ -4473,7 +4508,8 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/Player.html">Player</a></code> representing the currently signed in player.
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/Player.html">Player</a></code> representing the currently signed in player. May be null if an error
+         occurred while communicating with the games service.
 </li></ul>
   </div>
 
@@ -4491,7 +4527,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getCurrentPlayerId</span>
       <span class="normal">()</span>
@@ -4507,7 +4543,8 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The player ID for the currently signed in player.
+      <ul class="nolist"><li>The player ID for the currently signed in player. May be null if an error occurred
+         while communicating with the games service.
 </li></ul>
   </div>
 
@@ -4525,7 +4562,7 @@ From interface
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getInvitationInboxIntent</span>
       <span class="normal">()</span>
@@ -4566,10 +4603,10 @@ From interface
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getLeaderboardIntent</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> leaderboardId)</span>
+      <span class="normal">(String leaderboardId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -4618,7 +4655,7 @@ From interface
         <a href="/reference/com/google/android/gms/games/RealTimeSocket.html">RealTimeSocket</a>
       </span>
       <span class="sympad">getRealTimeSocketForParticipant</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/lang/String.html">String</a> participantId)</span>
+      <span class="normal">(String roomId, String participantId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -4666,7 +4703,7 @@ From interface
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getRealTimeWaitingRoomIntent</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, int minParticipantsToStart)</span>
@@ -4753,7 +4790,7 @@ From interface
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getSelectPlayersIntent</span>
       <span class="normal">(int minPlayers, int maxPlayers)</span>
@@ -4817,7 +4854,7 @@ From interface
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getSettingsIntent</span>
       <span class="normal">()</span>
@@ -4865,7 +4902,7 @@ From interface
         void
       </span>
       <span class="sympad">incrementAchievement</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> id, int numSteps)</span>
+      <span class="normal">(String id, int numSteps)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -4917,7 +4954,7 @@ From interface
         void
       </span>
       <span class="sympad">incrementAchievementImmediate</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> id, int numSteps)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id, int numSteps)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5176,7 +5213,7 @@ From interface
         void
       </span>
       <span class="sympad">leaveRoom</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html">RoomUpdateListener</a> listener, <a href="/reference/java/lang/String.html">String</a> roomId)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html">RoomUpdateListener</a> listener, String roomId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5203,52 +5240,6 @@ From interface
         <tr>
           <th>roomId</td>
           <td>ID of the room to leave.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">loadAchievements</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load achievement data for the currently signed in player.
- <p>
- The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
- called before the result is ready it will not be delivered.
- <p>
- This form of the API is deprecated and will be removed in a future release. Please use
- <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener, boolean)">loadAchievements(OnAchievementsLoadedListener, boolean)</a></code> instead.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The listener that is called when the load is complete. The listener is called
-            on the main thread.
 </td>
         </tr>
       </table>
@@ -5449,6 +5440,56 @@ From interface
 </div>
 
 
+<A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadLeaderboardMetadata</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, boolean forceReload)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of leaderboard metadata for this game.
+ <p>
+ The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
+ called before the result is ready it will not be delivered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the load is complete. The listener is called
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>forceReload</td>
+          <td>If true, this call will clear any locally cached data and attempt to fetch
+            the latest data from the server. This would commonly be used for something like a
+            user-initiated refresh. Normally, this should be set to false to gain advantages
+            of data caching.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -5462,7 +5503,7 @@ From interface
         void
       </span>
       <span class="sympad">loadLeaderboardMetadata</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5471,7 +5512,14 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
+ instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load a specific leaderboard's metadata for this game.
  <p>
  The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
@@ -5486,8 +5534,7 @@ From interface
         </tr>
         <tr>
           <th>leaderboardId</td>
-          <td>ID of the leaderboard to load metadata for.
-</td>
+          <td>ID of the leaderboard to load metadata for.</td>
         </tr>
       </table>
   </div>
@@ -5518,7 +5565,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of leaderboard metadata for this game.
  <p>
  The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
@@ -5529,7 +5582,60 @@ From interface
         <tr>
           <th>listener</td>
           <td>The listener that is called when the load is complete. The listener is called
-            on the main thread.
+            on the main thread.</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadLeaderboardMetadata</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId, boolean forceReload)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load a specific leaderboard's metadata for this game.
+ <p>
+ The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
+ called before the result is ready it will not be delivered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the load is complete. The listener is called
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>leaderboardId</td>
+          <td>ID of the leaderboard to load metadata for.</td>
+        </tr>
+        <tr>
+          <th>forceReload</td>
+          <td>If true, this call will clear any locally cached data and attempt to fetch
+            the latest data from the server. This would commonly be used for something like a
+            user-initiated refresh. Normally, this should be set to false to gain advantages
+            of data caching.
 </td>
         </tr>
       </table>
@@ -5658,7 +5764,7 @@ From interface
         void
       </span>
       <span class="sympad">loadPlayer</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/OnPlayersLoadedListener.html">OnPlayersLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> playerId)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/OnPlayersLoadedListener.html">OnPlayersLoadedListener</a> listener, String playerId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5705,7 +5811,7 @@ From interface
         void
       </span>
       <span class="sympad">loadPlayerCenteredScores</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5777,7 +5883,7 @@ From interface
         void
       </span>
       <span class="sympad">loadPlayerCenteredScores</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5842,7 +5948,7 @@ From interface
         void
       </span>
       <span class="sympad">loadTopScores</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5906,7 +6012,7 @@ From interface
         void
       </span>
       <span class="sympad">loadTopScores</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection, int maxResults, boolean forceReload)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6168,7 +6274,7 @@ From interface
         void
       </span>
       <span class="sympad">revealAchievement</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> id)</span>
+      <span class="normal">(String id)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6219,7 +6325,7 @@ From interface
         void
       </span>
       <span class="sympad">revealAchievementImmediate</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> id)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6275,7 +6381,7 @@ From interface
         int
       </span>
       <span class="sympad">sendReliableRealTimeMessage</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeReliableMessageSentListener.html">RealTimeReliableMessageSentListener</a> listener, byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/lang/String.html">String</a> recipientParticipantId)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeReliableMessageSentListener.html">RealTimeReliableMessageSentListener</a> listener, byte[] messageData, String roomId, String recipientParticipantId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6337,7 +6443,7 @@ From interface
         int
       </span>
       <span class="sympad">sendUnreliableRealTimeMessage</span>
-      <span class="normal">(byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; recipientParticipantIds)</span>
+      <span class="normal">(byte[] messageData, String roomId, List&lt;String&gt; recipientParticipantIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6394,7 +6500,7 @@ From interface
         int
       </span>
       <span class="sympad">sendUnreliableRealTimeMessage</span>
-      <span class="normal">(byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId, <a href="/reference/java/lang/String.html">String</a> recipientParticipantId)</span>
+      <span class="normal">(byte[] messageData, String roomId, String recipientParticipantId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6451,7 +6557,7 @@ From interface
         int
       </span>
       <span class="sympad">sendUnreliableRealTimeMessageToAll</span>
-      <span class="normal">(byte[] messageData, <a href="/reference/java/lang/String.html">String</a> roomId)</span>
+      <span class="normal">(byte[] messageData, String roomId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6584,7 +6690,7 @@ From interface
         void
       </span>
       <span class="sympad">setViewForPopups</span>
-      <span class="normal">(<a href="/reference/android/view/View.html">View</a> gamesContentView)</span>
+      <span class="normal">(View gamesContentView)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6696,7 +6802,7 @@ From interface
         void
       </span>
       <span class="sympad">submitScore</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> leaderboardId, long score)</span>
+      <span class="normal">(String leaderboardId, long score)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6761,7 +6867,7 @@ From interface
         void
       </span>
       <span class="sympad">submitScoreImmediate</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> leaderboardId, long score)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a> listener, String leaderboardId, long score)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6837,7 +6943,7 @@ From interface
         void
       </span>
       <span class="sympad">unlockAchievement</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> id)</span>
+      <span class="normal">(String id)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -6888,7 +6994,7 @@ From interface
         void
       </span>
       <span class="sympad">unlockAchievementImmediate</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, <a href="/reference/java/lang/String.html">String</a> id)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id)</span>
     </h4>
       <div class="api-level">
         <div></div>

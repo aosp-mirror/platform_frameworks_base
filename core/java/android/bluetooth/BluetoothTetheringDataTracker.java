@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.net.BaseNetworkStateTracker;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.INetworkManagementService;
@@ -54,7 +55,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @hide
  */
-public class BluetoothTetheringDataTracker implements NetworkStateTracker {
+public class BluetoothTetheringDataTracker extends BaseNetworkStateTracker {
     private static final String NETWORKTYPE = "BLUETOOTH_TETHER";
     private static final String TAG = "BluetoothTethering";
     private static final boolean DBG = true;
@@ -66,18 +67,12 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
     private final Object mLinkPropertiesLock = new Object();
-    private LinkProperties mLinkProperties;
-
-    private LinkCapabilities mLinkCapabilities;
-
     private final Object mNetworkInfoLock = new Object();
-    private NetworkInfo mNetworkInfo;
 
     private BluetoothPan mBluetoothPan;
     private static String mRevTetheredIface;
     /* For sending events to connectivity service handler */
     private Handler mCsHandler;
-    protected Context mContext;
     private static BluetoothTetheringDataTracker sInstance;
     private BtdtHandler mBtdtHandler;
     private AtomicReference<AsyncChannel> mAsyncChannel = new AtomicReference<AsyncChannel>(null);
@@ -149,6 +144,11 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
 
     @Override
     public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         // not implemented
     }
 

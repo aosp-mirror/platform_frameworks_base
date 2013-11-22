@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2012, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<resources>
+    <!-- Keyguard PIN pad styles -->
+    <style name="Widget.Button.NumPadKey"
+            parent="@android:style/Widget.Button">
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:textSize">34dp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">6dp</item>
+    </style>
+    <style name="TextAppearance.NumPadKey"
+            parent="@android:style/TextAppearance">
+        <item name="android:textSize">34dp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffff</item>
+    </style>
+    <style name="TextAppearance.NumPadKey.Klondike">
+        <item name="android:textSize">20dp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#80ffffff</item>
+    </style>
+
+    <!-- Standard animations for a non-full-screen window or activity. -->
+    <style name="Animation.LockScreen" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/lock_screen_enter</item>
+        <item name="android:windowExitAnimation">@anim/lock_screen_exit</item>
+    </style>
+
+    <!-- Built-in clock widget stuff -->
+    <style name="widget_label">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textSize">@dimen/widget_label_font_size</item>
+    </style>
+    <style name="big_thin">
+        <item name="android:textSize">@dimen/big_font_size</item>
+        <item name="android:fontFamily">sans-serif-thin</item>
+    </style>
+    <style name="widget_big_thin" parent="big_thin">
+        <item name="android:textSize">@dimen/widget_big_font_size</item>
+    </style>
+
+    <style name="Widget.TransportControl.SeekBar" parent="@android:style/Widget.Holo.SeekBar">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
+        <item name="android:minHeight">13dip</item>
+        <item name="android:maxHeight">13dip</item>
+        <item name="android:thumb">@drawable/scrubber_control_selector_holo</item>
+        <item name="android:thumbOffset">16dip</item>
+        <item name="android:focusable">true</item>
+        <item name="android:paddingStart">16dip</item>
+        <item name="android:paddingEnd">16dip</item>
+        <item name="android:mirrorForRtl">true</item>
+    </style>
+
+</resources>

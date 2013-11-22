@@ -16,6 +16,7 @@
 
 package android.os;
 
+import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.TypedProperties;
 
 import android.util.Log;
@@ -108,31 +109,88 @@ public final class Debug
      * process. The returns info broken down by dalvik, native, and other. All results are in kB.
      */
     public static class MemoryInfo implements Parcelable {
-        /** The proportional set size for dalvik. */
+        /** The proportional set size for dalvik heap.  (Doesn't include other Dalvik overhead.) */
         public int dalvikPss;
-        /** The private dirty pages used by dalvik. */
+        /** The proportional set size that is swappable for dalvik heap. */
+        /** @hide We may want to expose this, eventually. */
+        public int dalvikSwappablePss;
+        /** The private dirty pages used by dalvik heap. */
         public int dalvikPrivateDirty;
-        /** The shared dirty pages used by dalvik. */
+        /** The shared dirty pages used by dalvik heap. */
         public int dalvikSharedDirty;
+        /** The private clean pages used by dalvik heap. */
+        /** @hide We may want to expose this, eventually. */
+        public int dalvikPrivateClean;
+        /** The shared clean pages used by dalvik heap. */
+        /** @hide We may want to expose this, eventually. */
+        public int dalvikSharedClean;
+        /** The dirty dalvik pages that have been swapped out. */
+        /** @hide We may want to expose this, eventually. */
+        public int dalvikSwappedOut;
 
         /** The proportional set size for the native heap. */
         public int nativePss;
+        /** The proportional set size that is swappable for the native heap. */
+        /** @hide We may want to expose this, eventually. */
+        public int nativeSwappablePss;
         /** The private dirty pages used by the native heap. */
         public int nativePrivateDirty;
         /** The shared dirty pages used by the native heap. */
         public int nativeSharedDirty;
+        /** The private clean pages used by the native heap. */
+        /** @hide We may want to expose this, eventually. */
+        public int nativePrivateClean;
+        /** The shared clean pages used by the native heap. */
+        /** @hide We may want to expose this, eventually. */
+        public int nativeSharedClean;
+        /** The dirty native pages that have been swapped out. */
+        /** @hide We may want to expose this, eventually. */
+        public int nativeSwappedOut;
 
         /** The proportional set size for everything else. */
         public int otherPss;
+        /** The proportional set size that is swappable for everything else. */
+        /** @hide We may want to expose this, eventually. */
+        public int otherSwappablePss;
         /** The private dirty pages used by everything else. */
         public int otherPrivateDirty;
         /** The shared dirty pages used by everything else. */
         public int otherSharedDirty;
+        /** The private clean pages used by everything else. */
+        /** @hide We may want to expose this, eventually. */
+        public int otherPrivateClean;
+        /** The shared clean pages used by everything else. */
+        /** @hide We may want to expose this, eventually. */
+        public int otherSharedClean;
+        /** The dirty pages used by anyting else that have been swapped out. */
+        /** @hide We may want to expose this, eventually. */
+        public int otherSwappedOut;
 
         /** @hide */
-        public static final int NUM_OTHER_STATS = 10;
+        public static final int NUM_OTHER_STATS = 16;
 
-        private int[] otherStats = new int[NUM_OTHER_STATS*3];
+        /** @hide */
+        public static final int NUM_DVK_STATS = 5;
+
+        /** @hide */
+        public static final int NUM_CATEGORIES = 7;
+
+        /** @hide */
+        public static final int offsetPss = 0;
+        /** @hide */
+        public static final int offsetSwappablePss = 1;
+        /** @hide */
+        public static final int offsetPrivateDirty = 2;
+        /** @hide */
+        public static final int offsetSharedDirty = 3;
+        /** @hide */
+        public static final int offsetPrivateClean = 4;
+        /** @hide */
+        public static final int offsetSharedClean = 5;
+        /** @hide */
+        public static final int offsetSwappedOut = 6;
+
+        private int[] otherStats = new int[(NUM_OTHER_STATS+NUM_DVK_STATS)*NUM_CATEGORIES];
 
         public MemoryInfo() {
         }
@@ -142,6 +200,22 @@ public final class Debug
          */
         public int getTotalPss() {
             return dalvikPss + nativePss + otherPss;
+        }
+
+        /**
+         * @hide Return total PSS memory usage in kB.
+         */
+        public int getTotalUss() {
+            return dalvikPrivateClean + dalvikPrivateDirty
+                    + nativePrivateClean + nativePrivateDirty
+                    + otherPrivateClean + otherPrivateDirty;
+        }
+
+        /**
+         * Return total PSS memory usage in kB.
+         */
+        public int getTotalSwappablePss() {
+            return dalvikSwappablePss + nativeSwappablePss + otherSwappablePss;
         }
 
         /**
@@ -158,35 +232,89 @@ public final class Debug
             return dalvikSharedDirty + nativeSharedDirty + otherSharedDirty;
         }
 
-        /* @hide */
+        /**
+         * Return total shared clean memory usage in kB.
+         */
+        public int getTotalPrivateClean() {
+            return dalvikPrivateClean + nativePrivateClean + otherPrivateClean;
+        }
+
+        /**
+         * Return total shared clean memory usage in kB.
+         */
+        public int getTotalSharedClean() {
+            return dalvikSharedClean + nativeSharedClean + otherSharedClean;
+        }
+
+        /**
+         * Return total swapped out memory in kB.
+         * @hide
+         */
+        public int getTotalSwappedOut() {
+            return dalvikSwappedOut + nativeSwappedOut + otherSwappedOut;
+        }
+
+        /** @hide */
         public int getOtherPss(int which) {
-            return otherStats[which*3];
+            return otherStats[which*NUM_CATEGORIES + offsetPss];
         }
 
-        /* @hide */
+
+        /** @hide */
+        public int getOtherSwappablePss(int which) {
+            return otherStats[which*NUM_CATEGORIES + offsetSwappablePss];
+        }
+
+
+        /** @hide */
         public int getOtherPrivateDirty(int which) {
-            return otherStats[which*3 + 1];
+            return otherStats[which*NUM_CATEGORIES + offsetPrivateDirty];
         }
 
-        /* @hide */
+        /** @hide */
         public int getOtherSharedDirty(int which) {
-            return otherStats[which*3 + 2];
+            return otherStats[which*NUM_CATEGORIES + offsetSharedDirty];
         }
 
+        /** @hide */
+        public int getOtherPrivateClean(int which) {
+            return otherStats[which*NUM_CATEGORIES + offsetPrivateClean];
+        }
 
-        /* @hide */
+        /** @hide */
+        public int getOtherSharedClean(int which) {
+            return otherStats[which*NUM_CATEGORIES + offsetSharedClean];
+        }
+
+        /** @hide */
+        public int getOtherSwappedOut(int which) {
+            return otherStats[which*NUM_CATEGORIES + offsetSwappedOut];
+        }
+
+        /** @hide */
         public static String getOtherLabel(int which) {
             switch (which) {
-                case 0: return "Stack";
-                case 1: return "Cursor";
-                case 2: return "Ashmem";
-                case 3: return "Other dev";
-                case 4: return ".so mmap";
-                case 5: return ".jar mmap";
-                case 6: return ".apk mmap";
-                case 7: return ".ttf mmap";
-                case 8: return ".dex mmap";
-                case 9: return "Other mmap";
+                case 0: return "Dalvik Other";
+                case 1: return "Stack";
+                case 2: return "Cursor";
+                case 3: return "Ashmem";
+                case 4: return "Other dev";
+                case 5: return ".so mmap";
+                case 6: return ".jar mmap";
+                case 7: return ".apk mmap";
+                case 8: return ".ttf mmap";
+                case 9: return ".dex mmap";
+                case 10: return "code mmap";
+                case 11: return "image mmap";
+                case 12: return "Other mmap";
+                case 13: return "Graphics";
+                case 14: return "GL";
+                case 15: return "Memtrack";
+                case 16: return ".Heap";
+                case 17: return ".LOS";
+                case 18: return ".LinearAlloc";
+                case 19: return ".GC";
+                case 20: return ".JITCache";
                 default: return "????";
             }
         }
@@ -197,27 +325,51 @@ public final class Debug
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(dalvikPss);
+            dest.writeInt(dalvikSwappablePss);
             dest.writeInt(dalvikPrivateDirty);
             dest.writeInt(dalvikSharedDirty);
+            dest.writeInt(dalvikPrivateClean);
+            dest.writeInt(dalvikSharedClean);
+            dest.writeInt(dalvikSwappedOut);
             dest.writeInt(nativePss);
+            dest.writeInt(nativeSwappablePss);
             dest.writeInt(nativePrivateDirty);
             dest.writeInt(nativeSharedDirty);
+            dest.writeInt(nativePrivateClean);
+            dest.writeInt(nativeSharedClean);
+            dest.writeInt(nativeSwappedOut);
             dest.writeInt(otherPss);
+            dest.writeInt(otherSwappablePss);
             dest.writeInt(otherPrivateDirty);
             dest.writeInt(otherSharedDirty);
+            dest.writeInt(otherPrivateClean);
+            dest.writeInt(otherSharedClean);
+            dest.writeInt(otherSwappedOut);
             dest.writeIntArray(otherStats);
         }
 
         public void readFromParcel(Parcel source) {
             dalvikPss = source.readInt();
+            dalvikSwappablePss = source.readInt();
             dalvikPrivateDirty = source.readInt();
             dalvikSharedDirty = source.readInt();
+            dalvikPrivateClean = source.readInt();
+            dalvikSharedClean = source.readInt();
+            dalvikSwappedOut = source.readInt();
             nativePss = source.readInt();
+            nativeSwappablePss = source.readInt();
             nativePrivateDirty = source.readInt();
             nativeSharedDirty = source.readInt();
+            nativePrivateClean = source.readInt();
+            nativeSharedClean = source.readInt();
+            nativeSwappedOut = source.readInt();
             otherPss = source.readInt();
+            otherSwappablePss = source.readInt();
             otherPrivateDirty = source.readInt();
             otherSharedDirty = source.readInt();
+            otherPrivateClean = source.readInt();
+            otherSharedClean = source.readInt();
+            otherSwappedOut = source.readInt();
             otherStats = source.createIntArray();
         }
 
@@ -364,7 +516,7 @@ public final class Debug
         PrintWriter outStream = null;
         try {
             FileOutputStream fos = new FileOutputStream(SYSFS_QEMU_TRACE_STATE);
-            outStream = new PrintWriter(new OutputStreamWriter(fos));
+            outStream = new FastPrintWriter(fos);
             outStream.println("1");
         } catch (Exception e) {
         } finally {
@@ -392,7 +544,7 @@ public final class Debug
         PrintWriter outStream = null;
         try {
             FileOutputStream fos = new FileOutputStream(SYSFS_QEMU_TRACE_STATE);
-            outStream = new PrintWriter(new OutputStreamWriter(fos));
+            outStream = new FastPrintWriter(fos);
             outStream.println("0");
         } catch (Exception e) {
             // We could print an error message here but we probably want
@@ -611,7 +763,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Clears the global size of objects allocated.
-     * @see #getGlobalAllocCountSize()
+     * @see #getGlobalAllocSize()
      */
     public static void resetGlobalAllocSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
@@ -891,9 +1043,38 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Retrieves the PSS memory used by the process as given by the
-     * smaps. @hide
+     * smaps.  Optionally supply a long array of 1 entry to also
+     * receive the uss of the process.  @hide
      */
-    public static native long getPss(int pid);
+    public static native long getPss(int pid, long[] outUss);
+
+    /** @hide */
+    public static final int MEMINFO_TOTAL = 0;
+    /** @hide */
+    public static final int MEMINFO_FREE = 1;
+    /** @hide */
+    public static final int MEMINFO_BUFFERS = 2;
+    /** @hide */
+    public static final int MEMINFO_CACHED = 3;
+    /** @hide */
+    public static final int MEMINFO_SHMEM = 4;
+    /** @hide */
+    public static final int MEMINFO_SLAB = 5;
+    /** @hide */
+    public static final int MEMINFO_SWAP_TOTAL = 6;
+    /** @hide */
+    public static final int MEMINFO_SWAP_FREE = 7;
+    /** @hide */
+    public static final int MEMINFO_ZRAM_TOTAL = 8;
+    /** @hide */
+    public static final int MEMINFO_COUNT = 9;
+
+    /**
+     * Retrieves /proc/meminfo.  outSizes is filled with fields
+     * as defined by MEMINFO_* offsets.
+     * @hide
+     */
+    public static native void getMemInfo(long[] outSizes);
 
     /**
      * Establish an object allocation limit in the current thread.
@@ -1400,7 +1581,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Return a String describing the calling method and location at a particular stack depth.
-     * @param callStack the Thread stack 
+     * @param callStack the Thread stack
      * @param depth the depth of stack to return information for.
      * @return the String describing the caller at that depth.
      */
@@ -1423,6 +1604,22 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
         final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < depth; i++) {
+            sb.append(getCaller(callStack, i)).append(" ");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Return a string consisting of methods and locations at multiple call stack levels.
+     * @param depth the number of levels to return, starting with the immediate caller.
+     * @return a string describing the call stack.
+     * {@hide}
+     */
+    public static String getCallers(final int start, int depth) {
+        final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+        StringBuffer sb = new StringBuffer();
+        depth += start;
+        for (int i = start; i < depth; i++) {
             sb.append(getCaller(callStack, i)).append(" ");
         }
         return sb.toString();

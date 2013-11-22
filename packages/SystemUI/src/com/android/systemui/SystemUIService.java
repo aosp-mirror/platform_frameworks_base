@@ -16,32 +16,26 @@
 
 package com.android.systemui;
 
+import android.app.Service;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.IBinder;
+import android.util.Log;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-
-import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.os.Binder;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.util.Slog;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
-import android.view.accessibility.AccessibilityManager;
+import java.util.HashMap;
 
 public class SystemUIService extends Service {
-    static final String TAG = "SystemUIService";
+    private static final String TAG = "SystemUIService";
 
     /**
-     * The class names of the stuff to start.
+     * The classes of the stuff to start.
      */
-    final Object[] SERVICES = new Object[] {
-            0, // system bar or status bar, filled in below.
+    private final Class<?>[] SERVICES = new Class[] {
+            com.android.systemui.recent.Recents.class,
+            com.android.systemui.statusbar.SystemBars.class,
+            com.android.systemui.usb.StorageNotification.class,
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.settings.SettingsUI.class,
@@ -50,44 +44,15 @@ public class SystemUIService extends Service {
     /**
      * Hold a reference on the stuff we start.
      */
-    SystemUI[] mServices;
-
-    private Class chooseClass(Object o) {
-        if (o instanceof Integer) {
-            final String cl = getString((Integer)o);
-            try {
-                return getClassLoader().loadClass(cl);
-            } catch (ClassNotFoundException ex) {
-                throw new RuntimeException(ex);
-            }
-        } else if (o instanceof Class) {
-            return (Class)o;
-        } else {
-            throw new RuntimeException("Unknown system ui service: " + o);
-        }
-    }
+    private final SystemUI[] mServices = new SystemUI[SERVICES.length];
 
     @Override
     public void onCreate() {
-        // Tell the accessibility layer that this process will
-        // run as the current user, i.e. run across users.
-        AccessibilityManager.createAsSharedAcrossUsers(this);
-
-        // Pick status bar or system bar.
-        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-        try {
-            SERVICES[0] = wm.hasSystemNavBar()
-                    ? R.string.config_systemBarComponent
-                    : R.string.config_statusBarComponent;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failing checking whether status bar can hide", e);
-        }
-
+        HashMap<Class<?>, Object> components = new HashMap<Class<?>, Object>();
         final int N = SERVICES.length;
-        mServices = new SystemUI[N];
         for (int i=0; i<N; i++) {
-            Class cl = chooseClass(SERVICES[i]);
-            Slog.d(TAG, "loading: " + cl);
+            Class<?> cl = SERVICES[i];
+            Log.d(TAG, "loading: " + cl);
             try {
                 mServices[i] = (SystemUI)cl.newInstance();
             } catch (IllegalAccessException ex) {
@@ -96,7 +61,8 @@ public class SystemUIService extends Service {
                 throw new RuntimeException(ex);
             }
             mServices[i].mContext = this;
-            Slog.d(TAG, "running: " + mServices[i]);
+            mServices[i].mComponents = components;
+            Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
         }
     }

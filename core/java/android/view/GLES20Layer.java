@@ -59,6 +59,9 @@ abstract class GLES20Layer extends HardwareLayer {
 
     @Override
     public void destroy() {
+        if (mDisplayList != null) {
+            mDisplayList.reset();
+        }
         if (mFinalizer != null) {
             mFinalizer.destroy();
             mFinalizer = null;

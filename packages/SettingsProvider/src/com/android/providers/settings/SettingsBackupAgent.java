@@ -137,6 +137,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     static class Network {
         String ssid = "";  // equals() and hashCode() need these to be non-null
         String key_mgmt = "";
+        boolean certUsed = false;
         final ArrayList<String> rawLines = new ArrayList<String>();
 
         public static Network readFromStream(BufferedReader in) {
@@ -167,6 +168,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 ssid = line;
             } else if (line.startsWith("key_mgmt")) {
                 key_mgmt = line;
+            } else if (line.startsWith("client_cert=")) {
+                certUsed = true;
+            } else if (line.startsWith("ca_cert=")) {
+                certUsed = true;
+            } else if (line.startsWith("ca_path=")) {
+                certUsed = true;
             }
         }
 
@@ -246,6 +253,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         public void write(Writer w) throws IOException {
             for (Network net : mNetworks) {
+                if (net.certUsed) {
+                    // Networks that use certificates for authentication can't be restored
+                    // because the certificates they need don't get restored (because they
+                    // are stored in keystore, and can't be restored)
+                    continue;
+                }
+
                 net.write(w);
             }
         }
@@ -738,10 +752,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
             }
 
+            // Intercept the keys and see if they need special handling
+            value = mSettingsHelper.onBackupValue(key, value);
+
             if (value == null) {
                 continue;
             }
-
             // Write the key and value in the intermediary array.
             byte[] keyBytes = key.getBytes();
             totalSize += INTEGER_BYTE_COUNT + keyBytes.length;

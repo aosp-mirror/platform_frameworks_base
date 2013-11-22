@@ -167,7 +167,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      * @return The Drawable at the specified frame index
      */
     public Drawable getFrame(int index) {
-        return mAnimationState.getChildren()[index];
+        return mAnimationState.getChild(index);
     }
     
     /**
@@ -322,7 +322,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 mDurations = orig.mDurations;
                 mOneShot = orig.mOneShot;
             } else {
-                mDurations = new int[getChildren().length];
+                mDurations = new int[getCapacity()];
                 mOneShot = true;
             }
         }

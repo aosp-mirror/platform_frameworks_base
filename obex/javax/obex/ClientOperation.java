@@ -121,6 +121,13 @@ public final class ClientOperation implements Operation, BaseStream {
                     (header).mAuthResp.length);
 
         }
+
+        if ((header).mConnectionID != null) {
+            mRequestHeader.mConnectionID = new byte[4];
+            System.arraycopy((header).mConnectionID, 0, mRequestHeader.mConnectionID, 0,
+                    4);
+
+        }
     }
 
     /**
@@ -420,7 +427,7 @@ public final class ClientOperation implements Operation, BaseStream {
                 //split the headerArray
                 end = ObexHelper.findHeaderEnd(headerArray, start, mMaxPacketSize
                         - ObexHelper.BASE_PACKET_LENGTH);
-                // can not split 
+                // can not split
                 if (end == -1) {
                     mOperationDone = true;
                     abort();
@@ -521,7 +528,7 @@ public final class ClientOperation implements Operation, BaseStream {
             return false;
         }
 
-        // send all of the output data in 0x48, 
+        // send all of the output data in 0x48,
         // send 0x49 with empty body
         if ((mPrivateOutput != null) && (mPrivateOutput.size() > 0))
             returnValue = true;
@@ -722,5 +729,8 @@ public final class ClientOperation implements Operation, BaseStream {
                 }
             }
         }
+    }
+
+    public void noBodyHeader(){
     }
 }

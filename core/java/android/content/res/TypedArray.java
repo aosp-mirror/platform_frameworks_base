@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -170,8 +171,8 @@ public class TypedArray {
      * 
      * @param index Index of attribute to retrieve.
      * @param allowedChangingConfigs Bit mask of configurations from
-     * ActivityInfo that are allowed to change.
-     * 
+     * {@link Configuration}.NATIVE_CONFIG_* that are allowed to change.
+     *
      * @return String holding string data.  Any styling information is
      * removed.  Returns null if the attribute is not defined.
      */

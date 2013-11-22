@@ -16,11 +16,11 @@
 
 include $(LOCAL_PATH)/common.mk
 
-PRODUCT_COPY_FILES := $(foreach file,$(keylayouts),\
-    frameworks/base/data/keyboards/$(file):system/usr/keylayout/$(file))
+PRODUCT_COPY_FILES := $(foreach file,$(framework_keylayouts),\
+    $(file):system/usr/keylayout/$(notdir $(file)))
 
-PRODUCT_COPY_FILES += $(foreach file,$(keycharmaps),\
-    frameworks/base/data/keyboards/$(file):system/usr/keychars/$(file))
+PRODUCT_COPY_FILES += $(foreach file,$(framework_keycharmaps),\
+    $(file):system/usr/keychars/$(notdir $(file)))
 
-PRODUCT_COPY_FILES += $(foreach file,$(keyconfigs),\
-    frameworks/base/data/keyboards/$(file):system/usr/idc/$(file))
+PRODUCT_COPY_FILES += $(foreach file,$(framework_keyconfigs),\
+    $(file):system/usr/idc/$(notdir $(file)))

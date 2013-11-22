@@ -10,17 +10,25 @@ page.tags="textview","font"
   </div>
   <div class="layout-content-col span-5">
 
+<p>
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
+    href="{@docRoot}downloads/design/roboto-1.100141.zip">Download Roboto</a>
+</p>
+
 <p>The Android design language relies on traditional typographic tools such as scale, space, rhythm,
 and alignment with an underlying grid. Successful deployment of these tools is essential to help
 users quickly understand a screen of information. To support such use of typography, Ice Cream
-Sandwich introduced a new type family named Roboto, created specifically for the requirements of UI
-and high-resolution screens. The current TextView framework supports regular, bold, italic, and bold
-italic weights by default.</p>
+Sandwich introduced a new type family named
+<a href="http://www.google.com/fonts/specimen/Roboto" class="external-link">Roboto</a>, created
+specifically for the requirements of UI and high-resolution screens.</p>
 
-    <img src="{@docRoot}design/media/typography_alphas.png">
+<p>The current {@link android.widget.TextView} framework offers Roboto in thin, light, regular and bold
+weights, along with an italic style for each weight. The framework also offers the
+<a href="http://www.google.com/fonts/specimen/Roboto+Condensed" class="external-link">Roboto Condensed</a>
+variant in regular and bold weights, along with an italic style for each weight.</p>
 
-<p><a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP (@typography page)']);"
-      href="{@docRoot}downloads/design/Roboto_Hinted_20120823.zip">Download Roboto</a></p>
+    <img src="{@docRoot}design/media/typography_variants@2x.png" width="220">
+
 <p><a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specimen Booke (@typography page)']);"
       href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a></p>
 

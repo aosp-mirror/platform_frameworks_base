@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"系统用户界面"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"请勿打扰"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"显示通知"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"从列表中删除"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"应用信息"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"最近没有运行任何应用"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"请连接充电器"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"电池电量低。"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"还剩 <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"不支持 USB 充电功能。"\n"只能使用随附的充电器充电。"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"不支持 USB 充电功能。\n只能使用随附的充电器充电。"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"默认情况下用于该 USB 设备"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"默认情况下用于该 USB 配件"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"允许 USB 调试吗？"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下："\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"拉伸以填满屏幕"</string>
@@ -162,7 +160,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 数据网络已停用"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"移动数据已停用"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"数据已停用"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"您已达到指定的数据流量上限。"\n\n"如果您重新启用数据，运营商可能会收取相应的费用。"</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"您已达到指定的数据流量上限。\n\n如果您重新启用数据，运营商可能会收取相应的费用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据连接"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN 已连接"</string>
@@ -170,9 +168,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"已通过 GPS 确定位置"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"应用信息"</string>
-    <string name="close_universe" msgid="3736513750241754348">"关闭"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"通知功能已停用"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"点按此处可重新启用通知功能。"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"屏幕会自动旋转。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕锁定为横向模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕锁定为纵向模式。"</string>
@@ -189,7 +184,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"自动旋转"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"屏幕方向已锁定"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"输入法"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"位置信息"</string>
+    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
+    <skip />
+    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"媒体设备"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"只能拨打紧急呼救电话"</string>
@@ -205,5 +203,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"通知会显示在这里"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑动可随时查看通知。"\n"再次向下滑动可使用系统控制功能。"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑动可随时查看通知。\n再次向下滑动可使用系统控制功能。"</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"从边缘向里滑可显示系统栏"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"从屏幕边缘向里滑动即可显示系统栏"</string>
 </resources>

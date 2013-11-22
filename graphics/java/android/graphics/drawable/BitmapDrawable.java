@@ -23,12 +23,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.LayoutDirection;
 import android.view.Gravity;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -72,7 +75,10 @@ public class BitmapDrawable extends Drawable {
      // These are scaled to match the target density.
     private int mBitmapWidth;
     private int mBitmapHeight;
-    
+
+    // Mirroring matrix for using with Shaders
+    private Matrix mMirrorMatrix;
+
     /**
      * Create an empty drawable, not dealing with density.
      * @deprecated Use {@link #BitmapDrawable(android.content.res.Resources, android.graphics.Bitmap)}
@@ -399,14 +405,51 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
+    public void setAutoMirrored(boolean mirrored) {
+        if (mBitmapState.mAutoMirrored != mirrored) {
+            mBitmapState.mAutoMirrored = mirrored;
+            invalidateSelf();
+        }
+    }
+
+    @Override
+    public final boolean isAutoMirrored() {
+        return mBitmapState.mAutoMirrored;
+    }
+
+    @Override
     public int getChangingConfigurations() {
         return super.getChangingConfigurations() | mBitmapState.mChangingConfigurations;
     }
-    
+
+    private boolean needMirroring() {
+        return isAutoMirrored() && getLayoutDirection() == LayoutDirection.RTL;
+    }
+
+    private void updateMirrorMatrix(float dx) {
+        if (mMirrorMatrix == null) {
+            mMirrorMatrix = new Matrix();
+        }
+        mMirrorMatrix.setTranslate(dx, 0);
+        mMirrorMatrix.preScale(-1.0f, 1.0f);
+    }
+
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
         mApplyGravity = true;
+        Shader shader = mBitmapState.mPaint.getShader();
+        if (shader != null) {
+            if (needMirroring()) {
+                updateMirrorMatrix(bounds.right - bounds.left);
+                shader.setLocalMatrix(mMirrorMatrix);
+            } else {
+                if (mMirrorMatrix != null) {
+                    mMirrorMatrix = null;
+                    shader.setLocalMatrix(Matrix.IDENTITY_MATRIX);
+                }
+            }
+        }
     }
 
     @Override
@@ -430,6 +473,7 @@ public class BitmapDrawable extends Drawable {
             }
 
             Shader shader = state.mPaint.getShader();
+            final boolean needMirroring = needMirroring();
             if (shader == null) {
                 if (mApplyGravity) {
                     final int layoutDirection = getLayoutDirection();
@@ -437,11 +481,30 @@ public class BitmapDrawable extends Drawable {
                             getBounds(), mDstRect, layoutDirection);
                     mApplyGravity = false;
                 }
+                if (needMirroring) {
+                    canvas.save();
+                    // Mirror the bitmap
+                    canvas.translate(mDstRect.right - mDstRect.left, 0);
+                    canvas.scale(-1.0f, 1.0f);
+                }
                 canvas.drawBitmap(bitmap, null, mDstRect, state.mPaint);
+                if (needMirroring) {
+                    canvas.restore();
+                }
             } else {
                 if (mApplyGravity) {
                     copyBounds(mDstRect);
                     mApplyGravity = false;
+                }
+                if (needMirroring) {
+                    // Mirror the bitmap
+                    updateMirrorMatrix(mDstRect.right - mDstRect.left);
+                    shader.setLocalMatrix(mMirrorMatrix);
+                } else {
+                    if (mMirrorMatrix != null) {
+                        mMirrorMatrix = null;
+                        shader.setLocalMatrix(Matrix.IDENTITY_MATRIX);
+                    }
                 }
                 canvas.drawRect(mDstRect, state.mPaint);
             }
@@ -458,8 +521,21 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
+    public int getAlpha() {
+        return mBitmapState.mPaint.getAlpha();
+    }
+
+    @Override
     public void setColorFilter(ColorFilter cf) {
         mBitmapState.mPaint.setColorFilter(cf);
+        invalidateSelf();
+    }
+
+    /**
+     * @hide Candidate for future API inclusion
+     */
+    public void setXfermode(Xfermode xfermode) {
+        mBitmapState.mPaint.setXfermode(xfermode);
         invalidateSelf();
     }
 
@@ -500,6 +576,8 @@ public class BitmapDrawable extends Drawable {
         setTargetDensity(r.getDisplayMetrics());
         setMipMap(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_mipMap,
                 bitmap.hasMipMap()));
+        setAutoMirrored(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_autoMirrored,
+                false));
 
         final Paint paint = mBitmapState.mPaint;
         paint.setAntiAlias(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_antialias,
@@ -562,6 +640,7 @@ public class BitmapDrawable extends Drawable {
         Shader.TileMode mTileModeY = null;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
         boolean mRebuildShader;
+        boolean mAutoMirrored;
 
         BitmapState(Bitmap bitmap) {
             mBitmap = bitmap;
@@ -576,6 +655,12 @@ public class BitmapDrawable extends Drawable {
             mTargetDensity = bitmapState.mTargetDensity;
             mPaint = new Paint(bitmapState.mPaint);
             mRebuildShader = bitmapState.mRebuildShader;
+            mAutoMirrored = bitmapState.mAutoMirrored;
+        }
+
+        @Override
+        public Bitmap getBitmap() {
+            return mBitmap;
         }
 
         @Override

@@ -213,8 +213,8 @@ public class TextureView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mLayer != null && mAttachInfo != null && mAttachInfo.mHardwareRenderer != null) {
-            boolean success = mAttachInfo.mHardwareRenderer.safelyRun(new Runnable() {
+        if (mLayer != null) {
+            boolean success = executeHardwareAction(new Runnable() {
                 @Override
                 public void run() {
                     destroySurface();
@@ -322,7 +322,7 @@ public class TextureView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mSurface != null) {
-            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            mSurface.setDefaultBufferSize(getWidth(), getHeight());
             updateLayer();
             if (mListener != null) {
                 mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
@@ -362,7 +362,7 @@ public class TextureView extends View {
                 // Create a new SurfaceTexture for the layer.
                 mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
             }
-            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            mSurface.setDefaultBufferSize(getWidth(), getHeight());
             nCreateNativeWindow(mSurface);
 
             mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
@@ -399,7 +399,7 @@ public class TextureView extends View {
             mMatrixChanged = true;
 
             mAttachInfo.mHardwareRenderer.setSurfaceTexture(mLayer, mSurface);
-            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            mSurface.setDefaultBufferSize(getWidth(), getHeight());
         }
 
         applyUpdate();
@@ -656,13 +656,19 @@ public class TextureView extends View {
      * rectangle. Every pixel within that rectangle must be written; however
      * pixels outside the dirty rectangle will be preserved by the next call
      * to lockCanvas().
+     *
+     * This method can return null if the underlying surface texture is not
+     * available (see {@link #isAvailable()} or if the surface texture is
+     * already connected to an image producer (for instance: the camera,
+     * OpenGL, a media player, etc.)
      * 
      * @param dirty Area of the surface that will be modified.
 
      * @return A Canvas used to draw into the surface.
      * 
      * @see #lockCanvas() 
-     * @see #unlockCanvasAndPost(android.graphics.Canvas) 
+     * @see #unlockCanvasAndPost(android.graphics.Canvas)
+     * @see #isAvailable()
      */
     public Canvas lockCanvas(Rect dirty) {
         if (!isAvailable()) return null;
@@ -672,7 +678,9 @@ public class TextureView extends View {
         }
 
         synchronized (mNativeWindowLock) {
-            nLockCanvas(mNativeWindow, mCanvas, dirty);
+            if (!nLockCanvas(mNativeWindow, mCanvas, dirty)) {
+                return null;
+            }
         }
         mSaveCount = mCanvas.save();
 
@@ -808,9 +816,6 @@ public class TextureView extends View {
     private native void nCreateNativeWindow(SurfaceTexture surface);
     private native void nDestroyNativeWindow();
 
-    private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture,
-            int width, int height);
-
-    private static native void nLockCanvas(int nativeWindow, Canvas canvas, Rect dirty);
+    private static native boolean nLockCanvas(int nativeWindow, Canvas canvas, Rect dirty);
     private static native void nUnlockCanvasAndPost(int nativeWindow, Canvas canvas);
 }

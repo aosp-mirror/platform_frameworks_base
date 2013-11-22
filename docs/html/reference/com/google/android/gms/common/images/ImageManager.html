@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>ImageManager | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -681,7 +688,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -701,7 +708,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -816,7 +823,7 @@ Summary:
             <a href="/reference/com/google/android/gms/common/images/ImageManager.html">ImageManager</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#create(android.content.Context)">create</a></span>(<a href="/reference/android/content/Context.html">Context</a> context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#create(android.content.Context)">create</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">Returns a new ImageManager for loading images from the network.</div>
   
@@ -834,7 +841,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(android.widget.ImageView, android.net.Uri)">loadImage</a></span>(<a href="/reference/android/widget/ImageView.html">ImageView</a> imageView, <a href="/reference/android/net/Uri.html">Uri</a> uri)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(android.widget.ImageView, android.net.Uri)">loadImage</a></span>(ImageView imageView, Uri uri)</nobr>
         
         <div class="jd-descrdiv">Loads an image to display from a URI.</div>
   
@@ -852,7 +859,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(android.widget.ImageView, int)">loadImage</a></span>(<a href="/reference/android/widget/ImageView.html">ImageView</a> imageView, int resId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(android.widget.ImageView, int)">loadImage</a></span>(ImageView imageView, int resId)</nobr>
         
         <div class="jd-descrdiv">Loads an image to display from the given resource ID.</div>
   
@@ -870,7 +877,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(com.google.android.gms.common.images.ImageManager.OnImageLoadedListener, android.net.Uri, int)">loadImage</a></span>(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, <a href="/reference/android/net/Uri.html">Uri</a> uri, int defaultResId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(com.google.android.gms.common.images.ImageManager.OnImageLoadedListener, android.net.Uri, int)">loadImage</a></span>(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, Uri uri, int defaultResId)</nobr>
         
         <div class="jd-descrdiv">Load an image to display from a URI, using the given resource ID as the default if no
  image if found for the given URI.</div>
@@ -889,7 +896,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(com.google.android.gms.common.images.ImageManager.OnImageLoadedListener, android.net.Uri)">loadImage</a></span>(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, <a href="/reference/android/net/Uri.html">Uri</a> uri)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(com.google.android.gms.common.images.ImageManager.OnImageLoadedListener, android.net.Uri)">loadImage</a></span>(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, Uri uri)</nobr>
         
         <div class="jd-descrdiv">Load an image to display from a URI.</div>
   
@@ -907,7 +914,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(android.widget.ImageView, android.net.Uri, int)">loadImage</a></span>(<a href="/reference/android/widget/ImageView.html">ImageView</a> imageView, <a href="/reference/android/net/Uri.html">Uri</a> uri, int defaultResId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(android.widget.ImageView, android.net.Uri, int)">loadImage</a></span>(ImageView imageView, Uri uri, int defaultResId)</nobr>
         
         <div class="jd-descrdiv">Loads an image to display from a URI, using the given resource ID as the default if no
  image if found for the given URI.</div>
@@ -938,7 +945,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -957,7 +964,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -976,7 +983,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1005,7 +1012,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1069,7 +1076,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1186,7 +1193,7 @@ From class
         <a href="/reference/com/google/android/gms/common/images/ImageManager.html">ImageManager</a>
       </span>
       <span class="sympad">create</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context)</span>
+      <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1229,7 +1236,7 @@ From class
         void
       </span>
       <span class="sympad">loadImage</span>
-      <span class="normal">(<a href="/reference/android/widget/ImageView.html">ImageView</a> imageView, <a href="/reference/android/net/Uri.html">Uri</a> uri)</span>
+      <span class="normal">(ImageView imageView, Uri uri)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1282,7 +1289,7 @@ From class
         void
       </span>
       <span class="sympad">loadImage</span>
-      <span class="normal">(<a href="/reference/android/widget/ImageView.html">ImageView</a> imageView, int resId)</span>
+      <span class="normal">(ImageView imageView, int resId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1329,7 +1336,7 @@ From class
         void
       </span>
       <span class="sympad">loadImage</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, <a href="/reference/android/net/Uri.html">Uri</a> uri, int defaultResId)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, Uri uri, int defaultResId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1383,7 +1390,7 @@ From class
         void
       </span>
       <span class="sympad">loadImage</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, <a href="/reference/android/net/Uri.html">Uri</a> uri)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, Uri uri)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1429,7 +1436,7 @@ From class
         void
       </span>
       <span class="sympad">loadImage</span>
-      <span class="normal">(<a href="/reference/android/widget/ImageView.html">ImageView</a> imageView, <a href="/reference/android/net/Uri.html">Uri</a> uri, int defaultResId)</span>
+      <span class="normal">(ImageView imageView, Uri uri, int defaultResId)</span>
     </h4>
       <div class="api-level">
         <div></div>

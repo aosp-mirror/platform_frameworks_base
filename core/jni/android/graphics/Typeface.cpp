@@ -29,20 +29,28 @@ private:
 
 static SkTypeface* Typeface_create(JNIEnv* env, jobject, jstring name,
                                    SkTypeface::Style style) {
-    SkTypeface* face;
+    SkTypeface* face = NULL;
 
-    if (NULL == name) {
-        face = SkTypeface::CreateFromName(NULL, (SkTypeface::Style)style);
-    }
-    else {
+    if (NULL != name) {
         AutoJavaStringToUTF8    str(env, name);
         face = SkTypeface::CreateFromName(str.c_str(), style);
+    }
+
+    // return the default font at the best style if no exact match exists
+    if (NULL == face) {
+        face = SkTypeface::CreateFromName(NULL, style);
     }
     return face;
 }
 
 static SkTypeface* Typeface_createFromTypeface(JNIEnv* env, jobject, SkTypeface* family, int style) {
-    return SkTypeface::CreateFromTypeface(family, (SkTypeface::Style)style);
+    SkTypeface* face = SkTypeface::CreateFromTypeface(family, (SkTypeface::Style)style);
+    // return the default font at the best style if the requested style does not
+    // exist in the provided family
+    if (NULL == face) {
+        face = SkTypeface::CreateFromName(NULL, (SkTypeface::Style)style);
+    }
+    return face;
 }
 
 static void Typeface_unref(JNIEnv* env, jobject obj, SkTypeface* face) {

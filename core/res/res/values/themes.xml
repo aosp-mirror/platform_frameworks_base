@@ -178,6 +178,8 @@ please see themes_device_defaults.xml.
         <item name="windowActionBar">false</item>
         <item name="windowActionModeOverlay">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
+        <item name="windowTranslucentStatus">false</item>
+        <item name="windowTranslucentNavigation">false</item>
 
         <!-- Define these here; ContextThemeWrappers around themes that define them should
              always clear these values. -->
@@ -311,6 +313,10 @@ please see themes_device_defaults.xml.
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
         <item name="preferencePanelStyle">@style/PreferencePanel</item>
+        <item name="preferenceHeaderPanelStyle">@style/PreferenceHeaderPanel</item>
+        <item name="preferenceListStyle">@style/PreferenceHeaderList</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList</item>
+        <item name="preferenceFragmentPaddingSide">@dimen/preference_fragment_padding_side</item>
         <item name="detailsElementBackground">@android:drawable/panel_bg_holo_dark</item>
 
         <!-- Search widget styles -->
@@ -905,8 +911,8 @@ please see themes_device_defaults.xml.
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
-        <item name="colorPressedHighlight">@color/holo_blue_light</item>
-        <item name="colorLongPressedHighlight">@color/holo_blue_bright</item>
+        <item name="colorPressedHighlight">@color/holo_gray_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
         <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
         <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
         <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
@@ -1220,8 +1226,8 @@ please see themes_device_defaults.xml.
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
-        <item name="colorPressedHighlight">@color/holo_blue_light</item>
-        <item name="colorLongPressedHighlight">@color/holo_blue_bright</item>
+        <item name="colorPressedHighlight">@color/holo_gray_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
         <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
         <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
         <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
@@ -1580,6 +1586,15 @@ please see themes_device_defaults.xml.
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <!-- Variant of the holographic (dark) theme that has no title bar and translucent
+         system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
+         {@link android.R.attr#windowTranslucentNavigation} to true. -->
+    <style name="Theme.Holo.NoActionBar.TranslucentDecor">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <!-- Variant of the holographic (light) theme with no action bar. -->
     <style name="Theme.Holo.Light.NoActionBar">
         <item name="android:windowActionBar">false</item>
@@ -1601,6 +1616,15 @@ please see themes_device_defaults.xml.
     <style name="Theme.Holo.Light.NoActionBar.Overscan">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowOverscan">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Variant of the holographic (light) theme that has no title bar and translucent
+         system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
+         {@link android.R.attr#windowTranslucentNavigation} to true. -->
+    <style name="Theme.Holo.Light.NoActionBar.TranslucentDecor">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
 

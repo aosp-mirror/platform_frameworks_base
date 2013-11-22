@@ -97,6 +97,30 @@ public class WorkSource implements Parcelable {
     }
 
     /**
+     * Clear names from this WorkSource.  Uids are left intact.
+     *
+     * <p>Useful when combining with another WorkSource that doesn't have names.
+     * @hide
+     */
+    public void clearNames() {
+        if (mNames != null) {
+            mNames = null;
+            // Clear out any duplicate uids now that we don't have names to disambiguate them.
+            int destIndex = 1;
+            int newNum = mNum;
+            for (int sourceIndex = 1; sourceIndex < mNum; sourceIndex++) {
+                if (mUids[sourceIndex] == mUids[sourceIndex - 1]) {
+                    newNum--;
+                } else {
+                    mUids[destIndex] = mUids[sourceIndex];
+                    destIndex++;
+                }
+            }
+            mNum = newNum;
+        }
+    }
+
+    /**
      * Clear this WorkSource to be empty.
      */
     public void clear() {
@@ -199,7 +223,6 @@ public class WorkSource implements Parcelable {
         }
         mUids[0] = uid;
         mNames[0] = name;
-        mNames = null;
     }
 
     /** @hide */

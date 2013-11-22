@@ -374,7 +374,7 @@ public class DhcpStateMachine extends StateMachine {
                 //Do it a bit earlier than half the lease duration time
                 //to beat the native DHCP client and avoid extra packets
                 //48% for one hour lease time = 29 minutes
-                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         SystemClock.elapsedRealtime() +
                         leaseDuration * 480, //in milliseconds
                         mDhcpRenewalIntent);

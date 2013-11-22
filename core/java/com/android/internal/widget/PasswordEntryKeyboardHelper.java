@@ -184,7 +184,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
                 KeyEvent event = events[i];
                 event = KeyEvent.changeFlags(event, event.getFlags()
                         | KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE);
-                viewRootImpl.dispatchKey(event);
+                viewRootImpl.dispatchInputEvent(event);
             }
         }
     }

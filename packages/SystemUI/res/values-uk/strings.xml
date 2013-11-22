@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Інтерфейс системи"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очист."</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Не турбувати"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показувати сповіщення"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Видалити зі списку"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Інформація про програму"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Немає останніх програм"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"Підключіть зарядний пристрій"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Акумулятор розряджається."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Залишилося <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Заряджання USB не підтримується."\n"Використовуйте лише наданий у комплекті зарядний пристрій."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Заряджання USB не підтримується.\nВикористовуйте лише наданий у комплекті зарядний пристрій."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Використання акумулятора"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Використовувати за умовчанням для пристрою USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Використовувати за умовчанням для аксесуара USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Дозволити налагодження USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Цифровий відбиток ключа RSA комп’ютера:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Цифровий відбиток ключа RSA комп’ютера:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Завжди дозволяти з цього комп’ютера"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Масштабув. на весь екран"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Розтягнути на весь екран"</string>
@@ -160,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Дані 4G вимкнено"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобільне передавання даних вимкнено"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Використання даних вимкнено"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Досягнуто вказаного ліміту використання даних."\n\n"Якщо ввімкнути використання даних знову, оператор може стягнути плату."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Досягнуто вказаного ліміту використання даних.\n\nЯкщо ввімкнути використання даних знову, оператор може стягнути плату."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Повторно ввімкнути дані"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Немає з’єднання"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi під’єднано"</string>
@@ -168,9 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Місцезнаходження встановлено за допомогою GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Очистити всі сповіщення."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Інформація про програму"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Закрити"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Сповіщення вимкнено"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Торкніться тут, щоб знову ввімкнути сповіщення."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Екран обертатиметься автоматично."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Екран заблоковано в альбомній орієнтації."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Екран заблоковано в книжковій орієнтації."</string>
@@ -187,7 +182,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Обертати автоматично"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Обертання заблоковано"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Метод введення"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"Поточне місцезнаходження"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Місцезнаходження"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Місцезнаходження вимкнено"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Носій"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Лише екстрені виклики"</string>
@@ -203,5 +199,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яскравість"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТО"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Сповіщення з’являються тут"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Отримуйте до них доступ будь-коли, провівши пальцем униз."\n"Знову проведіть униз, щоб відкрити елементи керування системи."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Отримуйте до них доступ будь-коли, провівши пальцем униз.\nЗнову проведіть униз, щоб відкрити елементи керування системи."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Гортайте від краю екрана, щоб з’явилась панель"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Проведіть пальцем від краю екрана, щоб з’явилась навігаційна панель"</string>
 </resources>

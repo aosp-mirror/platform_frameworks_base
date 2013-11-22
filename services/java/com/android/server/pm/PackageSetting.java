@@ -52,4 +52,8 @@ final class PackageSetting extends PackageSettingBase {
             + Integer.toHexString(System.identityHashCode(this))
             + " " + name + "/" + appId + "}";
     }
+
+    public int[] getGids() {
+        return sharedUser != null ? sharedUser.gids : gids;
+    }
 }

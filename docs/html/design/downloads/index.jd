@@ -4,8 +4,10 @@ page.title=Downloads
 <div class="layout-content-row">
   <div class="layout-content-col span-9">
 
-<p>Want everything? We've bundled all the downloads available on Android Design into a single ZIP file.
-You can also download individual files listed below.</p>
+<p>Want everything? We've bundled all the downloads available on Android Design, except for the
+  <a href="#roboto">Roboto</a> font family, into a single ZIP file. You can also download
+  individual files listed below.</p>
+
 <p>You may use these materials without restriction in your apps and to develop your apps.</p>
 
   </div>
@@ -13,7 +15,7 @@ You can also download individual files listed below.</p>
 
 <p>
   <a class="download-button" onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'All Design Assets']);"
-    href="{@docRoot}downloads/design/Android_Design_Downloads_20120823.zip">Download All</a>
+    href="{@docRoot}downloads/design/Android_Design_Downloads_20130814.zip">Download All</a>
 </p>
 
   </div>
@@ -72,7 +74,7 @@ modify to match your theme, plus source files.</p>
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Action Bar Icons']);"
-    href="{@docRoot}downloads/design/Android_Design_Icons_20120814.zip">Action Bar Icon Pack</a>
+    href="{@docRoot}downloads/design/Android_Design_Icons_20130926.zip">Action Bar Icon Pack</a>
 </p>
 
   </div>
@@ -83,10 +85,12 @@ modify to match your theme, plus source files.</p>
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
 
-<h4>Roboto</h4>
+<h4 id="roboto">Roboto</h4>
 <p>Ice Cream Sandwich introduced a new type family named Roboto, created specifically for the
 requirements of UI and high-resolution screens.</p>
-<p><a href="{@docRoot}design/style/typography.html#actionbar">More on Roboto</a></p>
+<p><a href="{@docRoot}design/style/typography.html">More on Roboto</a></p>
+<p><a href="http://www.google.com/fonts/specimen/Roboto" class="external-link">Roboto on Google Fonts</a></p>
+<p><a href="http://www.google.com/fonts/specimen/Roboto+Condensed" class="external-link">Roboto Condensed on Google Fonts</a></p>
 
   </div>
   <div class="layout-content-col span-4">
@@ -98,7 +102,7 @@ requirements of UI and high-resolution screens.</p>
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
-    href="{@docRoot}downloads/design/Roboto_Hinted_20120823.zip">Roboto</a>
+    href="{@docRoot}downloads/design/roboto-1.100141.zip">Roboto</a>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specemin Book']);"
     href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a>
 </p>

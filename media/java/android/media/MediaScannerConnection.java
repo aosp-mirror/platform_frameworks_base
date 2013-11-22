@@ -113,6 +113,9 @@ public class MediaScannerConnection implements ServiceConnection {
         synchronized (this) {
             if (!mConnected) {
                 Intent intent = new Intent(IMediaScannerService.class.getName());
+                intent.setComponent(
+                        new ComponentName("com.android.providers.media",
+                                "com.android.providers.media.MediaScannerService"));
                 mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
                 mConnected = true;
             }

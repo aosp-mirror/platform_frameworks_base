@@ -698,6 +698,11 @@ public class ViewDebug {
                 captureViewLayer(group.getChildAt(i), clientStream, localVisible);
             }
         }
+
+        if (view.mOverlay != null) {
+            ViewGroup overlayContainer = view.getOverlay().mOverlayViewGroup;
+            captureViewLayer(overlayContainer, clientStream, localVisible);
+        }
     }
 
     private static void outputDisplayList(View root, String parameter) throws IOException {
@@ -743,7 +748,7 @@ public class ViewDebug {
         }
     }
 
-    private static Bitmap performViewCapture(final View captureView, final boolean skpiChildren) {
+    private static Bitmap performViewCapture(final View captureView, final boolean skipChildren) {
         if (captureView != null) {
             final CountDownLatch latch = new CountDownLatch(1);
             final Bitmap[] cache = new Bitmap[1];
@@ -752,7 +757,7 @@ public class ViewDebug {
                 public void run() {
                     try {
                         cache[0] = captureView.createSnapshot(
-                                Bitmap.Config.ARGB_8888, 0, skpiChildren);
+                                Bitmap.Config.ARGB_8888, 0, skipChildren);
                     } catch (OutOfMemoryError e) {
                         Log.w("View", "Out of memory for bitmap");
                     } finally {
@@ -815,6 +820,13 @@ public class ViewDebug {
             } else if (isRequestedView(view, className, hashCode)) {
                 return view;
             }
+            if (view.mOverlay != null) {
+                final View found = findView((ViewGroup) view.mOverlay.mOverlayViewGroup,
+                        className, hashCode);
+                if (found != null) {
+                    return found;
+                }
+            }
             if (view instanceof HierarchyHandler) {
                 final View found = ((HierarchyHandler)view)
                         .findHierarchyView(className, hashCode);
@@ -823,12 +835,19 @@ public class ViewDebug {
                 }
             }
         }
-
         return null;
     }
 
     private static boolean isRequestedView(View view, String className, int hashCode) {
-        return view.getClass().getName().equals(className) && view.hashCode() == hashCode;
+        if (view.hashCode() == hashCode) {
+            String viewClassName = view.getClass().getName();
+            if (className.equals("ViewOverlay")) {
+                return viewClassName.equals("android.view.ViewOverlay$OverlayViewGroup");
+            } else {
+                return className.equals(viewClassName);
+            }
+        }
+        return false;
     }
 
     private static void dumpViewHierarchy(Context context, ViewGroup group,
@@ -850,6 +869,12 @@ public class ViewDebug {
             } else {
                 dumpView(context, view, out, level + 1, includeProperties);
             }
+            if (view.mOverlay != null) {
+                ViewOverlay overlay = view.getOverlay();
+                ViewGroup overlayContainer = overlay.mOverlayViewGroup;
+                dumpViewHierarchy(context, overlayContainer, out, level + 2, skipChildren,
+                        includeProperties);
+            }
         }
         if (group instanceof HierarchyHandler) {
             ((HierarchyHandler)group).dumpViewHierarchyWithProperties(out, level + 1);
@@ -863,7 +888,11 @@ public class ViewDebug {
             for (int i = 0; i < level; i++) {
                 out.write(' ');
             }
-            out.write(view.getClass().getName());
+            String className = view.getClass().getName();
+            if (className.equals("android.view.ViewOverlay$OverlayViewGroup")) {
+                className = "ViewOverlay";
+            }
+            out.write(className);
             out.write('@');
             out.write(Integer.toHexString(view.hashCode()));
             out.write(' ');

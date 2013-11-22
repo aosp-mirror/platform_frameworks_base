@@ -100,12 +100,17 @@ class GLES20RenderLayer extends GLES20Layer {
 
     @Override
     HardwareCanvas start(Canvas currentCanvas) {
+        return start(currentCanvas, null);
+    }
+
+    @Override
+    HardwareCanvas start(Canvas currentCanvas, Rect dirty) {
         if (currentCanvas instanceof GLES20Canvas) {
             ((GLES20Canvas) currentCanvas).interrupt();
         }
         HardwareCanvas canvas = getCanvas();
         canvas.setViewport(mWidth, mHeight);
-        canvas.onPreDraw(null);
+        canvas.onPreDraw(dirty);
         return canvas;
     }
 

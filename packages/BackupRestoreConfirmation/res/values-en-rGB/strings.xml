@@ -18,10 +18,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Full backup"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Full restoration"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"A full backup of all data to a connected desktop computer has been requested. Do you want to allow this to happen?"\n\n"If you did not request the backup yourself, do not allow the operation to proceed."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"A full backup of all data to a connected desktop computer has been requested. Do you want to allow this to happen?\n\nIf you did not request the backup yourself, do not allow the operation to proceed."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Back up my data"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Do not back up"</string>
-    <string name="restore_confirm_text" msgid="7499866728030461776">"A full restore of all data from a connected desktop computer has been requested. Do you want to allow this to happen?"\n\n"If you did not request the restore yourself, do not allow the operation to proceed. This will replace any data currently on the device!"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"A full restore of all data from a connected desktop computer has been requested. Do you want to allow this to happen?\n\nIf you did not request the restore yourself, do not allow the operation to proceed. This will replace any data currently on the device!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restore my data"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Do not restore"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Please enter your current backup password below:"</string>

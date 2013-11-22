@@ -22,13 +22,6 @@ import android.content.SharedPreferences;
 public class Prefs {
     private static final String SHARED_PREFS_NAME = "status_bar";
 
-    // a boolean
-    public static final String DO_NOT_DISTURB_PREF = "do_not_disturb";
-    public static final boolean DO_NOT_DISTURB_DEFAULT = false;
-
-    public static final String SHOWN_COMPAT_MODE_HELP = "shown_compat_mode_help";
-    public static final String SHOWN_QUICK_SETTINGS_HELP = "shown_quick_settings_help";
-
     public static SharedPreferences read(Context context) {
         return context.getSharedPreferences(Prefs.SHARED_PREFS_NAME, Context.MODE_PRIVATE);
     }

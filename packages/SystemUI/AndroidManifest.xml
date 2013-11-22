@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.systemui"
+        android:sharedUserId="android.uid.systemui"
         coreApp="true">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -23,6 +24,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
 
     <!-- Networking and telephony -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -37,7 +39,6 @@
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
-    <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
     <uses-permission android:name="android.permission.MASTER_CLEAR" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -51,7 +52,7 @@
     <uses-permission android:name="android.permission.START_ANY_ACTIVITY" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
-    
+
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -64,6 +65,12 @@
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
 
+    <!-- Alarm clocks -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+
+    <!-- Keyguard -->
+    <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
+
     <application
         android:persistent="true"
         android:allowClearUserData="false"
@@ -71,6 +78,7 @@
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
         android:icon="@*android:drawable/platlogo"
+        android:process="com.android.systemui"
         android:supportsRtl="true">
 
         <!-- Broadcast receiver that gets the broadcast at boot time and starts
@@ -184,30 +192,31 @@
             android:taskAffinity="com.android.systemui.net"
             android:excludeFromRecents="true" />
 
-        <!-- started from ... somewhere -->
+        <!-- platform logo easter egg activity -->
         <activity
-            android:name=".BeanBag"
+            android:name=".DessertCase"
             android:exported="true"
-            android:label="BeanBag"
-            android:icon="@drawable/redbean2"
-            android:theme="@android:style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+            android:label="@string/dessert_case"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
+            android:screenOrientation="locked"
+            android:process=":sweetsweetdesserts"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="com.android.internal.category.PLATLOGO" />
-<!--            <category android:name="android.intent.category.LAUNCHER" />-->
             </intent-filter>
         </activity>
 
-        <!-- Beans in space -->
+        <!-- a gallery of delicious treats -->
         <service
-            android:name=".BeanBagDream"
+            android:name=".DessertCaseDream"
             android:exported="true"
-            android:label="@string/jelly_bean_dream_name"
+            android:label="@string/dessert_case"
             android:enabled="false"
+            android:process=":sweetsweetdesserts"
             >
             <intent-filter>
                 <action android:name="android.service.dreams.DreamService" />

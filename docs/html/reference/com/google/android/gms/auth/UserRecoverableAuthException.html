@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>UserRecoverableAuthException | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -735,7 +742,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="5" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="5" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -743,7 +750,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="4" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Throwable.html">java.lang.Throwable</a></td>
+        <td colspan="4" class="jd-inheritance-class-cell">java.lang.Throwable</td>
     </tr>
     
 
@@ -753,7 +760,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="3" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Exception.html">java.lang.Exception</a></td>
+        <td colspan="3" class="jd-inheritance-class-cell">java.lang.Exception</td>
     </tr>
     
 
@@ -896,7 +903,7 @@ Summary:
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html#UserRecoverableAuthException(java.lang.String, android.content.Intent)">UserRecoverableAuthException</a></span>(<a href="/reference/java/lang/String.html">String</a> msg, <a href="/reference/android/content/Intent.html">Intent</a> intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html#UserRecoverableAuthException(java.lang.String, android.content.Intent)">UserRecoverableAuthException</a></span>(String msg, Intent intent)</nobr>
         
   </td></tr>
 
@@ -922,7 +929,7 @@ Summary:
             
             
             
-            <a href="/reference/android/content/Intent.html">Intent</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html#getIntent()">getIntent</a></span>()</nobr>
@@ -959,7 +966,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Throwable.html">java.lang.Throwable</a>
+  java.lang.Throwable
 
 <div id="inherited-methods-java.lang.Throwable">
   <div id="inherited-methods-java.lang.Throwable-list"
@@ -978,7 +985,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Throwable.html">Throwable</a></nobr>
+            Throwable</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">fillInStackTrace</span>()</nobr>
@@ -994,7 +1001,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Throwable.html">Throwable</a></nobr>
+            Throwable</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getCause</span>()</nobr>
@@ -1010,7 +1017,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getLocalizedMessage</span>()</nobr>
@@ -1026,7 +1033,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getMessage</span>()</nobr>
@@ -1042,7 +1049,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/StackTraceElement.html">StackTraceElement[]</a></nobr>
+            StackTraceElement[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getStackTrace</span>()</nobr>
@@ -1058,10 +1065,10 @@ From class
             
             
             
-            <a href="/reference/java/lang/Throwable.html">Throwable</a></nobr>
+            Throwable</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">initCause</span>(<a href="/reference/java/lang/Throwable.html">Throwable</a> arg0)</nobr>
+        <span class="sympad">initCause</span>(Throwable arg0)</nobr>
         
   </td></tr>
 
@@ -1077,7 +1084,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">printStackTrace</span>(<a href="/reference/java/io/PrintWriter.html">PrintWriter</a> arg0)</nobr>
+        <span class="sympad">printStackTrace</span>(PrintWriter arg0)</nobr>
         
   </td></tr>
 
@@ -1093,7 +1100,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">printStackTrace</span>(<a href="/reference/java/io/PrintStream.html">PrintStream</a> arg0)</nobr>
+        <span class="sympad">printStackTrace</span>(PrintStream arg0)</nobr>
         
   </td></tr>
 
@@ -1125,7 +1132,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setStackTrace</span>(<a href="/reference/java/lang/StackTraceElement.html">StackTraceElement[]</a> arg0)</nobr>
+        <span class="sympad">setStackTrace</span>(StackTraceElement[] arg0)</nobr>
         
   </td></tr>
 
@@ -1138,7 +1145,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1161,7 +1168,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1180,7 +1187,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1199,7 +1206,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1228,7 +1235,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1292,7 +1299,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1403,7 +1410,7 @@ From class
         
       </span>
       <span class="sympad">UserRecoverableAuthException</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> msg, <a href="/reference/android/content/Intent.html">Intent</a> intent)</span>
+      <span class="normal">(String msg, Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1444,7 +1451,7 @@ From class
          
          
          
-        <a href="/reference/android/content/Intent.html">Intent</a>
+        Intent
       </span>
       <span class="sympad">getIntent</span>
       <span class="normal">()</span>

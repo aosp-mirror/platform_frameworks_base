@@ -18,6 +18,7 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
+     android:detachWallpaper="true"
      android:shareInterpolator="false"
      android:zAdjustment="normal">
   <!--scale android:fromXScale="2.0" android:toXScale="1.0"

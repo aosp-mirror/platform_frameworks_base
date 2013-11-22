@@ -19,7 +19,8 @@ Lifecycle</a>)</li>
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}training/sharing/index.html">Sharing Content</a></li>
+    <li><a href="{@docRoot}training/sharing/index.html">Sharing Simple Data</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>
   <li><a
 href="http://android-developers.blogspot.com/2009/11/integrating-application-with-intents.html">
 Integrating Application with Intents (blog post)</a></li>
@@ -49,7 +50,7 @@ interactions with other apps, such as start another app, receive a result from t
 make your app able to respond to intents from other apps.</p>
 
 <h2>Lessons</h2>
- 
+
 <dl>
   <dt><b><a href="sending.html">Sending the User to Another App</a></b></dt>
   <dd>Shows how you can create implicit intents to launch other apps that can perform an
@@ -59,5 +60,5 @@ action.</dd>
   <dt><b><a href="filters.html">Allowing Other Apps to Start Your Activity</a></b></dt>
   <dd>Shows how to make activities in your app open for use by other apps by defining
 intent filters that declare the implicit intents your app accepts.</dd>
-</dl> 
+</dl>
 

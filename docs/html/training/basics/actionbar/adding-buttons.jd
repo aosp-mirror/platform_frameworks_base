@@ -74,7 +74,21 @@ is available in the action bar, but the
 Settings action should always appear in the overflow. (By default, all actions appear in the
 overflow, but it's good practice to explicitly declare your design intentions for each action.)
 
-<p>However, <strong>if your app is using the Support Library</strong> for compatibility on versions
+<p>The {@code icon} attribute requires a resource ID for an
+image. The name that follows {@code &#64;drawable/} must be the name of a bitmap image you've
+saved in your project's {@code res/drawable/} directory. For example,
+{@code "&#64;drawable/ic_action_search"} refers to {@code ic_action_search.png}.
+Likewise, the {@code title} attribute uses a string resource that's defined by an XML
+file in your project's {@code res/values/} directory, as discussed in <a
+href="{@docRoot}training/basics/firstapp/building-ui.html#Strings">Building a Simple User
+Interface</a>.
+
+<p class="note"><strong>Note:</strong> When creating icons and other bitmap images for your app,
+it's important that you provide multiple versions that are each optimized for a different screen
+density. This is discussed more in the lesson about <a
+href="{@docRoot}training/basics/supporting-devices/screens.html">Supporting Different Screens</a>.
+
+<p><strong>If your app is using the Support Library</strong> for compatibility on versions
 as low as Android 2.1, the {@code showAsAction} attribute is not available from
 the {@code android:} namespace. Instead this attribute is provided by the Support Library
 and you must define your own XML namespace and use that namespace as the attribute prefix.

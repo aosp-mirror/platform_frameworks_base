@@ -85,4 +85,12 @@ startpage=true
         Learn how to recognize the user's current activity, such as walking, bicycling,
         or driving a car, and how to use this information to modify your app's location strategy.
     </dd>
+    <dt>
+        <b><a href="location-testing.html">Testing Using Mock Locations</a></b>
+    </dt>
+    <dd>
+        Learn how to test a location-aware app by injecting mock locations into Location
+        Services. In mock mode, Location Services sends out mock locations that you inject instead
+        of sensor-based locations.
+    </dd>
 </dl>

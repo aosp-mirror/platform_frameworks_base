@@ -28,9 +28,9 @@
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
+Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight):
+        caches(Caches::getInstance()), texture(caches) {
     mesh = NULL;
-    meshIndices = NULL;
     meshElementCount = 0;
     cacheable = true;
     dirty = false;
@@ -47,16 +47,15 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
     debugDrawUpdate = false;
     hasDrawnSinceUpdate = false;
     deferredList = NULL;
-    Caches::getInstance().resourceCache.incrementRefcount(this);
+    caches.resourceCache.incrementRefcount(this);
 }
 
 Layer::~Layer() {
-    if (colorFilter) Caches::getInstance().resourceCache.decrementRefcount(colorFilter);
+    if (colorFilter) caches.resourceCache.decrementRefcount(colorFilter);
     removeFbo();
     deleteTexture();
 
     delete[] mesh;
-    delete[] meshIndices;
     delete deferredList;
 }
 
@@ -76,7 +75,7 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
         return true;
     }
 
-    const uint32_t maxTextureSize = Caches::getInstance().maxTextureSize;
+    const uint32_t maxTextureSize = caches.maxTextureSize;
     if (desiredWidth > maxTextureSize || desiredHeight > maxTextureSize) {
         ALOGW("Layer exceeds max. dimensions supported by the GPU (%dx%d, max=%dx%d)",
                 desiredWidth, desiredHeight, maxTextureSize, maxTextureSize);
@@ -89,7 +88,7 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
     setSize(desiredWidth, desiredHeight);
 
     if (fbo) {
-        Caches::getInstance().activeTexture(0);
+        caches.activeTexture(0);
         bindTexture();
         allocateTexture();
 
@@ -120,14 +119,14 @@ void Layer::removeFbo(bool flush) {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
         if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
 
-        Caches::getInstance().renderBufferCache.put(stencil);
+        caches.renderBufferCache.put(stencil);
         stencil = NULL;
     }
 
     if (fbo) {
         if (flush) LayerRenderer::flushLayer(this);
         // If put fails the cache will delete the FBO
-        Caches::getInstance().fboCache.put(fbo);
+        caches.fboCache.put(fbo);
         fbo = 0;
     }
 }
@@ -138,21 +137,55 @@ void Layer::setPaint(SkPaint* paint) {
 
 void Layer::setColorFilter(SkiaColorFilter* filter) {
     if (colorFilter) {
-        Caches::getInstance().resourceCache.decrementRefcount(colorFilter);
+        caches.resourceCache.decrementRefcount(colorFilter);
     }
     colorFilter = filter;
     if (colorFilter) {
-        Caches::getInstance().resourceCache.incrementRefcount(colorFilter);
+        caches.resourceCache.incrementRefcount(colorFilter);
+    }
+}
+
+void Layer::bindTexture() const {
+    if (texture.id) {
+        caches.bindTexture(renderTarget, texture.id);
+    }
+}
+
+void Layer::bindStencilRenderBuffer() const {
+    if (stencil) {
+        stencil->bind();
+    }
+}
+
+void Layer::generateTexture() {
+    if (!texture.id) {
+        glGenTextures(1, &texture.id);
+    }
+}
+
+void Layer::deleteTexture() {
+    if (texture.id) {
+        texture.deleteTexture();
+        texture.id = 0;
+    }
+}
+
+void Layer::clearTexture() {
+    texture.id = 0;
+}
+
+void Layer::allocateTexture() {
+#if DEBUG_LAYERS
+    ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
+#endif
+    if (texture.id) {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        glTexImage2D(renderTarget, 0, GL_RGBA, getWidth(), getHeight(), 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     }
 }
 
 void Layer::defer() {
-    if (!deferredList) {
-        deferredList = new DeferredDisplayList;
-    }
-    DeferStateStruct deferredState(*deferredList, *renderer,
-            DisplayList::kReplayFlag_ClipChildren);
-
     const float width = layer.getWidth();
     const float height = layer.getHeight();
 
@@ -160,6 +193,14 @@ void Layer::defer() {
             dirtyRect.right >= width && dirtyRect.bottom >= height)) {
         dirtyRect.set(0, 0, width, height);
     }
+
+    if (deferredList) {
+        deferredList->reset(dirtyRect);
+    } else {
+        deferredList = new DeferredDisplayList(dirtyRect);
+    }
+    DeferStateStruct deferredState(*deferredList, *renderer,
+            DisplayList::kReplayFlag_ClipChildren);
 
     renderer->initViewport(width, height);
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
@@ -170,8 +211,19 @@ void Layer::defer() {
     deferredUpdateScheduled = false;
 }
 
-void Layer::flush() {
+void Layer::cancelDefer() {
+    renderer = NULL;
+    displayList = NULL;
+    deferredUpdateScheduled = false;
     if (deferredList) {
+        delete deferredList;
+        deferredList = NULL;
+    }
+}
+
+void Layer::flush() {
+    // renderer is checked as layer may be destroyed/put in layer cache with flush scheduled
+    if (deferredList && renderer) {
         renderer->setViewport(layer.getWidth(), layer.getHeight());
         renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
                 !isBlend());

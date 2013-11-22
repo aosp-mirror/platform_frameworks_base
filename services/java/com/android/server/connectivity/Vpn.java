@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
 
+import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -28,8 +29,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -37,6 +40,7 @@ import android.net.BaseNetworkStateTracker;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
@@ -54,11 +58,14 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemService;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.widget.Toast;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.R;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
@@ -74,6 +81,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import libcore.io.IoUtils;
@@ -98,19 +106,52 @@ public class Vpn extends BaseNetworkStateTracker {
     private volatile boolean mEnableNotif = true;
     private volatile boolean mEnableTeardown = true;
     private final IConnectivityManager mConnService;
+    private VpnConfig mConfig;
+
+    /* list of users using this VPN. */
+    @GuardedBy("this")
+    private SparseBooleanArray mVpnUsers = null;
+    private BroadcastReceiver mUserIntentReceiver = null;
+
+    private final int mUserId;
 
     public Vpn(Context context, VpnCallback callback, INetworkManagementService netService,
-            IConnectivityManager connService) {
+            IConnectivityManager connService, int userId) {
         // TODO: create dedicated TYPE_VPN network type
         super(ConnectivityManager.TYPE_DUMMY);
         mContext = context;
         mCallback = callback;
         mConnService = connService;
+        mUserId = userId;
 
         try {
             netService.registerObserver(mObserver);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Problem registering observer", e);
+        }
+        if (userId == UserHandle.USER_OWNER) {
+            // Owner's VPN also needs to handle restricted users
+            mUserIntentReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    final String action = intent.getAction();
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            UserHandle.USER_NULL);
+                    if (userId == UserHandle.USER_NULL) return;
+
+                    if (Intent.ACTION_USER_ADDED.equals(action)) {
+                        onUserAdded(userId);
+                    } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                        onUserRemoved(userId);
+                    }
+                }
+            };
+
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_USER_ADDED);
+            intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+            mContext.registerReceiverAsUser(
+                    mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
         }
     }
 
@@ -197,15 +238,25 @@ public class Vpn extends BaseNetworkStateTracker {
 
         // Reset the interface and hide the notification.
         if (mInterface != null) {
-            jniReset(mInterface);
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallback.restore();
-                hideNotification();
+                final int size = mVpnUsers.size();
+                final boolean forwardDns = (mConfig.dnsServers != null &&
+                        mConfig.dnsServers.size() != 0);
+                for (int i = 0; i < size; i++) {
+                    int user = mVpnUsers.keyAt(i);
+                    mCallback.clearUserForwarding(mInterface, user, forwardDns);
+                    hideNotification(user);
+                }
+
+                mCallback.clearMarkedForwarding(mInterface);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+            jniReset(mInterface);
             mInterface = null;
+            mVpnUsers = null;
         }
 
         // Revoke the connection or stop LegacyVpnRunner.
@@ -225,6 +276,7 @@ public class Vpn extends BaseNetworkStateTracker {
 
         Log.i(TAG, "Switched from " + mPackage + " to " + newPackage);
         mPackage = newPackage;
+        mConfig = null;
         updateState(DetailedState.IDLE, "prepare");
         return true;
     }
@@ -237,12 +289,22 @@ public class Vpn extends BaseNetworkStateTracker {
      * @param interfaze The name of the interface.
      */
     public void protect(ParcelFileDescriptor socket, String interfaze) throws Exception {
+
         PackageManager pm = mContext.getPackageManager();
-        ApplicationInfo app = pm.getApplicationInfo(mPackage, 0);
-        if (Binder.getCallingUid() != app.uid) {
+        int appUid = pm.getPackageUid(mPackage, mUserId);
+        if (Binder.getCallingUid() != appUid) {
             throw new SecurityException("Unauthorized Caller");
         }
+        // protect the socket from routing rules
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mCallback.protect(socket);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        // bind the socket to the interface
         jniProtect(socket.getFd(), interfaze);
+
     }
 
     /**
@@ -255,44 +317,40 @@ public class Vpn extends BaseNetworkStateTracker {
      */
     public synchronized ParcelFileDescriptor establish(VpnConfig config) {
         // Check if the caller is already prepared.
+        UserManager mgr = UserManager.get(mContext);
         PackageManager pm = mContext.getPackageManager();
         ApplicationInfo app = null;
         try {
-            app = pm.getApplicationInfo(mPackage, 0);
+            app = AppGlobals.getPackageManager().getApplicationInfo(mPackage, 0, mUserId);
+            if (Binder.getCallingUid() != app.uid) {
+                return null;
+            }
         } catch (Exception e) {
             return null;
         }
-        if (Binder.getCallingUid() != app.uid) {
-            return null;
-        }
-
         // Check if the service is properly declared.
         Intent intent = new Intent(VpnConfig.SERVICE_INTERFACE);
         intent.setClassName(mPackage, config.user);
-        ResolveInfo info = pm.resolveService(intent, 0);
-        if (info == null) {
-            throw new SecurityException("Cannot find " + config.user);
-        }
-        if (!BIND_VPN_SERVICE.equals(info.serviceInfo.permission)) {
-            throw new SecurityException(config.user + " does not require " + BIND_VPN_SERVICE);
-        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            // Restricted users are not allowed to create VPNs, they are tied to Owner
+            UserInfo user = mgr.getUserInfo(mUserId);
+            if (user.isRestricted()) {
+                throw new SecurityException("Restricted users cannot establish VPNs");
+            }
 
-        // Load the label.
-        String label = app.loadLabel(pm).toString();
-
-        // Load the icon and convert it into a bitmap.
-        Drawable icon = app.loadIcon(pm);
-        Bitmap bitmap = null;
-        if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
-            int width = mContext.getResources().getDimensionPixelSize(
-                    android.R.dimen.notification_large_icon_width);
-            int height = mContext.getResources().getDimensionPixelSize(
-                    android.R.dimen.notification_large_icon_height);
-            icon.setBounds(0, 0, width, height);
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(bitmap);
-            icon.draw(c);
-            c.setBitmap(null);
+            ResolveInfo info = AppGlobals.getPackageManager().resolveService(intent,
+                                                                        null, 0, mUserId);
+            if (info == null) {
+                throw new SecurityException("Cannot find " + config.user);
+            }
+            if (!BIND_VPN_SERVICE.equals(info.serviceInfo.permission)) {
+                throw new SecurityException(config.user + " does not require " + BIND_VPN_SERVICE);
+            }
+        } catch (RemoteException e) {
+                throw new SecurityException("Cannot find " + config.user);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         // Configure the interface. Abort if any of these steps fails.
@@ -300,14 +358,18 @@ public class Vpn extends BaseNetworkStateTracker {
         try {
             updateState(DetailedState.CONNECTING, "establish");
             String interfaze = jniGetName(tun.getFd());
-            if (jniSetAddresses(interfaze, config.addresses) < 1) {
+
+            // TEMP use the old jni calls until there is support for netd address setting
+            StringBuilder builder = new StringBuilder();
+            for (LinkAddress address : config.addresses) {
+                builder.append(" " + address);
+            }
+            if (jniSetAddresses(interfaze, builder.toString()) < 1) {
                 throw new IllegalArgumentException("At least one address must be specified");
             }
-            if (config.routes != null) {
-                jniSetRoutes(interfaze, config.routes);
-            }
             Connection connection = new Connection();
-            if (!mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
+            if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
+                        new UserHandle(mUserId))) {
                 throw new IllegalStateException("Cannot bind " + config.user);
             }
             if (mConnection != null) {
@@ -318,28 +380,159 @@ public class Vpn extends BaseNetworkStateTracker {
             }
             mConnection = connection;
             mInterface = interfaze;
+
+            // Fill more values.
+            config.user = mPackage;
+            config.interfaze = mInterface;
+            config.startTime = SystemClock.elapsedRealtime();
+            mConfig = config;
+            // Set up forwarding and DNS rules.
+            mVpnUsers = new SparseBooleanArray();
+            token = Binder.clearCallingIdentity();
+            try {
+                mCallback.setMarkedForwarding(mInterface);
+                mCallback.setRoutes(interfaze, config.routes);
+                mCallback.override(mInterface, config.dnsServers, config.searchDomains);
+                addVpnUserLocked(mUserId);
+
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+
         } catch (RuntimeException e) {
             updateState(DetailedState.FAILED, "establish");
             IoUtils.closeQuietly(tun);
+            // make sure marked forwarding is cleared if it was set
+            try {
+                mCallback.clearMarkedForwarding(mInterface);
+            } catch (Exception ingored) {
+                // ignored
+            }
             throw e;
         }
         Log.i(TAG, "Established by " + config.user + " on " + mInterface);
 
-        // Fill more values.
-        config.user = mPackage;
-        config.interfaze = mInterface;
 
-        // Override DNS servers and show the notification.
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mCallback.override(config.dnsServers, config.searchDomains);
-            showNotification(config, label, bitmap);
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        // If we are owner assign all Restricted Users to this VPN
+        if (mUserId == UserHandle.USER_OWNER) {
+            token = Binder.clearCallingIdentity();
+            try {
+                for (UserInfo user : mgr.getUsers()) {
+                    if (user.isRestricted()) {
+                        try {
+                            addVpnUserLocked(user.id);
+                        } catch (Exception e) {
+                            Log.wtf(TAG, "Failed to add user " + user.id + " to owner's VPN");
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
         // TODO: ensure that contract class eventually marks as connected
         updateState(DetailedState.AUTHENTICATING, "establish");
         return tun;
+    }
+
+    private boolean isRunningLocked() {
+        return mVpnUsers != null;
+    }
+
+    private void addVpnUserLocked(int user) {
+        enforceControlPermission();
+
+        if (!isRunningLocked()) {
+            throw new IllegalStateException("VPN is not active");
+        }
+
+        final boolean forwardDns = (mConfig.dnsServers != null &&
+                mConfig.dnsServers.size() != 0);
+
+        // add the user
+        mCallback.addUserForwarding(mInterface, user, forwardDns);
+        mVpnUsers.put(user, true);
+
+        // show the notification
+        if (!mPackage.equals(VpnConfig.LEGACY_VPN)) {
+            // Load everything for the user's notification
+            PackageManager pm = mContext.getPackageManager();
+            ApplicationInfo app = null;
+            try {
+                app = AppGlobals.getPackageManager().getApplicationInfo(mPackage, 0, mUserId);
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Invalid application");
+            }
+            String label = app.loadLabel(pm).toString();
+            // Load the icon and convert it into a bitmap.
+            Drawable icon = app.loadIcon(pm);
+            Bitmap bitmap = null;
+            if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
+                int width = mContext.getResources().getDimensionPixelSize(
+                        android.R.dimen.notification_large_icon_width);
+                int height = mContext.getResources().getDimensionPixelSize(
+                        android.R.dimen.notification_large_icon_height);
+                icon.setBounds(0, 0, width, height);
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas c = new Canvas(bitmap);
+                icon.draw(c);
+                c.setBitmap(null);
+            }
+            showNotification(label, bitmap, user);
+        } else {
+            showNotification(null, null, user);
+        }
+    }
+
+    private void removeVpnUserLocked(int user) {
+            enforceControlPermission();
+
+            if (!isRunningLocked()) {
+                throw new IllegalStateException("VPN is not active");
+            }
+            final boolean forwardDns = (mConfig.dnsServers != null &&
+                    mConfig.dnsServers.size() != 0);
+            mCallback.clearUserForwarding(mInterface, user, forwardDns);
+            mVpnUsers.delete(user);
+            hideNotification(user);
+    }
+
+    private void onUserAdded(int userId) {
+        // If the user is restricted tie them to the owner's VPN
+        synchronized(Vpn.this) {
+            UserManager mgr = UserManager.get(mContext);
+            UserInfo user = mgr.getUserInfo(userId);
+            if (user.isRestricted()) {
+                try {
+                    addVpnUserLocked(userId);
+                } catch (Exception e) {
+                    Log.wtf(TAG, "Failed to add restricted user to owner", e);
+                }
+            }
+        }
+    }
+
+    private void onUserRemoved(int userId) {
+        // clean up if restricted
+        synchronized(Vpn.this) {
+            UserManager mgr = UserManager.get(mContext);
+            UserInfo user = mgr.getUserInfo(userId);
+            if (user.isRestricted()) {
+                try {
+                    removeVpnUserLocked(userId);
+                } catch (Exception e) {
+                    Log.wtf(TAG, "Failed to remove restricted user to owner", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Return the configuration of the currently running VPN.
+     */
+    public VpnConfig getVpnConfig() {
+        enforceControlPermission();
+        return mConfig;
     }
 
     @Deprecated
@@ -367,8 +560,18 @@ public class Vpn extends BaseNetworkStateTracker {
                 if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
                     final long token = Binder.clearCallingIdentity();
                     try {
+                        final int size = mVpnUsers.size();
+                        final boolean forwardDns = (mConfig.dnsServers != null &&
+                                mConfig.dnsServers.size() != 0);
+                        for (int i = 0; i < size; i++) {
+                            int user = mVpnUsers.keyAt(i);
+                            mCallback.clearUserForwarding(mInterface, user, forwardDns);
+                            hideNotification(user);
+                        }
+                        mVpnUsers = null;
+                        mCallback.clearMarkedForwarding(mInterface);
+
                         mCallback.restore();
-                        hideNotification();
                     } finally {
                         Binder.restoreCallingIdentity(token);
                     }
@@ -391,16 +594,19 @@ public class Vpn extends BaseNetworkStateTracker {
         if (Binder.getCallingUid() == Process.SYSTEM_UID) {
             return;
         }
-
+        int appId = UserHandle.getAppId(Binder.getCallingUid());
+        final long token = Binder.clearCallingIdentity();
         try {
             // System dialogs are also allowed to control VPN.
             PackageManager pm = mContext.getPackageManager();
             ApplicationInfo app = pm.getApplicationInfo(VpnConfig.DIALOGS_PACKAGE, 0);
-            if (Binder.getCallingUid() == app.uid) {
+            if (appId == app.uid) {
                 return;
             }
         } catch (Exception e) {
             // ignore
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         throw new SecurityException("Unauthorized Caller");
@@ -420,9 +626,9 @@ public class Vpn extends BaseNetworkStateTracker {
         }
     }
 
-    private void showNotification(VpnConfig config, String label, Bitmap icon) {
+    private void showNotification(String label, Bitmap icon, int user) {
         if (!mEnableNotif) return;
-        mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext, config);
+        mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext);
 
         NotificationManager nm = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -430,9 +636,8 @@ public class Vpn extends BaseNetworkStateTracker {
         if (nm != null) {
             String title = (label == null) ? mContext.getString(R.string.vpn_title) :
                     mContext.getString(R.string.vpn_title_long, label);
-            String text = (config.session == null) ? mContext.getString(R.string.vpn_text) :
-                    mContext.getString(R.string.vpn_text_long, config.session);
-            config.startTime = SystemClock.elapsedRealtime();
+            String text = (mConfig.session == null) ? mContext.getString(R.string.vpn_text) :
+                    mContext.getString(R.string.vpn_text_long, mConfig.session);
 
             Notification notification = new Notification.Builder(mContext)
                     .setSmallIcon(R.drawable.vpn_connected)
@@ -443,11 +648,11 @@ public class Vpn extends BaseNetworkStateTracker {
                     .setDefaults(0)
                     .setOngoing(true)
                     .build();
-            nm.notifyAsUser(null, R.drawable.vpn_connected, notification, UserHandle.ALL);
+            nm.notifyAsUser(null, R.drawable.vpn_connected, notification, new UserHandle(user));
         }
     }
 
-    private void hideNotification() {
+    private void hideNotification(int user) {
         if (!mEnableNotif) return;
         mStatusIntent = null;
 
@@ -455,7 +660,7 @@ public class Vpn extends BaseNetworkStateTracker {
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (nm != null) {
-            nm.cancelAsUser(null, R.drawable.vpn_connected, UserHandle.ALL);
+            nm.cancelAsUser(null, R.drawable.vpn_connected, new UserHandle(user));
         }
     }
 
@@ -577,7 +782,8 @@ public class Vpn extends BaseNetworkStateTracker {
         config.user = profile.key;
         config.interfaze = iface;
         config.session = profile.name;
-        config.routes = profile.routes;
+
+        config.addLegacyRoutes(profile.routes);
         if (!profile.dnsServers.isEmpty()) {
             config.dnsServers = Arrays.asList(profile.dnsServers.split(" +"));
         }
@@ -620,7 +826,7 @@ public class Vpn extends BaseNetworkStateTracker {
         if (mLegacyVpnRunner == null) return null;
 
         final LegacyVpnInfo info = new LegacyVpnInfo();
-        info.key = mLegacyVpnRunner.mConfig.user;
+        info.key = mConfig.user;
         info.state = LegacyVpnInfo.stateFromNetworkInfo(mNetworkInfo);
         if (mNetworkInfo.isConnected()) {
             info.intent = mStatusIntent;
@@ -630,7 +836,7 @@ public class Vpn extends BaseNetworkStateTracker {
 
     public VpnConfig getLegacyVpnConfig() {
         if (mLegacyVpnRunner != null) {
-            return mLegacyVpnRunner.mConfig;
+            return mConfig;
         } else {
             return null;
         }
@@ -646,7 +852,6 @@ public class Vpn extends BaseNetworkStateTracker {
     private class LegacyVpnRunner extends Thread {
         private static final String TAG = "LegacyVpnRunner";
 
-        private final VpnConfig mConfig;
         private final String[] mDaemons;
         private final String[][] mArguments;
         private final LocalSocket[] mSockets;
@@ -691,7 +896,7 @@ public class Vpn extends BaseNetworkStateTracker {
             // mConfig.interfaze will change to point to OUR
             // internal interface soon. TODO - add inner/outer to mconfig
             // TODO - we have a race - if the outer iface goes away/disconnects before we hit this
-            // we will leave the VPN up.  We should check that it's still there/connected after 
+            // we will leave the VPN up.  We should check that it's still there/connected after
             // registering
             mOuterInterface = mConfig.interfaze;
 
@@ -867,11 +1072,11 @@ public class Vpn extends BaseNetworkStateTracker {
 
                 // Set the interface and the addresses in the config.
                 mConfig.interfaze = parameters[0].trim();
-                mConfig.addresses = parameters[1].trim();
 
+                mConfig.addLegacyAddresses(parameters[1]);
                 // Set the routes if they are not set in the config.
                 if (mConfig.routes == null || mConfig.routes.isEmpty()) {
-                    mConfig.routes = parameters[2].trim();
+                    mConfig.addLegacyRoutes(parameters[2]);
                 }
 
                 // Set the DNS servers if they are not set in the config.
@@ -891,10 +1096,19 @@ public class Vpn extends BaseNetworkStateTracker {
                 }
 
                 // Set the routes.
-                jniSetRoutes(mConfig.interfaze, mConfig.routes);
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mCallback.setMarkedForwarding(mConfig.interfaze);
+                    mCallback.setRoutes(mConfig.interfaze, mConfig.routes);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
 
                 // Here is the last step and it must be done synchronously.
                 synchronized (Vpn.this) {
+                    // Set the start time
+                    mConfig.startTime = SystemClock.elapsedRealtime();
+
                     // Check if the thread is interrupted while we are waiting.
                     checkpoint(false);
 
@@ -905,14 +1119,44 @@ public class Vpn extends BaseNetworkStateTracker {
 
                     // Now INetworkManagementEventObserver is watching our back.
                     mInterface = mConfig.interfaze;
-                    mCallback.override(mConfig.dnsServers, mConfig.searchDomains);
-                    showNotification(mConfig, null, null);
+                    mVpnUsers = new SparseBooleanArray();
 
+                    token = Binder.clearCallingIdentity();
+                    try {
+                        mCallback.override(mInterface, mConfig.dnsServers, mConfig.searchDomains);
+                        addVpnUserLocked(mUserId);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+
+                    // Assign all restircted users to this VPN
+                    // (Legacy VPNs are Owner only)
+                    UserManager mgr = UserManager.get(mContext);
+                    token = Binder.clearCallingIdentity();
+                    try {
+                        for (UserInfo user : mgr.getUsers()) {
+                            if (user.isRestricted()) {
+                                try {
+                                    addVpnUserLocked(user.id);
+                                } catch (Exception e) {
+                                    Log.wtf(TAG, "Failed to add user " + user.id
+                                            + " to owner's VPN");
+                                }
+                            }
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                     Log.i(TAG, "Connected!");
                     updateState(DetailedState.CONNECTED, "execute");
                 }
             } catch (Exception e) {
                 Log.i(TAG, "Aborting", e);
+                // make sure the routing is cleared
+                try {
+                    mCallback.clearMarkedForwarding(mConfig.interfaze);
+                } catch (Exception ignored) {
+                }
                 exit();
             } finally {
                 // Kill the daemons if they fail to stop.

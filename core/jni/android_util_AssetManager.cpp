@@ -586,7 +586,7 @@ static jstring android_content_AssetManager_getResourceName(JNIEnv* env, jobject
     }
 
     ResTable::resource_name name;
-    if (!am->getResources().getResourceName(resid, &name)) {
+    if (!am->getResources().getResourceName(resid, true, &name)) {
         return NULL;
     }
 
@@ -594,19 +594,27 @@ static jstring android_content_AssetManager_getResourceName(JNIEnv* env, jobject
     if (name.package != NULL) {
         str.setTo(name.package, name.packageLen);
     }
-    if (name.type != NULL) {
+    if (name.type8 != NULL || name.type != NULL) {
         if (str.size() > 0) {
             char16_t div = ':';
             str.append(&div, 1);
         }
-        str.append(name.type, name.typeLen);
+        if (name.type8 != NULL) {
+            str.append(String16(name.type8, name.typeLen));
+        } else {
+            str.append(name.type, name.typeLen);
+        }
     }
-    if (name.name != NULL) {
+    if (name.name8 != NULL || name.name != NULL) {
         if (str.size() > 0) {
             char16_t div = '/';
             str.append(&div, 1);
         }
-        str.append(name.name, name.nameLen);
+        if (name.name8 != NULL) {
+            str.append(String16(name.name8, name.nameLen));
+        } else {
+            str.append(name.name, name.nameLen);
+        }
     }
 
     return env->NewString((const jchar*)str.string(), str.size());
@@ -621,7 +629,7 @@ static jstring android_content_AssetManager_getResourcePackageName(JNIEnv* env, 
     }
 
     ResTable::resource_name name;
-    if (!am->getResources().getResourceName(resid, &name)) {
+    if (!am->getResources().getResourceName(resid, true, &name)) {
         return NULL;
     }
 
@@ -641,8 +649,12 @@ static jstring android_content_AssetManager_getResourceTypeName(JNIEnv* env, job
     }
 
     ResTable::resource_name name;
-    if (!am->getResources().getResourceName(resid, &name)) {
+    if (!am->getResources().getResourceName(resid, true, &name)) {
         return NULL;
+    }
+
+    if (name.type8 != NULL) {
+        return env->NewStringUTF(name.type8);
     }
 
     if (name.type != NULL) {
@@ -661,8 +673,12 @@ static jstring android_content_AssetManager_getResourceEntryName(JNIEnv* env, jo
     }
 
     ResTable::resource_name name;
-    if (!am->getResources().getResourceName(resid, &name)) {
+    if (!am->getResources().getResourceName(resid, true, &name)) {
         return NULL;
+    }
+
+    if (name.name8 != NULL) {
+        return env->NewStringUTF(name.name8);
     }
 
     if (name.name != NULL) {
@@ -680,7 +696,7 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
 {
     if (outValue == NULL) {
          jniThrowNullPointerException(env, "outValue");
-         return NULL;
+         return 0;
     }
     AssetManager* am = assetManagerForJavaObject(env, clazz);
     if (am == NULL) {

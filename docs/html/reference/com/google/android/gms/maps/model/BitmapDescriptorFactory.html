@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>BitmapDescriptorFactory | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -681,7 +688,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -701,7 +708,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -923,7 +930,7 @@ Summary:
             <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromAsset(java.lang.String)">fromAsset</a></span>(<a href="/reference/java/lang/String.html">String</a> assetName)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromAsset(java.lang.String)">fromAsset</a></span>(String assetName)</nobr>
         
         <div class="jd-descrdiv">Creates a <code><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></code> using the name of an image in the assets directory.</div>
   
@@ -941,7 +948,7 @@ Summary:
             <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromBitmap(android.graphics.Bitmap)">fromBitmap</a></span>(<a href="/reference/android/graphics/Bitmap.html">Bitmap</a> image)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromBitmap(android.graphics.Bitmap)">fromBitmap</a></span>(Bitmap image)</nobr>
         
         <div class="jd-descrdiv">Creates a bitmap descriptor from a given image.</div>
   
@@ -959,7 +966,7 @@ Summary:
             <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromFile(java.lang.String)">fromFile</a></span>(<a href="/reference/java/lang/String.html">String</a> fileName)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromFile(java.lang.String)">fromFile</a></span>(String fileName)</nobr>
         
         <div class="jd-descrdiv">Creates a <code><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></code> using the name of an image file located in the internal
  storage.</div>
@@ -978,7 +985,7 @@ Summary:
             <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromPath(java.lang.String)">fromPath</a></span>(<a href="/reference/java/lang/String.html">String</a> absolutePath)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#fromPath(java.lang.String)">fromPath</a></span>(String absolutePath)</nobr>
         
         <div class="jd-descrdiv">Creates a bitmap descriptor from an absolute file path.</div>
   
@@ -1026,7 +1033,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1045,7 +1052,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1064,7 +1071,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1093,7 +1100,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1157,7 +1164,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1720,7 +1727,7 @@ From class
         <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a>
       </span>
       <span class="sympad">fromAsset</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> assetName)</span>
+      <span class="normal">(String assetName)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1764,7 +1771,7 @@ From class
         <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a>
       </span>
       <span class="sympad">fromBitmap</span>
-      <span class="normal">(<a href="/reference/android/graphics/Bitmap.html">Bitmap</a> image)</span>
+      <span class="normal">(Bitmap image)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1794,7 +1801,7 @@ From class
         <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a>
       </span>
       <span class="sympad">fromFile</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> fileName)</span>
+      <span class="normal">(String fileName)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1823,7 +1830,7 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><a href="/guide/topics/data/data-storage.html#filesInternal">
+      <ul class="nolist"><li><a href="http://developer.android.com/guide/topics/data/data-storage.html#filesInternal">
  Using the Internal Storage</a></li>
       </ul>
   </div>
@@ -1845,7 +1852,7 @@ From class
         <a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a>
       </span>
       <span class="sympad">fromPath</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> absolutePath)</span>
+      <span class="normal">(String absolutePath)</span>
     </h4>
       <div class="api-level">
         <div></div>

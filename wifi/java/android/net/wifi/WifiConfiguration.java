@@ -312,7 +312,10 @@ public class WifiConfiguration implements Parcelable {
         STATIC,
         /* no proxy details are assigned, this is used to indicate
          * that any existing proxy settings should be retained */
-        UNASSIGNED
+        UNASSIGNED,
+        /* Use a Pac based proxy.
+         */
+        PAC
     }
     /**
      * @hide
@@ -343,6 +346,29 @@ public class WifiConfiguration implements Parcelable {
         ipAssignment = IpAssignment.UNASSIGNED;
         proxySettings = ProxySettings.UNASSIGNED;
         linkProperties = new LinkProperties();
+    }
+
+    /**
+     * indicates whether the configuration is valid
+     * @return true if valid, false otherwise
+     * @hide
+     */
+    public boolean isValid() {
+        if (allowedKeyManagement.cardinality() > 1) {
+            if (allowedKeyManagement.cardinality() != 2) {
+                return false;
+            }
+            if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) == false) {
+                return false;
+            }
+            if ((allowedKeyManagement.get(KeyMgmt.IEEE8021X) == false)
+                    && (allowedKeyManagement.get(KeyMgmt.WPA_PSK) == false)) {
+                return false;
+            }
+        }
+
+        // TODO: Add more checks
+        return true;
     }
 
     @Override
@@ -529,8 +555,8 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public int getAuthType() {
-        if (allowedKeyManagement.cardinality() > 1) {
-            throw new IllegalStateException("More than one auth type set");
+        if (isValid() == false) {
+            throw new IllegalStateException("Invalid configuration");
         }
         if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             return KeyMgmt.WPA_PSK;

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.util.ArrayMap;
+import android.util.SuperNotCalledException;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
@@ -686,6 +688,7 @@ public class Activity extends ContextThemeWrapper
     boolean mFinished;
     boolean mStartedActivity;
     private boolean mDestroyed;
+    private boolean mDoReportFullyDrawn = true;
     /** true if the activity is going through a transient pause */
     /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
@@ -699,7 +702,7 @@ public class Activity extends ContextThemeWrapper
         Object activity;
         HashMap<String, Object> children;
         ArrayList<Fragment> fragments;
-        HashMap<String, LoaderManagerImpl> loaders;
+        ArrayMap<String, LoaderManagerImpl> loaders;
     }
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
     
@@ -724,7 +727,7 @@ public class Activity extends ContextThemeWrapper
         }
     };
     
-    HashMap<String, LoaderManagerImpl> mAllLoaderManagers;
+    ArrayMap<String, LoaderManagerImpl> mAllLoaderManagers;
     LoaderManagerImpl mLoaderManager;
     
     private static final class ManagedCursor {
@@ -744,6 +747,8 @@ public class Activity extends ContextThemeWrapper
     // protected by synchronized (this) 
     int mResultCode = RESULT_CANCELED;
     Intent mResultData = null;
+    private TranslucentConversionListener mTranslucentCallback;
+    private boolean mChangeCanvasToTranslucent;
 
     private boolean mTitleReady = false;
 
@@ -817,13 +822,13 @@ public class Activity extends ContextThemeWrapper
             return mLoaderManager;
         }
         mCheckedForLoaderManager = true;
-        mLoaderManager = getLoaderManager(null, mLoadersStarted, true);
+        mLoaderManager = getLoaderManager("(root)", mLoadersStarted, true);
         return mLoaderManager;
     }
     
     LoaderManagerImpl getLoaderManager(String who, boolean started, boolean create) {
         if (mAllLoaderManagers == null) {
-            mAllLoaderManagers = new HashMap<String, LoaderManagerImpl>();
+            mAllLoaderManagers = new ArrayMap<String, LoaderManagerImpl>();
         }
         LoaderManagerImpl lm = mAllLoaderManagers.get(who);
         if (lm == null) {
@@ -1034,7 +1039,7 @@ public class Activity extends ContextThemeWrapper
             if (mLoaderManager != null) {
                 mLoaderManager.doStart();
             } else if (!mCheckedForLoaderManager) {
-                mLoaderManager = getLoaderManager(null, mLoadersStarted, false);
+                mLoaderManager = getLoaderManager("(root)", mLoadersStarted, false);
             }
             mCheckedForLoaderManager = true;
         }
@@ -1381,6 +1386,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         getApplication().dispatchActivityStopped(this);
+        mTranslucentCallback = null;
         mCalled = true;
     }
 
@@ -1446,6 +1452,29 @@ public class Activity extends ContextThemeWrapper
         }
 
         getApplication().dispatchActivityDestroyed(this);
+    }
+
+    /**
+     * Report to the system that your app is now fully drawn, purely for diagnostic
+     * purposes (calling it does not impact the visible behavior of the activity).
+     * This is only used to help instrument application launch times, so that the
+     * app can report when it is fully in a usable state; without this, the only thing
+     * the system itself can determine is the point at which the activity's window
+     * is <em>first</em> drawn and displayed.  To participate in app launch time
+     * measurement, you should always call this method after first launch (when
+     * {@link #onCreate(android.os.Bundle)} is called), at the point where you have
+     * entirely drawn your UI and populated with all of the significant data.  You
+     * can safely call this method any time after first launch as well, in which case
+     * it will simply be ignored.
+     */
+    public void reportFullyDrawn() {
+        if (mDoReportFullyDrawn) {
+            mDoReportFullyDrawn = false;
+            try {
+                ActivityManagerNative.getDefault().reportActivityFullyDrawn(mToken);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     /**
@@ -1624,17 +1653,18 @@ public class Activity extends ContextThemeWrapper
         if (mAllLoaderManagers != null) {
             // prune out any loader managers that were already stopped and so
             // have nothing useful to retain.
-            LoaderManagerImpl loaders[] = new LoaderManagerImpl[mAllLoaderManagers.size()];
-            mAllLoaderManagers.values().toArray(loaders);
-            if (loaders != null) {
-                for (int i=0; i<loaders.length; i++) {
-                    LoaderManagerImpl lm = loaders[i];
-                    if (lm.mRetaining) {
-                        retainLoaders = true;
-                    } else {
-                        lm.doDestroy();
-                        mAllLoaderManagers.remove(lm.mWho);
-                    }
+            final int N = mAllLoaderManagers.size();
+            LoaderManagerImpl loaders[] = new LoaderManagerImpl[N];
+            for (int i=N-1; i>=0; i--) {
+                loaders[i] = mAllLoaderManagers.valueAt(i);
+            }
+            for (int i=0; i<N; i++) {
+                LoaderManagerImpl lm = loaders[i];
+                if (lm.mRetaining) {
+                    retainLoaders = true;
+                } else {
+                    lm.doDestroy();
+                    mAllLoaderManagers.remove(lm.mWho);
                 }
             }
         }
@@ -1877,9 +1907,12 @@ public class Activity extends ContextThemeWrapper
         if (isChild() || !window.hasFeature(Window.FEATURE_ACTION_BAR) || mActionBar != null) {
             return;
         }
-        
+
         mActionBar = new ActionBarImpl(this);
         mActionBar.setDefaultDisplayHomeAsUpEnabled(mEnableDefaultActionBarUp);
+
+        mWindow.setDefaultIcon(mActivityInfo.getIconResource());
+        mWindow.setDefaultLogo(mActivityInfo.getLogoResource());
     }
     
     /**
@@ -3406,6 +3439,12 @@ public class Activity extends ContextThemeWrapper
                 // activity is finished, no matter what happens to it.
                 mStartedActivity = true;
             }
+
+            final View decor = mWindow != null ? mWindow.peekDecorView() : null;
+            if (decor != null) {
+                decor.cancelPendingInputEvents();
+            }
+            // TODO Consider clearing/flushing other event sources and events for child windows.
         } else {
             if (options != null) {
                 mParent.startActivityFromChild(this, intent, requestCode, options);
@@ -4859,6 +4898,74 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} to a
+     * fullscreen opaque Activity.
+     * <p>
+     * Call this whenever the background of a translucent Activity has changed to become opaque.
+     * Doing so will allow the {@link android.view.Surface} of the Activity behind to be released.
+     * <p>
+     * This call has no effect on non-translucent activities or on activities with the
+     * {@link android.R.attr#windowIsFloating} attribute.
+     *
+     * @see #convertToTranslucent(TranslucentConversionListener)
+     * @see TranslucentConversionListener
+     *
+     * @hide
+     */
+    public void convertFromTranslucent() {
+        try {
+            mTranslucentCallback = null;
+            if (ActivityManagerNative.getDefault().convertFromTranslucent(mToken)) {
+                WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, true);
+            }
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
+    /**
+     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} back from
+     * opaque to translucent following a call to {@link #convertFromTranslucent()}.
+     * <p>
+     * Calling this allows the Activity behind this one to be seen again. Once all such Activities
+     * have been redrawn {@link TranslucentConversionListener#onTranslucentConversionComplete} will
+     * be called indicating that it is safe to make this activity translucent again. Until
+     * {@link TranslucentConversionListener#onTranslucentConversionComplete} is called the image
+     * behind the frontmost Activity will be indeterminate.
+     * <p>
+     * This call has no effect on non-translucent activities or on activities with the
+     * {@link android.R.attr#windowIsFloating} attribute.
+     *
+     * @param callback the method to call when all visible Activities behind this one have been
+     * drawn and it is safe to make this Activity translucent again.
+     *
+     * @see #convertFromTranslucent()
+     * @see TranslucentConversionListener
+     *
+     * @hide
+     */
+    public void convertToTranslucent(TranslucentConversionListener callback) {
+        try {
+            mTranslucentCallback = callback;
+            mChangeCanvasToTranslucent =
+                    ActivityManagerNative.getDefault().convertToTranslucent(mToken);
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
+    /** @hide */
+    void onTranslucentConversionComplete(boolean drawComplete) {
+        if (mTranslucentCallback != null) {
+            mTranslucentCallback.onTranslucentConversionComplete(drawComplete);
+            mTranslucentCallback = null;
+        }
+        if (mChangeCanvasToTranslucent) {
+            WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, false);
+        }
+    }
+
+    /**
      * Adjust the current immersive mode setting.
      *
      * Note that changing this value will have no effect on the activity's
@@ -4903,6 +5010,7 @@ public class Activity extends ContextThemeWrapper
      * @return The new action mode, or <code>null</code> if the activity does not want to
      *         provide special handling for this action mode. (It will be handled by the system.)
      */
+    @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
         initActionBar();
         if (mActionBar != null) {
@@ -4917,6 +5025,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param mode The new action mode.
      */
+    @Override
     public void onActionModeStarted(ActionMode mode) {
     }
 
@@ -4926,6 +5035,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param mode The action mode that just finished.
      */
+    @Override
     public void onActionModeFinished(ActionMode mode) {
     }
 
@@ -5148,14 +5258,15 @@ public class Activity extends ContextThemeWrapper
         }
         mFragments.dispatchStart();
         if (mAllLoaderManagers != null) {
-            LoaderManagerImpl loaders[] = new LoaderManagerImpl[mAllLoaderManagers.size()];
-            mAllLoaderManagers.values().toArray(loaders);
-            if (loaders != null) {
-                for (int i=0; i<loaders.length; i++) {
-                    LoaderManagerImpl lm = loaders[i];
-                    lm.finishRetain();
-                    lm.doReportStart();
-                }
+            final int N = mAllLoaderManagers.size();
+            LoaderManagerImpl loaders[] = new LoaderManagerImpl[N];
+            for (int i=N-1; i>=0; i--) {
+                loaders[i] = mAllLoaderManagers.valueAt(i);
+            }
+            for (int i=0; i<N; i++) {
+                LoaderManagerImpl lm = loaders[i];
+                lm.finishRetain();
+                lm.doReportStart();
             }
         }
     }
@@ -5230,6 +5341,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performPause() {
+        mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
         mCalled = false;
         onPause();
@@ -5249,6 +5361,7 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performStop() {
+        mDoReportFullyDrawn = false;
         if (mLoadersStarted) {
             mLoadersStarted = false;
             if (mLoaderManager != null) {
@@ -5326,5 +5439,29 @@ public class Activity extends ContextThemeWrapper
                 frag.onActivityResult(requestCode, resultCode, data);
             }
         }
+    }
+
+    /**
+     * Interface for informing a translucent {@link Activity} once all visible activities below it
+     * have completed drawing. This is necessary only after an {@link Activity} has been made
+     * opaque using {@link Activity#convertFromTranslucent()} and before it has been drawn
+     * translucent again following a call to {@link
+     * Activity#convertToTranslucent(TranslucentConversionListener)}.
+     *
+     * @hide
+     */
+    public interface TranslucentConversionListener {
+        /**
+         * Callback made following {@link Activity#convertToTranslucent} once all visible Activities
+         * below the top one have been redrawn. Following this callback it is safe to make the top
+         * Activity translucent because the underlying Activity has been drawn.
+         *
+         * @param drawComplete True if the background Activity has drawn itself. False if a timeout
+         * occurred waiting for the Activity to complete drawing.
+         *
+         * @see Activity#convertFromTranslucent()
+         * @see Activity#convertToTranslucent(TranslucentConversionListener)
+         */
+        public void onTranslucentConversionComplete(boolean drawComplete);
     }
 }

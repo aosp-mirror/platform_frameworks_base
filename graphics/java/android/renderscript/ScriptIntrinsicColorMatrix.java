@@ -21,15 +21,27 @@ import android.util.Log;
 /**
  * Intrinsic for applying a color matrix to allocations.
  *
- * This has the same effect as loading each element and
- * converting it to a {@link Element#F32_4}, multiplying the
- * result by the 4x4 color matrix as performed by
- * rsMatrixMultiply() and writing it to the output after
- * conversion back to {@link Element#U8_4}.
+ * If the element type is {@link Element.DataType#UNSIGNED_8},
+ * it is converted to {@link Element.DataType#FLOAT_32} and
+ * normalized from (0-255) to (0-1). If the incoming vector size
+ * is less than four, a {@link Element#F32_4} is created by
+ * filling the missing vector channels with zero. This value is
+ * then multiplied by the 4x4 color matrix as performed by
+ * rsMatrixMultiply(), adding a {@link Element#F32_4}, and then
+ * writing it to the output {@link Allocation}.
+ *
+ * If the ouptut type is unsigned, the value is normalized from
+ * (0-1) to (0-255) and converted. If the output vector size is
+ * less than four, the unused channels are discarded.
+ *
+ * Supported elements types are {@link Element#U8}, {@link
+ * Element#U8_2}, {@link Element#U8_3}, {@link Element#U8_4},
+ * {@link Element#F32}, {@link Element#F32_2}, {@link
+ * Element#F32_3}, and {@link Element#F32_4}.
  **/
 public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
     private final Matrix4f mMatrix = new Matrix4f();
-    private Allocation mInput;
+    private final Float4 mAdd = new Float4();
 
     private ScriptIntrinsicColorMatrix(int id, RenderScript rs) {
         super(id, rs);
@@ -39,18 +51,31 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
      * Create an intrinsic for applying a color matrix to an
      * allocation.
      *
-     * Supported elements types are {@link Element#U8_4}
-     *
      * @param rs The RenderScript context
-     * @param e Element type for intputs and outputs
+     * @param e Element type for inputs and outputs, As of API 19,
+     *          this parameter is ignored. The Element type check is
+     *          performed in the kernel launch.
+     *
+     * @deprecated Use the single argument version as Element is now
+     *             ignored.
      *
      * @return ScriptIntrinsicColorMatrix
      */
+    @Deprecated
     public static ScriptIntrinsicColorMatrix create(RenderScript rs, Element e) {
-        if (!e.isCompatible(Element.U8_4(rs))) {
-            throw new RSIllegalArgumentException("Unsuported element type.");
-        }
-        int id = rs.nScriptIntrinsicCreate(2, e.getID(rs));
+        return create(rs);
+    }
+
+    /**
+     * Create an intrinsic for applying a color matrix to an
+     * allocation.
+     *
+     * @param rs The RenderScript context
+     *
+     * @return ScriptIntrinsicColorMatrix
+     */
+    public static ScriptIntrinsicColorMatrix create(RenderScript rs) {
+        int id = rs.nScriptIntrinsicCreate(2, 0);
         return new ScriptIntrinsicColorMatrix(id, rs);
 
     }
@@ -81,6 +106,49 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
     public void setColorMatrix(Matrix3f m) {
         mMatrix.load(m);
         setMatrix();
+    }
+
+    /**
+     * Set the value to be added after the color matrix has been
+     * applied. The default value is {0, 0, 0, 0}
+     *
+     * @param f The float4 value to be added.
+     */
+    public void setAdd(Float4 f) {
+        mAdd.x = f.x;
+        mAdd.y = f.y;
+        mAdd.z = f.z;
+        mAdd.w = f.w;
+
+        FieldPacker fp = new FieldPacker(4*4);
+        fp.addF32(f.x);
+        fp.addF32(f.y);
+        fp.addF32(f.z);
+        fp.addF32(f.w);
+        setVar(1, fp);
+    }
+
+    /**
+     * Set the value to be added after the color matrix has been
+     * applied. The default value is {0, 0, 0, 0}
+     *
+     * @param r The red add value.
+     * @param g The green add value.
+     * @param b The blue add value.
+     * @param a The alpha add value.
+     */
+    public void setAdd(float r, float g, float b, float a) {
+        mAdd.x = r;
+        mAdd.y = g;
+        mAdd.z = b;
+        mAdd.w = a;
+
+        FieldPacker fp = new FieldPacker(4*4);
+        fp.addF32(mAdd.x);
+        fp.addF32(mAdd.y);
+        fp.addF32(mAdd.z);
+        fp.addF32(mAdd.w);
+        setVar(1, fp);
     }
 
     /**
@@ -142,13 +210,45 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
 
 
     /**
-     * Invoke the kernel and apply the matrix to each cell of ain and copy to
-     * aout.
+     * Invoke the kernel and apply the matrix to each cell of input
+     * {@link Allocation} and copy to the output {@link Allocation}.
+     *
+     * If the vector size of the input is less than four, the
+     * remaining components are treated as zero for the matrix
+     * multiply.
+     *
+     * If the output vector size is less than four, the unused
+     * vector components are discarded.
+     *
      *
      * @param ain Input allocation
      * @param aout Output allocation
      */
     public void forEach(Allocation ain, Allocation aout) {
+        if (!ain.getElement().isCompatible(Element.U8(mRS)) &&
+            !ain.getElement().isCompatible(Element.U8_2(mRS)) &&
+            !ain.getElement().isCompatible(Element.U8_3(mRS)) &&
+            !ain.getElement().isCompatible(Element.U8_4(mRS)) &&
+            !ain.getElement().isCompatible(Element.F32(mRS)) &&
+            !ain.getElement().isCompatible(Element.F32_2(mRS)) &&
+            !ain.getElement().isCompatible(Element.F32_3(mRS)) &&
+            !ain.getElement().isCompatible(Element.F32_4(mRS))) {
+
+            throw new RSIllegalArgumentException("Unsuported element type.");
+        }
+
+        if (!aout.getElement().isCompatible(Element.U8(mRS)) &&
+            !aout.getElement().isCompatible(Element.U8_2(mRS)) &&
+            !aout.getElement().isCompatible(Element.U8_3(mRS)) &&
+            !aout.getElement().isCompatible(Element.U8_4(mRS)) &&
+            !aout.getElement().isCompatible(Element.F32(mRS)) &&
+            !aout.getElement().isCompatible(Element.F32_2(mRS)) &&
+            !aout.getElement().isCompatible(Element.F32_3(mRS)) &&
+            !aout.getElement().isCompatible(Element.F32_4(mRS))) {
+
+            throw new RSIllegalArgumentException("Unsuported element type.");
+        }
+
         forEach(0, ain, aout, null);
     }
 

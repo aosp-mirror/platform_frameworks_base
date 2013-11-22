@@ -7,10 +7,10 @@
 #include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
-#include "../images/SkBitmapRegionDecoder.h"
-#include "../images/SkImageDecoder.h"
+#include "SkImageDecoder.h"
 #include <jni.h>
 
+class SkBitmapRegionDecoder;
 class SkCanvas;
 class SkPaint;
 class SkPicture;
@@ -59,25 +59,29 @@ public:
         storage array (may be null).
     */
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-                                bool isMutable, jbyteArray ninepatch, jintArray layoutbounds,
-                                int density = -1);
+            int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density = -1);
 
-    static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
-                                jbyteArray ninepatch, int density = -1);
+    static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
+            jbyteArray ninepatch, int density = -1);
+
+    static void reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
+            bool isPremultiplied);
+
+    static int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
 
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
     static jbyteArray allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
-                                     SkColorTable* ctable);
+            SkColorTable* ctable);
 
     /** Copy the colors in colors[] to the bitmap, convert to the correct
         format along the way.
     */
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
-                          int srcStride, int x, int y, int width, int height,
-                          const SkBitmap& dstBitmap);
+            int srcStride, int x, int y, int width, int height,
+            const SkBitmap& dstBitmap, bool isPremultiplied);
 
     static jbyteArray getBitmapStorageObj(SkPixelRef *pixref);
 };
@@ -87,9 +91,16 @@ public:
     AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
                     SkColorTable* ctable);
 
+    /**
+     * Creates an AndroidPixelRef that wraps (and refs) another to reuse/share
+     * the same storage and java byte array refcounting, yet have a different
+     * color table.
+     */
+    AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, SkColorTable* ctable);
+
     virtual ~AndroidPixelRef();
 
-    jbyteArray getStorageObj() { return fStorageObj; }
+    jbyteArray getStorageObj();
 
     void setLocalJNIRef(jbyteArray arr);
 
@@ -106,6 +117,8 @@ public:
     virtual void globalUnref();
 
 private:
+    AndroidPixelRef* const fWrappedPixelRef; // if set, delegate memory management calls to this
+
     JavaVM* fVM;
     bool fOnJavaHeap; // If true, the memory was allocated on the Java heap
 

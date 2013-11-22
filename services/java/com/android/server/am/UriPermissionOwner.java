@@ -24,7 +24,7 @@ import android.os.IBinder;
 import java.util.HashSet;
 import java.util.Iterator;
 
-class UriPermissionOwner {
+final class UriPermissionOwner {
     final ActivityManagerService service;
     final Object owner;
 
@@ -67,24 +67,16 @@ class UriPermissionOwner {
         if ((mode&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0
                 && readUriPermissions != null) {
             for (UriPermission perm : readUriPermissions) {
-                perm.readOwners.remove(this);
-                if (perm.readOwners.size() == 0 && (perm.globalModeFlags
-                        &Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
-                    perm.modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                    service.removeUriPermissionIfNeededLocked(perm);
-                }
+                perm.removeReadOwner(this);
+                service.removeUriPermissionIfNeededLocked(perm);
             }
             readUriPermissions = null;
         }
         if ((mode&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0
                 && writeUriPermissions != null) {
             for (UriPermission perm : writeUriPermissions) {
-                perm.writeOwners.remove(this);
-                if (perm.writeOwners.size() == 0 && (perm.globalModeFlags
-                        &Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
-                    perm.modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                    service.removeUriPermissionIfNeededLocked(perm);
-                }
+                perm.removeWriteOwner(this);
+                service.removeUriPermissionIfNeededLocked(perm);
             }
             writeUriPermissions = null;
         }
@@ -97,12 +89,8 @@ class UriPermissionOwner {
             while (it.hasNext()) {
                 UriPermission perm = it.next();
                 if (uri.equals(perm.uri)) {
-                    perm.readOwners.remove(this);
-                    if (perm.readOwners.size() == 0 && (perm.globalModeFlags
-                            &Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
-                        perm.modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                        service.removeUriPermissionIfNeededLocked(perm);
-                    }
+                    perm.removeReadOwner(this);
+                    service.removeUriPermissionIfNeededLocked(perm);
                     it.remove();
                 }
             }
@@ -116,12 +104,8 @@ class UriPermissionOwner {
             while (it.hasNext()) {
                 UriPermission perm = it.next();
                 if (uri.equals(perm.uri)) {
-                    perm.writeOwners.remove(this);
-                    if (perm.writeOwners.size() == 0 && (perm.globalModeFlags
-                            &Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
-                        perm.modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                        service.removeUriPermissionIfNeededLocked(perm);
-                    }
+                    perm.removeWriteOwner(this);
+                    service.removeUriPermissionIfNeededLocked(perm);
                     it.remove();
                 }
             }

@@ -81,14 +81,16 @@ public final class BridgeContentProvider implements IContentProvider {
     }
 
     @Override
-    public AssetFileDescriptor openAssetFile(String callingPackage, Uri arg0, String arg1)
+    public AssetFileDescriptor openAssetFile(
+            String callingPackage, Uri arg0, String arg1, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ParcelFileDescriptor openFile(String callingPackage, Uri arg0, String arg1)
+    public ParcelFileDescriptor openFile(
+            String callingPackage, Uri arg0, String arg1, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
@@ -122,7 +124,7 @@ public final class BridgeContentProvider implements IContentProvider {
 
     @Override
     public AssetFileDescriptor openTypedAssetFile(String callingPackage, Uri arg0, String arg1,
-            Bundle arg2) throws RemoteException, FileNotFoundException {
+            Bundle arg2, ICancellationSignal signal) throws RemoteException, FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -130,6 +132,16 @@ public final class BridgeContentProvider implements IContentProvider {
     @Override
     public ICancellationSignal createCancellationSignal() throws RemoteException {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
         return null;
     }
 }

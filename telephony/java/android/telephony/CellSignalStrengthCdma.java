@@ -331,10 +331,12 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(mCdmaDbm);
-        dest.writeInt(mCdmaEcio);
-        dest.writeInt(mEvdoDbm);
-        dest.writeInt(mEvdoEcio);
+        // Need to multiply CdmaDbm, CdmaEcio, EvdoDbm and EvdoEcio by -1
+        // to ensure consistency when reading values written here
+        dest.writeInt(mCdmaDbm * -1);
+        dest.writeInt(mCdmaEcio * -1);
+        dest.writeInt(mEvdoDbm * -1);
+        dest.writeInt(mEvdoEcio * -1);
         dest.writeInt(mEvdoSnr);
     }
 
@@ -343,10 +345,13 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
      * where the TYPE_LTE token is already been processed.
      */
     private CellSignalStrengthCdma(Parcel in) {
-        mCdmaDbm = in.readInt();
-        mCdmaEcio = in.readInt();
-        mEvdoDbm = in.readInt();
-        mEvdoEcio = in.readInt();
+        // CdmaDbm, CdmaEcio, EvdoDbm and EvdoEcio are written into
+        // the parcel as positive values.
+        // Need to convert into negative values
+        mCdmaDbm = in.readInt() * -1;
+        mCdmaEcio = in.readInt() * -1;
+        mEvdoDbm = in.readInt() * -1;
+        mEvdoEcio = in.readInt() * -1;
         mEvdoSnr = in.readInt();
         if (DBG) log("CellSignalStrengthCdma(Parcel): " + toString());
     }

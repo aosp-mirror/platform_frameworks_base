@@ -26,13 +26,15 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
+#include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
+
 #include <cutils/compiler.h>
 
-#include "utils/LinearAllocator.h"
+#include <androidfw/ResourceTypes.h>
 
 #include "Debug.h"
 
@@ -111,7 +113,6 @@ public:
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
-
     void defer(DeferStateStruct& deferStruct, const int level);
     void replay(ReplayStateStruct& replayStruct, const int level);
 
@@ -129,7 +130,12 @@ public:
 
     void setName(const char* name) {
         if (name) {
-            mName.setTo(name);
+            char* lastPeriod = strrchr(name, '.');
+            if (lastPeriod) {
+                mName.setTo(lastPeriod + 1);
+            } else {
+                mName.setTo(name);
+            }
         }
     }
 
@@ -479,6 +485,7 @@ private:
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
+    Vector<Res_png_9patch*> mPatchResources;
 
     Vector<SkPaint*> mPaints;
     Vector<SkPath*> mPaths;
@@ -496,6 +503,7 @@ private:
     uint32_t mFunctorCount;
 
     String8 mName;
+    bool mDestroyed; // used for debugging crash, TODO: remove once invalid state crash fixed
 
     // View properties
     bool mClipToBounds;
@@ -525,11 +533,11 @@ private:
      * an alpha causes a SaveLayerAlpha to occur). These operations point into mDisplayListData's
      * allocation, or null if uninitialized.
      *
-     * These are initialized (via friend constructors) when a displayList is issued in either replay
-     * or deferred mode. If replaying, the ops are not used until the next frame. If deferring, the
-     * ops may be stored in the DeferredDisplayList to be played back a second time.
+     * These are initialized (via friend re-constructors) when a displayList is issued in either
+     * replay or deferred mode. If replaying, the ops are not used until the next frame. If
+     * deferring, the ops may be stored in the DeferredDisplayList to be played back a second time.
      *
-     * They should be used at most once per frame (one call to iterate)
+     * They should be used at most once per frame (one call to 'iterate') to avoid overwriting data
      */
     ClipRectOp* mClipRectOp;
     SaveLayerOp* mSaveLayerOp;

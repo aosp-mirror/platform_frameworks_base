@@ -139,7 +139,7 @@ static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
 
 static PathTexture* createTexture(float left, float top, float offset,
         uint32_t width, uint32_t height, uint32_t id) {
-    PathTexture* texture = new PathTexture();
+    PathTexture* texture = new PathTexture(Caches::getInstance());
     texture->left = left;
     texture->top = top;
     texture->offset = offset;
@@ -214,7 +214,22 @@ void PathCache::operator()(PathDescription& entry, PathTexture*& texture) {
 void PathCache::removeTexture(PathTexture* texture) {
     if (texture) {
         const uint32_t size = texture->width * texture->height;
-        mSize -= size;
+
+        // If there is a pending task we must wait for it to return
+        // before attempting our cleanup
+        const sp<Task<SkBitmap*> >& task = texture->task();
+        if (task != NULL) {
+            SkBitmap* bitmap = task->getResult();
+            texture->clearTask();
+        } else {
+            // If there is a pending task, the path was not added
+            // to the cache and the size wasn't increased
+            if (size > mSize) {
+                ALOGE("Removing path texture of size %d will leave "
+                        "the cache in an inconsistent state", size);
+            }
+            mSize -= size;
+        }
 
         PATH_LOGD("PathCache::delete name, size, mSize = %d, %d, %d",
                 texture->id, size, mSize);
@@ -223,7 +238,7 @@ void PathCache::removeTexture(PathTexture* texture) {
         }
 
         if (texture->id) {
-            glDeleteTextures(1, &texture->id);
+            Caches::getInstance().deleteTexture(texture->id);
         }
         delete texture;
     }
@@ -283,6 +298,11 @@ void PathCache::generateTexture(const PathDescription& entry, SkBitmap* bitmap,
             mCache.put(entry, texture);
         }
     } else {
+        // It's okay to add a texture that's bigger than the cache since
+        // we'll trim the cache later when addToCache is set to false
+        if (!addToCache) {
+            mSize += size;
+        }
         texture->cleanup = true;
     }
 }
@@ -300,7 +320,7 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
 
     glGenTextures(1, &texture->id);
 
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    Caches::getInstance().bindTexture(texture->id);
     // Textures are Alpha8
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -350,8 +370,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 // Paths
 ///////////////////////////////////////////////////////////////////////////////
 
-void PathCache::remove(const path_pair_t& pair) {
-    Vector<PathDescription> pathsToRemove;
+void PathCache::remove(Vector<PathDescription>& pathsToRemove, const path_pair_t& pair) {
     LruCache<PathDescription, PathTexture*>::Iterator i(mCache);
 
     while (i.next()) {
@@ -362,10 +381,6 @@ void PathCache::remove(const path_pair_t& pair) {
             pathsToRemove.push(key);
         }
     }
-
-    for (size_t i = 0; i < pathsToRemove.size(); i++) {
-        mCache.remove(pathsToRemove.itemAt(i));
-    }
 }
 
 void PathCache::removeDeferred(SkPath* path) {
@@ -374,12 +389,20 @@ void PathCache::removeDeferred(SkPath* path) {
 }
 
 void PathCache::clearGarbage() {
-    Mutex::Autolock l(mLock);
-    size_t count = mGarbage.size();
-    for (size_t i = 0; i < count; i++) {
-        remove(mGarbage.itemAt(i));
+    Vector<PathDescription> pathsToRemove;
+
+    { // scope for the mutex
+        Mutex::Autolock l(mLock);
+        size_t count = mGarbage.size();
+        for (size_t i = 0; i < count; i++) {
+            remove(pathsToRemove, mGarbage.itemAt(i));
+        }
+        mGarbage.clear();
     }
-    mGarbage.clear();
+
+    for (size_t i = 0; i < pathsToRemove.size(); i++) {
+        mCache.remove(pathsToRemove.itemAt(i));
+    }
 }
 
 /**

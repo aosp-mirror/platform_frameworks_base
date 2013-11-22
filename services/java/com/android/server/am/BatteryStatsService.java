@@ -22,11 +22,13 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -58,7 +60,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     public void publish(Context context) {
         mContext = context;
-        ServiceManager.addService("batteryinfo", asBinder());
+        ServiceManager.addService(BatteryStats.SERVICE_NAME, asBinder());
         mStats.setNumSpeedSteps(new PowerProfile(mContext).getNumSpeedSteps());
         mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout)
@@ -76,7 +78,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (sService != null) {
             return sService;
         }
-        IBinder b = ServiceManager.getService("batteryinfo");
+        IBinder b = ServiceManager.getService(BatteryStats.SERVICE_NAME);
         sService = asInterface(b);
         return sService;
     }
@@ -431,10 +433,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    @Override
     public void noteNetworkInterfaceType(String iface, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteNetworkInterfaceTypeLocked(iface, type);
+        }
+    }
+
+    @Override
+    public void noteNetworkStatsEnabled() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteNetworkStatsEnabledLocked();
         }
     }
 
@@ -469,12 +480,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     }
     
     private void dumpHelp(PrintWriter pw) {
-        pw.println("Battery stats (batteryinfo) dump options:");
-        pw.println("  [--checkin] [--reset] [--write] [-h]");
+        pw.println("Battery stats (batterystats) dump options:");
+        pw.println("  [--checkin] [-c] [--unplugged] [--reset] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
+        pw.println("  --unplugged: only output data since last unplugged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
         pw.println("  -h: print this help text.");
+        pw.println("  <package.name>: optional name of package to filter output by.");
     }
 
     @Override
@@ -488,11 +501,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
 
         boolean isCheckin = false;
+        boolean includeHistory = false;
+        boolean isUnpluggedOnly = false;
         boolean noOutput = false;
+        int reqUid = -1;
         if (args != null) {
             for (String arg : args) {
                 if ("--checkin".equals(arg)) {
                     isCheckin = true;
+                } else if ("-c".equals(arg)) {
+                    isCheckin = true;
+                    includeHistory = true;
+                } else if ("--unplugged".equals(arg)) {
+                    isUnpluggedOnly = true;
                 } else if ("--reset".equals(arg)) {
                     synchronized (mStats) {
                         mStats.resetAllStatsLocked();
@@ -510,9 +531,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                     return;
                 } else if ("-a".equals(arg)) {
                     // fall through
-                } else {
+                } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     dumpHelp(pw);
+                    return;
+                } else {
+                    // Not an option, last argument must be a package name.
+                    try {
+                        reqUid = mContext.getPackageManager().getPackageUid(arg,
+                                UserHandle.getCallingUserId());
+                    } catch (PackageManager.NameNotFoundException e) {
+                        pw.println("Unknown package: " + arg);
+                        dumpHelp(pw);
+                        return;
+                    }
                 }
             }
         }
@@ -522,11 +554,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (isCheckin) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
             synchronized (mStats) {
-                mStats.dumpCheckinLocked(pw, args, apps);
+                mStats.dumpCheckinLocked(pw, apps, isUnpluggedOnly, includeHistory);
             }
         } else {
             synchronized (mStats) {
-                mStats.dumpLocked(pw);
+                mStats.dumpLocked(pw, isUnpluggedOnly, reqUid);
             }
         }
     }

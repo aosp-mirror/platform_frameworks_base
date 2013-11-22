@@ -66,6 +66,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * 
      * Called by the InputManager.
      */
+    @Override
     public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
         if (inputWindowHandle == null) {
             return;
@@ -85,8 +86,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * 
      * Called by the InputManager.
      */
+    @Override
     public long notifyANR(InputApplicationHandle inputApplicationHandle,
-            InputWindowHandle inputWindowHandle) {
+            InputWindowHandle inputWindowHandle, String reason) {
         AppWindowToken appWindowToken = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
@@ -103,7 +105,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
             if (windowState != null) {
                 Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
-                        + "sending to " + windowState.mAttrs.getTitle());
+                        + "sending to " + windowState.mAttrs.getTitle()
+                        + ".  Reason: " + reason);
                 // Figure out whether this window is layered above system windows.
                 // We need to do this here to help the activity manager know how to
                 // layer its ANR dialog.
@@ -112,19 +115,21 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 aboveSystem = windowState.mBaseLayer > systemAlertLayer;
             } else if (appWindowToken != null) {
                 Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
-                        + "sending to application " + appWindowToken.stringName);
+                        + "sending to application " + appWindowToken.stringName
+                        + ".  Reason: " + reason);
             } else {
-                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out.");
+                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
+                        + ".  Reason: " + reason);
             }
 
-            mService.saveANRStateLocked(appWindowToken, windowState);
+            mService.saveANRStateLocked(appWindowToken, windowState, reason);
         }
 
         if (appWindowToken != null && appWindowToken.appToken != null) {
             try {
                 // Notify the activity manager about the timeout and let it decide whether
                 // to abort dispatching or keep waiting.
-                boolean abort = appWindowToken.appToken.keyDispatchingTimedOut();
+                boolean abort = appWindowToken.appToken.keyDispatchingTimedOut(reason);
                 if (! abort) {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.
@@ -137,7 +142,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 // Notify the activity manager about the timeout and let it decide whether
                 // to abort dispatching or keep waiting.
                 long timeout = ActivityManagerNative.getDefault().inputDispatchingTimedOut(
-                        windowState.mSession.mPid, aboveSystem);
+                        windowState.mSession.mPid, aboveSystem, reason);
                 if (timeout >= 0) {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.
@@ -161,11 +166,22 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
-            final WindowState child, final int flags, final int type,
+            final WindowState child, int flags, int privateFlags, final int type,
             final boolean isVisible, final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
+        final boolean modal = (flags & (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)) == 0;
+        if (modal && child.mAppToken != null) {
+            // Limit the outer touch to the activity stack region.
+            flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            inputWindowHandle.touchableRegion.set(child.getStackBounds());
+        } else {
+            // Not modal or full screen modal
+            child.getTouchableRegion(inputWindowHandle.touchableRegion);
+        }
         inputWindowHandle.layoutParamsFlags = flags;
+        inputWindowHandle.layoutParamsPrivateFlags = privateFlags;
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
         inputWindowHandle.visible = isVisible;
@@ -193,7 +209,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             inputWindowHandle.scaleFactor = 1;
         }
 
-        child.getTouchableRegion(inputWindowHandle.touchableRegion);
 
         addInputWindowHandleLw(inputWindowHandle);
     }
@@ -249,8 +264,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // Add all windows on the default display.
         final int numDisplays = mService.mDisplayContents.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windows =
-                    mService.mDisplayContents.valueAt(displayNdx).getWindowList();
+            WindowList windows = mService.mDisplayContents.valueAt(displayNdx).getWindowList();
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState child = windows.get(winNdx);
                 final InputChannel inputChannel = child.mInputChannel;
@@ -261,6 +275,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 }
 
                 final int flags = child.mAttrs.flags;
+                final int privateFlags = child.mAttrs.privateFlags;
                 final int type = child.mAttrs.type;
 
                 final boolean hasFocus = (child == mInputFocus);
@@ -280,13 +295,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     final WindowState u = universeBackground.mWin;
                     if (u.mInputChannel != null && u.mInputWindowHandle != null) {
                         addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
-                                u.mAttrs.type, true, u == mInputFocus, false);
+                                u.mAttrs.privateFlags, u.mAttrs.type,
+                                true, u == mInputFocus, false);
                     }
                     addedUniverse = true;
                 }
 
                 if (child.mWinAnimator != universeBackground) {
-                    addInputWindowHandleLw(inputWindowHandle, child, flags, type,
+                    addInputWindowHandleLw(inputWindowHandle, child, flags, privateFlags, type,
                             isVisible, hasFocus, hasWallpaper);
                 }
             }
@@ -302,6 +318,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     /* Notifies that the input device configuration has changed. */
+    @Override
     public void notifyConfigurationChanged() {
         mService.sendNewConfiguration();
 
@@ -327,12 +344,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     /* Notifies that the lid switch changed state. */
+    @Override
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
         mService.mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
     }
-    
+
     /* Provides an opportunity for the window manager policy to intercept early key
      * processing as soon as the key has been read from the device. */
+    @Override
     public int interceptKeyBeforeQueueing(
             KeyEvent event, int policyFlags, boolean isScreenOn) {
         return mService.mPolicy.interceptKeyBeforeQueueing(event, policyFlags, isScreenOn);
@@ -341,20 +360,23 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     /* Provides an opportunity for the window manager policy to intercept early
      * motion event processing when the screen is off since these events are normally
      * dropped. */
+    @Override
     public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
         return mService.mPolicy.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
     }
 
     /* Provides an opportunity for the window manager policy to process a key before
      * ordinary dispatch. */
+    @Override
     public long interceptKeyBeforeDispatching(
             InputWindowHandle focus, KeyEvent event, int policyFlags) {
         WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
         return mService.mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
     }
-    
+
     /* Provides an opportunity for the window manager policy to process a key that
      * the application did not handle. */
+    @Override
     public KeyEvent dispatchUnhandledKey(
             InputWindowHandle focus, KeyEvent event, int policyFlags) {
         WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
@@ -362,6 +384,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     /* Callback to get pointer layer. */
+    @Override
     public int getPointerLayer() {
         return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_POINTER)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
@@ -372,7 +395,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * Layer assignment is assumed to be complete by the time this is called.
      */
     public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
-        if (WindowManagerService.DEBUG_INPUT) {
+        if (WindowManagerService.DEBUG_FOCUS_LIGHT || WindowManagerService.DEBUG_INPUT) {
             Slog.d(WindowManagerService.TAG, "Input focus has changed to " + newWindow);
         }
 
@@ -392,7 +415,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
         }
     }
-    
+
     public void setFocusedAppLw(AppWindowToken newApp) {
         // Focused app has changed.
         if (newApp == null) {
@@ -405,7 +428,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             mService.mInputManager.setFocusedApplication(handle);
         }
     }
-    
+
     public void pauseDispatchingLw(WindowToken window) {
         if (! window.paused) {
             if (WindowManagerService.DEBUG_INPUT) {

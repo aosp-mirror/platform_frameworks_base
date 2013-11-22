@@ -17,8 +17,8 @@
 package android.net;
 
 import android.app.Activity;
-import android.app.Service;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -30,12 +30,13 @@ import android.os.ServiceManager;
 
 import com.android.internal.net.VpnConfig;
 
-import java.net.InetAddress;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
-import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * VpnService is a base class for applications to extend and build their
@@ -253,8 +254,8 @@ public class VpnService extends Service {
     public class Builder {
 
         private final VpnConfig mConfig = new VpnConfig();
-        private final StringBuilder mAddresses = new StringBuilder();
-        private final StringBuilder mRoutes = new StringBuilder();
+        private final List<LinkAddress> mAddresses = new ArrayList<LinkAddress>();
+        private final List<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
 
         public Builder() {
             mConfig.user = VpnService.this.getClass().getName();
@@ -328,8 +329,7 @@ public class VpnService extends Service {
             if (address.isAnyLocalAddress()) {
                 throw new IllegalArgumentException("Bad address");
             }
-
-            mAddresses.append(' ' + address.getHostAddress() + '/' +  prefixLength);
+            mAddresses.add(new LinkAddress(address, prefixLength));
             return this;
         }
 
@@ -363,8 +363,7 @@ public class VpnService extends Service {
                     }
                 }
             }
-
-            mRoutes.append(String.format(" %s/%d", address.getHostAddress(), prefixLength));
+            mRoutes.add(new RouteInfo(new LinkAddress(address, prefixLength), null));
             return this;
         }
 
@@ -465,8 +464,8 @@ public class VpnService extends Service {
          * @see VpnService
          */
         public ParcelFileDescriptor establish() {
-            mConfig.addresses = mAddresses.toString();
-            mConfig.routes = mRoutes.toString();
+            mConfig.addresses = mAddresses;
+            mConfig.routes = mRoutes;
 
             try {
                 return getService().establishVpn(mConfig);

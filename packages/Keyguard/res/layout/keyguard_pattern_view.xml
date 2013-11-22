@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2012, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- This is the screen that shows the 9 circle unlock widget and instructs
+     the user how to unlock their device, or make an emergency call.  This
+     is the portrait layout.  -->
+<com.android.keyguard.KeyguardPatternView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    android:id="@+id/keyguard_pattern_view"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
+    android:gravity="center_horizontal"
+    android:contentDescription="@string/keyguard_accessibility_pattern_unlock">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center">
+
+            <include layout="@layout/keyguard_message_area"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+               />
+
+          <FrameLayout
+             android:id="@+id/keyguard_bouncer_frame"
+             android:background="@drawable/kg_bouncer_bg_white"
+             android:layout_width="match_parent"
+             android:layout_height="0dp"
+             android:layout_weight="1"
+             >
+            <com.android.internal.widget.LockPatternView
+                android:id="@+id/lockPatternView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dip"
+                android:layout_marginBottom="4dip"
+                android:layout_marginStart="8dip"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:contentDescription="@string/keyguard_accessibility_pattern_area" />
+          </FrameLayout>
+          <include layout="@layout/keyguard_eca"
+              android:id="@+id/keyguard_selector_fade_container"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:layout_gravity="bottom|center_horizontal"
+              android:gravity="center_horizontal" />
+        </LinearLayout>
+    </FrameLayout>
+
+</com.android.keyguard.KeyguardPatternView>

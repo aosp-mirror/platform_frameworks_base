@@ -44,6 +44,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.server.accessibility.AccessibilityManagerService;
@@ -62,6 +63,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
+import com.android.server.print.PrintManagerService;
 import com.android.server.search.SearchManagerService;
 import com.android.server.usb.UsbService;
 import com.android.server.wifi.WifiService;
@@ -74,7 +76,7 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class ServerThread extends Thread {
+class ServerThread {
     private static final String TAG = "SystemServer";
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
@@ -86,8 +88,7 @@ class ServerThread extends Thread {
         Log.wtf(TAG, "BOOT FAILURE " + msg, e);
     }
 
-    @Override
-    public void run() {
+    public void initAndLoop() {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN,
             SystemClock.uptimeMillis());
 
@@ -153,30 +154,7 @@ class ServerThread extends Thread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
-
-        // Create a shared handler thread for UI within the system server.
-        // This thread is used by at least the following components:
-        // - WindowManagerPolicy
-        // - KeyguardViewManager
-        // - DisplayManagerService
-        HandlerThread uiHandlerThread = new HandlerThread("UI");
-        uiHandlerThread.start();
-        Handler uiHandler = new Handler(uiHandlerThread.getLooper());
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                //Looper.myLooper().setMessageLogging(new LogPrinter(
-                //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
-                android.os.Process.setThreadPriority(
-                        android.os.Process.THREAD_PRIORITY_FOREGROUND);
-                android.os.Process.setCanSelfBackground(false);
-
-                // For debug builds, log event loop stalls to dropbox for analysis.
-                if (StrictMode.conditionallyEnableDebugLogging()) {
-                    Slog.i(TAG, "Enabled StrictMode logging for UI Looper");
-                }
-            }
-        });
+        ConsumerIrService consumerIr = null;
 
         // Create a handler thread just for the window manager to enjoy.
         HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
@@ -198,8 +176,9 @@ class ServerThread extends Thread {
             }
         });
 
-        // Critical services...
+        // bootstrap services
         boolean onlyCore = false;
+        boolean firstBoot = false;
         try {
             // Wait for installd to finished starting up so that it has a chance to
             // create critical directories such as /data/user with the appropriate
@@ -214,9 +193,23 @@ class ServerThread extends Thread {
 
             Slog.i(TAG, "Activity Manager");
             context = ActivityManagerService.main(factoryTest);
+        } catch (RuntimeException e) {
+            Slog.e("System", "******************************************");
+            Slog.e("System", "************ Failure starting bootstrap service", e);
+        }
 
+        boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
+        boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
+        boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
+        boolean disableTelephony = SystemProperties.getBoolean("config.disable_telephony", false);
+        boolean disableLocation = SystemProperties.getBoolean("config.disable_location", false);
+        boolean disableSystemUI = SystemProperties.getBoolean("config.disable_systemui", false);
+        boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
+        boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
+
+        try {
             Slog.i(TAG, "Display Manager");
-            display = new DisplayManagerService(context, wmHandler, uiHandler);
+            display = new DisplayManagerService(context, wmHandler);
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
@@ -224,8 +217,7 @@ class ServerThread extends Thread {
             ServiceManager.addService("telephony.registry", telephonyRegistry);
 
             Slog.i(TAG, "Scheduling Policy");
-            ServiceManager.addService(Context.SCHEDULING_POLICY_SERVICE,
-                    new SchedulingPolicyService());
+            ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
 
             AttributeCache.init(context);
 
@@ -248,7 +240,6 @@ class ServerThread extends Thread {
             pm = PackageManagerService.main(context, installer,
                     factoryTest != SystemServer.FACTORY_TEST_OFF,
                     onlyCore);
-            boolean firstBoot = false;
             try {
                 firstBoot = pm.isFirstBoot();
             } catch (RemoteException e) {
@@ -267,6 +258,7 @@ class ServerThread extends Thread {
 
             // The AccountManager must come before the ContentService
             try {
+                // TODO: seems like this should be disable-able, but req'd by ContentService
                 Slog.i(TAG, "Account Manager");
                 accountManager = new AccountManagerService(context);
                 ServiceManager.addService(Context.ACCOUNT_SERVICE, accountManager);
@@ -292,10 +284,15 @@ class ServerThread extends Thread {
             vibrator = new VibratorService(context);
             ServiceManager.addService("vibrator", vibrator);
 
+            Slog.i(TAG, "Consumer IR Service");
+            consumerIr = new ConsumerIrService(context);
+            ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
+
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
             power.init(context, lights, ActivityManagerService.self(), battery,
-                    BatteryStatsService.getService(), display);
+                    BatteryStatsService.getService(),
+                    ActivityManagerService.self().getAppOpsService(), display);
 
             Slog.i(TAG, "Alarm Manager");
             alarm = new AlarmManagerService(context);
@@ -304,14 +301,14 @@ class ServerThread extends Thread {
             Slog.i(TAG, "Init Watchdog");
             Watchdog.getInstance().init(context, battery, power, alarm,
                     ActivityManagerService.self());
+            Watchdog.getInstance().addThread(wmHandler, "WindowManager thread");
 
             Slog.i(TAG, "Input Manager");
             inputManager = new InputManagerService(context, wmHandler);
 
             Slog.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, power, display, inputManager,
-                    uiHandler, wmHandler,
-                    factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
+                    wmHandler, factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
@@ -334,12 +331,13 @@ class ServerThread extends Thread {
             } else if (!context.getPackageManager().hasSystemFeature
                        (PackageManager.FEATURE_BLUETOOTH)) {
                 Slog.i(TAG, "No Bluetooth Service (Bluetooth Hardware Not Present)");
+            } else if (disableBluetooth) {
+                Slog.i(TAG, "Bluetooth Service disabled by config");
             } else {
                 Slog.i(TAG, "Bluetooth Manager Service");
                 bluetooth = new BluetoothManagerService(context);
                 ServiceManager.addService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE, bluetooth);
             }
-
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
@@ -356,23 +354,28 @@ class ServerThread extends Thread {
         TextServicesManagerService tsms = null;
         LockSettingsService lockSettings = null;
         DreamManagerService dreamy = null;
+        AssetAtlasService atlas = null;
+        PrintManagerService printManager = null;
 
         // Bring up services needed for UI.
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-            try {
-                Slog.i(TAG, "Input Method Service");
-                imm = new InputMethodManagerService(context, wm);
-                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
-            } catch (Throwable e) {
-                reportWtf("starting Input Manager Service", e);
-            }
+            //if (!disableNonCoreServices) { // TODO: View depends on these; mock them?
+            if (true) {
+                try {
+                    Slog.i(TAG, "Input Method Service");
+                    imm = new InputMethodManagerService(context, wm);
+                    ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
+                } catch (Throwable e) {
+                    reportWtf("starting Input Manager Service", e);
+                }
 
-            try {
-                Slog.i(TAG, "Accessibility Manager");
-                ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
-                        new AccessibilityManagerService(context));
-            } catch (Throwable e) {
-                reportWtf("starting Accessibility Manager", e);
+                try {
+                    Slog.i(TAG, "Accessibility Manager");
+                    ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                            new AccessibilityManagerService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting Accessibility Manager", e);
+                }
             }
         }
 
@@ -397,7 +400,8 @@ class ServerThread extends Thread {
         }
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-            if (!"0".equals(SystemProperties.get("system_init.startmountservice"))) {
+            if (!disableStorage &&
+                !"0".equals(SystemProperties.get("system_init.startmountservice"))) {
                 try {
                     /*
                      * NotificationManagerService is dependant on MountService,
@@ -411,116 +415,131 @@ class ServerThread extends Thread {
                 }
             }
 
-            try {
-                Slog.i(TAG,  "LockSettingsService");
-                lockSettings = new LockSettingsService(context);
-                ServiceManager.addService("lock_settings", lockSettings);
-            } catch (Throwable e) {
-                reportWtf("starting LockSettingsService service", e);
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG,  "LockSettingsService");
+                    lockSettings = new LockSettingsService(context);
+                    ServiceManager.addService("lock_settings", lockSettings);
+                } catch (Throwable e) {
+                    reportWtf("starting LockSettingsService service", e);
+                }
+
+                try {
+                    Slog.i(TAG, "Device Policy");
+                    devicePolicy = new DevicePolicyManagerService(context);
+                    ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
+                } catch (Throwable e) {
+                    reportWtf("starting DevicePolicyService", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "Device Policy");
-                devicePolicy = new DevicePolicyManagerService(context);
-                ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
-            } catch (Throwable e) {
-                reportWtf("starting DevicePolicyService", e);
+            if (!disableSystemUI) {
+                try {
+                    Slog.i(TAG, "Status Bar");
+                    statusBar = new StatusBarManagerService(context, wm);
+                    ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
+                } catch (Throwable e) {
+                    reportWtf("starting StatusBarManagerService", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "Status Bar");
-                statusBar = new StatusBarManagerService(context, wm);
-                ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
-            } catch (Throwable e) {
-                reportWtf("starting StatusBarManagerService", e);
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Clipboard Service");
+                    ServiceManager.addService(Context.CLIPBOARD_SERVICE,
+                            new ClipboardService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting Clipboard Service", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "Clipboard Service");
-                ServiceManager.addService(Context.CLIPBOARD_SERVICE,
-                        new ClipboardService(context));
-            } catch (Throwable e) {
-                reportWtf("starting Clipboard Service", e);
+            if (!disableNetwork) {
+                try {
+                    Slog.i(TAG, "NetworkManagement Service");
+                    networkManagement = NetworkManagementService.create(context);
+                    ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
+                } catch (Throwable e) {
+                    reportWtf("starting NetworkManagement Service", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "NetworkManagement Service");
-                networkManagement = NetworkManagementService.create(context);
-                ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
-            } catch (Throwable e) {
-                reportWtf("starting NetworkManagement Service", e);
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Text Service Manager Service");
+                    tsms = new TextServicesManagerService(context);
+                    ServiceManager.addService(Context.TEXT_SERVICES_MANAGER_SERVICE, tsms);
+                } catch (Throwable e) {
+                    reportWtf("starting Text Service Manager Service", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "Text Service Manager Service");
-                tsms = new TextServicesManagerService(context);
-                ServiceManager.addService(Context.TEXT_SERVICES_MANAGER_SERVICE, tsms);
-            } catch (Throwable e) {
-                reportWtf("starting Text Service Manager Service", e);
+            if (!disableNetwork) {
+                try {
+                    Slog.i(TAG, "NetworkStats Service");
+                    networkStats = new NetworkStatsService(context, networkManagement, alarm);
+                    ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
+                } catch (Throwable e) {
+                    reportWtf("starting NetworkStats Service", e);
+                }
+
+                try {
+                    Slog.i(TAG, "NetworkPolicy Service");
+                    networkPolicy = new NetworkPolicyManagerService(
+                            context, ActivityManagerService.self(), power,
+                            networkStats, networkManagement);
+                    ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
+                } catch (Throwable e) {
+                    reportWtf("starting NetworkPolicy Service", e);
+                }
+
+               try {
+                    Slog.i(TAG, "Wi-Fi P2pService");
+                    wifiP2p = new WifiP2pService(context);
+                    ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
+                } catch (Throwable e) {
+                    reportWtf("starting Wi-Fi P2pService", e);
+                }
+
+               try {
+                    Slog.i(TAG, "Wi-Fi Service");
+                    wifi = new WifiService(context);
+                    ServiceManager.addService(Context.WIFI_SERVICE, wifi);
+                } catch (Throwable e) {
+                    reportWtf("starting Wi-Fi Service", e);
+                }
+
+                try {
+                    Slog.i(TAG, "Connectivity Service");
+                    connectivity = new ConnectivityService(
+                            context, networkManagement, networkStats, networkPolicy);
+                    ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
+                    networkStats.bindConnectivityManager(connectivity);
+                    networkPolicy.bindConnectivityManager(connectivity);
+
+                    wifiP2p.connectivityServiceReady();
+                    wifi.checkAndStartWifi();
+                } catch (Throwable e) {
+                    reportWtf("starting Connectivity Service", e);
+                }
+
+                try {
+                    Slog.i(TAG, "Network Service Discovery Service");
+                    serviceDiscovery = NsdService.create(context);
+                    ServiceManager.addService(
+                            Context.NSD_SERVICE, serviceDiscovery);
+                } catch (Throwable e) {
+                    reportWtf("starting Service Discovery Service", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "NetworkStats Service");
-                networkStats = new NetworkStatsService(context, networkManagement, alarm);
-                ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
-            } catch (Throwable e) {
-                reportWtf("starting NetworkStats Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "NetworkPolicy Service");
-                networkPolicy = new NetworkPolicyManagerService(
-                        context, ActivityManagerService.self(), power,
-                        networkStats, networkManagement);
-                ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
-            } catch (Throwable e) {
-                reportWtf("starting NetworkPolicy Service", e);
-            }
-
-           try {
-                Slog.i(TAG, "Wi-Fi P2pService");
-                wifiP2p = new WifiP2pService(context);
-                ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
-            } catch (Throwable e) {
-                reportWtf("starting Wi-Fi P2pService", e);
-            }
-
-           try {
-                Slog.i(TAG, "Wi-Fi Service");
-                wifi = new WifiService(context);
-                ServiceManager.addService(Context.WIFI_SERVICE, wifi);
-            } catch (Throwable e) {
-                reportWtf("starting Wi-Fi Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "Connectivity Service");
-                connectivity = new ConnectivityService(
-                        context, networkManagement, networkStats, networkPolicy);
-                ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
-                networkStats.bindConnectivityManager(connectivity);
-                networkPolicy.bindConnectivityManager(connectivity);
-                wifi.checkAndStartWifi();
-                wifiP2p.connectivityServiceReady();
-            } catch (Throwable e) {
-                reportWtf("starting Connectivity Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "Network Service Discovery Service");
-                serviceDiscovery = NsdService.create(context);
-                ServiceManager.addService(
-                        Context.NSD_SERVICE, serviceDiscovery);
-            } catch (Throwable e) {
-                reportWtf("starting Service Discovery Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "UpdateLock Service");
-                ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
-                        new UpdateLockService(context));
-            } catch (Throwable e) {
-                reportWtf("starting UpdateLockService", e);
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "UpdateLock Service");
+                    ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
+                            new UpdateLockService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting UpdateLockService", e);
+                }
             }
 
             /*
@@ -528,7 +547,7 @@ class ServerThread extends Thread {
              * AppWidget Provider. Make sure MountService is completely started
              * first before continuing.
              */
-            if (mountService != null) {
+            if (mountService != null && !onlyCore) {
                 mountService.waitForAsecScan();
             }
 
@@ -563,28 +582,32 @@ class ServerThread extends Thread {
                 reportWtf("starting DeviceStorageMonitor service", e);
             }
 
-            try {
-                Slog.i(TAG, "Location Manager");
-                location = new LocationManagerService(context);
-                ServiceManager.addService(Context.LOCATION_SERVICE, location);
-            } catch (Throwable e) {
-                reportWtf("starting Location Manager", e);
+            if (!disableLocation) {
+                try {
+                    Slog.i(TAG, "Location Manager");
+                    location = new LocationManagerService(context);
+                    ServiceManager.addService(Context.LOCATION_SERVICE, location);
+                } catch (Throwable e) {
+                    reportWtf("starting Location Manager", e);
+                }
+
+                try {
+                    Slog.i(TAG, "Country Detector");
+                    countryDetector = new CountryDetectorService(context);
+                    ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
+                } catch (Throwable e) {
+                    reportWtf("starting Country Detector", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "Country Detector");
-                countryDetector = new CountryDetectorService(context);
-                ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
-            } catch (Throwable e) {
-                reportWtf("starting Country Detector", e);
-            }
-
-            try {
-                Slog.i(TAG, "Search Service");
-                ServiceManager.addService(Context.SEARCH_SERVICE,
-                        new SearchManagerService(context));
-            } catch (Throwable e) {
-                reportWtf("starting Search Service", e);
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Search Service");
+                    ServiceManager.addService(Context.SEARCH_SERVICE,
+                            new SearchManagerService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting Search Service", e);
+                }
             }
 
             try {
@@ -595,8 +618,8 @@ class ServerThread extends Thread {
                 reportWtf("starting DropBoxManagerService", e);
             }
 
-            if (context.getResources().getBoolean(
-                        com.android.internal.R.bool.config_enableWallpaperService)) {
+            if (!disableNonCoreServices && context.getResources().getBoolean(
+                        R.bool.config_enableWallpaperService)) {
                 try {
                     Slog.i(TAG, "Wallpaper Service");
                     if (!headless) {
@@ -608,7 +631,7 @@ class ServerThread extends Thread {
                 }
             }
 
-            if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
+            if (!disableMedia && !"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
                 try {
                     Slog.i(TAG, "Audio Service");
                     ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
@@ -617,39 +640,45 @@ class ServerThread extends Thread {
                 }
             }
 
-            try {
-                Slog.i(TAG, "Dock Observer");
-                // Listen for dock station changes
-                dock = new DockObserver(context);
-            } catch (Throwable e) {
-                reportWtf("starting DockObserver", e);
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Dock Observer");
+                    // Listen for dock station changes
+                    dock = new DockObserver(context);
+                } catch (Throwable e) {
+                    reportWtf("starting DockObserver", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "Wired Accessory Manager");
-                // Listen for wired headset changes
-                inputManager.setWiredAccessoryCallbacks(
-                        new WiredAccessoryManager(context, inputManager));
-            } catch (Throwable e) {
-                reportWtf("starting WiredAccessoryManager", e);
+            if (!disableMedia) {
+                try {
+                    Slog.i(TAG, "Wired Accessory Manager");
+                    // Listen for wired headset changes
+                    inputManager.setWiredAccessoryCallbacks(
+                            new WiredAccessoryManager(context, inputManager));
+                } catch (Throwable e) {
+                    reportWtf("starting WiredAccessoryManager", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "USB Service");
-                // Manage USB host and device support
-                usb = new UsbService(context);
-                ServiceManager.addService(Context.USB_SERVICE, usb);
-            } catch (Throwable e) {
-                reportWtf("starting UsbService", e);
-            }
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "USB Service");
+                    // Manage USB host and device support
+                    usb = new UsbService(context);
+                    ServiceManager.addService(Context.USB_SERVICE, usb);
+                } catch (Throwable e) {
+                    reportWtf("starting UsbService", e);
+                }
 
-            try {
-                Slog.i(TAG, "Serial Service");
-                // Serial port support
-                serial = new SerialService(context);
-                ServiceManager.addService(Context.SERIAL_SERVICE, serial);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting SerialService", e);
+                try {
+                    Slog.i(TAG, "Serial Service");
+                    // Serial port support
+                    serial = new SerialService(context);
+                    ServiceManager.addService(Context.SERIAL_SERVICE, serial);
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting SerialService", e);
+                }
             }
 
             try {
@@ -667,27 +696,29 @@ class ServerThread extends Thread {
                 reportWtf("starting UiModeManagerService", e);
             }
 
-            try {
-                Slog.i(TAG, "Backup Service");
-                ServiceManager.addService(Context.BACKUP_SERVICE,
-                        new BackupManagerService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Backup Service", e);
-            }
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Backup Service");
+                    ServiceManager.addService(Context.BACKUP_SERVICE,
+                            new BackupManagerService(context));
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting Backup Service", e);
+                }
 
-            try {
-                Slog.i(TAG, "AppWidget Service");
-                appWidget = new AppWidgetService(context);
-                ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
-            } catch (Throwable e) {
-                reportWtf("starting AppWidget Service", e);
-            }
+                try {
+                    Slog.i(TAG, "AppWidget Service");
+                    appWidget = new AppWidgetService(context);
+                    ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
+                } catch (Throwable e) {
+                    reportWtf("starting AppWidget Service", e);
+                }
 
-            try {
-                Slog.i(TAG, "Recognition Service");
-                recognition = new RecognitionManagerService(context);
-            } catch (Throwable e) {
-                reportWtf("starting Recognition Service", e);
+                try {
+                    Slog.i(TAG, "Recognition Service");
+                    recognition = new RecognitionManagerService(context);
+                } catch (Throwable e) {
+                    reportWtf("starting Recognition Service", e);
+                }
             }
 
             try {
@@ -709,30 +740,36 @@ class ServerThread extends Thread {
                 reportWtf("starting SamplingProfiler Service", e);
             }
 
-            try {
-                Slog.i(TAG, "NetworkTimeUpdateService");
-                networkTimeUpdater = new NetworkTimeUpdateService(context);
-            } catch (Throwable e) {
-                reportWtf("starting NetworkTimeUpdate service", e);
+            if (!disableNetwork) {
+                try {
+                    Slog.i(TAG, "NetworkTimeUpdateService");
+                    networkTimeUpdater = new NetworkTimeUpdateService(context);
+                } catch (Throwable e) {
+                    reportWtf("starting NetworkTimeUpdate service", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "CommonTimeManagementService");
-                commonTimeMgmtService = new CommonTimeManagementService(context);
-                ServiceManager.addService("commontime_management", commonTimeMgmtService);
-            } catch (Throwable e) {
-                reportWtf("starting CommonTimeManagementService service", e);
+            if (!disableMedia) {
+                try {
+                    Slog.i(TAG, "CommonTimeManagementService");
+                    commonTimeMgmtService = new CommonTimeManagementService(context);
+                    ServiceManager.addService("commontime_management", commonTimeMgmtService);
+                } catch (Throwable e) {
+                    reportWtf("starting CommonTimeManagementService service", e);
+                }
             }
 
-            try {
-                Slog.i(TAG, "CertBlacklister");
-                CertBlacklister blacklister = new CertBlacklister(context);
-            } catch (Throwable e) {
-                reportWtf("starting CertBlacklister", e);
+            if (!disableNetwork) {
+                try {
+                    Slog.i(TAG, "CertBlacklister");
+                    CertBlacklister blacklister = new CertBlacklister(context);
+                } catch (Throwable e) {
+                    reportWtf("starting CertBlacklister", e);
+                }
             }
-            
-            if (context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_dreamsSupported)) {
+
+            if (!disableNonCoreServices && 
+                context.getResources().getBoolean(R.bool.config_dreamsSupported)) {
                 try {
                     Slog.i(TAG, "Dreams Service");
                     // Dreams (interactive idle-time views, a/k/a screen savers)
@@ -743,11 +780,29 @@ class ServerThread extends Thread {
                 }
             }
 
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Assets Atlas Service");
+                    atlas = new AssetAtlasService(context);
+                    ServiceManager.addService(AssetAtlasService.ASSET_ATLAS_SERVICE, atlas);
+                } catch (Throwable e) {
+                    reportWtf("starting AssetAtlasService", e);
+                }
+            }
+
             try {
                 Slog.i(TAG, "IdleMaintenanceService");
                 new IdleMaintenanceService(context, battery);
             } catch (Throwable e) {
                 reportWtf("starting IdleMaintenanceService", e);
+            }
+
+            try {
+                Slog.i(TAG, "Print Service");
+                printManager = new PrintManagerService(context);
+                ServiceManager.addService(Context.PRINT_SERVICE, printManager);
+            } catch (Throwable e) {
+                reportWtf("starting Print Service", e);
             }
         }
 
@@ -773,10 +828,12 @@ class ServerThread extends Thread {
             reportWtf("making Vibrator Service ready", e);
         }
 
-        try {
-            lockSettings.systemReady();
-        } catch (Throwable e) {
-            reportWtf("making Lock Settings Service ready", e);
+        if (lockSettings != null) {
+            try {
+                lockSettings.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Lock Settings Service ready", e);
+            }
         }
 
         if (devicePolicy != null) {
@@ -855,8 +912,10 @@ class ServerThread extends Thread {
         final TextServicesManagerService textServiceManagerServiceF = tsms;
         final StatusBarManagerService statusBarF = statusBar;
         final DreamManagerService dreamyF = dreamy;
+        final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
+        final PrintManagerService printManagerF = printManager;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -872,7 +931,9 @@ class ServerThread extends Thread {
                 } catch (Throwable e) {
                     reportWtf("observing native crashes", e);
                 }
-                if (!headless) startSystemUi(contextF);
+                if (!headless) {
+                    startSystemUi(contextF);
+                }
                 try {
                     if (mountServiceF != null) mountServiceF.systemReady();
                 } catch (Throwable e) {
@@ -934,60 +995,73 @@ class ServerThread extends Thread {
                 // third party code...
 
                 try {
-                    if (appWidgetF != null) appWidgetF.systemReady(safeMode);
+                    if (appWidgetF != null) appWidgetF.systemRunning(safeMode);
                 } catch (Throwable e) {
-                    reportWtf("making App Widget Service ready", e);
+                    reportWtf("Notifying AppWidgetService running", e);
                 }
                 try {
-                    if (wallpaperF != null) wallpaperF.systemReady();
+                    if (wallpaperF != null) wallpaperF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Wallpaper Service ready", e);
+                    reportWtf("Notifying WallpaperService running", e);
                 }
                 try {
-                    if (immF != null) immF.systemReady(statusBarF);
+                    if (immF != null) immF.systemRunning(statusBarF);
                 } catch (Throwable e) {
-                    reportWtf("making Input Method Service ready", e);
+                    reportWtf("Notifying InputMethodService running", e);
                 }
                 try {
-                    if (locationF != null) locationF.systemReady();
+                    if (locationF != null) locationF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Location Service ready", e);
+                    reportWtf("Notifying Location Service running", e);
                 }
                 try {
-                    if (countryDetectorF != null) countryDetectorF.systemReady();
+                    if (countryDetectorF != null) countryDetectorF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Country Detector Service ready", e);
+                    reportWtf("Notifying CountryDetectorService running", e);
                 }
                 try {
-                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
+                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Network Time Service ready", e);
+                    reportWtf("Notifying NetworkTimeService running", e);
                 }
                 try {
-                    if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemReady();
+                    if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Common time management service ready", e);
+                    reportWtf("Notifying CommonTimeManagementService running", e);
                 }
                 try {
-                    if (textServiceManagerServiceF != null) textServiceManagerServiceF.systemReady();
+                    if (textServiceManagerServiceF != null)
+                        textServiceManagerServiceF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Text Services Manager Service ready", e);
+                    reportWtf("Notifying TextServicesManagerService running", e);
                 }
                 try {
-                    if (dreamyF != null) dreamyF.systemReady();
+                    if (dreamyF != null) dreamyF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making DreamManagerService ready", e);
+                    reportWtf("Notifying DreamManagerService running", e);
+                }
+                try {
+                    if (atlasF != null) atlasF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying AssetAtlasService running", e);
                 }
                 try {
                     // TODO(BT) Pass parameter to input manager
-                    if (inputManagerF != null) inputManagerF.systemReady();
+                    if (inputManagerF != null) inputManagerF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making InputManagerService ready", e);
+                    reportWtf("Notifying InputManagerService running", e);
                 }
+
                 try {
-                    if (telephonyRegistryF != null) telephonyRegistryF.systemReady();
+                    if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making TelephonyRegistry ready", e);
+                    reportWtf("Notifying TelephonyRegistry running", e);
+                }
+
+                try {
+                    if (printManagerF != null) printManagerF.systemRuning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying PrintManagerService running", e);
                 }
             }
         });
@@ -1025,11 +1099,9 @@ public class SystemServer {
     private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
 
     /**
-     * This method is called from Zygote to initialize the system. This will cause the native
-     * services (SurfaceFlinger, AudioFlinger, etc..) to be started. After that it will call back
-     * up into init2() to start the Android services.
+     * Called to initialize native system services.
      */
-    native public static void init1(String[] args);
+    private static native void nativeInit();
 
     public static void main(String[] args) {
         if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
@@ -1063,13 +1135,15 @@ public class SystemServer {
         Environment.setUserRequired(true);
 
         System.loadLibrary("android_servers");
-        init1(args);
-    }
 
-    public static final void init2() {
         Slog.i(TAG, "Entered the Android system server!");
-        Thread thr = new ServerThread();
-        thr.setName("android.server.ServerThread");
-        thr.start();
+
+        // Initialize native services.
+        nativeInit();
+
+        // This used to be its own separate thread, but now it is
+        // just the loop we run on the main thread.
+        ServerThread thr = new ServerThread();
+        thr.initAndLoop();
     }
 }

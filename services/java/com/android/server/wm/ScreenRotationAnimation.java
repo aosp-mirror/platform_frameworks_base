@@ -26,6 +26,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayInfo;
+import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -43,7 +45,7 @@ class ScreenRotationAnimation {
     static final int FREEZE_LAYER = WindowManagerService.TYPE_LAYER_MULTIPLIER * 200;
 
     final Context mContext;
-    final Display mDisplay;
+    final DisplayContent mDisplayContent;
     SurfaceControl mSurfaceControl;
     BlackFrame mCustomBlackFrame;
     BlackFrame mExitingBlackFrame;
@@ -53,6 +55,8 @@ class ScreenRotationAnimation {
     int mOriginalRotation;
     int mOriginalWidth, mOriginalHeight;
     int mCurRotation;
+    Rect mOriginalDisplayRect = new Rect();
+    Rect mCurrentDisplayRect = new Rect();
 
     // For all animations, "exit" is for the UI elements that are going
     // away (that is the snapshot of the old screen), and "enter" is for
@@ -108,6 +112,7 @@ class ScreenRotationAnimation {
     boolean mAnimRunning;
     boolean mFinishAnimReady;
     long mFinishAnimStartTime;
+    boolean mForceDefaultOrientation;
 
     final Matrix mFrameInitialMatrix = new Matrix();
     final Matrix mSnapshotInitialMatrix = new Matrix();
@@ -186,14 +191,35 @@ class ScreenRotationAnimation {
         pw.print(prefix); pw.print("mExitFrameFinalMatrix=");
                 mExitFrameFinalMatrix.printShortString(pw);
                 pw.println();
+        pw.print(prefix); pw.print("mForceDefaultOrientation="); pw.print(mForceDefaultOrientation);
+        if (mForceDefaultOrientation) {
+            pw.print(" mOriginalDisplayRect="); pw.print(mOriginalDisplayRect.toShortString());
+            pw.print(" mCurrentDisplayRect="); pw.println(mCurrentDisplayRect.toShortString());
+        }
     }
 
-    public ScreenRotationAnimation(Context context, Display display, SurfaceSession session,
-            boolean inTransaction, int originalWidth, int originalHeight, int originalRotation) {
+    public ScreenRotationAnimation(Context context, DisplayContent displayContent,
+            SurfaceSession session, boolean inTransaction, boolean forceDefaultOrientation) {
         mContext = context;
-        mDisplay = display;
+        mDisplayContent = displayContent;
+        displayContent.getLogicalDisplayRect(mOriginalDisplayRect);
 
         // Screenshot does NOT include rotation!
+        final Display display = displayContent.getDisplay();
+        int originalRotation = display.getRotation();
+        final int originalWidth;
+        final int originalHeight;
+        DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        if (forceDefaultOrientation) {
+            // Emulated orientation.
+            mForceDefaultOrientation = true;
+            originalWidth = displayContent.mBaseDisplayWidth;
+            originalHeight = displayContent.mBaseDisplayHeight;
+        } else {
+            // Normal situation
+            originalWidth = displayInfo.logicalWidth;
+            originalHeight = displayInfo.logicalHeight;
+        }
         if (originalRotation == Surface.ROTATION_90
                 || originalRotation == Surface.ROTATION_270) {
             mWidth = originalHeight;
@@ -219,6 +245,8 @@ class ScreenRotationAnimation {
                     mSurfaceControl = new SurfaceTrace(session, "ScreenshotSurface",
                             mWidth, mHeight,
                             PixelFormat.OPAQUE, SurfaceControl.HIDDEN);
+                    Slog.w(TAG, "ScreenRotationAnimation ctor: displayOffset="
+                            + mOriginalDisplayRect.toShortString());
                 } else {
                     mSurfaceControl = new SurfaceControl(session, "ScreenshotSurface",
                             mWidth, mHeight,
@@ -230,12 +258,12 @@ class ScreenRotationAnimation {
                 // FIXME: we should use the proper display
                 SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
                         SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), sur);
-                mSurfaceControl.setLayerStack(mDisplay.getLayerStack());
+                mSurfaceControl.setLayerStack(display.getLayerStack());
                 mSurfaceControl.setLayer(FREEZE_LAYER + 1);
                 mSurfaceControl.setAlpha(0);
                 mSurfaceControl.show();
                 sur.destroy();
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
             }
 
@@ -266,7 +294,14 @@ class ScreenRotationAnimation {
     private void setSnapshotTransformInTransaction(Matrix matrix, float alpha) {
         if (mSurfaceControl != null) {
             matrix.getValues(mTmpFloats);
-            mSurfaceControl.setPosition(mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
+            float x = mTmpFloats[Matrix.MTRANS_X];
+            float y = mTmpFloats[Matrix.MTRANS_Y];
+            if (mForceDefaultOrientation) {
+                mDisplayContent.getLogicalDisplayRect(mCurrentDisplayRect);
+                x -= mCurrentDisplayRect.left;
+                y -= mCurrentDisplayRect.top;
+            }
+            mSurfaceControl.setPosition(x, y);
             mSurfaceControl.setMatrix(
                     mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                     mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
@@ -491,7 +526,7 @@ class ScreenRotationAnimation {
             mRotateFrameAnimation.scaleCurrentDuration(animationScale);
         }
 
-        final int layerStack = mDisplay.getLayerStack();
+        final int layerStack = mDisplayContent.getDisplay().getLayerStack();
         if (USE_CUSTOM_BLACK_FRAME && mCustomBlackFrame == null) {
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                     WindowManagerService.TAG,
@@ -511,9 +546,9 @@ class ScreenRotationAnimation {
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
                 mCustomBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 3,
-                        layerStack);
+                        layerStack, false);
                 mCustomBlackFrame.setMatrix(mFrameInitialMatrix);
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -537,13 +572,23 @@ class ScreenRotationAnimation {
                 // we were last in.
                 createRotationMatrix(delta, mOriginalWidth, mOriginalHeight, mFrameInitialMatrix);
 
-                Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
-                        mOriginalWidth*2, mOriginalHeight*2);
-                Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
+                final Rect outer;
+                final Rect inner;
+                if (mForceDefaultOrientation) {
+                    // Going from a smaller Display to a larger Display, add curtains to sides
+                    // or top and bottom. Going from a larger to smaller display will result in
+                    // no BlackSurfaces being constructed.
+                    outer = mCurrentDisplayRect;
+                    inner = mOriginalDisplayRect;
+                } else {
+                    outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
+                            mOriginalWidth*2, mOriginalHeight*2);
+                    inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
+                }
                 mExitingBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 2,
-                        layerStack);
+                        layerStack, mForceDefaultOrientation);
                 mExitingBlackFrame.setMatrix(mFrameInitialMatrix);
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -564,8 +609,8 @@ class ScreenRotationAnimation {
                         finalWidth*2, finalHeight*2);
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
                 mEnteringBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER,
-                        layerStack);
-            } catch (SurfaceControl.OutOfResourcesException e) {
+                        layerStack, false);
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -850,7 +895,7 @@ class ScreenRotationAnimation {
                     && (mMoreStartEnter || mMoreStartExit || mMoreFinishEnter || mMoreFinishExit))
                 || (USE_CUSTOM_BLACK_FRAME
                         && (mMoreStartFrame || mMoreRotateFrame || mMoreFinishFrame))
-                || mMoreRotateEnter || mMoreRotateExit 
+                || mMoreRotateEnter || mMoreRotateExit
                 || !mFinishAnimReady;
 
         mSnapshotFinalMatrix.setConcat(mExitTransformation.getMatrix(), mSnapshotInitialMatrix);
@@ -888,6 +933,9 @@ class ScreenRotationAnimation {
             } else {
                 mExitFrameFinalMatrix.setConcat(mExitTransformation.getMatrix(), mFrameInitialMatrix);
                 mExitingBlackFrame.setMatrix(mExitFrameFinalMatrix);
+                if (mForceDefaultOrientation) {
+                    mExitingBlackFrame.setAlpha(mExitTransformation.getAlpha());
+                }
             }
         }
 

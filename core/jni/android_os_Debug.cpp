@@ -20,7 +20,9 @@
 #include <utils/String8.h>
 #include "utils/misc.h"
 #include "cutils/debugger.h"
+#include <memtrack/memtrack.h>
 
+#include <cutils/log.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,6 +45,7 @@ enum {
     HEAP_UNKNOWN,
     HEAP_DALVIK,
     HEAP_NATIVE,
+    HEAP_DALVIK_OTHER,
     HEAP_STACK,
     HEAP_CURSOR,
     HEAP_ASHMEM,
@@ -52,38 +55,67 @@ enum {
     HEAP_APK,
     HEAP_TTF,
     HEAP_DEX,
+    HEAP_OAT,
+    HEAP_ART,
     HEAP_UNKNOWN_MAP,
+    HEAP_GRAPHICS,
+    HEAP_GL,
+    HEAP_OTHER_MEMTRACK,
+
+    HEAP_DALVIK_NORMAL,
+    HEAP_DALVIK_LARGE,
+    HEAP_DALVIK_LINEARALLOC,
+    HEAP_DALVIK_ACCOUNTING,
+    HEAP_DALVIK_CODE_CACHE,
 
     _NUM_HEAP,
+    _NUM_EXCLUSIVE_HEAP = HEAP_OTHER_MEMTRACK+1,
     _NUM_CORE_HEAP = HEAP_NATIVE+1
 };
 
 struct stat_fields {
     jfieldID pss_field;
+    jfieldID pssSwappable_field;
     jfieldID privateDirty_field;
     jfieldID sharedDirty_field;
+    jfieldID privateClean_field;
+    jfieldID sharedClean_field;
+    jfieldID swappedOut_field;
 };
 
 struct stat_field_names {
     const char* pss_name;
+    const char* pssSwappable_name;
     const char* privateDirty_name;
     const char* sharedDirty_name;
+    const char* privateClean_name;
+    const char* sharedClean_name;
+    const char* swappedOut_name;
 };
 
 static stat_fields stat_fields[_NUM_CORE_HEAP];
 
 static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
-    { "otherPss", "otherPrivateDirty", "otherSharedDirty" },
-    { "dalvikPss", "dalvikPrivateDirty", "dalvikSharedDirty" },
-    { "nativePss", "nativePrivateDirty", "nativeSharedDirty" }
+    { "otherPss", "otherSwappablePss", "otherPrivateDirty", "otherSharedDirty",
+        "otherPrivateClean", "otherSharedClean", "otherSwappedOut" },
+    { "dalvikPss", "dalvikSwappablePss", "dalvikPrivateDirty", "dalvikSharedDirty",
+        "dalvikPrivateClean", "dalvikSharedClean", "dalvikSwappedOut" },
+    { "nativePss", "nativeSwappablePss", "nativePrivateDirty", "nativeSharedDirty",
+        "nativePrivateClean", "nativeSharedClean", "nativeSwappedOut" }
 };
 
 jfieldID otherStats_field;
 
+static bool memtrackLoaded;
+
 struct stats_t {
     int pss;
+    int swappablePss;
     int privateDirty;
     int sharedDirty;
+    int privateClean;
+    int sharedClean;
+    int swappedOut;
 };
 
 #define BINDER_STATS "/proc/binder/stats"
@@ -118,15 +150,83 @@ static jlong android_os_Debug_getNativeHeapFreeSize(JNIEnv *env, jobject clazz)
 #endif
 }
 
+// Container used to retrieve graphics memory pss
+struct graphics_memory_pss
+{
+    int graphics;
+    int gl;
+    int other;
+};
+
+/*
+ * Uses libmemtrack to retrieve graphics memory that the process is using.
+ * Any graphics memory reported in /proc/pid/smaps is not included here.
+ */
+static int read_memtrack_memory(struct memtrack_proc* p, int pid,
+        struct graphics_memory_pss* graphics_mem)
+{
+    int err = memtrack_proc_get(p, pid);
+    if (err != 0) {
+        ALOGW("failed to get memory consumption info: %d", err);
+        return err;
+    }
+
+    ssize_t pss = memtrack_proc_graphics_pss(p);
+    if (pss < 0) {
+        ALOGW("failed to get graphics pss: %d", pss);
+        return pss;
+    }
+    graphics_mem->graphics = pss / 1024;
+
+    pss = memtrack_proc_gl_pss(p);
+    if (pss < 0) {
+        ALOGW("failed to get gl pss: %d", pss);
+        return pss;
+    }
+    graphics_mem->gl = pss / 1024;
+
+    pss = memtrack_proc_other_pss(p);
+    if (pss < 0) {
+        ALOGW("failed to get other pss: %d", pss);
+        return pss;
+    }
+    graphics_mem->other = pss / 1024;
+
+    return 0;
+}
+
+/*
+ * Retrieves the graphics memory that is unaccounted for in /proc/pid/smaps.
+ */
+static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_mem)
+{
+    if (!memtrackLoaded) {
+        return -1;
+    }
+
+    struct memtrack_proc* p = memtrack_proc_new();
+    if (p == NULL) {
+        ALOGW("failed to create memtrack_proc");
+        return -1;
+    }
+
+    int err = read_memtrack_memory(p, pid, graphics_mem);
+    memtrack_proc_destroy(p);
+    return err;
+}
+
 static void read_mapinfo(FILE *fp, stats_t* stats)
 {
     char line[1024];
     int len, nameLen;
     bool skip, done = false;
 
-    unsigned size = 0, resident = 0, pss = 0;
+    unsigned size = 0, resident = 0, pss = 0, swappable_pss = 0;
+    float sharing_proportion = 0.0;
     unsigned shared_clean = 0, shared_dirty = 0;
     unsigned private_clean = 0, private_dirty = 0;
+    unsigned swapped_out = 0;
+    bool is_swappable = false;
     unsigned referenced = 0;
     unsigned temp;
 
@@ -137,6 +237,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     int name_pos;
 
     int whichHeap = HEAP_UNKNOWN;
+    int subHeap = HEAP_UNKNOWN;
     int prevHeap = HEAP_UNKNOWN;
 
     if(fgets(line, sizeof(line), fp) == 0) return;
@@ -145,7 +246,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         prevHeap = whichHeap;
         prevEnd = end;
         whichHeap = HEAP_UNKNOWN;
+        subHeap = HEAP_UNKNOWN;
         skip = false;
+        is_swappable = false;
 
         len = strlen(line);
         if (len < 1) return;
@@ -160,30 +263,72 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             name = line + name_pos;
             nameLen = strlen(name);
 
-            if ((strstr(name, "[heap]") == name) ||
-                (strstr(name, "/dev/ashmem/libc malloc") == name)) {
+            if ((strstr(name, "[heap]") == name)) {
                 whichHeap = HEAP_NATIVE;
-            } else if (strstr(name, "/dev/ashmem/dalvik-") == name) {
-                whichHeap = HEAP_DALVIK;
-            } else if (strstr(name, "[stack") == name) {
+            } else if (strncmp(name, "/dev/ashmem", 11) == 0) {
+                if (strncmp(name, "/dev/ashmem/dalvik-", 19) == 0) {
+                    whichHeap = HEAP_DALVIK_OTHER;
+                    if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
+                        subHeap = HEAP_DALVIK_LINEARALLOC;
+                    } else if ((strstr(name, "/dev/ashmem/dalvik-mark") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space live-bitmap") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-allocspace alloc space mark-bitmap") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-card table") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-allocation stack") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-live stack") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-imagespace") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-bitmap") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-card-table") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-mark-stack") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-aux-structure") == name)) {
+                        subHeap = HEAP_DALVIK_ACCOUNTING;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-large") == name) {
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_LARGE;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
+                        subHeap = HEAP_DALVIK_CODE_CACHE;
+                    } else {
+                        // This is the regular Dalvik heap.
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_NORMAL;
+                    }
+                } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
+                    whichHeap = HEAP_CURSOR;
+                } else if (strncmp(name, "/dev/ashmem/libc malloc", 23) == 0) {
+                    whichHeap = HEAP_NATIVE;
+                } else {
+                    whichHeap = HEAP_ASHMEM;
+                }
+            } else if (strncmp(name, "[anon:libc_malloc]", 18) == 0) {
+                whichHeap = HEAP_NATIVE;
+            } else if (strncmp(name, "[stack", 6) == 0) {
                 whichHeap = HEAP_STACK;
-            } else if (strstr(name, "/dev/ashmem/CursorWindow") == name) {
-                whichHeap = HEAP_CURSOR;
-            } else if (strstr(name, "/dev/ashmem/") == name) {
-                whichHeap = HEAP_ASHMEM;
-            } else if (strstr(name, "/dev/") == name) {
+            } else if (strncmp(name, "/dev/", 5) == 0) {
                 whichHeap = HEAP_UNKNOWN_DEV;
             } else if (nameLen > 3 && strcmp(name+nameLen-3, ".so") == 0) {
                 whichHeap = HEAP_SO;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".jar") == 0) {
                 whichHeap = HEAP_JAR;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".apk") == 0) {
                 whichHeap = HEAP_APK;
+                is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".ttf") == 0) {
                 whichHeap = HEAP_TTF;
+                is_swappable = true;
             } else if ((nameLen > 4 && strcmp(name+nameLen-4, ".dex") == 0) ||
                        (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
                 whichHeap = HEAP_DEX;
+                is_swappable = true;
+            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".oat") == 0) {
+                whichHeap = HEAP_OAT;
+                is_swappable = true;
+            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
+                whichHeap = HEAP_ART;
+                is_swappable = true;
+            } else if (strncmp(name, "[anon:", 6) == 0) {
+                whichHeap = HEAP_UNKNOWN;
             } else if (nameLen > 0) {
                 whichHeap = HEAP_UNKNOWN_MAP;
             } else if (start == prevEnd && prevHeap == HEAP_SO) {
@@ -195,28 +340,36 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         //ALOGI("native=%d dalvik=%d sqlite=%d: %s\n", isNativeHeap, isDalvikHeap,
         //    isSqliteHeap, line);
 
+        shared_clean = 0;
+        shared_dirty = 0;
+        private_clean = 0;
+        private_dirty = 0;
+        swapped_out = 0;
+
         while (true) {
             if (fgets(line, 1024, fp) == 0) {
                 done = true;
                 break;
             }
 
-            if (sscanf(line, "Size: %d kB", &temp) == 1) {
+            if (line[0] == 'S' && sscanf(line, "Size: %d kB", &temp) == 1) {
                 size = temp;
-            } else if (sscanf(line, "Rss: %d kB", &temp) == 1) {
+            } else if (line[0] == 'R' && sscanf(line, "Rss: %d kB", &temp) == 1) {
                 resident = temp;
-            } else if (sscanf(line, "Pss: %d kB", &temp) == 1) {
+            } else if (line[0] == 'P' && sscanf(line, "Pss: %d kB", &temp) == 1) {
                 pss = temp;
-            } else if (sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
+            } else if (line[0] == 'S' && sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
                 shared_clean = temp;
-            } else if (sscanf(line, "Shared_Dirty: %d kB", &temp) == 1) {
+            } else if (line[0] == 'S' && sscanf(line, "Shared_Dirty: %d kB", &temp) == 1) {
                 shared_dirty = temp;
-            } else if (sscanf(line, "Private_Clean: %d kB", &temp) == 1) {
+            } else if (line[0] == 'P' && sscanf(line, "Private_Clean: %d kB", &temp) == 1) {
                 private_clean = temp;
-            } else if (sscanf(line, "Private_Dirty: %d kB", &temp) == 1) {
+            } else if (line[0] == 'P' && sscanf(line, "Private_Dirty: %d kB", &temp) == 1) {
                 private_dirty = temp;
-            } else if (sscanf(line, "Referenced: %d kB", &temp) == 1) {
+            } else if (line[0] == 'R' && sscanf(line, "Referenced: %d kB", &temp) == 1) {
                 referenced = temp;
+            } else if (line[0] == 'S' && sscanf(line, "Swap: %d kB", &temp) == 1) {
+                swapped_out = temp;
             } else if (strlen(line) > 30 && line[8] == '-' && line[17] == ' ') {
                 // looks like a new mapping
                 // example: "10000000-10001000 ---p 10000000 00:00 0"
@@ -225,9 +378,32 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         }
 
         if (!skip) {
+            if (is_swappable && (pss > 0)) {
+                sharing_proportion = 0.0;
+                if ((shared_clean > 0) || (shared_dirty > 0)) {
+                    sharing_proportion = (pss - private_clean
+                            - private_dirty)/(shared_clean+shared_dirty);
+                }
+                swappable_pss = (sharing_proportion*shared_clean) + private_clean;
+            } else
+                swappable_pss = 0;
+
             stats[whichHeap].pss += pss;
+            stats[whichHeap].swappablePss += swappable_pss;
             stats[whichHeap].privateDirty += private_dirty;
             stats[whichHeap].sharedDirty += shared_dirty;
+            stats[whichHeap].privateClean += private_clean;
+            stats[whichHeap].sharedClean += shared_clean;
+            stats[whichHeap].swappedOut += swapped_out;
+            if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER) {
+                stats[subHeap].pss += pss;
+                stats[subHeap].swappablePss += swappable_pss;
+                stats[subHeap].privateDirty += private_dirty;
+                stats[subHeap].sharedDirty += shared_dirty;
+                stats[subHeap].privateClean += private_clean;
+                stats[subHeap].sharedClean += shared_clean;
+                stats[subHeap].swappedOut += swapped_out;
+            }
         }
     }
 }
@@ -253,17 +429,36 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
 
     load_maps(pid, stats);
 
-    for (int i=_NUM_CORE_HEAP; i<_NUM_HEAP; i++) {
+    struct graphics_memory_pss graphics_mem;
+    if (read_memtrack_memory(pid, &graphics_mem) == 0) {
+        stats[HEAP_GRAPHICS].pss = graphics_mem.graphics;
+        stats[HEAP_GRAPHICS].privateDirty = graphics_mem.graphics;
+        stats[HEAP_GL].pss = graphics_mem.gl;
+        stats[HEAP_GL].privateDirty = graphics_mem.gl;
+        stats[HEAP_OTHER_MEMTRACK].pss = graphics_mem.other;
+        stats[HEAP_OTHER_MEMTRACK].privateDirty = graphics_mem.other;
+    }
+
+    for (int i=_NUM_CORE_HEAP; i<_NUM_EXCLUSIVE_HEAP; i++) {
         stats[HEAP_UNKNOWN].pss += stats[i].pss;
+        stats[HEAP_UNKNOWN].swappablePss += stats[i].swappablePss;
         stats[HEAP_UNKNOWN].privateDirty += stats[i].privateDirty;
         stats[HEAP_UNKNOWN].sharedDirty += stats[i].sharedDirty;
+        stats[HEAP_UNKNOWN].privateClean += stats[i].privateClean;
+        stats[HEAP_UNKNOWN].sharedClean += stats[i].sharedClean;
+        stats[HEAP_UNKNOWN].swappedOut += stats[i].swappedOut;
     }
 
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         env->SetIntField(object, stat_fields[i].pss_field, stats[i].pss);
+        env->SetIntField(object, stat_fields[i].pssSwappable_field, stats[i].swappablePss);
         env->SetIntField(object, stat_fields[i].privateDirty_field, stats[i].privateDirty);
         env->SetIntField(object, stat_fields[i].sharedDirty_field, stats[i].sharedDirty);
+        env->SetIntField(object, stat_fields[i].privateClean_field, stats[i].privateClean);
+        env->SetIntField(object, stat_fields[i].sharedClean_field, stats[i].sharedClean);
+        env->SetIntField(object, stat_fields[i].swappedOut_field, stats[i].swappedOut);
     }
+
 
     jintArray otherIntArray = (jintArray)env->GetObjectField(object, otherStats_field);
 
@@ -275,8 +470,12 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     int j=0;
     for (int i=_NUM_CORE_HEAP; i<_NUM_HEAP; i++) {
         otherArray[j++] = stats[i].pss;
+        otherArray[j++] = stats[i].swappablePss;
         otherArray[j++] = stats[i].privateDirty;
         otherArray[j++] = stats[i].sharedDirty;
+        otherArray[j++] = stats[i].privateClean;
+        otherArray[j++] = stats[i].sharedClean;
+        otherArray[j++] = stats[i].swappedOut;
     }
 
     env->ReleasePrimitiveArrayCritical(otherIntArray, otherArray, 0);
@@ -287,37 +486,178 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
-static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid)
+static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jlongArray outUss)
 {
     char line[1024];
     jlong pss = 0;
+    jlong uss = 0;
     unsigned temp;
 
     char tmp[128];
     FILE *fp;
 
-    sprintf(tmp, "/proc/%d/smaps", pid);
-    fp = fopen(tmp, "r");
-    if (fp == 0) return 0;
-
-    while (true) {
-        if (fgets(line, 1024, fp) == 0) {
-            break;
-        }
-
-        if (sscanf(line, "Pss: %d kB", &temp) == 1) {
-            pss += temp;
-        }
+    struct graphics_memory_pss graphics_mem;
+    if (read_memtrack_memory(pid, &graphics_mem) == 0) {
+        pss = uss = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
     }
 
-    fclose(fp);
+    sprintf(tmp, "/proc/%d/smaps", pid);
+    fp = fopen(tmp, "r");
+
+    if (fp != 0) {
+        while (true) {
+            if (fgets(line, 1024, fp) == NULL) {
+                break;
+            }
+
+            if (line[0] == 'P') {
+                if (strncmp(line, "Pss:", 4) == 0) {
+                    char* c = line + 4;
+                    while (*c != 0 && (*c < '0' || *c > '9')) {
+                        c++;
+                    }
+                    pss += atoi(c);
+                } else if (strncmp(line, "Private_Clean:", 14)
+                        || strncmp(line, "Private_Dirty:", 14)) {
+                    char* c = line + 14;
+                    while (*c != 0 && (*c < '0' || *c > '9')) {
+                        c++;
+                    }
+                    uss += atoi(c);
+                }
+            }
+        }
+
+        fclose(fp);
+    }
+
+    if (outUss != NULL) {
+        if (env->GetArrayLength(outUss) >= 1) {
+            jlong* outUssArray = env->GetLongArrayElements(outUss, 0);
+            if (outUssArray != NULL) {
+                outUssArray[0] = uss;
+            }
+            env->ReleaseLongArrayElements(outUss, outUssArray, 0);
+        }
+    }
 
     return pss;
 }
 
 static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
 {
-    return android_os_Debug_getPssPid(env, clazz, getpid());
+    return android_os_Debug_getPssPid(env, clazz, getpid(), NULL);
+}
+
+enum {
+    MEMINFO_TOTAL,
+    MEMINFO_FREE,
+    MEMINFO_BUFFERS,
+    MEMINFO_CACHED,
+    MEMINFO_SHMEM,
+    MEMINFO_SLAB,
+    MEMINFO_SWAP_TOTAL,
+    MEMINFO_SWAP_FREE,
+    MEMINFO_ZRAM_TOTAL,
+    MEMINFO_COUNT
+};
+
+static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray out)
+{
+    char buffer[1024];
+    int numFound = 0;
+
+    if (out == NULL) {
+        jniThrowNullPointerException(env, "out == null");
+        return;
+    }
+
+    int fd = open("/proc/meminfo", O_RDONLY);
+
+    if (fd < 0) {
+        ALOGW("Unable to open /proc/meminfo: %s\n", strerror(errno));
+        return;
+    }
+
+    int len = read(fd, buffer, sizeof(buffer)-1);
+    close(fd);
+
+    if (len < 0) {
+        ALOGW("Empty /proc/meminfo");
+        return;
+    }
+    buffer[len] = 0;
+
+    static const char* const tags[] = {
+            "MemTotal:",
+            "MemFree:",
+            "Buffers:",
+            "Cached:",
+            "Shmem:",
+            "Slab:",
+            "SwapTotal:",
+            "SwapFree:",
+            NULL
+    };
+    static const int tagsLen[] = {
+            9,
+            8,
+            8,
+            7,
+            6,
+            5,
+            10,
+            9,
+            0
+    };
+    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    char* p = buffer;
+    while (*p && numFound < 8) {
+        int i = 0;
+        while (tags[i]) {
+            if (strncmp(p, tags[i], tagsLen[i]) == 0) {
+                p += tagsLen[i];
+                while (*p == ' ') p++;
+                char* num = p;
+                while (*p >= '0' && *p <= '9') p++;
+                if (*p != 0) {
+                    *p = 0;
+                    p++;
+                }
+                mem[i] = atoll(num);
+                numFound++;
+                break;
+            }
+            i++;
+        }
+        while (*p && *p != '\n') {
+            p++;
+        }
+        if (*p) p++;
+    }
+
+    fd = open("/sys/block/zram0/mem_used_total", O_RDONLY);
+    if (fd >= 0) {
+        len = read(fd, buffer, sizeof(buffer)-1);
+        close(fd);
+        if (len > 0) {
+            buffer[len] = 0;
+            mem[MEMINFO_ZRAM_TOTAL] = atoll(buffer)/1024;
+        }
+    }
+
+    int maxNum = env->GetArrayLength(out);
+    if (maxNum > MEMINFO_COUNT) {
+        maxNum = MEMINFO_COUNT;
+    }
+    jlong* outArray = env->GetLongArrayElements(out, 0);
+    if (outArray != NULL) {
+        for (int i=0; i<maxNum; i++) {
+            outArray[i] = mem[i];
+        }
+    }
+    env->ReleaseLongArrayElements(out, outArray, 0);
 }
 
 static jint read_binder_stat(const char* stat)
@@ -596,8 +936,10 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getDirtyPagesPid },
     { "getPss",                 "()J",
             (void*) android_os_Debug_getPss },
-    { "getPss",                 "(I)J",
+    { "getPss",                 "(I[J)J",
             (void*) android_os_Debug_getPssPid },
+    { "getMemInfo",             "([J)V",
+            (void*) android_os_Debug_getMemInfo },
     { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
             (void*) android_os_Debug_dumpNativeHeap },
     { "getBinderSentTransactions", "()I",
@@ -616,16 +958,26 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_os_Debug(JNIEnv *env)
 {
+    int err = memtrack_init();
+    if (err != 0) {
+        memtrackLoaded = false;
+        ALOGE("failed to load memtrack module: %d", err);
+    } else {
+        memtrackLoaded = true;
+    }
+
     jclass clazz = env->FindClass("android/os/Debug$MemoryInfo");
 
     // Sanity check the number of other statistics expected in Java matches here.
     jfieldID numOtherStats_field = env->GetStaticFieldID(clazz, "NUM_OTHER_STATS", "I");
     jint numOtherStats = env->GetStaticIntField(clazz, numOtherStats_field);
+    jfieldID numDvkStats_field = env->GetStaticFieldID(clazz, "NUM_DVK_STATS", "I");
+    jint numDvkStats = env->GetStaticIntField(clazz, numDvkStats_field);
     int expectedNumOtherStats = _NUM_HEAP - _NUM_CORE_HEAP;
-    if (numOtherStats != expectedNumOtherStats) {
+    if ((numOtherStats + numDvkStats) != expectedNumOtherStats) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
-                             "android.os.Debug.Meminfo.NUM_OTHER_STATS=%d expected %d",
-                             numOtherStats, expectedNumOtherStats);
+                             "android.os.Debug.Meminfo.NUM_OTHER_STATS+android.os.Debug.Meminfo.NUM_DVK_STATS=%d expected %d",
+                             numOtherStats+numDvkStats, expectedNumOtherStats);
         return JNI_ERR;
     }
 
@@ -634,10 +986,18 @@ int register_android_os_Debug(JNIEnv *env)
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         stat_fields[i].pss_field =
                 env->GetFieldID(clazz, stat_field_names[i].pss_name, "I");
+        stat_fields[i].pssSwappable_field =
+                env->GetFieldID(clazz, stat_field_names[i].pssSwappable_name, "I");
         stat_fields[i].privateDirty_field =
                 env->GetFieldID(clazz, stat_field_names[i].privateDirty_name, "I");
         stat_fields[i].sharedDirty_field =
                 env->GetFieldID(clazz, stat_field_names[i].sharedDirty_name, "I");
+        stat_fields[i].privateClean_field =
+                env->GetFieldID(clazz, stat_field_names[i].privateClean_name, "I");
+        stat_fields[i].sharedClean_field =
+                env->GetFieldID(clazz, stat_field_names[i].sharedClean_name, "I");
+        stat_fields[i].swappedOut_field =
+                env->GetFieldID(clazz, stat_field_names[i].swappedOut_name, "I");
     }
 
     return jniRegisterNativeMethods(env, "android/os/Debug", gMethods, NELEM(gMethods));

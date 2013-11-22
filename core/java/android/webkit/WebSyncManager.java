@@ -36,7 +36,7 @@ abstract class WebSyncManager implements Runnable {
     private String mThreadName;
     // handler of the sync thread
     protected Handler mHandler;
-    // database for the persistent storage
+    // database for the persistent storage. Always null.
     protected WebViewDatabase mDataBase;
     // Ref count for calls to start/stop sync
     private int mStartSyncRefCount;
@@ -60,16 +60,15 @@ abstract class WebSyncManager implements Runnable {
     }
 
     protected WebSyncManager(Context context, String name) {
+        this(name);
+    }
+
+    /** @hide */
+    WebSyncManager(String name) {
         mThreadName = name;
-        if (context != null) {
-            mDataBase = WebViewDatabase.getInstance(context);
-            mSyncThread = new Thread(this);
-            mSyncThread.setName(mThreadName);
-            mSyncThread.start();
-        } else {
-            throw new IllegalStateException(
-                    "WebSyncManager can't be created without context");
-        }
+        mSyncThread = new Thread(this);
+        mSyncThread.setName(mThreadName);
+        mSyncThread.start();
     }
 
     protected Object clone() throws CloneNotSupportedException {
@@ -82,7 +81,7 @@ abstract class WebSyncManager implements Runnable {
         mHandler = new SyncHandler();
         onSyncInit();
         // lower the priority after onSyncInit() is done
-       Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
         Message msg = mHandler.obtainMessage(SYNC_MESSAGE);
         mHandler.sendMessageDelayed(msg, SYNC_LATER_INTERVAL);

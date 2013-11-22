@@ -83,13 +83,15 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public AssetFileDescriptor openAssetFile(String callingPackage, Uri url, String mode)
+        public AssetFileDescriptor openAssetFile(
+                String callingPackage, Uri url, String mode, ICancellationSignal signal)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openAssetFile(url, mode);
         }
 
         @Override
-        public ParcelFileDescriptor openFile(String callingPackage, Uri url, String mode)
+        public ParcelFileDescriptor openFile(
+                String callingPackage, Uri url, String mode, ICancellationSignal signal)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openFile(url, mode);
         }
@@ -126,7 +128,7 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public AssetFileDescriptor openTypedAssetFile(String callingPackage, Uri url,
-                String mimeType, Bundle opts)
+                String mimeType, Bundle opts, ICancellationSignal signal)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openTypedAssetFile(url, mimeType, opts);
         }
@@ -134,6 +136,16 @@ public class MockContentProvider extends ContentProvider {
         @Override
         public ICancellationSignal createCancellationSignal() throws RemoteException {
             return null;
+        }
+
+        @Override
+        public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException {
+            return MockContentProvider.this.canonicalize(uri);
+        }
+
+        @Override
+        public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
+            return MockContentProvider.this.uncanonicalize(uri);
         }
     }
     private final InversionIContentProvider mIContentProvider = new InversionIContentProvider();

@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+        package="com.android.proxyhandler"
+        coreApp="true">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:label="@string/app_label"
+        android:process="com.android.proxyhandler">
+
+        <service android:name=".ProxyService"
+            android:exported="true">
+        </service>
+
+    </application>
+</manifest>

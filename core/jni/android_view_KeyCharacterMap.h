@@ -19,7 +19,7 @@
 
 #include "jni.h"
 
-#include <androidfw/KeyCharacterMap.h>
+#include <input/KeyCharacterMap.h>
 
 namespace android {
 

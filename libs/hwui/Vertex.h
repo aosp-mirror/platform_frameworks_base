@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_VERTEX_H
 #define ANDROID_HWUI_VERTEX_H
 
+#include "Vector.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -24,12 +26,30 @@ namespace uirenderer {
  * Simple structure to describe a vertex with a position and a texture.
  */
 struct Vertex {
+    /**
+     * Fudge-factor used to disambiguate geometry pixel positioning.
+     *
+     * Used to offset lines and points to avoid ambiguous intersection with pixel centers (see
+     * Program::set()), and used to make geometry damage rect calculation conservative (see
+     * Rect::snapGeometryToPixelBoundaries())
+     */
+    static const float gGeometryFudgeFactor = 0.0656f;
+
     float position[2];
 
     static inline void set(Vertex* vertex, float x, float y) {
         vertex[0].position[0] = x;
         vertex[0].position[1] = y;
     }
+
+    static inline void set(Vertex* vertex, vec2 val) {
+        set(vertex, val.x, val.y);
+    }
+
+    static inline void copyWithOffset(Vertex* vertex, const Vertex& src, float x, float y) {
+        set(vertex, src.position[0] + x, src.position[1] + y);
+    }
+
 }; // struct Vertex
 
 /**
@@ -79,6 +99,12 @@ struct AlphaVertex : Vertex {
     static inline void set(AlphaVertex* vertex, float x, float y, float alpha) {
         Vertex::set(vertex, x, y);
         vertex[0].alpha = alpha;
+    }
+
+    static inline void copyWithOffset(AlphaVertex* vertex, const AlphaVertex& src,
+            float x, float y) {
+        Vertex::set(vertex, src.position[0] + x, src.position[1] + y);
+        vertex[0].alpha = src.alpha;
     }
 
     static inline void setColor(AlphaVertex* vertex, float alpha) {

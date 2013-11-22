@@ -89,7 +89,7 @@
     <dimen name="status_bar_icon_drawing_size">18dip</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
-    <item type="dimen" name="status_bar_icon_drawing_alpha">65%</item>
+    <item type="dimen" name="status_bar_icon_drawing_alpha">75%</item>
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
@@ -212,4 +212,12 @@
     <dimen name="qs_tile_margin_below_icon">17dp</dimen>
     <!-- Quick Settings tile geometry: icon size -->
     <dimen name="qs_tile_icon_size">32dp</dimen>
+    <!-- Quick Settings CA Cert Warning tile geometry: gap between icon and text -->
+    <dimen name="qs_cawarn_tile_margin_below_icon">3dp</dimen>
+
+    <!-- The width of the notification panel window: match_parent below sw600dp -->
+    <dimen name="notification_panel_width">-1dp</dimen>
+
+    <!-- used by DessertCase -->
+    <dimen name="dessert_case_cell_size">192dp</dimen>
 </resources>

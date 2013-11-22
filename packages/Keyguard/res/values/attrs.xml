@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2006 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- Formatting note: terminate all comments with a period, to avoid breaking
+     the documentation output. To suppress comment lines from the documentation
+     output, insert an eat-comment element after the comment lines.
+-->
+
+<resources>
+    <!-- Standard gravity constant that a child supplies to its parent.
+         Defines how the child view should be positioned, on both the X and Y axes, within its enclosing layout. -->
+    <attr name="layout_gravity">
+        <!-- Push object to the top of its container, not changing its size. -->
+        <flag name="top" value="0x30" />
+        <!-- Push object to the bottom of its container, not changing its size. -->
+        <flag name="bottom" value="0x50" />
+        <!-- Push object to the left of its container, not changing its size. -->
+        <flag name="left" value="0x03" />
+        <!-- Push object to the right of its container, not changing its size. -->
+        <flag name="right" value="0x05" />
+        <!-- Place object in the vertical center of its container, not changing its size. -->
+        <flag name="center_vertical" value="0x10" />
+        <!-- Grow the vertical size of the object if needed so it completely fills its container. -->
+        <flag name="fill_vertical" value="0x70" />
+        <!-- Place object in the horizontal center of its container, not changing its size. -->
+        <flag name="center_horizontal" value="0x01" />
+        <!-- Grow the horizontal size of the object if needed so it completely fills its container. -->
+        <flag name="fill_horizontal" value="0x07" />
+        <!-- Place the object in the center of its container in both the vertical and horizontal axis, not changing its size. -->
+        <flag name="center" value="0x11" />
+        <!-- Grow the horizontal and vertical size of the object if needed so it completely fills its container. -->
+        <flag name="fill" value="0x77" />
+        <!-- Additional option that can be set to have the top and/or bottom edges of
+             the child clipped to its container's bounds.
+             The clip will be based on the vertical gravity: a top gravity will clip the bottom
+             edge, a bottom gravity will clip the top edge, and neither will clip both edges. -->
+        <flag name="clip_vertical" value="0x80" />
+        <!-- Additional option that can be set to have the left and/or right edges of
+             the child clipped to its container's bounds.
+             The clip will be based on the horizontal gravity: a left gravity will clip the right
+             edge, a right gravity will clip the left edge, and neither will clip both edges. -->
+        <flag name="clip_horizontal" value="0x08" />
+        <!-- Push object to the beginning of its container, not changing its size. -->
+        <flag name="start" value="0x00800003" />
+        <!-- Push object to the end of its container, not changing its size. -->
+        <flag name="end" value="0x00800005" />
+    </attr>
+
+
+    <!-- PagedView specific attributes. These attributes are used to customize
+         a PagedView view in XML files. -->
+    <declare-styleable name="PagedView">
+        <!-- The space between adjacent pages of the PagedView. -->
+        <attr name="pageSpacing" format="dimension" />
+        <!-- The padding for the scroll indicator area -->
+        <attr name="scrollIndicatorPaddingLeft" format="dimension" />
+        <attr name="scrollIndicatorPaddingRight" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="KeyguardGlowStripView">
+        <attr name="dotSize" format="dimension" />
+        <attr name="numDots" format="integer" />
+        <attr name="glowDot" format="reference" />
+        <attr name="leftToRight" format="boolean" />
+    </declare-styleable>
+
+    <!-- Some child types have special behavior. -->
+    <attr name="layout_childType">
+        <!-- No special behavior. Layout will proceed as normal. -->
+        <enum name="none" value="0" />
+        <!-- Widget container.
+             This will be resized in response to certain events. -->
+        <enum name="widget" value="1" />
+        <!-- Security challenge container.
+             This will be dismissed/shown in response to certain events,
+             possibly obscuring widget elements. -->
+        <enum name="challenge" value="2" />
+        <!-- User switcher.
+             This will consume space from the total layout area. -->
+        <enum name="userSwitcher" value="3" />
+        <!-- Scrim. This will block access to child views that
+             come before it in the child list in bouncer mode. -->
+        <enum name="scrim" value="4" />
+        <!-- The home for widgets. All widgets will be descendents of this. -->
+        <enum name="widgets" value="5" />
+        <!-- This is a handle that is used for expanding the
+             security challenge container when it is collapsed. -->
+        <enum name="expandChallengeHandle" value="6" />
+        <!-- Delete drop target.  This will be the drop target to delete pages. -->
+        <enum name="pageDeleteDropTarget" value="7" />
+    </attr>
+
+    <declare-styleable name="SlidingChallengeLayout_Layout">
+        <attr name="layout_childType" />
+        <attr name="layout_maxHeight" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="MultiPaneChallengeLayout">
+        <!-- Influences how layout_centerWithinArea behaves -->
+        <attr name="android:orientation" />
+    </declare-styleable>
+
+    <declare-styleable name="MultiPaneChallengeLayout_Layout">
+        <!-- Percentage of the screen this child should consume or center within.
+             If 0/default, the view will be measured by standard rules
+             as if this were a FrameLayout. -->
+        <attr name="layout_centerWithinArea" format="float" />
+        <attr name="layout_childType" />
+        <attr name="layout_gravity" />
+        <attr name="layout_maxWidth" format="dimension" />
+        <attr name="layout_maxHeight" />
+    </declare-styleable>
+
+    <declare-styleable name="KeyguardSecurityViewFlipper_Layout">
+        <attr name="layout_maxWidth" />
+        <attr name="layout_maxHeight" />
+    </declare-styleable>
+
+    <declare-styleable name="NumPadKey">
+        <attr name="digit" format="integer" />
+        <attr name="textView" format="reference" />
+    </declare-styleable>
+</resources>

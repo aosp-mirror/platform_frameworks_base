@@ -33,22 +33,11 @@ public class StatusBarNotification implements Parcelable {
     private final int uid;
     private final String basePkg;
     private final int initialPid;
-    // TODO: make this field private and move callers to an accessor that
-    // ensures sourceUser is applied.
-
     private final Notification notification;
     private final UserHandle user;
     private final long postTime;
 
     private final int score;
-
-    /** This is temporarily needed for the JB MR1 PDK.
-     * @hide */
-    @Deprecated
-    public StatusBarNotification(String pkg, int id, String tag, int uid, int initialPid, int score,
-            Notification notification) {
-        this(pkg, id, tag, uid, initialPid, score, notification, UserHandle.OWNER);
-    }
 
     /** @hide */
     public StatusBarNotification(String pkg, int id, String tag, int uid, int initialPid, int score,

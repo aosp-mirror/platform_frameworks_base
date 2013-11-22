@@ -7,6 +7,7 @@ extern jclass gOptions_class;
 extern jfieldID gOptions_justBoundsFieldID;
 extern jfieldID gOptions_sampleSizeFieldID;
 extern jfieldID gOptions_configFieldID;
+extern jfieldID gOptions_premultipliedFieldID;
 extern jfieldID gOptions_ditherFieldID;
 extern jfieldID gOptions_purgeableFieldID;
 extern jfieldID gOptions_shareableFieldID;

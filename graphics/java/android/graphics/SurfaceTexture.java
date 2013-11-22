@@ -21,6 +21,7 @@ import java.lang.ref.WeakReference;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.view.Surface;
 
 /**
  * Captures frames from an image stream as an OpenGL ES texture.
@@ -69,6 +70,7 @@ public class SurfaceTexture {
      * These fields are used by native code, do not access or modify.
      */
     private int mSurfaceTexture;
+    private int mBufferQueue;
     private int mFrameAvailableListener;
 
     /**
@@ -79,8 +81,12 @@ public class SurfaceTexture {
     }
 
     /**
-     * Exception thrown when a surface couldn't be created or resized
+     * Exception thrown when a SurfaceTexture couldn't be created or resized.
+     *
+     * @deprecated No longer thrown. {@link Surface.OutOfResourcesException} is used instead.
      */
+    @SuppressWarnings("serial")
+    @Deprecated
     public static class OutOfResourcesException extends Exception {
         public OutOfResourcesException() {
         }
@@ -93,32 +99,32 @@ public class SurfaceTexture {
      * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
      *
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
+     *
+     * @throws OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName) {
-        this(texName, false);
+        init(texName, false);
     }
 
     /**
      * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
      *
-     * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
-     * @param allowSynchronousMode whether the SurfaceTexture can run in the synchronous mode.
-     *      When the image stream comes from OpenGL, SurfaceTexture may run in the synchronous
-     *      mode where the producer side may be blocked to avoid skipping frames. To avoid the
-     *      thread block, set allowSynchronousMode to false.
+     * In single buffered mode the application is responsible for serializing access to the image
+     * content buffer. Each time the image content is to be updated, the
+     * {@link #releaseTexImage()} method must be called before the image content producer takes
+     * ownership of the buffer. For example, when producing image content with the NDK
+     * ANativeWindow_lock and ANativeWindow_unlockAndPost functions, {@link #releaseTexImage()}
+     * must be called before each ANativeWindow_lock, or that call will fail. When producing
+     * image content with OpenGL ES, {@link #releaseTexImage()} must be called before the first
+     * OpenGL ES function call each frame.
      *
-     * @hide
+     * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
+     * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
+     *
+     * @throws throws OutOfResourcesException If the SurfaceTexture cannot be created.
      */
-    public SurfaceTexture(int texName, boolean allowSynchronousMode) {
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(looper);
-        } else {
-            mEventHandler = null;
-        }
-        nativeInit(texName, new WeakReference<SurfaceTexture>(this), allowSynchronousMode);
+    public SurfaceTexture(int texName, boolean singleBufferMode) {
+        init(texName, singleBufferMode);
     }
 
     /**
@@ -143,9 +149,9 @@ public class SurfaceTexture {
      * android.view.Surface#lockCanvas} is called.  For OpenGL ES, the EGLSurface should be
      * destroyed (via eglDestroySurface), made not-current (via eglMakeCurrent), and then recreated
      * (via eglCreateWindowSurface) to ensure that the new default size has taken effect.
-     * 
+     *
      * The width and height parameters must be no greater than the minimum of
-     * GL_MAX_VIEWPORT_DIMS and GL_MAX_TEXTURE_SIZE (see 
+     * GL_MAX_VIEWPORT_DIMS and GL_MAX_TEXTURE_SIZE (see
      * {@link javax.microedition.khronos.opengles.GL10#glGetIntegerv glGetIntegerv}).
      * An error due to invalid dimensions might not be reported until
      * updateTexImage() is called.
@@ -161,6 +167,15 @@ public class SurfaceTexture {
      */
     public void updateTexImage() {
         nativeUpdateTexImage();
+    }
+
+    /**
+     * Releases the the texture content. This is needed in single buffered mode to allow the image
+     * content producer to take ownership of the image buffer.
+     * For more information see {@link #SurfaceTexture(int, boolean)}.
+     */
+    public void releaseTexImage() {
+        nativeReleaseTexImage();
     }
 
     /**
@@ -261,6 +276,7 @@ public class SurfaceTexture {
         nativeRelease();
     }
 
+    @Override
     protected void finalize() throws Throwable {
         try {
             nativeFinalize();
@@ -299,12 +315,26 @@ public class SurfaceTexture {
         }
     }
 
-    private native void nativeInit(int texName, Object weakSelf, boolean allowSynchronousMode);
+    private void init(int texName, boolean singleBufferMode) throws Surface.OutOfResourcesException {
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(looper);
+        } else {
+            mEventHandler = null;
+        }
+        nativeInit(texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
+    }
+
+    private native void nativeInit(int texName, boolean singleBufferMode, Object weakSelf)
+            throws Surface.OutOfResourcesException;
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
+    private native void nativeReleaseTexImage();
     private native int nativeDetachFromGLContext();
     private native int nativeAttachToGLContext(int texName);
     private native int nativeGetQueuedCount();

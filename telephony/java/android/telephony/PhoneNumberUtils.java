@@ -1805,7 +1805,7 @@ public class PhoneNumberUtils
         String countryIso;
         CountryDetector detector = (CountryDetector) context.getSystemService(
                 Context.COUNTRY_DETECTOR);
-        if (detector != null) {
+        if (detector != null && detector.detectCountry() != null) {
             countryIso = detector.detectCountry().getCountryIso();
         } else {
             Locale locale = context.getResources().getConfiguration().locale;

@@ -16,22 +16,21 @@
 
 package android.widget;
 
+import android.util.ArrayMap;
 import com.android.internal.R;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Pools.SimplePool;
+import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
@@ -42,7 +41,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-import static android.util.Log.d;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
@@ -83,10 +81,6 @@ import static android.util.Log.d;
  */
 @RemoteView
 public class RelativeLayout extends ViewGroup {
-    private static final String LOG_TAG = "RelativeLayout";
-
-    private static final boolean DEBUG_GRAPH = false;
-
     public static final int TRUE = -1;
 
     /**
@@ -212,8 +206,8 @@ public class RelativeLayout extends ViewGroup {
     private SortedSet<View> mTopToBottomLeftToRightSet = null;
     
     private boolean mDirtyHierarchy;
-    private View[] mSortedHorizontalChildren = new View[0];
-    private View[] mSortedVerticalChildren = new View[0];
+    private View[] mSortedHorizontalChildren;
+    private View[] mSortedVerticalChildren;
     private final DependencyGraph mGraph = new DependencyGraph();
 
     // Compatibility hack. Old versions of the platform had problems
@@ -360,42 +354,26 @@ public class RelativeLayout extends ViewGroup {
     }
 
     private void sortChildren() {
-        int count = getChildCount();
-        if (mSortedVerticalChildren.length != count) mSortedVerticalChildren = new View[count];
-        if (mSortedHorizontalChildren.length != count) mSortedHorizontalChildren = new View[count];
+        final int count = getChildCount();
+        if (mSortedVerticalChildren == null || mSortedVerticalChildren.length != count) {
+            mSortedVerticalChildren = new View[count];
+        }
+
+        if (mSortedHorizontalChildren == null || mSortedHorizontalChildren.length != count) {
+            mSortedHorizontalChildren = new View[count];
+        }
 
         final DependencyGraph graph = mGraph;
         graph.clear();
 
         for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            graph.add(child);
-        }
-
-        if (DEBUG_GRAPH) {
-            d(LOG_TAG, "=== Sorted vertical children");
-            graph.log(getResources(), RULES_VERTICAL);
-            d(LOG_TAG, "=== Sorted horizontal children");
-            graph.log(getResources(), RULES_HORIZONTAL);
+            graph.add(getChildAt(i));
         }
 
         graph.getSortedViews(mSortedVerticalChildren, RULES_VERTICAL);
         graph.getSortedViews(mSortedHorizontalChildren, RULES_HORIZONTAL);
-
-        if (DEBUG_GRAPH) {
-            d(LOG_TAG, "=== Ordered list of vertical children");
-            for (View view : mSortedVerticalChildren) {
-                DependencyGraph.printViewId(getResources(), view);
-            }
-            d(LOG_TAG, "=== Ordered list of horizontal children");
-            for (View view : mSortedHorizontalChildren) {
-                DependencyGraph.printViewId(getResources(), view);
-            }
-        }        
     }
 
-    // TODO: we need to find another way to implement RelativeLayout
-    // This implementation cannot handle every case
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mDirtyHierarchy) {
@@ -484,6 +462,7 @@ public class RelativeLayout extends ViewGroup {
 
         views = mSortedVerticalChildren;
         count = views.length;
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
 
         for (int i = 0; i < count; i++) {
             View child = views[i];
@@ -498,14 +477,26 @@ public class RelativeLayout extends ViewGroup {
 
                 if (isWrapContentWidth) {
                     if (isLayoutRtl()) {
-                        width = Math.max(width, myWidth - params.mLeft);
+                        if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
+                            width = Math.max(width, myWidth - params.mLeft);
+                        } else {
+                            width = Math.max(width, myWidth - params.mLeft - params.leftMargin);
+                        }
                     } else {
-                        width = Math.max(width, params.mRight);
+                        if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
+                            width = Math.max(width, params.mRight);
+                        } else {
+                            width = Math.max(width, params.mRight + params.rightMargin);
+                        }
                     }
                 }
 
                 if (isWrapContentHeight) {
-                    height = Math.max(height, params.mBottom);
+                    if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
+                        height = Math.max(height, params.mBottom);
+                    } else {
+                        height = Math.max(height, params.mBottom + params.bottomMargin);
+                    }
                 }
 
                 if (child != ignore || verticalGravity) {
@@ -545,7 +536,7 @@ public class RelativeLayout extends ViewGroup {
             // the right of each child view
             width += mPaddingRight;
 
-            if (mLayoutParams.width >= 0) {
+            if (mLayoutParams != null && mLayoutParams.width >= 0) {
                 width = Math.max(width, mLayoutParams.width);
             }
 
@@ -575,7 +566,7 @@ public class RelativeLayout extends ViewGroup {
             // the bottom of each child view
             height += mPaddingBottom;
 
-            if (mLayoutParams.height >= 0) {
+            if (mLayoutParams != null && mLayoutParams.height >= 0) {
                 height = Math.max(height, mLayoutParams.height);
             }
 
@@ -900,8 +891,6 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[LEFT_OF] != 0) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
@@ -926,8 +915,6 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ALIGN_RIGHT] != 0) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
@@ -938,8 +925,6 @@ public class RelativeLayout extends ViewGroup {
         if (0 != rules[ALIGN_PARENT_RIGHT]) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
     }
@@ -958,8 +943,6 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ABOVE] != 0) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
@@ -984,8 +967,6 @@ public class RelativeLayout extends ViewGroup {
         } else if (childParams.alignWithParent && rules[ALIGN_BOTTOM] != 0) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
@@ -996,8 +977,6 @@ public class RelativeLayout extends ViewGroup {
         if (0 != rules[ALIGN_PARENT_BOTTOM]) {
             if (myHeight >= 0) {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
-            } else {
-                // FIXME uh oh...
             }
         }
 
@@ -1355,6 +1334,24 @@ public class RelativeLayout extends ViewGroup {
             super(source);
         }
 
+        /**
+         * Copy constructor. Clones the width, height, margin values, and rules
+         * of the source.
+         *
+         * @param source The layout params to copy from.
+         */
+        public LayoutParams(LayoutParams source) {
+            super(source);
+
+            this.mIsRtlCompatibilityMode = source.mIsRtlCompatibilityMode;
+            this.mRulesChanged = source.mRulesChanged;
+            this.alignWithParent = source.alignWithParent;
+
+            System.arraycopy(source.mRules, LEFT_OF, this.mRules, LEFT_OF, VERB_COUNT);
+            System.arraycopy(
+                    source.mInitialRules, LEFT_OF, this.mInitialRules, LEFT_OF, VERB_COUNT);
+        }
+
         @Override
         public String debug(String output) {
             return output + "ViewGroup.LayoutParams={ width=" + sizeToString(width) +
@@ -1677,8 +1674,10 @@ public class RelativeLayout extends ViewGroup {
 
                 sorted[index++] = view;
 
-                final HashMap<Node, DependencyGraph> dependents = node.dependents;
-                for (Node dependent : dependents.keySet()) {
+                final ArrayMap<Node, DependencyGraph> dependents = node.dependents;
+                final int count = dependents.size();
+                for (int i = 0; i < count; i++) {
+                    final Node dependent = dependents.keyAt(i);
                     final SparseArray<Node> dependencies = dependent.dependencies;
 
                     dependencies.remove(key);
@@ -1756,61 +1755,6 @@ public class RelativeLayout extends ViewGroup {
         }
 
         /**
-         * Prints the dependency graph for the specified rules.
-         *
-         * @param resources The context's resources to print the ids.
-         * @param rules The list of rules to take into account.
-         */
-        void log(Resources resources, int... rules) {
-            final ArrayDeque<Node> roots = findRoots(rules);
-            for (Node node : roots) {
-                printNode(resources, node);
-            }
-        }
-
-        static void printViewId(Resources resources, View view) {
-            if (view.getId() != View.NO_ID) {
-                d(LOG_TAG, resources.getResourceEntryName(view.getId()));
-            } else {
-                d(LOG_TAG, "NO_ID");
-            }
-        }
-
-        private static void appendViewId(Resources resources, Node node, StringBuilder buffer) {
-            if (node.view.getId() != View.NO_ID) {
-                buffer.append(resources.getResourceEntryName(node.view.getId()));
-            } else {
-                buffer.append("NO_ID");
-            }
-        }
-
-        private static void printNode(Resources resources, Node node) {
-            if (node.dependents.size() == 0) {
-                printViewId(resources, node.view);
-            } else {
-                for (Node dependent : node.dependents.keySet()) {
-                    StringBuilder buffer = new StringBuilder();
-                    appendViewId(resources, node, buffer);
-                    printdependents(resources, dependent, buffer);
-                }
-            }
-        }
-
-        private static void printdependents(Resources resources, Node node, StringBuilder buffer) {
-            buffer.append(" -> ");
-            appendViewId(resources, node, buffer);
-
-            if (node.dependents.size() == 0) {
-                d(LOG_TAG, buffer.toString());
-            } else {
-                for (Node dependent : node.dependents.keySet()) {
-                    StringBuilder subBuffer = new StringBuilder(buffer);
-                    printdependents(resources, dependent, subBuffer);
-                }
-            }
-        }
-
-        /**
          * A node in the dependency graph. A node is a view, its list of dependencies
          * and its list of dependents.
          *
@@ -1826,7 +1770,8 @@ public class RelativeLayout extends ViewGroup {
              * The list of dependents for this node; a dependent is a node
              * that needs this node to be processed first.
              */
-            final HashMap<Node, DependencyGraph> dependents = new HashMap<Node, DependencyGraph>();
+            final ArrayMap<Node, DependencyGraph> dependents =
+                    new ArrayMap<Node, DependencyGraph>();
 
             /**
              * The list of dependencies for this node.
@@ -1839,7 +1784,8 @@ public class RelativeLayout extends ViewGroup {
             // The pool is static, so all nodes instances are shared across
             // activities, that's why we give it a rather high limit
             private static final int POOL_LIMIT = 100;
-            private static final SimplePool<Node> sPool = new SimplePool<Node>(POOL_LIMIT);
+            private static final SynchronizedPool<Node> sPool =
+                    new SynchronizedPool<Node>(POOL_LIMIT);
 
             static Node acquire(View view) {
                 Node node = sPool.acquire();

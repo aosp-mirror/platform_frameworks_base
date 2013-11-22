@@ -40,4 +40,24 @@
         <item>@null</item>
     </array>
 
+    <!-- BatteryMeterView parameters -->
+    <array name="batterymeter_color_levels">
+        <item>4</item>
+        <item>15</item>
+        <item>100</item>
+    </array>
+    <array name="batterymeter_color_values">
+        <item>#FFFF3300</item>
+        <item>#FFFF3300</item>
+        <item>#FFFFFFFF</item>
+    </array>
+    <array name="batterymeter_bolt_points">
+        <item>73</item> <item>0</item>
+        <item>392</item><item>0</item>
+        <item>201</item><item>259</item>
+        <item>442</item><item>259</item>
+        <item>4</item>  <item>703</item>
+        <item>157</item><item>334</item>
+        <item>0</item>  <item>334</item>
+    </array>
 </resources>

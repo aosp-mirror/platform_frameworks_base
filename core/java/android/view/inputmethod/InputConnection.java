@@ -337,14 +337,17 @@ public interface InputConnection {
     public boolean deleteSurroundingText(int beforeLength, int afterLength);
 
     /**
-     * Set composing text around the current cursor position with the
-     * given text, and set the new cursor position. Any composing text
-     * set previously will be removed automatically.
+     * Replace the currently composing text with the given text, and
+     * set the new cursor position. Any composing text set previously
+     * will be removed automatically.
      *
      * <p>If there is any composing span currently active, all
      * characters that it comprises are removed. The passed text is
      * added in its place, and a composing span is added to this
-     * text. Finally, the cursor is moved to the location specified by
+     * text. If there is no composing span active, the passed text is
+     * added at the cursor position (removing selected characters
+     * first if any), and a composing span is added on the new text.
+     * Finally, the cursor is moved to the location specified by
      * <code>newCursorPosition</code>.</p>
      *
      * <p>This is usually called by IMEs to add or remove or change
@@ -447,8 +450,10 @@ public interface InputConnection {
      *
      * <p>This method removes the contents of the currently composing
      * text and replaces it with the passed CharSequence, and then
-     * moves the cursor according to {@code newCursorPosition}.
-     * This behaves like calling
+     * moves the cursor according to {@code newCursorPosition}. If there
+     * is no composing text when this method is called, the new text is
+     * inserted at the cursor position, removing text inside the selection
+     * if any. This behaves like calling
      * {@link #setComposingText(CharSequence, int) setComposingText(text, newCursorPosition)}
      * then {@link #finishComposingText()}.</p>
      *
@@ -461,15 +466,16 @@ public interface InputConnection {
      * but be careful to wait until the batch edit is over if one is
      * in progress.</p>
      *
-     * @param text The committed text. This may include styles.
-     * @param newCursorPosition The new cursor position around the text. If
-     *        > 0, this is relative to the end of the text - 1; if <= 0, this
-     *        is relative to the start of the text. So a value of 1 will
-     *        always advance you to the position after the full text being
-     *        inserted. Note that this means you can't position the cursor
-     *        within the text, because the editor can make modifications to
-     *        the text you are providing so it is not possible to correctly
-     *        specify locations there.
+     * @param text The text to commit. This may include styles.
+     * @param newCursorPosition The new cursor position around the text,
+     *        in Java characters. If > 0, this is relative to the end
+     *        of the text - 1; if <= 0, this is relative to the start
+     *        of the text. So a value of 1 will always advance the cursor
+     *        to the position after the full text being inserted. Note that
+     *        this means you can't position the cursor within the text,
+     *        because the editor can make modifications to the text
+     *        you are providing so it is not possible to correctly specify
+     *        locations there.
      * @return true on success, false if the input connection is no longer
      * valid.
      */

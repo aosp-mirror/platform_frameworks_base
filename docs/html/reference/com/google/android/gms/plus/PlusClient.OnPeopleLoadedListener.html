@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>PlusClient.OnPeopleLoadedListener | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -688,7 +695,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(PlusClient.OnPeopleLoadedListener, int)</a></code></li>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code></li>
       </ul>
   </div>
 
@@ -757,7 +764,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html#onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)">onPeopleLoaded</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, <a href="/reference/java/lang/String.html">String</a> nextPageToken)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html#onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)">onPeopleLoaded</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, String nextPageToken)</nobr>
         
   </td></tr>
 
@@ -823,7 +830,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeopleLoaded</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, <a href="/reference/java/lang/String.html">String</a> nextPageToken)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, String nextPageToken)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -839,7 +846,7 @@ onkeyup="return search_changed(event, false, '/')" />
       <table class="jd-tagtable">
         <tr>
           <th>status</td>
-          <td>The resulting connection status of the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(PlusClient.OnPeopleLoadedListener, int)</a></code> or
+          <td>The resulting connection status of the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> or
             <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople(PlusClient.OnPeopleLoadedListener, int, String)</a></code> request.</td>
         </tr>
         <tr>

@@ -45,8 +45,8 @@ public class PointCloud {
 
     public class WaveManager {
         private float radius = 50;
-        private float width = 200.0f; // TODO: Make configurable
         private float alpha = 0.0f;
+
         public void setRadius(float r) {
             radius = r;
         }
@@ -186,13 +186,12 @@ public class PointCloud {
 
         // Compute contribution from Wave
         float radius = hypot(point.x, point.y);
-        float distanceToWaveRing = (radius - waveManager.radius);
         float waveAlpha = 0.0f;
-        if (distanceToWaveRing < waveManager.width * 0.5f && distanceToWaveRing < 0.0f) {
-            float cosf = FloatMath.cos(PI * 0.25f * distanceToWaveRing / waveManager.width);
-            waveAlpha = waveManager.alpha * max(0.0f, (float) Math.pow(cosf, 20.0f));
+        if (radius < waveManager.radius * 2) {
+            float distanceToWaveRing = (radius - waveManager.radius);
+            float cosf = FloatMath.cos(PI * 0.5f * distanceToWaveRing / waveManager.radius);
+            waveAlpha = waveManager.alpha * max(0.0f, (float) Math.pow(cosf, 6.0f));
         }
-
         return (int) (max(glowAlpha, waveAlpha) * 255);
     }
 

@@ -21,7 +21,8 @@ import com.android.server.firewall.IntentFirewall;
 public class IntentFirewallInstallReceiver extends ConfigUpdateInstallReceiver {
 
     public IntentFirewallInstallReceiver() {
-        super(IntentFirewall.getRulesFile().getParent(), IntentFirewall.getRulesFile().getName(),
-                "metadata/", "version");
+        // TODO: should we dynamically generate a filename and store the name in metadata?
+        super(IntentFirewall.getRulesDir().getAbsolutePath(), "ifw.xml", "metadata/",
+                "gservices.version");
     }
 }

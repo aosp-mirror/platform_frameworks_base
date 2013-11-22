@@ -71,17 +71,14 @@ interface IWindowManager
 
     void setOverscan(int displayId, int left, int top, int right, int bottom);
 
-    // Is the device configured to have a full system bar for larger screens?
-    boolean hasSystemNavBar();
-
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void pauseKeyDispatching(IBinder token);
     void resumeKeyDispatching(IBinder token);
     void setEventDispatching(boolean enabled);
     void addWindowToken(IBinder token, int type);
     void removeWindowToken(IBinder token);
-    void addAppToken(int addPos, IApplicationToken token,
-            int groupId, int requestedOrientation, boolean fullscreen, boolean showWhenLocked);
+    void addAppToken(int addPos, IApplicationToken token, int groupId, int stackId,
+            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId);
     void setAppGroupId(IBinder token, int groupId);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
@@ -97,15 +94,12 @@ interface IWindowManager
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
+            int icon, int logo, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
     void setAppWillBeHidden(IBinder token);
     void setAppVisibility(IBinder token, boolean visible);
     void startAppFreezingScreen(IBinder token, int configChanges);
     void stopAppFreezingScreen(IBinder token, boolean force);
     void removeAppToken(IBinder token);
-    void moveAppToken(int index, IBinder token);
-    void moveAppTokensToTop(in List<IBinder> tokens);
-    void moveAppTokensToBottom(in List<IBinder> tokens);
 
     // Re-evaluate the current orientation from the caller's state.
     // If there is a change, the new Configuration is returned and the
@@ -211,7 +205,8 @@ interface IWindowManager
     /**
      * Create a screenshot of the applications currently displayed.
      */
-    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight);
+    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth,
+            int maxHeight, boolean force565);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
@@ -255,12 +250,6 @@ interface IWindowManager
     boolean isSafeModeEnabled();
 
     /**
-     * Tell keyguard to show the assistant (Intent.ACTION_ASSIST) after asking for the user's
-     * credentials.
-     */
-    void showAssistant();
-
-    /**
      * Sets the display magnification callbacks. These callbacks notify
      * the client for contextual changes related to display magnification.
      *
@@ -285,4 +274,11 @@ interface IWindowManager
      * @return The magnification spec if such or null.
      */
     MagnificationSpec getCompatibleMagnificationSpecForWindow(in IBinder windowToken);
+
+    /**
+     * Sets the current touch exploration state.
+     *
+     * @param enabled Whether touch exploration is enabled.
+     */
+    void setTouchExplorationEnabled(boolean enabled);
 }

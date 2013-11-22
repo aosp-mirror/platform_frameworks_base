@@ -258,7 +258,6 @@ static PixelFormat convertPixelFormat(SkBitmap::Config format)
     case SkBitmap::kARGB_8888_Config:   return PIXEL_FORMAT_RGBA_8888;
     case SkBitmap::kARGB_4444_Config:   return PIXEL_FORMAT_RGBA_4444;
     case SkBitmap::kRGB_565_Config:     return PIXEL_FORMAT_RGB_565;
-    case SkBitmap::kA8_Config:          return PIXEL_FORMAT_A_8;
     default:                            return PIXEL_FORMAT_NONE;
     }
 }
@@ -352,10 +351,9 @@ not_valid_surface:
                 "Make sure the SurfaceTexture is valid");
         return 0;
     }
-    
-    sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(_env, native_window));
 
-    window = new Surface(glConsumer->getBufferQueue());
+    sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(_env, native_window));
+    window = new Surface(producer, true);
     if (window == NULL)
         goto not_valid_surface;
 

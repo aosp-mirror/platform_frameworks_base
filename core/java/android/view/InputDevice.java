@@ -44,13 +44,17 @@ import java.util.List;
 public final class InputDevice implements Parcelable {
     private final int mId;
     private final int mGeneration;
+    private final int mControllerNumber;
     private final String mName;
+    private final int mVendorId;
+    private final int mProductId;
     private final String mDescriptor;
     private final boolean mIsExternal;
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
     private final boolean mHasVibrator;
+    private final boolean mHasButtonUnderPad;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     private Vibrator mVibrator; // guarded by mMotionRanges during initialization
@@ -341,30 +345,38 @@ public final class InputDevice implements Parcelable {
     };
 
     // Called by native code.
-    private InputDevice(int id, int generation, String name, String descriptor,
-            boolean isExternal, int sources,
-            int keyboardType, KeyCharacterMap keyCharacterMap, boolean hasVibrator) {
+    private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
+            int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
+            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasButtonUnderPad) {
         mId = id;
         mGeneration = generation;
+        mControllerNumber = controllerNumber;
         mName = name;
+        mVendorId = vendorId;
+        mProductId = productId;
         mDescriptor = descriptor;
         mIsExternal = isExternal;
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
         mHasVibrator = hasVibrator;
+        mHasButtonUnderPad = hasButtonUnderPad;
     }
 
     private InputDevice(Parcel in) {
         mId = in.readInt();
         mGeneration = in.readInt();
+        mControllerNumber = in.readInt();
         mName = in.readString();
+        mVendorId = in.readInt();
+        mProductId = in.readInt();
         mDescriptor = in.readString();
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
         mKeyboardType = in.readInt();
         mKeyCharacterMap = KeyCharacterMap.CREATOR.createFromParcel(in);
         mHasVibrator = in.readInt() != 0;
+        mHasButtonUnderPad = in.readInt() != 0;
 
         for (;;) {
             int axis = in.readInt();
@@ -410,6 +422,25 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * The controller number for a given input device.
+     * <p>
+     * Each gamepad or joystick is given a unique, positive controller number when initially
+     * configured by the system. This number may change due to events such as device disconnects /
+     * reconnects or user initiated reassignment. Any change in number will trigger an event that
+     * can be observed by registering an {@link InputManager.InputDeviceListener}.
+     * </p>
+     * <p>
+     * All input devices which are not gamepads or joysticks will be assigned a controller number
+     * of 0.
+     * </p>
+     *
+     * @return The controller number of the device.
+     */
+    public int getControllerNumber() {
+        return mControllerNumber;
+    }
+
+    /**
      * Gets a generation number for this input device.
      * The generation number is incremented whenever the device is reconfigured and its
      * properties may have changed.
@@ -420,6 +451,33 @@ public final class InputDevice implements Parcelable {
      */
     public int getGeneration() {
         return mGeneration;
+    }
+
+    /**
+     * Gets the vendor id for the given device, if available.
+     * <p>
+     * A vendor id uniquely identifies the company who manufactured the device. A value of 0 will
+     * be assigned where a vendor id is not available.
+     * </p>
+     *
+     * @return The vendor id of a given device
+     */
+    public int getVendorId() {
+        return mVendorId;
+    }
+
+    /**
+     * Gets the product id for the given device, if available.
+     * <p>
+     * A product id uniquely identifies which product within the address space of a given vendor,
+     * identified by the device's vendor id. A value of 0 will be assigned where a product id is
+     * not available.
+     * </p>
+     *
+     * @return The product id of a given device
+     */
+    public int getProductId() {
+        return mProductId;
     }
 
     /**
@@ -521,6 +579,16 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Gets whether the device is capable of producing the list of keycodes.
+     * @param keys The list of android keycodes to check for.
+     * @return An array of booleans where each member specifies whether the device is capable of
+     * generating the keycode given by the corresponding value at the same index in the keys array.
+     */
+    public boolean[] hasKeys(int... keys) {
+        return InputManager.getInstance().deviceHasKeys(mId, keys);
+    }
+
+    /**
      * Gets information about the range of values for a particular {@link MotionEvent} axis.
      * If the device supports multiple sources, the same axis may have different meanings
      * for each source.  Returns information about the first axis found for any source.
@@ -609,6 +677,15 @@ public final class InputDevice implements Parcelable {
             }
             return mVibrator;
         }
+    }
+
+    /**
+     * Reports whether the device has a button under its touchpad
+     * @return Whether the device has a button under its touchpad
+     * @hide
+     */
+    public boolean hasButtonUnderPad() {
+        return mHasButtonUnderPad;
     }
 
     /**
@@ -726,13 +803,17 @@ public final class InputDevice implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mId);
         out.writeInt(mGeneration);
+        out.writeInt(mControllerNumber);
         out.writeString(mName);
+        out.writeInt(mVendorId);
+        out.writeInt(mProductId);
         out.writeString(mDescriptor);
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
         mKeyCharacterMap.writeToParcel(out, flags);
         out.writeInt(mHasVibrator ? 1 : 0);
+        out.writeInt(mHasButtonUnderPad ? 1 : 0);
 
         final int numRanges = mMotionRanges.size();
         for (int i = 0; i < numRanges; i++) {

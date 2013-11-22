@@ -49,15 +49,13 @@ public class IWindowManagerImpl implements IWindowManager {
     private final Configuration mConfig;
     private final DisplayMetrics mMetrics;
     private final int mRotation;
-    private final boolean mHasSystemNavBar;
     private final boolean mHasNavigationBar;
 
     public IWindowManagerImpl(Configuration config, DisplayMetrics metrics, int rotation,
-            boolean hasSystemNavBar, boolean hasNavigationBar) {
+            boolean hasNavigationBar) {
         mConfig = config;
         mMetrics = metrics;
         mRotation = rotation;
-        mHasSystemNavBar = hasSystemNavBar;
         mHasNavigationBar = hasNavigationBar;
     }
 
@@ -79,16 +77,11 @@ public class IWindowManagerImpl implements IWindowManager {
         return mHasNavigationBar;
     }
 
-    @Override
-    public boolean hasSystemNavBar() throws RemoteException {
-        return mHasSystemNavBar;
-    }
-
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, boolean arg4,
-                            boolean arg5)
+    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
+            boolean arg5, boolean arg6, int arg7)
             throws RemoteException {
         // TODO Auto-generated method stub
 
@@ -211,24 +204,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void moveAppToken(int arg0, IBinder arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void moveAppTokensToBottom(List<IBinder> arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void moveAppTokensToTop(List<IBinder> arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public IWindowSession openSession(IInputMethodClient arg0, IInputContext arg1)
             throws RemoteException {
         // TODO Auto-generated method stub
@@ -291,8 +266,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public Bitmap screenshotApplications(IBinder arg0, int displayId, int arg1, int arg2)
-            throws RemoteException {
+    public Bitmap screenshotApplications(IBinder arg0, int displayId, int arg1,
+            int arg2, boolean arg3) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -322,7 +297,7 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void setAppStartingWindow(IBinder arg0, String arg1, int arg2, CompatibilityInfo arg3,
-            CharSequence arg4, int arg5, int arg6, int arg7, IBinder arg8, boolean arg9)
+            CharSequence arg4, int arg5, int arg6, int arg7, int arg8, IBinder arg9, boolean arg10)
             throws RemoteException {
         // TODO Auto-generated method stub
     }
@@ -483,11 +458,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void showAssistant() {
-
-    }
-
-    @Override
     public IBinder getFocusedWindowToken() {
         // TODO Auto-generated method stub
         return null;
@@ -523,5 +493,9 @@ public class IWindowManagerImpl implements IWindowManager {
     public boolean isRotationFrozen() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public void setTouchExplorationEnabled(boolean enabled) {
     }
 }

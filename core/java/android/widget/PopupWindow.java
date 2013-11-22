@@ -72,7 +72,9 @@ public class PopupWindow {
      * screen as needed, regardless of whether this covers the input method.
      */
     public static final int INPUT_METHOD_NOT_NEEDED = 2;
-    
+
+    private static final int DEFAULT_ANCHORED_GRAVITY = Gravity.TOP | Gravity.START;
+
     private Context mContext;
     private WindowManager mWindowManager;
     
@@ -135,12 +137,13 @@ public class PopupWindow {
                     WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                             mPopupView.getLayoutParams();
 
-                    updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff));
+                    updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
+                            mAnchoredGravity));
                     update(p.x, p.y, -1, -1, true);
                 }
             }
         };
-    private int mAnchorXoff, mAnchorYoff;
+    private int mAnchorXoff, mAnchorYoff, mAnchoredGravity;
 
     private boolean mPopupViewInitialLayoutDirectionInherited;
 
@@ -873,15 +876,38 @@ public class PopupWindow {
      * location, the popup will be moved correspondingly.</p>
      *
      * @param anchor the view on which to pin the popup window
+     * @param xoff A horizontal offset from the anchor in pixels
+     * @param yoff A vertical offset from the anchor in pixels
      *
      * @see #dismiss()
      */
     public void showAsDropDown(View anchor, int xoff, int yoff) {
+        showAsDropDown(anchor, xoff, yoff, DEFAULT_ANCHORED_GRAVITY);
+    }
+
+    /**
+     * <p>Display the content view in a popup window anchored to the bottom-left
+     * corner of the anchor view offset by the specified x and y coordinates.
+     * If there is not enough room on screen to show
+     * the popup in its entirety, this method tries to find a parent scroll
+     * view to scroll. If no parent scroll view can be scrolled, the bottom-left
+     * corner of the popup is pinned at the top left corner of the anchor view.</p>
+     * <p>If the view later scrolls to move <code>anchor</code> to a different
+     * location, the popup will be moved correspondingly.</p>
+     *
+     * @param anchor the view on which to pin the popup window
+     * @param xoff A horizontal offset from the anchor in pixels
+     * @param yoff A vertical offset from the anchor in pixels
+     * @param gravity Alignment of the popup relative to the anchor
+     *
+     * @see #dismiss()
+     */
+    public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
         if (isShowing() || mContentView == null) {
             return;
         }
 
-        registerForScrollChanged(anchor, xoff, yoff);
+        registerForScrollChanged(anchor, xoff, yoff, gravity);
 
         mIsShowing = true;
         mIsDropdown = true;
@@ -889,7 +915,7 @@ public class PopupWindow {
         WindowManager.LayoutParams p = createPopupLayout(anchor.getWindowToken());
         preparePopup(p);
 
-        updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff));
+        updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff, gravity));
 
         if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
         if (mWidthMode < 0) p.width = mLastWidth = mWidthMode;
@@ -1105,17 +1131,24 @@ public class PopupWindow {
      * @return true if the popup is translated upwards to fit on screen
      */
     private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
-            int xoff, int yoff) {
+            int xoff, int yoff, int gravity) {
 
         final int anchorHeight = anchor.getHeight();
         anchor.getLocationInWindow(mDrawingLocation);
         p.x = mDrawingLocation[0] + xoff;
         p.y = mDrawingLocation[1] + anchorHeight + yoff;
+
+        final int hgrav = Gravity.getAbsoluteGravity(gravity, anchor.getLayoutDirection()) &
+                Gravity.HORIZONTAL_GRAVITY_MASK;
+        if (hgrav == Gravity.RIGHT) {
+            // Flip the location to align the right sides of the popup and anchor instead of left
+            p.x -= mPopupWidth - anchor.getWidth();
+        }
         
         boolean onTop = false;
 
-        p.gravity = Gravity.START | Gravity.TOP;
-        
+        p.gravity = Gravity.LEFT | Gravity.TOP;
+
         anchor.getLocationOnScreen(mScreenLocation);
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
@@ -1141,6 +1174,11 @@ public class PopupWindow {
             anchor.getLocationInWindow(mDrawingLocation);
             p.x = mDrawingLocation[0] + xoff;
             p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
+
+            // Preserve the gravity adjustment
+            if (hgrav == Gravity.RIGHT) {
+                p.x -= mPopupWidth - anchor.getWidth();
+            }
             
             // determine whether there is more space above or below the anchor
             anchor.getLocationOnScreen(mScreenLocation);
@@ -1148,7 +1186,7 @@ public class PopupWindow {
             onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getHeight() - yoff) <
                     (mScreenLocation[1] - yoff - displayFrame.top);
             if (onTop) {
-                p.gravity = Gravity.START | Gravity.BOTTOM;
+                p.gravity = Gravity.LEFT | Gravity.BOTTOM;
                 p.y = root.getHeight() - mDrawingLocation[1] + yoff;
             } else {
                 p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
@@ -1436,7 +1474,7 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      */
     public void update(View anchor, int width, int height) {
-        update(anchor, false, 0, 0, true, width, height);
+        update(anchor, false, 0, 0, true, width, height, mAnchoredGravity);
     }
 
     /**
@@ -1455,11 +1493,11 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      */
     public void update(View anchor, int xoff, int yoff, int width, int height) {
-        update(anchor, true, xoff, yoff, true, width, height);
+        update(anchor, true, xoff, yoff, true, width, height, mAnchoredGravity);
     }
 
     private void update(View anchor, boolean updateLocation, int xoff, int yoff,
-            boolean updateDimension, int width, int height) {
+            boolean updateDimension, int width, int height, int gravity) {
 
         if (!isShowing() || mContentView == null) {
             return;
@@ -1468,11 +1506,12 @@ public class PopupWindow {
         WeakReference<View> oldAnchor = mAnchor;
         final boolean needsUpdate = updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff);
         if (oldAnchor == null || oldAnchor.get() != anchor || (needsUpdate && !mIsDropdown)) {
-            registerForScrollChanged(anchor, xoff, yoff);
+            registerForScrollChanged(anchor, xoff, yoff, gravity);
         } else if (needsUpdate) {
             // No need to register again if this is a DropDown, showAsDropDown already did.
             mAnchorXoff = xoff;
             mAnchorYoff = yoff;
+            mAnchoredGravity = gravity;
         }
 
         WindowManager.LayoutParams p = (WindowManager.LayoutParams) mPopupView.getLayoutParams();
@@ -1494,9 +1533,10 @@ public class PopupWindow {
         int y = p.y;
 
         if (updateLocation) {
-            updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff));
+            updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff, gravity));
         } else {
-            updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff));            
+            updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
+                    mAnchoredGravity));
         }
 
         update(p.x, p.y, width, height, x != p.x || y != p.y);
@@ -1525,7 +1565,7 @@ public class PopupWindow {
         mAnchor = null;
     }
 
-    private void registerForScrollChanged(View anchor, int xoff, int yoff) {
+    private void registerForScrollChanged(View anchor, int xoff, int yoff, int gravity) {
         unregisterForScrollChanged();
 
         mAnchor = new WeakReference<View>(anchor);
@@ -1536,6 +1576,7 @@ public class PopupWindow {
 
         mAnchorXoff = xoff;
         mAnchorYoff = yoff;
+        mAnchoredGravity = gravity;
     }
 
     private class PopupViewContainer extends FrameLayout {

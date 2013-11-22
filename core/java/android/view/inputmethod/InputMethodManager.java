@@ -613,7 +613,8 @@ public final class InputMethodManager {
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes) {
         try {
-            return mService.getEnabledInputMethodSubtypeList(imi, allowsImplicitlySelectedSubtypes);
+            return mService.getEnabledInputMethodSubtypeList(
+                    imi == null ? null : imi.getId(), allowsImplicitlySelectedSubtypes);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -1411,12 +1412,17 @@ public final class InputMethodManager {
 
                 try {
                     if (DEBUG) Log.v(TAG, "SELECTION CHANGE: " + mCurMethod);
-                    mCurMethod.updateSelection(mCursorSelStart, mCursorSelEnd,
-                            selStart, selEnd, candidatesStart, candidatesEnd);
+                    final int oldSelStart = mCursorSelStart;
+                    final int oldSelEnd = mCursorSelEnd;
+                    // Update internal values before sending updateSelection to the IME, because
+                    // if it changes the text within its onUpdateSelection handler in a way that
+                    // does not move the cursor we don't want to call it again with the same values.
                     mCursorSelStart = selStart;
                     mCursorSelEnd = selEnd;
                     mCursorCandStart = candidatesStart;
                     mCursorCandEnd = candidatesEnd;
+                    mCurMethod.updateSelection(oldSelStart, oldSelEnd,
+                            selStart, selEnd, candidatesStart, candidatesEnd);
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }
@@ -1867,6 +1873,28 @@ public final class InputMethodManager {
         synchronized (mH) {
             try {
                 return mService.switchToNextInputMethod(imeToken, onlyCurrentIme);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Returns true if the current IME needs to offer the users ways to switch to a next input
+     * method (e.g. a globe key.).
+     * When an IME sets supportsSwitchingToNextInputMethod and this method returns true,
+     * the IME has to offer ways to to invoke {@link #switchToNextInputMethod} accordingly.
+     * <p> Note that the system determines the most appropriate next input method
+     * and subtype in order to provide the consistent user experience in switching
+     * between IMEs and subtypes.
+     * @param imeToken Supplies the identifying token given to an input method when it was started,
+     * which allows it to perform this operation on itself.
+     */
+    public boolean shouldOfferSwitchingToNextInputMethod(IBinder imeToken) {
+        synchronized (mH) {
+            try {
+                return mService.shouldOfferSwitchingToNextInputMethod(imeToken);
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
                 return false;

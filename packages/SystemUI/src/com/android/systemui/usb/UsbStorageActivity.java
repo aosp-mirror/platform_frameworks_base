@@ -16,7 +16,6 @@
 
 package com.android.systemui.usb;
 
-import com.android.internal.R;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -24,31 +23,30 @@ import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.storage.IMountService;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageEventListener;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.widget.ImageView;
+import android.os.storage.IMountService;
+import android.os.storage.StorageEventListener;
+import android.os.storage.StorageManager;
+import android.util.Log;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.util.Log;
+
+import com.android.internal.R;
 
 import java.util.List;
 
@@ -96,7 +94,7 @@ public class UsbStorageActivity extends Activity
             switchDisplay(on);
         }
     };
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +105,7 @@ public class UsbStorageActivity extends Activity
                 Log.w(TAG, "Failed to get StorageManager");
             }
         }
-        
+
         mUIHandler = new Handler();
 
         HandlerThread thr = new HandlerThread("SystemUI UsbStorageActivity");
@@ -186,7 +184,7 @@ public class UsbStorageActivity extends Activity
     @Override
     protected void onPause() {
         super.onPause();
-        
+
         unregisterReceiver(mUsbStateReceiver);
         if (mStorageManager == null && mStorageListener != null) {
             mStorageManager.unregisterListener(mStorageListener);
@@ -258,7 +256,7 @@ public class UsbStorageActivity extends Activity
                 // will be hidden once USB mass storage kicks in (or fails)
             }
         });
-        
+
         // things to do elsewhere
         mAsyncStorageHandler.post(new Runnable() {
             @Override

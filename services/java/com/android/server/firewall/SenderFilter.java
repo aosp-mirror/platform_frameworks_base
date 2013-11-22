@@ -16,9 +16,14 @@
 
 package com.android.server.firewall;
 
+import android.app.AppGlobals;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.os.Process;
+import android.os.RemoteException;
+import android.util.Slog;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -32,15 +37,21 @@ class SenderFilter {
     private static final String VAL_SYSTEM_OR_SIGNATURE = "system|signature";
     private static final String VAL_USER_ID = "userId";
 
-    static boolean isSystemApp(ApplicationInfo callerApp, int callerUid, int callerPid) {
-        if (callerUid == Process.SYSTEM_UID ||
-                callerPid == Process.myPid()) {
+    static boolean isPrivilegedApp(int callerUid, int callerPid) {
+        if (callerUid == Process.SYSTEM_UID || callerUid == 0 ||
+                callerPid == Process.myPid() || callerPid == 0) {
             return true;
         }
-        if (callerApp == null) {
-            return false;
+
+        IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            return (pm.getFlagsForUid(callerUid) & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+        } catch (RemoteException ex) {
+            Slog.e(IntentFirewall.TAG, "Remote exception while retrieving uid flags",
+                    ex);
         }
-        return (callerApp.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+
+        return false;
     }
 
     public static final FilterFactory FACTORY = new FilterFactory("sender") {
@@ -67,45 +78,38 @@ class SenderFilter {
 
     private static final Filter SIGNATURE = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
-            if (callerApp == null) {
-                return false;
-            }
-            return ifw.signaturesMatch(callerUid, resolvedApp.uid);
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
+            return ifw.signaturesMatch(callerUid, receivingUid);
         }
     };
 
     private static final Filter SYSTEM = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
-            if (callerApp == null) {
-                // if callerApp is null, the caller is the system process
-                return false;
-            }
-            return isSystemApp(callerApp, callerUid, callerPid);
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
+            return isPrivilegedApp(callerUid, callerPid);
         }
     };
 
     private static final Filter SYSTEM_OR_SIGNATURE = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
-            return isSystemApp(callerApp, callerUid, callerPid) ||
-                    ifw.signaturesMatch(callerUid, resolvedApp.uid);
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
+            return isPrivilegedApp(callerUid, callerPid) ||
+                    ifw.signaturesMatch(callerUid, receivingUid);
         }
     };
 
     private static final Filter USER_ID = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
             // This checks whether the caller is either the system process, or has the same user id
             // I.e. the same app, or an app that uses the same shared user id.
             // This is the same set of applications that would be able to access the component if
             // it wasn't exported.
-            return ifw.checkComponentPermission(null, callerPid, callerUid, resolvedApp.uid, false);
+            return ifw.checkComponentPermission(null, callerPid, callerUid, receivingUid, false);
         }
     };
 }

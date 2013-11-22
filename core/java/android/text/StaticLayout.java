@@ -474,6 +474,8 @@ public class StaticLayout extends Layout {
                 mLineCount < mMaximumVisibleLineCount) {
             // Log.e("text", "output last " + bufEnd);
 
+            measured.setPara(source, bufStart, bufEnd, textDir);
+
             paint.getFontMetricsInt(fm);
 
             v = out(source,
@@ -482,7 +484,7 @@ public class StaticLayout extends Layout {
                     v,
                     spacingmult, spacingadd, null,
                     null, fm, false,
-                    needMultiply, null, DEFAULT_DIR, true, bufEnd,
+                    needMultiply, measured.mLevels, measured.mDir, measured.mEasy, bufEnd,
                     includepad, trackpad, null,
                     null, bufStart, ellipsize,
                     ellipsizedWidth, 0, paint, false);

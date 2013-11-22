@@ -65,10 +65,17 @@ public class ManageDialog extends AlertActivity implements
         }
 
         try {
-            mConfig = getIntent().getParcelableExtra("config");
 
             mService = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+
+            mConfig = mService.getVpnConfig();
+
+            // mConfig can be null if we are a restricted user, in that case don't show this dialog
+            if (mConfig == null) {
+                finish();
+                return;
+            }
 
             View view = View.inflate(this, R.layout.manage, null);
             if (mConfig.session != null) {
@@ -140,7 +147,7 @@ public class ManageDialog extends AlertActivity implements
         mHandler.removeMessages(0);
 
         if (!isFinishing()) {
-            if (mConfig.startTime != 0) {
+            if (mConfig.startTime != -1) {
                 long seconds = (SystemClock.elapsedRealtime() - mConfig.startTime) / 1000;
                 mDuration.setText(String.format("%02d:%02d:%02d",
                         seconds / 3600, seconds / 60 % 60, seconds % 60));

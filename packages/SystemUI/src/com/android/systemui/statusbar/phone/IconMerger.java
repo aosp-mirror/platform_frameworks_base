@@ -17,16 +17,11 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.android.internal.statusbar.StatusBarIcon;
-
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBarIconView;
 
 public class IconMerger extends LinearLayout {
     private static final String TAG = "IconMerger";

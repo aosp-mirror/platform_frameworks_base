@@ -429,7 +429,7 @@ public class ScoAudioTest extends Activity {
                     mMediaRecorder.start();
                     mState = 1;
                 } catch (Exception e) {
-                    Log.e(TAG, "Could start MediaRecorder: " + e.toString());
+                    Log.e(TAG, "Could start MediaRecorder: ", e);
                     mMediaRecorder.release();
                     mMediaRecorder = null;
                     mState = 0;
@@ -439,7 +439,7 @@ public class ScoAudioTest extends Activity {
                     mMediaRecorder.stop();
                     mMediaRecorder.reset();
                 } catch (Exception e) {
-                    Log.e(TAG, "Could not stop MediaRecorder: " + e.toString());
+                    Log.e(TAG, "Could not stop MediaRecorder: ", e);
                     mMediaRecorder.release();
                     mMediaRecorder = null;
                 } finally {
@@ -466,7 +466,7 @@ public class ScoAudioTest extends Activity {
                 mMediaRecorder.prepare();
             }
             catch (Exception e) {
-                Log.e(TAG, "Could not prepare MediaRecorder: " + e.toString());
+                Log.e(TAG, "Could not prepare MediaRecorder: ", e);
                 mMediaRecorder.release();
                 mMediaRecorder = null;
             }
@@ -475,9 +475,14 @@ public class ScoAudioTest extends Activity {
         @Override
         public void stop() {
             if (mMediaRecorder != null) {
-                mMediaRecorder.stop();
-                mMediaRecorder.release();
-                mMediaRecorder = null;
+                try {
+                    mMediaRecorder.stop();
+                } catch (Exception e) {
+                    Log.e(TAG, "Could not stop MediaRecorder: ", e);
+                } finally {
+                    mMediaRecorder.release();
+                    mMediaRecorder = null;
+                }
             }
             updatePlayPauseButton();
         }

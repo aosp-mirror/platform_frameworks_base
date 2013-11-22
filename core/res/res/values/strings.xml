@@ -273,6 +273,18 @@
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
     <string name="low_memory" product="default">Phone storage is full. Delete some files to free space.</string>
 
+    <!-- SSL CA cert notification --> <skip />
+    <!-- Shows up when there is a user SSL CA Cert installed on the
+         device.  Indicates to the user that SSL traffic can be intercepted.  [CHAR LIMIT=NONE] -->
+    <string name="ssl_ca_cert_warning">Network may be monitored</string>
+    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning",
+         i.e.  "Network may be monitored". This says that an unknown party is doing the monitoring.
+         [CHAR LIMIT=100]-->
+    <string name="ssl_ca_cert_noti_by_unknown">By an unknown third party</string>
+    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning",
+         i.e.  "Network may be monitored". This indicates who is doing the monitoring.
+         [CHAR LIMIT=100]-->
+    <string name="ssl_ca_cert_noti_managed">By <xliff:g id="managing_domain">%s</xliff:g></string>
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
@@ -587,6 +599,22 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_expandStatusBar">Allows the app to expand or collapse the status bar.</string>
 
+    <!-- Title of an application permission, listed so the user can install application shortcuts
+    in their Launcher -->
+    <string name="permlab_install_shortcut">install shortcuts</string>
+    <!-- Description of an application permission, listed so the user can install application shortcuts
+    in their Launcher -->
+    <string name="permdesc_install_shortcut">Allows an application to add
+        Homescreen shortcuts without user intervention.</string>
+
+    <!-- Title of an application permission, listed so the user can uninstall application shortcuts
+    in their Launcher -->
+    <string name="permlab_uninstall_shortcut">uninstall shortcuts</string>
+    <!-- Description of an application permission, listed so the user can install application shortcuts
+    in their Launcher -->
+    <string name="permdesc_uninstall_shortcut">Allows the application to remove
+        Homescreen shortcuts without user intervention.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_processOutgoingCalls">reroute outgoing calls</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -712,6 +740,15 @@
         tasks and kill their apps. Malicious apps may disrupt
         the behavior of other apps.</string>
 
+    <!-- [CHAR LIMIT=NONE] Title of an application permission, allowing an application to create,
+         change, remove activity stacks. -->
+    <string name="permlab_manageActivityStacks">manage activity stacks</string>
+    <!-- [CHAR LIMIT=NONE] Description of an application permission, allowing an application to create,
+             change, remove activity stacks. -->
+    <string name="permdesc_manageActivityStacks">Allows the app to add, remove, and
+        modify the activity stacks in which other apps run.  Malicious apps may disrupt
+        the behavior of other apps.</string>
+
     <!-- Title of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
     <string name="permlab_startAnyActivity">start any activity</string>
     <!-- Description of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
@@ -823,7 +860,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getTopActivityInfo">Allows the holder to retrieve private information
         about the current application in the foreground of the screen.</string>
-    
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_runSetActivityWatcher">monitor and control all app launching</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -970,6 +1007,26 @@
         interface of an accessibility service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindPrintService">bind to a print service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindPrintService">Allows the holder to bind to the top-level
+        interface of a print service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose
+         whether they want to allow the application to do this. -->
+    <string name="permlab_bindPrintSpoolerService">bind to a print spooler service</string>
+    <!-- Description of an application permission, listed so the user can
+         choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindPrintSpoolerService">Allows the holder to bind to the top-level
+        interface of a print spooler service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindNfcService">bind to NFC service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindNfcService">Allows the holder to bind to applications
+        that are emulating NFC cards. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindTextService">bind to a text service</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindTextService">Allows the holder to bind to the top-level
@@ -998,6 +1055,12 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindDeviceAdmin">Allows the holder to send intents to
         a device administrator. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_manageDeviceAdmins">add or remove a device admin</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_manageDeviceAdmins">Allows the holder to add or remove active device
+        administrators. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setOrientation">change screen orientation</string>
@@ -1093,6 +1156,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_anyCodecForPlayback">Allows the app to use any installed
         media decoder to decode for playback.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. This permission allows the app to install or uninstall trusted credentials, a.k.a. CA certificates. [CHAR LIMIT=NONE] -->
+    <string name="permlab_manageCaCertificates">manage trusted credentials</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_manageCaCertificates">Allows the app to install and uninstall CA certificates as trusted credentials.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
@@ -1360,6 +1428,32 @@
     <string name="permdesc_controlWifiDisplay">Allows the app to control low-level features of Wifi displays.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_captureAudioOutput">capture audio output</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_captureAudioOutput">Allows the app to capture and redirect audio output.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_captureAudioHotword">Hotword detection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_captureAudioHotword">Allows the app to capture audio for Hotword detection. The capture can
+      happen in the background but does not prevent other audio capture (e.g. Camcorder).</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_captureVideoOutput">capture video output</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_captureVideoOutput">Allows the app to capture and redirect video output.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_captureSecureVideoOutput">capture secure video output</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_captureSecureVideoOutput">Allows the app to capture and redirect secure video output.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_mediaContentControl">control media playback and metadata access</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_mediaContentControl">Allows the app to control media playback and access the media information (title, author...).</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_modifyAudioSettings">Allows the app to modify global audio settings such as volume and which speaker is used for output.</string>
@@ -1541,6 +1635,14 @@
     <string name="permdesc_wakeLock" product="default">Allows the app to prevent the phone from going to sleep.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_transmitIr">transmit infrared</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_transmitIr" product="tablet">Allows the app to use the tablet\'s infrared transmitter.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_transmitIr" product="default">Allows the app to use the phone\'s infrared transmitter.</string>
+
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_devicePower" product="tablet">power tablet on or off</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_devicePower" product="default">power phone on or off</string>
@@ -1699,6 +1801,15 @@
     <string name="permdesc_bluetoothAdmin" product="default">Allows the app to configure
       the local Bluetooth phone, and to discover and pair with remote devices.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bluetoothPriv">allow Bluetooth pairing by Application</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetoothPriv" product="tablet">Allows the app to
+      pair with remote devices without user interaction.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetoothPriv" product="default">Allows the app to
+      pair with remote devices without user interaction.</string>
+
     <string name="permlab_accessWimaxState">connect and disconnect from WiMAX</string>
     <string name="permdesc_accessWimaxState">Allows the app to determine whether
      WiMAX is enabled and information about any WiMAX networks that are
@@ -1774,13 +1885,13 @@
       user dictionary.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_sdcardRead" product="nosdcard">test access to protected storage</string>
+    <string name="permlab_sdcardRead" product="nosdcard">read the contents of your USB storage</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sdcardRead" product="default">test access to protected storage</string>
+    <string name="permlab_sdcardRead" product="default">read the contents of your SD card</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permdesc_sdcardRead" product="nosdcard">Allows the app to test a permission for USB storage that will be available on future devices. </string>
+    <string name="permdesc_sdcardRead" product="nosdcard">Allows the app to read the contents of your USB storage.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sdcardRead" product="default">Allows the app to test a permission for the SD card that will be available on future devices.</string>
+    <string name="permdesc_sdcardRead" product="default">Allows the app to read the contents of your SD card.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
     <string name="permlab_sdcardWrite" product="nosdcard">modify or delete the contents of your USB storage</string>
@@ -1795,6 +1906,11 @@
     <string name="permlab_mediaStorageWrite" product="default">modify/delete internal media storage contents</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permdesc_mediaStorageWrite" product="default">Allows the app to modify the contents of the internal media storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
+    <string name="permlab_manageDocs" product="default">manage document storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_manageDocs" product="default">Allows the app to manage document storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
     <string name="permlab_sdcardAccessAll">access external storage of all users</string>
@@ -1812,6 +1928,11 @@
     <string name="permdesc_use_sip">Allows the app to use the SIP service to make/receive Internet calls.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bind_call_service">interact with in-call screen</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bind_call_service">Allows the app to control when and how the user sees the in-call screen.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readNetworkUsageHistory">read historical network usage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readNetworkUsageHistory">Allows the app to read historical network usage for specific networks and apps.</string>
@@ -1827,6 +1948,11 @@
     <string name="permdesc_modifyNetworkAccounting">Allows the app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_markNetworkSocket">modify socket marks</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_markNetworkSocket">Allows the app to modify socket marks for routing</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessNotifications">access notifications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessNotifications">Allows the app to retrieve, examine, and clear notifications, including those posted by other apps.</string>
@@ -1835,6 +1961,16 @@
     <string name="permlab_bindNotificationListenerService">bind to a notification listener service</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindNotificationListenerService">Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_invokeCarrierSetup">invoke the carrier-provided configuration app</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_invokeCarrierSetup">Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessNetworkConditions">listen for observations on network conditions</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessNetworkConditions">Allows an application to listen for observations on network conditions. Should never be needed for normal apps.</string>
 
     <!-- Policy administration -->
 
@@ -3046,6 +3182,8 @@
 
     <!-- Title of intent resolver dialog when selecting an application to run. -->
     <string name="whichApplication">Complete action using</string>
+    <!-- Title of intent resolver dialog when selecting a HOME application to run. -->
+    <string name="whichHomeApplication">Select a home app</string>
     <!-- Option to always use the selected application resolution in the future. See the "Complete action using" dialog title-->
     <string name="alwaysUse">Use by default for this action.</string>
     <!-- Text displayed when the user selects the check box for setting default application.  See the "Use by default for this action" check box. -->
@@ -3469,6 +3607,16 @@
     <!-- Description of an application permission that lets an application route media output. -->
     <string name="permdesc_route_media_output">Allows an application to route media output to other external devices.</string>
 
+    <!-- Title of an application permission that lets an application access keyguard secure storage. -->
+    <string name="permlab_access_keyguard_secure_storage">Access keyguard secure storage</string>
+    <!-- Description of an application permission that lets an application access keyguard secure storage. -->
+    <string name="permdesc_access_keyguard_secure_storage">Allows an application to access keguard secure storage.</string>
+
+    <!-- Title of an application permission that lets it control keyguard. -->
+    <string name="permlab_control_keyguard">Control displaying and hiding keyguard</string>
+    <!-- Description of an application permission that lets it control keyguard. -->
+    <string name="permdesc_control_keyguard">Allows an application to control keguard.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 
@@ -3885,11 +4033,6 @@
     <!-- Title for a dialog showing possible activities for sharing in ShareActionProvider [CHAR LIMIT=25] -->
     <string name="share_action_provider_share_with">Share with</string>
 
-    <!-- Status Bar icon descriptions -->
-
-    <!-- Description of for the status bar's icon that the device is locked for accessibility. [CHAR LIMIT=NONE] -->
-    <string name="status_bar_device_locked">Device locked.</string>
-
     <!-- Delimeter used between each item in a textual list; for example "Alpha, Beta". [CHAR LIMIT=3] -->
     <string name="list_delimeter">", "</string>
 
@@ -3955,6 +4098,9 @@
     <!-- Status message for remote routes that are not available for connection right now -->
     <string name="media_route_status_not_available">Not available</string>
 
+    <!-- Status message for a remote route that is in use (and thus unavailabe) right now -->
+    <string name="media_route_status_in_use">In use</string>
+
     <!-- Display manager service -->
 
     <!-- Name of the built-in display.  [CHAR LIMIT=50] -->
@@ -3968,6 +4114,9 @@
 
     <!-- Title text to show within the overlay.  [CHAR LIMIT=50] -->
     <string name="display_manager_overlay_display_title"><xliff:g id="name">%1$s</xliff:g>: <xliff:g id="width">%2$d</xliff:g>x<xliff:g id="height">%3$d</xliff:g>, <xliff:g id="dpi">%4$d</xliff:g> dpi</string>
+
+    <!-- Title text to append when the display is secure.  [CHAR LIMIT=30] -->
+    <string name="display_manager_overlay_display_secure_suffix">, secure</string>
 
     <!-- Title of the notification to indicate an active wifi display connection.  [CHAR LIMIT=50] -->
     <string name="wifi_display_notification_title">Wireless display is connected</string>
@@ -3988,7 +4137,7 @@
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
-    <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%1$d</xliff:g> seconds.</string>
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
@@ -4108,8 +4257,236 @@
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
     <!-- Message informing user that app is not permitted to access accounts. [CHAR LIMIT=none] -->
-    <string name="app_no_restricted_accounts">This application does not support accounts for restricted profiles</string>
+    <string name="app_no_restricted_accounts">This app doesn\'t support accounts for restricted profiles</string>
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
+
+    <!-- Printing -->
+
+    <!-- ISO (European standard) A0 media (paper) size: 33.11" × 46.81" -->
+    <string name="mediasize_iso_a0">ISO A0</string>
+    <!-- ISO (European standard) A1 media (paper) size: 23.39" × 33.11" -->
+    <string name="mediasize_iso_a1">ISO A1</string>
+    <!-- ISO (European standard) A2 media (paper) size: 16.54" x 23.39" -->
+    <string name="mediasize_iso_a2">ISO A2</string>
+    <!-- ISO (European standard) A3 media (paper) size: 11.69" x 16.54" -->
+    <string name="mediasize_iso_a3">ISO A3</string>
+    <!-- ISO (European standard) A4 media (paper) size: 8.27" x 11.69" -->
+    <string name="mediasize_iso_a4">ISO A4</string>
+    <!-- ISO (European standard) A5 media (paper) size: 5.83" x 8.27" -->
+    <string name="mediasize_iso_a5">ISO A5</string>
+    <!-- ISO (European standard) A6 media (paper) size: 4.13" x 5.83" -->
+    <string name="mediasize_iso_a6">ISO A6</string>
+    <!-- ISO (European standard) A7 media (paper) size: 2.91" x 4.13" -->
+    <string name="mediasize_iso_a7">ISO A7</string>
+    <!-- ISO (European standard) A8 media (paper) size: 2.05" x 2.91" -->
+    <string name="mediasize_iso_a8">ISO A8</string>
+    <!-- ISO (European standard) A9 media (paper) size: 1.46" x 2.05" -->
+    <string name="mediasize_iso_a9">ISO A9</string>
+    <!-- ISO (European standard) A10 media (paper) size: 1.02" x 1.46" -->
+    <string name="mediasize_iso_a10">ISO A10</string>
+
+    <!-- ISO (European standard) B0 media (paper) size: 39.37" x 55.67" -->
+    <string name="mediasize_iso_b0">ISO B0</string>
+    <!-- ISO (European standard) B1 media (paper) size: 27.83" x 39.37" -->
+    <string name="mediasize_iso_b1">ISO B1</string>
+    <!-- ISO (European standard) B2 media (paper) size - 19.69" x 27.83" -->
+    <string name="mediasize_iso_b2">ISO B2</string>
+    <!-- ISO (European standard) B3 media (paper) size: 13.90" x 19.69" -->
+    <string name="mediasize_iso_b3">ISO B3</string>
+    <!-- ISO (European standard) B4 media (paper) size: 9.84" x 13.90" -->
+    <string name="mediasize_iso_b4">ISO B4</string>
+    <!-- ISO (European standard) B5 media (paper) size: 6.93" x 9.84" -->
+    <string name="mediasize_iso_b5">ISO B5</string>
+    <!-- ISO (European standard) B6 media (paper) size: 4.92" x 6.93" -->
+    <string name="mediasize_iso_b6">ISO B6</string>
+    <!-- ISO (European standard) B7 media (paper) size: 3.46" x 4.92" -->
+    <string name="mediasize_iso_b7">ISO B7</string>
+    <!-- ISO (European standard) B8 media (paper) size: 2.44" x 3.46" -->
+    <string name="mediasize_iso_b8">ISO B8</string>
+    <!-- ISO (European standard) B9 media (paper) size: 1.73" x 2.44" -->
+    <string name="mediasize_iso_b9">ISO B9</string>
+    <!-- ISO (European standard) B10 media (paper) size: 1.22" x 1.73" -->
+    <string name="mediasize_iso_b10">ISO B10</string>
+
+    <!-- ISO (European standard) C0 media (paper) size: 36.10" x 51.06" -->
+    <string name="mediasize_iso_c0">ISO C0</string>
+    <!-- ISO (European standard) C1 media (paper) size: 25.51" x 36.10" -->
+    <string name="mediasize_iso_c1">ISO C1</string>
+    <!-- ISO (European standard) C2 media (paper) size: 18.03" x 25.51" -->
+    <string name="mediasize_iso_c2">ISO C2</string>
+    <!-- ISO (European standard) C3 media (paper) size: 12.76" x 18.03" -->
+    <string name="mediasize_iso_c3">ISO C3</string>
+    <!-- ISO (European standard) C4 media (paper) size: 9.02" x 12.76" -->
+    <string name="mediasize_iso_c4">ISO C4</string>
+    <!-- ISO (European standard) C5 media (paper) size: 6.38" x 9.02" -->
+    <string name="mediasize_iso_c5">ISO C5</string>
+    <!-- ISO (European standard) C6 media (paper) size: 4.49" x 6.38" -->
+    <string name="mediasize_iso_c6">ISO C6</string>
+    <!-- ISO (European standard) C7 media (paper) size: 3.19" x 4.49" -->
+    <string name="mediasize_iso_c7">ISO C7</string>
+    <!-- ISO ISO C8 media (paper) size: 2.24" x 3.19" -->
+    <string name="mediasize_iso_c8">ISO C8</string>
+    <!-- ISO ISO C9 media (paper) size: 1.57" x 2.24" -->
+    <string name="mediasize_iso_c9">ISO C9</string>
+    <!-- ISO (European standard) C10 media (paper) size: 1.10" x 1.57" -->
+    <string name="mediasize_iso_c10">ISO C10</string>
+
+    <!-- North America Letter media (paper) size: 8.5" × 11" (279mm x 216mm) -->
+    <string name="mediasize_na_letter">Letter</string>
+    <!-- North America Government Letter media (paper) size: 8.0" × 10.5" (203mm x 267mm) -->
+    <string name="mediasize_na_gvrnmt_letter">Government Letter</string>
+    <!-- North America Legal media (paper) size: 8.5" × 14" (216mm x 356mm) -->
+    <string name="mediasize_na_legal">Legal</string>
+    <!-- North America Junior Legal media (paper) size: 8.0" × 5.0" (203mm × 127mm) -->
+    <string name="mediasize_na_junior_legal">Junior Legal</string>
+    <!-- North America Ledger media (paper) size: 17" × 11" (432mm × 279mm) -->
+    <string name="mediasize_na_ledger">Ledger</string>
+    <!-- North America Tabloid media (paper) size: 11" × 17" (279mm × 432mm) -->
+    <string name="mediasize_na_tabloid">Tabloid</string>
+
+    <!-- North America Index Card 3x5 media (paper) size: 3" x 5" (76mm x 127mm) -->
+    <string name="mediasize_na_index_3x5">Index Card 3x5</string>
+    <!-- North America Index Card 4x6 media (paper) size: 4" x 6" (102mm x 152mm) -->
+    <string name="mediasize_na_index_4x6">Index Card 4x6</string>
+    <!-- North America Index Card 5x8 media (paper) size: 5" x 8" (127mm x 203mm) -->
+    <string name="mediasize_na_index_5x8">Index Card 5x8</string>
+    <!-- North America Monarch media (paper) size: 7.25" x 10.5" (184mm x 267mm) -->
+    <string name="mediasize_na_monarch">Monarch</string>
+    <!-- North America Quarto media (paper) size: 8" x 10" (203mm x 254mm) -->
+    <string name="mediasize_na_quarto">Quarto</string>
+    <!-- North America Foolscap media (paper) size: 8" x 13" (203mm x 330mm) -->
+    <string name="mediasize_na_foolscap">Foolscap</string>
+
+    <!-- Chinese Roc 8k media (paper) size: 270mm x 390mm (10.629" x 15.3543") -->
+    <string name="mediasize_chinese_roc_8k">ROC 8K</string>
+    <!-- Chinese Roc 16k media (paper) size: 195mm x 270mm (7.677" x 10.629") -->
+    <string name="mediasize_chinese_roc_16k">ROC 16K</string>
+
+    <!-- Chinese PRC 1 media (paper) size: 102mm x 165mm (4.015" x 6.496") -->
+    <string name="mediasize_chinese_prc_1">PRC 1</string>
+    <!-- Chinese PRC 2 media (paper) size: 102mm x 176mm (4.015" x 6.929") -->
+    <string name="mediasize_chinese_prc_2">PRC 2</string>
+    <!-- Chinese PRC 3 media (paper) size: 125mm x 176mm (4.921" x 6.929") -->
+    <string name="mediasize_chinese_prc_3">PRC 3</string>
+    <!-- Chinese PRC 4 media (paper) size: 110mm x 208mm (4.330" x 8.189") -->
+    <string name="mediasize_chinese_prc_4">PRC 4</string>
+    <!-- Chinese PRC 5 media (paper) size: 110mm x 220mm (4.330" x 8.661") -->
+    <string name="mediasize_chinese_prc_5">PRC 5</string>
+    <!-- Chinese PRC 6 media (paper) size: 120mm x 320mm (4.724" x 12.599") -->
+    <string name="mediasize_chinese_prc_6">PRC 6</string>
+    <!-- Chinese PRC 7 media (paper) size: 160mm x 230mm (6.299" x 9.055") -->
+    <string name="mediasize_chinese_prc_7">PRC 7</string>
+    <!-- Chinese PRC 8 media (paper) size: 120mm x 309mm (4.724" x 12.165") -->
+    <string name="mediasize_chinese_prc_8">PRC 8</string>
+    <!-- Chinese PRC 9 media (paper) size: 229mm x 324mm (9.016" x 12.756") -->
+    <string name="mediasize_chinese_prc_9">PRC 9</string>
+    <!-- Chinese PRC 10 media (paper) size: 324mm x 458mm (12.756" x 18.032") -->
+    <string name="mediasize_chinese_prc_10">PRC 10</string>
+
+    <!-- Chinese RPC 16K media (paper) size: 146mm x 215mm (5.749" x 8.465") -->
+    <string name="mediasize_chinese_prc_16k">PRC 16K</string>
+    <!-- Chinese Pa Kai media (paper) size: 146mm x 215mm (5.749" x 8.465") -->
+    <string name="mediasize_chinese_om_pa_kai">Pa Kai</string>
+    <!-- Chinese Dai Pa Kai media (paper) size: 275mm x 395mm (10.827" x 15.551") -->
+    <string name="mediasize_chinese_om_dai_pa_kai">Dai Pa Kai</string>
+    <!-- Chinese Jurro Ku Kai media (paper) size: 275mm x 395mm (10.827" x 15.551") -->
+    <string name="mediasize_chinese_om_jurro_ku_kai">Jurro Ku Kai</string>
+
+    <!-- Japanese JIS B10 media (paper) size: 32mm x 45mm (1.259" x 1.772") -->
+    <string name="mediasize_japanese_jis_b10">JIS B10</string>
+    <!-- Japanese JIS B9 media (paper) size: 45mm x 64mm (1.772" x 2.52") -->
+    <string name="mediasize_japanese_jis_b9">JIS B9</string>
+    <!-- Japanese JIS B8 media (paper) size: 64mm x 91mm (2.52" x 3.583") -->
+    <string name="mediasize_japanese_jis_b8">JIS B8</string>
+    <!-- Japanese JIS B7 media (paper) size: 91mm x 128mm (3.583" x 5.049") -->
+    <string name="mediasize_japanese_jis_b7">JIS B7</string>
+    <!-- Japanese JIS B6 media (paper) size: 128mm x 182mm (5.049" x 7.165") -->
+    <string name="mediasize_japanese_jis_b6">JIS B6</string>
+    <!-- Japanese JIS B5 media (paper) size: 182mm x 257mm (7.165" x 10.118") -->
+    <string name="mediasize_japanese_jis_b5">JIS B5</string>
+    <!-- Japanese JIS B4 media (paper) size: 257mm x 364mm (10.118" x 14.331") -->
+    <string name="mediasize_japanese_jis_b4">JIS B4</string>
+    <!-- Japanese JIS B3 media (paper) size: 364mm x 515mm (14.331" x 20.276") -->
+    <string name="mediasize_japanese_jis_b3">JIS B3</string>
+    <!-- Japanese JIS B2 media (paper) size: 515mm x 728mm (20.276" x 28.661") -->
+    <string name="mediasize_japanese_jis_b2">JIS B2</string>
+    <!-- Japanese JIS B1 media (paper) size: 728mm x 1030mm (28.661" x 40.551") -->
+    <string name="mediasize_japanese_jis_b1">JIS B1</string>
+    <!-- Japanese JIS B0 media (paper) size: 1030mm x 1456mm (40.551" x 57.323") -->
+    <string name="mediasize_japanese_jis_b0">JIS B0</string>
+
+    <!-- Japanese JIS Exec media (paper) size: 216mm x 330mm (8.504" x 12.992") -->
+    <string name="mediasize_japanese_jis_exec">JIS Exec</string>
+
+    <!-- Japanese Chou4 media (paper) size: 90mm x 205mm (3.543" x 8.071") -->
+    <string name="mediasize_japanese_chou4">Chou4</string>
+    <!-- Japanese Chou3 media (paper) size: 120mm x 235mm (4.724" x 9.252") -->
+    <string name="mediasize_japanese_chou3">Chou3</string>
+    <!-- Japanese Chou2 media (paper) size: 111.1mm x 146mm (4.374" x 5.748") -->
+    <string name="mediasize_japanese_chou2">Chou2</string>
+
+    <!-- Japanese Hagaki media (paper) size: 100mm x 148mm (3.937" x 5.827") -->
+    <string name="mediasize_japanese_hagaki">Hagaki </string>
+    <!-- Japanese Oufuku media (paper) size: 148mm x 200mm (5.827" x 7.874") -->
+    <string name="mediasize_japanese_oufuku">Oufuku </string>
+    <!-- Japanese Kahu media (paper) size: 240mm x 322.1mm (9.449" x 12.681") -->
+    <string name="mediasize_japanese_kahu">Kahu</string>
+    <!-- Japanese Kaku2 media (paper) size: 240mm x 332mm (9.449" x 13.071") -->
+    <string name="mediasize_japanese_kaku2">Kaku2</string>
+    <!-- Japanese You4 media (paper) size: 105mm x 235mm (4.134" x 9.252") -->
+    <string name="mediasize_japanese_you4">You4</string>
+
+    <!-- Media (paper) size for specifying any paper size in portrait.-->
+    <string name="mediasize_unknown_portrait">Unknown portrait</string>
+    <!-- Media (paper) size for specifying any paper size in landscape.-->
+    <string name="mediasize_unknown_landscape">Unknown landscape</string>
+
+    <!-- Write fail reason: printing was cancelled.[CHAR LIMIT=none] -->
+    <string name="write_fail_reason_cancelled">Cancelled</string>
+    <!-- Write fail reason: couldn't write the printed content. [CHAR LIMIT=none] -->
+    <string name="write_fail_reason_cannot_write">Error writing content</string>
+
+    <!-- Print fail reason: unknown. [CHAR LIMIT=25] -->
+    <string name="reason_unknown">unknown</string>
+
+    <!-- Print fail reason: the print service that has to process the print job is not available. [CHAR LIMIT=none] -->
+    <string name="reason_service_unavailable">Print service not enabled</string>
+
+    <!-- Title for the notification that a print service was installed. [CHAR LIMIT=50] -->
+    <string name="print_service_installed_title"><xliff:g id="name" example="Cloud Print">%s</xliff:g> service installed</string>
+    <!-- Message for the notification that a print service was installed. [CHAR LIMIT=50] -->
+    <string name="print_service_installed_message">Tap to enable</string>
+
+    <!-- PIN entry dialog title for entering the administrator PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_admin_pin">Enter administrator PIN</string>
+    <!-- PIN entry dialog label/hint for PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_pin">Enter PIN</string>
+    <!-- PIN entry dialog label/hint for incorrect PIN entry [CHAR LIMIT=none] -->
+    <string name="restr_pin_incorrect">Incorrect</string>
+    <!-- PIN entry dialog label/hint for old PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_old_pin">Current PIN</string>
+    <!-- PIN entry dialog label for new PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_new_pin">New PIN</string>
+    <!-- PIN entry dialog label for new PIN confirmation [CHAR LIMIT=none] -->
+    <string name="restr_pin_confirm_pin">Confirm new PIN</string>
+    <!-- PIN creation dialog message [CHAR LIMIT=none] -->
+    <string name="restr_pin_create_pin">Create a PIN for modifying restrictions</string>
+    <!-- PIN entry dialog error when PINs are not the same [CHAR LIMIT=none] -->
+    <string name="restr_pin_error_doesnt_match">PINs don\'t match. Try again.</string>
+    <!-- PIN entry dialog error when PIN is too short [CHAR LIMIT=none] -->
+    <string name="restr_pin_error_too_short">PIN is too short. Must be at least 4 digits.</string>
+    <!-- PIN entry dialog countdown message for next chance to enter the PIN [CHAR LIMIT=none] -->
+    <!-- Phrase describing a time duration using seconds [CHAR LIMIT=none] -->
+    <plurals name="restr_pin_countdown">
+        <item quantity="one">Try again in 1 second</item>
+        <item quantity="other">Try again in <xliff:g id="count">%d</xliff:g> seconds</item>
+    </plurals>
+    <!-- PIN entry dialog tells the user to not enter a PIN for a while. [CHAR LIMIT=none] -->
+    <string name="restr_pin_try_later">Try again later</string>
+
+    <!-- Cling help message when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">Swipe down from the top to exit full screen.</string>
+
 </resources>

@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import android.app.AppOpsManager;
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.EventLogTags;
 
@@ -75,6 +77,7 @@ final class Notifier {
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
+    private final IAppOpsService mAppOps;
     private final SuspendBlocker mSuspendBlocker;
     private final ScreenOnBlocker mScreenOnBlocker;
     private final WindowManagerPolicy mPolicy;
@@ -104,10 +107,11 @@ final class Notifier {
     private boolean mScreenOnBlockerAcquired;
 
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
-            SuspendBlocker suspendBlocker, ScreenOnBlocker screenOnBlocker,
+            IAppOpsService appOps, SuspendBlocker suspendBlocker, ScreenOnBlocker screenOnBlocker,
             WindowManagerPolicy policy) {
         mContext = context;
         mBatteryStats = batteryStats;
+        mAppOps = appOps;
         mSuspendBlocker = suspendBlocker;
         mScreenOnBlocker = screenOnBlocker;
         mPolicy = policy;
@@ -124,11 +128,12 @@ final class Notifier {
     /**
      * Called when a wake lock is acquired.
      */
-    public void onWakeLockAcquired(int flags, String tag, int ownerUid, int ownerPid,
-            WorkSource workSource) {
+    public void onWakeLockAcquired(int flags, String tag, String packageName,
+            int ownerUid, int ownerPid, WorkSource workSource) {
         if (DEBUG) {
             Slog.d(TAG, "onWakeLockAcquired: flags=" + flags + ", tag=\"" + tag
-                    + "\", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
+                    + "\", packageName=" + packageName
+                    + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
 
@@ -138,6 +143,9 @@ final class Notifier {
                 mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag, monitorType);
             } else {
                 mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, monitorType);
+                // XXX need to deal with disabled operations.
+                mAppOps.startOperation(AppOpsManager.getToken(mAppOps),
+                        AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -147,11 +155,12 @@ final class Notifier {
     /**
      * Called when a wake lock is released.
      */
-    public void onWakeLockReleased(int flags, String tag, int ownerUid, int ownerPid,
-            WorkSource workSource) {
+    public void onWakeLockReleased(int flags, String tag, String packageName,
+            int ownerUid, int ownerPid, WorkSource workSource) {
         if (DEBUG) {
             Slog.d(TAG, "onWakeLockReleased: flags=" + flags + ", tag=\"" + tag
-                    + "\", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
+                    + "\", packageName=" + packageName
+                    + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
 
@@ -161,6 +170,8 @@ final class Notifier {
                 mBatteryStats.noteStopWakelockFromSource(workSource, ownerPid, tag, monitorType);
             } else {
                 mBatteryStats.noteStopWakelock(ownerUid, ownerPid, tag, monitorType);
+                mAppOps.finishOperation(AppOpsManager.getToken(mAppOps),
+                        AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
             }
         } catch (RemoteException ex) {
             // Ignore

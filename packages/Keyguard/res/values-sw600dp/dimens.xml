@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/dimens.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources>
+    <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
+    <dimen name="keyguard_lockscreen_outerring_diameter">364dp</dimen>
+
+    <!-- Height of FaceUnlock view in keyguard -->
+    <dimen name="face_unlock_height">430dip</dimen>
+
+    <!-- target placement radius for GlowPadView. Should be 1/2 of outerring diameter. -->
+    <dimen name="glowpadview_target_placement_radius">182dip</dimen>
+
+    <!-- Size of status line font in LockScreen. -->
+    <dimen name="keyguard_pattern_unlock_status_line_font_size">14sp</dimen>
+
+    <!-- Keyguard dimensions -->
+    <!-- Size of the clock font in keyguard's status view -->
+    <dimen name="kg_status_clock_font_size">141dp</dimen>
+
+    <!-- Size of the generic status lines keyguard's status view  -->
+    <dimen name="kg_status_line_font_size">16sp</dimen>
+
+    <!-- Top margin for the clock view --> 
+    <dimen name="kg_clock_top_margin">0dp</dimen>
+
+    <!-- Size of margin on the right of keyguard's status view -->
+    <dimen name="kg_status_line_font_right_margin">50dp</dimen>
+
+    <!-- Horizontal padding for the widget pager -->
+    <dimen name="kg_widget_pager_horizontal_padding">24dp</dimen>
+
+    <!-- Top padding for the widget pager -->
+    <dimen name="kg_widget_pager_top_padding">0dp</dimen>
+
+    <!-- Bottom padding for the widget pager -->
+    <dimen name="kg_widget_pager_bottom_padding">0dp</dimen>
+
+    <!-- Top margin for the runway lights. We add a negative margin in large
+        devices to account for the widget pager padding -->
+    <dimen name="kg_runway_lights_top_margin">-10dp</dimen>
+
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_security_view_margin">12dp</dimen>
+
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_muliuser_selector_margin">12dp</dimen>
+
+    <!-- Overload default clock widget parameters -->
+    <dimen name="widget_label_font_size">16dp</dimen>
+    <dimen name="widget_big_font_size">141dp</dimen>
+
+</resources>

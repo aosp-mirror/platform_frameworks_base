@@ -20,8 +20,8 @@
 
 #define LOG_TAG "zip"
 
+#include <androidfw/ZipUtils.h>
 #include <utils/Log.h>
-#include <utils/ZipUtils.h>
 
 #include "ZipFile.h"
 

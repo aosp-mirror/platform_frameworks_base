@@ -57,6 +57,78 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.2.1</a> <em>(September 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.2.1</a>.
+        If you haven't already installed SDK Tools r22.2.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed problem with templates that causes the new project wizard to hang.
+       (<a href="http://b.android.com/60149">Issue 60149</a>)</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>ADT 22.2</a> <em>(September 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.2</a>.
+        If you haven't already installed SDK Tools r22.2 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Updated build tools to allow use of RenderScript on older versions of Android
+       using new features in the
+       <a href="{@docRoot}tools/support-library/features.html#v8">Support Library</a>.</li>
+      <li>Reverted signing changes that sometimes trigger a signing verification problem on older
+        platforms.</li>
+      <li>Fixed problem with gradle export function for the Windows platform.</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.0.5</a> <em>(July 2013)</em>
   </p>
 
@@ -78,7 +150,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
   <dt>General Notes:</dt>
   <dd>
     <ul>
-      <li>Fixed Renderscript compilation issue for Windows platforms.</li>
+      <li>Fixed RenderScript compilation issue for Windows platforms.</li>
       <li>Updated <a href="{@docRoot}tools/help/systrace.html">Systrace</a> report generation
         in the Monitor and DDMS perspectives.</li>
     </ul>
@@ -113,7 +185,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
   <dt>General Notes:</dt>
   <dd>
     <ul>
-      <li>Fixed problem with compiling Renderscript code.</li>
+      <li>Fixed problem with compiling RenderScript code.</li>
       <li>Improved Gradle export with better workflow and error reporting.</li>
       <li>Improved Gradle multi-module export feature.</li>
       <li>Updated build logic to force exporting of the classpath containers unless you are using
@@ -1005,7 +1077,7 @@ href="http://tools.android.com/recent/lint">more info</a>)</li>
 <dt>Bug fixes:</dt>
 <dd>
 <ul>
-  <li>Fixed build issue when using Renderscript in projects that target API levels 11-13
+  <li>Fixed build issue when using RenderScript in projects that target API levels 11-13
     (<a href="http://code.google.com/p/android/issues/detail?id=21006">Issue 21006</a>).</li>
   <li>Fixed issue when creating projects from existing source code.</li>
   <li>Fixed issues in the SDK Manager

@@ -520,7 +520,7 @@ public final class TwilightService {
             Intent updateIntent = new Intent(ACTION_UPDATE_TWILIGHT_STATE);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, updateIntent, 0);
             mAlarmManager.cancel(pendingIntent);
-            mAlarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent);
+            mAlarmManager.setExact(AlarmManager.RTC, nextUpdate, pendingIntent);
         }
     };
 

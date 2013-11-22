@@ -277,9 +277,6 @@ public interface SurfaceHolder {
      * 
      * <p>This method is intended to be used by frameworks which often need
      * direct access to the Surface object (usually to pass it to native code).
-     * When designing APIs always use SurfaceHolder to pass surfaces around
-     * as opposed to the Surface object itself. A rule of thumb is that
-     * application code should never have to call this method.
      * 
      * @return Surface The surface.
      */

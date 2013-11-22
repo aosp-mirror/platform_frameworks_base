@@ -16,17 +16,18 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <EGL/egl.h>
-
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
 
+#include "android_view_GraphicBuffer.h"
+
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
-#include <gui/GLConsumer.h>
 
 #include <androidfw/ResourceTypes.h>
+
+#include <gui/GLConsumer.h>
 
 #include <private/hwui/DrawGlInfo.h>
 
@@ -99,16 +100,32 @@ static void android_view_GLES20Canvas_flushCaches(JNIEnv* env, jobject clazz,
     }
 }
 
-static void android_view_GLES20Canvas_initCaches(JNIEnv* env, jobject clazz) {
+static bool android_view_GLES20Canvas_initCaches(JNIEnv* env, jobject clazz) {
     if (Caches::hasInstance()) {
-        Caches::getInstance().init();
+        return Caches::getInstance().init();
     }
+    return false;
 }
 
 static void android_view_GLES20Canvas_terminateCaches(JNIEnv* env, jobject clazz) {
     if (Caches::hasInstance()) {
         Caches::getInstance().terminate();
     }
+}
+
+// ----------------------------------------------------------------------------
+// Caching
+// ----------------------------------------------------------------------------
+
+static void android_view_GLES20Canvas_initAtlas(JNIEnv* env, jobject clazz,
+        jobject graphicBuffer, jintArray atlasMapArray, jint count) {
+
+    sp<GraphicBuffer> buffer = graphicBufferForJavaObject(env, graphicBuffer);
+    jint* atlasMap = env->GetIntArrayElements(atlasMapArray, NULL);
+
+    Caches::getInstance().assetAtlas.init(buffer, atlasMap, count);
+
+    env->ReleaseIntArrayElements(atlasMapArray, atlasMap, 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -166,6 +183,16 @@ static void android_view_GLES20Canvas_setName(JNIEnv* env,
     } else {
         renderer->setName(NULL);
     }
+}
+
+static void android_view_GLES20Canvas_setCountOverdrawEnabled(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jboolean enabled) {
+    renderer->setCountOverdrawEnabled(enabled);
+}
+
+static jfloat android_view_GLES20Canvas_getOverdraw(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer) {
+    return renderer->getOverdraw();
 }
 
 // ----------------------------------------------------------------------------
@@ -271,7 +298,7 @@ static jint android_view_GLES20Canvas_saveLayerAlphaClip(JNIEnv* env, jobject cl
 
 static bool android_view_GLES20Canvas_quickReject(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom) {
-    return renderer->quickReject(left, top, right, bottom);
+    return renderer->quickRejectNoScissor(left, top, right, bottom);
 }
 
 static bool android_view_GLES20Canvas_clipRectF(JNIEnv* env, jobject clazz,
@@ -370,8 +397,8 @@ static void android_view_GLES20Canvas_drawBitmapRect(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer, SkMatrix* matrix,
-        SkPaint* paint) {
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer,
+        SkMatrix* matrix, SkPaint* paint) {
     // This object allows the renderer to allocate a global JNI ref to the buffer object.
     JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
 
@@ -390,7 +417,7 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
         return;
     }
 
-    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, *bitmap)) {
+    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, *bitmap, true)) {
         delete bitmap;
         return;
     }
@@ -405,8 +432,8 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
 
 static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer,
-        jint meshWidth, jint meshHeight, jfloatArray vertices, jint offset,
-        jintArray colors, jint colorOffset, SkPaint* paint) {
+        jint meshWidth, jint meshHeight, jfloatArray vertices, jint offset, jintArray colors,
+        jint colorOffset, SkPaint* paint) {
     // This object allows the renderer to allocate a global JNI ref to the buffer object.
     JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
 
@@ -420,20 +447,12 @@ static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer, jbyteArray chunks,
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer, Res_png_9patch* patch,
         float left, float top, float right, float bottom, SkPaint* paint) {
     // This object allows the renderer to allocate a global JNI ref to the buffer object.
     JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
 
-    jbyte* storage = env->GetByteArrayElements(chunks, NULL);
-    Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(storage);
-    Res_png_9patch::deserialize(patch);
-
-    renderer->drawPatch(bitmap, &patch->xDivs[0], &patch->yDivs[0],
-            &patch->colors[0], patch->numXDivs, patch->numYDivs, patch->numColors,
-            left, top, right, bottom, paint);
-
-    env->ReleaseByteArrayElements(chunks, storage, 0);
+    renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
 }
 
 static void android_view_GLES20Canvas_drawColor(JNIEnv* env, jobject clazz,
@@ -567,6 +586,20 @@ static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject claz
 // Text
 // ----------------------------------------------------------------------------
 
+static float xOffsetForTextAlign(SkPaint* paint, float totalAdvance) {
+    switch (paint->getTextAlign()) {
+        case SkPaint::kCenter_Align:
+            return -totalAdvance / 2.0f;
+            break;
+        case SkPaint::kRight_Align:
+            return -totalAdvance;
+            break;
+        default:
+            break;
+    }
+    return 0;
+}
+
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
@@ -577,10 +610,15 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     jfloat totalAdvance = value->getTotalAdvance();
+    x += xOffsetForTextAlign(paint, totalAdvance);
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y,
-            positions, paint, totalAdvance);
+    const SkRect& r = value->getBounds();
+    android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
+    bounds.translate(x, y);
+
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
+            x, y, positions, paint, totalAdvance, bounds);
 }
 
 static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
@@ -608,10 +646,15 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     jfloat totalAdvance = value->getTotalAdvance();
+    x += xOffsetForTextAlign(paint, totalAdvance);
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y,
-            positions, paint, totalAdvance);
+    const SkRect& r = value->getBounds();
+    android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
+    bounds.translate(x, y);
+
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
+            x, y, positions, paint, totalAdvance, bounds);
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,
@@ -835,6 +878,23 @@ static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject cl
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
 
     if (surfaceTexture->updateTexImage() == NO_ERROR) {
+        int64_t frameNumber = surfaceTexture->getFrameNumber();
+        // If the GLConsumer queue is in synchronous mode, need to discard all
+        // but latest frame, using the frame number to tell when we no longer
+        // have newer frames to target. Since we can't tell which mode it is in,
+        // do this unconditionally.
+        int dropCounter = 0;
+        while (surfaceTexture->updateTexImage() == NO_ERROR) {
+            int64_t newFrameNumber = surfaceTexture->getFrameNumber();
+            if (newFrameNumber == frameNumber) break;
+            frameNumber = newFrameNumber;
+            dropCounter++;
+        }
+        #if DEBUG_RENDERER
+        if (dropCounter > 0) {
+            RENDERER_LOGD("Dropped %d frames on texture layer update", dropCounter);
+        }
+        #endif
         surfaceTexture->getTransformMatrix(transform);
         GLenum renderTarget = surfaceTexture->getCurrentTextureTarget();
 
@@ -882,9 +942,19 @@ static void android_view_GLES20Canvas_pushLayerUpdate(JNIEnv* env, jobject clazz
     renderer->pushLayerUpdate(layer);
 }
 
+static void android_view_GLES20Canvas_cancelLayerUpdate(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, Layer* layer) {
+    renderer->cancelLayerUpdate(layer);
+}
+
 static void android_view_GLES20Canvas_clearLayerUpdates(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer) {
     renderer->clearLayerUpdates();
+}
+
+static void android_view_GLES20Canvas_flushLayerUpdates(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer) {
+    renderer->flushLayerUpdates();
 }
 
 #endif // USE_OPENGL_RENDERER
@@ -932,8 +1002,11 @@ static JNINativeMethod gMethods[] = {
 
 #ifdef USE_OPENGL_RENDERER
     { "nFlushCaches",       "(I)V",            (void*) android_view_GLES20Canvas_flushCaches },
-    { "nInitCaches",        "()V",             (void*) android_view_GLES20Canvas_initCaches },
+    { "nInitCaches",        "()Z",             (void*) android_view_GLES20Canvas_initCaches },
     { "nTerminateCaches",   "()V",             (void*) android_view_GLES20Canvas_terminateCaches },
+
+    { "nInitAtlas",         "(Landroid/view/GraphicBuffer;[II)V",
+            (void*) android_view_GLES20Canvas_initAtlas },
 
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
@@ -943,6 +1016,9 @@ static JNINativeMethod gMethods[] = {
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
     { "nSetName",           "(ILjava/lang/String;)V",
             (void*) android_view_GLES20Canvas_setName },
+
+    { "nSetCountOverdrawEnabled", "(IZ)V",     (void*) android_view_GLES20Canvas_setCountOverdrawEnabled },
+    { "nGetOverdraw",             "(I)F",      (void*) android_view_GLES20Canvas_getOverdraw },
 
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
@@ -984,7 +1060,7 @@ static JNINativeMethod gMethods[] = {
 
     { "nDrawBitmapMesh",    "(II[BII[FI[III)V",(void*) android_view_GLES20Canvas_drawBitmapMesh },
 
-    { "nDrawPatch",         "(II[B[BFFFFI)V",  (void*) android_view_GLES20Canvas_drawPatch },
+    { "nDrawPatch",         "(II[BIFFFFI)V",   (void*) android_view_GLES20Canvas_drawPatch },
 
     { "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     { "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
@@ -1053,7 +1129,9 @@ static JNINativeMethod gMethods[] = {
     { "nDrawLayer",              "(IIFF)V",    (void*) android_view_GLES20Canvas_drawLayer },
     { "nCopyLayer",              "(II)Z",      (void*) android_view_GLES20Canvas_copyLayer },
     { "nClearLayerUpdates",      "(I)V",       (void*) android_view_GLES20Canvas_clearLayerUpdates },
+    { "nFlushLayerUpdates",      "(I)V",       (void*) android_view_GLES20Canvas_flushLayerUpdates },
     { "nPushLayerUpdate",        "(II)V",      (void*) android_view_GLES20Canvas_pushLayerUpdate },
+    { "nCancelLayerUpdate",      "(II)V",      (void*) android_view_GLES20Canvas_cancelLayerUpdate },
 
     { "nSetTextureLayerTransform", "(II)V",    (void*) android_view_GLES20Canvas_setTextureLayerTransform },
 

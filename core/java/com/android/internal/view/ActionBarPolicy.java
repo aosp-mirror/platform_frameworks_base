@@ -45,10 +45,7 @@ public class ActionBarPolicy {
     }
 
     public boolean showsOverflowMenuButton() {
-        return !ViewConfiguration.get(mContext).hasPermanentMenuKey() ||
-                ((mContext.getResources().getConfiguration().uiMode &
-                        Configuration.UI_MODE_TYPE_TELEVISION) ==
-                        Configuration.UI_MODE_TYPE_TELEVISION);
+        return true;
     }
 
     public int getEmbeddedMenuWidthLimit() {

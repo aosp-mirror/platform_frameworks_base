@@ -16,21 +16,27 @@
 
 package android.app;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Binder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,13 +47,14 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Provides access to the system wallpaper. With WallpaperManager, you can
@@ -60,6 +67,16 @@ public class WallpaperManager {
     private static boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
+
+    /**
+     * Activity Action: Show settings for choosing wallpaper. Do not use directly to construct
+     * an intent; instead, use {@link #getCropAndSetWallpaperIntent}.
+     * <p>Input:  {@link Intent#getData} is the URI of the image to crop and set as wallpaper.
+     * <p>Output: RESULT_OK if user decided to crop/set the wallpaper, RESULT_CANCEL otherwise
+     * Activities that support this intent should specify a MIME filter of "image/*"
+     */
+    public static final String ACTION_CROP_AND_SET_WALLPAPER =
+            "android.service.wallpaper.CROP_AND_SET_WALLPAPER";
 
     /**
      * Launch an activity for the user to pick the current global live
@@ -263,6 +280,7 @@ public class WallpaperManager {
             synchronized (this) {
                 mWallpaper = null;
                 mDefaultWallpaper = null;
+                mHandler.removeMessages(MSG_CLEAR_WALLPAPER);
             }
         }
 
@@ -355,7 +373,7 @@ public class WallpaperManager {
     
     /**
      * Retrieve the current system wallpaper; if
-     * no wallpaper is set, the system default wallpaper is returned.
+     * no wallpaper is set, the system built-in static wallpaper is returned.
      * This is returned as an
      * abstract Drawable that you can install in a View to display whatever
      * wallpaper the user has currently set. 
@@ -370,6 +388,178 @@ public class WallpaperManager {
             return dr;
         }
         return null;
+    }
+
+    /**
+     * Returns a drawable for the system built-in static wallpaper .
+     *
+     */
+    public Drawable getBuiltInDrawable() {
+        return getBuiltInDrawable(0, 0, false, 0, 0);
+    }
+
+    /**
+     * Returns a drawable for the system built-in static wallpaper. Based on the parameters, the
+     * drawable can be cropped and scaled
+     *
+     * @param outWidth The width of the returned drawable
+     * @param outWidth The height of the returned drawable
+     * @param scaleToFit If true, scale the wallpaper down rather than just cropping it
+     * @param horizontalAlignment A float value between 0 and 1 specifying where to crop the image;
+     *        0 for left-aligned, 0.5 for horizontal center-aligned, and 1 for right-aligned
+     * @param verticalAlignment A float value between 0 and 1 specifying where to crop the image;
+     *        0 for top-aligned, 0.5 for vertical center-aligned, and 1 for bottom-aligned
+     *
+     */
+    public Drawable getBuiltInDrawable(int outWidth, int outHeight,
+            boolean scaleToFit, float horizontalAlignment, float verticalAlignment) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return null;
+        }
+        Resources resources = mContext.getResources();
+        horizontalAlignment = Math.max(0, Math.min(1, horizontalAlignment));
+        verticalAlignment = Math.max(0, Math.min(1, verticalAlignment));
+
+        InputStream is = new BufferedInputStream(
+                resources.openRawResource(com.android.internal.R.drawable.default_wallpaper));
+
+        if (is == null) {
+            Log.e(TAG, "default wallpaper input stream is null");
+            return null;
+        } else {
+            if (outWidth <= 0 || outHeight <= 0) {
+                Bitmap fullSize = BitmapFactory.decodeStream(is, null, null);
+                return new BitmapDrawable(resources, fullSize);
+            } else {
+                int inWidth;
+                int inHeight;
+                {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeStream(is, null, options);
+                    if (options.outWidth != 0 && options.outHeight != 0) {
+                        inWidth = options.outWidth;
+                        inHeight = options.outHeight;
+                    } else {
+                        Log.e(TAG, "default wallpaper dimensions are 0");
+                        return null;
+                    }
+                }
+
+                is = new BufferedInputStream(resources.openRawResource(
+                        com.android.internal.R.drawable.default_wallpaper));
+
+                RectF cropRectF;
+
+                outWidth = Math.min(inWidth, outWidth);
+                outHeight = Math.min(inHeight, outHeight);
+                if (scaleToFit) {
+                    cropRectF = getMaxCropRect(inWidth, inHeight, outWidth, outHeight,
+                        horizontalAlignment, verticalAlignment);
+                } else {
+                    float left = (inWidth - outWidth) * horizontalAlignment;
+                    float right = left + outWidth;
+                    float top = (inHeight - outHeight) * verticalAlignment;
+                    float bottom = top + outHeight;
+                    cropRectF = new RectF(left, top, right, bottom);
+                }
+                Rect roundedTrueCrop = new Rect();
+                cropRectF.roundOut(roundedTrueCrop);
+
+                if (roundedTrueCrop.width() <= 0 || roundedTrueCrop.height() <= 0) {
+                    Log.w(TAG, "crop has bad values for full size image");
+                    return null;
+                }
+
+                // See how much we're reducing the size of the image
+                int scaleDownSampleSize = Math.min(roundedTrueCrop.width() / outWidth,
+                        roundedTrueCrop.height() / outHeight);
+
+                // Attempt to open a region decoder
+                BitmapRegionDecoder decoder = null;
+                try {
+                    decoder = BitmapRegionDecoder.newInstance(is, true);
+                } catch (IOException e) {
+                    Log.w(TAG, "cannot open region decoder for default wallpaper");
+                }
+
+                Bitmap crop = null;
+                if (decoder != null) {
+                    // Do region decoding to get crop bitmap
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    if (scaleDownSampleSize > 1) {
+                        options.inSampleSize = scaleDownSampleSize;
+                    }
+                    crop = decoder.decodeRegion(roundedTrueCrop, options);
+                    decoder.recycle();
+                }
+
+                if (crop == null) {
+                    // BitmapRegionDecoder has failed, try to crop in-memory
+                    is = new BufferedInputStream(resources.openRawResource(
+                            com.android.internal.R.drawable.default_wallpaper));
+                    Bitmap fullSize = null;
+                    if (is != null) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        if (scaleDownSampleSize > 1) {
+                            options.inSampleSize = scaleDownSampleSize;
+                        }
+                        fullSize = BitmapFactory.decodeStream(is, null, options);
+                    }
+                    if (fullSize != null) {
+                        crop = Bitmap.createBitmap(fullSize, roundedTrueCrop.left,
+                                roundedTrueCrop.top, roundedTrueCrop.width(),
+                                roundedTrueCrop.height());
+                    }
+                }
+
+                if (crop == null) {
+                    Log.w(TAG, "cannot decode default wallpaper");
+                    return null;
+                }
+
+                // Scale down if necessary
+                if (outWidth > 0 && outHeight > 0 &&
+                        (crop.getWidth() != outWidth || crop.getHeight() != outHeight)) {
+                    Matrix m = new Matrix();
+                    RectF cropRect = new RectF(0, 0, crop.getWidth(), crop.getHeight());
+                    RectF returnRect = new RectF(0, 0, outWidth, outHeight);
+                    m.setRectToRect(cropRect, returnRect, Matrix.ScaleToFit.FILL);
+                    Bitmap tmp = Bitmap.createBitmap((int) returnRect.width(),
+                            (int) returnRect.height(), Bitmap.Config.ARGB_8888);
+                    if (tmp != null) {
+                        Canvas c = new Canvas(tmp);
+                        Paint p = new Paint();
+                        p.setFilterBitmap(true);
+                        c.drawBitmap(crop, m, p);
+                        crop = tmp;
+                    }
+                }
+
+                return new BitmapDrawable(resources, crop);
+            }
+        }
+    }
+
+    private static RectF getMaxCropRect(int inWidth, int inHeight, int outWidth, int outHeight,
+                float horizontalAlignment, float verticalAlignment) {
+        RectF cropRect = new RectF();
+        // Get a crop rect that will fit this
+        if (inWidth / (float) inHeight > outWidth / (float) outHeight) {
+             cropRect.top = 0;
+             cropRect.bottom = inHeight;
+             float cropWidth = outWidth * (inHeight / (float) outHeight);
+             cropRect.left = (inWidth - cropWidth) * horizontalAlignment;
+             cropRect.right = cropRect.left + cropWidth;
+        } else {
+            cropRect.left = 0;
+            cropRect.right = inWidth;
+            float cropHeight = outHeight * (inWidth / (float) outWidth);
+            cropRect.top = (inHeight - cropHeight) * verticalAlignment;
+            cropRect.bottom = cropRect.top + cropHeight;
+        }
+        return cropRect;
     }
 
     /**
@@ -463,7 +653,58 @@ public class WallpaperManager {
             return null;
         }
     }
-    
+
+    /**
+     * Gets an Intent that will launch an activity that crops the given
+     * image and sets the device's wallpaper. If there is a default HOME activity
+     * that supports cropping wallpapers, it will be preferred as the default.
+     * Use this method instead of directly creating a {@link #ACTION_CROP_AND_SET_WALLPAPER}
+     * intent.
+     *
+     * @param imageUri The image URI that will be set in the intent. The must be a content
+     *                 URI and its provider must resolve its type to "image/*"
+     *
+     * @throws IllegalArgumentException if the URI is not a content URI or its MIME type is
+     *         not "image/*"
+     */
+    public Intent getCropAndSetWallpaperIntent(Uri imageUri) {
+        if (!ContentResolver.SCHEME_CONTENT.equals(imageUri.getScheme())) {
+            throw new IllegalArgumentException("Image URI must be of the "
+                    + ContentResolver.SCHEME_CONTENT + " scheme type");
+        }
+
+        final PackageManager packageManager = mContext.getPackageManager();
+        Intent cropAndSetWallpaperIntent =
+                new Intent(ACTION_CROP_AND_SET_WALLPAPER, imageUri);
+        cropAndSetWallpaperIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        // Find out if the default HOME activity supports CROP_AND_SET_WALLPAPER
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+        ResolveInfo resolvedHome = packageManager.resolveActivity(homeIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolvedHome != null) {
+            cropAndSetWallpaperIntent.setPackage(resolvedHome.activityInfo.packageName);
+
+            List<ResolveInfo> cropAppList = packageManager.queryIntentActivities(
+                    cropAndSetWallpaperIntent, 0);
+            if (cropAppList.size() > 0) {
+                return cropAndSetWallpaperIntent;
+            }
+        }
+
+        // fallback crop activity
+        cropAndSetWallpaperIntent.setPackage("com.android.wallpapercropper");
+        List<ResolveInfo> cropAppList = packageManager.queryIntentActivities(
+                cropAndSetWallpaperIntent, 0);
+        if (cropAppList.size() > 0) {
+            return cropAndSetWallpaperIntent;
+        }
+        // If the URI is not of the right type, or for some reason the system wallpaper
+        // cropper doesn't exist, return null
+        throw new IllegalArgumentException("Cannot use passed URI to set wallpaper; " +
+            "check that the type returned by ContentProvider matches image/*");
+    }
+
     /**
      * Change the current system wallpaper to the bitmap in the given resource.
      * The resource is opened as a raw data stream and copied into the
@@ -475,7 +716,7 @@ public class WallpaperManager {
      *
      * @param resid The bitmap to save.
      *
-     * @throws IOException If an error occurs reverting to the default
+     * @throws IOException If an error occurs reverting to the built-in
      * wallpaper.
      */
     public void setResource(int resid) throws IOException {
@@ -514,7 +755,7 @@ public class WallpaperManager {
      *
      * @param bitmap The bitmap to save.
      *
-     * @throws IOException If an error occurs reverting to the default
+     * @throws IOException If an error occurs reverting to the built-in
      * wallpaper.
      */
     public void setBitmap(Bitmap bitmap) throws IOException {
@@ -553,7 +794,7 @@ public class WallpaperManager {
      *
      * @param data A stream containing the raw data to install as a wallpaper.
      *
-     * @throws IOException If an error occurs reverting to the default
+     * @throws IOException If an error occurs reverting to the built-in
      * wallpaper.
      */
     public void setStream(InputStream data) throws IOException {
@@ -775,14 +1016,14 @@ public class WallpaperManager {
     }
     
     /**
-     * Remove any currently set wallpaper, reverting to the system's default
+     * Remove any currently set wallpaper, reverting to the system's built-in
      * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
      * is broadcast.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
-     * @throws IOException If an error occurs reverting to the default
+     * @throws IOException If an error occurs reverting to the built-in
      * wallpaper.
      */
     public void clear() throws IOException {

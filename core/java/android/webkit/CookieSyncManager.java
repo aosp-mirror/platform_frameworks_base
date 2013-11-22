@@ -59,8 +59,10 @@ public final class CookieSyncManager extends WebSyncManager {
 
     private static CookieSyncManager sRef;
 
-    private CookieSyncManager(Context context) {
-        super(context, "CookieSyncManager");
+    private static boolean sGetInstanceAllowed = false;
+
+    private CookieSyncManager() {
+        super("CookieSyncManager");
     }
 
     /**
@@ -71,7 +73,10 @@ public final class CookieSyncManager extends WebSyncManager {
      * @return CookieSyncManager
      */
     public static synchronized CookieSyncManager getInstance() {
-        checkInstanceIsCreated();
+        checkInstanceIsAllowed();
+        if (sRef == null) {
+            sRef = new CookieSyncManager();
+        }
         return sRef;
     }
 
@@ -80,16 +85,13 @@ public final class CookieSyncManager extends WebSyncManager {
      * @param context
      * @return CookieSyncManager
      */
-    public static synchronized CookieSyncManager createInstance(
-            Context context) {
+    public static synchronized CookieSyncManager createInstance(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
         }
 
-        if (sRef == null) {
-            sRef = new CookieSyncManager(context);
-        }
-        return sRef;
+        setGetInstanceIsAllowed();
+        return getInstance();
     }
 
     protected void syncFromRamToFlash() {
@@ -110,8 +112,15 @@ public final class CookieSyncManager extends WebSyncManager {
         }
     }
 
-    private static void checkInstanceIsCreated() {
-        if (sRef == null) {
+    static void setGetInstanceIsAllowed() {
+        sGetInstanceAllowed = true;
+    }
+
+    private static void checkInstanceIsAllowed() {
+        // Prior to Android KK, calling createInstance() or constructing a WebView is
+        // a hard pre-condition for calling getInstance(). We retain that contract to aid
+        // developers targeting a range of SDK levels.
+        if (!sGetInstanceAllowed) {
             throw new IllegalStateException(
                     "CookieSyncManager::createInstance() needs to be called "
                             + "before CookieSyncManager::getInstance()");

@@ -19,8 +19,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.security.Credentials;
+import android.security.KeyChain;
 import android.security.KeyStore;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,6 +45,7 @@ import java.util.Map;
  */
 public class WifiEnterpriseConfig implements Parcelable {
     private static final String TAG = "WifiEnterpriseConfig";
+    private static final boolean DBG = false;
     /**
      * In old configurations, the "private_key" field was used. However, newer
      * configurations use the key_id field with the engine_id set to "keystore".
@@ -91,6 +94,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     private X509Certificate mCaCert;
     private PrivateKey mClientPrivateKey;
     private X509Certificate mClientCertificate;
+    private boolean mNeedsSoftwareKeystore = false;
 
     /** This represents an empty value of an enterprise field.
      * NULL is used at wpa_supplicant to indicate an empty value
@@ -509,6 +513,18 @@ public class WifiEnterpriseConfig implements Parcelable {
         return true;
     }
 
+    static boolean isHardwareBackedKey(PrivateKey key) {
+        return KeyChain.isBoundKeyAlgorithm(key.getAlgorithm());
+    }
+
+    static boolean hasHardwareBackedKey(Certificate certificate) {
+        return KeyChain.isBoundKeyAlgorithm(certificate.getPublicKey().getAlgorithm());
+    }
+
+    boolean needsSoftwareBackedKeyStore() {
+        return mNeedsSoftwareKeystore;
+    }
+
     boolean installKeys(android.security.KeyStore keyStore, String name) {
         boolean ret = true;
         String privKeyName = Credentials.USER_PRIVATE_KEY + name;
@@ -516,8 +532,23 @@ public class WifiEnterpriseConfig implements Parcelable {
         String caCertName = Credentials.CA_CERTIFICATE + name;
         if (mClientCertificate != null) {
             byte[] privKeyData = mClientPrivateKey.getEncoded();
-            ret = keyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID,
-                            KeyStore.FLAG_ENCRYPTED);
+            if (isHardwareBackedKey(mClientPrivateKey)) {
+                // Hardware backed key store is secure enough to store keys un-encrypted, this
+                // removes the need for user to punch a PIN to get access to these keys
+                if (DBG) Slog.d(TAG, "importing keys " + name + " in hardware backed " +
+                        "store");
+                ret = keyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID,
+                                KeyStore.FLAG_NONE);
+            } else {
+                // Software backed key store is NOT secure enough to store keys un-encrypted.
+                // Save keys encrypted so they are protected with user's PIN. User will
+                // have to unlock phone before being able to use these keys and connect to
+                // networks.
+                if (DBG) Slog.d(TAG, "importing keys " + name + " in software backed store");
+                ret = keyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID,
+                        KeyStore.FLAG_ENCRYPTED);
+                mNeedsSoftwareKeystore = true;
+            }
             if (ret == false) {
                 return ret;
             }
@@ -561,7 +592,9 @@ public class WifiEnterpriseConfig implements Parcelable {
             Certificate cert) {
         try {
             byte[] certData = Credentials.convertToPem(cert);
-            return keyStore.put(name, certData, Process.WIFI_UID, KeyStore.FLAG_ENCRYPTED);
+            if (DBG) Slog.d(TAG, "putting certificate " + name + " in keystore");
+            return keyStore.put(name, certData, Process.WIFI_UID, KeyStore.FLAG_NONE);
+
         } catch (IOException e1) {
             return false;
         } catch (CertificateException e2) {
@@ -573,6 +606,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         String client = getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
         // a valid client certificate is configured
         if (!TextUtils.isEmpty(client)) {
+            if (DBG) Slog.d(TAG, "removing client private key and user cert");
             keyStore.delKey(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
             keyStore.delete(Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
         }
@@ -580,6 +614,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         String ca = getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
         // a valid ca certificate is configured
         if (!TextUtils.isEmpty(ca)) {
+            if (DBG) Slog.d(TAG, "removing CA cert");
             keyStore.delete(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
         }
     }
@@ -684,6 +719,61 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
     }
 
+    void initializeSoftwareKeystoreFlag(android.security.KeyStore keyStore) {
+        String client = getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
+        if (!TextUtils.isEmpty(client)) {
+            // a valid client certificate is configured
+
+            // BUGBUG: keyStore.get() never returns certBytes; because it is not
+            // taking WIFI_UID as a parameter. It always looks for certificate
+            // with SYSTEM_UID, and never finds any Wifi certificates. Assuming that
+            // all certificates need software keystore until we get the get() API
+            // fixed.
+
+            mNeedsSoftwareKeystore = true;
+
+            /*
+            try {
+
+                if (DBG) Slog.d(TAG, "Loading client certificate " + Credentials
+                        .USER_CERTIFICATE + client);
+
+                CertificateFactory factory = CertificateFactory.getInstance("X.509");
+                if (factory == null) {
+                    Slog.e(TAG, "Error getting certificate factory");
+                    return;
+                }
+
+                byte[] certBytes = keyStore.get(Credentials.USER_CERTIFICATE + client);
+                if (certBytes != null) {
+                    Certificate cert = (X509Certificate) factory.generateCertificate(
+                            new ByteArrayInputStream(certBytes));
+
+                    if (cert != null) {
+                        mNeedsSoftwareKeystore = hasHardwareBackedKey(cert);
+
+                        if (DBG) Slog.d(TAG, "Loaded client certificate " + Credentials
+                                .USER_CERTIFICATE + client);
+                        if (DBG) Slog.d(TAG, "It " + (mNeedsSoftwareKeystore ? "needs" :
+                                "does not need" ) + " software key store");
+                    } else {
+                        Slog.d(TAG, "could not generate certificate");
+                    }
+                } else {
+                    Slog.e(TAG, "Could not load client certificate " + Credentials
+                            .USER_CERTIFICATE + client);
+                    mNeedsSoftwareKeystore = true;
+                }
+
+            } catch(CertificateException e) {
+                Slog.e(TAG, "Could not read certificates");
+                mCaCert = null;
+                mClientCertificate = null;
+            }
+            */
+        }
+    }
+
     private String removeDoubleQuotes(String string) {
         if (TextUtils.isEmpty(string)) return "";
         int length = string.length();
@@ -721,7 +811,13 @@ public class WifiEnterpriseConfig implements Parcelable {
         String value = mFields.get(key);
         // Uninitialized or known to be empty after reading from supplicant
         if (TextUtils.isEmpty(value) || EMPTY_VALUE.equals(value)) return "";
-        return removeDoubleQuotes(value).substring(prefix.length());
+
+        value = removeDoubleQuotes(value);
+        if (value.startsWith(prefix)) {
+            return value.substring(prefix.length());
+        } else {
+            return value;
+        }
     }
 
     /** Set a value with an optional prefix at key

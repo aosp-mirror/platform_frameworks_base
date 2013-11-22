@@ -16,127 +16,209 @@
 
 package com.android.systemui.statusbar.policy;
 
-import java.util.ArrayList;
-
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
-
-// private NM API
-import android.app.INotificationManager;
 
 import com.android.systemui.R;
 
-public class LocationController extends BroadcastReceiver {
-    private static final String TAG = "StatusBar.LocationController";
+import java.util.ArrayList;
+import java.util.List;
 
-    private static final int GPS_NOTIFICATION_ID = 374203-122084;
+/**
+ * A controller to manage changes of location related states and update the views accordingly.
+ */
+public class LocationController extends BroadcastReceiver {
+    // The name of the placeholder corresponding to the location request status icon.
+    // This string corresponds to config_statusBarIcons in core/res/res/values/config.xml.
+    public static final String LOCATION_STATUS_ICON_PLACEHOLDER = "location";
+    public static final int LOCATION_STATUS_ICON_ID
+        = R.drawable.stat_sys_device_access_location_found;
+
+    private static final int[] mHighPowerRequestAppOpArray
+        = new int[] {AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION};
 
     private Context mContext;
 
-    private INotificationManager mNotificationService;
+    private AppOpsManager mAppOpsManager;
+    private StatusBarManager mStatusBarManager;
 
-    private ArrayList<LocationGpsStateChangeCallback> mChangeCallbacks =
-            new ArrayList<LocationGpsStateChangeCallback>();
+    private boolean mAreActiveLocationRequests;
 
-    public interface LocationGpsStateChangeCallback {
-        public void onLocationGpsStateChanged(boolean inUse, String description);
+    private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
+            new ArrayList<LocationSettingsChangeCallback>();
+
+    /**
+     * A callback for change in location settings (the user has enabled/disabled location).
+     */
+    public interface LocationSettingsChangeCallback {
+        /**
+         * Called whenever location settings change.
+         *
+         * @param locationEnabled A value of true indicates that at least one type of location
+         *                        is enabled in settings.
+         */
+        public void onLocationSettingsChanged(boolean locationEnabled);
     }
 
     public LocationController(Context context) {
         mContext = context;
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LocationManager.GPS_ENABLED_CHANGE_ACTION);
-        filter.addAction(LocationManager.GPS_FIX_CHANGE_ACTION);
+        filter.addAction(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
         context.registerReceiver(this, filter);
 
-        NotificationManager nm = (NotificationManager)context.getSystemService(
-                Context.NOTIFICATION_SERVICE);
-        mNotificationService = nm.getService();
+        mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        mStatusBarManager
+                = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
+
+        // Register to listen for changes in location settings.
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
+        context.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
+                    locationSettingsChanged();
+                }
+            }
+        }, UserHandle.ALL, intentFilter, null, new Handler());
+
+        // Examine the current location state and initialize the status view.
+        updateActiveLocationRequests();
+        refreshViews();
     }
 
-    public void addStateChangedCallback(LocationGpsStateChangeCallback cb) {
-        mChangeCallbacks.add(cb);
+    /**
+     * Add a callback to listen for changes in location settings.
+     */
+    public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
+        mSettingsChangeCallbacks.add(cb);
+    }
+
+    /**
+     * Enable or disable location in settings.
+     *
+     * <p>This will attempt to enable/disable every type of location setting
+     * (e.g. high and balanced power).
+     *
+     * <p>If enabling, a user consent dialog will pop up prompting the user to accept.
+     * If the user doesn't accept, network location won't be enabled.
+     *
+     * @return true if attempt to change setting was successful.
+     */
+    public boolean setLocationEnabled(boolean enabled) {
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (isUserLocationRestricted(currentUserId)) {
+            return false;
+        }
+        final ContentResolver cr = mContext.getContentResolver();
+        // When enabling location, a user consent dialog will pop up, and the
+        // setting won't be fully enabled until the user accepts the agreement.
+        int mode = enabled
+                ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY : Settings.Secure.LOCATION_MODE_OFF;
+        // QuickSettings always runs as the owner, so specifically set the settings
+        // for the current foreground user.
+        return Settings.Secure
+                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
+    }
+
+    /**
+     * Returns true if location isn't disabled in settings.
+     */
+    public boolean isLocationEnabled() {
+        ContentResolver resolver = mContext.getContentResolver();
+        // QuickSettings always runs as the owner, so specifically retrieve the settings
+        // for the current foreground user.
+        int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
+        return mode != Settings.Secure.LOCATION_MODE_OFF;
+    }
+
+    /**
+     * Returns true if the current user is restricted from using location.
+     */
+    private boolean isUserLocationRestricted(int userId) {
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        return um.hasUserRestriction(
+                UserManager.DISALLOW_SHARE_LOCATION,
+                new UserHandle(userId));
+    }
+
+    /**
+     * Returns true if there currently exist active high power location requests.
+     */
+    private boolean areActiveHighPowerLocationRequests() {
+        List<AppOpsManager.PackageOps> packages
+            = mAppOpsManager.getPackagesForOps(mHighPowerRequestAppOpArray);
+        // AppOpsManager can return null when there is no requested data.
+        if (packages != null) {
+            final int numPackages = packages.size();
+            for (int packageInd = 0; packageInd < numPackages; packageInd++) {
+                AppOpsManager.PackageOps packageOp = packages.get(packageInd);
+                List<AppOpsManager.OpEntry> opEntries = packageOp.getOps();
+                if (opEntries != null) {
+                    final int numOps = opEntries.size();
+                    for (int opInd = 0; opInd < numOps; opInd++) {
+                        AppOpsManager.OpEntry opEntry = opEntries.get(opInd);
+                        // AppOpsManager should only return OP_MONITOR_HIGH_POWER_LOCATION because
+                        // of the mHighPowerRequestAppOpArray filter, but checking defensively.
+                        if (opEntry.getOp() == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION) {
+                            if (opEntry.isRunning()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // Updates the status view based on the current state of location requests.
+    private void refreshViews() {
+        if (mAreActiveLocationRequests) {
+            mStatusBarManager.setIcon(LOCATION_STATUS_ICON_PLACEHOLDER, LOCATION_STATUS_ICON_ID, 0,
+                    mContext.getString(R.string.accessibility_location_active));
+        } else {
+            mStatusBarManager.removeIcon(LOCATION_STATUS_ICON_PLACEHOLDER);
+        }
+    }
+
+    // Reads the active location requests and updates the status view if necessary.
+    private void updateActiveLocationRequests() {
+        boolean hadActiveLocationRequests = mAreActiveLocationRequests;
+        mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
+        if (mAreActiveLocationRequests != hadActiveLocationRequests) {
+            refreshViews();
+        }
+    }
+
+    private void locationSettingsChanged() {
+        boolean isEnabled = isLocationEnabled();
+        for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
+            cb.onLocationSettingsChanged(isEnabled);
+        }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-        final boolean enabled = intent.getBooleanExtra(LocationManager.EXTRA_GPS_ENABLED, false);
-
-        boolean visible;
-        int iconId, textResId;
-
-        if (action.equals(LocationManager.GPS_FIX_CHANGE_ACTION) && enabled) {
-            // GPS is getting fixes
-            iconId = com.android.internal.R.drawable.stat_sys_gps_on;
-            textResId = R.string.gps_notification_found_text;
-            visible = true;
-        } else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
-            // GPS is off
-            visible = false;
-            iconId = textResId = 0;
-        } else {
-            // GPS is on, but not receiving fixes
-            iconId = R.drawable.stat_sys_gps_acquiring_anim;
-            textResId = R.string.gps_notification_searching_text;
-            visible = true;
-        }
-        
-        try {
-            if (visible) {
-                Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                gpsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
-                        gpsIntent, 0, null, UserHandle.CURRENT);
-                String text = mContext.getText(textResId).toString();
-
-                Notification n = new Notification.Builder(mContext)
-                    .setSmallIcon(iconId)
-                    .setContentTitle(text)
-                    .setOngoing(true)
-                    .setContentIntent(pendingIntent)
-                    .getNotification();
-
-                // Notification.Builder will helpfully fill these out for you no matter what you do
-                n.tickerView = null;
-                n.tickerText = null;
-                
-                n.priority = Notification.PRIORITY_HIGH;
-
-                int[] idOut = new int[1];
-                mNotificationService.enqueueNotificationWithTag(
-                        mContext.getPackageName(), mContext.getBasePackageName(),
-                        null, 
-                        GPS_NOTIFICATION_ID, 
-                        n,
-                        idOut,
-                        UserHandle.USER_ALL);
-
-                for (LocationGpsStateChangeCallback cb : mChangeCallbacks) {
-                    cb.onLocationGpsStateChanged(true, text);
-                }
-            } else {
-                mNotificationService.cancelNotificationWithTag(
-                        mContext.getPackageName(), null,
-                        GPS_NOTIFICATION_ID, UserHandle.USER_ALL);
-
-                for (LocationGpsStateChangeCallback cb : mChangeCallbacks) {
-                    cb.onLocationGpsStateChanged(false, null);
-                }
-            }
-        } catch (android.os.RemoteException ex) {
-            // well, it was worth a shot
+        if (LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
+            updateActiveLocationRequests();
         }
     }
 }
-

@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import android.animation.ValueAnimator;
+import android.view.ViewParent;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
@@ -75,7 +77,6 @@ public class ActionBarImpl extends ActionBar {
 
     private ActionBarOverlayLayout mOverlayLayout;
     private ActionBarContainer mContainerView;
-    private ViewGroup mTopVisibilityView;
     private ActionBarView mActionView;
     private ActionBarContextView mContextView;
     private ActionBarContainer mSplitView;
@@ -125,12 +126,12 @@ public class ActionBarImpl extends ActionBar {
         public void onAnimationEnd(Animator animation) {
             if (mContentAnimations && mContentView != null) {
                 mContentView.setTranslationY(0);
-                mTopVisibilityView.setTranslationY(0);
+                mContainerView.setTranslationY(0);
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 mSplitView.setVisibility(View.GONE);
             }
-            mTopVisibilityView.setVisibility(View.GONE);
+            mContainerView.setVisibility(View.GONE);
             mContainerView.setTransitioning(false);
             mCurrentShowAnim = null;
             completeDeferredDestroyActionMode();
@@ -144,7 +145,16 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public void onAnimationEnd(Animator animation) {
             mCurrentShowAnim = null;
-            mTopVisibilityView.requestLayout();
+            mContainerView.requestLayout();
+        }
+    };
+
+    final ValueAnimator.AnimatorUpdateListener mUpdateListener =
+            new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            final ViewParent parent = mContainerView.getParent();
+            ((View) parent).invalidate();
         }
     };
 
@@ -153,7 +163,7 @@ public class ActionBarImpl extends ActionBar {
         Window window = activity.getWindow();
         View decor = window.getDecorView();
         boolean overlayMode = mActivity.getWindow().hasFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        init(decor, overlayMode);
+        init(decor);
         if (!overlayMode) {
             mContentView = decor.findViewById(android.R.id.content);
         }
@@ -161,26 +171,21 @@ public class ActionBarImpl extends ActionBar {
 
     public ActionBarImpl(Dialog dialog) {
         mDialog = dialog;
-        init(dialog.getWindow().getDecorView(), false);
+        init(dialog.getWindow().getDecorView());
     }
 
-    private void init(View decor, boolean overlayMode) {
+    private void init(View decor) {
         mContext = decor.getContext();
         mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
                 com.android.internal.R.id.action_bar_overlay_layout);
         if (mOverlayLayout != null) {
-            mOverlayLayout.setActionBar(this, overlayMode);
+            mOverlayLayout.setActionBar(this);
         }
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mContextView = (ActionBarContextView) decor.findViewById(
                 com.android.internal.R.id.action_context_bar);
         mContainerView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.action_bar_container);
-        mTopVisibilityView = (ViewGroup)decor.findViewById(
-                com.android.internal.R.id.top_action_bar);
-        if (mTopVisibilityView == null) {
-            mTopVisibilityView = mContainerView;
-        }
         mSplitView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.split_action_bar);
 
@@ -675,29 +680,30 @@ public class ActionBarImpl extends ActionBar {
         if (mCurrentShowAnim != null) {
             mCurrentShowAnim.end();
         }
-        mTopVisibilityView.setVisibility(View.VISIBLE);
+        mContainerView.setVisibility(View.VISIBLE);
 
         if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
                 || fromSystem)) {
-            mTopVisibilityView.setTranslationY(0); // because we're about to ask its window loc
-            float startingY = -mTopVisibilityView.getHeight();
+            mContainerView.setTranslationY(0); // because we're about to ask its window loc
+            float startingY = -mContainerView.getHeight();
             if (fromSystem) {
                 int topLeft[] = {0, 0};
-                mTopVisibilityView.getLocationInWindow(topLeft);
+                mContainerView.getLocationInWindow(topLeft);
                 startingY -= topLeft[1];
             }
-            mTopVisibilityView.setTranslationY(startingY);
+            mContainerView.setTranslationY(startingY);
             AnimatorSet anim = new AnimatorSet();
-            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView,
-                    "translationY", 0));
+            ObjectAnimator a = ObjectAnimator.ofFloat(mContainerView, View.TRANSLATION_Y, 0);
+            a.addUpdateListener(mUpdateListener);
+            AnimatorSet.Builder b = anim.play(a);
             if (mContentAnimations && mContentView != null) {
-                b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
+                b.with(ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y,
                         startingY, 0));
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 mSplitView.setTranslationY(mSplitView.getHeight());
                 mSplitView.setVisibility(View.VISIBLE);
-                b.with(ObjectAnimator.ofFloat(mSplitView, "translationY", 0));
+                b.with(ObjectAnimator.ofFloat(mSplitView, View.TRANSLATION_Y, 0));
             }
             anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
                     com.android.internal.R.interpolator.decelerate_cubic));
@@ -713,8 +719,8 @@ public class ActionBarImpl extends ActionBar {
             mCurrentShowAnim = anim;
             anim.start();
         } else {
-            mTopVisibilityView.setAlpha(1);
-            mTopVisibilityView.setTranslationY(0);
+            mContainerView.setAlpha(1);
+            mContainerView.setTranslationY(0);
             if (mContentAnimations && mContentView != null) {
                 mContentView.setTranslationY(0);
             }
@@ -737,24 +743,25 @@ public class ActionBarImpl extends ActionBar {
 
         if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
                 || fromSystem)) {
-            mTopVisibilityView.setAlpha(1);
+            mContainerView.setAlpha(1);
             mContainerView.setTransitioning(true);
             AnimatorSet anim = new AnimatorSet();
-            float endingY = -mTopVisibilityView.getHeight();
+            float endingY = -mContainerView.getHeight();
             if (fromSystem) {
                 int topLeft[] = {0, 0};
-                mTopVisibilityView.getLocationInWindow(topLeft);
+                mContainerView.getLocationInWindow(topLeft);
                 endingY -= topLeft[1];
             }
-            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView,
-                    "translationY", endingY));
+            ObjectAnimator a = ObjectAnimator.ofFloat(mContainerView, View.TRANSLATION_Y, endingY);
+            a.addUpdateListener(mUpdateListener);
+            AnimatorSet.Builder b = anim.play(a);
             if (mContentAnimations && mContentView != null) {
-                b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
+                b.with(ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y,
                         0, endingY));
             }
             if (mSplitView != null && mSplitView.getVisibility() == View.VISIBLE) {
                 mSplitView.setAlpha(1);
-                b.with(ObjectAnimator.ofFloat(mSplitView, "translationY",
+                b.with(ObjectAnimator.ofFloat(mSplitView, View.TRANSLATION_Y,
                         mSplitView.getHeight()));
             }
             anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
@@ -1210,6 +1217,10 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setIcon(icon);
     }
 
+    public boolean hasIcon() {
+        return mActionView.hasIcon();
+    }
+
     @Override
     public void setLogo(int resId) {
         mActionView.setLogo(resId);
@@ -1218,6 +1229,10 @@ public class ActionBarImpl extends ActionBar {
     @Override
     public void setLogo(Drawable logo) {
         mActionView.setLogo(logo);
+    }
+
+    public boolean hasLogo() {
+        return mActionView.hasLogo();
     }
 
     public void setDefaultDisplayHomeAsUpEnabled(boolean enable) {

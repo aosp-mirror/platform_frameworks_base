@@ -23,7 +23,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
 
 public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";

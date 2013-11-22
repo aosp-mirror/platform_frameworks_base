@@ -18,11 +18,13 @@
 #define ANDROID_HWUI_DEFERRED_DISPLAY_LIST_H
 
 #include <utils/Errors.h>
+#include <utils/LinearAllocator.h>
 #include <utils/Vector.h>
+#include <utils/TinyHashMap.h>
 
 #include "Matrix.h"
+#include "OpenGLRenderer.h"
 #include "Rect.h"
-#include "utils/TinyHashMap.h"
 
 class SkBitmap;
 
@@ -34,18 +36,56 @@ class DrawOp;
 class SaveOp;
 class SaveLayerOp;
 class StateOp;
+
+class DeferredDisplayState;
 class OpenGLRenderer;
 
 class Batch;
 class DrawBatch;
 class MergingDrawBatch;
 
-typedef void* mergeid_t;
+typedef const void* mergeid_t;
+
+class DeferredDisplayState {
+public:
+    /** static void* operator new(size_t size); PURPOSELY OMITTED **/
+    static void* operator new(size_t size, LinearAllocator& allocator) {
+        return allocator.alloc(size);
+    }
+
+    // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped
+    Rect mBounds;
+
+    // the below are set and used by the OpenGLRenderer at record and deferred playback
+    bool mClipValid;
+    Rect mClip;
+    int mClipSideFlags; // specifies which sides of the bounds are clipped, unclipped if cleared
+    bool mClipped;
+    mat4 mMatrix;
+    DrawModifiers mDrawModifiers;
+    float mAlpha;
+};
+
+class OpStatePair {
+public:
+    OpStatePair()
+            : op(NULL), state(NULL) {}
+    OpStatePair(DrawOp* newOp, const DeferredDisplayState* newState)
+            : op(newOp), state(newState) {}
+    OpStatePair(const OpStatePair& other)
+            : op(other.op), state(other.state) {}
+    DrawOp* op;
+    const DeferredDisplayState* state;
+};
 
 class DeferredDisplayList {
 public:
-    DeferredDisplayList() { clear(); }
+    DeferredDisplayList(const Rect& bounds, bool avoidOverdraw = true) :
+            mBounds(bounds), mAvoidOverdraw(avoidOverdraw) {
+        clear();
+    }
     ~DeferredDisplayList() { clear(); }
+    void reset(const Rect& bounds) { mBounds.set(bounds); }
 
     enum OpBatchId {
         kOpBatch_None = 0, // Don't batch
@@ -75,11 +115,19 @@ public:
 
     /**
      * Add a draw op into the DeferredDisplayList, reordering as needed (for performance) if
-     * disallowReorder is false, respecting draw order when overlaps occur
+     * disallowReorder is false, respecting draw order when overlaps occur.
      */
     void addDrawOp(OpenGLRenderer& renderer, DrawOp* op);
 
 private:
+    DeferredDisplayState* createState() {
+        return new (mAllocator) DeferredDisplayState();
+    }
+
+    void tryRecycleState(DeferredDisplayState* state) {
+        mAllocator.rewindIfLastAlloc(state, sizeof(DeferredDisplayState));
+    }
+
     /**
      * Resets the batching back-pointers, creating a barrier in the operation stream so that no ops
      * added in the future will be inserted into a batch that already exist.
@@ -95,6 +143,12 @@ private:
 
     int getStateOpDeferFlags() const;
     int getDrawOpDeferFlags() const;
+
+    void discardDrawingBatches(const unsigned int maxIndex);
+
+    // layer space bounds of rendering
+    Rect mBounds;
+    const bool mAvoidOverdraw;
 
     /**
      * At defer time, stores the *defer time* savecount of save/saveLayer ops that were deferred, so
@@ -112,12 +166,35 @@ private:
     // Points to the index after the most recent barrier
     int mEarliestBatchIndex;
 
+    // Points to the first index that may contain a pure drawing batch
+    int mEarliestUnclearedIndex;
+
     /**
      * Maps the mergeid_t returned by an op's getMergeId() to the most recently seen
      * MergingDrawBatch of that id. These ids are unique per draw type and guaranteed to not
      * collide, which avoids the need to resolve mergeid collisions.
      */
     TinyHashMap<mergeid_t, DrawBatch*> mMergingBatches[kOpBatch_Count];
+
+    LinearAllocator mAllocator;
+};
+
+/**
+ * Struct containing information that instructs the defer
+ */
+struct DeferInfo {
+public:
+    DeferInfo() :
+            batchId(DeferredDisplayList::kOpBatch_None),
+            mergeId((mergeid_t) -1),
+            mergeable(false),
+            opaqueOverBounds(false) {
+    };
+
+    int batchId;
+    mergeid_t mergeId;
+    bool mergeable;
+    bool opaqueOverBounds; // opaque over bounds in DeferredDisplayState - can skip ops below
 };
 
 }; // namespace uirenderer

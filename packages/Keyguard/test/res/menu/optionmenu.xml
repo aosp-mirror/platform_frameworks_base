@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/none_menu_item"
+          android:title="@string/none_menu_item" />
+    <item android:id="@+id/pin_menu_item"
+          android:title="@string/pin_menu_item" />
+    <item android:id="@+id/password_menu_item"
+        android:title="@string/password_menu_item" />
+    <item android:id="@+id/pattern_menu_item"
+          android:title="@string/pattern_menu_item" />
+    <item android:id="@+id/sim_pin_menu_item"
+          android:title="@string/sim_pin_menu_item" />
+    <item android:id="@+id/sim_puk_menu_item"
+          android:title="@string/sim_puk_menu_item" />
+    <item android:id="@+id/add_widget_item"
+          android:title="@string/add_widget_item" />
+</menu>

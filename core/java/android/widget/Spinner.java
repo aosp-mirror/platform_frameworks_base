@@ -30,12 +30,14 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.ListPopupWindow.ForwardingListener;
 import android.widget.PopupWindow.OnDismissListener;
 
 
@@ -76,7 +78,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * Use the theme-supplied value to select the dropdown mode.
      */
     private static final int MODE_THEME = -1;
-    
+
+    /** Forwarding listener used to implement drag-to-open. */
+    private ForwardingListener mForwardingListener;
+
     private SpinnerPopup mPopup;
     private DropDownAdapter mTempAdapter;
     int mDropDownWidth;
@@ -173,7 +178,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         case MODE_DROPDOWN: {
-            DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
+            final DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
 
             mDropDownWidth = a.getLayoutDimension(
                     com.android.internal.R.styleable.Spinner_dropDownWidth,
@@ -193,6 +198,20 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             }
 
             mPopup = popup;
+            mForwardingListener = new ForwardingListener(this) {
+                @Override
+                public ListPopupWindow getPopup() {
+                    return popup;
+                }
+
+                @Override
+                public boolean onForwardingStarted() {
+                    if (!mPopup.isShowing()) {
+                        mPopup.show(getTextDirection(), getTextAlignment());
+                    }
+                    return true;
+                }
+            };
             break;
         }
         }
@@ -377,9 +396,23 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         return mGravity;
     }
 
+    /**
+     * Sets the Adapter used to provide the data which backs this Spinner.
+     * <p>
+     * Note that Spinner overrides {@link Adapter#getViewTypeCount()} on the
+     * Adapter associated with this view. Calling
+     * {@link Adapter#getItemViewType(int) getItemViewType(int)} on the object
+     * returned from {@link #getAdapter()} will always return 0. Calling
+     * {@link Adapter#getViewTypeCount() getViewTypeCount()} will always return
+     * 1.
+     *
+     * @see AbsSpinner#setAdapter(SpinnerAdapter)
+     */
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
         super.setAdapter(adapter);
+
+        mRecycler.clear();
 
         if (mPopup != null) {
             mPopup.setAdapter(new DropDownAdapter(adapter));
@@ -395,9 +428,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         if (getChildCount() > 0) {
             child = getChildAt(0);
         } else if (mAdapter != null && mAdapter.getCount() > 0) {
-            child = makeAndAddView(0);
+            child = makeView(0, false);
             mRecycler.put(0, child);
-            removeAllViewsInLayout();
         }
 
         if (child != null) {
@@ -434,6 +466,15 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      */
     public void setOnItemClickListenerInt(OnItemClickListener l) {
         super.setOnItemClickListener(l);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mForwardingListener != null && mForwardingListener.onTouch(this, event)) {
+            return true;
+        }
+
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -496,7 +537,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         mFirstPosition = mSelectedPosition;
 
         if (mAdapter != null) {
-            View sel = makeAndAddView(mSelectedPosition);
+            View sel = makeView(mSelectedPosition, true);
             int width = sel.getMeasuredWidth();
             int selectedOffset = childrenLeft;
             final int layoutDirection = getLayoutDirection();
@@ -531,17 +572,17 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * from the old to new positions.
      *
      * @param position Position in the spinner for the view to obtain
-     * @return A view that has been added to the spinner
+     * @param addChild true to add the child to the spinner, false to obtain and configure only.
+     * @return A view for the given position
      */
-    private View makeAndAddView(int position) {
-
+    private View makeView(int position, boolean addChild) {
         View child;
 
         if (!mDataChanged) {
             child = mRecycler.get(position);
             if (child != null) {
                 // Position the view
-                setUpChild(child);
+                setUpChild(child, addChild);
 
                 return child;
             }
@@ -551,7 +592,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         child = mAdapter.getView(position, null, this);
 
         // Position the view
-        setUpChild(child);
+        setUpChild(child, addChild);
 
         return child;
     }
@@ -561,8 +602,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * and fill out its layout paramters.
      *
      * @param child The view to position
+     * @param addChild true if the child should be added to the Spinner during setup
      */
-    private void setUpChild(View child) {
+    private void setUpChild(View child, boolean addChild) {
 
         // Respect layout params that are already in the view. Otherwise
         // make some up...
@@ -571,7 +613,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             lp = generateDefaultLayoutParams();
         }
 
-        addViewInLayout(child, 0, lp);
+        if (addChild) {
+            addViewInLayout(child, 0, lp);
+        }
 
         child.setSelected(hasFocus());
         if (mDisableChildrenWhenDisabled) {
@@ -633,6 +677,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(Spinner.class.getName());
+
+        if (mAdapter != null) {
+            info.setCanOpenPopup(true);
+        }
     }
 
     /**
@@ -925,6 +973,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         public void show(int textDirection, int textAlignment) {
+            if (mListAdapter == null) {
+                return;
+            }
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             if (mPrompt != null) {
                 builder.setTitle(mPrompt);

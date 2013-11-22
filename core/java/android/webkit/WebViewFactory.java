@@ -19,9 +19,8 @@ package android.webkit;
 import android.os.Build;
 import android.os.StrictMode;
 import android.os.SystemProperties;
+import android.util.AndroidRuntimeException;
 import android.util.Log;
-
-import dalvik.system.PathClassLoader;
 
 /**
  * Top level factory, used creating all the main WebView implementation classes.
@@ -29,19 +28,24 @@ import dalvik.system.PathClassLoader;
  * @hide
  */
 public final class WebViewFactory {
-    public static final String WEBVIEW_EXPERIMENTAL_PROPERTY = "persist.sys.webview.exp";
-    private static final String DEPRECATED_CHROMIUM_PROPERTY = "webview.use_chromium";
 
-    // Default Provider factory class name.
-    // TODO: When the Chromium powered WebView is ready, it should be the default factory class.
-    private static final String DEFAULT_WEBVIEW_FACTORY = "android.webkit.WebViewClassic$Factory";
     private static final String CHROMIUM_WEBVIEW_FACTORY =
             "com.android.webview.chromium.WebViewChromiumFactoryProvider";
-    private static final String CHROMIUM_WEBVIEW_JAR = "/system/framework/webviewchromium.jar";
 
     private static final String LOGTAG = "WebViewFactory";
 
     private static final boolean DEBUG = false;
+
+    private static class Preloader {
+        static WebViewFactoryProvider sPreloadedProvider;
+        static {
+            try {
+                sPreloadedProvider = getFactoryClass().newInstance();
+            } catch (Exception e) {
+                Log.w(LOGTAG, "error preloading provider", e);
+            }
+        }
+    }
 
     // Cache the factory both for efficiency, and ensure any one process gets all webviews from the
     // same provider.
@@ -49,75 +53,65 @@ public final class WebViewFactory {
     private static final Object sProviderLock = new Object();
 
     public static boolean isExperimentalWebViewAvailable() {
-        return Build.IS_DEBUGGABLE && (new java.io.File(CHROMIUM_WEBVIEW_JAR).exists());
+        // TODO: Remove callers of this method then remove it.
+        return false;  // Hide the toggle in Developer Settings.
+    }
+
+    /** @hide */
+    public static void setUseExperimentalWebView(boolean enable) {
+        // TODO: Remove callers of this method then remove it.
+    }
+
+    /** @hide */
+    public static boolean useExperimentalWebView() {
+        // TODO: Remove callers of this method then remove it.
+        return true;
+    }
+
+    /** @hide */
+    public static boolean isUseExperimentalWebViewSet() {
+        // TODO: Remove callers of this method then remove it.
+        return false;  // User has not modifed Developer Settings
     }
 
     static WebViewFactoryProvider getProvider() {
         synchronized (sProviderLock) {
             // For now the main purpose of this function (and the factory abstraction) is to keep
-            // us honest and minimize usage of WebViewClassic internals when binding the proxy.
+            // us honest and minimize usage of WebView internals when binding the proxy.
             if (sProviderInstance != null) return sProviderInstance;
 
-            if (isExperimentalWebViewEnabled()) {
-                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-                try {
-                    sProviderInstance = loadChromiumProvider();
-                    if (DEBUG) Log.v(LOGTAG, "Loaded Chromium provider: " + sProviderInstance);
-                } finally {
-                    StrictMode.setThreadPolicy(oldPolicy);
-                }
+            Class<WebViewFactoryProvider> providerClass;
+            try {
+                providerClass = getFactoryClass();
+            } catch (ClassNotFoundException e) {
+                Log.e(LOGTAG, "error loading provider", e);
+                throw new AndroidRuntimeException(e);
             }
 
-            if (sProviderInstance == null) {
-                if (DEBUG) Log.v(LOGTAG, "Falling back to default provider: "
-                        + DEFAULT_WEBVIEW_FACTORY);
-                sProviderInstance = getFactoryByName(DEFAULT_WEBVIEW_FACTORY,
-                        WebViewFactory.class.getClassLoader());
-                if (sProviderInstance == null) {
-                    if (DEBUG) Log.v(LOGTAG, "Falling back to explicit linkage");
-                    sProviderInstance = new WebViewClassic.Factory();
-                }
+            // This implicitly loads Preloader even if it wasn't preloaded at boot.
+            if (Preloader.sPreloadedProvider != null &&
+                Preloader.sPreloadedProvider.getClass() == providerClass) {
+                sProviderInstance = Preloader.sPreloadedProvider;
+                if (DEBUG) Log.v(LOGTAG, "Using preloaded provider: " + sProviderInstance);
+                return sProviderInstance;
             }
-            return sProviderInstance;
+
+            // The preloaded provider isn't the one we wanted; construct our own.
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            try {
+                sProviderInstance = providerClass.newInstance();
+                if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
+                return sProviderInstance;
+            } catch (Exception e) {
+                Log.e(LOGTAG, "error instantiating provider", e);
+                throw new AndroidRuntimeException(e);
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
         }
     }
 
-    // For debug builds, we allow a system property to specify that we should use the
-    // experimtanl Chromium powered WebView. This enables us to switch between
-    // implementations at runtime. For user (release) builds, don't allow this.
-    private static boolean isExperimentalWebViewEnabled() {
-        if (!isExperimentalWebViewAvailable())
-            return false;
-        if (SystemProperties.getBoolean(DEPRECATED_CHROMIUM_PROPERTY, false)) {
-            Log.w(LOGTAG, String.format("The property %s has been deprecated. Please use %s.",
-                    DEPRECATED_CHROMIUM_PROPERTY, WEBVIEW_EXPERIMENTAL_PROPERTY));
-            return true;
-        }
-        return SystemProperties.getBoolean(WEBVIEW_EXPERIMENTAL_PROPERTY, false);
-    }
-
-    // TODO: This allows us to have the legacy and Chromium WebView coexist for development
-    // and side-by-side testing. After transition, remove this when no longer required.
-    private static WebViewFactoryProvider loadChromiumProvider() {
-        ClassLoader clazzLoader = new PathClassLoader(CHROMIUM_WEBVIEW_JAR, null,
-                WebViewFactory.class.getClassLoader());
-        return getFactoryByName(CHROMIUM_WEBVIEW_FACTORY, clazzLoader);
-    }
-
-    private static WebViewFactoryProvider getFactoryByName(String providerName,
-            ClassLoader loader) {
-        try {
-            if (DEBUG) Log.v(LOGTAG, "attempt to load class " + providerName);
-            Class<?> c = Class.forName(providerName, true, loader);
-            if (DEBUG) Log.v(LOGTAG, "instantiating factory");
-            return (WebViewFactoryProvider) c.newInstance();
-        } catch (ClassNotFoundException e) {
-            Log.e(LOGTAG, "error loading " + providerName, e);
-        } catch (IllegalAccessException e) {
-            Log.e(LOGTAG, "error loading " + providerName, e);
-        } catch (InstantiationException e) {
-            Log.e(LOGTAG, "error loading " + providerName, e);
-        }
-        return null;
+    private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
+        return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
     }
 }

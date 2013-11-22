@@ -35,8 +35,6 @@
 
 #include <utils/Log.h>
 
-#define TIME_DRAWx
-
 static uint32_t get_thread_msec() {
 #if defined(HAVE_POSIX_CLOCKS)
     struct timespec tm;
@@ -463,20 +461,6 @@ public:
         canvas->drawPath(*path, *paint);
     }
  
-    static void drawPicture(JNIEnv* env, jobject, SkCanvas* canvas,
-                            SkPicture* picture) {
-        SkASSERT(canvas);
-        SkASSERT(picture);
-        
-#ifdef TIME_DRAW
-        SkMSec now = get_thread_msec(); //SkTime::GetMSecs();
-#endif
-        canvas->drawPicture(*picture);
-#ifdef TIME_DRAW
-        ALOGD("---- picture playback %d ms\n", get_thread_msec() - now);
-#endif
-    }
-
     static void drawBitmap__BitmapFFPaint(JNIEnv* env, jobject jcanvas,
                                           SkCanvas* canvas, SkBitmap* bitmap,
                                           jfloat left, jfloat top,
@@ -563,18 +547,17 @@ public:
                                 jboolean hasAlpha, SkPaint* paint)
     {
         SkBitmap    bitmap;
-        
         bitmap.setConfig(hasAlpha ? SkBitmap::kARGB_8888_Config :
                          SkBitmap::kRGB_565_Config, width, height);
         if (!bitmap.allocPixels()) {
             return;
         }
-        
+
         if (!GraphicsJNI::SetPixels(env, jcolors, offset, stride,
-                                    0, 0, width, height, bitmap)) {
+                0, 0, width, height, bitmap, true)) {
             return;
         }
-        
+
         canvas->drawBitmap(bitmap, SkFloatToScalar(x), SkFloatToScalar(y),
                            paint);
     }
@@ -1103,7 +1086,6 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawTextOnPath___CIIPathFFPaint},
     {"native_drawTextOnPath","(ILjava/lang/String;IFFII)V",
         (void*) SkCanvasGlue::drawTextOnPath__StringPathFFPaint},
-    {"native_drawPicture", "(II)V", (void*) SkCanvasGlue::drawPicture},
 
     {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches},
 

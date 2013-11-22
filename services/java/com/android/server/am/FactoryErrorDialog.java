@@ -22,7 +22,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.WindowManager;
 
-class FactoryErrorDialog extends BaseErrorDialog {
+final class FactoryErrorDialog extends BaseErrorDialog {
     public FactoryErrorDialog(Context context, CharSequence msg) {
         super(context);
         setCancelable(false);

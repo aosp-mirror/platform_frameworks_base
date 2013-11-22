@@ -22,6 +22,10 @@ import java.io.InputStream;
 import java.io.FileDescriptor;
 import java.net.SocketOptions;
 
+import libcore.io.ErrnoException;
+import libcore.io.Libcore;
+import libcore.io.OsConstants;
+
 /**
  * Socket implementation used for android.net.LocalSocket and
  * android.net.LocalServerSocket. Supports only AF_LOCAL sockets.
@@ -35,6 +39,8 @@ class LocalSocketImpl
 
     /** null if closed or not yet created */
     private FileDescriptor fd;
+    /** whether fd is created internally */
+    private boolean mFdCreatedInternally;
 
     // These fields are accessed by native code;
     /** file descriptor array received during a previous read */
@@ -159,7 +165,6 @@ class LocalSocketImpl
 
     private native int pending_native(FileDescriptor fd) throws IOException;
     private native int available_native(FileDescriptor fd) throws IOException;
-    private native void close_native(FileDescriptor fd) throws IOException;
     private native int read_native(FileDescriptor fd) throws IOException;
     private native int readba_native(byte[] b, int off, int len,
             FileDescriptor fd) throws IOException;
@@ -170,8 +175,6 @@ class LocalSocketImpl
     private native void connectLocal(FileDescriptor fd, String name,
             int namespace) throws IOException;
     private native void bindLocal(FileDescriptor fd, String name, int namespace)
-            throws IOException;
-    private native FileDescriptor create_native(boolean stream)
             throws IOException;
     private native void listen_native(FileDescriptor fd, int backlog)
             throws IOException;
@@ -222,15 +225,34 @@ class LocalSocketImpl
     /**
      * Creates a socket in the underlying OS.
      *
-     * @param stream true if this should be a stream socket, false for
-     * datagram.
+     * @param sockType either {@link LocalSocket#SOCKET_DGRAM}, {@link LocalSocket#SOCKET_STREAM}
+     * or {@link LocalSocket#SOCKET_SEQPACKET}
      * @throws IOException
      */
-    public void create (boolean stream) throws IOException {
+    public void create (int sockType) throws IOException {
         // no error if socket already created
         // need this for LocalServerSocket.accept()
         if (fd == null) {
-            fd = create_native(stream);
+            int osType;
+            switch (sockType) {
+                case LocalSocket.SOCKET_DGRAM:
+                    osType = OsConstants.SOCK_DGRAM;
+                    break;
+                case LocalSocket.SOCKET_STREAM:
+                    osType = OsConstants.SOCK_STREAM;
+                    break;
+                case LocalSocket.SOCKET_SEQPACKET:
+                    osType = OsConstants.SOCK_SEQPACKET;
+                    break;
+                default:
+                    throw new IllegalStateException("unknown sockType");
+            }
+            try {
+                fd = Libcore.os.socket(OsConstants.AF_UNIX, osType, 0);
+                mFdCreatedInternally = true;
+            } catch (ErrnoException e) {
+                e.rethrowAsIOException();
+            }
         }
     }
 
@@ -241,8 +263,15 @@ class LocalSocketImpl
      */
     public void close() throws IOException {
         synchronized (LocalSocketImpl.this) {
-            if (fd == null) return;
-            close_native(fd);
+            if ((fd == null) || (mFdCreatedInternally == false)) {
+                fd = null;
+                return;
+            }
+            try {
+                Libcore.os.close(fd);
+            } catch (ErrnoException e) {
+                e.rethrowAsIOException();
+            }
             fd = null;
         }
     }

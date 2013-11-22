@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:background="#fff"
+              android:layout_width="fill_parent"
+              android:id="@+id/topContainer"
+              android:layout_height="wrap_content">
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/contact_arrow"
+            android:src="@drawable/arrow_thumbnail"/>
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/contact_picture"/>
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="0dip"
+                  android:id="@+id/itemContainer"
+                  android:background="#ccc"
+                  android:layout_weight="1"
+                  android:layout_height="wrap_content">
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/contact_name"/>
+        <LinearLayout android:orientation="vertical"
+                      android:visibility="gone"
+                      android:id="@+id/expanded_info"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content">
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/contact_street"/>
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/contact_city"/>
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/contact_phone"/>
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/contact_email"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -66,7 +66,7 @@ public class CountryDetectorServiceTest extends AndroidTestCase {
 
     public void testAddRemoveListener() throws RemoteException {
         CountryDetectorServiceTester serviceTester = new CountryDetectorServiceTester(getContext());
-        serviceTester.systemReady();
+        serviceTester.systemRunning();
         waitForSystemReady(serviceTester);
         CountryListenerTester listenerTester = new CountryListenerTester();
         serviceTester.addCountryListener(listenerTester);
@@ -80,7 +80,7 @@ public class CountryDetectorServiceTest extends AndroidTestCase {
         CountryListenerTester listenerTesterA = new CountryListenerTester();
         CountryListenerTester listenerTesterB = new CountryListenerTester();
         Country country = new Country("US", Country.COUNTRY_SOURCE_NETWORK);
-        serviceTester.systemReady();
+        serviceTester.systemRunning();
         waitForSystemReady(serviceTester);
         serviceTester.addCountryListener(listenerTesterA);
         serviceTester.addCountryListener(listenerTesterB);

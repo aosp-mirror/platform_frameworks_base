@@ -23,62 +23,51 @@
 
 #include <utils/Vector.h>
 
+#include <androidfw/ResourceTypes.h>
+
 #include "Rect.h"
+#include "UvMapper.h"
 #include "Vertex.h"
 
 namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Defines
-///////////////////////////////////////////////////////////////////////////////
-
-#define EXPLODE_GAP 4
-
-///////////////////////////////////////////////////////////////////////////////
 // 9-patch structures
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * An OpenGL patch. This contains an array of vertices and an array of
- * indices to render the vertices.
- */
 struct Patch {
-    Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQuads);
+    Patch();
     ~Patch();
 
-    void updateVertices(const float bitmapWidth, const float bitmapHeight,
-            float left, float top, float right, float bottom);
+    /**
+     * Returns the size of this patch's mesh in bytes.
+     */
+    uint32_t getSize() const;
 
-    void updateColorKey(const uint32_t colorKey);
-    void copy(const int32_t* xDivs, const int32_t* yDivs);
-    bool matches(const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t colorKey, const int8_t emptyQuads);
-
-    GLuint meshBuffer;
+    TextureVertex* vertices;
     uint32_t verticesCount;
+    uint32_t indexCount;
     bool hasEmptyQuads;
     Vector<Rect> quads;
 
+    GLintptr offset;
+    GLintptr textureOffset;
+
+    TextureVertex* createMesh(const float bitmapWidth, const float bitmapHeight,
+            float width, float height, const Res_png_9patch* patch);
+    TextureVertex* createMesh(const float bitmapWidth, const float bitmapHeight,
+            float width, float height, const UvMapper& mapper, const Res_png_9patch* patch);
+
 private:
-    TextureVertex* mVertices;
-    uint32_t mAllocatedVerticesCount;
-
-    int32_t* mXDivs;
-    int32_t* mYDivs;
-    uint32_t mColorKey;
-
-    uint32_t mXCount;
-    uint32_t mYCount;
-    int8_t mEmptyQuads;
-
-    void generateRow(TextureVertex*& vertex, float y1, float y2,
-            float v1, float v2, float stretchX, float rescaleX,
+    void generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,
+            float y1, float y2, float v1, float v2, float stretchX, float rescaleX,
             float width, float bitmapWidth, uint32_t& quadCount);
-    void generateQuad(TextureVertex*& vertex,
-            float x1, float y1, float x2, float y2,
-            float u1, float v1, float u2, float v2,
-            uint32_t& quadCount);
+    void generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
+            float u1, float v1, float u2, float v2, uint32_t& quadCount);
+
+    uint32_t* mColors;
+    UvMapper mUvMapper;
 }; // struct Patch
 
 }; // namespace uirenderer

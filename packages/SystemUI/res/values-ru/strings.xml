@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Графический интерфейс системы"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очистить"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Не беспокоить"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показать уведомления"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удалить из списка"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Список недавно использованных приложений пуст."</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"Подключите зарядное устройство"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Батарея разряжена."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Осталось <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Зарядка через порт USB не поддерживается."\n"Используйте только зарядное устройство из комплекта поставки."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Зарядка через порт USB не поддерживается.\nИспользуйте только зарядное устройство из комплекта поставки."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Подробнее"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Настройки"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Использовать по умолчанию для этого USB-устройства"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Использовать по умолчанию для этого USB-аксессуара"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Отладка по USB"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Цифровой отпечаток ключа RSA:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Цифровой отпечаток ключа RSA:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Всегда разрешать отладку с этого компьютера"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Подогнать по размерам экрана"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растянуть на весь экран"</string>
@@ -162,7 +160,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Передача данных по каналу 4G отключена"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Моб. Интернет отключен"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Передача данных отключена"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигнут лимит трафика."\n\n"При восстановлении подключения оператор может взимать плату за передачу данных."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигнут лимит трафика.\n\nПри восстановлении подключения оператор может взимать плату за передачу данных."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Восстановить подключение"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нет интернет-подключения"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi подключено"</string>
@@ -170,9 +168,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Координаты по GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Удалить все уведомления"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"О приложении"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Закрыть"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Уведомления отключены"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Нажмите здесь, чтобы снова включить уведомления."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран будет поворачиваться автоматически."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Выбрана только альбомная ориентация экрана."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Выбрана только книжная ориентация экрана."</string>
@@ -191,7 +186,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Автоповорот"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Автоповорот выкл."</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Способ ввода"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"Геосервис вкл."</string>
+    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
+    <skip />
+    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Режим медиа"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Экстр. вызов"</string>
@@ -207,5 +205,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркость"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОНАСТРОЙКА"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Это панель уведомлений"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Ее можно открыть, пролистнув экран вниз."\n"Чтобы открыть настройки, проведите пальцем вниз ещё раз."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Ее можно открыть, пролистнув экран вниз.\nЧтобы открыть настройки, проведите пальцем вниз ещё раз."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Чтобы открыть панель, проведите пальцем от края к центру экрана"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Чтобы открыть панель навигации, проведите пальцем от края к центру экрана"</string>
 </resources>

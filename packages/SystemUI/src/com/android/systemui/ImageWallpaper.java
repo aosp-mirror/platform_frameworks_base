@@ -16,6 +16,9 @@
 
 package com.android.systemui;
 
+import static android.opengl.GLES20.*;
+import static javax.microedition.khronos.egl.EGL10.*;
+
 import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
@@ -35,18 +38,16 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import static android.opengl.GLES20.*;
-import static javax.microedition.khronos.egl.EGL10.*;
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.egl.EGLSurface;
 
 /**
  * Default built-in wallpaper that simply shows a static image.
@@ -139,7 +140,7 @@ public class ImageWallpaper extends WallpaperService {
                 "\nvoid main(void) {\n" +
                 "    gl_FragColor = texture2D(texture, outTexCoords);\n" +
                 "}\n\n";
-    
+
         private static final int FLOAT_SIZE_BYTES = 4;
         private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
         private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
@@ -183,7 +184,7 @@ public class ImageWallpaper extends WallpaperService {
             }
 
             super.onCreate(surfaceHolder);
-            
+
             // TODO: Don't need this currently because the wallpaper service
             // will restart the image wallpaper whenever the image changes.
             //IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
@@ -325,6 +326,7 @@ public class ImageWallpaper extends WallpaperService {
                             ((mBackground == null) ? 0 : mBackground.getHeight()) + ", " +
                             dw + ", " + dh);
                 }
+                mWallpaperManager.forgetLoadedWallpaper();
                 updateWallpaperLocked();
                 if (mBackground == null) {
                     if (DEBUG) {
@@ -511,44 +513,44 @@ public class ImageWallpaper extends WallpaperService {
 
         private int loadTexture(Bitmap bitmap) {
             int[] textures = new int[1];
-    
+
             glActiveTexture(GL_TEXTURE0);
             glGenTextures(1, textures, 0);
             checkGlError();
-    
+
             int texture = textures[0];
             glBindTexture(GL_TEXTURE_2D, texture);
             checkGlError();
-            
+
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
+
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
+
             GLUtils.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap, GL_UNSIGNED_BYTE, 0);
             checkGlError();
 
             return texture;
         }
-        
+
         private int buildProgram(String vertex, String fragment) {
             int vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
             if (vertexShader == 0) return 0;
-    
+
             int fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
             if (fragmentShader == 0) return 0;
-    
+
             int program = glCreateProgram();
             glAttachShader(program, vertexShader);
             checkGlError();
-    
+
             glAttachShader(program, fragmentShader);
             checkGlError();
-    
+
             glLinkProgram(program);
             checkGlError();
-    
+
             int[] status = new int[1];
             glGetProgramiv(program, GL_LINK_STATUS, status, 0);
             if (status[0] != GL_TRUE) {
@@ -559,19 +561,19 @@ public class ImageWallpaper extends WallpaperService {
                 glDeleteProgram(program);
                 return 0;
             }
-    
+
             return program;
         }
 
         private int buildShader(String source, int type) {
             int shader = glCreateShader(type);
-    
+
             glShaderSource(shader, source);
             checkGlError();
-    
+
             glCompileShader(shader);
             checkGlError();
-    
+
             int[] status = new int[1];
             glGetShaderiv(shader, GL_COMPILE_STATUS, status, 0);
             if (status[0] != GL_TRUE) {
@@ -580,7 +582,7 @@ public class ImageWallpaper extends WallpaperService {
                 glDeleteShader(shader);
                 return 0;
             }
-            
+
             return shader;
         }
 
@@ -607,24 +609,24 @@ public class ImageWallpaper extends WallpaperService {
 
         private boolean initGL(SurfaceHolder surfaceHolder) {
             mEgl = (EGL10) EGLContext.getEGL();
-    
+
             mEglDisplay = mEgl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
             if (mEglDisplay == EGL_NO_DISPLAY) {
                 throw new RuntimeException("eglGetDisplay failed " +
                         GLUtils.getEGLErrorString(mEgl.eglGetError()));
             }
-            
+
             int[] version = new int[2];
             if (!mEgl.eglInitialize(mEglDisplay, version)) {
                 throw new RuntimeException("eglInitialize failed " +
                         GLUtils.getEGLErrorString(mEgl.eglGetError()));
             }
-    
+
             mEglConfig = chooseEglConfig();
             if (mEglConfig == null) {
                 throw new RuntimeException("eglConfig not initialized");
             }
-            
+
             mEglContext = createContext(mEgl, mEglDisplay, mEglConfig);
             if (mEglContext == EGL_NO_CONTEXT) {
                 throw new RuntimeException("createContext failed " +
@@ -666,7 +668,7 @@ public class ImageWallpaper extends WallpaperService {
                 throw new RuntimeException("createWindowSurface failed " +
                         GLUtils.getEGLErrorString(error));
             }
-    
+
             if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                 throw new RuntimeException("eglMakeCurrent failed " +
                         GLUtils.getEGLErrorString(mEgl.eglGetError()));
@@ -674,13 +676,13 @@ public class ImageWallpaper extends WallpaperService {
 
             return true;
         }
-        
-    
+
+
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
             int[] attrib_list = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-            return egl.eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, attrib_list);            
+            return egl.eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, attrib_list);
         }
-    
+
         private EGLConfig chooseEglConfig() {
             int[] configsCount = new int[1];
             EGLConfig[] configs = new EGLConfig[1];

@@ -35,6 +35,9 @@ interface IBluetoothHeadset {
     boolean startVoiceRecognition(in BluetoothDevice device);
     boolean stopVoiceRecognition(in BluetoothDevice device);
     boolean isAudioConnected(in BluetoothDevice device);
+    boolean sendVendorSpecificResultCode(in BluetoothDevice device,
+                                         in String command,
+                                         in String arg);
 
     // APIs that can be made public in future
     int getBatteryUsageHint(in BluetoothDevice device);
@@ -50,7 +53,6 @@ interface IBluetoothHeadset {
     boolean startScoUsingVirtualVoiceCall(in BluetoothDevice device);
     boolean stopScoUsingVirtualVoiceCall(in BluetoothDevice device);
     void phoneStateChanged(int numActive, int numHeld, int callState, String number, int type);
-    void roamChanged(boolean roam);
     void clccResponse(int index, int direction, int status, int mode, boolean mpty,
                       String number, int type);
 }

@@ -99,14 +99,6 @@ public class WebView extends MockView {
     public static void disablePlatformNotifications() {
     }
 
-    public WebBackForwardList saveState(Bundle outState) {
-        return null;
-    }
-
-    public WebBackForwardList restoreState(Bundle inState) {
-        return null;
-    }
-
     public void loadUrl(String url) {
     }
 
@@ -213,10 +205,6 @@ public class WebView extends MockView {
     public void clearSslPreferences() {
     }
 
-    public WebBackForwardList copyBackForwardList() {
-        return null;
-    }
-
     public static String findAddress(String addr) {
         return null;
     }
@@ -234,10 +222,6 @@ public class WebView extends MockView {
     }
 
     public void addJavascriptInterface(Object obj, String interfaceName) {
-    }
-
-    public WebSettings getSettings() {
-        return null;
     }
 
     public View getZoomControls() {

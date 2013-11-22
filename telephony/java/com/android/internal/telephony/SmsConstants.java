@@ -62,6 +62,12 @@ public class SmsConstants {
     }
 
     /**
+     * Indicates unknown format SMS message.
+     * @hide pending API council approval
+     */
+    public static final String FORMAT_UNKNOWN = "unknown";
+
+    /**
      * Indicates a 3GPP format SMS message.
      * @hide pending API council approval
      */

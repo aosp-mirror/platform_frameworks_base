@@ -192,12 +192,23 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
     public void setAlpha(int alpha) {
         mInsetState.mDrawable.setAlpha(alpha);
     }
-    
+
+    @Override
+    public int getAlpha() {
+        return mInsetState.mDrawable.getAlpha();
+    }
+
     @Override
     public void setColorFilter(ColorFilter cf) {
         mInsetState.mDrawable.setColorFilter(cf);
     }
-    
+
+    /** {@hide} */
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        mInsetState.mDrawable.setLayoutDirection(layoutDirection);
+    }
+
     @Override
     public int getOpacity() {
         return mInsetState.mDrawable.getOpacity();
@@ -254,6 +265,13 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
             mMutated = true;
         }
         return this;
+    }
+
+    /**
+     * Returns the drawable wrapped by this InsetDrawable. May be null.
+     */
+    public Drawable getDrawable() {
+        return mInsetState.mDrawable;
     }
 
     final static class InsetState extends ConstantState {

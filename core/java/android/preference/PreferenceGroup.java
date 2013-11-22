@@ -210,10 +210,7 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
      * @return Whether to allow adding the preference (true), or not (false).
      */
     protected boolean onPrepareAddPreference(Preference preference) {
-        if (!super.isEnabled()) {
-            preference.setEnabled(false);
-        }
-        
+        preference.onParentChanged(this, shouldDisableDependents());
         return true;
     }
 
@@ -290,13 +287,14 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        
-        // Dispatch to all contained preferences
+    public void notifyDependencyChange(boolean disableDependents) {
+        super.notifyDependencyChange(disableDependents);
+
+        // Child preferences have an implicit dependency on their containing
+        // group. Dispatch dependency change to all contained preferences.
         final int preferenceCount = getPreferenceCount();
         for (int i = 0; i < preferenceCount; i++) {
-            getPreference(i).setEnabled(enabled);
+            getPreference(i).onParentChanged(this, disableDependents);
         }
     }
     

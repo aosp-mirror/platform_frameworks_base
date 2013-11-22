@@ -33,7 +33,7 @@ import java.util.Map;
  * disk I/O operations. Note: This class assumes that all core settings reside
  * in {@link Settings.Secure}.
  */
-class CoreSettingsObserver extends ContentObserver {
+final class CoreSettingsObserver extends ContentObserver {
     private static final String LOG_TAG = CoreSettingsObserver.class.getSimpleName();
 
     // mapping form property name to its type

@@ -16,11 +16,17 @@
 
 package android.provider;
 
+import android.content.ContentResolver;
+import android.content.Intent;
+
 /**
- * These are standard columns for openable URIs. (See
- * {@link android.content.Intent#CATEGORY_OPENABLE}.) If possible providers that have openable URIs
- * should support these columns. To find the content type of a URI use
- * {@link android.content.ContentResolver#getType(android.net.Uri)} as normal.
+ * These are standard columns for openable URIs. Providers that serve openable
+ * URIs <em>must</em> support at least these columns when queried.
+ * <p>
+ * To find the content type of a URI, use
+ * {@link ContentResolver#getType(android.net.Uri)}.
+ *
+ * @see Intent#CATEGORY_OPENABLE
  */
 public interface OpenableColumns {
 

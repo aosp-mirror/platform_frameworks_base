@@ -16,6 +16,9 @@
 
 package com.android.internal.widget;
 
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.ViewGroup;
 import com.android.internal.app.ActionBarImpl;
 
@@ -31,18 +34,23 @@ import android.view.View;
  * has request that its layout ignore them.
  */
 public class ActionBarOverlayLayout extends ViewGroup {
+    private static final String TAG = "ActionBarOverlayLayout";
+
     private int mActionBarHeight;
     private ActionBarImpl mActionBar;
     private int mWindowVisibility = View.VISIBLE;
 
     // The main UI elements that we handle the layout of.
     private View mContent;
-    private View mActionBarTop;
     private View mActionBarBottom;
+    private ActionBarContainer mActionBarTop;
 
     // Some interior UI elements.
-    private ActionBarContainer mContainerView;
-    private ActionBarView mActionView;
+    private ActionBarView mActionBarView;
+
+    // Content overlay drawable - generally the action bar's shadow
+    private Drawable mWindowContentOverlay;
+    private boolean mIgnoreWindowContentOverlay;
 
     private boolean mOverlayMode;
     private int mLastSystemUiVisibility;
@@ -53,8 +61,9 @@ public class ActionBarOverlayLayout extends ViewGroup {
     private final Rect mInnerInsets = new Rect();
     private final Rect mLastInnerInsets = new Rect();
 
-    static final int[] mActionBarSizeAttr = new int [] {
-            com.android.internal.R.attr.actionBarSize
+    static final int[] ATTRS = new int [] {
+            com.android.internal.R.attr.actionBarSize,
+            com.android.internal.R.attr.windowContentOverlay
     };
 
     public ActionBarOverlayLayout(Context context) {
@@ -68,14 +77,18 @@ public class ActionBarOverlayLayout extends ViewGroup {
     }
 
     private void init(Context context) {
-        TypedArray ta = getContext().getTheme().obtainStyledAttributes(mActionBarSizeAttr);
+        TypedArray ta = getContext().getTheme().obtainStyledAttributes(ATTRS);
         mActionBarHeight = ta.getDimensionPixelSize(0, 0);
+        mWindowContentOverlay = ta.getDrawable(1);
+        setWillNotDraw(mWindowContentOverlay == null);
         ta.recycle();
+
+        mIgnoreWindowContentOverlay = context.getApplicationInfo().targetSdkVersion <
+                Build.VERSION_CODES.KITKAT;
     }
 
-    public void setActionBar(ActionBarImpl impl, boolean overlayMode) {
+    public void setActionBar(ActionBarImpl impl) {
         mActionBar = impl;
-        mOverlayMode = overlayMode;
         if (getWindowToken() != null) {
             // This is being initialized after being added to a window;
             // make sure to update all state now.
@@ -86,6 +99,18 @@ public class ActionBarOverlayLayout extends ViewGroup {
                 requestFitSystemWindows();
             }
         }
+    }
+
+    public void setOverlayMode(boolean overlayMode) {
+        mOverlayMode = overlayMode;
+
+        /*
+         * Drawing the window content overlay was broken before K so starting to draw it
+         * again unexpectedly will cause artifacts in some apps. They should fix it.
+         */
+        mIgnoreWindowContentOverlay = overlayMode &&
+                getContext().getApplicationInfo().targetSdkVersion <
+                        Build.VERSION_CODES.KITKAT;
     }
 
     public void setShowingForActionMode(boolean showing) {
@@ -253,7 +278,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
             // we can't depend on the size currently reported by it -- this must remain constant.
             topInset = mActionBarHeight;
             if (mActionBar != null && mActionBar.hasNonEmbeddedTabs()) {
-                View tabs = mContainerView.getTabContainer();
+                View tabs = mActionBarTop.getTabContainer();
                 if (tabs != null) {
                     // If tabs are not embedded, increase space on top to account for them.
                     topInset += mActionBarHeight;
@@ -265,7 +290,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
             topInset = mActionBarTop.getMeasuredHeight();
         }
 
-        if (mActionView.isSplitActionBar()) {
+        if (mActionBarView.isSplitActionBar()) {
             // If action bar is split, adjust bottom insets for it.
             if (mActionBarBottom != null) {
                 if (stable) {
@@ -352,6 +377,18 @@ public class ActionBarOverlayLayout extends ViewGroup {
     }
 
     @Override
+    public void draw(Canvas c) {
+        super.draw(c);
+        if (mWindowContentOverlay != null && !mIgnoreWindowContentOverlay) {
+            final int top = mActionBarTop.getVisibility() == VISIBLE ?
+                    (int) (mActionBarTop.getBottom() + mActionBarTop.getTranslationY() + 0.5f) : 0;
+            mWindowContentOverlay.setBounds(0, top, getWidth(),
+                    top + mWindowContentOverlay.getIntrinsicHeight());
+            mWindowContentOverlay.draw(c);
+        }
+    }
+
+    @Override
     public boolean shouldDelayChildPressedState() {
         return false;
     }
@@ -359,10 +396,9 @@ public class ActionBarOverlayLayout extends ViewGroup {
     void pullChildren() {
         if (mContent == null) {
             mContent = findViewById(com.android.internal.R.id.content);
-            mActionBarTop = findViewById(com.android.internal.R.id.top_action_bar);
-            mContainerView = (ActionBarContainer)findViewById(
+            mActionBarTop = (ActionBarContainer)findViewById(
                     com.android.internal.R.id.action_bar_container);
-            mActionView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
+            mActionBarView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
             mActionBarBottom = findViewById(com.android.internal.R.id.split_action_bar);
         }
     }

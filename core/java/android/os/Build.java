@@ -436,6 +436,30 @@ public class Build {
          * Android 4.3: Jelly Bean MR2, the revenge of the beans.
          */
         public static final int JELLY_BEAN_MR2 = 18;
+
+        /**
+         * Android 4.4: KitKat, another tasty treat.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> The default result of {android.preference.PreferenceActivity#isValidFragment
+         * PreferenceActivity.isValueFragment} becomes false instead of true.</li>
+         * <li> In {@link android.webkit.WebView}, apps targeting earlier versions will have
+         * JS URLs evaluated directly and any result of the evaluation will not replace
+         * the current page content.  Apps targetting KITKAT or later that load a JS URL will
+         * have the result of that URL replace the content of the current page</li>
+         * <li> {@link android.app.AlarmManager#set AlarmManager.set} becomes interpreted as
+         * an inexact value, to give the system more flexibility in scheduling alarms.</li>
+         * <li> {@link android.content.Context#getSharedPreferences(String, int)
+         * Context.getSharedPreferences} no longer allows a null name.</li>
+         * <li> {@link android.widget.RelativeLayout} changes to compute wrapped content
+         * margins correctly.</li>
+         * <li> {@link android.app.ActionBar}'s window content overlay is allowed to be
+         * drawn.</li>
+         * </ul>
+         */
+        public static final int KITKAT = 19;
     }
     
     /** The type of build, like "user" or "eng". */

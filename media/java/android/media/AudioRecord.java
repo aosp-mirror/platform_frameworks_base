@@ -17,8 +17,6 @@
 package android.media;
 
 import java.lang.ref.WeakReference;
-import java.lang.IllegalArgumentException;
-import java.lang.IllegalStateException;
 import java.nio.ByteBuffer;
 
 import android.os.Handler;
@@ -89,7 +87,7 @@ public class AudioRecord
     private static final int AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    = -20;
 
     // Events:
-    // to keep in sync with frameworks/base/include/media/AudioRecord.h
+    // to keep in sync with frameworks/av/include/media/AudioRecord.h
     /**
      * Event id denotes when record head has reached a previously set marker.
      */
@@ -99,7 +97,7 @@ public class AudioRecord
      */
     private static final int NATIVE_EVENT_NEW_POS = 3;
 
-    private final static String TAG = "AudioRecord-Java";
+    private final static String TAG = "android.media.AudioRecord";
 
 
     //---------------------------------------------------------
@@ -124,29 +122,25 @@ public class AudioRecord
     /**
      * The audio data sampling rate in Hz.
      */
-    private int mSampleRate = 22050;
+    private int mSampleRate;
     /**
      * The number of input audio channels (1 is mono, 2 is stereo)
      */
-    private int mChannelCount = 1;
+    private int mChannelCount;
     /**
      * The audio channel mask
      */
-    private int mChannels = AudioFormat.CHANNEL_IN_MONO;
-    /**
-     * The current audio channel configuration
-     */
-    private int mChannelConfiguration = AudioFormat.CHANNEL_IN_MONO;
+    private int mChannelMask;
     /**
      * The encoding of the audio samples.
      * @see AudioFormat#ENCODING_PCM_8BIT
      * @see AudioFormat#ENCODING_PCM_16BIT
      */
-    private int mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    private int mAudioFormat;
     /**
      * Where the audio data is recorded from.
      */
-    private int mRecordSource = MediaRecorder.AudioSource.DEFAULT;
+    private int mRecordSource;
     /**
      * Indicates the state of the AudioRecord instance.
      */
@@ -214,7 +208,6 @@ public class AudioRecord
     public AudioRecord(int audioSource, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes)
     throws IllegalArgumentException {
-        mState = STATE_UNINITIALIZED;
         mRecordingState = RECORDSTATE_STOPPED;
 
         // remember which looper is associated with the AudioRecord instanciation
@@ -232,7 +225,7 @@ public class AudioRecord
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
-                mRecordSource, mSampleRate, mChannels, mAudioFormat, mNativeBufferSizeInBytes,
+                mRecordSource, mSampleRate, mChannelMask, mAudioFormat, mNativeBufferSizeInBytes,
                 session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
@@ -250,7 +243,7 @@ public class AudioRecord
     // postconditions:
     //    mRecordSource is valid
     //    mChannelCount is valid
-    //    mChannels is valid
+    //    mChannelMask is valid
     //    mAudioFormat is valid
     //    mSampleRate is valid
     private void audioParamCheck(int audioSource, int sampleRateInHz,
@@ -259,46 +252,40 @@ public class AudioRecord
         //--------------
         // audio source
         if ( (audioSource < MediaRecorder.AudioSource.DEFAULT) ||
-             (audioSource > MediaRecorder.getAudioSourceMax()) )  {
-            throw (new IllegalArgumentException("Invalid audio source."));
-        } else {
-            mRecordSource = audioSource;
+             ((audioSource > MediaRecorder.getAudioSourceMax()) &&
+              (audioSource != MediaRecorder.AudioSource.HOTWORD)) )  {
+            throw new IllegalArgumentException("Invalid audio source.");
         }
+        mRecordSource = audioSource;
 
         //--------------
         // sample rate
         if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
-            throw (new IllegalArgumentException(sampleRateInHz
-                    + "Hz is not a supported sample rate."));
-        } else {
-            mSampleRate = sampleRateInHz;
+            throw new IllegalArgumentException(sampleRateInHz
+                    + "Hz is not a supported sample rate.");
         }
+        mSampleRate = sampleRateInHz;
 
         //--------------
         // channel config
-        mChannelConfiguration = channelConfig;
-
         switch (channelConfig) {
         case AudioFormat.CHANNEL_IN_DEFAULT: // AudioFormat.CHANNEL_CONFIGURATION_DEFAULT
         case AudioFormat.CHANNEL_IN_MONO:
         case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             mChannelCount = 1;
-            mChannels = AudioFormat.CHANNEL_IN_MONO;
+            mChannelMask = AudioFormat.CHANNEL_IN_MONO;
             break;
         case AudioFormat.CHANNEL_IN_STEREO:
         case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             mChannelCount = 2;
-            mChannels = AudioFormat.CHANNEL_IN_STEREO;
+            mChannelMask = AudioFormat.CHANNEL_IN_STEREO;
             break;
         case (AudioFormat.CHANNEL_IN_FRONT | AudioFormat.CHANNEL_IN_BACK):
             mChannelCount = 2;
-            mChannels = channelConfig;
+            mChannelMask = channelConfig;
             break;
         default:
-            mChannelCount = 0;
-            mChannels = AudioFormat.CHANNEL_INVALID;
-            mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
-            throw (new IllegalArgumentException("Unsupported channel configuration."));
+            throw new IllegalArgumentException("Unsupported channel configuration.");
         }
 
         //--------------
@@ -312,9 +299,8 @@ public class AudioRecord
             mAudioFormat = audioFormat;
             break;
         default:
-            mAudioFormat = AudioFormat.ENCODING_INVALID;
-        throw (new IllegalArgumentException("Unsupported sample encoding."
-                + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT."));
+            throw new IllegalArgumentException("Unsupported sample encoding."
+                    + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT.");
         }
     }
 
@@ -331,7 +317,7 @@ public class AudioRecord
         int frameSizeInBytes = mChannelCount
             * (mAudioFormat == AudioFormat.ENCODING_PCM_8BIT ? 1 : 2);
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
-            throw (new IllegalArgumentException("Invalid audio buffer size."));
+            throw new IllegalArgumentException("Invalid audio buffer size.");
         }
 
         mNativeBufferSizeInBytes = audioBufferSize;
@@ -393,7 +379,7 @@ public class AudioRecord
      * and {@link AudioFormat#CHANNEL_IN_STEREO}.
      */
     public int getChannelConfiguration() {
-        return mChannelConfiguration;
+        return mChannelMask;
     }
 
     /**
@@ -421,7 +407,9 @@ public class AudioRecord
      * @see AudioRecord#RECORDSTATE_RECORDING
      */
     public int getRecordingState() {
-        return mRecordingState;
+        synchronized (mRecordingStateLock) {
+            return mRecordingState;
+        }
     }
 
     /**
@@ -440,10 +428,12 @@ public class AudioRecord
 
     /**
      * Returns the minimum buffer size required for the successful creation of an AudioRecord
-     * object.
+     * object, in byte units.
      * Note that this size doesn't guarantee a smooth recording under load, and higher values
      * should be chosen according to the expected frequency at which the AudioRecord instance
      * will be polled for new data.
+     * See {@link #AudioRecord(int, int, int, int, int)} for more information on valid
+     * configuration values.
      * @param sampleRateInHz the sample rate expressed in Hertz.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_IN_MONO} and
@@ -453,10 +443,9 @@ public class AudioRecord
      * @return {@link #ERROR_BAD_VALUE} if the recording parameters are not supported by the
      *  hardware, or an invalid parameter was passed,
      *  or {@link #ERROR} if the implementation was unable to query the hardware for its
-     *  output properties,
+     *  input properties,
      *   or the minimum buffer size expressed in bytes.
-     * @see #AudioRecord(int, int, int, int, int) for more information on valid
-     *   configuration values.
+     * @see #AudioRecord(int, int, int, int, int)
      */
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
@@ -474,21 +463,21 @@ public class AudioRecord
         case AudioFormat.CHANNEL_INVALID:
         default:
             loge("getMinBufferSize(): Invalid channel configuration.");
-            return AudioRecord.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
 
         // PCM_8BIT is not supported at the moment
         if (audioFormat != AudioFormat.ENCODING_PCM_16BIT) {
             loge("getMinBufferSize(): Invalid audio format.");
-            return AudioRecord.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
 
         int size = native_get_min_buff_size(sampleRateInHz, channelCount, audioFormat);
         if (size == 0) {
-            return AudioRecord.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
         else if (size == -1) {
-            return AudioRecord.ERROR;
+            return ERROR;
         }
         else {
             return size;
@@ -514,8 +503,8 @@ public class AudioRecord
     public void startRecording()
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("startRecording() called on an "
-                    +"uninitialized AudioRecord."));
+            throw new IllegalStateException("startRecording() called on an "
+                    + "uninitialized AudioRecord.");
         }
 
         // start recording
@@ -536,8 +525,8 @@ public class AudioRecord
     public void startRecording(MediaSyncEvent syncEvent)
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("startRecording() called on an "
-                    +"uninitialized AudioRecord."));
+            throw new IllegalStateException("startRecording() called on an "
+                    + "uninitialized AudioRecord.");
         }
 
         // start recording
@@ -555,7 +544,7 @@ public class AudioRecord
     public void stop()
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("stop() called on an uninitialized AudioRecord."));
+            throw new IllegalStateException("stop() called on an uninitialized AudioRecord.");
         }
 
         // stop recording
@@ -585,6 +574,7 @@ public class AudioRecord
         }
 
         if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0)
+                || (offsetInBytes + sizeInBytes < 0)  // detect integer overflow
                 || (offsetInBytes + sizeInBytes > audioData.length)) {
             return ERROR_BAD_VALUE;
         }
@@ -609,6 +599,7 @@ public class AudioRecord
         }
 
         if ( (audioData == null) || (offsetInShorts < 0 ) || (sizeInShorts < 0)
+                || (offsetInShorts + sizeInShorts < 0)  // detect integer overflow
                 || (offsetInShorts + sizeInShorts > audioData.length)) {
             return ERROR_BAD_VALUE;
         }
@@ -692,6 +683,9 @@ public class AudioRecord
      *  {@link #ERROR_INVALID_OPERATION}
      */
     public int setNotificationMarkerPosition(int markerInFrames) {
+        if (mState == STATE_UNINITIALIZED) {
+            return ERROR_INVALID_OPERATION;
+        }
         return native_set_marker_pos(markerInFrames);
     }
 
@@ -700,10 +694,14 @@ public class AudioRecord
      * Sets the period at which the listener is called, if set with
      * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener)} or
      * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener, Handler)}.
+     * It is possible for notifications to be lost if the period is too small.
      * @param periodInFrames update period expressed in frames
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
      */
     public int setPositionNotificationPeriod(int periodInFrames) {
+        if (mState == STATE_UNINITIALIZED) {
+            return ERROR_INVALID_OPERATION;
+        }
         return native_set_pos_update_period(periodInFrames);
     }
 
@@ -769,9 +767,8 @@ public class AudioRecord
                 }
                 break;
             default:
-                Log.e(TAG, "[ android.media.AudioRecord.NativeEventHandler ] " +
-                        "Unknown event type: " + msg.what);
-            break;
+                loge("Unknown native event type: " + msg.what);
+                break;
             }
         }
     };
@@ -837,11 +834,11 @@ public class AudioRecord
     //------------------
 
     private static void logd(String msg) {
-        Log.d(TAG, "[ android.media.AudioRecord ] " + msg);
+        Log.d(TAG, msg);
     }
 
     private static void loge(String msg) {
-        Log.e(TAG, "[ android.media.AudioRecord ] " + msg);
+        Log.e(TAG, msg);
     }
 
 }

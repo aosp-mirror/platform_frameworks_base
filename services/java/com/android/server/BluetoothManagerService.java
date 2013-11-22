@@ -34,7 +34,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -120,7 +119,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     // used inside handler thread
     private boolean mEnable;
     private int mState;
-    private HandlerThread mThread;
     private final BluetoothHandler mHandler;
     private int mErrorRecoveryRetryCounter;
 
@@ -194,9 +192,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     };
 
     BluetoothManagerService(Context context) {
-        mThread = new HandlerThread("BluetoothManager");
-        mThread.start();
-        mHandler = new BluetoothHandler(mThread.getLooper());
+        mHandler = new BluetoothHandler(IoThread.get().getLooper());
 
         mContext = context;
         mBluetooth = null;
@@ -647,10 +643,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             Message timeoutMsg = mHandler.obtainMessage(MESSAGE_TIMEOUT_BIND);
                             mHandler.sendMessageDelayed(timeoutMsg,TIMEOUT_BIND_MS);
                             Intent i = new Intent(IBluetooth.class.getName());
-                            if (!mContext.bindServiceAsUser(i, mConnection,
-                                  Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
+                            if (!doBind(i, mConnection,
+                                    Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
                                 mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
-                                Log.e(TAG, "fail to bind to: " + IBluetooth.class.getName());
                             } else {
                                 mBinding = true;
                             }
@@ -771,13 +766,17 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 case MESSAGE_REGISTER_STATE_CHANGE_CALLBACK:
                 {
                     IBluetoothStateChangeCallback callback = (IBluetoothStateChangeCallback) msg.obj;
-                    mStateChangeCallbacks.register(callback);
+                    if (callback != null) {
+                        mStateChangeCallbacks.register(callback);
+                    }
                     break;
                 }
                 case MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK:
                 {
                     IBluetoothStateChangeCallback callback = (IBluetoothStateChangeCallback) msg.obj;
-                    mStateChangeCallbacks.unregister(callback);
+                    if (callback != null) {
+                        mStateChangeCallbacks.unregister(callback);
+                    }
                     break;
                 }
                 case MESSAGE_BLUETOOTH_SERVICE_CONNECTED:
@@ -792,10 +791,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         } // else must be SERVICE_IBLUETOOTH
 
                         //Remove timeout
-                            mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
+                        mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
 
                         mBinding = false;
                         mBluetooth = IBluetooth.Stub.asInterface(service);
+
+                        try {
+                            boolean enableHciSnoopLog = (Settings.Secure.getInt(mContentResolver,
+                                Settings.Secure.BLUETOOTH_HCI_LOG, 0) == 1);
+                            if (!mBluetooth.configHciSnoopLog(enableHciSnoopLog)) {
+                                Log.e(TAG,"IBluetooth.configHciSnoopLog return false");
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG,"Unable to call configHciSnoopLog", e);
+                        }
 
                         if (mConnection.isGetNameAddressOnly()) {
                             //Request GET NAME AND ADDRESS
@@ -1022,10 +1031,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 mHandler.sendMessageDelayed(timeoutMsg,TIMEOUT_BIND_MS);
                 mConnection.setGetNameAddressOnly(false);
                 Intent i = new Intent(IBluetooth.class.getName());
-                if (!mContext.bindServiceAsUser(i, mConnection,Context.BIND_AUTO_CREATE,
-                                          UserHandle.CURRENT)) {
+                if (!doBind(i, mConnection,Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
                     mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
-                    Log.e(TAG, "Fail to bind to: " + IBluetooth.class.getName());
                 } else {
                     mBinding = true;
                 }
@@ -1062,6 +1069,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
             }
         }
+    }
+
+    boolean doBind(Intent intent, ServiceConnection conn, int flags, UserHandle user) {
+        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        intent.setComponent(comp);
+        if (comp == null || !mContext.bindServiceAsUser(intent, conn, flags, user)) {
+            Log.e(TAG, "Fail to bind to: " + intent);
+            return false;
+        }
+        return true;
     }
 
     private void handleDisable() {
@@ -1116,10 +1133,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     if (mContext.getPackageManager().hasSystemFeature(
                                                      PackageManager.FEATURE_BLUETOOTH_LE)) {
                         Intent i = new Intent(IBluetoothGatt.class.getName());
-                        if (!mContext.bindServiceAsUser(i, mConnection, Context.BIND_AUTO_CREATE,
-                                                        UserHandle.CURRENT)) {
-                            Log.e(TAG, "Fail to bind to: " + IBluetoothGatt.class.getName());
-                        }
+                        doBind(i, mConnection, Context.BIND_AUTO_CREATE, UserHandle.CURRENT);
                     }
                 } else {
                     //If Bluetooth is off, send service down event to proxy objects, and unbind

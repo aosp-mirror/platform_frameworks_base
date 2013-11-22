@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- This is a view to control music playback in keyguard. -->
+<com.android.keyguard.KeyguardTransportControlView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:id="@+id/keyguard_transport_control">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:gravity="center">
+        <ImageView
+            android:id="@+id/badge"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:scaleType="fitCenter" />
+        <FrameLayout
+            android:id="@+id/info_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/metadata_container"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dip"
+                    android:layout_marginEnd="16dip"
+                    android:gravity="center_horizontal"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:fontFamily="sans-serif-light" />
+                <TextView
+                    android:id="@+id/artist_album"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dip"
+                    android:layout_marginEnd="16dip"
+                    android:gravity="center_horizontal"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?android:attr/textColorSecondary" />
+            </LinearLayout>
+            <RelativeLayout
+                android:id="@+id/transient_seek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible">
+                <SeekBar
+                    android:id="@+id/transient_seek_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.TransportControl.SeekBar" />
+                <TextView
+                    android:id="@+id/transient_seek_time_elapsed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/transient_seek_bar"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="12dp" />
+                <TextView
+                    android:id="@+id/transient_seek_time_remaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_below="@id/transient_seek_bar"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="12dp" />
+            </RelativeLayout>
+        </FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <ImageButton
+                    android:id="@+id/btn_prev"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_media_previous"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:contentDescription="@string/keyguard_accessibility_transport_prev_description"/>
+            </FrameLayout>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <ImageButton
+                    android:id="@+id/btn_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_media_play"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:contentDescription="@string/keyguard_accessibility_transport_play_description"/>
+            </FrameLayout>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <ImageButton
+                    android:id="@+id/btn_next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_media_next"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:contentDescription="@string/keyguard_accessibility_transport_next_description"/>
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</com.android.keyguard.KeyguardTransportControlView>

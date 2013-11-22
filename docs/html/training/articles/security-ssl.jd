@@ -250,7 +250,7 @@ due to a self-signed certificate, which means the server is behaving as its own 
 This is similar to an unknown certificate authority, so you can use the
 same approach from the previous section.</p>
 
-<p>You can create yout own {@link javax.net.ssl.TrustManager},
+<p>You can create your own {@link javax.net.ssl.TrustManager},
 this time trusting the server certificate directly. This has all of the
 downsides discussed earlier of tying your app directly to a certificate, but can be done
 securely. However, you should be careful to make sure your self-signed certificate has a

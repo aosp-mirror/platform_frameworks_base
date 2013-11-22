@@ -21,10 +21,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
+import android.net.RouteInfo;
+import android.net.LinkAddress;
 
 import com.android.internal.util.Preconditions;
 
+import java.net.InetAddress;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * A simple container used to carry information in VpnBuilder, VpnDialogs,
@@ -46,28 +51,53 @@ public class VpnConfig implements Parcelable {
         return intent;
     }
 
-    public static PendingIntent getIntentForStatusPanel(Context context, VpnConfig config) {
-        Preconditions.checkNotNull(config);
-
+    public static PendingIntent getIntentForStatusPanel(Context context) {
         Intent intent = new Intent();
         intent.setClassName(DIALOGS_PACKAGE, DIALOGS_PACKAGE + ".ManageDialog");
-        intent.putExtra("config", config);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
                 Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        return PendingIntent.getActivityAsUser(context, 0, intent, 0, null, UserHandle.CURRENT);
     }
 
     public String user;
     public String interfaze;
     public String session;
     public int mtu = -1;
-    public String addresses;
-    public String routes;
+    public List<LinkAddress> addresses = new ArrayList<LinkAddress>();
+    public List<RouteInfo> routes = new ArrayList<RouteInfo>();
     public List<String> dnsServers;
     public List<String> searchDomains;
     public PendingIntent configureIntent;
     public long startTime = -1;
     public boolean legacy;
+
+    public void addLegacyRoutes(String routesStr) {
+        if (routesStr.trim().equals("")) {
+            return;
+        }
+        String[] routes = routesStr.trim().split(" ");
+        for (String route : routes) {
+            //each route is ip/prefix
+            String[] split = route.split("/");
+            RouteInfo info = new RouteInfo(new LinkAddress
+                    (InetAddress.parseNumericAddress(split[0]), Integer.parseInt(split[1])), null);
+            this.routes.add(info);
+        }
+    }
+
+    public void addLegacyAddresses(String addressesStr) {
+        if (addressesStr.trim().equals("")) {
+            return;
+        }
+        String[] addresses = addressesStr.trim().split(" ");
+        for (String address : addresses) {
+            //each address is ip/prefix
+            String[] split = address.split("/");
+            LinkAddress addr = new LinkAddress(InetAddress.parseNumericAddress(split[0]),
+                    Integer.parseInt(split[1]));
+            this.addresses.add(addr);
+        }
+    }
 
     @Override
     public int describeContents() {
@@ -80,8 +110,8 @@ public class VpnConfig implements Parcelable {
         out.writeString(interfaze);
         out.writeString(session);
         out.writeInt(mtu);
-        out.writeString(addresses);
-        out.writeString(routes);
+        out.writeTypedList(addresses);
+        out.writeTypedList(routes);
         out.writeStringList(dnsServers);
         out.writeStringList(searchDomains);
         out.writeParcelable(configureIntent, flags);
@@ -98,8 +128,8 @@ public class VpnConfig implements Parcelable {
             config.interfaze = in.readString();
             config.session = in.readString();
             config.mtu = in.readInt();
-            config.addresses = in.readString();
-            config.routes = in.readString();
+            in.readTypedList(config.addresses, LinkAddress.CREATOR);
+            in.readTypedList(config.routes, RouteInfo.CREATOR);
             config.dnsServers = in.createStringArrayList();
             config.searchDomains = in.createStringArrayList();
             config.configureIntent = in.readParcelable(null);

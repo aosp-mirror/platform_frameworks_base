@@ -19,7 +19,7 @@
 
 #include "jni.h"
 
-#include <androidfw/InputDevice.h>
+#include <input/InputDevice.h>
 
 namespace android {
 

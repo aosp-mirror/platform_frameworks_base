@@ -326,6 +326,7 @@ import java.util.List;
  * <em>Properties:</em></br>
  * <ul>
  *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getContentChangeTypes()} - The type of content changes.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
@@ -661,6 +662,30 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_TOUCH_INTERACTION_END = 0x00200000;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The type of change is not defined.
+     */
+    public static final int CONTENT_CHANGE_TYPE_UNDEFINED = 0x00000000;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * A node in the subtree rooted at the source node was added or removed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_SUBTREE = 0x00000001;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The node's text changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_TEXT = 0x00000002;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The node's content description changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
+
+    /**
      * Mask for {@link AccessibilityEvent} all types.
      *
      * @see #TYPE_VIEW_CLICKED
@@ -695,6 +720,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private long mEventTime;
     int mMovementGranularity;
     int mAction;
+    int mContentChangeTypes;
 
     private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
 
@@ -714,6 +740,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mEventType = event.mEventType;
         mMovementGranularity = event.mMovementGranularity;
         mAction = event.mAction;
+        mContentChangeTypes = event.mContentChangeTypes;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
     }
@@ -774,6 +801,36 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public int getEventType() {
         return mEventType;
+    }
+
+    /**
+     * Gets the bit mask of change types signaled by an
+     * {@link #TYPE_WINDOW_CONTENT_CHANGED} event. A single event may represent
+     * multiple change types.
+     *
+     * @return The bit mask of change types. One or more of:
+     *         <ul>
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
+     *         </ul>
+     */
+    public int getContentChangeTypes() {
+        return mContentChangeTypes;
+    }
+
+    /**
+     * Sets the bit mask of node tree changes signaled by an
+     * {@link #TYPE_WINDOW_CONTENT_CHANGED} event.
+     *
+     * @param changeTypes The bit mask of change types.
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @see #getContentChangeTypes()
+     */
+    public void setContentChangeTypes(int changeTypes) {
+        enforceNotSealed();
+        mContentChangeTypes = changeTypes;
     }
 
     /**
@@ -853,10 +910,20 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Sets the performed action that triggered this event.
+     * <p>
+     * Valid actions are defined in {@link AccessibilityNodeInfo}:
+     * <ul>
+     * <li>{@link AccessibilityNodeInfo#ACTION_ACCESSIBILITY_FOCUS}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_ACCESSIBILITY_FOCUS}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_FOCUS}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_SELECTION}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLICK}
+     * <li>etc.
+     * </ul>
      *
      * @param action The action.
-     *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @see AccessibilityNodeInfo#performAction(int)
      */
     public void setAction(int action) {
         enforceNotSealed();
@@ -943,6 +1010,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mEventType = 0;
         mMovementGranularity = 0;
         mAction = 0;
+        mContentChangeTypes = 0;
         mPackageName = null;
         mEventTime = 0;
         while (!mRecords.isEmpty()) {
@@ -961,6 +1029,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mEventType = parcel.readInt();
         mMovementGranularity = parcel.readInt();
         mAction = parcel.readInt();
+        mContentChangeTypes = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         mConnectionId = parcel.readInt();
@@ -1013,6 +1082,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(mEventType);
         parcel.writeInt(mMovementGranularity);
         parcel.writeInt(mAction);
+        parcel.writeInt(mContentChangeTypes);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mConnectionId);
@@ -1074,6 +1144,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");
+            builder.append("; ContentChangeTypes: ").append(mContentChangeTypes);
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
             builder.append("; mSourceNodeId: ").append(mSourceNodeId);
             for (int i = 0; i < mRecords.size(); i++) {

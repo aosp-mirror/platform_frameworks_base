@@ -16,8 +16,11 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
+
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -64,11 +67,6 @@ class WindowList extends ArrayList<WindowState> {
  */
 final class WindowState implements WindowManagerPolicy.WindowState {
     static final String TAG = "WindowState";
-
-    static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
-    static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
-    static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
-    static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
 
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
@@ -220,6 +218,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final Rect mContentFrame = new Rect();
     final Rect mParentFrame = new Rect();
     final Rect mVisibleFrame = new Rect();
+    final Rect mDecorFrame = new Rect();
 
     boolean mContentChanged;
 
@@ -300,6 +299,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     /** When true this window can be displayed on screens owther than mOwnerUid's */
     private boolean mShowToOwnerOnly;
 
+    /** When true this window is at the top of the screen and should be layed out to extend under
+     * the status bar */
+    boolean mUnderStatusBar = true;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
@@ -330,7 +333,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
         mSeq = seq;
-        mEnforceSizeCompat = (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
+        mEnforceSizeCompat = (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
         if (WindowManagerService.localLOGV) Slog.v(
             TAG, "Window " + this + " client=" + c.asBinder()
             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
@@ -456,17 +459,23 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf) {
+    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf) {
         mHaveFrame = true;
 
-        final Rect container = mContainingFrame;
-        container.set(pf);
+        TaskStack stack = mAppToken != null ? getStack() : null;
+        if (stack != null && stack.hasSibling()) {
+            mContainingFrame.set(getStackBounds(stack));
+            if (mUnderStatusBar) {
+                mContainingFrame.top = pf.top;
+            }
+        } else {
+            mContainingFrame.set(pf);
+        }
 
-        final Rect display = mDisplayFrame;
-        display.set(df);
+        mDisplayFrame.set(df);
 
-        final int pw = container.right - container.left;
-        final int ph = container.bottom - container.top;
+        final int pw = mContainingFrame.width();
+        final int ph = mContainingFrame.height();
 
         int w,h;
         if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SCALED) != 0) {
@@ -513,18 +522,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContentChanged = true;
         }
 
-        final Rect overscan = mOverscanFrame;
-        overscan.set(of);
+        mOverscanFrame.set(of);
+        mContentFrame.set(cf);
+        mVisibleFrame.set(vf);
+        mDecorFrame.set(dcf);
 
-        final Rect content = mContentFrame;
-        content.set(cf);
-
-        final Rect visible = mVisibleFrame;
-        visible.set(vf);
-
-        final Rect frame = mFrame;
-        final int fw = frame.width();
-        final int fh = frame.height();
+        final int fw = mFrame.width();
+        final int fh = mFrame.height();
 
         //System.out.println("In: w=" + w + " h=" + h + " container=" +
         //                   container + " x=" + mAttrs.x + " y=" + mAttrs.y);
@@ -538,75 +542,69 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             y = mAttrs.y;
         }
 
-        Gravity.apply(mAttrs.gravity, w, h, container,
+        Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
                 (int) (x + mAttrs.horizontalMargin * pw),
-                (int) (y + mAttrs.verticalMargin * ph), frame);
+                (int) (y + mAttrs.verticalMargin * ph), mFrame);
 
         //System.out.println("Out: " + mFrame);
 
         // Now make sure the window fits in the overall display.
-        Gravity.applyDisplay(mAttrs.gravity, df, frame);
+        Gravity.applyDisplay(mAttrs.gravity, df, mFrame);
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
-        if (content.left < frame.left) content.left = frame.left;
-        if (content.top < frame.top) content.top = frame.top;
-        if (content.right > frame.right) content.right = frame.right;
-        if (content.bottom > frame.bottom) content.bottom = frame.bottom;
-        if (visible.left < frame.left) visible.left = frame.left;
-        if (visible.top < frame.top) visible.top = frame.top;
-        if (visible.right > frame.right) visible.right = frame.right;
-        if (visible.bottom > frame.bottom) visible.bottom = frame.bottom;
+        mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
+                Math.max(mContentFrame.top, mFrame.top),
+                Math.min(mContentFrame.right, mFrame.right),
+                Math.min(mContentFrame.bottom, mFrame.bottom));
 
-        final Rect overscanInsets = mOverscanInsets;
-        overscanInsets.left = overscan.left > frame.left ? overscan.left-frame.left : 0;
-        overscanInsets.top = overscan.top > frame.top ? overscan.top-frame.top : 0;
-        overscanInsets.right = overscan.right < frame.right ? frame.right-overscan.right : 0;
-        overscanInsets.bottom = overscan.bottom < frame.bottom ? frame.bottom-overscan.bottom : 0;
+        mVisibleFrame.set(Math.max(mVisibleFrame.left, mFrame.left),
+                Math.max(mVisibleFrame.top, mFrame.top),
+                Math.min(mVisibleFrame.right, mFrame.right),
+                Math.min(mVisibleFrame.bottom, mFrame.bottom));
 
-        final Rect contentInsets = mContentInsets;
-        contentInsets.left = content.left-frame.left;
-        contentInsets.top = content.top-frame.top;
-        contentInsets.right = frame.right-content.right;
-        contentInsets.bottom = frame.bottom-content.bottom;
+        mOverscanInsets.set(Math.max(mOverscanFrame.left - mFrame.left, 0),
+                Math.max(mOverscanFrame.top - mFrame.top, 0),
+                Math.max(mFrame.right - mOverscanFrame.right, 0),
+                Math.max(mFrame.bottom - mOverscanFrame.bottom, 0));
 
-        final Rect visibleInsets = mVisibleInsets;
-        visibleInsets.left = visible.left-frame.left;
-        visibleInsets.top = visible.top-frame.top;
-        visibleInsets.right = frame.right-visible.right;
-        visibleInsets.bottom = frame.bottom-visible.bottom;
+        mContentInsets.set(mContentFrame.left - mFrame.left,
+                mContentFrame.top - mFrame.top,
+                mFrame.right - mContentFrame.right,
+                mFrame.bottom - mContentFrame.bottom);
 
-        mCompatFrame.set(frame);
+        mVisibleInsets.set(mVisibleFrame.left - mFrame.left,
+                mVisibleFrame.top - mFrame.top,
+                mFrame.right - mVisibleFrame.right,
+                mFrame.bottom - mVisibleFrame.bottom);
+
+        mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
             // If there is a size compatibility scale being applied to the
             // window, we need to apply this to its insets so that they are
             // reported to the app in its coordinate space.
-            overscanInsets.scale(mInvGlobalScale);
-            contentInsets.scale(mInvGlobalScale);
-            visibleInsets.scale(mInvGlobalScale);
+            mOverscanInsets.scale(mInvGlobalScale);
+            mContentInsets.scale(mInvGlobalScale);
+            mVisibleInsets.scale(mInvGlobalScale);
 
             // Also the scaled frame that we report to the app needs to be
             // adjusted to be in its coordinate space.
             mCompatFrame.scale(mInvGlobalScale);
         }
 
-        if (mIsWallpaper && (fw != frame.width() || fh != frame.height())) {
+        if (mIsWallpaper && (fw != mFrame.width() || fh != mFrame.height())) {
             final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-            mService.updateWallpaperOffsetLocked(this, displayInfo.appWidth, displayInfo.appHeight,
-                    false);
+            mService.updateWallpaperOffsetLocked(this,
+                    displayInfo.logicalWidth, displayInfo.logicalHeight, false);
         }
 
-        if (WindowManagerService.localLOGV) {
-            //if ("com.google.android.youtube".equals(mAttrs.packageName)
-            //        && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                Slog.v(TAG, "Resolving (mRequestedWidth="
-                        + mRequestedWidth + ", mRequestedheight="
-                        + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
-                        + "): frame=" + mFrame.toShortString()
-                        + " ci=" + contentInsets.toShortString()
-                        + " vi=" + visibleInsets.toShortString());
-            //}
-        }
+        if (DEBUG_LAYOUT || WindowManagerService.localLOGV) Slog.v(TAG,
+                "Resolving (mRequestedWidth="
+                + mRequestedWidth + ", mRequestedheight="
+                + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
+                + "): frame=" + mFrame.toShortString()
+                + " ci=" + mContentInsets.toShortString()
+                + " vi=" + mVisibleInsets.toShortString());
     }
 
     @Override
@@ -705,6 +703,28 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     public int getDisplayId() {
         return mDisplayContent.getDisplayId();
+    }
+
+    TaskStack getStack() {
+        AppWindowToken wtoken = mAppToken == null ? mService.mFocusedApp : mAppToken;
+        if (wtoken != null) {
+            Task task = mService.mTaskIdToTask.get(wtoken.groupId);
+            if (task != null) {
+                return task.mStack;
+            }
+        }
+        return mDisplayContent.getHomeStack();
+    }
+
+    Rect getStackBounds() {
+        return getStackBounds(getStack());
+    }
+
+    private Rect getStackBounds(TaskStack stack) {
+        if (stack != null) {
+            return stack.mStackBox.mBounds;
+        }
+        return mFrame;
     }
 
     public long getInputDispatchingTimeoutNanos() {
@@ -901,7 +921,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 || (atoken == null && mRootToken.hidden)
                 || (atoken != null && (atoken.hiddenRequested || atoken.hidden))
                 || mAttachedHidden
-                || mExiting || mDestroying;
+                || (mExiting && !isAnimatingLw())
+                || mDestroying;
     }
 
     /**
@@ -968,12 +989,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return configChanged;
     }
 
-    boolean isConfigDiff(int mask) {
-        return mConfiguration != mService.mCurConfiguration
-                && mConfiguration != null
-                && (mConfiguration.diff(mService.mCurConfiguration) & mask) != 0;
-    }
-
     void removeLocked() {
         disposeInputChannel();
 
@@ -1026,7 +1041,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
                         mService.removeWindowLocked(mSession, win);
-                    } else if (WindowState.this.mHasSurface) {
+                    } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         mService.removeWindowLocked(mSession, WindowState.this);
                     }
@@ -1129,6 +1144,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // we allow the display to be enabled now.
             mService.enableScreenIfNeededLocked();
             if (mService.mCurrentFocus == this) {
+                if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.i(TAG,
+                        "WindowState.hideLw: setting mFocusMayChange true");
                 mService.mFocusMayChange = true;
             }
         }
@@ -1138,7 +1155,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return true;
     }
 
-    public boolean setAppOpVisibilityLw(boolean state) {
+    public void setAppOpVisibilityLw(boolean state) {
         if (mAppOpVisibility != state) {
             mAppOpVisibility = state;
             if (state) {
@@ -1148,13 +1165,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 // ops modifies they should only be hidden by policy due to the
                 // lock screen, and the user won't be changing this if locked.
                 // Plus it will quickly be fixed the next time we do a layout.
-                showLw(true, false);
+                showLw(true, true);
             } else {
-                hideLw(true, false);
+                hideLw(true, true);
             }
-            return true;
         }
-        return false;
     }
 
     @Override
@@ -1390,6 +1405,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.println();
             pw.print(prefix); pw.print("    content="); mContentFrame.printShortString(pw);
                     pw.print(" visible="); mVisibleFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("    decor="); mDecorFrame.printShortString(pw);
                     pw.println();
             pw.print(prefix); pw.print("Cur insets: overscan=");
                     mOverscanInsets.printShortString(pw);

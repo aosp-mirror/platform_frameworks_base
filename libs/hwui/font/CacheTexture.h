@@ -24,13 +24,14 @@
 #include <utils/Log.h>
 
 #include "FontUtil.h"
+#include "../PixelBuffer.h"
 #include "../Rect.h"
 #include "../Vertex.h"
 
 namespace android {
 namespace uirenderer {
 
-class PixelBuffer;
+class Caches;
 
 /**
  * CacheBlock is a node in a linked list of current free space areas in a CacheTexture.
@@ -73,7 +74,7 @@ struct CacheBlock {
 
 class CacheTexture {
 public:
-    CacheTexture(uint16_t width, uint16_t height, uint32_t maxQuadCount);
+    CacheTexture(uint16_t width, uint16_t height, GLenum format, uint32_t maxQuadCount);
     ~CacheTexture();
 
     void reset();
@@ -97,6 +98,14 @@ public:
 
     inline uint16_t getHeight() const {
         return mHeight;
+    }
+
+    inline GLenum getFormat() const {
+        return mFormat;
+    }
+
+    inline uint32_t getOffset(uint16_t x, uint16_t y) const {
+        return (y * mWidth + x) * PixelBuffer::formatSize(mFormat);
     }
 
     inline const Rect* getDirtyRect() const {
@@ -150,9 +159,9 @@ public:
             float x3, float y3, float u3, float v3,
             float x4, float y4, float u4, float v4) {
         TextureVertex* mesh = mMesh + mCurrentQuad * 4;
-        TextureVertex::set(mesh++, x1, y1, u1, v1);
         TextureVertex::set(mesh++, x2, y2, u2, v2);
         TextureVertex::set(mesh++, x3, y3, u3, v3);
+        TextureVertex::set(mesh++, x1, y1, u1, v1);
         TextureVertex::set(mesh++, x4, y4, u4, v4);
         mCurrentQuad++;
     }
@@ -172,15 +181,17 @@ private:
     GLuint mTextureId;
     uint16_t mWidth;
     uint16_t mHeight;
+    GLenum mFormat;
     bool mLinearFiltering;
     bool mDirty;
     uint16_t mNumGlyphs;
     TextureVertex* mMesh;
     uint32_t mCurrentQuad;
     uint32_t mMaxQuadCount;
+    Caches& mCaches;
     CacheBlock* mCacheBlocks;
+    bool mHasUnpackRowLength;
     Rect mDirtyRect;
-    bool mHasES3;
 };
 
 }; // namespace uirenderer

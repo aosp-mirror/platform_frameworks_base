@@ -63,6 +63,13 @@ public class StatusBarManager {
     public static final int NAVIGATION_HINT_RECENT_NOP    = 1 << 2;
     public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 3;
 
+    public static final int WINDOW_STATUS_BAR = 1;
+    public static final int WINDOW_NAVIGATION_BAR = 2;
+
+    public static final int WINDOW_STATE_SHOWING = 0;
+    public static final int WINDOW_STATE_HIDING = 1;
+    public static final int WINDOW_STATE_HIDDEN = 2;
+
     private Context mContext;
     private IStatusBarService mService;
     private IBinder mToken = new Binder();
@@ -178,5 +185,13 @@ public class StatusBarManager {
             // system process is dead anyway.
             throw new RuntimeException(ex);
         }
+    }
+
+    /** @hide */
+    public static String windowStateToString(int state) {
+        if (state == WINDOW_STATE_HIDING) return "WINDOW_STATE_HIDING";
+        if (state == WINDOW_STATE_HIDDEN) return "WINDOW_STATE_HIDDEN";
+        if (state == WINDOW_STATE_SHOWING) return "WINDOW_STATE_SHOWING";
+        return "WINDOW_STATE_UNKNOWN";
     }
 }

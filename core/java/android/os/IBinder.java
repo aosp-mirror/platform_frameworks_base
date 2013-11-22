@@ -238,7 +238,7 @@ public interface IBinder {
      * <p>You will only receive death notifications for remote binders,
      * as local binders by definition can't die without you dying as well.
      * 
-     * @throws Throws {@link RemoteException} if the target IBinder's
+     * @throws RemoteException if the target IBinder's
      * process has already died.
      * 
      * @see #unlinkToDeath
@@ -251,13 +251,13 @@ public interface IBinder {
      * The recipient will no longer be called if this object
      * dies.
      * 
-     * @return Returns true if the <var>recipient</var> is successfully
+     * @return {@code true} if the <var>recipient</var> is successfully
      * unlinked, assuring you that its
      * {@link DeathRecipient#binderDied DeathRecipient.binderDied()} method
-     * will not be called.  Returns false if the target IBinder has already
+     * will not be called;  {@code false} if the target IBinder has already
      * died, meaning the method has been (or soon will be) called.
      * 
-     * @throws Throws {@link java.util.NoSuchElementException} if the given
+     * @throws java.util.NoSuchElementException if the given
      * <var>recipient</var> has not been registered with the IBinder, and
      * the IBinder is still alive.  Note that if the <var>recipient</var>
      * was never registered, but the IBinder has already died, then this

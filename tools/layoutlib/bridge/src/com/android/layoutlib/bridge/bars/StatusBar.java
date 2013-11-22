@@ -30,7 +30,10 @@ import android.widget.TextView;
 
 public class StatusBar extends CustomBar {
 
-    public StatusBar(Context context, Density density) throws XmlPullParserException {
+    public StatusBar(Context context, Density density, int direction, boolean RtlEnabled)
+            throws XmlPullParserException {
+        // FIXME: if direction is RTL but it's not enabled in application manifest, mirror this bar.
+
         super(context, density, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml");
 
         // FIXME: use FILL_H?

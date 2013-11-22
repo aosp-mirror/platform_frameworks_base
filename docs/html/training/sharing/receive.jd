@@ -1,5 +1,5 @@
-page.title=Receiving Content from Other Apps
-parent.title=Sharing Content
+page.title=Receiving Simple Data from Other Apps
+parent.title=Sharing Simple Data
 parent.link=index.html
 
 trainingnavtop=true
@@ -30,26 +30,26 @@ Intent Filters</a></li>
 </div>
 </div>
 
-<p>Just as your application can send data to other applications, so too can it easily receive data 
-from applications. Think about how users interact with your application, and what data types you 
-want to receive from other applications. For example, a social networking application would likely 
-be interested in receiving text content, like an interesting web URL, from another app. The 
+<p>Just as your application can send data to other applications, so too can it easily receive data
+from applications. Think about how users interact with your application, and what data types you
+want to receive from other applications. For example, a social networking application would likely
+be interested in receiving text content, like an interesting web URL, from another app. The
 <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.plus">Google+ Android
-application</a> 
-accepts both text <em>and</em> single or multiple images. With this app, a user can easily start a 
+application</a>
+accepts both text <em>and</em> single or multiple images. With this app, a user can easily start a
 new Google+ post with photos from the Android Gallery app.</p>
 
 
 <h2 id="update-manifest">Update Your Manifest</h2>
 
-<p>Intent filters inform the system what intents an application component is willing to accept. 
-Similar to how you constructed an intent with action {@link android.content.Intent#ACTION_SEND} in 
-the <a href="{@docRoot}training/sharing/send.html">Send Content to Other Apps Using Intents</a> 
-lesson, you create intent filters in order to be able to receive intents with this action. You 
-define an intent filter in your manifest, using the 
+<p>Intent filters inform the system what intents an application component is willing to accept.
+Similar to how you constructed an intent with action {@link android.content.Intent#ACTION_SEND} in
+the <a href="{@docRoot}training/sharing/send.html">Sending Simple Data to Other Apps</a>
+lesson, you create intent filters in order to be able to receive intents with this action. You
+define an intent filter in your manifest, using the
 <code><a
-href="{@docRoot}guide/components/intents-filters.html#ifs">&lt;intent-filter&gt;</a></code> 
-element. For example, if your application handles receiving text content, a single image of any 
+href="{@docRoot}guide/components/intents-filters.html#ifs">&lt;intent-filter&gt;</a></code>
+element. For example, if your application handles receiving text content, a single image of any
 type, or multiple images of any type, your manifest would look like:</p>
 
 <pre>
@@ -72,24 +72,24 @@ type, or multiple images of any type, your manifest would look like:</p>
 &lt;/activity&gt;
 </pre>
 
-<p class="note"><strong>Note:</strong> For more information on intent filters and intent resolution 
+<p class="note"><strong>Note:</strong> For more information on intent filters and intent resolution
 please read <a href="{@docRoot}guide/components/intents-filters.html#ifs">Intents and Intent
 Filters</a></p>
 
 <p>When another application tries to share any of these things by constructing an intent and passing
 it to {@link android.content.Context#startActivity(android.content.Intent) startActivity()}, your
-application will be listed as an option in the intent chooser. If the user selects your application, 
-the corresponding activity (<code>.ui.MyActivity</code> in the example above) will be started. It 
+application will be listed as an option in the intent chooser. If the user selects your application,
+the corresponding activity (<code>.ui.MyActivity</code> in the example above) will be started. It
 is then up to you to handle the content appropriately within your code and UI.</p>
 
 
 <h2 id="handling-content">Handle the Incoming Content</h2>
 
 <p>To handle the content delivered by an {@link android.content.Intent}, start by calling {@link
-android.content.Intent#getIntent(String) getIntent()} 
-to get {@link android.content.Intent} object. Once you have the object, you can examine its 
-contents to determine what to do next. Keep in mind that if this activity can be started from other 
-parts of the system, such as the launcher, then you will need to take this into consideration when 
+android.content.Intent#getIntent(String) getIntent()}
+to get {@link android.content.Intent} object. Once you have the object, you can examine its
+contents to determine what to do next. Keep in mind that if this activity can be started from other
+parts of the system, such as the launcher, then you will need to take this into consideration when
 examining the intent.</p>
 
 <pre>
@@ -143,7 +143,7 @@ know what some other application may send you. For example, the wrong MIME type 
 image being sent might be extremely large. Also, remember to process binary data in a separate
 thread rather than the main ("UI") thread.</p>
 
-<p>Updating the UI can be as simple as populating an {@link android.widget.EditText}, or it can 
-be more complicated like applying an interesting photo filter to an image. It's really specific 
+<p>Updating the UI can be as simple as populating an {@link android.widget.EditText}, or it can
+be more complicated like applying an interesting photo filter to an image. It's really specific
 to your application what happens next.</p>
 

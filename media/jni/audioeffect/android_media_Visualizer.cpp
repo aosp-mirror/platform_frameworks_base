@@ -43,6 +43,8 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/audiofx/Visualizer";
+static const char* const kClassPeakRmsPathName =
+        "android/media/audiofx/Visualizer$MeasurementPeakRms";
 
 struct fields_t {
     // these fields provide access from C++ to the...
@@ -50,6 +52,8 @@ struct fields_t {
     jmethodID midPostNativeEvent;   // event post callback method
     jfieldID  fidNativeVisualizer; // stores in Java the native Visualizer object
     jfieldID  fidJniData;           // stores in Java additional resources used by the native Visualizer
+    jfieldID  fidPeak; // to access Visualizer.MeasurementPeakRms.mPeak
+    jfieldID  fidRms;  // to access Visualizer.MeasurementPeakRms.mRms
 };
 static fields_t fields;
 
@@ -257,6 +261,14 @@ android_media_visualizer_native_init(JNIEnv *env)
 
     fields.clazzEffect = (jclass)env->NewGlobalRef(clazz);
 
+    // Get the Visualizer.MeasurementPeakRms class
+    clazz = env->FindClass(kClassPeakRmsPathName);
+    if (clazz == NULL) {
+        ALOGE("Can't find %s", kClassPeakRmsPathName);
+        return;
+    }
+    jclass clazzMeasurementPeakRms = (jclass)env->NewGlobalRef(clazz);
+
     // Get the postEvent method
     fields.midPostNativeEvent = env->GetStaticMethodID(
             fields.clazzEffect,
@@ -283,7 +295,24 @@ android_media_visualizer_native_init(JNIEnv *env)
         ALOGE("Can't find Visualizer.%s", "mJniData");
         return;
     }
+    //      fidPeak
+    fields.fidPeak = env->GetFieldID(
+            clazzMeasurementPeakRms,
+            "mPeak", "I");
+    if (fields.fidPeak == NULL) {
+        ALOGE("Can't find Visualizer.MeasurementPeakRms.%s", "mPeak");
+        return;
+    }
+    //      fidRms
+    fields.fidRms = env->GetFieldID(
+            clazzMeasurementPeakRms,
+            "mRms", "I");
+    if (fields.fidRms == NULL) {
+        ALOGE("Can't find Visualizer.MeasurementPeakRms.%s", "mPeak");
+        return;
+    }
 
+    env->DeleteGlobalRef(clazzMeasurementPeakRms);
 }
 
 static void android_media_visualizer_effect_callback(int32_t event,
@@ -513,6 +542,26 @@ android_media_visualizer_native_getScalingMode(JNIEnv *env, jobject thiz)
 }
 
 static jint
+android_media_visualizer_native_setMeasurementMode(JNIEnv *env, jobject thiz, jint mode)
+{
+    Visualizer* lpVisualizer = getVisualizer(env, thiz);
+    if (lpVisualizer == NULL) {
+        return VISUALIZER_ERROR_NO_INIT;
+    }
+    return translateError(lpVisualizer->setMeasurementMode(mode));
+}
+
+static jint
+android_media_visualizer_native_getMeasurementMode(JNIEnv *env, jobject thiz)
+{
+    Visualizer* lpVisualizer = getVisualizer(env, thiz);
+    if (lpVisualizer == NULL) {
+        return MEASUREMENT_MODE_NONE;
+    }
+    return lpVisualizer->getMeasurementMode();
+}
+
+static jint
 android_media_visualizer_native_getSamplingRate(JNIEnv *env, jobject thiz)
 {
     Visualizer* lpVisualizer = getVisualizer(env, thiz);
@@ -556,6 +605,25 @@ android_media_visualizer_native_getFft(JNIEnv *env, jobject thiz, jbyteArray jFf
 
     env->ReleasePrimitiveArrayCritical(jFft, nFft, 0);
 
+    return status;
+}
+
+static jint
+android_media_visualizer_native_getPeakRms(JNIEnv *env, jobject thiz, jobject jPeakRmsObj)
+{
+    Visualizer* lpVisualizer = getVisualizer(env, thiz);
+    if (lpVisualizer == NULL) {
+        return VISUALIZER_ERROR_NO_INIT;
+    }
+    int32_t measurements[2];
+    jint status = translateError(
+                lpVisualizer->getIntMeasurements(MEASUREMENT_MODE_PEAK_RMS,
+                        2, measurements));
+    if (status == VISUALIZER_SUCCESS) {
+        // measurement worked, write the values to the java object
+        env->SetIntField(jPeakRmsObj, fields.fidPeak, measurements[MEASUREMENT_IDX_PEAK]);
+        env->SetIntField(jPeakRmsObj, fields.fidRms, measurements[MEASUREMENT_IDX_RMS]);
+    }
     return status;
 }
 
@@ -606,9 +674,13 @@ static JNINativeMethod gMethods[] = {
     {"native_getCaptureSize",    "()I",   (void *)android_media_visualizer_native_getCaptureSize},
     {"native_setScalingMode",    "(I)I",  (void *)android_media_visualizer_native_setScalingMode},
     {"native_getScalingMode",    "()I",   (void *)android_media_visualizer_native_getScalingMode},
+    {"native_setMeasurementMode","(I)I",  (void *)android_media_visualizer_native_setMeasurementMode},
+    {"native_getMeasurementMode","()I",   (void *)android_media_visualizer_native_getMeasurementMode},
     {"native_getSamplingRate",   "()I",   (void *)android_media_visualizer_native_getSamplingRate},
     {"native_getWaveForm",       "([B)I", (void *)android_media_visualizer_native_getWaveForm},
     {"native_getFft",            "([B)I", (void *)android_media_visualizer_native_getFft},
+    {"native_getPeakRms",      "(Landroid/media/audiofx/Visualizer$MeasurementPeakRms;)I",
+                                          (void *)android_media_visualizer_native_getPeakRms},
     {"native_setPeriodicCapture","(IZZ)I",(void *)android_media_setPeriodicCapture},
 };
 

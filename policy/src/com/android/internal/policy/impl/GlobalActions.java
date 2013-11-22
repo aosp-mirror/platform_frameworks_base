@@ -265,7 +265,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: bug report, if enabled
         if (Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0) {
+                Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
             mItems.add(
                 new SinglePressAction(com.android.internal.R.drawable.stat_sys_adb,
                         R.string.global_action_bug_report) {
@@ -349,16 +349,24 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         return dialog;
     }
 
+    private UserInfo getCurrentUser() {
+        try {
+            return ActivityManagerNative.getDefault().getCurrentUser();
+        } catch (RemoteException re) {
+            return null;
+        }
+    }
+
+    private boolean isCurrentUserOwner() {
+        UserInfo currentUser = getCurrentUser();
+        return currentUser == null || currentUser.isPrimary();
+    }
+
     private void addUsersToMenu(ArrayList<Action> items) {
         List<UserInfo> users = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
                 .getUsers();
         if (users.size() > 1) {
-            UserInfo currentUser;
-            try {
-                currentUser = ActivityManagerNative.getDefault().getCurrentUser();
-            } catch (RemoteException re) {
-                currentUser = null;
-            }
+            UserInfo currentUser = getCurrentUser();
             for (final UserInfo user : users) {
                 boolean isCurrentUser = currentUser == null
                         ? user.id == 0 : (currentUser.id == user.id);

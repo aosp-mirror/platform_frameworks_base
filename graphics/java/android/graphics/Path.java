@@ -78,7 +78,11 @@ public class Path {
             mLastDirection = null;
             if (rects != null) rects.setEmpty();
         }
+        // We promised not to change this, so preserve it around the native
+        // call, which does now reset fill type.
+        final FillType fillType = getFillType();
         native_reset(mNativePath);
+        setFillType(fillType);
     }
 
     /**
@@ -103,21 +107,106 @@ public class Path {
         }
     }
 
-    /** Enum for the ways a path may be filled
-    */
+    /**
+     * The logical operations that can be performed when combining two paths.
+     *
+     * @see #op(Path, android.graphics.Path.Op)
+     * @see #op(Path, Path, android.graphics.Path.Op)
+     */
+    public enum Op {
+        /**
+         * Subtract the second path from the first path.
+         */
+        DIFFERENCE,
+        /**
+         * Intersect the two paths.
+         */
+        INTERSECT,
+        /**
+         * Union (inclusive-or) the two paths.
+         */
+        UNION,
+        /**
+         * Exclusive-or the two paths.
+         */
+        XOR,
+        /**
+         * Subtract the first path from the second path.
+         */
+        REVERSE_DIFFERENCE
+    }
+
+    /**
+     * Set this path to the result of applying the Op to this path and the specified path.
+     * The resulting path will be constructed from non-overlapping contours.
+     * The curve order is reduced where possible so that cubics may be turned
+     * into quadratics, and quadratics maybe turned into lines.
+     *
+     * @param path The second operand (for difference, the subtrahend)
+     *
+     * @return True if operation succeeded, false otherwise and this path remains unmodified.
+     *
+     * @see Op
+     * @see #op(Path, Path, android.graphics.Path.Op)
+     */
+    public boolean op(Path path, Op op) {
+        return op(this, path, op);
+    }
+
+    /**
+     * Set this path to the result of applying the Op to the two specified paths.
+     * The resulting path will be constructed from non-overlapping contours.
+     * The curve order is reduced where possible so that cubics may be turned
+     * into quadratics, and quadratics maybe turned into lines.
+     *
+     * @param path1 The first operand (for difference, the minuend)
+     * @param path2 The second operand (for difference, the subtrahend)
+     *
+     * @return True if operation succeeded, false otherwise and this path remains unmodified.
+     *
+     * @see Op
+     * @see #op(Path, android.graphics.Path.Op)
+     */
+    public boolean op(Path path1, Path path2, Op op) {
+        if (native_op(path1.mNativePath, path2.mNativePath, op.ordinal(), this.mNativePath)) {
+            isSimplePath = false;
+            rects = null;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Enum for the ways a path may be filled.
+     */
     public enum FillType {
         // these must match the values in SkPath.h
+        /**
+         * Specifies that "inside" is computed by a non-zero sum of signed
+         * edge crossings.
+         */
         WINDING         (0),
+        /**
+         * Specifies that "inside" is computed by an odd number of edge
+         * crossings.
+         */
         EVEN_ODD        (1),
+        /**
+         * Same as {@link #WINDING}, but draws outside of the path, rather than inside.
+         */
         INVERSE_WINDING (2),
+        /**
+         * Same as {@link #EVEN_ODD}, but draws outside of the path, rather than inside.
+         */
         INVERSE_EVEN_ODD(3);
         
         FillType(int ni) {
             nativeInt = ni;
         }
+
         final int nativeInt;
     }
-    
+
     // these must be in the same order as their native values
     static final FillType[] sFillTypeArray = {
         FillType.WINDING,
@@ -644,24 +733,20 @@ public class Path {
     private static native void native_addRect(int nPath, float left, float top,
                                             float right, float bottom, int dir);
     private static native void native_addOval(int nPath, RectF oval, int dir);
-    private static native void native_addCircle(int nPath, float x, float y,
-                                                float radius, int dir);
+    private static native void native_addCircle(int nPath, float x, float y, float radius, int dir);
     private static native void native_addArc(int nPath, RectF oval,
                                             float startAngle, float sweepAngle);
     private static native void native_addRoundRect(int nPath, RectF rect,
                                                    float rx, float ry, int dir);
-    private static native void native_addRoundRect(int nPath, RectF r,
-                                                   float[] radii, int dir);
-    private static native void native_addPath(int nPath, int src, float dx,
-                                              float dy);
+    private static native void native_addRoundRect(int nPath, RectF r, float[] radii, int dir);
+    private static native void native_addPath(int nPath, int src, float dx, float dy);
     private static native void native_addPath(int nPath, int src);
     private static native void native_addPath(int nPath, int src, int matrix);
-    private static native void native_offset(int nPath, float dx, float dy,
-                                             int dst_path);
+    private static native void native_offset(int nPath, float dx, float dy, int dst_path);
     private static native void native_offset(int nPath, float dx, float dy);
     private static native void native_setLastPoint(int nPath, float dx, float dy);
-    private static native void native_transform(int nPath, int matrix,
-                                                int dst_path);
+    private static native void native_transform(int nPath, int matrix, int dst_path);
     private static native void native_transform(int nPath, int matrix);
+    private static native boolean native_op(int path1, int path2, int op, int result);
     private static native void finalizer(int nPath);
 }

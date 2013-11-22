@@ -26,6 +26,7 @@ import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
 import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
+import android.media.Rating;
 import android.net.Uri;
 import android.view.KeyEvent;
 
@@ -33,25 +34,29 @@ import android.view.KeyEvent;
  * {@hide}
  */
 interface IAudioService {
-    
-    void adjustVolume(int direction, int flags);
 
-    oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction);
+    void adjustVolume(int direction, int flags, String callingPackage);
 
-    void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags);
+    boolean isLocalOrRemoteMusicActive();
 
-    void adjustStreamVolume(int streamType, int direction, int flags);
+    oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
+            String callingPackage);
 
-    void adjustMasterVolume(int direction, int flags);
+    void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
+            String callingPackage);
 
-    void setStreamVolume(int streamType, int index, int flags);
+    void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
+
+    void adjustMasterVolume(int direction, int flags, String callingPackage);
+
+    void setStreamVolume(int streamType, int index, int flags, String callingPackage);
 
     oneway void setRemoteStreamVolume(int index);
 
-    void setMasterVolume(int index, int flags);
-    
+    void setMasterVolume(int index, int flags, String callingPackage);
+
     void setStreamSolo(int streamType, boolean state, IBinder cb);
-   	
+
     void setStreamMute(int streamType, boolean state, IBinder cb);
 
     boolean isStreamMute(int streamType);
@@ -67,19 +72,19 @@ interface IAudioService {
     int getStreamMaxVolume(int streamType);
 
     int getMasterMaxVolume();
-    
+
     int getLastAudibleStreamVolume(int streamType);
 
     int getLastAudibleMasterVolume();
 
     void setRingerMode(int ringerMode);
-    
+
     int getRingerMode();
 
     void setVibrateSetting(int vibrateType, int vibrateSetting);
-    
+
     int getVibrateSetting(int vibrateType);
-    
+
     boolean shouldVibrate(int vibrateType);
 
     void setMode(int mode, IBinder cb);
@@ -87,14 +92,16 @@ interface IAudioService {
     int getMode();
 
     oneway void playSoundEffect(int effectType);
-  
+
     oneway void playSoundEffectVolume(int effectType, float volume);
 
     boolean loadSoundEffects();
-  
+
     oneway void unloadSoundEffects();
 
     oneway void reloadAudioSettings();
+
+    oneway void avrcpSupportsAbsoluteVolume(String address, boolean support);
 
     void setSpeakerphoneOn(boolean on);
 
@@ -108,14 +115,14 @@ interface IAudioService {
 
     boolean isBluetoothA2dpOn();
 
-    oneway void setRemoteSubmixOn(boolean on, int address);
+    int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName);
 
-    int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb, IAudioFocusDispatcher l,
-            String clientId, String callingPackageName);
+    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId);
 
-    int abandonAudioFocus(IAudioFocusDispatcher l, String clientId);
-    
     void unregisterAudioFocusClient(String clientId);
+
+    int getCurrentAudioFocus();
 
     oneway void dispatchMediaKeyEvent(in KeyEvent keyEvent);
     void dispatchMediaKeyEventUnderWakelock(in KeyEvent keyEvent);
@@ -128,6 +135,8 @@ interface IAudioService {
 
     /**
      * Register an IRemoteControlDisplay.
+     * Success of registration is subject to a check on
+     *   the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission.
      * Notify all IRemoteControlClient of the new display and cause the RemoteControlClient
      * at the top of the stack to update the new display with its information.
      * @param rcd the IRemoteControlDisplay to register. No effect if null.
@@ -136,7 +145,17 @@ interface IAudioService {
      * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
      *   display doesn't need to receive artwork.
      */
-    oneway void   registerRemoteControlDisplay(in IRemoteControlDisplay rcd, int w, int h);
+    boolean registerRemoteControlDisplay(in IRemoteControlDisplay rcd, int w, int h);
+
+    /**
+     * Like registerRemoteControlDisplay, but with success being subject to a check on
+     *   the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission, and if it fails,
+     *   success is subject to listenerComp being one of the ENABLED_NOTIFICATION_LISTENERS
+     *   components.
+     */
+    boolean registerRemoteController(in IRemoteControlDisplay rcd, int w, int h,
+            in ComponentName listenerComp);
+
     /**
      * Unregister an IRemoteControlDisplay.
      * No effect if the IRemoteControlDisplay hasn't been successfully registered.
@@ -173,6 +192,15 @@ interface IAudioService {
      * @param timeMs the time in ms to seek to, must be positive.
      */
      void setRemoteControlClientPlaybackPosition(int generationId, long timeMs);
+     /**
+      * Notify the user of a RemoteControlClient that it should update its metadata with the
+      * new value for the given key.
+      * @param generationId the RemoteControlClient generation counter for which this request is
+      *         issued. Requests for an older generation than current one will be ignored.
+      * @param key the metadata key for which a new value exists
+      * @param value the new metadata value
+      */
+     void updateRemoteControlClientMetadata(int generationId, int key, in Rating value);
 
     /**
      * Do not use directly, use instead

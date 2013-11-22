@@ -132,4 +132,19 @@ public abstract class AccessibilityNodeProvider {
             int virtualViewId) {
         return null;
     }
+
+    /**
+     * Find the virtual view, i.e. a descendant of the host View, that has the
+     * specified focus type.
+     *
+     * @param focus The focus to find. One of
+     *            {@link AccessibilityNodeInfo#FOCUS_INPUT} or
+     *            {@link AccessibilityNodeInfo#FOCUS_ACCESSIBILITY}.
+     * @return The node info of the focused view or null.
+     * @see AccessibilityNodeInfo#FOCUS_INPUT
+     * @see AccessibilityNodeInfo#FOCUS_ACCESSIBILITY
+     */
+    public AccessibilityNodeInfo findFocus(int focus) {
+        return null;
+    }
 }

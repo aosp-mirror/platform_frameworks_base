@@ -16,21 +16,13 @@
 
 package com.android.connectivitymanagertest.unit;
 
-import android.content.BroadcastReceiver;
-import android.content.Intent;
 import android.content.Context;
-import android.app.Instrumentation;
-import android.os.Handler;
-import android.os.Message;
-import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.AndroidTestCase;
-
-import java.util.ArrayList;
 
 import android.util.Log;
 

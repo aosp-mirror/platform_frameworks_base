@@ -20,18 +20,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import java.io.File;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class ListActivity extends Activity {
@@ -86,7 +82,7 @@ public class ListActivity extends Activity {
 
         ListAdapter adapter = new SimpleListAdapter(this);
 
-        ListView list = (ListView) findViewById(R.id.list);
+        final ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
         
         registerForContextMenu(list);

@@ -158,14 +158,22 @@ abstract class HardwareLayer {
     /**
      * This must be invoked before drawing onto this layer.
      *
-     * @param currentCanvas
+     * @param currentCanvas The canvas whose rendering needs to be interrupted
      */
     abstract HardwareCanvas start(Canvas currentCanvas);
 
     /**
+     * This must be invoked before drawing onto this layer.
+     *
+     * @param dirty The dirty area to repaint
+     * @param currentCanvas The canvas whose rendering needs to be interrupted
+     */
+    abstract HardwareCanvas start(Canvas currentCanvas, Rect dirty);
+
+    /**
      * This must be invoked after drawing onto this layer.
      *
-     * @param currentCanvas
+     * @param currentCanvas The canvas whose rendering needs to be resumed
      */
     abstract void end(Canvas currentCanvas);
 

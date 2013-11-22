@@ -6,6 +6,7 @@
 #include <ScopedUtfChars.h>
 
 #include "EmojiFactory.h"
+#include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
 
 #include <dlfcn.h>
@@ -92,9 +93,6 @@ static EmojiFactoryCaller* gCaller;
 static pthread_once_t g_once = PTHREAD_ONCE_INIT;
 static bool lib_emoji_factory_is_ready;
 
-static jclass    gBitmap_class;
-static jmethodID gBitmap_constructorMethodID;
-
 static jclass    gEmojiFactory_class;
 static jmethodID gEmojiFactory_constructorMethodID;
 
@@ -172,13 +170,8 @@ static jobject android_emoji_EmojiFactory_getBitmapFromAndroidPua(
     return NULL;
   }
 
-  jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
-      static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)), NULL, false, NULL, -1);
-  if (env->ExceptionCheck() != 0) {
-    ALOGE("*** Uncaught exception returned from Java call!\n");
-    env->ExceptionDescribe();
-  }
-  return obj;
+  return GraphicsJNI::createBitmap(env, bitmap,
+      GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
 static void android_emoji_EmojiFactory_destructor(
@@ -281,9 +274,6 @@ static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
 }
 
 int register_android_emoji_EmojiFactory(JNIEnv* env) {
-  gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
-  gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
-                                                 "(I[BZ[BI)V");
   gEmojiFactory_class = make_globalref(env, "android/emoji/EmojiFactory");
   gEmojiFactory_constructorMethodID = env->GetMethodID(
       gEmojiFactory_class, "<init>", "(ILjava/lang/String;)V");

@@ -49,7 +49,8 @@ to query the active network and determine if it has Internet connectivity.</p>
         (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
  
 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
+boolean isConnected = activeNetwork != null &&
+                      activeNetwork.isConnectedOrConnecting();</pre>
 
 
 <h2 id="DetermineType">Determine the Type of your Internet Connection</h2> 

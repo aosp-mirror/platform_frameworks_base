@@ -16,8 +16,6 @@
 
 package android.content;
 
-import dalvik.system.CloseGuard;
-
 import android.accounts.Account;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
@@ -45,6 +43,8 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -54,7 +54,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 
 /**
  * This class provides applications access to the content model.
@@ -72,7 +71,13 @@ public abstract class ContentResolver {
      */
     @Deprecated
     public static final String SYNC_EXTRAS_ACCOUNT = "account";
+
+    /**
+     * If this extra is set to true, the sync request will be scheduled
+     * at the front of the sync request queue and without any delay
+     */
     public static final String SYNC_EXTRAS_EXPEDITED = "expedited";
+
     /**
      * @deprecated instead use
      * {@link #SYNC_EXTRAS_MANUAL}
@@ -104,9 +109,39 @@ public abstract class ContentResolver {
      */
     public static final String SYNC_EXTRAS_MANUAL = "force";
 
+    /**
+     * Indicates that this sync is intended to only upload local changes to the server.
+     * For example, this will be set to true if the sync is initiated by a call to
+     * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}
+     */
     public static final String SYNC_EXTRAS_UPLOAD = "upload";
+
+    /**
+     * Indicates that the sync adapter should proceed with the delete operations,
+     * even if it determines that there are too many.
+     * See {@link SyncResult#tooManyDeletions}
+     */
     public static final String SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS = "deletions_override";
+
+    /**
+     * Indicates that the sync adapter should not proceed with the delete operations,
+     * if it determines that there are too many.
+     * See {@link SyncResult#tooManyDeletions}
+     */
     public static final String SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS = "discard_deletions";
+
+    /* Extensions to API. TODO: Not clear if we will keep these as public flags. */
+    /** {@hide} User-specified flag for expected upload size. */
+    public static final String SYNC_EXTRAS_EXPECTED_UPLOAD = "expected_upload";
+
+    /** {@hide} User-specified flag for expected download size. */
+    public static final String SYNC_EXTRAS_EXPECTED_DOWNLOAD = "expected_download";
+
+    /** {@hide} Priority of this sync with respect to other syncs scheduled for this application. */
+    public static final String SYNC_EXTRAS_PRIORITY = "sync_priority";
+
+    /** {@hide} Flag to allow sync to occur on metered network. */
+    public static final String SYNC_EXTRAS_DISALLOW_METERED = "disallow_metered";
 
     /**
      * Set by the SyncManager to request that the SyncAdapter initialize itself for
@@ -220,22 +255,29 @@ public abstract class ContentResolver {
 
     // Always log queries which take 500ms+; shorter queries are
     // sampled accordingly.
+    private static final boolean ENABLE_CONTENT_SAMPLE = false;
     private static final int SLOW_THRESHOLD_MILLIS = 500;
     private final Random mRandom = new Random();  // guarded by itself
 
     public ContentResolver(Context context) {
         mContext = context != null ? context : ActivityThread.currentApplication();
-        mPackageName = mContext.getBasePackageName();
+        mPackageName = mContext.getOpPackageName();
     }
 
     /** @hide */
     protected abstract IContentProvider acquireProvider(Context c, String name);
-    /** Providing a default implementation of this, to avoid having to change
-     * a lot of other things, but implementations of ContentResolver should
-     * implement it. @hide */
+
+    /**
+     * Providing a default implementation of this, to avoid having to change a
+     * lot of other things, but implementations of ContentResolver should
+     * implement it.
+     *
+     * @hide
+     */
     protected IContentProvider acquireExistingProvider(Context c, String name) {
         return acquireProvider(c, name);
     }
+
     /** @hide */
     public abstract boolean releaseProvider(IContentProvider icp);
     /** @hide */
@@ -244,6 +286,11 @@ public abstract class ContentResolver {
     public abstract boolean releaseUnstableProvider(IContentProvider icp);
     /** @hide */
     public abstract void unstableProviderDied(IContentProvider icp);
+
+    /** @hide */
+    public void appNotRespondingViaProvider(IContentProvider icp) {
+        throw new UnsupportedOperationException("appNotRespondingViaProvider");
+    }
 
     /**
      * Return the MIME type of the given content URL.
@@ -291,7 +338,7 @@ public abstract class ContentResolver {
      * content URL can be returned when opened as as stream with
      * {@link #openTypedAssetFileDescriptor}.  Note that the types here are
      * not necessarily a superset of the type returned by {@link #getType} --
-     * many content providers can not return a raw stream for the structured
+     * many content providers cannot return a raw stream for the structured
      * data that they contain.
      *
      * @param url A Uri identifying content (either a list or specific type),
@@ -448,12 +495,97 @@ public abstract class ContentResolver {
             if (qCursor != null) {
                 qCursor.close();
             }
+            if (cancellationSignal != null) {
+                cancellationSignal.setRemote(null);
+            }
             if (unstableProvider != null) {
                 releaseUnstableProvider(unstableProvider);
             }
             if (stableProvider != null) {
                 releaseProvider(stableProvider);
             }
+        }
+    }
+
+    /**
+     * Transform the given <var>url</var> to a canonical representation of
+     * its referenced resource, which can be used across devices, persisted,
+     * backed up and restored, etc.  The returned Uri is still a fully capable
+     * Uri for use with its content provider, allowing you to do all of the
+     * same content provider operations as with the original Uri --
+     * {@link #query}, {@link #openInputStream(android.net.Uri)}, etc.  The
+     * only difference in behavior between the original and new Uris is that
+     * the content provider may need to do some additional work at each call
+     * using it to resolve it to the correct resource, especially if the
+     * canonical Uri has been moved to a different environment.
+     *
+     * <p>If you are moving a canonical Uri between environments, you should
+     * perform another call to {@link #canonicalize} with that original Uri to
+     * re-canonicalize it for the current environment.  Alternatively, you may
+     * want to use {@link #uncanonicalize} to transform it to a non-canonical
+     * Uri that works only in the current environment but potentially more
+     * efficiently than the canonical representation.</p>
+     *
+     * @param url The {@link Uri} that is to be transformed to a canonical
+     * representation.  Like all resolver calls, the input can be either
+     * a non-canonical or canonical Uri.
+     *
+     * @return Returns the official canonical representation of <var>url</var>,
+     * or null if the content provider does not support a canonical representation
+     * of the given Uri.  Many providers may not support canonicalization of some
+     * or all of their Uris.
+     *
+     * @see #uncanonicalize
+     */
+    public final Uri canonicalize(Uri url) {
+        IContentProvider provider = acquireProvider(url);
+        if (provider == null) {
+            return null;
+        }
+
+        try {
+            return provider.canonicalize(mPackageName, url);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
+        } finally {
+            releaseProvider(provider);
+        }
+    }
+
+    /**
+     * Given a canonical Uri previously generated by {@link #canonicalize}, convert
+     * it to its local non-canonical form.  This can be useful in some cases where
+     * you know that you will only be using the Uri in the current environment and
+     * want to avoid any possible overhead when using it with the content
+     * provider or want to verify that the referenced data exists at all in the
+     * new environment.
+     *
+     * @param url The canonical {@link Uri} that is to be convered back to its
+     * non-canonical form.
+     *
+     * @return Returns the non-canonical representation of <var>url</var>.  This will
+     * return null if data identified by the canonical Uri can not be found in
+     * the current environment; callers must always check for null and deal with
+     * that by appropriately falling back to an alternative.
+     *
+     * @see #canonicalize
+     */
+    public final Uri uncanonicalize(Uri url) {
+        IContentProvider provider = acquireProvider(url);
+        if (provider == null) {
+            return null;
+        }
+
+        try {
+            return provider.uncanonicalize(mPackageName, url);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
+        } finally {
+            releaseProvider(provider);
         }
     }
 
@@ -494,7 +626,7 @@ public abstract class ContentResolver {
             // with sufficient testing.
             return new FileInputStream(uri.getPath());
         } else {
-            AssetFileDescriptor fd = openAssetFileDescriptor(uri, "r");
+            AssetFileDescriptor fd = openAssetFileDescriptor(uri, "r", null);
             try {
                 return fd != null ? fd.createInputStream() : null;
             } catch (IOException e) {
@@ -534,7 +666,7 @@ public abstract class ContentResolver {
      */
     public final OutputStream openOutputStream(Uri uri, String mode)
             throws FileNotFoundException {
-        AssetFileDescriptor fd = openAssetFileDescriptor(uri, mode);
+        AssetFileDescriptor fd = openAssetFileDescriptor(uri, mode, null);
         try {
             return fd != null ? fd.createOutputStream() : null;
         } catch (IOException e) {
@@ -560,6 +692,15 @@ public abstract class ContentResolver {
      *
      * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
      * on these schemes.
+     * <p>
+     * If opening with the exclusive "r" or "w" modes, the returned
+     * ParcelFileDescriptor could be a pipe or socket pair to enable streaming
+     * of data. Opening with the "rw" mode implies a file on disk that supports
+     * seeking. If possible, always use an exclusive mode to give the underlying
+     * {@link ContentProvider} the most flexibility.
+     * <p>
+     * If you are writing a file, and need to communicate an error to the
+     * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
      * @param mode The file mode to use, as per {@link ContentProvider#openFile
@@ -570,9 +711,54 @@ public abstract class ContentResolver {
      * file exists under the URI or the mode is invalid.
      * @see #openAssetFileDescriptor(Uri, String)
      */
+    public final ParcelFileDescriptor openFileDescriptor(Uri uri, String mode)
+            throws FileNotFoundException {
+        return openFileDescriptor(uri, mode, null);
+    }
+
+    /**
+     * Open a raw file descriptor to access data under a URI.  This
+     * is like {@link #openAssetFileDescriptor(Uri, String)}, but uses the
+     * underlying {@link ContentProvider#openFile}
+     * ContentProvider.openFile()} method, so will <em>not</em> work with
+     * providers that return sub-sections of files.  If at all possible,
+     * you should use {@link #openAssetFileDescriptor(Uri, String)}.  You
+     * will receive a FileNotFoundException exception if the provider returns a
+     * sub-section of a file.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
+     *
+     * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
+     * on these schemes.
+     * <p>
+     * If opening with the exclusive "r" or "w" modes, the returned
+     * ParcelFileDescriptor could be a pipe or socket pair to enable streaming
+     * of data. Opening with the "rw" mode implies a file on disk that supports
+     * seeking. If possible, always use an exclusive mode to give the underlying
+     * {@link ContentProvider} the most flexibility.
+     * <p>
+     * If you are writing a file, and need to communicate an error to the
+     * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
+     *
+     * @param uri The desired URI to open.
+     * @param mode The file mode to use, as per {@link ContentProvider#openFile
+     * ContentProvider.openFile}.
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *         or null if none. If the operation is canceled, then
+     *         {@link OperationCanceledException} will be thrown.
+     * @return Returns a new ParcelFileDescriptor pointing to the file.  You
+     * own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException if no
+     * file exists under the URI or the mode is invalid.
+     * @see #openAssetFileDescriptor(Uri, String)
+     */
     public final ParcelFileDescriptor openFileDescriptor(Uri uri,
-            String mode) throws FileNotFoundException {
-        AssetFileDescriptor afd = openAssetFileDescriptor(uri, mode);
+            String mode, CancellationSignal cancellationSignal) throws FileNotFoundException {
+        AssetFileDescriptor afd = openAssetFileDescriptor(uri, mode, cancellationSignal);
         if (afd == null) {
             return null;
         }
@@ -640,8 +826,64 @@ public abstract class ContentResolver {
      * @throws FileNotFoundException Throws FileNotFoundException of no
      * file exists under the URI or the mode is invalid.
      */
+    public final AssetFileDescriptor openAssetFileDescriptor(Uri uri, String mode)
+            throws FileNotFoundException {
+        return openAssetFileDescriptor(uri, mode, null);
+    }
+
+    /**
+     * Open a raw file descriptor to access data under a URI.  This
+     * interacts with the underlying {@link ContentProvider#openAssetFile}
+     * method of the provider associated with the given URI, to retrieve any file stored there.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
+     * <h5>The android.resource ({@link #SCHEME_ANDROID_RESOURCE}) Scheme</h5>
+     * <p>
+     * A Uri object can be used to reference a resource in an APK file.  The
+     * Uri should be one of the following formats:
+     * <ul>
+     * <li><code>android.resource://package_name/id_number</code><br/>
+     * <code>package_name</code> is your package name as listed in your AndroidManifest.xml.
+     * For example <code>com.example.myapp</code><br/>
+     * <code>id_number</code> is the int form of the ID.<br/>
+     * The easiest way to construct this form is
+     * <pre>Uri uri = Uri.parse("android.resource://com.example.myapp/" + R.raw.my_resource");</pre>
+     * </li>
+     * <li><code>android.resource://package_name/type/name</code><br/>
+     * <code>package_name</code> is your package name as listed in your AndroidManifest.xml.
+     * For example <code>com.example.myapp</code><br/>
+     * <code>type</code> is the string form of the resource type.  For example, <code>raw</code>
+     * or <code>drawable</code>.
+     * <code>name</code> is the string form of the resource name.  That is, whatever the file
+     * name was in your res directory, without the type extension.
+     * The easiest way to construct this form is
+     * <pre>Uri uri = Uri.parse("android.resource://com.example.myapp/raw/my_resource");</pre>
+     * </li>
+     * </ul>
+     *
+     * <p>Note that if this function is called for read-only input (mode is "r")
+     * on a content: URI, it will instead call {@link #openTypedAssetFileDescriptor}
+     * for you with a MIME type of "*\/*".  This allows such callers to benefit
+     * from any built-in data conversion that a provider implements.
+     *
+     * @param uri The desired URI to open.
+     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
+     * ContentProvider.openAssetFile}.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if
+     *            none. If the operation is canceled, then
+     *            {@link OperationCanceledException} will be thrown.
+     * @return Returns a new ParcelFileDescriptor pointing to the file.  You
+     * own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException of no
+     * file exists under the URI or the mode is invalid.
+     */
     public final AssetFileDescriptor openAssetFileDescriptor(Uri uri,
-            String mode) throws FileNotFoundException {
+            String mode, CancellationSignal cancellationSignal) throws FileNotFoundException {
         String scheme = uri.getScheme();
         if (SCHEME_ANDROID_RESOURCE.equals(scheme)) {
             if (!"r".equals(mode)) {
@@ -655,11 +897,11 @@ public abstract class ContentResolver {
             }
         } else if (SCHEME_FILE.equals(scheme)) {
             ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
-                    new File(uri.getPath()), modeToMode(uri, mode));
+                    new File(uri.getPath()), ParcelFileDescriptor.parseMode(mode));
             return new AssetFileDescriptor(pfd, 0, -1);
         } else {
             if ("r".equals(mode)) {
-                return openTypedAssetFileDescriptor(uri, "*/*", null);
+                return openTypedAssetFileDescriptor(uri, "*/*", null, cancellationSignal);
             } else {
                 IContentProvider unstableProvider = acquireUnstableProvider(uri);
                 if (unstableProvider == null) {
@@ -669,8 +911,16 @@ public abstract class ContentResolver {
                 AssetFileDescriptor fd = null;
 
                 try {
+                    ICancellationSignal remoteCancellationSignal = null;
+                    if (cancellationSignal != null) {
+                        cancellationSignal.throwIfCanceled();
+                        remoteCancellationSignal = unstableProvider.createCancellationSignal();
+                        cancellationSignal.setRemote(remoteCancellationSignal);
+                    }
+
                     try {
-                        fd = unstableProvider.openAssetFile(mPackageName, uri, mode);
+                        fd = unstableProvider.openAssetFile(
+                                mPackageName, uri, mode, remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -684,7 +934,8 @@ public abstract class ContentResolver {
                         if (stableProvider == null) {
                             throw new FileNotFoundException("No content provider: " + uri);
                         }
-                        fd = stableProvider.openAssetFile(mPackageName, uri, mode);
+                        fd = stableProvider.openAssetFile(
+                                mPackageName, uri, mode, remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -712,6 +963,9 @@ public abstract class ContentResolver {
                 } catch (FileNotFoundException e) {
                     throw e;
                 } finally {
+                    if (cancellationSignal != null) {
+                        cancellationSignal.setRemote(null);
+                    }
                     if (stableProvider != null) {
                         releaseProvider(stableProvider);
                     }
@@ -751,8 +1005,45 @@ public abstract class ContentResolver {
      * @throws FileNotFoundException Throws FileNotFoundException of no
      * data of the desired type exists under the URI.
      */
+    public final AssetFileDescriptor openTypedAssetFileDescriptor(
+            Uri uri, String mimeType, Bundle opts) throws FileNotFoundException {
+        return openTypedAssetFileDescriptor(uri, mimeType, opts, null);
+    }
+
+    /**
+     * Open a raw file descriptor to access (potentially type transformed)
+     * data from a "content:" URI.  This interacts with the underlying
+     * {@link ContentProvider#openTypedAssetFile} method of the provider
+     * associated with the given URI, to retrieve retrieve any appropriate
+     * data stream for the data stored there.
+     *
+     * <p>Unlike {@link #openAssetFileDescriptor}, this function only works
+     * with "content:" URIs, because content providers are the only facility
+     * with an associated MIME type to ensure that the returned data stream
+     * is of the desired type.
+     *
+     * <p>All text/* streams are encoded in UTF-8.
+     *
+     * @param uri The desired URI to open.
+     * @param mimeType The desired MIME type of the returned data.  This can
+     * be a pattern such as *\/*, which will allow the content provider to
+     * select a type, though there is no way for you to determine what type
+     * it is returning.
+     * @param opts Additional provider-dependent options.
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *         or null if none. If the operation is canceled, then
+     *         {@link OperationCanceledException} will be thrown.
+     * @return Returns a new ParcelFileDescriptor from which you can read the
+     * data stream from the provider.  Note that this may be a pipe, meaning
+     * you can't seek in it.  The only seek you should do is if the
+     * AssetFileDescriptor contains an offset, to move to that offset before
+     * reading.  You own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException of no
+     * data of the desired type exists under the URI.
+     */
     public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
-            String mimeType, Bundle opts) throws FileNotFoundException {
+            String mimeType, Bundle opts, CancellationSignal cancellationSignal)
+            throws FileNotFoundException {
         IContentProvider unstableProvider = acquireUnstableProvider(uri);
         if (unstableProvider == null) {
             throw new FileNotFoundException("No content provider: " + uri);
@@ -761,8 +1052,16 @@ public abstract class ContentResolver {
         AssetFileDescriptor fd = null;
 
         try {
+            ICancellationSignal remoteCancellationSignal = null;
+            if (cancellationSignal != null) {
+                cancellationSignal.throwIfCanceled();
+                remoteCancellationSignal = unstableProvider.createCancellationSignal();
+                cancellationSignal.setRemote(remoteCancellationSignal);
+            }
+
             try {
-                fd = unstableProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
+                fd = unstableProvider.openTypedAssetFile(
+                        mPackageName, uri, mimeType, opts, remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -776,7 +1075,8 @@ public abstract class ContentResolver {
                 if (stableProvider == null) {
                     throw new FileNotFoundException("No content provider: " + uri);
                 }
-                fd = stableProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
+                fd = stableProvider.openTypedAssetFile(
+                        mPackageName, uri, mimeType, opts, remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -804,6 +1104,9 @@ public abstract class ContentResolver {
         } catch (FileNotFoundException e) {
             throw e;
         } finally {
+            if (cancellationSignal != null) {
+                cancellationSignal.setRemote(null);
+            }
             if (stableProvider != null) {
                 releaseProvider(stableProvider);
             }
@@ -864,33 +1167,6 @@ public abstract class ContentResolver {
         res.r = r;
         res.id = id;
         return res;
-    }
-
-    /** @hide */
-    static public int modeToMode(Uri uri, String mode) throws FileNotFoundException {
-        int modeBits;
-        if ("r".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_ONLY;
-        } else if ("w".equals(mode) || "wt".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
-                    | ParcelFileDescriptor.MODE_CREATE
-                    | ParcelFileDescriptor.MODE_TRUNCATE;
-        } else if ("wa".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
-                    | ParcelFileDescriptor.MODE_CREATE
-                    | ParcelFileDescriptor.MODE_APPEND;
-        } else if ("rw".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
-                    | ParcelFileDescriptor.MODE_CREATE;
-        } else if ("rwt".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
-                    | ParcelFileDescriptor.MODE_CREATE
-                    | ParcelFileDescriptor.MODE_TRUNCATE;
-        } else {
-            throw new FileNotFoundException("Bad mode for " + uri + ": "
-                    + mode);
-        }
-        return modeBits;
     }
 
     /**
@@ -1351,6 +1627,71 @@ public abstract class ContentResolver {
     }
 
     /**
+     * Take a persistable URI permission grant that has been offered. Once
+     * taken, the permission grant will be remembered across device reboots.
+     * Only URI permissions granted with
+     * {@link Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION} can be persisted. If
+     * the grant has already been persisted, taking it again will touch
+     * {@link UriPermission#getPersistedTime()}.
+     *
+     * @see #getPersistedUriPermissions()
+     */
+    public void takePersistableUriPermission(Uri uri, int modeFlags) {
+        try {
+            ActivityManagerNative.getDefault().takePersistableUriPermission(uri, modeFlags);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Relinquish a persisted URI permission grant. The URI must have been
+     * previously made persistent with
+     * {@link #takePersistableUriPermission(Uri, int)}. Any non-persistent
+     * grants to the calling package will remain intact.
+     *
+     * @see #getPersistedUriPermissions()
+     */
+    public void releasePersistableUriPermission(Uri uri, int modeFlags) {
+        try {
+            ActivityManagerNative.getDefault().releasePersistableUriPermission(uri, modeFlags);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Return list of all URI permission grants that have been persisted by the
+     * calling app. That is, the returned permissions have been granted
+     * <em>to</em> the calling app. Only persistable grants taken with
+     * {@link #takePersistableUriPermission(Uri, int)} are returned.
+     *
+     * @see #takePersistableUriPermission(Uri, int)
+     * @see #releasePersistableUriPermission(Uri, int)
+     */
+    public List<UriPermission> getPersistedUriPermissions() {
+        try {
+            return ActivityManagerNative.getDefault()
+                    .getPersistedUriPermissions(mPackageName, true).getList();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Activity manager has died", e);
+        }
+    }
+
+    /**
+     * Return list of all persisted URI permission grants that are hosted by the
+     * calling app. That is, the returned permissions have been granted
+     * <em>from</em> the calling app. Only grants taken with
+     * {@link #takePersistableUriPermission(Uri, int)} are returned.
+     */
+    public List<UriPermission> getOutgoingPersistedUriPermissions() {
+        try {
+            return ActivityManagerNative.getDefault()
+                    .getPersistedUriPermissions(mPackageName, false).getList();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Activity manager has died", e);
+        }
+    }
+
+    /**
      * Start an asynchronous sync operation. If you want to monitor the progress
      * of the sync you may register a SyncObserver. Only values of the following
      * types may be used in the extras bundle:
@@ -1361,6 +1702,8 @@ public abstract class ContentResolver {
      * <li>Float</li>
      * <li>Double</li>
      * <li>String</li>
+     * <li>Account</li>
+     * <li>null</li>
      * </ul>
      *
      * @param uri the uri of the provider to sync or null to sync all providers.
@@ -1392,6 +1735,8 @@ public abstract class ContentResolver {
      * <li>Float</li>
      * <li>Double</li>
      * <li>String</li>
+     * <li>Account</li>
+     * <li>null</li>
      * </ul>
      *
      * @param account which account should be synced
@@ -1399,10 +1744,30 @@ public abstract class ContentResolver {
      * @param extras any extras to pass to the SyncAdapter.
      */
     public static void requestSync(Account account, String authority, Bundle extras) {
-        validateSyncExtrasBundle(extras);
+        if (extras == null) {
+            throw new IllegalArgumentException("Must specify extras.");
+        }
+        SyncRequest request =
+            new SyncRequest.Builder()
+                .setSyncAdapter(account, authority)
+                .setExtras(extras)
+                .syncOnce()
+                .build();
+        requestSync(request);
+    }
+
+    /**
+     * Register a sync with the SyncManager. These requests are built using the
+     * {@link SyncRequest.Builder}.
+     *
+     * @param request The immutable SyncRequest object containing the sync parameters. Use
+     * {@link SyncRequest.Builder} to construct these.
+     */
+    public static void requestSync(SyncRequest request) {
         try {
-            getContentService().requestSync(account, authority, extras);
-        } catch (RemoteException e) {
+            getContentService().sync(request);
+        } catch(RemoteException e) {
+            // Shouldn't happen.
         }
     }
 
@@ -1532,6 +1897,9 @@ public abstract class ContentResolver {
      * {@link #SYNC_EXTRAS_INITIALIZE}, {@link #SYNC_EXTRAS_FORCE},
      * {@link #SYNC_EXTRAS_EXPEDITED}, {@link #SYNC_EXTRAS_MANUAL} set to true.
      * If any are supplied then an {@link IllegalArgumentException} will be thrown.
+     * <p>As of API level 19 this function introduces a default flexibility of ~4% (up to a maximum
+     * of one hour in the day) into the requested period. Use
+     * {@link SyncRequest.Builder#syncPeriodic(long, long)} to set this flexibility manually.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
@@ -1546,12 +1914,6 @@ public abstract class ContentResolver {
     public static void addPeriodicSync(Account account, String authority, Bundle extras,
             long pollFrequency) {
         validateSyncExtrasBundle(extras);
-        if (account == null) {
-            throw new IllegalArgumentException("account must not be null");
-        }
-        if (authority == null) {
-            throw new IllegalArgumentException("authority must not be null");
-        }
         if (extras.getBoolean(SYNC_EXTRAS_MANUAL, false)
                 || extras.getBoolean(SYNC_EXTRAS_DO_NOT_RETRY, false)
                 || extras.getBoolean(SYNC_EXTRAS_IGNORE_BACKOFF, false)
@@ -1562,7 +1924,7 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("illegal extras were set");
         }
         try {
-            getContentService().addPeriodicSync(account, authority, extras, pollFrequency);
+             getContentService().addPeriodicSync(account, authority, extras, pollFrequency);
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
@@ -1581,12 +1943,6 @@ public abstract class ContentResolver {
      */
     public static void removePeriodicSync(Account account, String authority, Bundle extras) {
         validateSyncExtrasBundle(extras);
-        if (account == null) {
-            throw new IllegalArgumentException("account must not be null");
-        }
-        if (authority == null) {
-            throw new IllegalArgumentException("authority must not be null");
-        }
         try {
             getContentService().removePeriodicSync(account, authority, extras);
         } catch (RemoteException e) {
@@ -1604,12 +1960,6 @@ public abstract class ContentResolver {
      * @return a list of PeriodicSync objects. This list may be empty but will never be null.
      */
     public static List<PeriodicSync> getPeriodicSyncs(Account account, String authority) {
-        if (account == null) {
-            throw new IllegalArgumentException("account must not be null");
-        }
-        if (authority == null) {
-            throw new IllegalArgumentException("authority must not be null");
-        }
         try {
             return getContentService().getPeriodicSyncs(account, authority);
         } catch (RemoteException e) {
@@ -1832,6 +2182,7 @@ public abstract class ContentResolver {
     private void maybeLogQueryToEventLog(long durationMillis,
                                          Uri uri, String[] projection,
                                          String selection, String sortOrder) {
+        if (!ENABLE_CONTENT_SAMPLE) return;
         int samplePercent = samplePercentForDuration(durationMillis);
         if (samplePercent < 100) {
             synchronized (mRandom) {
@@ -1871,6 +2222,7 @@ public abstract class ContentResolver {
 
     private void maybeLogUpdateToEventLog(
         long durationMillis, Uri uri, String operation, String selection) {
+        if (!ENABLE_CONTENT_SAMPLE) return;
         int samplePercent = samplePercentForDuration(durationMillis);
         if (samplePercent < 100) {
             synchronized (mRandom) {
@@ -1935,7 +2287,7 @@ public abstract class ContentResolver {
 
     private final class ParcelFileDescriptorInner extends ParcelFileDescriptor {
         private final IContentProvider mContentProvider;
-        private boolean mReleaseProviderFlag = false;
+        private boolean mProviderReleased;
 
         ParcelFileDescriptorInner(ParcelFileDescriptor pfd, IContentProvider icp) {
             super(pfd);
@@ -1943,18 +2295,10 @@ public abstract class ContentResolver {
         }
 
         @Override
-        public void close() throws IOException {
-            if(!mReleaseProviderFlag) {
-                super.close();
+        public void releaseResources() {
+            if (!mProviderReleased) {
                 ContentResolver.this.releaseProvider(mContentProvider);
-                mReleaseProviderFlag = true;
-            }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            if (!mReleaseProviderFlag) {
-                close();
+                mProviderReleased = true;
             }
         }
     }

@@ -20,7 +20,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <utils/Log.h>
-#include <utils/ZipFileRO.h>
+#include <androidfw/ZipFileRO.h>
 #include <ScopedUtfChars.h>
 
 #include <zlib.h>

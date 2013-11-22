@@ -178,7 +178,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mConnectedApns = new ArrayList<String>();
     }
 
-    public void systemReady() {
+    public void systemRunning() {
         // Watch for interesting updates
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);

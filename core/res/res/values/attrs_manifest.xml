@@ -1048,6 +1048,11 @@
         tag; often this is one of the {@link android.Manifest.permission standard
         system permissions}. -->
         <attr name="name" />
+        <!-- Optional: specify the maximum version of the Android OS for which the
+             application wishes to request the permission.  When running on a version
+             of Android higher than the number given here, the permission will not
+             be requested.  -->
+        <attr name="maxSdkVersion" format="integer" />
         <!--  Specify whether this permission is required for the application.
               The default is true, meaning the application requires the
               permission, and it must always be granted when it is installed.
@@ -1129,7 +1134,7 @@
              on.  You can use this to ensure your application is filtered out
              of later versions of the platform when you know you have
              incompatibility with them. -->
-        <attr name="maxSdkVersion" format="integer" />
+        <attr name="maxSdkVersion" />
     </declare-styleable>
     
     <!-- The <code>library</code> tag declares that this apk is providing itself
@@ -1624,6 +1629,27 @@
              case-sensitive, unlike the formal RFC.  As a result,
              schemes here should always use lower case letters.</em></p> -->
         <attr name="scheme" format="string" />
+        <!-- Specify a URI scheme specific part that must exactly match, as per
+             {@link android.content.IntentFilter#addDataSchemeSpecificPart
+             IntentFilter.addDataSchemeSpecificPart()} with
+             {@link android.os.PatternMatcher#PATTERN_LITERAL}. -->
+        <attr name="ssp" format="string" />
+        <!-- Specify a URI scheme specific part that must be a prefix to match, as per
+             {@link android.content.IntentFilter#addDataSchemeSpecificPart
+             IntentFilter.addDataSchemeSpecificPart()} with
+             {@link android.os.PatternMatcher#PATTERN_PREFIX}. -->
+        <attr name="sspPrefix" format="string" />
+        <!-- Specify a URI scheme specific part that matches a simple pattern, as per
+             {@link android.content.IntentFilter#addDataSchemeSpecificPart
+             IntentFilter.addDataSchemeSpecificPart()} with
+             {@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="sspPattern" format="string" />
         <!-- Specify a URI authority host that is handled, as per
              {@link android.content.IntentFilter#addDataAuthority
              IntentFilter.addDataAuthority()}.
@@ -1638,17 +1664,17 @@
         <attr name="port" format="string" />
         <!-- Specify a URI path that must exactly match, as per
              {@link android.content.IntentFilter#addDataPath
-             IntentFilter.addDataAuthority()} with
+             IntentFilter.addDataPath()} with
              {@link android.os.PatternMatcher#PATTERN_LITERAL}. -->
         <attr name="path" />
         <!-- Specify a URI path that must be a prefix to match, as per
              {@link android.content.IntentFilter#addDataPath
-             IntentFilter.addDataAuthority()} with
+             IntentFilter.addDataPath()} with
              {@link android.os.PatternMatcher#PATTERN_PREFIX}. -->
         <attr name="pathPrefix" />
         <!-- Specify a URI path that matches a simple pattern, as per
              {@link android.content.IntentFilter#addDataPath
-             IntentFilter.addDataAuthority()} with
+             IntentFilter.addDataPath()} with
              {@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB}. 
              Note that because '\' is used as an escape character when
              reading the string from XML (before it is parsed as a pattern),
@@ -1694,20 +1720,20 @@
     
     <!-- Attributes that can be supplied in an AndroidManifest.xml
          <code>screen</code> tag, a child of <code>compatible-screens</code>,
-         which is itseld a child of the root
+         which is itself a child of the root
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestCompatibleScreensScreen"
                        parent="AndroidManifest.AndroidManifestCompatibleScreens">
         <!-- Specifies a compatible screen size, as per the device
              configuration screen size bins. -->
         <attr name="screenSize">
-            <!-- A small screen configuration, at least 240x320db. -->
+            <!-- A small screen configuration, at least 240x320dp. -->
             <enum name="small" value="200" />
-            <!-- A normal screen configuration, at least 320x480db. -->
+            <!-- A normal screen configuration, at least 320x480dp. -->
             <enum name="normal" value="300" />
-            <!-- A large screen configuration, at least 400x530db. -->
+            <!-- A large screen configuration, at least 400x530dp. -->
             <enum name="large" value="400" />
-            <!-- An extra large screen configuration, at least 600x800db. -->
+            <!-- An extra large screen configuration, at least 600x800dp. -->
             <enum name="xlarge" value="500" />
         </attr>
         <!-- Specifies a compatible screen density, as per the device
@@ -1722,6 +1748,19 @@
             <!-- An extra high density screen, approximately 320dpi. -->
             <enum name="xhdpi" value="320" />
         </attr>
+    </declare-styleable>
+
+    <!-- The <code>input-type</code> tag is a child of the <code>supports-input</code> tag, which
+         is itself a child of the root {@link #AndroidManifest manifest} tag. Each
+         <code>input-type</code> tag specifices the name of a specific input device type. When
+         grouped with the other elements of the parent <code>supports-input</code> tag it defines
+         a collection of input devices, which when all used together, are considered a supported
+         input mechanism for the application. There may be multiple <code>supports-input</code>
+         tags defined, each containing a different combination of input device types. -->
+    <declare-styleable name="AndroidManifestSupportsInputInputType"
+                       parent="AndroidManifest.AndroidManifestSupportsInput">
+        <!-- Specifices the name of the input device type -->
+        <attr name="name" />
     </declare-styleable>
 
     <!-- The attribute that holds a Base64-encoded public key. -->
@@ -1780,5 +1819,15 @@
         <attr name="name" />
         <!-- Concrete value to put for this named extra data. -->
         <attr name="value" />
+    </declare-styleable>
+
+    <!-- Groups signing keys into a {@code KeySet} for easier reference in
+            other APIs. However, currently no APIs use this. -->
+    <attr name="keySet" />
+    <declare-styleable name="PublicKey">
+        <attr name="value" />
+    </declare-styleable>
+    <declare-styleable name="KeySet">
+        <attr name="name" />
     </declare-styleable>
 </resources>

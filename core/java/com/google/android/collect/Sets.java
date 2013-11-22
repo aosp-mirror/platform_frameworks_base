@@ -16,6 +16,8 @@
 
 package com.google.android.collect;
 
+import android.util.ArraySet;
+
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -90,4 +92,20 @@ public class Sets {
         return set;
     }
 
+    /**
+     * Creates a {@code ArraySet} instance.
+     */
+    public static <E> ArraySet<E> newArraySet() {
+        return new ArraySet<E>();
+    }
+
+    /**
+     * Creates a {@code ArraySet} instance containing the given elements.
+     */
+    public static <E> ArraySet<E> newArraySet(E... elements) {
+        int capacity = elements.length * 4 / 3 + 1;
+        ArraySet<E> set = new ArraySet<E>(capacity);
+        Collections.addAll(set, elements);
+        return set;
+    }
 }

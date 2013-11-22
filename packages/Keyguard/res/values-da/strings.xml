@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Indtast pinkode"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Indtast PUK- og pinkode"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Ny pinkode"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Tryk for at angive adgangskode"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Indtast adgangskoden for at låse op"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Indtast pinkode for at låse op"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Forkert pinkode."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Tryk på Menu og dernæst på 0 for at låse op."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Det maksimale antal forsøg på at bruge Ansigtslås er overskredet"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Opladet"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Oplader, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Tilslut din oplader."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Tryk på Menu for at låse op."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Netværket er låst"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Intet SIM-kort"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Der er ikke noget SIM-kort i tabletten."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Der er ikke noget SIM-kort i telefonen."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Indsæt et SIM-kort."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM-kortet mangler eller kan ikke læses. Indsæt et SIM-kort."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Ubrugeligt SIM-kort."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Dit SIM-kort er blevet permanent deaktiveret.\nKontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-kortet er låst."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-kort er låst med PUK-koden."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM-kortet låses op…"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d af %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Tilføj widget."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tom"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Oplåsningsområdet er udvidet."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Oplåsningsområdet er skjult."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget til <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Brugervælger"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediekontrolelementer"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Omrokering af widgets er påbegyndt."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Omrokering af widgets er afsluttet."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widgetten <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> er slettet."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Udvid oplåsningsområdet."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Lås op ved at stryge."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Lås op med mønster."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Lås op med ansigt."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Lås op med pinkode."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Lås op med adgangskode."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mønsterområde."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Strygeområde."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Knap til forrige nummer"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Knap til næste nummer"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pause-knap"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Afspil-knap"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Stop-knap"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Annuller"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Slet"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Udført"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Ændring af tilstand"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Angiv"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Lås op"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Lydløs"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Lyd slået til"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Søgning"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Glid op for at <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"Glid ned for at <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Glid til venstre for at <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Glid til højre for at <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Nødopkald"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Glemt mønster"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Forkert mønster"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Forkert adgangskode"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Forkert pinkode"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn dit mønster"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Indtast pinkode"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Angiv adgangskode"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobiloperatøren for at få flere oplysninger."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Indtast den ønskede pinkode"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekræft den ønskede pinkode"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kortet låses op…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Forkert pinkode."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Indtast en pinkode på mellem 4 og 8 tal."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-koden skal være på 8 tal eller mere."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Indtast den korrekte PUK-kode. Gentagne forsøg vil permanent deaktivere SIM-kortet."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Pinkoderne stemmer ikke overens"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøg på at tegne mønstret korrekt"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Lås op ved at logge ind med din Google-konto."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Brugernavn (e-mail)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Adgangskode"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Log ind"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ugyldigt brugernavn eller ugyldig adgangskode."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Har du glemt dit brugernavn eller din adgangskode?\nGå til "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Kontoen kontrolleres…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Du har indtastet en forkert pinkode <xliff:g id="NUMBER_0">%d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Du har indtastet din adgangskode forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Du har forsøgt at låse tabletten op forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg nulstilles tabletten til fabriksindstillingerne, og alle brugerdata mistes."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg, nulstilles telefonen til fabriksindstillingerne, og alle brugerdata mistes."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Du har forsøgt at låse tabletten op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Tabletten nulstilles til fabriksindstillingerne."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Telefonen nulstilles til fabriksindstillingerne."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en e-mailkonto\n\n Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Knap til forrige nummer"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Knap til næste nummer"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Pause-knap"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Afspil-knap"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Stop-knap"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ingen dækning."</string>
+</resources>

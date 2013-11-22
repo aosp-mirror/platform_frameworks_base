@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+
+    <string-array name="mediasize_to_standard_map" translatable="false">
+        <!-- North America -->
+        <item>NA_LETTER</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_GOVT_LETTER</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_LEGAL</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_JUNIOR_LEGAL</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_LEDGER</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_TABLOID</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_INDEX_3X5</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_INDEX_4X6</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_INDEX_5X8</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_MONARCH</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_QUARTO</item>
+        <item>@string/mediasize_standard_north_america</item>
+        <item>NA_FOOLSCAP</item>
+        <item>@string/mediasize_standard_north_america</item>
+
+        <!-- China -->
+        <item>ROC_8K</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>ROC_16K</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_1</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_2</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_3</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_4</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_5</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_6</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_7</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_8</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_9</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_10</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>PRC_16K</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>OM_PA_KAI</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>OM_DAI_PA_KAI</item>
+        <item>@string/mediasize_standard_china</item>
+        <item>OM_JUURO_KU_KAI</item>
+        <item>@string/mediasize_standard_china</item>
+
+        <!-- Japan -->
+        <item>JIS_B10</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B9</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B8</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B7</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B6</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B5</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B4</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B3</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B2</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B1</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_B0</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JIS_EXEC</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_CHOU4</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_CHOU3</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_CHOU2</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_HAGAKI</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_OUFUKU</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_KAHU</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_KAKU2</item>
+        <item>@string/mediasize_standard_japan</item>
+        <item>JPN_YOU4</item>
+        <item>@string/mediasize_standard_japan</item>
+
+        <!-- Everything else is ISO -->
+    </string-array>
+
+    <string-array name="pdf_printer_media_sizes" translatable="false">
+        <item>ISO_A0</item>
+        <item>ISO_A1</item>
+        <item>ISO_A2</item>
+        <item>ISO_A3</item>
+        <item>ISO_A4</item>
+        <item>ISO_A5</item>
+        <item>ISO_A6</item>
+        <item>ISO_A7</item>
+        <item>ISO_A8</item>
+        <item>ISO_A9</item>
+        <item>ISO_A10</item>
+        <item>ISO_B1</item>
+        <item>ISO_B2</item>
+        <item>ISO_B3</item>
+        <item>ISO_B4</item>
+        <item>ISO_B5</item>
+        <item>ISO_B6</item>
+        <item>ISO_B7</item>
+        <item>ISO_B8</item>
+        <item>ISO_B9</item>
+        <item>ISO_B10</item>
+        <item>ISO_C1</item>
+        <item>ISO_C2</item>
+        <item>ISO_C3</item>
+        <item>ISO_C4</item>
+        <item>ISO_C5</item>
+        <item>ISO_C6</item>
+        <item>ISO_C7</item>
+        <item>ISO_C8</item>
+        <item>ISO_C9</item>
+        <item>ISO_C10</item>
+    </string-array>
+
+</resources>

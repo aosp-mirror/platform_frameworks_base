@@ -68,6 +68,8 @@ public class EdgeEffect {
 
     // Minimum velocity that will be absorbed
     private static final int MIN_VELOCITY = 100;
+    // Maximum velocity, clamps at this value
+    private static final int MAX_VELOCITY = 10000;
 
     private static final float EPSILON = 0.001f;
 
@@ -115,7 +117,7 @@ public class EdgeEffect {
     private static final float PULL_DISTANCE_ALPHA_GLOW_FACTOR = 1.1f;
 
     private static final int VELOCITY_EDGE_FACTOR = 8;
-    private static final int VELOCITY_GLOW_FACTOR = 16;
+    private static final int VELOCITY_GLOW_FACTOR = 12;
 
     private int mState = STATE_IDLE;
 
@@ -283,10 +285,10 @@ public class EdgeEffect {
      */
     public void onAbsorb(int velocity) {
         mState = STATE_ABSORB;
-        velocity = Math.max(MIN_VELOCITY, Math.abs(velocity));
+        velocity = Math.min(Math.max(MIN_VELOCITY, Math.abs(velocity)), MAX_VELOCITY);
 
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
-        mDuration = 0.1f + (velocity * 0.03f);
+        mDuration = 0.15f + (velocity * 0.02f);
 
         // The edge should always be at least partially visible, regardless
         // of velocity.
@@ -294,7 +296,7 @@ public class EdgeEffect {
         mEdgeScaleY = mEdgeScaleYStart = 0.f;
         // The glow depends more on the velocity, and therefore starts out
         // nearly invisible.
-        mGlowAlphaStart = 0.5f;
+        mGlowAlphaStart = 0.3f;
         mGlowScaleYStart = 0.f;
 
         // Factor the velocity by 8. Testing on device shows this works best to

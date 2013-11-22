@@ -80,6 +80,20 @@ public class ValueAnimator extends Animator {
      */
     long mSeekTime = -1;
 
+    /**
+     * Set on the next frame after pause() is called, used to calculate a new startTime
+     * or delayStartTime which allows the animator to continue from the point at which
+     * it was paused. If negative, has not yet been set.
+     */
+    private long mPauseTime;
+
+    /**
+     * Set when an animator is resumed. This triggers logic in the next frame which
+     * actually resumes the animator.
+     */
+    private boolean mResumed = false;
+
+
     // The static sAnimationHandler processes the internal timing loop on which all animations
     // are based
     /**
@@ -147,7 +161,7 @@ public class ValueAnimator extends Animator {
     private boolean mStarted = false;
 
     /**
-     * Tracks whether we've notified listeners of the onAnimationSTart() event. This can be
+     * Tracks whether we've notified listeners of the onAnimationStart() event. This can be
      * complex to keep track of since we notify listeners at different times depending on
      * startDelay and whether start() was called before end().
      */
@@ -869,7 +883,7 @@ public class ValueAnimator extends Animator {
      *
      * <p>If this ValueAnimator has only one set of values being animated between, this evaluator
      * will be used for that set. If there are several sets of values being animated, which is
-     * the case if PropertyValuesHOlder objects were set on the ValueAnimator, then the evaluator
+     * the case if PropertyValuesHolder objects were set on the ValueAnimator, then the evaluator
      * is assigned just to the first PropertyValuesHolder object.</p>
      *
      * @param value the evaluator to be used this animation
@@ -914,6 +928,7 @@ public class ValueAnimator extends Animator {
         mPlayingState = STOPPED;
         mStarted = true;
         mStartedDelay = false;
+        mPaused = false;
         AnimationHandler animationHandler = getOrCreateAnimationHandler();
         animationHandler.mPendingAnimations.add(this);
         if (mStartDelay == 0) {
@@ -971,6 +986,24 @@ public class ValueAnimator extends Animator {
     }
 
     @Override
+    public void resume() {
+        if (mPaused) {
+            mResumed = true;
+        }
+        super.resume();
+    }
+
+    @Override
+    public void pause() {
+        boolean previouslyPaused = mPaused;
+        super.pause();
+        if (!previouslyPaused && mPaused) {
+            mPauseTime = -1;
+            mResumed = false;
+        }
+    }
+
+    @Override
     public boolean isRunning() {
         return (mPlayingState == RUNNING || mRunning);
     }
@@ -994,6 +1027,8 @@ public class ValueAnimator extends Animator {
             long currentPlayTime = currentTime - mStartTime;
             long timeLeft = mDuration - currentPlayTime;
             mStartTime = currentTime - timeLeft;
+        } else if (mStarted) {
+            end();
         } else {
             start(true);
         }
@@ -1008,6 +1043,7 @@ public class ValueAnimator extends Animator {
         handler.mPendingAnimations.remove(this);
         handler.mDelayedAnims.remove(this);
         mPlayingState = STOPPED;
+        mPaused = false;
         if ((mStarted || mRunning) && mListeners != null) {
             if (!mRunning) {
                 // If it's not yet running, then start listeners weren't called. Call them now.
@@ -1024,8 +1060,10 @@ public class ValueAnimator extends Animator {
         mStarted = false;
         mStartListenersCalled = false;
         mPlayingBackwards = false;
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, "animator",
-                System.identityHashCode(this));
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
+                    System.identityHashCode(this));
+        }
     }
 
     /**
@@ -1033,8 +1071,10 @@ public class ValueAnimator extends Animator {
      * called on the UI thread.
      */
     private void startAnimation(AnimationHandler handler) {
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, "animator",
-                System.identityHashCode(this));
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, getNameForTrace(),
+                    System.identityHashCode(this));
+        }
         initAnimation();
         handler.mAnimations.add(this);
         if (mStartDelay > 0 && mListeners != null) {
@@ -1043,6 +1083,14 @@ public class ValueAnimator extends Animator {
             notifyStartListeners();
         }
     }
+
+    /**
+     * Returns the name of this animator for debugging purposes.
+     */
+    String getNameForTrace() {
+        return "animator";
+    }
+
 
     /**
      * Internal function called to process an animation frame on an animation that is currently
@@ -1059,6 +1107,18 @@ public class ValueAnimator extends Animator {
             mStartedDelay = true;
             mDelayStartTime = currentTime;
         } else {
+            if (mPaused) {
+                if (mPauseTime < 0) {
+                    mPauseTime = currentTime;
+                }
+                return false;
+            } else if (mResumed) {
+                mResumed = false;
+                if (mPauseTime > 0) {
+                    // Offset by the duration that the animation was paused
+                    mDelayStartTime += (currentTime - mPauseTime);
+                }
+            }
             long deltaTime = currentTime - mDelayStartTime;
             if (deltaTime > mStartDelay) {
                 // startDelay ended - start the anim and record the
@@ -1081,7 +1141,7 @@ public class ValueAnimator extends Animator {
      *
      * @param currentTime The current time, as tracked by the static timing handler
      * @return true if the animation's duration, including any repetitions due to
-     * <code>repeatCount</code> has been exceeded and the animation should be ended.
+     * <code>repeatCount</code>, has been exceeded and the animation should be ended.
      */
     boolean animationFrame(long currentTime) {
         boolean done = false;
@@ -1134,6 +1194,18 @@ public class ValueAnimator extends Animator {
                 mStartTime = frameTime - mSeekTime;
                 // Now that we're playing, reset the seek time
                 mSeekTime = -1;
+            }
+        }
+        if (mPaused) {
+            if (mPauseTime < 0) {
+                mPauseTime = frameTime;
+            }
+            return false;
+        } else if (mResumed) {
+            mResumed = false;
+            if (mPauseTime > 0) {
+                // Offset by the duration that the animation was paused
+                mStartTime += (frameTime - mPauseTime);
             }
         }
         // The frame time might be before the start time during the first frame of

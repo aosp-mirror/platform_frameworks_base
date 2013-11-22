@@ -50,7 +50,7 @@ import android.test.InstrumentationTestSuite;
  * Running all tests:
  *
  * adb shell am instrument \
- *   -w com.android.smstests.MediaPlayerInstrumentationTestRunner
+ *  -w com.android.mediaframeworktest/.MediaFrameworkTestRunner
  */
 
 public class MediaFrameworkTestRunner extends InstrumentationTestRunner {

@@ -19,16 +19,65 @@
  * System clock functions.
  */
 
+#ifdef HAVE_ANDROID_OS
+#include <linux/ioctl.h>
+#include <linux/rtc.h>
+#include <utils/Atomic.h>
+#include <linux/android_alarm.h>
+#endif
+
+#include <sys/time.h>
+#include <limits.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+
 #include "JNIHelp.h"
 #include "jni.h"
 #include "android_runtime/AndroidRuntime.h"
 
-#include "utils/SystemClock.h"
-
 #include <sys/time.h>
 #include <time.h>
 
+#include <utils/SystemClock.h>
+
 namespace android {
+
+/*
+ * Set the current time.  This only works when running as root.
+ */
+static int setCurrentTimeMillis(int64_t millis)
+{
+    struct timeval tv;
+    struct timespec ts;
+    int fd;
+    int res;
+    int ret = 0;
+
+    if (millis <= 0 || millis / 1000LL >= INT_MAX) {
+        return -1;
+    }
+
+    tv.tv_sec = (time_t) (millis / 1000LL);
+    tv.tv_usec = (suseconds_t) ((millis % 1000LL) * 1000LL);
+
+    ALOGD("Setting time of day to sec=%d\n", (int) tv.tv_sec);
+
+    fd = open("/dev/alarm", O_RDWR);
+    if(fd < 0) {
+        ALOGW("Unable to open alarm driver: %s\n", strerror(errno));
+        return -1;
+    }
+    ts.tv_sec = tv.tv_sec;
+    ts.tv_nsec = tv.tv_usec * 1000;
+    res = ioctl(fd, ANDROID_ALARM_SET_RTC, &ts);
+    if(res < 0) {
+        ALOGW("Unable to set rtc to %ld: %s\n", tv.tv_sec, strerror(errno));
+        ret = -1;
+    }
+    close(fd);
+    return ret;
+}
 
 /*
  * native public static void setCurrentTimeMillis(long millis)

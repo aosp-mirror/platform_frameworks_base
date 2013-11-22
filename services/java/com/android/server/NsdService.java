@@ -417,7 +417,15 @@ public class NsdService extends INsdManager.Stub {
                 int keyId = clientInfo.mClientIds.indexOfValue(id);
                 if (keyId != -1) {
                     clientId = clientInfo.mClientIds.keyAt(keyId);
+                } else {
+                    // This can happen because of race conditions. For example,
+                    // SERVICE_FOUND may race with STOP_SERVICE_DISCOVERY,
+                    // and we may get in this situation.
+                    Slog.d(TAG, "Notification for a listener that is no longer active: " + id);
+                    handled = false;
+                    return handled;
                 }
+
                 switch (code) {
                     case NativeResponseCode.SERVICE_FOUND:
                         /* NNN uniqueId serviceName regType domain */

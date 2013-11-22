@@ -29,7 +29,7 @@ namespace uirenderer {
 
 TaskManager::TaskManager() {
     // Get the number of available CPUs. This value does not change over time.
-    int cpuCount = sysconf(_SC_NPROCESSORS_ONLN);
+    int cpuCount = sysconf(_SC_NPROCESSORS_CONF);
 
     for (int i = 0; i < cpuCount / 2; i++) {
         String8 name;

@@ -16,8 +16,7 @@
 
 package com.android.server.am;
 
-
-class AppErrorResult {
+final class AppErrorResult {
     public void set(int res) {
         synchronized (this) {
             mHasResult = true;

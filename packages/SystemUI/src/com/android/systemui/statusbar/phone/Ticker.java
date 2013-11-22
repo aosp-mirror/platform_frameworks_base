@@ -16,31 +16,29 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.service.notification.StatusBarNotification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.text.StaticLayout;
+import android.service.notification.StatusBarNotification;
 import android.text.Layout.Alignment;
+import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageSwitcher;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
-import android.widget.ImageSwitcher;
-
-import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.CharSequences;
-
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 
+import java.util.ArrayList;
+
 public abstract class Ticker {
     private static final int TICKER_SEGMENT_DELAY = 3000;
-    
+
     private Context mContext;
     private Handler mHandler = new Handler();
     private ArrayList<Segment> mSegments = new ArrayList();
@@ -192,7 +190,7 @@ public abstract class Ticker {
             if (n.getPackageName().equals(seg.notification.getPackageName())
                     && n.getNotification().icon == seg.notification.getNotification().icon
                     && n.getNotification().iconLevel == seg.notification.getNotification().iconLevel
-                    && CharSequences.equals(seg.notification.getNotification().tickerText,
+                    && charSequencesEqual(seg.notification.getNotification().tickerText,
                         n.getNotification().tickerText)) {
                 return;
             }
@@ -218,18 +216,32 @@ public abstract class Ticker {
         if (initialCount == 0 && mSegments.size() > 0) {
             Segment seg = mSegments.get(0);
             seg.first = false;
-            
+
             mIconSwitcher.setAnimateFirstView(false);
             mIconSwitcher.reset();
             mIconSwitcher.setImageDrawable(seg.icon);
-            
+
             mTextSwitcher.setAnimateFirstView(false);
             mTextSwitcher.reset();
             mTextSwitcher.setText(seg.getText());
-            
+
             tickerStarting();
             scheduleAdvance();
         }
+    }
+
+    private static boolean charSequencesEqual(CharSequence a, CharSequence b) {
+        if (a.length() != b.length()) {
+            return false;
+        }
+
+        int length = a.length();
+        for (int i = 0; i < length; i++) {
+            if (a.charAt(i) != b.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void removeEntry(StatusBarNotification n) {

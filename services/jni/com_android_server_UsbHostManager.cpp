@@ -20,6 +20,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/Log.h"
 #include "utils/Vector.h"
 
 #include <usbhost/usbhost.h>

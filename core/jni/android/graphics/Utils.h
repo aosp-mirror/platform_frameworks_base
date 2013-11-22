@@ -26,16 +26,27 @@
 
 namespace android {
 
-class AssetStreamAdaptor : public SkStream {
+class AssetStreamAdaptor : public SkStreamRewindable {
 public:
     AssetStreamAdaptor(Asset* a) : fAsset(a) {}
     virtual bool rewind();
     virtual size_t read(void* buffer, size_t size);
+    virtual bool hasLength() const { return true; }
+    virtual size_t getLength() const;
+    virtual bool isAtEnd() const;
 
+    virtual SkStreamRewindable* duplicate() const;
 private:
     Asset*  fAsset;
 };
 
+/**
+ *  Make a deep copy of the asset, and return it as a stream, or NULL if there
+ *  was an error.
+ *  FIXME: If we could "ref/reopen" the asset, we may not need to copy it here.
+ */
+
+SkMemoryStream* CopyAssetToStream(Asset*);
 
 /** Restore the file descriptor's offset in our destructor
  */

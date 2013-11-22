@@ -19,18 +19,18 @@ package com.android.systemui.recent;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.animation.Animator.AnimatorListener;
 import android.util.Log;
-import android.view.ViewTreeObserver;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewTreeObserver;
 
 /*
  *  This is a helper class that listens to updates from the corresponding animation.
  *  For the first two frames, it adjusts the current play time of the animation to
  *  prevent jank at the beginning of the animation
  */
-public class FirstFrameAnimatorHelper implements ValueAnimator.AnimatorUpdateListener {
+public class FirstFrameAnimatorHelper extends AnimatorListenerAdapter
+    implements ValueAnimator.AnimatorUpdateListener {
     private static final boolean DEBUG = false;
     private static final int MAX_DELAY = 1000;
     private static final int IDEAL_FRAME_DURATION = 16;
@@ -50,13 +50,14 @@ public class FirstFrameAnimatorHelper implements ValueAnimator.AnimatorUpdateLis
 
     public FirstFrameAnimatorHelper(ViewPropertyAnimator vpa, View target) {
         mTarget = target;
-        vpa.setListener(new AnimatorListenerAdapter() {
-                public void onAnimationStart (Animator animation) {
-                    final ValueAnimator va = (ValueAnimator) animation;
-                    va.addUpdateListener(FirstFrameAnimatorHelper.this);
-                    onAnimationUpdate(va);
-                }
-            });
+        vpa.setListener(this);
+    }
+
+    // only used for ViewPropertyAnimators
+    public void onAnimationStart(Animator animation) {
+        final ValueAnimator va = (ValueAnimator) animation;
+        va.addUpdateListener(FirstFrameAnimatorHelper.this);
+        onAnimationUpdate(va);
     }
 
     public static void initializeDrawListener(View view) {
@@ -84,7 +85,11 @@ public class FirstFrameAnimatorHelper implements ValueAnimator.AnimatorUpdateLis
             mStartTime = currentTime;
         }
 
-        if (!mHandlingOnAnimationUpdate) {
+        if (!mHandlingOnAnimationUpdate &&
+            // If the current play time exceeds the duration, the animation
+            // will get finished, even if we call setCurrentPlayTime -- therefore
+            // don't adjust the animation in that case
+            animation.getCurrentPlayTime() < animation.getDuration()) {
             mHandlingOnAnimationUpdate = true;
             long frameNum = sGlobalFrameCounter - mStartFrame;
             // If we haven't drawn our first frame, reset the time to t = 0

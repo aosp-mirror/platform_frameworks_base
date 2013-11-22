@@ -725,6 +725,13 @@ public class Element extends BaseObj {
         return rs.mElement_LONG_4;
     }
 
+    public static Element YUV(RenderScript rs) {
+        if (rs.mElement_YUV == null) {
+            rs.mElement_YUV = createPixel(rs, DataType.UNSIGNED_8, DataKind.PIXEL_YUV);
+        }
+        return rs.mElement_YUV;
+    }
+
     public static Element MATRIX_4X4(RenderScript rs) {
         if(rs.mElement_MATRIX_4X4 == null) {
             rs.mElement_MATRIX_4X4 = createUser(rs, DataType.MATRIX_4X4);

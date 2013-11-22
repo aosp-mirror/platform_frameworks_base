@@ -18,16 +18,15 @@
 
 #include "JNIHelp.h"
 
+#include <SkMatrix.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <utils/Log.h>
-#include <androidfw/Input.h>
+#include <input/Input.h>
 #include "android_os_Parcel.h"
 #include "android_view_MotionEvent.h"
 #include "android_util_Binder.h"
 #include "android/graphics/Matrix.h"
-
-#include "SkMatrix.h"
-
 
 namespace android {
 
@@ -680,7 +679,18 @@ static void android_view_MotionEvent_nativeTransform(JNIEnv* env, jclass clazz,
         jint nativePtr, jobject matrixObj) {
     SkMatrix* matrix = android_graphics_Matrix_getSkMatrix(env, matrixObj);
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->transform(matrix);
+
+    float m[9];
+    m[0] = SkScalarToFloat(matrix->get(SkMatrix::kMScaleX));
+    m[1] = SkScalarToFloat(matrix->get(SkMatrix::kMSkewX));
+    m[2] = SkScalarToFloat(matrix->get(SkMatrix::kMTransX));
+    m[3] = SkScalarToFloat(matrix->get(SkMatrix::kMSkewY));
+    m[4] = SkScalarToFloat(matrix->get(SkMatrix::kMScaleY));
+    m[5] = SkScalarToFloat(matrix->get(SkMatrix::kMTransY));
+    m[6] = SkScalarToFloat(matrix->get(SkMatrix::kMPersp0));
+    m[7] = SkScalarToFloat(matrix->get(SkMatrix::kMPersp1));
+    m[8] = SkScalarToFloat(matrix->get(SkMatrix::kMPersp2));
+    event->transform(m);
 }
 
 static jint android_view_MotionEvent_nativeReadFromParcel(JNIEnv* env, jclass clazz,

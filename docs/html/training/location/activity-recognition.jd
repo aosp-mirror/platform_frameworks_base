@@ -31,13 +31,13 @@ trainingnavtop=true
 </div>
 
 <p>
-    This lesson shows you how to request activity recognition updates from Location Services.
     Activity recognition tries to detect the user's current physical activity, such as walking,
     driving, or standing still. Requests for updates go through an activity recognition client,
     which, while different from the location client used by location or geofencing, follows a
     similar pattern. Based on the update interval you choose, Location Services sends out
     activity information containing one or more possible activities and the confidence level for
-    each one.
+    each one. This lesson shows you how to request activity recognition updates from Location 
+    Services.
 </p>
 <h2 id="RequestUpdates">Request Activity Recognition Updates</h2>
 <p>

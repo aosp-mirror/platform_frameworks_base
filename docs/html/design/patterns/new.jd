@@ -56,7 +56,7 @@ page.title=New in Android
       <li>Trying it out yourself</li>
     </ul>
 
-    <p>You can supply separate landscape and portrait layouts for your widgets, which the system inflates as appropriate when the screen orientation changes. The [Application Widgets] (should be link) has useful details about widget types, limitations, and design considerations.</p>
+    <p>You can supply separate landscape and portrait layouts for your widgets, which the system inflates as appropriate when the screen orientation changes. The <a href="{@docRoot}design/patterns/widgets.html">Widgets</a> page has useful details about widget types, limitations, and design considerations.</p>
   </div>
   <div class="layout-content-col span-2">
     <img src="{@docRoot}design/media/new_accessibility.png">

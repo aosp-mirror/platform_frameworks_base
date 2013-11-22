@@ -432,58 +432,176 @@ public class Notification implements Parcelable
 
     /**
      * Additional semantic data to be carried around with this Notification.
-     * @hide
+     * <p>
+     * The extras keys defined here are intended to capture the original inputs to {@link Builder}
+     * APIs, and are intended to be used by
+     * {@link android.service.notification.NotificationListenerService} implementations to extract
+     * detailed information from notification objects.
      */
     public Bundle extras = new Bundle();
 
-    // extras keys for Builder inputs
-    /** @hide */
+    /**
+     * {@link #extras} key: this is the title of the notification,
+     * as supplied to {@link Builder#setContentTitle(CharSequence)}.
+     */
     public static final String EXTRA_TITLE = "android.title";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is the title of the notification when shown in expanded form,
+     * e.g. as supplied to {@link BigTextStyle#setBigContentTitle(CharSequence)}.
+     */
     public static final String EXTRA_TITLE_BIG = EXTRA_TITLE + ".big";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is the main text payload, as supplied to
+     * {@link Builder#setContentText(CharSequence)}.
+     */
     public static final String EXTRA_TEXT = "android.text";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is a third line of text, as supplied to
+     * {@link Builder#setSubText(CharSequence)}.
+     */
     public static final String EXTRA_SUB_TEXT = "android.subText";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is a small piece of additional text as supplied to
+     * {@link Builder#setContentInfo(CharSequence)}.
+     */
     public static final String EXTRA_INFO_TEXT = "android.infoText";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is a line of summary information intended to be shown
+     * alongside expanded notifications, as supplied to (e.g.)
+     * {@link BigTextStyle#setSummaryText(CharSequence)}.
+     */
     public static final String EXTRA_SUMMARY_TEXT = "android.summaryText";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is the resource ID of the notification's main small icon, as
+     * supplied to {@link Builder#setSmallIcon(int)}.
+     */
     public static final String EXTRA_SMALL_ICON = "android.icon";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is a bitmap to be used instead of the small icon when showing the
+     * notification payload, as
+     * supplied to {@link Builder#setLargeIcon(android.graphics.Bitmap)}.
+     */
     public static final String EXTRA_LARGE_ICON = "android.largeIcon";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is a bitmap to be used instead of the one from
+     * {@link Builder#setLargeIcon(android.graphics.Bitmap)} when the notification is
+     * shown in its expanded form, as supplied to
+     * {@link BigPictureStyle#bigLargeIcon(android.graphics.Bitmap)}.
+     */
     public static final String EXTRA_LARGE_ICON_BIG = EXTRA_LARGE_ICON + ".big";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is the progress value supplied to
+     * {@link Builder#setProgress(int, int, boolean)}.
+     */
     public static final String EXTRA_PROGRESS = "android.progress";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: this is the maximum value supplied to
+     * {@link Builder#setProgress(int, int, boolean)}.
+     */
     public static final String EXTRA_PROGRESS_MAX = "android.progressMax";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: whether the progress bar is indeterminate, supplied to
+     * {@link Builder#setProgress(int, int, boolean)}.
+     */
     public static final String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: whether {@link #when} should be shown as a count-up timer (specifically
+     * a {@link android.widget.Chronometer}) instead of a timestamp, as supplied to
+     * {@link Builder#setUsesChronometer(boolean)}.
+     */
     public static final String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
-    /** @hide */
+
+    /**
+     * {@link #extras} key: whether {@link #when} should be shown,
+     * as supplied to {@link Builder#setShowWhen(boolean)}.
+     */
     public static final String EXTRA_SHOW_WHEN = "android.showWhen";
-    /** @hide from BigPictureStyle */
+
+    /**
+     * {@link #extras} key: this is a bitmap to be shown in {@link BigPictureStyle} expanded
+     * notifications, supplied to {@link BigPictureStyle#bigPicture(android.graphics.Bitmap)}.
+     */
     public static final String EXTRA_PICTURE = "android.picture";
-    /** @hide from InboxStyle */
+
+    /**
+     * {@link #extras} key: An array of CharSequences to show in {@link InboxStyle} expanded
+     * notifications, each of which was supplied to {@link InboxStyle#addLine(CharSequence)}.
+     */
     public static final String EXTRA_TEXT_LINES = "android.textLines";
 
-    // extras keys for other interesting pieces of information
-    /** @hide */
+    /**
+     * {@link #extras} key: An array of people that this notification relates to, specified
+     * by contacts provider contact URI.
+     */
     public static final String EXTRA_PEOPLE = "android.people";
 
     /**
-     * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
+     * @hide
+     * Extra added by NotificationManagerService to indicate whether a NotificationScorer
+     * modified the Notifications's score.
+     */
+    public static final String EXTRA_SCORE_MODIFIED = "android.scoreModified";
+
+    /**
+     * Not used.
      * @hide
      */
+    public static final String EXTRA_AS_HEADS_UP = "headsup";
+
+    /**
+     * Value for {@link #EXTRA_AS_HEADS_UP}.
+     * @hide
+     */
+    public static final int HEADS_UP_NEVER = 0;
+
+    /**
+     * Default value for {@link #EXTRA_AS_HEADS_UP}.
+     * @hide
+     */
+    public static final int HEADS_UP_ALLOWED = 1;
+
+    /**
+     * Value for {@link #EXTRA_AS_HEADS_UP}.
+     * @hide
+     */
+    public static final int HEADS_UP_REQUESTED = 2;
+
+    /**
+     * Structure to encapsulate a named action that can be shown as part of this notification.
+     * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
+     * selected by the user.
+     * <p>
+     * Apps should use {@link Builder#addAction(int, CharSequence, PendingIntent)} to create and
+     * attach actions.
+     */
     public static class Action implements Parcelable {
+        /**
+         * Small icon representing the action.
+         */
         public int icon;
+        /**
+         * Title of the action.
+         */
         public CharSequence title;
+        /**
+         * Intent to send when the user invokes this action. May be null, in which case the action
+         * may be rendered in a disabled presentation by the system UI.
+         */
         public PendingIntent actionIntent;
-        @SuppressWarnings("unused")
-        public Action() { }
+ 
+        private Action() { }
         private Action(Parcel in) {
             icon = in.readInt();
             title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -491,16 +609,20 @@ public class Notification implements Parcelable
                 actionIntent = PendingIntent.CREATOR.createFromParcel(in);
             }
         }
-        public Action(int icon_, CharSequence title_, PendingIntent intent_) {
-            this.icon = icon_;
-            this.title = title_;
-            this.actionIntent = intent_;
+        /**
+         * Use {@link Builder#addAction(int, CharSequence, PendingIntent)}.
+         */
+        public Action(int icon, CharSequence title, PendingIntent intent) {
+            this.icon = icon;
+            this.title = title;
+            this.actionIntent = intent;
         }
+
         @Override
         public Action clone() {
             return new Action(
                 this.icon,
-                this.title.toString(),
+                this.title,
                 this.actionIntent // safe to alias
             );
         }
@@ -531,7 +653,10 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @hide
+     * Array of all {@link Action} structures attached to this notification by
+     * {@link Builder#addAction(int, CharSequence, PendingIntent)}. Mostly useful for instances of
+     * {@link android.service.notification.NotificationListenerService} that provide an alternative
+     * interface for invoking actions.
      */
     public Action[] actions;
 
@@ -1450,7 +1575,6 @@ public class Notification implements Parcelable
          * called.
          *
          * @see Notification#extras
-         * @hide
          */
         public Builder setExtras(Bundle bag) {
             mExtras = bag;
@@ -1460,8 +1584,15 @@ public class Notification implements Parcelable
         /**
          * Add an action to this notification. Actions are typically displayed by
          * the system as a button adjacent to the notification content.
-         * <br>
-         * A notification displays up to 3 actions, from left to right in the order they were added.
+         * <p>
+         * Every action must have an icon (32dp square and matching the
+         * <a href="{@docRoot}design/style/iconography.html#action-bar">Holo
+         * Dark action bar</a> visual style), a textual label, and a {@link PendingIntent}.
+         * <p>
+         * A notification in its expanded form can display up to 3 actions, from left to right in
+         * the order they were added. Actions will not be displayed when the notification is
+         * collapsed, however, so be sure that any essential functions may be accessed by the user
+         * in some other way (for example, in the Activity pointed to by {@link #contentIntent}).
          *
          * @param icon Resource ID of a drawable that represents the action.
          * @param title Text describing the action.
@@ -1658,8 +1789,9 @@ public class Notification implements Parcelable
 
         /**
          * Apply the unstyled operations and return a new {@link Notification} object.
+         * @hide
          */
-        private Notification buildUnstyled() {
+        public Notification buildUnstyled() {
             Notification n = new Notification();
             n.when = mWhen;
             n.icon = mSmallIcon;
@@ -1737,12 +1869,10 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
-            final Notification n;
+            Notification n = buildUnstyled();
 
             if (mStyle != null) {
-                n = mStyle.build();
-            } else {
-                n = buildUnstyled();
+                n = mStyle.buildStyled(n);
             }
 
             n.extras = mExtras != null ? new Bundle(mExtras) : new Bundle();
@@ -1852,7 +1982,21 @@ public class Notification implements Parcelable
             }
         }
 
-        public abstract Notification build();
+        /**
+         * @hide
+         */
+        public abstract Notification buildStyled(Notification wip);
+
+        /**
+         * Calls {@link android.app.Notification.Builder#build()} on the Builder this Style is
+         * attached to.
+         *
+         * @return the fully constructed Notification.
+         */
+        public Notification build() {
+            checkBuilder();
+            return mBuilder.build();
+        }
     }
 
     /**
@@ -1938,10 +2082,11 @@ public class Notification implements Parcelable
             extras.putParcelable(EXTRA_PICTURE, mPicture);
         }
 
+        /**
+         * @hide
+         */
         @Override
-        public Notification build() {
-            checkBuilder();
-            Notification wip = mBuilder.buildUnstyled();
+        public Notification buildStyled(Notification wip) {
             if (mBigLargeIconSet ) {
                 mBuilder.mLargeIcon = mBigLargeIcon;
             }
@@ -2031,10 +2176,11 @@ public class Notification implements Parcelable
             return contentView;
         }
 
+        /**
+         * @hide
+         */
         @Override
-        public Notification build() {
-            checkBuilder();
-            Notification wip = mBuilder.buildUnstyled();
+        public Notification buildStyled(Notification wip) {
             wip.bigContentView = makeBigContentView();
 
             wip.extras.putCharSequence(EXTRA_TEXT, mBigText);
@@ -2142,10 +2288,11 @@ public class Notification implements Parcelable
             return contentView;
         }
 
+        /**
+         * @hide
+         */
         @Override
-        public Notification build() {
-            checkBuilder();
-            Notification wip = mBuilder.buildUnstyled();
+        public Notification buildStyled(Notification wip) {
             wip.bigContentView = makeBigContentView();
 
             return wip;

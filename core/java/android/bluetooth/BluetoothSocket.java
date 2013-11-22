@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import android.net.LocalSocket;
 import java.nio.ByteOrder;
@@ -473,7 +474,7 @@ public final class BluetoothSocket implements Closeable {
         return mPort;
     }
     private String convertAddr(final byte[] addr)  {
-        return String.format("%02X:%02X:%02X:%02X:%02X:%02X",
+        return String.format(Locale.US, "%02X:%02X:%02X:%02X:%02X:%02X",
                 addr[0] , addr[1], addr[2], addr[3] , addr[4], addr[5]);
     }
     private String waitSocketSignal(InputStream is) throws IOException {

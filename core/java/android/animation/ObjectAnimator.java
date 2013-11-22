@@ -123,9 +123,37 @@ public final class ObjectAnimator extends ValueAnimator {
      * in a call to the function <code>setFoo()</code> on the target object. If either
      * <code>valueFrom</code> or <code>valueTo</code> is null, then a getter function will
      * also be derived and called.
+     *
+     * <p>If this animator was created with a {@link Property} object instead of the
+     * string name of a property, then this method will return the {@link
+     * Property#getName() name} of that Property object instead. If this animator was
+     * created with one or more {@link PropertyValuesHolder} objects, then this method
+     * will return the {@link PropertyValuesHolder#getPropertyName() name} of that
+     * object (if there was just one) or a comma-separated list of all of the
+     * names (if there are more than one).</p>
      */
     public String getPropertyName() {
-        return mPropertyName;
+        String propertyName = null;
+        if (mPropertyName != null) {
+            propertyName = mPropertyName;
+        } else if (mProperty != null) {
+            propertyName = mProperty.getName();
+        } else if (mValues != null && mValues.length > 0) {
+            for (int i = 0; i < mValues.length; ++i) {
+                if (i == 0) {
+                    propertyName = "";
+                } else {
+                    propertyName += ",";
+                }
+                propertyName += mValues[i].getPropertyName();
+            }
+        }
+        return propertyName;
+    }
+
+    @Override
+    String getNameForTrace() {
+        return "animator:" + getPropertyName();
     }
 
     /**

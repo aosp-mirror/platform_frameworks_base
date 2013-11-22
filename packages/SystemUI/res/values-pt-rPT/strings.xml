@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"IU do sist."</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Não incomodar"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostrar notificações"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações da aplicação"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Não existem aplicações recentes"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"Ligar carregador"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"A bateria está a ficar fraca."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> restante"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Carregamento USB não suportado. "\n"Utilize apenas o carregador fornecido."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Carregamento USB não suportado. \nUtilize apenas o carregador fornecido."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Utilização da bateria"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Definições"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Utilizar por predefinição para este aparelho USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Utilizar por predefinição para este acessório USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Permitir depuração USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"A impressão digital da chave RSA do computador é:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"A impressão digital da chave RSA do computador é:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir sempre a partir deste computador"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para preencher o ecrã"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Esticar p. caber em ec. int."</string>
@@ -160,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Os dados 4G estão desativados"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Os dados móveis estão desativados"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dados desativados"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Atingiu o limite de utilização de dados especificado."\n\n"Se voltar a ativar os dados, pode levar a uma cobrança por parte do operador."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Atingiu o limite de utilização de dados especificado.\n\nSe voltar a ativar os dados, pode levar a uma cobrança por parte do operador."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Reativar dados"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sem ligação internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ligado"</string>
@@ -168,9 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Localização definida por GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Limpar todas as notificações."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informações da aplicação"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Fechar"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Notificações desativadas"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Toque aqui para voltar a ativar as notificações."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"O ecrã será rodado automaticamente."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"O ecrã está bloqueado na orientação horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"O ecrã está bloqueado na orientação vertical."</string>
@@ -187,7 +182,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rodar automat."</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotação Bloqueada"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Método de Introdução"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"Localização em utilização"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Localização"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Localização Desativada"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimédia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Apenas Chamadas de Emergência"</string>
@@ -203,5 +199,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brilho"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÁTICO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"As notificações são apresentadas aqui"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Pode aceder em qualquer altura, deslizando rapidamente para baixo com o dedo."\n"Deslize novamente para baixo para aceder aos controlos do sistema."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Pode aceder em qualquer altura, deslizando rapidamente para baixo com o dedo.\nDeslize novamente para baixo para aceder aos controlos do sistema."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Deslize da extremidade do ecrã para revelar a barra"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Deslize da extremidade do ecrã para revelar a barra do sistema"</string>
 </resources>

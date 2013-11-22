@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Title of the PrintSpooler application. [CHAR LIMIT=50] -->
+    <string name="app_label">Print Spooler</string>
+
+    <!-- Label of the print dialog's print button. [CHAR LIMIT=16] -->
+    <string name="print_button">Print</string>
+
+    <!-- Label of the print dialog's save button. [CHAR LIMIT=16] -->
+    <string name="save_button">Save</string>
+
+    <!-- Label of the destination widget. [CHAR LIMIT=20] -->
+    <string name="label_destination">Destination</string>
+
+    <!-- Label of the copies count widget. [CHAR LIMIT=20] -->
+    <string name="label_copies">Copies</string>
+
+    <!-- Label of the paper size widget. [CHAR LIMIT=20] -->
+    <string name="label_paper_size">Paper Size</string>
+
+    <!-- Label of the color mode widget. [CHAR LIMIT=20] -->
+    <string name="label_color">Color</string>
+
+    <!-- Label of the orientation widget. [CHAR LIMIT=20] -->
+    <string name="label_orientation">Orientation</string>
+
+    <!-- Label of the page selection widget. [CHAR LIMIT=20] -->
+    <string name="label_pages">Pages (<xliff:g id="page_count" example="5">%1$s</xliff:g>)</string>
+
+    <!-- Page range exmple used as a hint of how to specify such. [CHAR LIMIT=20] -->
+    <string name="pages_range_example">e.g. 1&#8212;5,8,11&#8212;13</string>
+
+    <!-- Title for the pring preview button .[CHAR LIMIT=30] -->
+    <string name="print_preview">Print preview</string>
+
+    <!-- Title for the pring preview button if there is no PDF viewer isntalled. [CHAR LIMIT=50] -->
+    <string name="install_for_print_preview">Install PDF viewer for preview</string>
+
+    <!-- Title of the message that the printing application crashed. [CHAR LIMIT=50] -->
+    <string name="printing_app_crashed">Printing app crashed</string>
+
+    <!-- Title if the number of pages in a printed document is unknown. [CHAR LIMIT=20] -->
+    <string name="page_count_unknown">Pages</string>
+
+    <!-- Title for the temporary dialog show while an app is generating a print job. [CHAR LIMIT=30] -->
+    <string name="generating_print_job">Generating print job</string>
+
+    <!-- Title for the save as PDF option in the printer list. [CHAR LIMIT=30] -->
+    <string name="save_as_pdf">Save as PDF</string>
+
+    <!-- Title for the open all printers UI option in the printer list. [CHAR LIMIT=30] -->
+    <string name="all_printers">All printers&#8230;</string>
+
+    <!-- Title for the print dialog announced to the user for accessibility. Not shown in the UI. [CHAR LIMIT=none] -->
+    <string name="print_dialog">Print dialog</string>
+
+    <!-- Select printer activity -->
+
+    <!-- Title for the share action bar menu item. [CHAR LIMIT=20] -->
+    <string name="search">Search</string>
+
+    <!-- Title for the select printer activity. [CHAR LIMIT=30] -->
+    <string name="all_printers_label">All printers</string>
+
+    <!-- Title of the button to install a print service. [CHAR LIMIT=25] -->
+    <string name="add_print_service_label">Add service</string>
+
+    <!-- Utterance to announce that the search box is shown. This is spoken to a blind user. [CHAR LIMIT=none] -->
+    <string name="print_search_box_shown_utterance">Search box shown</string>
+
+    <!-- Utterance to announce that the search box is hidden. This is spoken to a blind user. [CHAR LIMIT=none] -->
+    <string name="print_search_box_hidden_utterance">Search box hidden</string>
+
+    <!-- Title of the action bar button to got to add a printer. [CHAR LIMIT=25] -->
+    <string name="print_add_printer">Add printer</string>
+
+    <!-- Utterance to announce a change in the number of matches during a search. This is spoken to a blind user. [CHAR LIMIT=none] -->
+    <plurals name="print_search_result_count_utterance">
+        <item quantity="one"><xliff:g id="count" example="1">%1$s</xliff:g> printer found</item>
+        <item quantity="other"><xliff:g id="count" example="2">%1$s</xliff:g> printers found</item>
+    </plurals>
+
+    <!-- Add printer dialog  -->
+
+    <!-- Title for the alert dialog for selecting a print service. [CHAR LIMIT=50] -->
+    <string name="choose_print_service">Choose print service</string>
+
+    <!-- Title for the prompt shown as a placeholder if no printers are found while not searching. [CHAR LIMIT=50] -->
+    <string name="print_searching_for_printers">Searching for printers</string>
+
+    <!-- Title for the prompt shown as a placeholder if there are no printers while searching. [CHAR LIMIT=50] -->
+    <string name="print_no_printers">No printers found</string>
+
+    <!-- Notifications -->
+
+    <!-- Template for the notificaiton label for a printing print job. [CHAR LIMIT=25] -->
+    <string name="printing_notification_title_template">Printing <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
+
+    <!-- Template for the notificaiton label for a cancelling print job. [CHAR LIMIT=25] -->
+    <string name="cancelling_notification_title_template">Cancelling <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
+
+    <!-- Template for the notificaiton label for a failed print job. [CHAR LIMIT=25] -->
+    <string name="failed_notification_title_template">Printer error <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
+
+    <!-- Template for the notificaiton label for a blocked print job. [CHAR LIMIT=25] -->
+    <string name="blocked_notification_title_template">Printer blocked <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
+
+    <!-- Template for the notificaiton label for a composite (multiple items) print jobs notification. [CHAR LIMIT=25] -->
+    <plurals name="composite_notification_title_template">
+        <item quantity="one"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print job</item>
+        <item quantity="other"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print jobs</item>
+    </plurals>
+
+    <!-- Label for the notification button for cancelling a print job. [CHAR LIMIT=25] -->
+    <string name="cancel">Cancel</string>
+
+    <!-- Label for the notification button for restrating a filed print job. [CHAR LIMIT=25] -->
+    <string name="restart">Restart</string>
+
+    <!-- Message that there is no connection to a printer. [CHAR LIMIT=40] -->
+    <string name="no_connection_to_printer">No connection to printer</string>
+
+    <!-- Label for an unknown reason for failed or blocked print job. [CHAR LIMIT=25] -->
+    <string name="reason_unknown">unknown</string>
+
+    <!-- Label for a printer that is not available. [CHAR LIMIT=25] -->
+    <string name="printer_unavailable"><xliff:g id="print_job_name" example="Canon-123GHT">%1$s</xliff:g> &#8211; unavailable</string>
+
+    <!-- Default message of an alert dialog for app error while generating a print job. [CHAR LIMIT=50] -->
+    <string name="print_error_default_message">Couldn\'t generate print job</string>
+
+    <!-- Arrays -->
+
+    <!-- Color mode labels. -->
+    <string-array name="color_mode_labels">
+        <!-- Color modelabel: Monochrome color scheme, e.g. one color is used. [CHAR LIMIT=20] -->
+        <item>Black &amp; White</item>
+        <!-- Color mode label: Color color scheme, e.g. many colors are used. [CHAR LIMIT=20] -->
+        <item>Color</item>
+    </string-array>
+
+    <!-- Orientation labels. -->
+    <string-array name="orientation_labels">
+        <!-- Orientation label: Portrait page orientation. [CHAR LIMIT=30] -->
+        <item>Portrait</item>
+        <!-- Orientation label: Landscape page orientation [CHAR LIMIT=30] -->
+        <item>Landscape</item>
+    </string-array>
+
+    <!-- Page options labels. -->
+    <string-array name="page_options_labels">
+        <!-- Page range option label: Print all pages [CHAR LIMIT=30] -->
+        <item>All</item>
+        <!-- Page range option label: Print a page range [CHAR LIMIT=30] -->
+        <item>Range</item>
+    </string-array>
+
+    <!-- Permissions -->
+
+    <!-- Title of an application permission, listed so the user can choose whether they want
+         to allow the application to do this. -->
+    <string name="permlab_accessAllPrintJobs" translatable="false">access all print jobs</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+         they want to allow the application to do this. -->
+    <string name="permdesc_accessAllPrintJobs" translatable="false">Allows the holder to access
+        print jobs created by another app. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want
+         to allow the application to do this. -->
+    <string name="permlab_startPrintServiceConfigActivity" translatable="false">start print
+        service configuration activities</string>
+    <!-- Description of an application permission, listed so the user can choose whether they
+         want to allow the application to do this. -->
+    <string name="permdesc_startPrintServiceConfigActivity" translatable="false">Allows the
+        holder to start the configuration activities of a print service. Should never be needed
+        for normal apps.</string>
+
+</resources>

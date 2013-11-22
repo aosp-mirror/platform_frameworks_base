@@ -41,6 +41,7 @@ import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class is a strategy for performing touch exploration. It
@@ -52,10 +53,8 @@ import java.util.Arrays;
  *   <li>2. One finger moving fast around performs gestures.</li>
  *   <li>3. Two close fingers moving in the same direction perform a drag.</li>
  *   <li>4. Multi-finger gestures are delivered to view hierarchy.</li>
- *   <li>5. Pointers that have not moved more than a specified distance after they
- *          went down are considered inactive.</li>
- *   <li>6. Two fingers moving in different directions are considered a multi-finger gesture.</li>
- *   <li>7. Double tapping clicks on the on the last touch explored location of it was in
+ *   <li>5. Two fingers moving in different directions are considered a multi-finger gesture.</li>
+ *   <li>7. Double tapping clicks on the on the last touch explored location if it was in
  *          a window that does not take focus, otherwise the click is within the accessibility
  *          focused rectangle.</li>
  *   <li>7. Tapping and holding for a while performs a long press in a similar fashion
@@ -102,9 +101,6 @@ class TouchExplorer implements EventStreamTransformation {
     // The timeout after which we are no longer trying to detect a gesture.
     private static final int EXIT_GESTURE_DETECTION_TIMEOUT = 2000;
 
-    // Temporary array for storing pointer IDs.
-    private final int[] mTempPointerIds = new int[MAX_POINTER_COUNT];
-
     // Timeout before trying to decide what the user is trying to do.
     private final int mDetermineUserIntentTimeout;
 
@@ -129,11 +125,11 @@ class TouchExplorer implements EventStreamTransformation {
     // Handler for performing asynchronous operations.
     private final Handler mHandler;
 
-    // Command for delayed sending of a hover enter event.
-    private final SendHoverDelayed mSendHoverEnterDelayed;
+    // Command for delayed sending of a hover enter and move event.
+    private final SendHoverEnterAndMoveDelayed mSendHoverEnterAndMoveDelayed;
 
     // Command for delayed sending of a hover exit event.
-    private final SendHoverDelayed mSendHoverExitDelayed;
+    private final SendHoverExitDelayed mSendHoverExitDelayed;
 
     // Command for delayed sending of touch exploration end events.
     private final SendAccessibilityEventDelayed mSendTouchExplorationEndDelayed;
@@ -220,7 +216,7 @@ class TouchExplorer implements EventStreamTransformation {
     public TouchExplorer(Context context, AccessibilityManagerService service) {
         mContext = context;
         mAms = service;
-        mReceivedPointerTracker = new ReceivedPointerTracker(context);
+        mReceivedPointerTracker = new ReceivedPointerTracker();
         mInjectedPointerTracker = new InjectedPointerTracker();
         mTapTimeout = ViewConfiguration.getTapTimeout();
         mDetermineUserIntentTimeout = ViewConfiguration.getDoubleTapTimeout();
@@ -234,8 +230,8 @@ class TouchExplorer implements EventStreamTransformation {
         mGestureLibrary.setOrientationStyle(8);
         mGestureLibrary.setSequenceType(GestureStore.SEQUENCE_SENSITIVE);
         mGestureLibrary.load();
-        mSendHoverEnterDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_ENTER, true);
-        mSendHoverExitDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_EXIT, false);
+        mSendHoverEnterAndMoveDelayed = new SendHoverEnterAndMoveDelayed();
+        mSendHoverExitDelayed = new SendHoverExitDelayed();
         mSendTouchExplorationEndDelayed = new SendAccessibilityEventDelayed(
                 AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END,
                 mDetermineUserIntentTimeout);
@@ -283,12 +279,12 @@ class TouchExplorer implements EventStreamTransformation {
             } break;
         }
         // Remove all pending callbacks.
-        mSendHoverEnterDelayed.remove();
-        mSendHoverExitDelayed.remove();
-        mPerformLongPressDelayed.remove();
-        mExitGestureDetectionModeDelayed.remove();
-        mSendTouchExplorationEndDelayed.remove();
-        mSendTouchInteractionEndDelayed.remove();
+        mSendHoverEnterAndMoveDelayed.cancel();
+        mSendHoverExitDelayed.cancel();
+        mPerformLongPressDelayed.cancel();
+        mExitGestureDetectionModeDelayed.cancel();
+        mSendTouchExplorationEndDelayed.cancel();
+        mSendTouchInteractionEndDelayed.cancel();
         // Reset the pointer trackers.
         mReceivedPointerTracker.clear();
         mInjectedPointerTracker.clear();
@@ -347,7 +343,7 @@ class TouchExplorer implements EventStreamTransformation {
         // last hover exit event.
         if (mSendTouchExplorationEndDelayed.isPending()
                 && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
-                    mSendTouchExplorationEndDelayed.remove();
+                    mSendTouchExplorationEndDelayed.cancel();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
         }
 
@@ -355,7 +351,7 @@ class TouchExplorer implements EventStreamTransformation {
         // last hover exit and the touch exploration gesture end events.
         if (mSendTouchInteractionEndDelayed.isPending()
                 && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
-            mSendTouchInteractionEndDelayed.remove();
+            mSendTouchInteractionEndDelayed.cancel();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
         }
 
@@ -390,95 +386,82 @@ class TouchExplorer implements EventStreamTransformation {
     private void handleMotionEventStateTouchExploring(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
         ReceivedPointerTracker receivedTracker = mReceivedPointerTracker;
-        final int activePointerCount = receivedTracker.getActivePointerCount();
 
         mVelocityTracker.addMovement(rawEvent);
 
         mDoubleTapDetector.onMotionEvent(event, policyFlags);
 
         switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_DOWN: {
                 mAms.onTouchInteractionStart();
+
                 // Pre-feed the motion events to the gesture detector since we
                 // have a distance slop before getting into gesture detection
                 // mode and not using the points within this slop significantly
                 // decreases the quality of gesture recognition.
                 handleMotionEventGestureDetecting(rawEvent, policyFlags);
-                //$FALL-THROUGH$
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                switch (activePointerCount) {
-                    case 0: {
-                        throw new IllegalStateException("The must always be one active pointer in"
-                                + "touch exploring state!");
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
+
+                // If we still have not notified the user for the last
+                // touch, we figure out what to do. If were waiting
+                // we resent the delayed callback and wait again.
+                mSendHoverEnterAndMoveDelayed.cancel();
+                mSendHoverExitDelayed.cancel();
+                mPerformLongPressDelayed.cancel();
+
+                if (mSendTouchExplorationEndDelayed.isPending()) {
+                    mSendTouchExplorationEndDelayed.forceSendAndRemove();
+                }
+
+                if (mSendTouchInteractionEndDelayed.isPending()) {
+                    mSendTouchInteractionEndDelayed.forceSendAndRemove();
+                }
+
+                // If we have the first tap, schedule a long press and break
+                // since we do not want to schedule hover enter because
+                // the delayed callback will kick in before the long click.
+                // This would lead to a state transition resulting in long
+                // pressing the item below the double taped area which is
+                // not necessary where accessibility focus is.
+                if (mDoubleTapDetector.firstTapDetected()) {
+                    // We got a tap now post a long press action.
+                    mPerformLongPressDelayed.post(event, policyFlags);
+                    break;
+                }
+                if (!mTouchExplorationInProgress) {
+                    if (!mSendHoverEnterAndMoveDelayed.isPending()) {
+                        // Deliver hover enter with a delay to have a chance
+                        // to detect what the user is trying to do.
+                        final int pointerId = receivedTracker.getPrimaryPointerId();
+                        final int pointerIdBits = (1 << pointerId);
+                        mSendHoverEnterAndMoveDelayed.post(event, true, pointerIdBits,
+                                policyFlags);
                     }
-                    case 1: {
-                        // If we still have not notified the user for the last
-                        // touch, we figure out what to do. If were waiting
-                        // we resent the delayed callback and wait again.
-                        if (mSendHoverEnterDelayed.isPending()) {
-                            mSendHoverEnterDelayed.remove();
-                            mSendHoverExitDelayed.remove();
-                        }
-
-                        if (mSendTouchExplorationEndDelayed.isPending()) {
-                            mSendTouchExplorationEndDelayed.forceSendAndRemove();
-                        }
-
-                        if (mSendTouchInteractionEndDelayed.isPending()) {
-                            mSendTouchInteractionEndDelayed.forceSendAndRemove();
-                        }
-
-                        // Every pointer that goes down is active until it moves or
-                        // another one goes down. Hence, having more than one pointer
-                        // down we have already send the interaction start event.
-                        if (event.getPointerCount() == 1) {
-                            sendAccessibilityEvent(
-                                    AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
-                        }
-
-                        mPerformLongPressDelayed.remove();
-
-                        // If we have the first tap schedule a long press and break
-                        // since we do not want to schedule hover enter because
-                        // the delayed callback will kick in before the long click.
-                        // This would lead to a state transition resulting in long
-                        // pressing the item below the double taped area which is
-                        // not necessary where accessibility focus is.
-                        if (mDoubleTapDetector.firstTapDetected()) {
-                            // We got a tap now post a long press action.
-                            mPerformLongPressDelayed.post(event, policyFlags);
-                            break;
-                        }
-                        if (!mTouchExplorationInProgress) {
-                            // Deliver hover enter with a delay to have a chance
-                            // to detect what the user is trying to do.
-                            final int pointerId = receivedTracker.getPrimaryActivePointerId();
-                            final int pointerIdBits = (1 << pointerId);
-                            mSendHoverEnterDelayed.post(event, true, pointerIdBits, policyFlags);
-                        }
-                    } break;
-                    default: {
-                        /* do nothing - let the code for ACTION_MOVE decide what to do */
-                    } break;
+                    // Cache the event until we discern exploration from gesturing.
+                    mSendHoverEnterAndMoveDelayed.addEvent(event);
                 }
             } break;
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                /* do nothing - let the code for ACTION_MOVE decide what to do */
+            } break;
             case MotionEvent.ACTION_MOVE: {
-                final int pointerId = receivedTracker.getPrimaryActivePointerId();
+                final int pointerId = receivedTracker.getPrimaryPointerId();
                 final int pointerIndex = event.findPointerIndex(pointerId);
                 final int pointerIdBits = (1 << pointerId);
-                switch (activePointerCount) {
-                    case 0: {
-                        /* do nothing - no active pointers so we swallow the event */
-                    } break;
+                switch (event.getPointerCount()) {
                     case 1: {
                         // We have not started sending events since we try to
                         // figure out what the user is doing.
-                        if (mSendHoverEnterDelayed.isPending()) {
+                        if (mSendHoverEnterAndMoveDelayed.isPending()) {
                             // Pre-feed the motion events to the gesture detector since we
                             // have a distance slop before getting into gesture detection
                             // mode and not using the points within this slop significantly
                             // decreases the quality of gesture recognition.
                             handleMotionEventGestureDetecting(rawEvent, policyFlags);
+
+                            // Cache the event until we discern exploration from gesturing.
+                            mSendHoverEnterAndMoveDelayed.addEvent(event);
+
                             // It is *important* to use the distance traveled by the pointers
                             // on the screen which may or may not be magnified.
                             final float deltaX = receivedTracker.getReceivedPointerDownX(pointerId)
@@ -500,9 +483,9 @@ class TouchExplorer implements EventStreamTransformation {
                                     // clear the current state and try to detect.
                                     mCurrentState = STATE_GESTURE_DETECTING;
                                     mVelocityTracker.clear();
-                                    mSendHoverEnterDelayed.remove();
-                                    mSendHoverExitDelayed.remove();
-                                    mPerformLongPressDelayed.remove();
+                                    mSendHoverEnterAndMoveDelayed.cancel();
+                                    mSendHoverExitDelayed.cancel();
+                                    mPerformLongPressDelayed.cancel();
                                     mExitGestureDetectionModeDelayed.post();
                                     // Send accessibility event to announce the start
                                     // of gesture recognition.
@@ -511,9 +494,9 @@ class TouchExplorer implements EventStreamTransformation {
                                 } else {
                                     // We have just decided that the user is touch,
                                     // exploring so start sending events.
-                                    mSendHoverEnterDelayed.forceSendAndRemove();
-                                    mSendHoverExitDelayed.remove();
-                                    mPerformLongPressDelayed.remove();
+                                    mSendHoverEnterAndMoveDelayed.forceSendAndRemove();
+                                    mSendHoverExitDelayed.cancel();
+                                    mPerformLongPressDelayed.cancel();
                                     sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE,
                                             pointerIdBits, policyFlags);
                                 }
@@ -532,11 +515,11 @@ class TouchExplorer implements EventStreamTransformation {
                                 final double moveDelta = Math.hypot(deltaX, deltaY);
                                 // The user has moved enough for us to decide.
                                 if (moveDelta > mTouchSlop) {
-                                    mPerformLongPressDelayed.remove();
+                                    mPerformLongPressDelayed.cancel();
                                 }
                             }
-                            // The user is wither double tapping or performing long
-                            // press so do not send move events yet.
+                            // The user is either double tapping or performing a long
+                            // press, so do not send move events yet.
                             if (mDoubleTapDetector.firstTapDetected()) {
                                 break;
                             }
@@ -548,14 +531,14 @@ class TouchExplorer implements EventStreamTransformation {
                     case 2: {
                         // More than one pointer so the user is not touch exploring
                         // and now we have to decide whether to delegate or drag.
-                        if (mSendHoverEnterDelayed.isPending()) {
+                        if (mSendHoverEnterAndMoveDelayed.isPending()) {
                             // We have not started sending events so cancel
                             // scheduled sending events.
-                            mSendHoverEnterDelayed.remove();
-                            mSendHoverExitDelayed.remove();
-                            mPerformLongPressDelayed.remove();
+                            mSendHoverEnterAndMoveDelayed.cancel();
+                            mSendHoverExitDelayed.cancel();
+                            mPerformLongPressDelayed.cancel();
                         } else {
-                            mPerformLongPressDelayed.remove();
+                            mPerformLongPressDelayed.cancel();
                             // If the user is touch exploring the second pointer may be
                             // performing a double tap to activate an item without need
                             // for the user to lift his exploring finger.
@@ -590,21 +573,21 @@ class TouchExplorer implements EventStreamTransformation {
                         } else {
                             // Two pointers moving arbitrary are delegated to the view hierarchy.
                             mCurrentState = STATE_DELEGATING;
-                            sendDownForAllActiveNotInjectedPointers(event, policyFlags);
+                            sendDownForAllNotInjectedPointers(event, policyFlags);
                         }
                         mVelocityTracker.clear();
                     } break;
                     default: {
                         // More than one pointer so the user is not touch exploring
                         // and now we have to decide whether to delegate or drag.
-                        if (mSendHoverEnterDelayed.isPending()) {
+                        if (mSendHoverEnterAndMoveDelayed.isPending()) {
                             // We have not started sending events so cancel
                             // scheduled sending events.
-                            mSendHoverEnterDelayed.remove();
-                            mSendHoverExitDelayed.remove();
-                            mPerformLongPressDelayed.remove();
+                            mSendHoverEnterAndMoveDelayed.cancel();
+                            mSendHoverExitDelayed.cancel();
+                            mPerformLongPressDelayed.cancel();
                         } else {
-                            mPerformLongPressDelayed.remove();
+                            mPerformLongPressDelayed.cancel();
                             // We are sending events so send exit and gesture
                             // end since we transition to another state.
                             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
@@ -612,43 +595,34 @@ class TouchExplorer implements EventStreamTransformation {
 
                         // More than two pointers are delegated to the view hierarchy.
                         mCurrentState = STATE_DELEGATING;
-                        sendDownForAllActiveNotInjectedPointers(event, policyFlags);
+                        sendDownForAllNotInjectedPointers(event, policyFlags);
                         mVelocityTracker.clear();
                     }
                 }
             } break;
-            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_UP: {
                 mAms.onTouchInteractionEnd();
                 // We know that we do not need the pre-fed gesture points are not
                 // needed anymore since the last pointer just went up.
                 mStrokeBuffer.clear();
-                //$FALL-THROUGH$
-            case MotionEvent.ACTION_POINTER_UP: {
-                final int pointerId = receivedTracker.getLastReceivedUpPointerId();
+                final int pointerId = event.getPointerId(event.getActionIndex());
                 final int pointerIdBits = (1 << pointerId);
-                switch (activePointerCount) {
-                    case 0: {
-                        // If the pointer that went up was not active we have nothing to do.
-                        if (!receivedTracker.wasLastReceivedUpPointerActive()) {
-                            break;
-                        }
 
-                        mPerformLongPressDelayed.remove();
-
-                        // If we have not delivered the enter schedule exit.
-                        if (mSendHoverEnterDelayed.isPending()) {
-                            mSendHoverExitDelayed.post(event, false, pointerIdBits, policyFlags);
-                        } else {
-                            // The user is touch exploring so we send events for end.
-                            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-                        }
-
-                        if (!mSendTouchInteractionEndDelayed.isPending()) {
-                            mSendTouchInteractionEndDelayed.post();
-                        }
-                    } break;
-                }
+                mPerformLongPressDelayed.cancel();
                 mVelocityTracker.clear();
+
+                if (mSendHoverEnterAndMoveDelayed.isPending()) {
+                    // If we have not delivered the enter schedule an exit.
+                    mSendHoverExitDelayed.post(event, pointerIdBits, policyFlags);
+                } else {
+                    // The user is touch exploring so we send events for end.
+                    sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+                }
+
+                if (!mSendTouchInteractionEndDelayed.isPending()) {
+                    mSendTouchInteractionEndDelayed.post();
+                }
+
             } break;
             case MotionEvent.ACTION_CANCEL: {
                 clear(event, policyFlags);
@@ -676,29 +650,19 @@ class TouchExplorer implements EventStreamTransformation {
                 if (mDraggingPointerId != INVALID_POINTER_ID) {
                     sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
                 }
-                sendDownForAllActiveNotInjectedPointers(event, policyFlags);
+                sendDownForAllNotInjectedPointers(event, policyFlags);
             } break;
             case MotionEvent.ACTION_MOVE: {
-                final int activePointerCount = mReceivedPointerTracker.getActivePointerCount();
-                switch (activePointerCount) {
+                switch (event.getPointerCount()) {
                     case 1: {
                         // do nothing
                     } break;
                     case 2: {
                         if (isDraggingGesture(event)) {
-                            // If the dragging pointer are closer that a given distance we
-                            // use the location of the primary one. Otherwise, we take the
-                            // middle between the pointers.
-                            int[] pointerIds = mTempPointerIds;
-                            mReceivedPointerTracker.populateActivePointerIds(pointerIds);
-
-                            final int firstPtrIndex = event.findPointerIndex(pointerIds[0]);
-                            final int secondPtrIndex = event.findPointerIndex(pointerIds[1]);
-
-                            final float firstPtrX = event.getX(firstPtrIndex);
-                            final float firstPtrY = event.getY(firstPtrIndex);
-                            final float secondPtrX = event.getX(secondPtrIndex);
-                            final float secondPtrY = event.getY(secondPtrIndex);
+                            final float firstPtrX = event.getX(0);
+                            final float firstPtrY = event.getY(0);
+                            final float secondPtrX = event.getX(1);
+                            final float secondPtrY = event.getY(1);
 
                             final float deltaX = firstPtrX - secondPtrX;
                             final float deltaY = firstPtrY - secondPtrY;
@@ -718,8 +682,8 @@ class TouchExplorer implements EventStreamTransformation {
                             // Send an event to the end of the drag gesture.
                             sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits,
                                     policyFlags);
-                            // Deliver all active pointers to the view hierarchy.
-                            sendDownForAllActiveNotInjectedPointers(event, policyFlags);
+                            // Deliver all pointers to the view hierarchy.
+                            sendDownForAllNotInjectedPointers(event, policyFlags);
                         }
                     } break;
                     default: {
@@ -727,8 +691,8 @@ class TouchExplorer implements EventStreamTransformation {
                         // Send an event to the end of the drag gesture.
                         sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits,
                                 policyFlags);
-                        // Deliver all active pointers to the view hierarchy.
-                        sendDownForAllActiveNotInjectedPointers(event, policyFlags);
+                        // Deliver all pointers to the view hierarchy.
+                        sendDownForAllNotInjectedPointers(event, policyFlags);
                     }
                 }
             } break;
@@ -771,37 +735,21 @@ class TouchExplorer implements EventStreamTransformation {
                 throw new IllegalStateException("Delegating state can only be reached if "
                         + "there is at least one pointer down!");
             }
-            case MotionEvent.ACTION_MOVE: {
-                // Check  whether some other pointer became active because they have moved
-                // a given distance and if such exist send them to the view hierarchy
-                final int notInjectedCount = getNotInjectedActivePointerCount(
-                        mReceivedPointerTracker, mInjectedPointerTracker);
-                if (notInjectedCount > 0) {
-                    MotionEvent prototype = MotionEvent.obtain(event);
-                    sendDownForAllActiveNotInjectedPointers(prototype, policyFlags);
-                }
-            } break;
-            case MotionEvent.ACTION_UP:
-                // Announce the end of a new touch interaction.
-                sendAccessibilityEvent(
-                        AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-                //$FALL-THROUGH$
-            case MotionEvent.ACTION_POINTER_UP: {
+            case MotionEvent.ACTION_UP: {
                 mAms.onTouchInteractionEnd();
+                // Announce the end of a the touch interaction.
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
                 mLongPressingPointerId = -1;
                 mLongPressingPointerDeltaX = 0;
                 mLongPressingPointerDeltaY = 0;
-                // No active pointers => go to initial state.
-                if (mReceivedPointerTracker.getActivePointerCount() == 0) {
-                    mCurrentState = STATE_TOUCH_EXPLORING;
-                }
+                mCurrentState = STATE_TOUCH_EXPLORING;
             } break;
             case MotionEvent.ACTION_CANCEL: {
                 clear(event, policyFlags);
             } break;
         }
-        // Deliver the event striping out inactive pointers.
-        sendMotionEventStripInactivePointers(event, policyFlags);
+        // Deliver the event.
+        sendMotionEvent(event, event.getAction(), ALL_POINTER_ID_BITS, policyFlags);
     }
 
     private void handleMotionEventGestureDetecting(MotionEvent event, int policyFlags) {
@@ -826,12 +774,10 @@ class TouchExplorer implements EventStreamTransformation {
             } break;
             case MotionEvent.ACTION_UP: {
                 mAms.onTouchInteractionEnd();
-                // Announce the end of gesture recognition.
-                sendAccessibilityEvent(
-                        AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
-                // Announce the end of a new touch interaction.
-                sendAccessibilityEvent(
-                        AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
+                // Announce the end of the gesture recognition.
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
+                // Announce the end of a the touch interaction.
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
 
                 float x = event.getX();
                 float y = event.getY();
@@ -858,7 +804,7 @@ class TouchExplorer implements EventStreamTransformation {
                 }
 
                 mStrokeBuffer.clear();
-                mExitGestureDetectionModeDelayed.remove();
+                mExitGestureDetectionModeDelayed.cancel();
                 mCurrentState = STATE_TOUCH_EXPLORING;
             } break;
             case MotionEvent.ACTION_CANCEL: {
@@ -876,6 +822,7 @@ class TouchExplorer implements EventStreamTransformation {
         AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
         if (accessibilityManager.isEnabled()) {
             AccessibilityEvent event = AccessibilityEvent.obtain(type);
+            event.setWindowId(mAms.getActiveWindowId());
             accessibilityManager.sendAccessibilityEvent(event);
             switch (type) {
                 case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START: {
@@ -889,40 +836,26 @@ class TouchExplorer implements EventStreamTransformation {
     }
 
     /**
-     * Sends down events to the view hierarchy for all active pointers which are
+     * Sends down events to the view hierarchy for all pointers which are
      * not already being delivered i.e. pointers that are not yet injected.
      *
      * @param prototype The prototype from which to create the injected events.
      * @param policyFlags The policy flags associated with the event.
      */
-    private void sendDownForAllActiveNotInjectedPointers(MotionEvent prototype, int policyFlags) {
-        ReceivedPointerTracker receivedPointers = mReceivedPointerTracker;
+    private void sendDownForAllNotInjectedPointers(MotionEvent prototype, int policyFlags) {
         InjectedPointerTracker injectedPointers = mInjectedPointerTracker;
+
+        // Inject the injected pointers.
         int pointerIdBits = 0;
         final int pointerCount = prototype.getPointerCount();
-
-        // Find which pointers are already injected.
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
-            if (injectedPointers.isInjectedPointerDown(pointerId)) {
-                pointerIdBits |= (1 << pointerId);
-            }
-        }
-
-        // Inject the active and not injected pointers.
-        for (int i = 0; i < pointerCount; i++) {
-            final int pointerId = prototype.getPointerId(i);
-            // Skip inactive pointers.
-            if (!receivedPointers.isActivePointer(pointerId)) {
-                continue;
-            }
             // Do not send event for already delivered pointers.
-            if (injectedPointers.isInjectedPointerDown(pointerId)) {
-                continue;
+            if (!injectedPointers.isInjectedPointerDown(pointerId)) {
+                pointerIdBits |= (1 << pointerId);
+                final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, i);
+                sendMotionEvent(prototype, action, pointerIdBits, policyFlags);
             }
-            pointerIdBits |= (1 << pointerId);
-            final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, i);
-            sendMotionEvent(prototype, action, pointerIdBits, policyFlags);
         }
     }
 
@@ -959,7 +892,7 @@ class TouchExplorer implements EventStreamTransformation {
     }
 
     /**
-     * Sends up events to the view hierarchy for all active pointers which are
+     * Sends up events to the view hierarchy for all pointers which are
      * already being delivered i.e. pointers that are injected.
      *
      * @param prototype The prototype from which to create the injected events.
@@ -982,58 +915,13 @@ class TouchExplorer implements EventStreamTransformation {
     }
 
     /**
-     * Sends a motion event by first stripping the inactive pointers.
-     *
-     * @param prototype The prototype from which to create the injected event.
-     * @param policyFlags The policy flags associated with the event.
-     */
-    private void sendMotionEventStripInactivePointers(MotionEvent prototype, int policyFlags) {
-        ReceivedPointerTracker receivedTracker = mReceivedPointerTracker;
-
-        // All pointers active therefore we just inject the event as is.
-        if (prototype.getPointerCount() == receivedTracker.getActivePointerCount()) {
-            sendMotionEvent(prototype, prototype.getAction(), ALL_POINTER_ID_BITS, policyFlags);
-            return;
-        }
-
-        // No active pointers and the one that just went up was not
-        // active, therefore we have nothing to do.
-        if (receivedTracker.getActivePointerCount() == 0
-                && !receivedTracker.wasLastReceivedUpPointerActive()) {
-            return;
-        }
-
-        // If the action pointer going up/down is not active we have nothing to do.
-        // However, for moves we keep going to report moves of active pointers.
-        final int actionMasked = prototype.getActionMasked();
-        final int actionPointerId = prototype.getPointerId(prototype.getActionIndex());
-        if (actionMasked != MotionEvent.ACTION_MOVE) {
-            if (!receivedTracker.isActiveOrWasLastActiveUpPointer(actionPointerId)) {
-                return;
-            }
-        }
-
-        // If the pointer is active or the pointer that just went up
-        // was active we keep the pointer data in the event.
-        int pointerIdBits = 0;
-        final int pointerCount = prototype.getPointerCount();
-        for (int pointerIndex = 0; pointerIndex < pointerCount; pointerIndex++) {
-            final int pointerId = prototype.getPointerId(pointerIndex);
-            if (receivedTracker.isActiveOrWasLastActiveUpPointer(pointerId)) {
-                pointerIdBits |= (1 << pointerId);
-            }
-        }
-        sendMotionEvent(prototype, prototype.getAction(), pointerIdBits, policyFlags);
-    }
-
-    /**
      * Sends an up and down events.
      *
      * @param prototype The prototype from which to create the injected events.
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendActionDownAndUp(MotionEvent prototype, int policyFlags) {
-        // Tap with the pointer that last explored - we may have inactive pointers.
+        // Tap with the pointer that last explored.
         final int pointerId = prototype.getPointerId(prototype.getActionIndex());
         final int pointerIdBits = (1 << pointerId);
         sendMotionEvent(prototype, MotionEvent.ACTION_DOWN, pointerIdBits, policyFlags);
@@ -1215,9 +1103,9 @@ class TouchExplorer implements EventStreamTransformation {
             }
 
             // Remove pending event deliveries.
-            mSendHoverEnterDelayed.remove();
-            mSendHoverExitDelayed.remove();
-            mPerformLongPressDelayed.remove();
+            mSendHoverEnterAndMoveDelayed.cancel();
+            mSendHoverExitDelayed.cancel();
+            mPerformLongPressDelayed.cancel();
 
             if (mSendTouchExplorationEndDelayed.isPending()) {
                 mSendTouchExplorationEndDelayed.forceSendAndRemove();
@@ -1307,21 +1195,16 @@ class TouchExplorer implements EventStreamTransformation {
      */
     private boolean isDraggingGesture(MotionEvent event) {
         ReceivedPointerTracker receivedTracker = mReceivedPointerTracker;
-        int[] pointerIds = mTempPointerIds;
-        receivedTracker.populateActivePointerIds(pointerIds);
 
-        final int firstPtrIndex = event.findPointerIndex(pointerIds[0]);
-        final int secondPtrIndex = event.findPointerIndex(pointerIds[1]);
+        final float firstPtrX = event.getX(0);
+        final float firstPtrY = event.getY(0);
+        final float secondPtrX = event.getX(1);
+        final float secondPtrY = event.getY(1);
 
-        final float firstPtrX = event.getX(firstPtrIndex);
-        final float firstPtrY = event.getY(firstPtrIndex);
-        final float secondPtrX = event.getX(secondPtrIndex);
-        final float secondPtrY = event.getY(secondPtrIndex);
-
-        final float firstPtrDownX = receivedTracker.getReceivedPointerDownX(firstPtrIndex);
-        final float firstPtrDownY = receivedTracker.getReceivedPointerDownY(firstPtrIndex);
-        final float secondPtrDownX = receivedTracker.getReceivedPointerDownX(secondPtrIndex);
-        final float secondPtrDownY = receivedTracker.getReceivedPointerDownY(secondPtrIndex);
+        final float firstPtrDownX = receivedTracker.getReceivedPointerDownX(0);
+        final float firstPtrDownY = receivedTracker.getReceivedPointerDownY(0);
+        final float secondPtrDownX = receivedTracker.getReceivedPointerDownX(1);
+        final float secondPtrDownY = receivedTracker.getReceivedPointerDownY(1);
 
         return GestureUtils.isDraggingGesture(firstPtrDownX, firstPtrDownY, secondPtrDownX,
                 secondPtrDownY, firstPtrX, firstPtrY, secondPtrX, secondPtrY,
@@ -1350,16 +1233,6 @@ class TouchExplorer implements EventStreamTransformation {
     }
 
     /**
-     * @return The number of non injected active pointers.
-     */
-    private int getNotInjectedActivePointerCount(ReceivedPointerTracker receivedTracker,
-            InjectedPointerTracker injectedTracker) {
-        final int pointerState = receivedTracker.getActivePointers()
-                & ~injectedTracker.getInjectedPointersDown();
-        return Integer.bitCount(pointerState);
-    }
-
-    /**
      * Class for delayed exiting from gesture detecting mode.
      */
     private final class ExitGestureDetectionModeDelayed implements Runnable {
@@ -1368,7 +1241,7 @@ class TouchExplorer implements EventStreamTransformation {
             mHandler.postDelayed(this, EXIT_GESTURE_DETECTION_TIMEOUT);
         }
 
-        public void remove() {
+        public void cancel() {
             mHandler.removeCallbacks(this);
         }
 
@@ -1396,21 +1269,21 @@ class TouchExplorer implements EventStreamTransformation {
             mHandler.postDelayed(this, ViewConfiguration.getLongPressTimeout());
         }
 
-        public void remove() {
-            if (isPending()) {
+        public void cancel() {
+            if (mEvent != null) {
                 mHandler.removeCallbacks(this);
                 clear();
             }
         }
 
-        public boolean isPending() {
-            return (mEvent != null);
+        private boolean isPending() {
+            return mHandler.hasCallbacks(this);
         }
 
         @Override
         public void run() {
-            // Active pointers should not be zero when running this command.
-            if (mReceivedPointerTracker.getActivePointerCount() == 0) {
+            // Pointers should not be zero when running this command.
+            if (mReceivedPointerTracker.getLastReceivedEvent().getPointerCount() == 0) {
                 return;
             }
 
@@ -1461,14 +1334,11 @@ class TouchExplorer implements EventStreamTransformation {
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(mPolicyFlags);
 
             mCurrentState = STATE_DELEGATING;
-            sendDownForAllActiveNotInjectedPointers(mEvent, mPolicyFlags);
+            sendDownForAllNotInjectedPointers(mEvent, mPolicyFlags);
             clear();
         }
 
         private void clear() {
-            if (!isPending()) {
-                return;
-            }
             mEvent.recycle();
             mEvent = null;
             mPolicyFlags = 0;
@@ -1476,59 +1346,114 @@ class TouchExplorer implements EventStreamTransformation {
     }
 
     /**
-     * Class for delayed sending of hover events.
+     * Class for delayed sending of hover enter and move events.
      */
-    class SendHoverDelayed implements Runnable {
-        private final String LOG_TAG_SEND_HOVER_DELAYED = SendHoverDelayed.class.getName();
+    class SendHoverEnterAndMoveDelayed implements Runnable {
+        private final String LOG_TAG_SEND_HOVER_DELAYED = "SendHoverEnterAndMoveDelayed";
 
-        private final int mHoverAction;
-        private final boolean mGestureStarted;
+        private final List<MotionEvent> mEvents = new ArrayList<MotionEvent>();
+
+        private int mPointerIdBits;
+        private int mPolicyFlags;
+
+        public void post(MotionEvent event, boolean touchExplorationInProgress,
+                int pointerIdBits, int policyFlags) {
+            cancel();
+            addEvent(event);
+            mPointerIdBits = pointerIdBits;
+            mPolicyFlags = policyFlags;
+            mHandler.postDelayed(this, mDetermineUserIntentTimeout);
+        }
+
+        public void addEvent(MotionEvent event) {
+            mEvents.add(MotionEvent.obtain(event));
+        }
+
+        public void cancel() {
+            if (isPending()) {
+                mHandler.removeCallbacks(this);
+                clear();
+            }
+        }
+
+        private boolean isPending() {
+            return mHandler.hasCallbacks(this);
+        }
+
+        private void clear() {
+            mPointerIdBits = -1;
+            mPolicyFlags = 0;
+            final int eventCount = mEvents.size();
+            for (int i = eventCount - 1; i >= 0; i--) {
+                mEvents.remove(i).recycle();
+            }
+        }
+
+        public void forceSendAndRemove() {
+            if (isPending()) {
+                run();
+                cancel();
+            }
+        }
+
+        public void run() {
+            // Send an accessibility event to announce the touch exploration start.
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
+
+            if (!mEvents.isEmpty()) {
+                // Deliver a down event.
+                sendMotionEvent(mEvents.get(0), MotionEvent.ACTION_HOVER_ENTER,
+                        mPointerIdBits, mPolicyFlags);
+                if (DEBUG) {
+                    Slog.d(LOG_TAG_SEND_HOVER_DELAYED,
+                            "Injecting motion event: ACTION_HOVER_ENTER");
+                }
+
+                // Deliver move events.
+                final int eventCount = mEvents.size();
+                for (int i = 1; i < eventCount; i++) {
+                    sendMotionEvent(mEvents.get(i), MotionEvent.ACTION_HOVER_MOVE,
+                            mPointerIdBits, mPolicyFlags);
+                    if (DEBUG) {
+                        Slog.d(LOG_TAG_SEND_HOVER_DELAYED,
+                                "Injecting motion event: ACTION_HOVER_MOVE");
+                    }
+                }
+            }
+            clear();
+        }
+    }
+
+    /**
+     * Class for delayed sending of hover exit events.
+     */
+    class SendHoverExitDelayed implements Runnable {
+        private final String LOG_TAG_SEND_HOVER_DELAYED = "SendHoverExitDelayed";
 
         private MotionEvent mPrototype;
         private int mPointerIdBits;
         private int mPolicyFlags;
 
-        public SendHoverDelayed(int hoverAction, boolean gestureStarted) {
-            mHoverAction = hoverAction;
-            mGestureStarted = gestureStarted;
-        }
-
-        public void post(MotionEvent prototype, boolean touchExplorationInProgress,
-                int pointerIdBits, int policyFlags) {
-            remove();
+        public void post(MotionEvent prototype, int pointerIdBits, int policyFlags) {
+            cancel();
             mPrototype = MotionEvent.obtain(prototype);
             mPointerIdBits = pointerIdBits;
             mPolicyFlags = policyFlags;
             mHandler.postDelayed(this, mDetermineUserIntentTimeout);
         }
 
-        public float getX() {
+        public void cancel() {
             if (isPending()) {
-                return mPrototype.getX();
+                mHandler.removeCallbacks(this);
+                clear();
             }
-            return 0;
-        }
-
-        public float getY() {
-            if (isPending()) {
-                return mPrototype.getY();
-            }
-            return 0;
-        }
-
-        public void remove() {
-            mHandler.removeCallbacks(this);
-            clear();
         }
 
         private boolean isPending() {
-            return (mPrototype != null);
+            return mHandler.hasCallbacks(this);
         }
 
         private void clear() {
-            if (!isPending()) {
-                return;
-            }
             mPrototype.recycle();
             mPrototype = null;
             mPointerIdBits = -1;
@@ -1538,29 +1463,25 @@ class TouchExplorer implements EventStreamTransformation {
         public void forceSendAndRemove() {
             if (isPending()) {
                 run();
-                remove();
+                cancel();
             }
         }
 
         public void run() {
             if (DEBUG) {
-                Slog.d(LOG_TAG_SEND_HOVER_DELAYED, "Injecting motion event: "
-                        + MotionEvent.actionToString(mHoverAction));
-                Slog.d(LOG_TAG_SEND_HOVER_DELAYED, mGestureStarted ?
-                        "touchExplorationGestureStarted" : "touchExplorationGestureEnded");
+                Slog.d(LOG_TAG_SEND_HOVER_DELAYED, "Injecting motion event:"
+                        + " ACTION_HOVER_EXIT");
             }
-            if (mGestureStarted) {
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
-            } else {
-                if (!mSendTouchExplorationEndDelayed.isPending()) {
-                    mSendTouchExplorationEndDelayed.post();
-                }
-                if (mSendTouchInteractionEndDelayed.isPending()) {
-                    mSendTouchInteractionEndDelayed.remove();
-                    mSendTouchInteractionEndDelayed.post();
-                }
+            sendMotionEvent(mPrototype, MotionEvent.ACTION_HOVER_EXIT,
+                    mPointerIdBits, mPolicyFlags);
+            if (!mSendTouchExplorationEndDelayed.isPending()) {
+                mSendTouchExplorationEndDelayed.cancel();
+                mSendTouchExplorationEndDelayed.post();
             }
-            sendMotionEvent(mPrototype, mHoverAction, mPointerIdBits, mPolicyFlags);
+            if (mSendTouchInteractionEndDelayed.isPending()) {
+                  mSendTouchInteractionEndDelayed.cancel();
+                mSendTouchInteractionEndDelayed.post();
+            }
             clear();
         }
     }
@@ -1574,7 +1495,7 @@ class TouchExplorer implements EventStreamTransformation {
             mDelay = delay;
         }
 
-        public void remove() {
+        public void cancel() {
             mHandler.removeCallbacks(this);
         }
 
@@ -1589,7 +1510,7 @@ class TouchExplorer implements EventStreamTransformation {
         public void forceSendAndRemove() {
             if (isPending()) {
                 run();
-                remove();
+                cancel();
             }
         }
 
@@ -1736,15 +1657,6 @@ class TouchExplorer implements EventStreamTransformation {
     class ReceivedPointerTracker {
         private static final String LOG_TAG_RECEIVED_POINTER_TRACKER = "ReceivedPointerTracker";
 
-        // The coefficient by which to multiply
-        // ViewConfiguration.#getScaledTouchSlop()
-        // to compute #mThresholdActivePointer.
-        private static final int COEFFICIENT_ACTIVE_POINTER = 2;
-
-        // Pointers that moved less than mThresholdActivePointer
-        // are considered active i.e. are ignored.
-        private final double mThresholdActivePointer;
-
         // Keep track of where and when a pointer went down.
         private final float[] mReceivedPointerDownX = new float[MAX_POINTER_COUNT];
         private final float[] mReceivedPointerDownY = new float[MAX_POINTER_COUNT];
@@ -1756,34 +1668,17 @@ class TouchExplorer implements EventStreamTransformation {
         // The edge flags of the last received down event.
         private int mLastReceivedDownEdgeFlags;
 
-        // Which down pointers are active.
-        private int mActivePointers;
-
-        // Primary active pointer which is either the first that went down
-        // or if it goes up the next active that most recently went down.
-        private int mPrimaryActivePointerId;
-
-        // Flag indicating that there is at least one active pointer moving.
-        private boolean mHasMovingActivePointer;
+        // Primary pointer which is either the first that went down
+        // or if it goes up the next one that most recently went down.
+        private int mPrimaryPointerId;
 
         // Keep track of the last up pointer data.
         private long mLastReceivedUpPointerDownTime;
         private int mLastReceivedUpPointerId;
-        private boolean mLastReceivedUpPointerActive;
         private float mLastReceivedUpPointerDownX;
         private float mLastReceivedUpPointerDownY;
 
         private MotionEvent mLastReceivedEvent;
-
-        /**
-         * Creates a new instance.
-         *
-         * @param context Context for looking up resources.
-         */
-        public ReceivedPointerTracker(Context context) {
-            mThresholdActivePointer =
-                ViewConfiguration.get(context).getScaledTouchSlop() * COEFFICIENT_ACTIVE_POINTER;
-        }
 
         /**
          * Clears the internals state.
@@ -1793,12 +1688,9 @@ class TouchExplorer implements EventStreamTransformation {
             Arrays.fill(mReceivedPointerDownY, 0);
             Arrays.fill(mReceivedPointerDownTime, 0);
             mReceivedPointersDown = 0;
-            mActivePointers = 0;
-            mPrimaryActivePointerId = 0;
-            mHasMovingActivePointer = false;
+            mPrimaryPointerId = 0;
             mLastReceivedUpPointerDownTime = 0;
             mLastReceivedUpPointerId = 0;
-            mLastReceivedUpPointerActive = false;
             mLastReceivedUpPointerDownX = 0;
             mLastReceivedUpPointerDownY = 0;
         }
@@ -1822,9 +1714,6 @@ class TouchExplorer implements EventStreamTransformation {
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     handleReceivedPointerDown(event.getActionIndex(), event);
                 } break;
-                case MotionEvent.ACTION_MOVE: {
-                    handleReceivedPointerMove(event);
-                } break;
                 case MotionEvent.ACTION_UP: {
                     handleReceivedPointerUp(event.getActionIndex(), event);
                 } break;
@@ -1833,7 +1722,7 @@ class TouchExplorer implements EventStreamTransformation {
                 } break;
             }
             if (DEBUG) {
-                Slog.i(LOG_TAG_RECEIVED_POINTER_TRACKER, "Received pointer: " + toString());
+                Slog.i(LOG_TAG_RECEIVED_POINTER_TRACKER, "Received pointer:\n" + toString());
             }
         }
 
@@ -1852,20 +1741,6 @@ class TouchExplorer implements EventStreamTransformation {
         }
 
         /**
-         * @return The bits of the pointers that are active.
-         */
-        public int getActivePointers() {
-            return mActivePointers;
-        }
-
-        /**
-         * @return The number of down input  pointers that are active.
-         */
-        public int getActivePointerCount() {
-            return Integer.bitCount(mActivePointers);
-        }
-
-        /**
          * Whether an received pointer is down.
          *
          * @param pointerId The unique pointer id.
@@ -1874,17 +1749,6 @@ class TouchExplorer implements EventStreamTransformation {
         public boolean isReceivedPointerDown(int pointerId) {
             final int pointerFlag = (1 << pointerId);
             return (mReceivedPointersDown & pointerFlag) != 0;
-        }
-
-        /**
-         * Whether an input pointer is active.
-         *
-         * @param pointerId The unique pointer id.
-         * @return True if the pointer is active.
-         */
-        public boolean isActivePointer(int pointerId) {
-            final int pointerFlag = (1 << pointerId);
-            return (mActivePointers & pointerFlag) != 0;
         }
 
         /**
@@ -1914,11 +1778,11 @@ class TouchExplorer implements EventStreamTransformation {
         /**
          * @return The id of the primary pointer.
          */
-        public int getPrimaryActivePointerId() {
-            if (mPrimaryActivePointerId == INVALID_POINTER_ID) {
-                mPrimaryActivePointerId = findPrimaryActivePointer();
+        public int getPrimaryPointerId() {
+            if (mPrimaryPointerId == INVALID_POINTER_ID) {
+                mPrimaryPointerId = findPrimaryPointerId();
             }
-            return mPrimaryActivePointerId;
+            return mPrimaryPointerId;
         }
 
         /**
@@ -1927,14 +1791,6 @@ class TouchExplorer implements EventStreamTransformation {
         public long getLastReceivedUpPointerDownTime() {
             return mLastReceivedUpPointerDownTime;
         }
-
-        /**
-         * @return The id of the last received pointer that went up.
-         */
-        public int getLastReceivedUpPointerId() {
-            return mLastReceivedUpPointerId;
-        }
-
 
         /**
          * @return The down X of the last received pointer that went up.
@@ -1958,39 +1814,6 @@ class TouchExplorer implements EventStreamTransformation {
         }
 
         /**
-         * @return Whether the last received pointer that went up was active.
-         */
-        public boolean wasLastReceivedUpPointerActive() {
-            return mLastReceivedUpPointerActive;
-        }
-        /**
-         * Populates the active pointer IDs to the given array.
-         * <p>
-         * Note: The client is responsible for providing large enough array.
-         *
-         * @param outPointerIds The array to which to write the active pointers.
-         */
-        public void populateActivePointerIds(int[] outPointerIds) {
-            int index = 0;
-            for (int idBits = mActivePointers; idBits != 0; ) {
-                final int id = Integer.numberOfTrailingZeros(idBits);
-                idBits &= ~(1 << id);
-                outPointerIds[index] = id;
-                index++;
-            }
-        }
-
-        /**
-         * @param pointerId The unique pointer id.
-         * @return Whether the pointer is active or was the last active than went up.
-         */
-        public boolean isActiveOrWasLastActiveUpPointer(int pointerId) {
-            return (isActivePointer(pointerId)
-                    || (mLastReceivedUpPointerId == pointerId
-                            && mLastReceivedUpPointerActive));
-        }
-
-        /**
          * Handles a received pointer down event.
          *
          * @param pointerIndex The index of the pointer that has changed.
@@ -2002,7 +1825,6 @@ class TouchExplorer implements EventStreamTransformation {
 
             mLastReceivedUpPointerId = 0;
             mLastReceivedUpPointerDownTime = 0;
-            mLastReceivedUpPointerActive = false;
             mLastReceivedUpPointerDownX = 0;
             mLastReceivedUpPointerDownX = 0;
 
@@ -2013,25 +1835,7 @@ class TouchExplorer implements EventStreamTransformation {
             mReceivedPointerDownY[pointerId] = event.getY(pointerIndex);
             mReceivedPointerDownTime[pointerId] = event.getEventTime();
 
-            if (!mHasMovingActivePointer) {
-                // If still no moving active pointers every
-                // down pointer is the only active one.
-                mActivePointers = pointerFlag;
-                mPrimaryActivePointerId = pointerId;
-            } else {
-                // If at least one moving active pointer every
-                // subsequent down pointer is active.
-                mActivePointers |= pointerFlag;
-            }
-        }
-
-        /**
-         * Handles a received pointer move event.
-         *
-         * @param event The event to be handled.
-         */
-        private void handleReceivedPointerMove(MotionEvent event) {
-            detectActivePointers(event);
+            mPrimaryPointerId = pointerId;
         }
 
         /**
@@ -2046,80 +1850,38 @@ class TouchExplorer implements EventStreamTransformation {
 
             mLastReceivedUpPointerId = pointerId;
             mLastReceivedUpPointerDownTime = getReceivedPointerDownTime(pointerId);
-            mLastReceivedUpPointerActive = isActivePointer(pointerId);
             mLastReceivedUpPointerDownX = mReceivedPointerDownX[pointerId];
             mLastReceivedUpPointerDownY = mReceivedPointerDownY[pointerId];
 
             mReceivedPointersDown &= ~pointerFlag;
-            mActivePointers &= ~pointerFlag;
             mReceivedPointerDownX[pointerId] = 0;
             mReceivedPointerDownY[pointerId] = 0;
             mReceivedPointerDownTime[pointerId] = 0;
 
-            if (mActivePointers == 0) {
-                mHasMovingActivePointer = false;
-            }
-            if (mPrimaryActivePointerId == pointerId) {
-                mPrimaryActivePointerId = INVALID_POINTER_ID;
+            if (mPrimaryPointerId == pointerId) {
+                mPrimaryPointerId = INVALID_POINTER_ID;
             }
         }
 
         /**
-         * Detects the active pointers in an event.
-         *
-         * @param event The event to examine.
+         * @return The primary pointer id.
          */
-        private void detectActivePointers(MotionEvent event) {
-            for (int i = 0, count = event.getPointerCount(); i < count; i++) {
-                final int pointerId = event.getPointerId(i);
-                if (mHasMovingActivePointer) {
-                    // If already active => nothing to do.
-                    if (isActivePointer(pointerId)) {
-                        continue;
-                    }
-                }
-                // Active pointers are ones that moved more than a given threshold.
-                final float pointerDeltaMove = computePointerDeltaMove(i, event);
-                if (pointerDeltaMove > mThresholdActivePointer) {
-                    final int pointerFlag = (1 << pointerId);
-                    mActivePointers |= pointerFlag;
-                    mHasMovingActivePointer = true;
-                }
-            }
-        }
-
-        /**
-         * @return The primary active pointer.
-         */
-        private int findPrimaryActivePointer() {
-            int primaryActivePointerId = INVALID_POINTER_ID;
+        private int findPrimaryPointerId() {
+            int primaryPointerId = INVALID_POINTER_ID;
             long minDownTime = Long.MAX_VALUE;
-            // Find the active pointer that went down first.
-            for (int i = 0, count = mReceivedPointerDownTime.length; i < count; i++) {
-                if (isActivePointer(i)) {
-                    final long downPointerTime = mReceivedPointerDownTime[i];
-                    if (downPointerTime < minDownTime) {
-                        minDownTime = downPointerTime;
-                        primaryActivePointerId = i;
-                    }
+
+            // Find the pointer that went down first.
+            int pointerIdBits = mReceivedPointersDown;
+            while (pointerIdBits > 0) {
+                final int pointerId = Integer.numberOfTrailingZeros(pointerIdBits);
+                pointerIdBits &= ~(1 << pointerId);
+                final long downPointerTime = mReceivedPointerDownTime[pointerId];
+                if (downPointerTime < minDownTime) {
+                    minDownTime = downPointerTime;
+                    primaryPointerId = pointerId;
                 }
             }
-            return primaryActivePointerId;
-        }
-
-        /**
-         * Computes the move for a given action pointer index since the
-         * corresponding pointer went down.
-         *
-         * @param pointerIndex The action pointer index.
-         * @param event The event to examine.
-         * @return The distance the pointer has moved.
-         */
-        private float computePointerDeltaMove(int pointerIndex, MotionEvent event) {
-            final int pointerId = event.getPointerId(pointerIndex);
-            final float deltaX = event.getX(pointerIndex) - mReceivedPointerDownX[pointerId];
-            final float deltaY = event.getY(pointerIndex) - mReceivedPointerDownY[pointerId];
-            return (float) Math.hypot(deltaX, deltaY);
+            return primaryPointerId;
         }
 
         @Override
@@ -2136,18 +1898,8 @@ class TouchExplorer implements EventStreamTransformation {
                 }
             }
             builder.append("]");
-            builder.append("\nActive pointers #");
-            builder.append(getActivePointerCount());
-            builder.append(" [ ");
-            for (int i = 0; i < MAX_POINTER_COUNT; i++) {
-                if (isActivePointer(i)) {
-                    builder.append(i);
-                    builder.append(" ");
-                }
-            }
-            builder.append("]");
-            builder.append("\nPrimary active pointer id [ ");
-            builder.append(getPrimaryActivePointerId());
+            builder.append("\nPrimary pointer id [ ");
+            builder.append(getPrimaryPointerId());
             builder.append(" ]");
             builder.append("\n=========================");
             return builder.toString();

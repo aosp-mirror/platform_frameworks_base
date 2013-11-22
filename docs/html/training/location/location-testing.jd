@@ -1,0 +1,371 @@
+page.title=Testing Using Mock Locations
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li><a href="#TurnOnMockMode">Turn On Mock Mode</a></li>
+    <li><a href="#SendMockLocations">Send Mock Locations</a></li>
+    <li><a href="RunProvider">Run the Mock Location Provider App</a></li>
+    <li><a href="#TestingTips">Testing Tips</a>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="receive-location-updates.html">Receiving Location Updates</a></li>
+  <li><a href="geofencing.html">Creating and Monitoring Geofences</a></li>
+  <li><a href="{@docRoot}guide/components/services.html">Services</a></li>
+  <li><a href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threads</a>
+</ul>
+
+<h2>Example Test App</h2>
+
+<div class="download-box">
+  <a href="http://developer.android.com/shareables/training/LocationProvider.zip" class="button"
+  >Download the sample</a>
+  <p class="filename">LocationProvider.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    To test a location-aware app that uses Location Services, you don't need to move your device
+    from place to place to generate location data. Instead, you can put Location Services into mock
+    mode. In this mode, you can send mock {@link android.location.Location} objects to
+    Location Services, which then sends them to location clients. In mock mode, Location Services
+    also uses mock {@link android.location.Location} objects to trigger geofences.
+</p>
+<p>
+    Using mock locations has several advantages:
+</p>
+<ul>
+    <li>
+        Mock locations allow you to create specific mock data, instead of trying to approximate
+        data by moving an actual device.
+    </li>
+    <li>
+        Since mock locations come from Location Services, they test every part of your
+        location-handling code. In addition, since you can send the mock data from outside your
+        production app, you don't have to disable or remove test code before you publish.
+    </li>
+    <li>
+        Since you don't have to generate test locations by moving a device, you can test an app
+        using the emulator.
+    </li>
+</ul>
+<p>
+    The best way to use mock locations is to send them from a separate mock location provider app.
+    This lesson includes a provider app that you can download and use to test your own software.
+    Modify the provider app as necessary to suit your own needs. Some ideas for providing test data
+    to the app are listed in the section <a href="TestData">Managing test data</a>.
+</p>
+<p>
+    The remainder of this lesson shows you how to turn on mock mode and use a location client to
+    send mock locations to Location Services.
+</p>
+<p class="note">
+    <strong>Note:</strong> Mock locations have no effect on the activity recognition algorithm used
+    by Location Services. To learn more about activity recognition, see the lesson
+    <a href="activity-recognition.html">Recognizing the User's Current Activity</a>.
+</p>
+<!--
+    Create a Test App
+ -->
+<h2 id="TurnOnMockMode">Turn On Mock Mode</h2>
+<p>
+    To send mock locations to Location Services in mock mode, a test app must request the permission
+    {@link android.Manifest.permission#ACCESS_MOCK_LOCATION}. In addition, you must enable mock
+    locations on the test device using the option <b>Enable mock locations</b>. To learn how to
+    enable mock locations on the device, see
+    <a href="{@docRoot}tools/device.html#setting-up">Setting up a Device for Development</a>.
+</p>
+<p>
+    To turn on mock mode in Location Services, start by connecting a location client to Location
+    Services, as described in the lesson
+    <a href="retrieve-current.html">Retrieving the Current Location</a>.
+    Next, call the method
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#setMockMode(boolean)">LocationClient.setMockMode(true)</a></code>.
+    Once you call this method, Location Services turns off its internal location providers and only
+    sends out the mock locations you provide it. The following snippet shows you how to call
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#setMockMode(boolean)">LocationClient.setMockMode(true)</a></code>:
+</p>
+<pre>
+    // Define a LocationClient object
+    public LocationClient mLocationClient;
+    ...
+    // Connect to Location Services
+    mLocationClient.connect();
+    ...
+    // When the location client is connected, set mock mode
+    mLocationClinet.setMockMode(true);
+</pre>
+<p>
+    Once you have connected the location client to Location Services, you must keep it connected
+    until you finish sending out mock locations. Once you call
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#disconnect()">LocationClient.disconnect()</a></code>,
+    Location Services returns to using its internal location providers. To turn off mock mode while
+    the location client is connected, call
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#setMockMode(boolean)">LocationClient.setMockMode(false)</a></code>.
+</p>
+<h2 id="SendMockLocations">Send Mock Locations</h2>
+<p>
+    Once you have set mock mode, you can create mock {@link android.location.Location} objects and
+    send them to Location Services. In turn, Location Services sends these mock
+    {@link android.location.Location} objects to connected location clients. Location Services also
+    uses the mock {@link android.location.Location} objects to control geofence triggering.
+</p>
+<p>
+    To create a new mock {@link android.location.Location}, create a new
+    {@link android.location.Location} object using your test data. Always set the provider
+    value to {@code flp}, which is the code that Location Services puts into the
+    {@link android.location.Location} objects it sends out. The following snippet shows you how
+    to create a new mock {@link android.location.Location}:
+</p>
+<pre>
+    private static final String PROVIDER = "flp";
+    private static final double LAT = 37.377166;
+    private static final double LNG = -122.086966;
+    private static final float ACCURACY = 3.0f;
+    ...
+    /*
+     * From input arguments, create a single Location with provider set to
+     * "flp"
+     */
+    public Location createLocation(double lat, double lng, float accuracy) {
+        // Create a new Location
+        Location newLocation = new Location(PROVIDER);
+        newLocation.setLatitude(lat);
+        newLocation.setLongitude(lng);
+        newLocation.setAccuracy(accuracy);
+        return newLocation;
+    }
+    ...
+    // Example of creating a new Location from test data
+    Location testLocation = createLocation(LAT, LNG, ACCURACY);
+</pre>
+<p>
+    In mock mode, to send a mock location to Location Services call the method
+<code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">LocationClient.setMockLocation()</a></code>.
+    For example:
+</p>
+<pre>
+    mLocationClient.setMockLocation(testLocation);
+</pre>
+<p>
+    Location Services sets this mock location as the current location, and this location is sent
+    out as the next location update. If this new mock location moves across a geofence boundary,
+    Location Services triggers the geofence.
+</p>
+<!--
+    Run the Mock Location Provider
+ -->
+<h2 id="RunProvider">Run the Mock Location Provider App</h2>
+<p>
+    This section contains a brief overview of the mock location provider sample app
+    (available for download above) and gives you directions for testing an app using the sample app.
+</p>
+<h3>Overview</h3>
+<p>
+    The mock location provider app included with this lesson sends mock
+    {@link android.location.Location} objects to Location Services from a background thread running
+    in a started {@link android.app.Service}. By using a started service, the provider app is able
+    to keep running even if the app's main {@link android.app.Activity} is destroyed because of
+    a configuration change or other system event. By using a background thread, the service is able
+    to perform a long-running test without blocking the UI thread.
+</p>
+<p>
+    The {@link android.app.Activity} that starts when you run the provider app allows you to
+    send test parameters to the {@link android.app.Service} and control the type of test you want.
+    You have the following options:
+</p>
+<dl>
+    <dt>
+        Pause before test
+    </dt>
+    <dd>
+        The number of seconds to wait before the provider app starts sending test data to Location
+        Services. This interval allows you to switch from the provider app to the app under test
+        before the testing actually starts.
+    </dd>
+    <dt>
+        Send interval
+    </dt>
+    <dd>
+        The number of seconds that the provider app waits before it sends another mock location to
+        Location Services. See the section <a href="#TestingTips">Testing Tips</a> to learn more
+        about setting the send interval.
+    </dd>
+    <dt>
+        Run once
+    </dt>
+    <dd>
+        Switch from normal mode to mock mode, run through the test data once, switch back to
+        normal mode, and then kill the {@link android.app.Service}.
+    </dd>
+    <dt>
+        Run continuously
+    </dt>
+    <dd>
+        Switch from normal mode to mock mode, then run through the test data indefinitely. The
+        background thread and the started {@link android.app.Service} continue to run, even if the
+        main {@link android.app.Activity} is destroyed.
+    </dd>
+    <dt>
+        Stop test
+    </dt>
+    <dd>
+        If a continuous test is in progress, stop it; otherwise, return a warning message. The
+        started {@link android.app.Service} switches from mock mode to normal mode and then
+        stops itself. This also stops the background thread.
+    </dd>
+</dl>
+<p>
+    Besides the options, the provider app has two status displays:
+</p>
+<dl>
+    <dt>
+        App status
+    </dt>
+    <dd>
+        Displays messages related to the lifecycle of the provider app.
+    </dd>
+    <dt>
+        Connection status
+    </dt>
+    <dd>
+        Displays messages related to the state of the location client connection.
+    </dd>
+</dl>
+<p>
+   While the started {@link android.app.Service} is running, it also posts notifications with the
+   testing status. These notifications allow you to see status updates even if the app is not in
+   the foreground. When you click on a notification, the main {@link android.app.Activity} of the
+   provider app returns to the foreground.
+</p>
+<h3>Test using the mock location provider app</h3>
+<p>
+    To test mock location data coming from the mock location provider app:
+</p>
+<ol>
+    <li>
+        Install the mock location provider app on a device that has Google Play services installed.
+        Location Services is part of Google Play services.
+    </li>
+    <li>
+        On the device, enable mock locations. To learn how to do this, see the topic
+        <a href="{@docRoot}tools/device.html#setting-up">Setting up a Device for Development</a>.
+    </li>
+    <li>
+        Start the provider app from the Launcher, then choose the options you want from the main
+        screen.
+    </li>
+    <li>
+        Unless you've removed the pause interval feature, the mock location provider app
+        pauses for a few seconds, and then starts sending mock location data to Location
+        Services.
+    </li>
+    <li>
+        Run the app you want to test. While the mock location provider app is running, the app
+        you're testing receives mock locations instead of real locations.
+    </li>
+    <li>
+        If the provider app is in the midst of a continuous test, you can switch back to real
+        locations by clicking <b>Stop test</b>. This forces the started {@link android.app.Service}
+        to turn off mock mode and then stop itself. When the service stops itself, the background
+        thread is also destroyed.
+    </li>
+
+</ol>
+<h2 id="TestingTips">Testing Tips</h2>
+<p>
+    The following sections contain tips for creating mock location data and using the data with a
+    mock location provider app.
+</p>
+<h3>Choosing a send interval</h3>
+<p>
+    Each location provider that contributes to the fused location sent out by Location Services has
+    its own minimum update cycle. For example, the GPS provider can't send a new location more often
+    than once per second, and the Wi-Fi provider can't send a new location more often than once
+    every five seconds. These cycle times are handled automatically for real locations, but you
+    should account for them when you send mock locations. For example, you shouldn't send a new mock
+    location more than once per second. If you're testing indoor locations, which rely heavily on
+    the Wi-Fi provider, then you should consider using a send interval of five seconds.
+</p>
+<h3>Simulating speed</h3>
+<p>
+    To simulate the speed of an actual device, shorten or lengthen the distance between two
+    successive locations. For example, changing the location by 88 feet every second simulates
+    car travel, because this change works out to 60 miles an hour. In comparison, changing the
+    location by 1.5 feet every second simulates brisk walking, because this change works out to
+    3 miles per hour.
+</p>
+<h3>Calculating location data</h3>
+<p>
+    By searching the web, you can find a variety of small programs that calculate a new set of
+    latitude and longitude coordinates from a starting location and a distance, as well as
+    references to formulas for calculating the distance between two points based on their latitude
+    and longitude. In addition, the {@link android.location.Location} class offers two methods for
+    calculating the distance between points:
+</p>
+<dl>
+    <dt>
+        {@link android.location.Location#distanceBetween distanceBetween()}
+    </dt>
+    <dd>
+        A static method that calculates the distance between two points specified by latitude and
+        longitude.
+    </dd>
+    <dt>
+        {@link android.location.Location#distanceTo distanceTo()}
+    </dt>
+    <dd>
+        For a given {@link android.location.Location}, returns the distance to another
+        {@link android.location.Location}.
+    </dd>
+</dl>
+<h3>Geofence testing</h3>
+<p>
+    When you test an app that uses geofence detection, use test data that reflects different modes
+    of travel, including walking, cycling, driving, and traveling by train. For a slow mode of
+    travel, make small changes in position between points. Conversely, for a fast mode of travel,
+    make a large change in position between points.
+</p>
+<h3 id="TestData">Managing test data</h3>
+<p>
+    The mock location provider app included with this lesson contains test latitude, longitude,
+    and accuracy values in the form of constants. You may want to consider other ways of organizing
+    data as well:
+</p>
+<dl>
+    <dt>
+        XML
+    </dt>
+    <dd>
+        Store location data in XML files that are including in the provider app. By separating the
+        data from the code, you facilitate changes to the data.
+    </dd>
+    <dt>
+        Server download
+    </dt>
+    <dd>
+        Store location data on a server and then have the provider app download it. Since the data
+        is completely separate from the app, you can change the data without having to rebuild the
+        app. You can also change the data on the server and have the changes reflected immediately
+        in the mock locations you're testing.
+    </dd>
+    <dt>
+        Recorded data
+    </dt>
+    <dd>
+        Instead of making up test data, write a utility app that records location data as you move
+        the device. Use the recorded data as your test data, or use the data to guide you in
+        developing test data. For example, record locations as you walk with a device, and then
+        create mock locations that have an appropriate change in latitude and longitude over
+        time.
+    </dd>
+</dl>

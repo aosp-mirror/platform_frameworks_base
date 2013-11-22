@@ -19,7 +19,6 @@ package android.net;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Environment.UserEnvironment;
 import android.os.StrictMode;
 import android.util.Log;
 import java.io.File;

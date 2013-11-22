@@ -1,0 +1,66 @@
+page.title=Managing Device Awake State
+page.tags=""
+
+trainingnavtop=true
+startpage=true
+
+
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+
+<ul>
+  <li>Android 1.6 (API Level 4) or higher</li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/Scheduler.zip"
+class="button">Download the sample</a>
+ <p class="filename">Scheduler.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>
+When an Android device is left idle, it will first dim, then turn off the screen, and
+ultimately turn off the CPU. This prevents the device's battery from quickly getting
+drained. Yet there are times when your application might require a different behavior:</p>
+
+<ul>
+
+<li>Apps such as games or movie apps may need to keep the screen turned on.</p>
+
+<li>Other applications may not need the screen to remain on, but they may require the CPU
+ to keep running until a critical operation finishes.</p>
+
+</ul>
+
+<p>
+This class describes how to keep a device awake when necessary without draining
+its battery.
+</p>
+<h2>Lessons</h2>
+
+<dl>
+    <dt>
+        <strong><a href="wakelock.html">Keeping the Device Awake</a></strong>
+    </dt>
+    <dd>
+        Learn how to keep the screen or CPU awake as needed, while minimizing the impact
+        on battery life.
+    </dd>
+    <dt>
+        <strong><a href="alarms.html">Scheduling Repeating Alarms</a></strong>
+    </dt>
+    <dd>
+        Learn how to use repeating alarms to schedule operations that take place outside
+        of the lifetime of the application, even if the application is not running and/or the
+        device is asleep.
+    </dd>
+</dl>

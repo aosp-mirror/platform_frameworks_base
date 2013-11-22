@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI systému"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazať"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Nerušiť"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Zobraziť upozornenia"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odstrániť zo zoznamu"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informácie o aplikácii"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Žiadne nedávne aplikácie"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"Pripojte nabíjačku"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Batéria je skoro vybitá."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Zostáva: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Nabíjanie pomocou rozhrania USB nie je podporované."\n"Používajte iba nabíjačku, ktorá bola dodaná spolu so zariadením."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Nabíjanie pomocou rozhrania USB nie je podporované.\nPoužívajte iba nabíjačku, ktorá bola dodaná spolu so zariadením."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Využitie batérie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavenia"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Pre toto zariadenie USB použiť ako predvolené"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Pre toto periférne zar. USB použiť ako predvolené"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Povoliť ladenie USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Digitálny odtlačok RSA počítača je:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Digitálny odtlačok RSA počítača je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povoliť z tohto počítača"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Priblížiť na celú obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celú obrazovku"</string>
@@ -162,7 +160,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dátové prenosy 4G sú zakázané"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilné dátové prenosy sú zakázané"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dáta boli zakázané"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosiahli ste stanovený limit využitia dát."\n\n"Ak dátové pripojenie znova povolíte, môže vám váš operátor účtovať poplatky."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosiahli ste stanovený limit využitia dát.\n\nAk dátové pripojenie znova povolíte, môže vám váš operátor účtovať poplatky."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova povoliť dátové prenosy"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Bez prip. na Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>
@@ -170,9 +168,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavená pomocou GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazať všetky upozornenia."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informácie o aplikácii"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Zavrieť"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Upozornenia sú vypnuté"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Klepnutím sem upozornenia znova povolíte."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka sa automaticky otočí."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Obrazovka je uzamknutá v orientácii na šírku."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Obrazovka je uzamknutá v orientácii na výšku."</string>
@@ -189,7 +184,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automatické otáčanie"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Otáčanie uzamknuté"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Metóda vstupu"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"Používaná poloha"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Poloha"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Poloha vypnutá"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Mediálne zariadenie"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Len tiesňové volania"</string>
@@ -205,5 +201,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Jas"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Tu sa zobrazujú upozornenia"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Môžete ich kedykoľvek zobraziť tak, že posuniete prstom nadol."\n"Ak posuniete prstom nadol ešte raz, zobrazia sa ovládacie prvky systému."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Môžete ich kedykoľvek zobraziť tak, že posuniete prstom nadol.\nAk posuniete prstom nadol ešte raz, zobrazia sa ovládacie prvky systému."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Panel zobrazíte posunutím cez okraj obrazovky"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Systémový panel zobrazíte posunutím cez okraj obrazovky"</string>
 </resources>

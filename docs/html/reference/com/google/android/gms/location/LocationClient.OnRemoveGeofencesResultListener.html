@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>LocationClient.OnRemoveGeofencesResultListener | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -752,7 +759,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html#onRemoveGeofencesByPendingIntentResult(int, android.app.PendingIntent)">onRemoveGeofencesByPendingIntentResult</a></span>(int statusCode, <a href="/reference/android/app/PendingIntent.html">PendingIntent</a> pendingIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html#onRemoveGeofencesByPendingIntentResult(int, android.app.PendingIntent)">onRemoveGeofencesByPendingIntentResult</a></span>(int statusCode, PendingIntent pendingIntent)</nobr>
         
         <div class="jd-descrdiv">Called when the <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(PendingIntent, OnRemoveGeofencesResultListener)</a></code> operation completes successfully or
  unsuccessfully.</div>
@@ -771,7 +778,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html#onRemoveGeofencesByRequestIdsResult(int, java.lang.String[])">onRemoveGeofencesByRequestIdsResult</a></span>(int statusCode, <a href="/reference/java/lang/String.html">String[]</a> geofenceRequestIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html#onRemoveGeofencesByRequestIdsResult(int, java.lang.String[])">onRemoveGeofencesByRequestIdsResult</a></span>(int statusCode, String[] geofenceRequestIds)</nobr>
         
         <div class="jd-descrdiv">Called when the <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(java.util.List<java.lang.String>, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(List, OnRemoveGeofencesResultListener)</a></code> operation completes successfully or
  unsuccessfully.</div>
@@ -840,7 +847,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onRemoveGeofencesByPendingIntentResult</span>
-      <span class="normal">(int statusCode, <a href="/reference/android/app/PendingIntent.html">PendingIntent</a> pendingIntent)</span>
+      <span class="normal">(int statusCode, PendingIntent pendingIntent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -889,7 +896,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onRemoveGeofencesByRequestIdsResult</span>
-      <span class="normal">(int statusCode, <a href="/reference/java/lang/String.html">String[]</a> geofenceRequestIds)</span>
+      <span class="normal">(int statusCode, String[] geofenceRequestIds)</span>
     </h4>
       <div class="api-level">
         <div></div>

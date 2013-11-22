@@ -593,7 +593,7 @@ public class NoticeDialogFragment extends DialogFragment {
                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                        // Send the negative button event back to the host activity
-                       mListener.onDialogPositiveClick(NoticeDialogFragment.this);
+                       mListener.onDialogNegativeClick(NoticeDialogFragment.this);
                    }
                });
         return builder.create();

@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
+#include <utils/Log.h>
+
 #include "Debug.h"
 #include "Extensions.h"
+#include "Properties.h"
 
 namespace android {
 
@@ -40,33 +51,28 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Extensions::Extensions(): Singleton<Extensions>() {
-    const char* buffer = (const char*) glGetString(GL_EXTENSIONS);
-    const char* current = buffer;
-    const char* head = current;
-    EXT_LOGD("Available GL extensions:");
-    do {
-        head = strchr(current, ' ');
-        String8 s(current, head ? head - current : strlen(current));
-        if (s.length()) {
-            mExtensionList.add(s);
-            EXT_LOGD("  %s", s.string());
-        }
-        current = head + 1;
-    } while (head);
+    // Query GL extensions
+    findExtensions((const char*) glGetString(GL_EXTENSIONS), mGlExtensionList);
+    mHasNPot = hasGlExtension("GL_OES_texture_npot");
+    mHasFramebufferFetch = hasGlExtension("GL_NV_shader_framebuffer_fetch");
+    mHasDiscardFramebuffer = hasGlExtension("GL_EXT_discard_framebuffer");
+    mHasDebugMarker = hasGlExtension("GL_EXT_debug_marker");
+    mHasDebugLabel = hasGlExtension("GL_EXT_debug_label");
+    mHasTiledRendering = hasGlExtension("GL_QCOM_tiled_rendering");
+    mHas1BitStencil = hasGlExtension("GL_OES_stencil1");
+    mHas4BitStencil = hasGlExtension("GL_OES_stencil4");
 
-    mHasNPot = hasExtension("GL_OES_texture_npot");
-    mHasFramebufferFetch = hasExtension("GL_NV_shader_framebuffer_fetch");
-    mHasDiscardFramebuffer = hasExtension("GL_EXT_discard_framebuffer");
-    mHasDebugMarker = hasExtension("GL_EXT_debug_marker");
-    mHasDebugLabel = hasExtension("GL_EXT_debug_label");
-    mHasTiledRendering = hasExtension("GL_QCOM_tiled_rendering");
-    mHas1BitStencil = hasExtension("GL_OES_stencil1");
-    mHas4BitStencil = hasExtension("GL_OES_stencil4");
+    // Query EGL extensions
+    findExtensions(eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS), mEglExtensionList);
 
-    mExtensions = strdup(buffer);
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_DEBUG_NV_PROFILING, property, NULL) > 0) {
+        mHasNvSystemTime = !strcmp(property, "true") && hasEglExtension("EGL_NV_system_time");
+    } else {
+        mHasNvSystemTime = false;
+    }
 
     const char* version = (const char*) glGetString(GL_VERSION);
-    mVersion = strdup(version);
 
     // Section 6.1.5 of the OpenGL ES specification indicates the GL version
     // string strictly follows this format:
@@ -80,7 +86,7 @@ Extensions::Extensions(): Singleton<Extensions>() {
     // or more digits. The release number and vendor specific information are
     // optional."
 
-    if (sscanf(version, "OpenGL ES %d.%d", &mVersionMajor, &mVersionMinor) !=2) {
+    if (sscanf(version, "OpenGL ES %d.%d", &mVersionMajor, &mVersionMinor) != 2) {
         // If we cannot parse the version number, assume OpenGL ES 2.0
         mVersionMajor = 2;
         mVersionMinor = 0;
@@ -88,22 +94,41 @@ Extensions::Extensions(): Singleton<Extensions>() {
 }
 
 Extensions::~Extensions() {
-   free(mExtensions);
-   free(mVersion);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Methods
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Extensions::hasExtension(const char* extension) const {
+bool Extensions::hasGlExtension(const char* extension) const {
    const String8 s(extension);
-   return mExtensionList.indexOf(s) >= 0;
+   return mGlExtensionList.indexOf(s) >= 0;
+}
+
+bool Extensions::hasEglExtension(const char* extension) const {
+   const String8 s(extension);
+   return mEglExtensionList.indexOf(s) >= 0;
+}
+
+void Extensions::findExtensions(const char* extensions, SortedVector<String8>& list) const {
+    const char* current = extensions;
+    const char* head = current;
+    EXT_LOGD("Available extensions:");
+    do {
+        head = strchr(current, ' ');
+        String8 s(current, head ? head - current : strlen(current));
+        if (s.length()) {
+            list.add(s);
+            EXT_LOGD("  %s", s.string());
+        }
+        current = head + 1;
+    } while (head);
 }
 
 void Extensions::dump() const {
-   ALOGD("%s", mVersion);
-   ALOGD("Supported extensions:\n%s", mExtensions);
+   ALOGD("%s", (const char*) glGetString(GL_VERSION));
+   ALOGD("Supported GL extensions:\n%s", (const char*) glGetString(GL_EXTENSIONS));
+   ALOGD("Supported EGL extensions:\n%s", eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS));
 }
 
 }; // namespace uirenderer

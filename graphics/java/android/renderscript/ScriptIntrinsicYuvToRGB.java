@@ -20,9 +20,9 @@ package android.renderscript;
 /**
  * Intrinsic for converting an Android YUV buffer to RGB.
  *
- * The input allocation is supplied in NV21 format as a U8
- * element type. The output is RGBA, the alpha channel will be
- * set to 255.
+ * The input allocation should be supplied in a supported YUV format
+ * as a YUV element Allocation. The output is RGBA; the alpha channel
+ * will be set to 255.
  */
 public final class ScriptIntrinsicYuvToRGB extends ScriptIntrinsic {
     private Allocation mInput;

@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "Caches.h"
+#include "Debug.h"
 #include "Extensions.h"
 #include "PixelBuffer.h"
 #include "Properties.h"
@@ -113,6 +114,14 @@ uint8_t* GpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
         mCaches.bindPixelBuffer(mBuffer);
         mMappedPointer = (uint8_t*) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
+#if DEBUG_OPENGL
+        if (!mMappedPointer) {
+            GLenum status = GL_NO_ERROR;
+            while ((status = glGetError()) != GL_NO_ERROR) {
+                ALOGE("Could not map GPU pixel buffer: 0x%x", status);
+            }
+        }
+#endif
         mAccessMode = mode;
     }
 
@@ -123,7 +132,10 @@ void GpuPixelBuffer::unmap() {
     if (mAccessMode != kAccessMode_None) {
         if (mMappedPointer) {
             mCaches.bindPixelBuffer(mBuffer);
-            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+            GLboolean status = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+            if (status == GL_FALSE) {
+                ALOGE("Corrupted GPU pixel buffer");
+            }
         }
         mAccessMode = kAccessMode_None;
         mMappedPointer = NULL;
@@ -147,14 +159,8 @@ void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t hei
 ///////////////////////////////////////////////////////////////////////////////
 
 PixelBuffer* PixelBuffer::create(GLenum format, uint32_t width, uint32_t height, BufferType type) {
-    bool gpuBuffer = type == kBufferType_Auto && Extensions::getInstance().getMajorGlVersion() >= 3;
-    if (gpuBuffer) {
-        char property[PROPERTY_VALUE_MAX];
-        if (property_get(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, property, "false") > 0) {
-            if (!strcmp(property, "true")) {
-                return new GpuPixelBuffer(format, width, height);
-            }
-        }
+    if (type == kBufferType_Auto && Caches::getInstance().gpuPixelBuffersEnabled) {
+        return new GpuPixelBuffer(format, width, height);
     }
     return new CpuPixelBuffer(format, width, height);
 }

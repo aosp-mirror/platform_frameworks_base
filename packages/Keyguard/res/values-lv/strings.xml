@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ievadiet PIN kodu."</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Ievadiet PUK kodu un jaunu PIN kodu."</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kods"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Jauns PIN kods"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Pieskarieties, lai ievadītu paroli"</font>"."</string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Ievadiet paroli, lai atbloķētu."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Lai atbloķētu, ievadiet PIN."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN kods nav pareizs."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Lai atbloķētu, nospiediet Izvēlne, pēc tam 0."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Ir pārsniegts maksimālais Autorizācijas pēc sejas mēģinājumu skaits."</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Uzlādēts"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Notiek uzlāde (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Pievienojiet uzlādes ierīci."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Lai atbloķētu, nospiediet vienumu Izvēlne."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Tīkls ir bloķēts."</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Nav SIM kartes."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Planšetdatorā nav SIM kartes."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Tālrunī nav SIM kartes."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Ievietojiet SIM karti."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Nav SIM kartes, vai arī to nevar nolasīt. Ievietojiet SIM karti."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM karte nav lietojama."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Jūsu SIM karte ir neatgriezeniski atspējota.\nSazinieties ar savu bezvadu pakalpojumu sniedzēju, lai iegūtu citu SIM karti."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM karte ir bloķēta."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM karte ir bloķēta ar PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Notiek SIM kartes atbloķēšana..."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d. logrīks no %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Pievienot logrīku."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tukšs"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Atbloķēšanas apgabals ir izvērsts."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Atbloķēšanas apgabals ir sakļauts."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Logrīks <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Lietotāju atlasītājs"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Statuss"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Multivides vadīklas"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Logrīku pārkārtošana ir sākta."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Logrīku pārkārtošana ir pabeigta."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Logrīks <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ir izdzēsts."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Izvērst atbloķēšanas apgabalu."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Autorizācija, velkot ar pirkstu."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Autorizācija ar kombināciju."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Autorizācija pēc sejas."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Autorizācija ar PIN kodu."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Autorizācija ar paroli."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Kombinācijas ievades apgabals."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Apgabals, kur vilkt ar pirkstu."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Iepriekšējā ieraksta poga"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Nākamā ieraksta poga"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pārtraukšanas poga"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Atskaņošanas poga"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Apturēšanas poga"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alternēšanas taustiņš"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Atcelt"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Dzēšanas taustiņš"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Gatavs"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Režīma maiņa"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Pārslēgšanas taustiņš"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Ievadīšanas taustiņš"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Atbloķēt"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Klusums"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Skaņa ieslēgta"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Meklēt"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Velciet uz augšu, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"Velciet uz leju, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Velciet pa kreisi, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Velciet pa labi, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Pašreizējais lietotājs: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Ārkārtas izsaukums"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Aizmirsu kombināciju"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Nepareiza kombinācija"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Nepareiza parole"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Nepareizs PIN"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER">%d</xliff:g> sekundēm."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Norādiet savu kombināciju"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ievadiet SIM kartes PIN"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Ievadiet PIN"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Ievadiet paroli"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM karte ir atspējota. Lai turpinātu, ievadiet PUK kodu. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ievadiet vēlamo PIN kodu."</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Apstipriniet vēlamo PIN."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Notiek SIM kartes atbloķēšana..."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN kods nav pareizs."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Ievadiet PIN, kas sastāv no 4 līdz 8 cipariem."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kodam ir jābūt vismaz 8 ciparus garam."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Atkārtoti ievadiet pareizo PUK kodu. Ja vairākas reizes ievadīsiet to nepareizi, SIM karte tiks neatgriezeniski atspējota."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodi neatbilst."</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Pārāk daudz kombinācijas mēģinājumu"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Lai atbloķētu, pierakstieties, izmantojot savu Google kontu."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Lietotājvārds (e-pasts)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Parole"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Pierakstīties"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nederīgs lietotājvārds vai parole."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Vai aizmirsāt lietotājvārdu vai paroli?\nApmeklējiet vietni "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Notiek konta pārbaude…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Jūs nepareizi ievadījāt PIN <xliff:g id="NUMBER_0">%d</xliff:g> reizes.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%d</xliff:g> sekundēm."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jūs nepareizi ievadījāt paroli <xliff:g id="NUMBER_0">%d</xliff:g> reizes.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%d</xliff:g> sekundēm."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%d</xliff:g> sekundēm."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Jūs nepareizi veicāt planšetdatora atbloķēšanu <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdatorā tiks atiestatīti rūpnīcas noklusējuma iestatījumi un lietotāja dati tiks zaudēti."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi un lietotāja dati tiks zaudēti."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Jūs nepareizi veicāt planšetdatora atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Planšetdatorā tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">"  — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Noņemt"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Iepriekšējā ieraksta poga"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Nākamā ieraksta poga"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Pārtraukšanas poga"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Atskaņošanas poga"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Apturēšanas poga"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nav pakalpojuma."</string>
+</resources>

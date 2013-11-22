@@ -22,6 +22,8 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.os.Process.SYSTEM_UID;
+import static android.os.Process.PACKAGE_INFO_GID;
 
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -43,6 +45,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
+import android.content.pm.KeySet;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -57,6 +60,7 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -67,6 +71,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.PublicKey;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,6 +111,7 @@ final class Settings {
     private static final String ATTR_ENABLED = "enabled";
     private static final String ATTR_ENABLED_CALLER = "enabledCaller";
     private static final String ATTR_STOPPED = "stopped";
+    private static final String ATTR_BLOCKED = "blocked";
     private static final String ATTR_INSTALLED = "inst";
 
     private final File mSettingsFilename;
@@ -113,11 +119,14 @@ final class Settings {
     private final File mPackageListFilename;
     private final File mStoppedPackagesFilename;
     private final File mBackupStoppedPackagesFilename;
+
     final HashMap<String, PackageSetting> mPackages =
             new HashMap<String, PackageSetting>();
     // List of replaced system applications
     private final HashMap<String, PackageSetting> mDisabledSysPackages =
         new HashMap<String, PackageSetting>();
+
+    private static int mFirstAvailableUid = 0;
 
     // These are the last platform API version we were using for
     // the apps installed on internal and external storage.  It is
@@ -177,6 +186,9 @@ final class Settings {
     private final Context mContext;
 
     private final File mSystemDir;
+
+    public final KeySetManager mKeySetManager = new KeySetManager(mPackages);
+
     Settings(Context context) {
         this(context, Environment.getDataDirectory());
     }
@@ -192,6 +204,8 @@ final class Settings {
         mSettingsFilename = new File(mSystemDir, "packages.xml");
         mBackupSettingsFilename = new File(mSystemDir, "packages-backup.xml");
         mPackageListFilename = new File(mSystemDir, "packages.list");
+        FileUtils.setPermissions(mPackageListFilename, 0660, SYSTEM_UID, PACKAGE_INFO_GID);
+
         // Deprecated: Needed for migration
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
@@ -337,6 +351,19 @@ final class Settings {
         return null;
     }
 
+    void pruneSharedUsersLPw() {
+        ArrayList<String> removeStage = new ArrayList<String>();
+        for (Map.Entry<String,SharedUserSetting> entry : mSharedUsers.entrySet()) {
+            final SharedUserSetting sus = entry.getValue();
+            if (sus == null || sus.packages.size() == 0) {
+                removeStage.add(entry.getKey());
+            }
+        }
+        for (int i = 0; i < removeStage.size(); i++) {
+            mSharedUsers.remove(removeStage.get(i));
+        }
+    }
+
     // Transfer ownership of permissions from one package to another.
     void transferPermissionsLPw(String origPkg, String newPkg) {
         // Transfer ownership of permissions to the new package.
@@ -454,6 +481,7 @@ final class Settings {
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
+                                    false, // blocked
                                     null, null, null);
                             writePackageRestrictionsLPr(user.id);
                         }
@@ -584,7 +612,7 @@ final class Settings {
                         "Package " + p.name + " was user "
                         + p.sharedUser + " but is now " + sharedUser
                         + "; I am not changing its files so it will probably fail!");
-                p.sharedUser.packages.remove(p);
+                p.sharedUser.removePackage(p);
             } else if (p.appId != sharedUser.userId) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
                     "Package " + p.name + " was user id " + p.appId
@@ -593,7 +621,7 @@ final class Settings {
                     + "; I am not changing its files so it will probably fail!");
             }
 
-            sharedUser.packages.add(p);
+            sharedUser.addPackage(p);
             p.sharedUser = sharedUser;
             p.appId = sharedUser.userId;
         }
@@ -653,7 +681,7 @@ final class Settings {
         if (p != null) {
             mPackages.remove(name);
             if (p.sharedUser != null) {
-                p.sharedUser.packages.remove(p);
+                p.sharedUser.removePackage(p);
                 if (p.sharedUser.packages.size() == 0) {
                     mSharedUsers.remove(p.sharedUser.name);
                     removeUserIdLPw(p.sharedUser.userId);
@@ -671,8 +699,8 @@ final class Settings {
         final PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.sharedUser != null) {
-                p.sharedUser.packages.remove(p);
-                p.sharedUser.packages.add(newp);
+                p.sharedUser.removePackage(p);
+                p.sharedUser.addPackage(newp);
             } else {
                 replaceUserIdLPw(p.appId, newp);
             }
@@ -729,6 +757,7 @@ final class Settings {
         } else {
             mOtherUserIds.remove(uid);
         }
+        setFirstAvailableUid(uid+1);
     }
 
     private void replaceUserIdLPw(int uid, Object obj) {
@@ -851,6 +880,7 @@ final class Settings {
                                 true,   // installed
                                 false,  // stopped
                                 false,  // notLaunched
+                                false,  // blocked
                                 null, null, null);
                     }
                     return;
@@ -904,6 +934,9 @@ final class Settings {
                     final String stoppedStr = parser.getAttributeValue(null, ATTR_STOPPED);
                     final boolean stopped = stoppedStr == null
                             ? false : Boolean.parseBoolean(stoppedStr);
+                    final String blockedStr = parser.getAttributeValue(null, ATTR_BLOCKED);
+                    final boolean blocked = blockedStr == null
+                            ? false : Boolean.parseBoolean(blockedStr);
                     final String notLaunchedStr = parser.getAttributeValue(null, ATTR_NOT_LAUNCHED);
                     final boolean notLaunched = stoppedStr == null
                             ? false : Boolean.parseBoolean(notLaunchedStr);
@@ -927,7 +960,7 @@ final class Settings {
                         }
                     }
 
-                    ps.setUserState(userId, enabled, installed, stopped, notLaunched,
+                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, blocked,
                             enabledCaller, enabledComponents, disabledComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
@@ -1035,6 +1068,7 @@ final class Settings {
                 PackageUserState ustate = pkg.readUserState(userId);
                 if (ustate.stopped || ustate.notLaunched || !ustate.installed
                         || ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT
+                        || ustate.blocked
                         || (ustate.enabledComponents != null
                                 && ustate.enabledComponents.size() > 0)
                         || (ustate.disabledComponents != null
@@ -1051,6 +1085,9 @@ final class Settings {
                     }
                     if (ustate.notLaunched) {
                         serializer.attribute(null, ATTR_NOT_LAUNCHED, "true");
+                    }
+                    if (ustate.blocked) {
+                        serializer.attribute(null, ATTR_BLOCKED, "true");
                     }
                     if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
                         serializer.attribute(null, ATTR_ENABLED,
@@ -1331,6 +1368,8 @@ final class Settings {
                 }
             }
             
+            mKeySetManager.writeKeySetManagerLPr(serializer);
+
             serializer.endTag(null, "packages");
 
             serializer.endDocument();
@@ -1348,22 +1387,29 @@ final class Settings {
                     -1, -1);
 
             // Write package list file now, use a JournaledFile.
-            //
-            File tempFile = new File(mPackageListFilename.toString() + ".tmp");
+            File tempFile = new File(mPackageListFilename.getAbsolutePath() + ".tmp");
             JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
 
-            fstr = new FileOutputStream(journal.chooseForWrite());
+            final File writeTarget = journal.chooseForWrite();
+            fstr = new FileOutputStream(writeTarget);
             str = new BufferedOutputStream(fstr);
             try {
+                FileUtils.setPermissions(fstr.getFD(), 0660, SYSTEM_UID, PACKAGE_INFO_GID);
+
                 StringBuilder sb = new StringBuilder();
                 for (final PackageSetting pkg : mPackages.values()) {
-                    ApplicationInfo ai = pkg.pkg.applicationInfo;
-                    String dataPath = ai.dataDir;
-                    boolean isDebug  = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    if (pkg.pkg == null || pkg.pkg.applicationInfo == null) {
+                        Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
+                        continue;
+                    }
 
-                    // Avoid any application that has a space in its path
-                    // or that is handled by the system.
-                    if (dataPath.indexOf(" ") >= 0 || ai.uid < Process.FIRST_APPLICATION_UID)
+                    final ApplicationInfo ai = pkg.pkg.applicationInfo;
+                    final String dataPath = ai.dataDir;
+                    final boolean isDebug = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    final int[] gids = pkg.getGids();
+
+                    // Avoid any application that has a space in its path.
+                    if (dataPath.indexOf(" ") >= 0)
                         continue;
 
                     // we store on each line the following information for now:
@@ -1373,12 +1419,14 @@ final class Settings {
                     // debugFlag  - 0 or 1 if the package is debuggable.
                     // dataPath   - path to package's data path
                     // seinfo     - seinfo label for the app (assigned at install time)
+                    // gids       - supplementary gids this app launches with
                     //
                     // NOTE: We prefer not to expose all ApplicationInfo flags for now.
                     //
                     // DO NOT MODIFY THIS FORMAT UNLESS YOU CAN ALSO MODIFY ITS USERS
                     // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
                     //   system/core/run-as/run-as.c
+                    //   system/core/sdcard/sdcard.c
                     //
                     sb.setLength(0);
                     sb.append(ai.packageName);
@@ -1388,6 +1436,16 @@ final class Settings {
                     sb.append(dataPath);
                     sb.append(" ");
                     sb.append(ai.seinfo);
+                    sb.append(" ");
+                    if (gids != null && gids.length > 0) {
+                        sb.append(gids[0]);
+                        for (int i = 1; i < gids.length; i++) {
+                            sb.append(",");
+                            sb.append(gids[i]);
+                        }
+                    } else {
+                        sb.append("none");
+                    }
                     sb.append("\n");
                     str.write(sb.toString().getBytes());
                 }
@@ -1396,14 +1454,10 @@ final class Settings {
                 str.close();
                 journal.commit();
             } catch (Exception e) {
+                Log.wtf(TAG, "Failed to write packages.list", e);
                 IoUtils.closeQuietly(str);
                 journal.rollback();
             }
-
-            FileUtils.setPermissions(mPackageListFilename.toString(),
-                    FileUtils.S_IRUSR|FileUtils.S_IWUSR
-                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
-                    -1, -1);
 
             writeAllUsersPackageRestrictionsLPr();
             return;
@@ -1521,7 +1575,29 @@ final class Settings {
             serializer.endTag(null, "perms");
         }
 
+        writeSigningKeySetsLPr(serializer, pkg.keySetData);
+        writeKeySetAliasesLPr(serializer, pkg.keySetData);
+
         serializer.endTag(null, "package");
+    }
+
+    void writeSigningKeySetsLPr(XmlSerializer serializer,
+            PackageKeySetData data) throws IOException {
+        for (long id : data.getSigningKeySets()) {
+            serializer.startTag(null, "signing-keyset");
+            serializer.attribute(null, "identifier", Long.toString(id));
+            serializer.endTag(null, "signing-keyset");
+        }
+    }
+
+    void writeKeySetAliasesLPr(XmlSerializer serializer,
+            PackageKeySetData data) throws IOException {
+        for (Map.Entry<String, Long> e: data.getAliases().entrySet()) {
+            serializer.startTag(null, "defined-keyset");
+            serializer.attribute(null, "alias", e.getKey());
+            serializer.attribute(null, "identifier", Long.toString(e.getValue()));
+            serializer.endTag(null, "defined-keyset");
+        }
     }
 
     void writePermissionLPr(XmlSerializer serializer, BasePermission bp)
@@ -1698,6 +1774,8 @@ final class Settings {
                 } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                     final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
                     mReadExternalStorageEnforced = "1".equals(enforcement);
+                } else if (tagName.equals("keyset-settings")) {
+                    mKeySetManager.readKeySetsLPw(parser);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -1785,6 +1863,20 @@ final class Settings {
     }
 
     void readDefaultPreferredAppsLPw(PackageManagerService service, int userId) {
+        // First pull data from any pre-installed apps.
+        for (PackageSetting ps : mPackages.values()) {
+            if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0 && ps.pkg != null
+                    && ps.pkg.preferredActivityFilters != null) {
+                ArrayList<PackageParser.ActivityIntentInfo> intents
+                        = ps.pkg.preferredActivityFilters;
+                for (int i=0; i<intents.size(); i++) {
+                    PackageParser.ActivityIntentInfo aii = intents.get(i);
+                    applyDefaultPreferredActivityLPw(service, aii, new ComponentName(
+                            ps.name, aii.activity.className), userId);
+                }
+            }
+        }
+
         // Read preferred apps from .../etc/preferred-apps directory.
         File preferredDir = new File(Environment.getRootDirectory(), "etc/preferred-apps");
         if (!preferredDir.exists() || !preferredDir.isDirectory()) {
@@ -1844,6 +1936,166 @@ final class Settings {
         }
     }
 
+    private void applyDefaultPreferredActivityLPw(PackageManagerService service,
+            IntentFilter tmpPa, ComponentName cn, int userId) {
+        // The initial preferences only specify the target activity
+        // component and intent-filter, not the set of matches.  So we
+        // now need to query for the matches to build the correct
+        // preferred activity entry.
+        if (PackageManagerService.DEBUG_PREFERRED) {
+            Log.d(TAG, "Processing preferred:");
+            tmpPa.dump(new LogPrinter(Log.DEBUG, TAG), "  ");
+        }
+        Intent intent = new Intent();
+        int flags = 0;
+        intent.setAction(tmpPa.getAction(0));
+        for (int i=0; i<tmpPa.countCategories(); i++) {
+            String cat = tmpPa.getCategory(i);
+            if (cat.equals(Intent.CATEGORY_DEFAULT)) {
+                flags |= PackageManager.MATCH_DEFAULT_ONLY;
+            } else {
+                intent.addCategory(cat);
+            }
+        }
+
+        boolean doNonData = true;
+
+        for (int ischeme=0; ischeme<tmpPa.countDataSchemes(); ischeme++) {
+            boolean doScheme = true;
+            String scheme = tmpPa.getDataScheme(ischeme);
+            for (int issp=0; issp<tmpPa.countDataSchemeSpecificParts(); issp++) {
+                Uri.Builder builder = new Uri.Builder();
+                builder.scheme(scheme);
+                PatternMatcher ssp = tmpPa.getDataSchemeSpecificPart(issp);
+                builder.opaquePart(ssp.getPath());
+                Intent finalIntent = new Intent(intent);
+                finalIntent.setData(builder.build());
+                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                        scheme, ssp, null, null, null, userId);
+                doScheme = false;
+            }
+            for (int iauth=0; iauth<tmpPa.countDataAuthorities(); iauth++) {
+                boolean doAuth = true;
+                IntentFilter.AuthorityEntry auth = tmpPa.getDataAuthority(iauth);
+                for (int ipath=0; ipath<tmpPa.countDataPaths(); ipath++) {
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.scheme(scheme);
+                    if (auth.getHost() != null) {
+                        builder.authority(auth.getHost());
+                    }
+                    PatternMatcher path = tmpPa.getDataPath(ipath);
+                    builder.path(path.getPath());
+                    Intent finalIntent = new Intent(intent);
+                    finalIntent.setData(builder.build());
+                    applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                            scheme, null, auth, path, null, userId);
+                    doAuth = doScheme = false;
+                }
+                if (doAuth) {
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.scheme(scheme);
+                    if (auth.getHost() != null) {
+                        builder.authority(auth.getHost());
+                    }
+                    Intent finalIntent = new Intent(intent);
+                    finalIntent.setData(builder.build());
+                    applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                            scheme, null, auth, null, null, userId);
+                    doScheme = false;
+                }
+            }
+            if (doScheme) {
+                Uri.Builder builder = new Uri.Builder();
+                builder.scheme(scheme);
+                Intent finalIntent = new Intent(intent);
+                finalIntent.setData(builder.build());
+                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                        scheme, null, null, null, null, userId);
+            }
+            doNonData = false;
+        }
+
+        for (int idata=0; idata<tmpPa.countDataTypes(); idata++) {
+            Intent finalIntent = new Intent(intent);
+            String mimeType = tmpPa.getDataType(idata);
+            finalIntent.setType(mimeType);
+            applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                    null, null, null, null, mimeType, userId);
+            doNonData = false;
+        }
+
+        if (doNonData) {
+            applyDefaultPreferredActivityLPw(service, intent, flags, cn,
+                    null, null, null, null, null, userId);
+        }
+    }
+
+    private void applyDefaultPreferredActivityLPw(PackageManagerService service,
+            Intent intent, int flags, ComponentName cn, String scheme, PatternMatcher ssp,
+            IntentFilter.AuthorityEntry auth, PatternMatcher path, String mimeType,
+            int userId) {
+        List<ResolveInfo> ri = service.mActivities.queryIntent(intent,
+                intent.getType(), flags, 0);
+        if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Queried " + intent
+                + " results: " + ri);
+        int match = 0;
+        if (ri != null && ri.size() > 1) {
+            boolean haveAct = false;
+            boolean haveNonSys = false;
+            ComponentName[] set = new ComponentName[ri.size()];
+            for (int i=0; i<ri.size(); i++) {
+                ActivityInfo ai = ri.get(i).activityInfo;
+                set[i] = new ComponentName(ai.packageName, ai.name);
+                if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    // If any of the matches are not system apps, then
+                    // there is a third party app that is now an option...
+                    // so don't set a default since we don't want to hide it.
+                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
+                            + ai.packageName + "/" + ai.name + ": non-system!");
+                    haveNonSys = true;
+                    break;
+                } else if (cn.getPackageName().equals(ai.packageName)
+                        && cn.getClassName().equals(ai.name)) {
+                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
+                            + ai.packageName + "/" + ai.name + ": default!");
+                    haveAct = true;
+                    match = ri.get(i).match;
+                } else {
+                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
+                            + ai.packageName + "/" + ai.name + ": skipped");
+                }
+            }
+            if (haveAct && !haveNonSys) {
+                IntentFilter filter = new IntentFilter();
+                if (intent.getAction() != null) {
+                    filter.addAction(intent.getAction());
+                }
+                for (String cat : intent.getCategories()) {
+                    filter.addCategory(cat);
+                }
+                if ((flags&PackageManager.MATCH_DEFAULT_ONLY) != 0) {
+                    filter.addCategory(Intent.CATEGORY_DEFAULT);
+                }
+                if (scheme != null) {
+                    filter.addDataScheme(scheme);
+                }
+                if (ssp != null) {
+                    filter.addDataSchemeSpecificPart(ssp.getPath(), ssp.getType());
+                }
+                if (auth != null) {
+                    filter.addDataAuthority(auth);
+                }
+                if (path != null) {
+                    filter.addDataPath(path);
+                }
+                PreferredActivity pa = new PreferredActivity(filter, match, set, cn, true);
+                editPreferredActivitiesLPw(userId).addFilter(pa);
+            } else if (!haveNonSys) {
+                Slog.w(TAG, "No component found for default preferred activity " + cn);
+            }
+        }
+    }
+
     private void readDefaultPreferredActivitiesLPw(PackageManagerService service,
             XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
@@ -1859,83 +2111,8 @@ final class Settings {
             if (tagName.equals(TAG_ITEM)) {
                 PreferredActivity tmpPa = new PreferredActivity(parser);
                 if (tmpPa.mPref.getParseError() == null) {
-                    // The initial preferences only specify the target activity
-                    // component and intent-filter, not the set of matches.  So we
-                    // now need to query for the matches to build the correct
-                    // preferred activity entry.
-                    if (PackageManagerService.DEBUG_PREFERRED) {
-                        Log.d(TAG, "Processing preferred:");
-                        tmpPa.dump(new LogPrinter(Log.DEBUG, TAG), "  ");
-                    }
-                    final ComponentName cn = tmpPa.mPref.mComponent;
-                    Intent intent = new Intent();
-                    int flags = 0;
-                    intent.setAction(tmpPa.getAction(0));
-                    for (int i=0; i<tmpPa.countCategories(); i++) {
-                        String cat = tmpPa.getCategory(i);
-                        if (cat.equals(Intent.CATEGORY_DEFAULT)) {
-                            flags |= PackageManager.MATCH_DEFAULT_ONLY;
-                        } else {
-                            intent.addCategory(cat);
-                        }
-                    }
-                    if (tmpPa.countDataSchemes() > 0) {
-                        Uri.Builder builder = new Uri.Builder();
-                        builder.scheme(tmpPa.getDataScheme(0));
-                        if (tmpPa.countDataAuthorities() > 0) {
-                            IntentFilter.AuthorityEntry auth = tmpPa.getDataAuthority(0);
-                            if (auth.getHost() != null) {
-                                builder.authority(auth.getHost());
-                            }
-                        }
-                        if (tmpPa.countDataPaths() > 0) {
-                            PatternMatcher path = tmpPa.getDataPath(0);
-                            builder.path(path.getPath());
-                        }
-                        intent.setData(builder.build());
-                    } else if (tmpPa.countDataTypes() > 0) {
-                        intent.setType(tmpPa.getDataType(0));
-                    }
-                    List<ResolveInfo> ri = service.mActivities.queryIntent(intent,
-                            intent.getType(), flags, 0);
-                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Queried " + intent
-                            + " results: " + ri);
-                    int match = 0;
-                    if (ri != null && ri.size() > 1) {
-                        boolean haveAct = false;
-                        boolean haveNonSys = false;
-                        ComponentName[] set = new ComponentName[ri.size()];
-                        for (int i=0; i<ri.size(); i++) {
-                            ActivityInfo ai = ri.get(i).activityInfo;
-                            set[i] = new ComponentName(ai.packageName, ai.name);
-                            if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
-                                // If any of the matches are not system apps, then
-                                // there is a third party app that is now an option...
-                                // so don't set a default since we don't want to hide it.
-                                if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
-                                        + ai.packageName + "/" + ai.name + ": non-system!");
-                                haveNonSys = true;
-                                break;
-                            } else if (cn.getPackageName().equals(ai.packageName)
-                                    && cn.getClassName().equals(ai.name)) {
-                                if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
-                                        + ai.packageName + "/" + ai.name + ": default!");
-                                haveAct = true;
-                                match = ri.get(i).match;
-                            } else {
-                                if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
-                                        + ai.packageName + "/" + ai.name + ": skipped");
-                            }
-                        }
-                        if (haveAct && !haveNonSys) {
-                            PreferredActivity pa = new PreferredActivity(tmpPa, match, set,
-                                    tmpPa.mPref.mComponent);
-                            editPreferredActivitiesLPw(userId).addFilter(pa);
-                        } else if (!haveNonSys) {
-                            Slog.w(TAG, "No component found for default preferred activity "
-                                    + tmpPa.mPref.mComponent);
-                        }
-                    }
+                    applyDefaultPreferredActivityLPw(service, tmpPa, tmpPa.mPref.mComponent,
+                            userId);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: <preferred-activity> "
@@ -2293,12 +2470,23 @@ final class Settings {
                 } else if (tagName.equals("perms")) {
                     readGrantedPermissionsLPw(parser, packageSetting.grantedPermissions);
                     packageSetting.permissionsFixed = true;
+                } else if (tagName.equals("signing-keyset")) {
+                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    packageSetting.keySetData.addSigningKeySet(id);
+                    if (false) Slog.d(TAG, "Adding signing keyset " + Long.toString(id)
+                            + " to " + name);
+                } else if (tagName.equals("defined-keyset")) {
+                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    String alias = parser.getAttributeValue(null, "alias");
+                    packageSetting.keySetData.addDefinedKeySet(id, alias);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
+
+
         } else {
             XmlUtils.skipCurrentTag(parser);
         }
@@ -2478,11 +2666,18 @@ final class Settings {
         file.delete();
     }
 
+    // This should be called (at least) whenever an application is removed
+    private void setFirstAvailableUid(int uid) {
+        if (uid > mFirstAvailableUid) {
+            mFirstAvailableUid = uid;
+        }
+    }
+
     // Returns -1 if we could not find an available UserId to assign
     private int newUserIdLPw(Object obj) {
         // Let's be stupidly inefficient for now...
         final int N = mUserIds.size();
-        for (int i = 0; i < N; i++) {
+        for (int i = mFirstAvailableUid; i < N; i++) {
             if (mUserIds.get(i) == null) {
                 mUserIds.set(i, obj);
                 return Process.FIRST_APPLICATION_UID + i;
@@ -2660,6 +2855,7 @@ final class Settings {
         ApplicationInfo.FLAG_RESTORE_ANY_VERSION, "RESTORE_ANY_VERSION",
         ApplicationInfo.FLAG_EXTERNAL_STORAGE, "EXTERNAL_STORAGE",
         ApplicationInfo.FLAG_LARGE_HEAP, "LARGE_HEAP",
+        ApplicationInfo.FLAG_PRIVILEGED, "PRIVILEGED",
         ApplicationInfo.FLAG_FORWARD_LOCK, "FORWARD_LOCK",
         ApplicationInfo.FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
     };
@@ -2791,6 +2987,8 @@ final class Settings {
             pw.print(prefix); pw.print("  User "); pw.print(user.id); pw.print(": ");
             pw.print(" installed=");
             pw.print(ps.getInstalled(user.id));
+            pw.print(" blocked=");
+            pw.print(ps.getBlocked(user.id));
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));
             pw.print(" notLaunched=");
@@ -2842,7 +3040,7 @@ final class Settings {
 
             if (!printedSomething) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Packages:");
                 printedSomething = true;
             }
@@ -2858,7 +3056,7 @@ final class Settings {
                 }
                 if (!printedSomething) {
                     if (dumpState.onTitlePrinted())
-                        pw.println(" ");
+                        pw.println();
                     pw.println("Renamed packages:");
                     printedSomething = true;
                 }
@@ -2878,7 +3076,7 @@ final class Settings {
                 }
                 if (!printedSomething) {
                     if (dumpState.onTitlePrinted())
-                        pw.println(" ");
+                        pw.println();
                     pw.println("Hidden system packages:");
                     printedSomething = true;
                 }
@@ -2895,7 +3093,7 @@ final class Settings {
             }
             if (!printedSomething) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Permissions:");
                 printedSomething = true;
             }
@@ -2929,7 +3127,7 @@ final class Settings {
             }
             if (!printedSomething) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Shared users:");
                 printedSomething = true;
             }

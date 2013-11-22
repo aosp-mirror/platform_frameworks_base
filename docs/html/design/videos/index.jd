@@ -1,7 +1,70 @@
 page.title=Videos
 @jd:body
 
-<p>The Android Design Team was pleased to present five fantastic design-oriented sessions at Google I/O 2012. Visit these pages to view the videos and presentations from the conference.</p>
+<p>The Android Design Team presents design-oriented sessions at Google I/O every year. Visit these pages to view the videos and presentations from the conferences.</p>
+
+<img src="{@docRoot}images/home/io-logo-2013-alt.png">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+    <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326368573">Enchant, Simplify, Amaze: Android's Design Principles</a></h3>
+    <p>Want to enchant people, simplify their lives, and make them feel amazing with your app? Learn how Android's Design Principles can help you create products that resonate with people. Find out about the meaning and research behind the principles. See real-world examples and practices from the Android Design team. Discover techniques for applying the principles in your daily work. No design experience necessary.</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <iframe width="355" height="200" src="//www.youtube.com/embed/s0HIP8EdlnE" frameborder="0" allowfullscreen=""></iframe>
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+    <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326301704">Structure in Android App Design</a></h3>
+    <p>Life is simple when your app is simple. But when your apps gets more complex, how do you choose between spinners, tabs, and drawers for navigation? Members of the Android Design team look at techniques for making your app predictable and pleasing to use.</p>
+  </div>
+  <div class="layout-content-col span-6">
+    <iframe width="355" height="200" src="//www.youtube.com/embed/XpqyiBR0lJ4" frameborder="0" allowfullscreen=""></iframe>
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+    <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326425499">Fireside Chat with the Android Team</a></h3>
+    <p>Pull up a chair and join the Android platform team for a fireside chat. It's your opportunity to ask us about the platform and learn a little bit more about why things work the way they do, from the people who built it. </p>
+  </div>
+  <div class="layout-content-col span-6">
+    <iframe width="355" height="200" src="//www.youtube.com/embed/A5OOJDIrYls" frameborder="0" allowfullscreen=""></iframe>
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+    <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326483138">Agile UX Research Practice in Android</a></h3>
+    <p>In the Android UX team, it is critical to get user feedback frequently and consistently so that we are able to iterate and develop the best-in-class designs for our users. We will discuss how the team applied ""Pulse Studies"" (iterative research sessions) in order to put new ideas, designs, and concepts in front of users on a regular basis; it requires minimal advance planning, it can have an immediate product impact, and it can meet urgent needs. </p>
+  </div>
+  <div class="layout-content-col span-6">
+    <iframe width="355" height="200" src="//www.youtube.com/embed/6MOeVNbh9cY" frameborder="0" allowfullscreen=""></iframe>
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+    <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326460111">Cognitive Science and Design</a></h3>
+    <p>This session will provide an in-depth look at human perception and cognition, and its implications for interactive and visual design. The human brain is purely treated as an information processing machine, and we will teach the audience its attributes, its advantages, its limitations, and generally how to hack it. </p>
+  </div>
+  <div class="layout-content-col span-6">
+    <iframe width="355" height="200" src="//www.youtube.com/embed/z2exxj4COhU" frameborder="0" allowfullscreen=""></iframe>
+  </div>
+</div>
+
 <img src="{@docRoot}design/media/extras_googleio_12.png">
 
 <div class="vspace size-2">&nbsp;</div>

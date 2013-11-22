@@ -224,7 +224,7 @@ public abstract class DisplayModifier {
                     put("rotate45", new DisplayModifier() {
                         @Override
                         public void modifyDrawing(Paint paint, Canvas canvas) {
-                            canvas.rotate(5);
+                            canvas.rotate(45);
                         }
                     });
                     put("rotate90", new DisplayModifier() {

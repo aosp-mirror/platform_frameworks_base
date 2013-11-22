@@ -193,6 +193,11 @@ public final class BluetoothHeadset implements BluetoothProfile {
             "android.bluetooth.headset.intent.category.companyid";
 
     /**
+     * A vendor-specific command for unsolicited result code.
+     */
+    public static final String VENDOR_RESULT_CODE_COMMAND_ANDROID = "+ANDROID";
+
+    /**
      * Headset state when SCO audio is not connected.
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
@@ -241,9 +246,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
                             try {
                                 if (mService == null) {
                                     if (VDBG) Log.d(TAG,"Binding service...");
-                                    if (!mContext.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
-                                        Log.e(TAG, "Could not bind to Bluetooth Headset Service");
-                                    }
+                                    doBind();
                                 }
                             } catch (Exception re) {
                                 Log.e(TAG,"",re);
@@ -270,9 +273,18 @@ public final class BluetoothHeadset implements BluetoothProfile {
             }
         }
 
-        if (!context.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
-            Log.e(TAG, "Could not bind to Bluetooth Headset Service");
+        doBind();
+    }
+
+    boolean doBind() {
+        Intent intent = new Intent(IBluetoothHeadset.class.getName());
+        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        intent.setComponent(comp);
+        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+            Log.e(TAG, "Could not bind to Bluetooth Headset Service with " + intent);
+            return false;
         }
+        return true;
     }
 
     /**
@@ -815,27 +827,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Notify Headset of phone roam state change.
-     * This is a backdoor for phone app to call BluetoothHeadset since
-     * there is currently not a good way to get roaming state change outside
-     * of phone app.
-     *
-     * @hide
-     */
-    public void roamChanged(boolean roaming) {
-        if (mService != null && isEnabled()) {
-            try {
-                mService.roamChanged(roaming);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-    }
-
-    /**
      * Send Headset of CLCC response
      *
      * @hide
@@ -854,7 +845,47 @@ public final class BluetoothHeadset implements BluetoothProfile {
         }
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    /**
+     * Sends a vendor-specific unsolicited result code to the headset.
+     *
+     * <p>The actual string to be sent is <code>command + ": " + arg</code>.
+     * For example, if {@code command} is {@link #VENDOR_RESULT_CODE_COMMAND_ANDROID} and {@code arg}
+     * is {@code "0"}, the string <code>"+ANDROID: 0"</code> will be sent.
+     *
+     * <p>Currently only {@link #VENDOR_RESULT_CODE_COMMAND_ANDROID} is allowed as {@code command}.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param device Bluetooth headset.
+     * @param command A vendor-specific command.
+     * @param arg The argument that will be attached to the command.
+     * @return {@code false} if there is no headset connected, or if the command is not an allowed
+     *         vendor-specific unsolicited result code, or on error. {@code true} otherwise.
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
+     */
+    public boolean sendVendorSpecificResultCode(BluetoothDevice device, String command,
+            String arg) {
+        if (DBG) {
+            log("sendVendorSpecificResultCode()");
+        }
+        if (command == null) {
+            throw new IllegalArgumentException("command is null");
+        }
+        if (mService != null && isEnabled() &&
+                isValidDevice(device)) {
+            try {
+                return mService.sendVendorSpecificResultCode(device, command, arg);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return false;
+    }
+
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
             mService = IBluetoothHeadset.Stub.asInterface(service);

@@ -80,4 +80,6 @@ interface IBluetooth
     // For Socket
     ParcelFileDescriptor connectSocket(in BluetoothDevice device, int type, in ParcelUuid uuid, int port, int flag);
     ParcelFileDescriptor createSocketChannel(int type, in String serviceName, in ParcelUuid uuid, int port, int flag);
+
+    boolean configHciSnoopLog(boolean enable);
 }

@@ -23,23 +23,23 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.os.Vibrator;
-import android.util.Slog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
         View getChildAtRawPosition(float x, float y);
         View getChildAtPosition(float x, float y);
         boolean canChildBeExpanded(View v);
-        boolean setUserExpandedChild(View v, boolean userExpanded);
-        boolean setUserLockedChild(View v, boolean userLocked);
+        void setUserExpandedChild(View v, boolean userExpanded);
+        void setUserLockedChild(View v, boolean userLocked);
     }
 
     private static final String TAG = "ExpandHelper";
@@ -109,11 +109,11 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     private View mScrollView;
 
-    private OnScaleGestureListener mScaleGestureListener 
+    private OnScaleGestureListener mScaleGestureListener
             = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-            if (DEBUG_SCALE) Slog.v(TAG, "onscalebegin()");
+            if (DEBUG_SCALE) Log.v(TAG, "onscalebegin()");
             float focusX = detector.getFocusX();
             float focusY = detector.getFocusY();
 
@@ -126,7 +126,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if (DEBUG_SCALE) Slog.v(TAG, "onscale() on " + mCurrView);
+            if (DEBUG_SCALE) Log.v(TAG, "onscale() on " + mCurrView);
             return true;
         }
 
@@ -143,7 +143,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             mView = v;
         }
         public void setHeight(float h) {
-            if (DEBUG_SCALE) Slog.v(TAG, "SetHeight: setting to " + h);
+            if (DEBUG_SCALE) Log.v(TAG, "SetHeight: setting to " + h);
             ViewGroup.LayoutParams lp = mView.getLayoutParams();
             lp.height = (int)h;
             mView.setLayoutParams(lp);
@@ -158,7 +158,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         }
         public int getNaturalHeight(int maximum) {
             ViewGroup.LayoutParams lp = mView.getLayoutParams();
-            if (DEBUG_SCALE) Slog.v(TAG, "Inspecting a child of type: " +
+            if (DEBUG_SCALE) Log.v(TAG, "Inspecting a child of type: " +
                     mView.getClass().getName());
             int oldHeight = lp.height;
             lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -181,7 +181,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
      * @param callback the container that holds the items to be manipulated
      * @param small the smallest allowable size for the manuipulated items.
      * @param large the largest allowable size for the manuipulated items.
-     * @param scoller if non-null also manipulate the scroll position to obey the gravity.
      */
     public ExpandHelper(Context context, Callback callback, int small, int large) {
         mSmallSize = small;
@@ -230,7 +229,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     }
 
     private void updateExpansion() {
-        if (DEBUG_SCALE) Slog.v(TAG, "updateExpansion()");
+        if (DEBUG_SCALE) Log.v(TAG, "updateExpansion()");
         // are we scaling or dragging?
         float span = mSGD.getCurrentSpan() - mInitialTouchSpan;
         span *= USE_SPAN ? 1f : 0f;
@@ -270,10 +269,10 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     }
 
     private boolean isInside(View v, float x, float y) {
-        if (DEBUG) Slog.d(TAG, "isinside (" + x + ", " + y + ")");
+        if (DEBUG) Log.d(TAG, "isinside (" + x + ", " + y + ")");
 
         if (v == null) {
-            if (DEBUG) Slog.d(TAG, "isinside null subject");
+            if (DEBUG) Log.d(TAG, "isinside null subject");
             return false;
         }
         if (mEventSource != null) {
@@ -281,14 +280,14 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             mEventSource.getLocationOnScreen(location);
             x += location[0];
             y += location[1];
-            if (DEBUG) Slog.d(TAG, "  to global (" + x + ", " + y + ")");
+            if (DEBUG) Log.d(TAG, "  to global (" + x + ", " + y + ")");
         }
         int[] location = new int[2];
         v.getLocationOnScreen(location);
         x -= location[0];
         y -= location[1];
-        if (DEBUG) Slog.d(TAG, "  to local (" + x + ", " + y + ")");
-        if (DEBUG) Slog.d(TAG, "  inside (" + v.getWidth() + ", " + v.getHeight() + ")");
+        if (DEBUG) Log.d(TAG, "  to local (" + x + ", " + y + ")");
+        if (DEBUG) Log.d(TAG, "  inside (" + v.getWidth() + ", " + v.getHeight() + ")");
         boolean inside = (x > 0f && y > 0f && x < v.getWidth() & y < v.getHeight());
         return inside;
     }
@@ -307,10 +306,10 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     private float calculateGlow(float target, float actual) {
         // glow if overscale
-        if (DEBUG_GLOW) Slog.d(TAG, "target: " + target + " actual: " + actual);
+        if (DEBUG_GLOW) Log.d(TAG, "target: " + target + " actual: " + actual);
         float stretch = Math.abs((target - actual) / mMaximumStretch);
         float strength = 1f / (1f + (float) Math.pow(Math.E, -1 * ((8f * stretch) - 5f)));
-        if (DEBUG_GLOW) Slog.d(TAG, "stretch: " + stretch + " strength: " + strength);
+        if (DEBUG_GLOW) Log.d(TAG, "stretch: " + stretch + " strength: " + strength);
         return (GLOW_BASE + strength * (1f - GLOW_BASE));
     }
 
@@ -348,7 +347,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
-        if (DEBUG_SCALE) Slog.d(TAG, "intercept: act=" + MotionEvent.actionToString(action) +
+        if (DEBUG_SCALE) Log.d(TAG, "intercept: act=" + MotionEvent.actionToString(action) +
                          " expanding=" + mExpanding +
                          (0 != (mExpansionStyle & BLINDS) ? " (blinds)" : "") +
                          (0 != (mExpansionStyle & PULL) ? " (pull)" : "") +
@@ -362,7 +361,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mInitialTouchSpan = mSGD.getCurrentSpan();
         mLastFocusY = mInitialTouchFocusY;
         mLastSpanY = mInitialTouchSpan;
-        if (DEBUG_SCALE) Slog.d(TAG, "set initial span: " + mInitialTouchSpan);
+        if (DEBUG_SCALE) Log.d(TAG, "set initial span: " + mInitialTouchSpan);
 
         if (mExpanding) {
             return true;
@@ -376,7 +375,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                     xspan > mPullGestureMinXSpan &&
                     xspan > mSGD.getCurrentSpanY())) {
                 // detect a vertical pulling gesture with fingers somewhat separated
-                if (DEBUG_SCALE) Slog.v(TAG, "got pull gesture (xspan=" + xspan + "px)");
+                if (DEBUG_SCALE) Log.v(TAG, "got pull gesture (xspan=" + xspan + "px)");
 
                 final View underFocus = findView(x, y);
                 if (underFocus != null) {
@@ -393,7 +392,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 if (mWatchingForPull) {
                     final int yDiff = y - mLastMotionY;
                     if (yDiff > mTouchSlop) {
-                        if (DEBUG) Slog.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
+                        if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
                         mLastMotionY = y;
                         final View underFocus = findView(x, y);
                         if (underFocus != null) {
@@ -413,7 +412,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                if (DEBUG) Slog.d(TAG, "up/cancel");
+                if (DEBUG) Log.d(TAG, "up/cancel");
                 finishExpanding(false);
                 clearView();
                 break;
@@ -425,7 +424,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getActionMasked();
-        if (DEBUG_SCALE) Slog.d(TAG, "touch: act=" + MotionEvent.actionToString(action) +
+        if (DEBUG_SCALE) Log.d(TAG, "touch: act=" + MotionEvent.actionToString(action) +
                 " expanding=" + mExpanding +
                 (0 != (mExpansionStyle & BLINDS) ? " (blinds)" : "") +
                 (0 != (mExpansionStyle & PULL) ? " (pull)" : "") +
@@ -484,14 +483,14 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_POINTER_DOWN:
-                if (DEBUG) Slog.d(TAG, "pointer change");
+                if (DEBUG) Log.d(TAG, "pointer change");
                 mInitialTouchY += mSGD.getFocusY() - mLastFocusY;
                 mInitialTouchSpan += mSGD.getCurrentSpan() - mLastSpanY;
                 break;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (DEBUG) Slog.d(TAG, "up/cancel");
+                if (DEBUG) Log.d(TAG, "up/cancel");
                 finishExpanding(false);
                 clearView();
                 break;
@@ -505,20 +504,20 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             return;
         }
         mExpanding = true;
-        if (DEBUG) Slog.d(TAG, "scale type " + expandType + " beginning on view: " + v);
+        if (DEBUG) Log.d(TAG, "scale type " + expandType + " beginning on view: " + v);
         mCallback.setUserLockedChild(v, true);
         setView(v);
         setGlow(GLOW_BASE);
         mScaler.setView(v);
         mOldHeight = mScaler.getHeight();
         if (mCallback.canChildBeExpanded(v)) {
-            if (DEBUG) Slog.d(TAG, "working on an expandable child");
+            if (DEBUG) Log.d(TAG, "working on an expandable child");
             mNaturalHeight = mScaler.getNaturalHeight(mLargeSize);
         } else {
-            if (DEBUG) Slog.d(TAG, "working on a non-expandable child");
+            if (DEBUG) Log.d(TAG, "working on a non-expandable child");
             mNaturalHeight = mOldHeight;
         }
-        if (DEBUG) Slog.d(TAG, "got mOldHeight: " + mOldHeight +
+        if (DEBUG) Log.d(TAG, "got mOldHeight: " + mOldHeight +
                     " mNaturalHeight: " + mNaturalHeight);
         v.getParent().requestDisallowInterceptTouchEvent(true);
     }
@@ -526,7 +525,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private void finishExpanding(boolean force) {
         if (!mExpanding) return;
 
-        if (DEBUG) Slog.d(TAG, "scale in finishing on view: " + mCurrView);
+        if (DEBUG) Log.d(TAG, "scale in finishing on view: " + mCurrView);
 
         float currentHeight = mScaler.getHeight();
         float targetHeight = mSmallSize;
@@ -552,11 +551,11 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mExpanding = false;
         mExpansionStyle = NONE;
 
-        if (DEBUG) Slog.d(TAG, "wasClosed is: " + wasClosed);
-        if (DEBUG) Slog.d(TAG, "currentHeight is: " + currentHeight);
-        if (DEBUG) Slog.d(TAG, "mSmallSize is: " + mSmallSize);
-        if (DEBUG) Slog.d(TAG, "targetHeight is: " + targetHeight);
-        if (DEBUG) Slog.d(TAG, "scale was finished on view: " + mCurrView);
+        if (DEBUG) Log.d(TAG, "wasClosed is: " + wasClosed);
+        if (DEBUG) Log.d(TAG, "currentHeight is: " + currentHeight);
+        if (DEBUG) Log.d(TAG, "mSmallSize is: " + mSmallSize);
+        if (DEBUG) Log.d(TAG, "targetHeight is: " + targetHeight);
+        if (DEBUG) Log.d(TAG, "scale was finished on view: " + mCurrView);
     }
 
     private void clearView() {
@@ -575,7 +574,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 String debugLog = "Looking for glows: " +
                         (mCurrViewTopGlow != null ? "found top " : "didn't find top") +
                         (mCurrViewBottomGlow != null ? "found bottom " : "didn't find bottom");
-                Slog.v(TAG,  debugLog);
+                Log.v(TAG,  debugLog);
             }
         }
     }

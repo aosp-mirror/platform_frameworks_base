@@ -1,0 +1,216 @@
+page.title=Testing UI Components
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#testcase">Create a Test Case for UI Testing with Instrumentation</a>
+  <li><a href="#test_method">Add Test Methods to Verify UI Behavior</a>
+     <ol>
+     <li><a href="#verify_button_display">Verify Button Layout Parameters</a></li>
+     <li><a href="#verify_TextView">Verify TextView Layout Parameters</a></li>
+     <li><a href="#verify_button_behavior">Verify Button Behavior</a></li>
+     </ol>
+  </li>
+  <li><a href="#annotations">Apply Test Annotations</a></li>
+</ol>
+
+<h2>Try it out</h2>
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/AndroidTestingFun.zip"
+class="button">Download the demo</a>
+ <p class="filename">AndroidTestingFun.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Typically, your {@link android.app.Activity} includes user interface
+components (such as buttons, editable text fields, checkboxes, and pickers) to
+allow users to interact with your Android application. This lesson shows how
+you can test an {@link android.app.Activity} with a simple push-button UI. You
+can use the same general steps to test other, more sophisticated types of UI
+components.</p>
+
+<p class="note"><strong>Note:</strong> The type of UI testing in this lesson is
+called <em>white-box testing</em> because you have the
+source code for the application that you want to test. The Android
+<a href="{@docRoot}tools/testing/testing_android.html#Instrumentation">Instrumentation</a>
+framework is suitable for creating white-box tests for UI components within an
+application. An alternative type of UI testing is <em>black-box testing</em>,
+where you may not have access to the application source. This type of testing
+is useful when you want to test how your app interacts with other apps or with
+the system. Black-box testing is not covered in this training. To learn more
+about how to perform black-box testing on your Android apps, see the
+<a href="{@docRoot}tools/testing/testing_ui.html">UI Testing guide</a>.
+<p>For a complete test case example, take a look at
+{@code ClickFunActivityTest.java} in the sample app.</p>
+
+<h2 id="testcase">Create a Test Case for UI Testing with Instrumentation</h2>
+<p>When testing an {@link android.app.Activity} that has a user interface (UI),
+the {@link android.app.Activity} under test runs in the UI thread. However, the
+test application itself runs in a separate thread in the same process as the
+application under test. This means that your test app can reference objects
+from the UI thread, but if it attempts to change properties on those objects or
+send events to the UI thread, you will usually get a {@code WrongThreadException}
+error.</p>
+<p>To safely inject {@link android.content.Intent} objects into your
+{@link android.app.Activity} or run test methods on the UI thread, you can
+extend your test class to use {@link android.test.ActivityInstrumentationTestCase2}.
+To learn more about how to run test methods on the UI thread, see
+<a href="{@docRoot}tools/testing/activity_testing.html#RunOnUIThread">Testing
+on the UI thread</a>.</p>
+
+<h3 id="fixture">Set Up Your Test Fixture</h3>
+<p>When setting up the test fixture for UI testing, you should specify the
+<a href="{@docRoot}guide/topics/ui/ui-events.html#TouchMode">touch mode</a>
+in your {@link junit.framework.TestCase#setUp()} method. Setting the touch mode
+to {@code true} prevents the UI control from taking focus when you click it
+programmatically in the test method later (for example, a button UI will just
+fire its on-click listener). Make sure that you call
+{@link android.test.ActivityInstrumentationTestCase2#setActivityInitialTouchMode(boolean) setActivityInitialTouchMode()}
+before calling {@link android.test.ActivityInstrumentationTestCase2#getActivity()}.
+</p>
+<p>For example:</ap>
+<pre>
+public class ClickFunActivityTest
+        extends ActivityInstrumentationTestCase2<ClickFunActivity> {
+    ...
+    &#64;Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        setActivityInitialTouchMode(true);
+
+        mClickFunActivity = getActivity();
+        mClickMeButton = (Button) 
+                mClickFunActivity
+                .findViewById(R.id.launch_next_activity_button);
+        mInfoTextView = (TextView) 
+                mClickFunActivity.findViewById(R.id.info_text_view);
+    }
+}
+</pre>
+
+<h2 id="test_methods">Add Test Methods to Validate UI Behavior</h2>
+<p id="test_goals">Your UI testing goals might include:</p>
+<ul>
+<li>Verifying that a button is displayed with the correct layout when the
+{@link android.app.Activity} is launched.</li>
+<li>Verifying that a {@link android.widget.TextView} is initially hidden.</li>
+<li>Verifying that a {@link android.widget.TextView} displays the expected string
+when a button is pushed.</li>
+</ul>
+<p>The following section demonstrates how you can implement test methods
+to perform these verifications.</p>
+
+<h3 id="verify_button_display">Verify Button Layout Parameters</h3>
+<p>You might add a test method like this to verify that a button is displayed
+correctly in your {@link android.app.Activity}:</p>
+<pre>
+&#64;MediumTest
+public void testClickMeButton_layout() {
+    final View decorView = mClickFunActivity.getWindow().getDecorView();
+
+    ViewAsserts.assertOnScreen(decorView, mClickMeButton);
+
+    final ViewGroup.LayoutParams layoutParams =
+            mClickMeButton.getLayoutParams();
+    assertNotNull(layoutParams);
+    assertEquals(layoutParams.width, WindowManager.LayoutParams.MATCH_PARENT);
+    assertEquals(layoutParams.height, WindowManager.LayoutParams.WRAP_CONTENT);
+}
+</pre>
+
+<p>In the {@link android.test.ViewAsserts#assertOnScreen(android.view.View,android.view.View) assertOnScreen()}
+method call, you should pass in the root view and the view that you are
+expecting to be present on the screen. If the expected view is not found in the
+root view, the assertion method throws an {@link junit.framework.AssertionFailedError}
+exception, otherwise the test passes.</p>
+<p>You can also verify that the layout of a {@link android.widget.Button} is
+correct by getting a reference to its {@link android.view.ViewGroup.LayoutParams}
+object, then call assertion methods to verify that the
+{@link android.widget.Button} object's width and height attributes match the
+expected values.</p>
+<p>The {@code &#64;MediumTest} annotation specifies how the test is categorized,
+relative to its absolute execution time. To learn more about using test size
+annotations, see <a href="#annotations">Apply Test Annotations</a>.</p>
+
+<h3 id="verify_TextView">Verify TextView Layout Parameters</h3>
+<p>You might add a test method like this to verify that a
+{@link android.widget.TextView} initially appears hidden in
+your {@link android.app.Activity}:</p>
+<pre>
+&#64;MediumTest
+public void testInfoTextView_layout() {
+    final View decorView = mClickFunActivity.getWindow().getDecorView();
+    ViewAsserts.assertOnScreen(decorView, mInfoTextView);
+    assertTrue(View.GONE == mInfoTextView.getVisibility());
+}
+</pre>
+<p>You can call {@link android.view.Window#getDecorView()} to get a reference
+to the decor view for the {@link android.app.Activity}. The decor view is the
+top-level ViewGroup ({@link android.widget.FrameLayout}) view in the layout
+hierarchy.</p>
+
+<h3 id="verify_button_behavior">Verify Button Behavior</h3>
+<p>You can use a test method like this to verify that a
+{@link android.widget.TextView} becomes visible when a
+{@link android.widget.Button} is pushed:</p>
+
+<pre>
+&#64;MediumTest
+public void testClickMeButton_clickButtonAndExpectInfoText() {
+    String expectedInfoText = mClickFunActivity.getString(R.string.info_text);
+    TouchUtils.clickView(this, mClickMeButton);
+    assertTrue(View.VISIBLE == mInfoTextView.getVisibility());
+    assertEquals(expectedInfoText, mInfoTextView.getText());
+}
+</pre>
+
+<p>To programmatically click a {@link android.widget.Button} in your
+test, call {@link android.test.TouchUtils#clickView(android.test.InstrumentationTestCase,android.view.View) clickView()}.
+You must pass in a reference to the test case that is being run and a reference
+to the {@link android.widget.Button} to manipulate.</p>
+
+<p class="note"><strong>Note: </strong>The {@link android.test.TouchUtils}
+helper class provides convenience methods for simulating touch interactions
+with your application. You can use these methods to simulate clicking, tapping,
+and dragging of Views or the application screen.</p>
+<p class="caution"><strong>Caution: </strong>The {@link android.test.TouchUtils}
+methods are designed to send events to the UI thread safely from the test thread.
+You should not run {@link android.test.TouchUtils} directly in the UI thread or
+any test method annotated with {@code &#64;UIThread}. Doing so might
+raise the {@code WrongThreadException}.</p>
+
+<h2 id="annotations">Apply Test Annotations</h2>
+<p>The following annotations can be applied to indicate the size of a test
+method:</p>
+<dl>
+<dt>{@link
+android.test.suitebuilder.annotation.SmallTest &#64;SmallTest}</dt>
+<dd>Marks a test that should run as part of the small tests.</dd>
+<dt>{@link
+android.test.suitebuilder.annotation.MediumTest &#64;MediumTest}</dt>
+<dd>Marks a test that should run as part of the medium tests.</dd>
+<dt>{@link android.test.suitebuilder.annotation.LargeTest &#64;LargeTest}</dt>
+<dd>Marks a test that should run as part of the large tests.</dd>
+</dl>
+<p>Typically, a short running test that take only a few milliseconds should be
+marked as a {@code &#64;SmallTest}. Longer running tests (100 milliseconds or
+more) are usually marked as {@code &#64;MediumTest}s or {@code &#64;LargeTest}s,
+depending on whether the test accesses resources on the local system only or
+remote resources over a network. For guidance on using test size annotations,
+see this <a href="https://plus.sandbox.google.com/+AndroidDevelopers/posts/TPy1EeSaSg8">Android Tools Protip</a>.</p>
+<p>You can mark up your test methods with other test annotations to control
+how the tests are organized and run. For more information on other annotations,
+see the {@link java.lang.annotation.Annotation} class reference.</p>
+
+
+
+

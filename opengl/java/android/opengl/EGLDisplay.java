@@ -29,7 +29,7 @@ public class EGLDisplay extends EGLObjectHandle {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof EGLDisplay)) return false;
 
         EGLDisplay that = (EGLDisplay) o;
         return getHandle() == that.getHandle();

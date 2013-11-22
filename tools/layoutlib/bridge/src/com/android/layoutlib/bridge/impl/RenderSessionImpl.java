@@ -192,11 +192,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         findNavigationBar(resources, metrics);
 
         // FIXME: find those out, and possibly add them to the render params
-        boolean hasSystemNavBar = true;
         boolean hasNavigationBar = true;
         IWindowManager iwm = new IWindowManagerImpl(getContext().getConfiguration(),
                 metrics, Surface.ROTATION_0,
-                hasSystemNavBar, hasNavigationBar);
+                hasNavigationBar);
         WindowManagerGlobal_Delegate.setWindowManagerService(iwm);
 
         // build the inflater and parser.
@@ -225,13 +224,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             SessionParams params = getParams();
             HardwareConfig hardwareConfig = params.getHardwareConfig();
             BridgeContext context = getContext();
-
+            boolean isRtl = Bridge.isLocaleRtl(params.getLocale());
+            int direction = isRtl ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR;
 
             // the view group that receives the window background.
             ViewGroup backgroundView = null;
 
             if (mWindowIsFloating || params.isForceNoDecor()) {
                 backgroundView = mViewRoot = mContentRoot = new FrameLayout(context);
+                mViewRoot.setLayoutDirection(direction);
             } else {
                 if (hasSoftwareButtons() && mNavigationBarOrientation == LinearLayout.VERTICAL) {
                     /*
@@ -253,12 +254,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                        the bottom
                      */
                     LinearLayout topLayout = new LinearLayout(context);
+                    topLayout.setLayoutDirection(direction);
                     mViewRoot = topLayout;
                     topLayout.setOrientation(LinearLayout.HORIZONTAL);
 
                     try {
                         NavigationBar navigationBar = new NavigationBar(context,
-                                hardwareConfig.getDensity(), LinearLayout.VERTICAL);
+                                hardwareConfig.getDensity(), LinearLayout.VERTICAL, isRtl,
+                                params.isRtlSupported());
                         navigationBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         mNavigationBarSize,
@@ -290,6 +293,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                 LinearLayout topLayout = new LinearLayout(context);
                 topLayout.setOrientation(LinearLayout.VERTICAL);
+                topLayout.setLayoutDirection(direction);
                 // if we don't already have a view root this is it
                 if (mViewRoot == null) {
                     mViewRoot = topLayout;
@@ -301,13 +305,22 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                     // this is the case of soft buttons + vertical bar.
                     // this top layout is the first layout in the horizontal layout. see above)
-                    mViewRoot.addView(topLayout, 0);
+                    if (isRtl && params.isRtlSupported()) {
+                        // If RTL is enabled, layoutlib will mirror the layouts. So, add the
+                        // topLayout to the right of Navigation Bar and layoutlib will draw it
+                        // to the left.
+                        mViewRoot.addView(topLayout);
+                    } else {
+                        // Add the top layout to the left of the Navigation Bar.
+                        mViewRoot.addView(topLayout, 0);
+                    }
                 }
 
                 if (mStatusBarSize > 0) {
                     // system bar
                     try {
-                        StatusBar systemBar = new StatusBar(context, hardwareConfig.getDensity());
+                        StatusBar systemBar = new StatusBar(context, hardwareConfig.getDensity(),
+                                direction, params.isRtlSupported());
                         systemBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mStatusBarSize));
@@ -366,7 +379,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     // system bar
                     try {
                         NavigationBar navigationBar = new NavigationBar(context,
-                                hardwareConfig.getDensity(), LinearLayout.HORIZONTAL);
+                                hardwareConfig.getDensity(), LinearLayout.HORIZONTAL, isRtl,
+                                params.isRtlSupported());
                         navigationBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mNavigationBarSize));

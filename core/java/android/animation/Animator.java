@@ -30,6 +30,17 @@ public abstract class Animator implements Cloneable {
     ArrayList<AnimatorListener> mListeners = null;
 
     /**
+     * The set of listeners to be sent pause/resume events through the life
+     * of an animation.
+     */
+    ArrayList<AnimatorPauseListener> mPauseListeners = null;
+
+    /**
+     * Whether this animator is currently in a paused state.
+     */
+    boolean mPaused = false;
+
+    /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
      * running after that delay elapses. A non-delayed animation will have its initial
      * value(s) set immediately, followed by calls to
@@ -66,6 +77,66 @@ public abstract class Animator implements Cloneable {
      * <p>This method must be called on the thread that is running the animation.</p>
      */
     public void end() {
+    }
+
+    /**
+     * Pauses a running animation. This method should only be called on the same thread on
+     * which the animation was started. If the animation has not yet been {@link
+     * #isStarted() started} or has since ended, then the call is ignored. Paused
+     * animations can be resumed by calling {@link #resume()}.
+     *
+     * @see #resume()
+     * @see #isPaused()
+     * @see AnimatorPauseListener
+     */
+    public void pause() {
+        if (isStarted() && !mPaused) {
+            mPaused = true;
+            if (mPauseListeners != null) {
+                ArrayList<AnimatorPauseListener> tmpListeners =
+                        (ArrayList<AnimatorPauseListener>) mPauseListeners.clone();
+                int numListeners = tmpListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    tmpListeners.get(i).onAnimationPause(this);
+                }
+            }
+        }
+    }
+
+    /**
+     * Resumes a paused animation, causing the animator to pick up where it left off
+     * when it was paused. This method should only be called on the same thread on
+     * which the animation was started. Calls to resume() on an animator that is
+     * not currently paused will be ignored.
+     *
+     * @see #pause()
+     * @see #isPaused()
+     * @see AnimatorPauseListener
+     */
+    public void resume() {
+        if (mPaused) {
+            mPaused = false;
+            if (mPauseListeners != null) {
+                ArrayList<AnimatorPauseListener> tmpListeners =
+                        (ArrayList<AnimatorPauseListener>) mPauseListeners.clone();
+                int numListeners = tmpListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    tmpListeners.get(i).onAnimationResume(this);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns whether this animator is currently in a paused state.
+     *
+     * @return True if the animator is currently paused, false otherwise.
+     *
+     * @see #pause()
+     * @see #resume()
+     */
+    public boolean isPaused() {
+        return mPaused;
     }
 
     /**
@@ -180,14 +251,47 @@ public abstract class Animator implements Cloneable {
     }
 
     /**
-     * Removes all listeners from this object. This is equivalent to calling
-     * <code>getListeners()</code> followed by calling <code>clear()</code> on the
-     * returned list of listeners.
+     * Adds a pause listener to this animator.
+     *
+     * @param listener the listener to be added to the current set of pause listeners
+     * for this animation.
+     */
+    public void addPauseListener(AnimatorPauseListener listener) {
+        if (mPauseListeners == null) {
+            mPauseListeners = new ArrayList<AnimatorPauseListener>();
+        }
+        mPauseListeners.add(listener);
+    }
+
+    /**
+     * Removes a pause listener from the set listening to this animation.
+     *
+     * @param listener the listener to be removed from the current set of pause
+     * listeners for this animation.
+     */
+    public void removePauseListener(AnimatorPauseListener listener) {
+        if (mPauseListeners == null) {
+            return;
+        }
+        mPauseListeners.remove(listener);
+        if (mPauseListeners.size() == 0) {
+            mPauseListeners = null;
+        }
+    }
+
+    /**
+     * Removes all {@link #addListener(android.animation.Animator.AnimatorListener) listeners}
+     * and {@link #addPauseListener(android.animation.Animator.AnimatorPauseListener)
+     * pauseListeners} from this object.
      */
     public void removeAllListeners() {
         if (mListeners != null) {
             mListeners.clear();
             mListeners = null;
+        }
+        if (mPauseListeners != null) {
+            mPauseListeners.clear();
+            mPauseListeners = null;
         }
     }
 
@@ -201,6 +305,14 @@ public abstract class Animator implements Cloneable {
                 int numListeners = oldListeners.size();
                 for (int i = 0; i < numListeners; ++i) {
                     anim.mListeners.add(oldListeners.get(i));
+                }
+            }
+            if (mPauseListeners != null) {
+                ArrayList<AnimatorPauseListener> oldListeners = mPauseListeners;
+                anim.mPauseListeners = new ArrayList<AnimatorPauseListener>();
+                int numListeners = oldListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    anim.mPauseListeners.add(oldListeners.get(i));
                 }
             }
             return anim;
@@ -279,5 +391,30 @@ public abstract class Animator implements Cloneable {
          * @param animation The animation which was repeated.
          */
         void onAnimationRepeat(Animator animation);
+    }
+
+    /**
+     * A pause listener receives notifications from an animation when the
+     * animation is {@link #pause() paused} or {@link #resume() resumed}.
+     *
+     * @see #addPauseListener(AnimatorPauseListener)
+     */
+    public static interface AnimatorPauseListener {
+        /**
+         * <p>Notifies that the animation was paused.</p>
+         *
+         * @param animation The animaton being paused.
+         * @see #pause()
+         */
+        void onAnimationPause(Animator animation);
+
+        /**
+         * <p>Notifies that the animation was resumed, after being
+         * previously paused.</p>
+         *
+         * @param animation The animation being resumed.
+         * @see #resume()
+         */
+        void onAnimationResume(Animator animation);
     }
 }

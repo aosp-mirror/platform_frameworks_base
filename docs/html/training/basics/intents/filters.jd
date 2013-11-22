@@ -20,7 +20,8 @@ previous.link=result.html
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}training/sharing/index.html">Sharing Content</a></li>
+    <li><a href="{@docRoot}training/sharing/index.html">Sharing Simple Data</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>
 </ul>
   </div>
 </div>
@@ -152,7 +153,7 @@ implicit intents will resolve to your activity.</p>
 
 <p>For more information about sending and receiving {@link android.content.Intent#ACTION_SEND}
 intents that perform social sharing behaviors, see the lesson about <a
-href="{@docRoot}training/sharing/receive.html">Receiving Content from Other Apps</a>.</p>
+href="{@docRoot}training/sharing/receive.html">Receiving Simple Data from Other Apps</a>.</p>
 
 
 <h2 id="HandleIntent">Handle the Intent in Your Activity</h2>

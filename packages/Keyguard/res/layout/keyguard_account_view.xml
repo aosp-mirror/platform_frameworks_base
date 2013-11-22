@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2012, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<com.android.keyguard.KeyguardAccountView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    android:id="@+id/keyguard_account_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
+    android:orientation="vertical">
+
+    <include layout="@layout/keyguard_message_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1">
+
+        <EditText
+            android:id="@+id/login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dip"
+            android:layout_marginStart="7dip"
+            android:layout_marginEnd="7dip"
+            android:layout_alignParentTop="true"
+            android:hint="@string/kg_login_username_hint"
+            android:inputType="textEmailAddress"
+            />
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/login"
+            android:layout_toLeftOf="@+id/ok"
+            android:layout_marginTop="15dip"
+            android:layout_marginStart="7dip"
+            android:layout_marginEnd="7dip"
+            android:inputType="textPassword"
+            android:hint="@string/kg_login_password_hint"
+            android:nextFocusRight="@+id/ok"
+            android:nextFocusDown="@+id/ok"
+            />
+
+        <!-- ok below password, aligned to right of screen -->
+        <Button
+            android:id="@+id/ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dip"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/login"
+            android:text="@string/kg_login_submit_button"
+            />
+
+    </RelativeLayout>
+
+    <!--  no room for ECA on this screen right now
+    <include layout="@layout/keyguard_eca"
+        android:id="@+id/keyguard_selector_fade_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|center_horizontal"
+        android:gravity="center_horizontal" />
+    -->
+
+</com.android.keyguard.KeyguardAccountView>

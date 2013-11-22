@@ -20,6 +20,7 @@ import android.accounts.Account;
 import android.content.SyncInfo;
 import android.content.ISyncStatusObserver;
 import android.content.SyncAdapterType;
+import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
 import android.content.PeriodicSync;
 import android.net.Uri;
@@ -54,6 +55,7 @@ interface IContentService {
             int userHandle);
 
     void requestSync(in Account account, String authority, in Bundle extras);
+    void sync(in SyncRequest request);
     void cancelSync(in Account account, String authority);
 
     /**

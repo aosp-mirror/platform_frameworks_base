@@ -39,6 +39,7 @@ cloud messaging.</p>
 
 
 
+
 <div style="margin-top:10px">
 <div class="col-6 normal-links" style="margin-left:0">
 
@@ -48,7 +49,7 @@ cloud messaging.</p>
   </div>
     <h4><a href="{@docRoot}google/play-services/maps.html"
     >Google Maps</a></h4>
-    <p>The power of Google Maps is available to your app
+    <p>Include the power of Google Maps in your app
     with an embeddable map view. You can customize the map with
     markers and overlays, control the user's perspective, draw lines
     and shapes, and much more.</p>
@@ -64,6 +65,17 @@ cloud messaging.</p>
     customize the user experience with Google+ info,
     pull people into your app with interactive posts,
     and add +1 buttons so users can recommend your content.</p>
+</div>
+
+<div class="landing-cell">
+  <div class="cell-icon">
+  <img src="{@docRoot}images/google/cloud-platform.png" width="40" >
+  </div>
+    <h4><a class="external-link" href="https://cloud.google.com/solutions/mobile"
+    >Google Cloud Platform</a></h4>
+    <p>Build and host the backend for your Android app at Google-scale. With an infrastructure
+    that is managed automatically, you can focus on your app. Then, scale to support
+    millions of users.</p>
 </div>
 
 <div class="landing-cell">
@@ -93,6 +105,18 @@ cloud messaging.</p>
     <p>Build an app with a steady revenue stream that keeps users engaged
     by offering new content or virtual goods directly in your app. All transactions are handled
     by Google Play Store for a simple user experience.
+    </p>
+</div>
+
+<div class="landing-cell">
+  <div class="cell-icon">
+    <img src="{@docRoot}images/google/wallet.png" width="40" />
+  </div>
+    <h4><a class="external-link" href="https://developers.google.com/commerce/wallet/instant-buy/"
+    >Google Wallet Instant Buy</a></h4>
+    <p>Provide fast and easy checkout in your app when selling physical goods and services.
+    Increase conversions by streamlining your purchase flow and reducing the amount of
+    information your customers need to enter.
     </p>
 </div>
 

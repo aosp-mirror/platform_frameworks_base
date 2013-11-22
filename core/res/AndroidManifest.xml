@@ -29,8 +29,10 @@
     <protected-broadcast android:name="android.intent.action.SCREEN_OFF" />
     <protected-broadcast android:name="android.intent.action.SCREEN_ON" />
     <protected-broadcast android:name="android.intent.action.USER_PRESENT" />
+    <protected-broadcast android:name="android.intent.action.TIME_SET" />
     <protected-broadcast android:name="android.intent.action.TIME_TICK" />
     <protected-broadcast android:name="android.intent.action.TIMEZONE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.DATE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BOOT_COMPLETED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_INSTALL" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_ADDED" />
@@ -64,6 +66,9 @@
     <protected-broadcast android:name="android.intent.action.MASTER_CLEAR_NOTIFICATION" />
     <protected-broadcast android:name="android.intent.action.USER_ADDED" />
     <protected-broadcast android:name="android.intent.action.USER_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.USER_STARTING" />
+    <protected-broadcast android:name="android.intent.action.USER_STARTED" />
+    <protected-broadcast android:name="android.intent.action.USER_STOPPING" />
     <protected-broadcast android:name="android.intent.action.USER_STOPPED" />
     <protected-broadcast android:name="android.intent.action.USER_BACKGROUND" />
     <protected-broadcast android:name="android.intent.action.USER_FOREGROUND" />
@@ -89,6 +94,8 @@
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.LOCAL_NAME_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.UUID" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ALIAS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
     <protected-broadcast android:name="android.bluetooth.device.action.DISAPPEARED" />
     <protected-broadcast android:name="android.bluetooth.device.action.CLASS_CHANGED" />
@@ -101,6 +108,10 @@
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REPLY" />
+    <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL" />
+    <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
+    <protected-broadcast android:name="android.bluetooth.devicepicker.action.LAUNCH" />
+    <protected-broadcast android:name="android.bluetooth.devicepicker.action.DEVICE_SELECTED" />
     <protected-broadcast
         android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
@@ -114,7 +125,30 @@
     <protected-broadcast
         android:name="android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
+        android:name="android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS" />
+    <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
+    <protected-broadcast android:name="android.btopp.intent.action.INCOMING_FILE_NOTIFICATION" />
+    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_HANDOVER_STARTED" />
+    <protected-broadcast android:name="android.btopp.intent.action.TRANSFER_COMPLETE" />
+    <protected-broadcast android:name="android.btopp.intent.action.USER_CONFIRMATION_TIMEOUT" />
+    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_TRANSFER_PROGRESS" />
+    <protected-broadcast android:name="android.btopp.intent.action.LIST" />
+    <protected-broadcast android:name="android.btopp.intent.action.OPEN_OUTBOUND" />
+    <protected-broadcast android:name="android.btopp.intent.action.HIDE_COMPLETE" />
+    <protected-broadcast android:name="android.btopp.intent.action.CONFIRM" />
+    <protected-broadcast android:name="android.btopp.intent.action.HIDE" />
+    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_TRANSFER_DONE" />
+    <protected-broadcast android:name="android.btopp.intent.action.RETRY" />
+    <protected-broadcast android:name="android.btopp.intent.action.OPEN" />
+    <protected-broadcast android:name="android.btopp.intent.action.OPEN_INBOUND" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.authchall" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.userconfirmtimeout" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.authresponse" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.authcancelled" />
 
     <protected-broadcast android:name="android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED" />
 
@@ -131,11 +165,33 @@
     <protected-broadcast android:name="android.intent.action.USB_AUDIO_ACCESSORY_PLUG" />
     <protected-broadcast android:name="android.intent.action.USB_AUDIO_DEVICE_PLUG" />
 
+    <protected-broadcast android:name="android.media.AUDIO_BECOMING_NOISY" />
+    <protected-broadcast android:name="android.media.RINGER_MODE_CHANGED" />
+    <protected-broadcast android:name="android.media.VIBRATE_SETTING_CHANGED" />
+    <protected-broadcast android:name="android.media.VOLUME_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.MASTER_VOLUME_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.MASTER_MUTE_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.SCO_AUDIO_STATE_CHANGED" />
+    <protected-broadcast android:name="android.media.ACTION_SCO_AUDIO_STATE_UPDATED" />
+
+    <protected-broadcast android:name="android.intent.action.MEDIA_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_CHECKING" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_NOFS" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_SHARED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_UNSHARED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_BAD_REMOVAL" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTABLE" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_EJECT" />
+
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
     <protected-broadcast android:name="android.net.conn.DATA_ACTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.BACKGROUND_DATA_SETTING_CHANGED" />
     <protected-broadcast android:name="android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED" />
+
+    <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
@@ -151,6 +207,7 @@
     <protected-broadcast android:name="android.intent.action.DREAMING_STARTED" />
     <protected-broadcast android:name="android.intent.action.DREAMING_STOPPED" />
     <protected-broadcast android:name="android.intent.action.ANY_DATA_STATE" />
+    <protected-broadcast android:name="android.intent.action.DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN" />
 
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_SCAN" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.DELAYED_DRIVER_STOP" />
@@ -172,6 +229,9 @@
     <protected-broadcast android:name="android.net.wifi.p2p.PERSISTENT_GROUPS_CHANGED" />
     <protected-broadcast android:name="android.net.conn.TETHER_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.conn.INET_CONDITION_ACTION" />
+    <protected-broadcast android:name="android.net.conn.NETWORK_CONDITIONS_MEASURED" />
+    <protected-broadcast
+            android:name="android.net.ConnectivityService.action.PKT_CNT_SAMPLE_INTERVAL_ELAPSED" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE" />
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
@@ -180,6 +240,19 @@
 
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_END" />
+
+    <protected-broadcast android:name="android.intent.action.HDMI_PLUGGED" />
+
+    <protected-broadcast android:name="android.intent.action.PHONE_STATE" />
+
+    <protected-broadcast android:name="android.location.GPS_ENABLED_CHANGE" />
+    <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
+    <protected-broadcast android:name="android.location.MODE_CHANGED" />
+    <protected-broadcast android:name="android.location.GPS_FIX_CHANGE" />
+    <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
+
+    <protected-broadcast
+        android:name="com.android.server.connectivityservice.CONNECTED_TO_PROVISIONING_NETWORK_ACTION" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
@@ -700,6 +773,14 @@
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
 
+    <!-- Allows applications to pair bluetooth devices without user interaction.
+         This is not available to third party applications. -->
+    <permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
+        android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
+        android:protectionLevel="system|signature"
+        android:description="@string/permdesc_bluetoothPriv"
+        android:label="@string/permlab_bluetoothPriv" />
+
     <!-- Allows bluetooth stack to access files
          @hide This should only be used by Bluetooth apk.
     -->
@@ -825,6 +906,13 @@
         android:protectionLevel="normal"
         android:label="@string/permlab_wakeLock"
         android:description="@string/permdesc_wakeLock" />
+
+    <!-- Allows using the device's IR transmitter, if available -->
+    <permission android:name="android.permission.TRANSMIT_IR"
+        android:permissionGroup="android.permission-group.AFFECTS_BATTERY"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_transmitIr"
+        android:description="@string/permdesc_transmitIr" />
 
     <!-- ==================================================== -->
     <!-- Permissions related to changing audio settings   -->
@@ -1023,6 +1111,14 @@
         android:description="@string/permdesc_use_sip"
         android:label="@string/permlab_use_sip" />
 
+    <!-- Allows an application to request CallHandlerService implementations.
+         @hide -->
+    <permission android:name="android.permission.BIND_CALL_SERVICE"
+        android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="system|signature"
+        android:description="@string/permdesc_bind_call_service"
+        android:label="@string/permlab_bind_call_service" />
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->
@@ -1039,15 +1135,15 @@
     <!-- Allows an application to read from external storage.
          <p>Any app that declares the {@link #WRITE_EXTERNAL_STORAGE} permission is implicitly
          granted this permission.</p>
-         <p>Currently, this permission is not enforced and all apps still have access to read from
-         external storage without this permission. That will change in a future release and apps
-         will require this permission to read from external storage. So if your
-         app reads from the external storage, you should add this permission to your app now
-         to ensure that it continues to work on future versions of Android.</p>
-         <p>You can test your app with the permission enforced by either running your app on the
-         Android Emulator when running Android 4.1 or higher, or enabling <em>Protect USB
+         <p>This permission is enforced starting in API level 19.  Before API level 19, this
+         permission is not enforced and all apps still have access to read from external storage.
+         You can test your app with the permission enforced by enabling <em>Protect USB
          storage</em> under Developer options in the Settings app on a device running Android 4.1 or
          higher.</p>
+         <p>Also starting in API level 19, this permission is <em>not</em> required to
+         read/write files in your application-specific directories returned by
+         {@link android.content.Context#getExternalFilesDir} and
+         {@link android.content.Context#getExternalCacheDir}.
          <p class="note"><strong>Note:</strong> If <em>both</em> your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
          minSdkVersion}</a> and <a
@@ -1070,7 +1166,11 @@
          targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
          grants your app this permission. If you don't need this permission, be sure your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> is 4 or higher. -->
+         targetSdkVersion}</a> is 4 or higher.
+         <p>Starting in API level 19, this permission is <em>not</em> required to
+         read/write files in your application-specific directories returned by
+         {@link android.content.Context#getExternalFilesDir} and
+         {@link android.content.Context#getExternalCacheDir}. -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_sdcardWrite"
@@ -1083,6 +1183,14 @@
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_mediaStorageWrite"
         android:description="@string/permdesc_mediaStorageWrite"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to manage access to documents, usually as part
+         of a document picker. -->
+    <permission android:name="android.permission.MANAGE_DOCUMENTS"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_manageDocs"
+        android:description="@string/permdesc_manageDocs"
         android:protectionLevel="signature|system" />
 
     <!-- ================================== -->
@@ -1176,6 +1284,13 @@
         android:protectionLevel="signature"
         android:label="@string/permlab_removeTasks"
         android:description="@string/permdesc_removeTasks" />
+
+    <!-- @hide Allows an application to create/manage/remove stacks -->
+    <permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"
+        android:permissionGroup="android.permission-group.APP_INFO"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_manageActivityStacks"
+        android:description="@string/permdesc_manageActivityStacks" />
 
     <!-- Allows an application to start any activity, regardless of permission
          protection or exported state. @hide -->
@@ -1296,6 +1411,27 @@
         android:protectionLevel="normal"
         android:label="@string/permlab_expandStatusBar"
         android:description="@string/permdesc_expandStatusBar" />
+
+    <!-- ============================================================== -->
+    <!-- Permissions related to adding/removing shortcuts from Launcher -->
+    <!-- ============================================================== -->
+    <eat-comment />
+
+    <!-- Allows an application to install a shortcut in Launcher -->
+    <permission
+        android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_install_shortcut"
+        android:description="@string/permdesc_install_shortcut" />
+
+        <!-- Allows an application to uninstall a shortcut in Launcher -->
+    <permission
+        android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_uninstall_shortcut"
+        android:description="@string/permdesc_uninstall_shortcut"/>
 
     <!-- ==================================================== -->
     <!-- Permissions related to accessing sync settings   -->
@@ -1560,6 +1696,14 @@
         android:label="@string/permlab_anyCodecForPlayback"
         android:description="@string/permdesc_anyCodecForPlayback" />
 
+    <!-- Allows an application to install and/or uninstall CA certificates on
+         behalf of the user.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_CA_CERTIFICATES"
+        android:protectionLevel="signature|system"
+        android:label="@string/permlab_manageCaCertificates"
+        android:description="@string/permdesc_manageCaCertificates" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
@@ -1805,6 +1949,29 @@
         android:description="@string/permdesc_bindAccessibilityService"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a {@link android.printservice.PrintService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_PRINT_SERVICE"
+        android:label="@string/permlab_bindPrintService"
+        android:description="@string/permdesc_bindPrintService"
+        android:protectionLevel="signature" />
+
+    <!-- Must be required by a {@link android.nfc.cardemulation.HostApduService}
+         or {@link android.nfc.cardemulation.OffHostApduService} to ensure that only
+         the system can bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_NFC_SERVICE"
+        android:label="@string/permlab_bindNfcService"
+        android:description="@string/permdesc_bindNfcService"
+        android:protectionLevel="signature" />
+
+    <!-- Must be required by the PrintSpooler to ensure that only the system can bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_PRINT_SPOOLER_SERVICE"
+        android:label="@string/permlab_bindPrintSpoolerService"
+        android:description="@string/permdesc_bindPrintSpoolerService"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a TextService (e.g. SpellCheckerService)
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_TEXT_SERVICE"
@@ -1812,7 +1979,7 @@
         android:description="@string/permdesc_bindTextService"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by an {@link android.net.VpnService},
+    <!-- Must be required by a {@link android.net.VpnService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_VPN_SERVICE"
         android:label="@string/permlab_bindVpnService"
@@ -1832,6 +1999,14 @@
         android:label="@string/permlab_bindDeviceAdmin"
         android:description="@string/permdesc_bindDeviceAdmin"
         android:protectionLevel="signature" />
+
+    <!-- Required to add or remove another application as a device admin.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_DEVICE_ADMINS"
+        android:label="@string/permlab_manageDeviceAdmins"
+        android:description="@string/permdesc_manageDeviceAdmins"
+        android:protectionLevel="signature|system" />
 
     <!-- Allows low-level access to setting the orientation (actually
          rotation) of the screen.
@@ -1935,6 +2110,42 @@
         android:label="@string/permlab_controlWifiDisplay"
         android:description="@string/permdesc_controlWifiDisplay"
         android:protectionLevel="signature" />
+
+    <!-- Allows an application to capture audio output.
+         <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
+        android:label="@string/permlab_captureAudioOutput"
+        android:description="@string/permdesc_captureAudioOutput"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to capture audio for hotword detection.
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
+        android:label="@string/permlab_captureAudioHotword"
+        android:description="@string/permdesc_captureAudioHotword"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to capture video output.
+         <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT"
+        android:label="@string/permlab_captureVideoOutput"
+        android:description="@string/permdesc_captureVideoOutput"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to capture secure video output.
+         <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.CAPTURE_SECURE_VIDEO_OUTPUT"
+        android:label="@string/permlab_captureSecureVideoOutput"
+        android:description="@string/permdesc_captureSecureVideoOutput"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to know what content is playing and control its playback.
+         <p>Not for use by third-party applications due to privacy of media consumption</p>  -->
+    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL"
+        android:label="@string/permlab_mediaContentControl"
+        android:description="@string/permdesc_mediaContentControl"
+        android:protectionLevel="signature|system" />
 
     <!-- Required to be able to disable the device (very dangerous!).
     <p>Not for use by third-party applications.. -->
@@ -2044,7 +2255,7 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permlab_batteryStats"
         android:description="@string/permdesc_batteryStats"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="signature|system" />
 
     <!-- Allows an application to control the backup and restore process.
     <p>Not for use by third-party applications.
@@ -2191,6 +2402,16 @@
         android:description="@string/permdesc_modifyNetworkAccounting"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to mark traffic as from another user for per user routing.
+         Used by system wide services like media server that execute delegated network connections
+         for users.
+         @hide
+    -->
+    <permission android:name="android.permission.MARK_NETWORK_SOCKET"
+        android:label="@string/permlab_markNetworkSocket"
+        android:description="@string/permdesc_markNetworkSocket"
+        android:protectionLevel="signature|system" />
+
     <!-- C2DM permission.
          @hide Used internally.
      -->
@@ -2248,6 +2469,20 @@
         android:description="@string/permdesc_accessNotifications"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
+        @hide -->
+    <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_access_keyguard_secure_storage"
+        android:description="@string/permdesc_access_keyguard_secure_storage" />
+
+    <!-- Allows an application to control keyguard.  Only allowed for system processes.
+        @hide -->
+    <permission android:name="android.permission.CONTROL_KEYGUARD"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_control_keyguard"
+        android:description="@string/permdesc_control_keyguard" />
+
     <!-- Must be required by an {@link
          android.service.notification.NotificationListenerService},
          to ensure that only the system can bind to it. -->
@@ -2255,6 +2490,21 @@
         android:label="@string/permlab_bindNotificationListenerService"
         android:description="@string/permdesc_bindNotificationListenerService"
         android:protectionLevel="signature" />
+
+    <!-- Allows an application to call into a carrier setup flow. It is up to the
+         carrier setup application to enforce that this permission is required
+         @hide This is not a third-party API (intended for OEMs and system apps). -->
+    <permission android:name="android.permission.INVOKE_CARRIER_SETUP"
+        android:label="@string/permlab_invokeCarrierSetup"
+        android:description="@string/permdesc_invokeCarrierSetup"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to listen for network condition observations.
+         @hide This is not a third-party API (intended for system apps). -->
+    <permission android:name="android.permission.ACCESS_NETWORK_CONDITIONS"
+        android:label="@string/permlab_accessNetworkConditions"
+        android:description="@string/permdesc_accessNetworkConditions"
+        android:protectionLevel="signature|system" />
 
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
@@ -2322,8 +2572,7 @@
         <activity android:name="android.accounts.CantAddAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
-                android:label="@string/error_message_title"
+                android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"
                 android:process=":ui">
         </activity>
 
@@ -2357,6 +2606,17 @@
                 android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:process=":ui">
+        </activity>
+
+        <activity android:name="com.android.internal.app.RestrictionsPinActivity"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:excludeFromRecents="true"
+                android:windowSoftInputMode="adjustPan"
+                android:process=":ui">
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.RESTRICTIONS_CHALLENGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver"
@@ -2403,9 +2663,9 @@
         </receiver>
 
         <receiver android:name="com.android.server.MasterClearReceiver"
-            android:permission="android.permission.MASTER_CLEAR"
-            android:priority="100" >
-            <intent-filter>
+            android:permission="android.permission.MASTER_CLEAR">
+            <intent-filter
+                    android:priority="100" >
                 <!-- For Checkin, Settings, etc.: action=MASTER_CLEAR -->
                 <action android:name="android.intent.action.MASTER_CLEAR" />
 

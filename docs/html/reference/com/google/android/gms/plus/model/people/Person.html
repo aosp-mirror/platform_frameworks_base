@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>Person | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -949,7 +956,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getAboutMe()">getAboutMe</a></span>()</nobr>
@@ -985,7 +992,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getBirthday()">getBirthday</a></span>()</nobr>
@@ -1003,7 +1010,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getBraggingRights()">getBraggingRights</a></span>()</nobr>
@@ -1058,7 +1065,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getCurrentLocation()">getCurrentLocation</a></span>()</nobr>
@@ -1076,12 +1083,12 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getDisplayName()">getDisplayName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The name of this person, suitable for display.</div>
+        <div class="jd-descrdiv">The name of this person, which is suitable for display.</div>
   
   </td></tr>
 
@@ -1094,7 +1101,7 @@ Summary:
             
             
             
-            <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a>&gt;</nobr>
+            List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getEmails()">getEmails</a></span>()</nobr>
@@ -1130,7 +1137,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getId()">getId</a></span>()</nobr>
@@ -1166,7 +1173,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getLanguage()">getLanguage</a></span>()</nobr>
@@ -1202,7 +1209,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getNickname()">getNickname</a></span>()</nobr>
@@ -1238,7 +1245,7 @@ Summary:
             
             
             
-            <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Organizations.html">Person.Organizations</a>&gt;</nobr>
+            List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Organizations.html">Person.Organizations</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getOrganizations()">getOrganizations</a></span>()</nobr>
@@ -1256,7 +1263,7 @@ Summary:
             
             
             
-            <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.PlacesLived.html">Person.PlacesLived</a>&gt;</nobr>
+            List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.PlacesLived.html">Person.PlacesLived</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getPlacesLived()">getPlacesLived</a></span>()</nobr>
@@ -1310,7 +1317,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getTagline()">getTagline</a></span>()</nobr>
@@ -1328,7 +1335,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getUrl()">getUrl</a></span>()</nobr>
@@ -1346,7 +1353,7 @@ Summary:
             
             
             
-            <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html">Person.Urls</a>&gt;</nobr>
+            List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html">Person.Urls</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getUrls()">getUrls</a></span>()</nobr>
@@ -1547,27 +1554,6 @@ Summary:
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#hasHasApp()">hasHasApp</a></span>()</nobr>
-        
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    Returns false (removed).
-</em></div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#hasId()">hasId</a></span>()</nobr>
         
         <div class="jd-descrdiv">Indicates whether the "id" field is explicitly set to a value.</div>
@@ -1576,7 +1562,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1594,7 +1580,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1612,7 +1598,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1630,7 +1616,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1648,7 +1634,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1666,7 +1652,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1684,7 +1670,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1702,7 +1688,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1720,7 +1706,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1738,7 +1724,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1756,7 +1742,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1774,7 +1760,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1792,7 +1778,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1810,7 +1796,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1823,27 +1809,6 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#hasVerified()">hasVerified</a></span>()</nobr>
         
         <div class="jd-descrdiv">Indicates whether the "verified" field is explicitly set to a value.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#isHasApp()">isHasApp</a></span>()</nobr>
-        
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    Returns false (removed).
-</em></div>
   
   </td></tr>
 
@@ -2012,7 +1977,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getAboutMe</span>
       <span class="normal">()</span>
@@ -2072,7 +2037,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getBirthday</span>
       <span class="normal">()</span>
@@ -2102,7 +2067,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getBraggingRights</span>
       <span class="normal">()</span>
@@ -2193,7 +2158,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getCurrentLocation</span>
       <span class="normal">()</span>
@@ -2223,7 +2188,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDisplayName</span>
       <span class="normal">()</span>
@@ -2236,7 +2201,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The name of this person, suitable for display.
+  <div class="jd-tagdata jd-tagdescr"><p>The name of this person, which is suitable for display.
 </p></div>
 
     </div>
@@ -2253,7 +2218,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a>&gt;
+        List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a>&gt;
       </span>
       <span class="sympad">getEmails</span>
       <span class="normal">()</span>
@@ -2297,7 +2262,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The person's gender. Possible values are:
+  <div class="jd-tagdata jd-tagdescr"><p>The person's gender. Possible values include, but are not limited to, the following values:
  - "male" - Male gender.
  - "female" - Female gender.
  - "other" - Other.
@@ -2317,7 +2282,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getId</span>
       <span class="normal">()</span>
@@ -2377,7 +2342,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getLanguage</span>
       <span class="normal">()</span>
@@ -2437,7 +2402,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getNickname</span>
       <span class="normal">()</span>
@@ -2480,7 +2445,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Type of person within Google+. Possible values are:
+  <div class="jd-tagdata jd-tagdescr"><p>Type of person within Google+. Possible values include, but are not limited to, the following
+ values:
  - "person" - represents an actual person.
  - "page" - represents a page.
 </p></div>
@@ -2499,7 +2465,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Organizations.html">Person.Organizations</a>&gt;
+        List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Organizations.html">Person.Organizations</a>&gt;
       </span>
       <span class="sympad">getOrganizations</span>
       <span class="normal">()</span>
@@ -2529,7 +2495,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.PlacesLived.html">Person.PlacesLived</a>&gt;
+        List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.PlacesLived.html">Person.PlacesLived</a>&gt;
       </span>
       <span class="sympad">getPlacesLived</span>
       <span class="normal">()</span>
@@ -2602,7 +2568,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The person's relationship status. Possible values are:
+  <div class="jd-tagdata jd-tagdescr"><p>The person's relationship status. Possible values include, but are not limited to, the
+ following values:
  - "single" - Person is single.
  - "in_a_relationship" - Person is in a relationship.
  - "engaged" - Person is engaged.
@@ -2628,7 +2595,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getTagline</span>
       <span class="normal">()</span>
@@ -2658,7 +2625,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getUrl</span>
       <span class="normal">()</span>
@@ -2688,7 +2655,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html">Person.Urls</a>&gt;
+        List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html">Person.Urls</a>&gt;
       </span>
       <span class="sympad">getUrls</span>
       <span class="normal">()</span>
@@ -3003,40 +2970,6 @@ From interface
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "gender" field is explicitly set to a value.
 </p></div>
-
-    </div>
-</div>
-
-
-<A NAME="hasHasApp()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">hasHasApp</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Returns false (removed).
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -3487,40 +3420,6 @@ From interface
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "verified" field is explicitly set to a value.
 </p></div>
-
-    </div>
-</div>
-
-
-<A NAME="isHasApp()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">isHasApp</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Returns false (removed).
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>

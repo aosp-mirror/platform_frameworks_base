@@ -226,6 +226,12 @@ public class ScrollBarDrawable extends Drawable {
     }
 
     @Override
+    public int getAlpha() {
+        // All elements should have same alpha, just return one of them
+        return mVerticalThumb.getAlpha();
+    }
+
+    @Override
     public void setColorFilter(ColorFilter cf) {
         if (mVerticalTrack != null) {
             mVerticalTrack.setColorFilter(cf);

@@ -285,7 +285,7 @@ page.title=Notifications
 <p>
     Starting an {@link android.app.Activity} when the user clicks the notification is the most
     common action scenario. You can also start an {@link android.app.Activity} when the user
-    dismisses an {@link android.app.Activity}. In Android 4.1 and later, you can start an
+    dismisses a notification. In Android 4.1 and later, you can start an
     {@link android.app.Activity} from an action button. To learn more, read the reference guide for
     {@link android.support.v4.app.NotificationCompat.Builder}.
 </p>

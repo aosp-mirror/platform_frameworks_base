@@ -93,7 +93,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
         
         try {
-            mWm.addAppToken(0, null, 0, 0, false, false);
+            mWm.addAppToken(0, null, 0, 0, 0, false, false, 0);
             fail("IWindowManager.addAppToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -164,7 +164,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
         
         try {
-            mWm.setAppStartingWindow(null, "foo", 0, null, null, 0, 0, 0, null, false);
+            mWm.setAppStartingWindow(null, "foo", 0, null, null, 0, 0, 0, 0, null, false);
             fail("IWindowManager.setAppStartingWindow did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -222,37 +222,7 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-        
-        try {
-            mWm.moveAppToken(0, null);
-            fail("IWindowManager.moveAppToken did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-        
-        try {
-            mWm.moveAppTokensToTop(null);
-            fail("IWindowManager.moveAppTokensToTop did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-        
-        try {
-            mWm.moveAppTokensToBottom(null);
-            fail("IWindowManager.moveAppTokensToBottom did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-	}    
+    }
 
     @SmallTest
     public void testDISABLE_KEYGUARD() {

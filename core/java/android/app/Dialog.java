@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
@@ -264,6 +266,9 @@ public class Dialog implements DialogInterface, Window.Callback,
         mDecor = mWindow.getDecorView();
 
         if (mActionBar == null && mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
+            final ApplicationInfo info = mContext.getApplicationInfo();
+            mWindow.setDefaultIcon(info.icon);
+            mWindow.setDefaultLogo(info.logo);
             mActionBar = new ActionBarImpl(this);
         }
 
@@ -301,6 +306,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * method to do cleanup when the dialog is dismissed, instead implement
      * that in {@link #onStop}.
      */
+    @Override
     public void dismiss() {
         if (Looper.myLooper() == mHandler.getLooper()) {
             dismissDialog();
@@ -320,7 +326,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
 
         try {
-            mWindowManager.removeView(mDecor);
+            mWindowManager.removeViewImmediate(mDecor);
         } finally {
             if (mActionMode != null) {
                 mActionMode.finish();
@@ -329,7 +335,7 @@ public class Dialog implements DialogInterface, Window.Callback,
             mWindow.closeAllPanels();
             onStop();
             mShowing = false;
-            
+
             sendDismissMessage();
         }
     }

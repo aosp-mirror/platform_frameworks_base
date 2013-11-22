@@ -24,6 +24,7 @@ import android.view.Surface;
 import android.os.IBinder;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.view.Surface.OutOfResourcesException;
 
 /**
  * SurfaceControl
@@ -59,13 +60,14 @@ public class SurfaceControl {
 
     private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
+    private static native void nativeDestroyDisplay(IBinder displayToken);
     private static native void nativeSetDisplaySurface(
             IBinder displayToken, int nativeSurfaceObject);
     private static native void nativeSetDisplayLayerStack(
             IBinder displayToken, int layerStack);
     private static native void nativeSetDisplayProjection(
             IBinder displayToken, int orientation,
-            int l, int t, int r, int b, 
+            int l, int t, int r, int b,
             int L, int T, int R, int B);
     private static native boolean nativeGetDisplayInfo(
             IBinder displayToken, SurfaceControl.PhysicalDisplayInfo outInfo);
@@ -74,22 +76,11 @@ public class SurfaceControl {
 
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
-    private String mName;
+    private final String mName;
     int mNativeObject; // package visibility only for Surface.java access
 
     private static final boolean HEADLESS = "1".equals(
         SystemProperties.get("ro.config.headless", "0"));
-
-    /**
-     * Exception thrown when a surface couldn't be created or resized.
-     */
-    public static class OutOfResourcesException extends Exception {
-        public OutOfResourcesException() {
-        }
-        public OutOfResourcesException(String name) {
-            super(name);
-        }
-    }
 
     /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
 
@@ -103,7 +94,7 @@ public class SurfaceControl {
      * measures will be taken to disallow the surface's content to be copied
      * from another process. In particular, screenshots and VNC servers will
      * be disabled, but other measures can take place, for instance the
-     * surface might not be hardware accelerated. 
+     * surface might not be hardware accelerated.
      *
      */
     public static final int SECURE = 0x00000080;
@@ -219,6 +210,8 @@ public class SurfaceControl {
      * @param h The surface initial height.
      * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
      * in the creation flags.
+     *
+     * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     public SurfaceControl(SurfaceSession session,
             String name, int w, int h, int format, int flags)
@@ -247,10 +240,10 @@ public class SurfaceControl {
             throw new OutOfResourcesException(
                     "Couldn't allocate SurfaceControl native object");
         }
-        
+
         mCloseGuard.open("release");
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -300,7 +293,7 @@ public class SurfaceControl {
         if (mNativeObject == 0) throw new NullPointerException(
                 "mNativeObject is null. Have you called release() already?");
     }
-    
+
     /*
      * set surface parameters.
      * needs to be inside open/closeTransaction block
@@ -369,7 +362,7 @@ public class SurfaceControl {
     public void setWindowCrop(Rect crop) {
         checkNotReleased();
         if (crop != null) {
-            nativeSetWindowCrop(mNativeObject, 
+            nativeSetWindowCrop(mNativeObject,
                 crop.left, crop.top, crop.right, crop.bottom);
         } else {
             nativeSetWindowCrop(mNativeObject, 0, 0, 0, 0);
@@ -397,19 +390,19 @@ public class SurfaceControl {
         public float xDpi;
         public float yDpi;
         public boolean secure;
-    
+
         public PhysicalDisplayInfo() {
         }
-    
+
         public PhysicalDisplayInfo(PhysicalDisplayInfo other) {
             copyFrom(other);
         }
-    
+
         @Override
         public boolean equals(Object o) {
             return o instanceof PhysicalDisplayInfo && equals((PhysicalDisplayInfo)o);
         }
-    
+
         public boolean equals(PhysicalDisplayInfo other) {
             return other != null
                     && width == other.width
@@ -420,12 +413,12 @@ public class SurfaceControl {
                     && yDpi == other.yDpi
                     && secure == other.secure;
         }
-    
+
         @Override
         public int hashCode() {
             return 0; // don't care
         }
-    
+
         public void copyFrom(PhysicalDisplayInfo other) {
             width = other.width;
             height = other.height;
@@ -435,7 +428,7 @@ public class SurfaceControl {
             yDpi = other.yDpi;
             secure = other.secure;
         }
-    
+
         // For debugging purposes
         @Override
         public String toString() {
@@ -481,7 +474,7 @@ public class SurfaceControl {
             throw new IllegalArgumentException("displayRect must not be null");
         }
         nativeSetDisplayProjection(displayToken, orientation,
-                layerStackRect.left, layerStackRect.top, layerStackRect.right, layerStackRect.bottom, 
+                layerStackRect.left, layerStackRect.top, layerStackRect.right, layerStackRect.bottom,
                 displayRect.left, displayRect.top, displayRect.right, displayRect.bottom);
     }
 
@@ -499,7 +492,7 @@ public class SurfaceControl {
 
         if (surface != null) {
             synchronized (surface.mLock) {
-                nativeSetDisplaySurface(displayToken, surface.mNativeSurface);
+                nativeSetDisplaySurface(displayToken, surface.mNativeObject);
             }
         } else {
             nativeSetDisplaySurface(displayToken, 0);
@@ -511,6 +504,13 @@ public class SurfaceControl {
             throw new IllegalArgumentException("name must not be null");
         }
         return nativeCreateDisplay(name, secure);
+    }
+
+    public static void destroyDisplay(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        nativeDestroyDisplay(displayToken);
     }
 
     public static IBinder getBuiltInDisplay(int builtInDisplayId) {
@@ -608,7 +608,7 @@ public class SurfaceControl {
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
         return nativeScreenshot(displayToken, width, height, 0, 0, true);
     }
-    
+
     private static void screenshot(IBinder display, Surface consumer,
             int width, int height, int minLayer, int maxLayer, boolean allLayers) {
         if (display == null) {

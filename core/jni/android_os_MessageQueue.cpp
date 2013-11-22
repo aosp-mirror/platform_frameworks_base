@@ -141,6 +141,11 @@ static void android_os_MessageQueue_nativeWake(JNIEnv* env, jclass clazz, jint p
     return nativeMessageQueue->wake();
 }
 
+static jboolean android_os_MessageQueue_nativeIsIdling(JNIEnv* env, jclass clazz, jint ptr) {
+    NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
+    return nativeMessageQueue->getLooper()->isIdling();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMessageQueueMethods[] = {
@@ -148,7 +153,8 @@ static JNINativeMethod gMessageQueueMethods[] = {
     { "nativeInit", "()I", (void*)android_os_MessageQueue_nativeInit },
     { "nativeDestroy", "(I)V", (void*)android_os_MessageQueue_nativeDestroy },
     { "nativePollOnce", "(II)V", (void*)android_os_MessageQueue_nativePollOnce },
-    { "nativeWake", "(I)V", (void*)android_os_MessageQueue_nativeWake }
+    { "nativeWake", "(I)V", (void*)android_os_MessageQueue_nativeWake },
+    { "nativeIsIdling", "(I)Z", (void*)android_os_MessageQueue_nativeIsIdling }
 };
 
 #define FIND_CLASS(var, className) \

@@ -132,6 +132,9 @@ public class StateListDrawable extends DrawableContainer {
         setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither,
                                DEFAULT_DITHER));
 
+        setAutoMirrored(a.getBoolean(
+                com.android.internal.R.styleable.StateListDrawable_autoMirrored, false));
+
         a.recycle();
 
         int type;
@@ -228,7 +231,7 @@ public class StateListDrawable extends DrawableContainer {
      * @see #getStateSet(int)
      */
     public Drawable getStateDrawable(int index) {
-        return mStateListState.getChildren()[index];
+        return mStateListState.getChild(index);
     }
     
     /**
@@ -264,11 +267,11 @@ public class StateListDrawable extends DrawableContainer {
     /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {
-        final int numStates = getStateCount();
-        for (int i = 0; i < numStates; i++) {
-            getStateDrawable(i).setLayoutDirection(layoutDirection);
-        }
         super.setLayoutDirection(layoutDirection);
+
+        // Let the container handle setting its own layout direction. Otherwise,
+        // we're accessing potentially unused states.
+        mStateListState.setLayoutDirection(layoutDirection);
     }
 
     static final class StateListState extends DrawableContainerState {
@@ -278,9 +281,9 @@ public class StateListDrawable extends DrawableContainer {
             super(orig, owner, res);
 
             if (orig != null) {
-                mStateSets = orig.mStateSets;
+                mStateSets = Arrays.copyOf(orig.mStateSets, orig.mStateSets.length);
             } else {
-                mStateSets = new int[getChildren().length][];
+                mStateSets = new int[getCapacity()][];
             }
         }
 

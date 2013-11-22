@@ -1034,6 +1034,10 @@ public class MenuBuilder implements Menu {
      * to avoid inadvertent reordering that may break the app's intended design.
      */
     public void flagActionItems() {
+        // Important side effect: if getVisibleItems is stale it may refresh,
+        // which can affect action items staleness.
+        final ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
+
         if (!mIsActionItemsStale) {
             return;
         }
@@ -1052,7 +1056,6 @@ public class MenuBuilder implements Menu {
         if (flagged) {
             mActionItems.clear();
             mNonActionItems.clear();
-            ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
             final int itemsSize = visibleItems.size();
             for (int i = 0; i < itemsSize; i++) {
                 MenuItemImpl item = visibleItems.get(i);

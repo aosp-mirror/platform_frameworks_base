@@ -46,4 +46,8 @@ interface IUserManager {
             int userHandle);
     Bundle getApplicationRestrictions(in String packageName);
     Bundle getApplicationRestrictionsForUser(in String packageName, int userHandle);
+    boolean setRestrictionsChallenge(in String newPin);
+    int checkRestrictionsChallenge(in String pin);
+    boolean hasRestrictionsChallenge();
+    void removeRestrictions();
 }

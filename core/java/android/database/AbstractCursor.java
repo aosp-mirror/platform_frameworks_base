@@ -369,7 +369,9 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     }
 
     public Uri getNotificationUri() {
-        return mNotifyUri;
+        synchronized (mSelfObserverLock) {
+            return mNotifyUri;
+        }
     }
 
     public boolean getWantsAllOnMoveCalls() {

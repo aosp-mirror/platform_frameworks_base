@@ -496,7 +496,7 @@ final class DisplayMagnifier {
                     mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
                     surfaceControl = new SurfaceControl(mWindowManagerService.mFxSession, SURFACE_TITLE,
                             mTempPoint.x, mTempPoint.y, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
-                } catch (SurfaceControl.OutOfResourcesException oore) {
+                } catch (OutOfResourcesException oore) {
                     /* ignore */
                 }
                 mSurfaceControl = surfaceControl;
@@ -629,7 +629,7 @@ final class DisplayMagnifier {
                         }
                     } catch (IllegalArgumentException iae) {
                         /* ignore */
-                    } catch (OutOfResourcesException oore) {
+                    } catch (Surface.OutOfResourcesException oore) {
                         /* ignore */
                     }
                     if (canvas == null) {
@@ -644,7 +644,7 @@ final class DisplayMagnifier {
                     canvas.drawPath(path, mPaint);
 
                     mSurface.unlockCanvasAndPost(canvas);
-                    
+
                     if (mAlpha > 0) {
                         mSurfaceControl.show();
                     } else {

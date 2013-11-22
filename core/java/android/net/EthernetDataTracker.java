@@ -27,6 +27,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import com.android.server.net.BaseNetworkObserver;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ConnectivityService.
  * @hide
  */
-public class EthernetDataTracker implements NetworkStateTracker {
+public class EthernetDataTracker extends BaseNetworkStateTracker {
     private static final String NETWORKTYPE = "ETHERNET";
     private static final String TAG = "Ethernet";
 
@@ -46,15 +48,11 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
     private static boolean mLinkUp;
-    private LinkProperties mLinkProperties;
-    private LinkCapabilities mLinkCapabilities;
-    private NetworkInfo mNetworkInfo;
     private InterfaceObserver mInterfaceObserver;
     private String mHwAddr;
 
     /* For sending events to connectivity service handler */
     private Handler mCsHandler;
-    private Context mContext;
 
     private static EthernetDataTracker sInstance;
     private static String sIfaceMatch = "";
@@ -62,7 +60,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
 
     private INetworkManagementService mNMService;
 
-    private static class InterfaceObserver extends INetworkManagementEventObserver.Stub {
+    private static class InterfaceObserver extends BaseNetworkObserver {
         private EthernetDataTracker mTracker;
 
         InterfaceObserver(EthernetDataTracker tracker) {
@@ -70,10 +68,12 @@ public class EthernetDataTracker implements NetworkStateTracker {
             mTracker = tracker;
         }
 
+        @Override
         public void interfaceStatusChanged(String iface, boolean up) {
             Log.d(TAG, "Interface status changed: " + iface + (up ? "up" : "down"));
         }
 
+        @Override
         public void interfaceLinkStateChanged(String iface, boolean up) {
             if (mIface.equals(iface)) {
                 Log.d(TAG, "Interface " + iface + " link " + (up ? "up" : "down"));
@@ -89,20 +89,14 @@ public class EthernetDataTracker implements NetworkStateTracker {
             }
         }
 
+        @Override
         public void interfaceAdded(String iface) {
             mTracker.interfaceAdded(iface);
         }
 
+        @Override
         public void interfaceRemoved(String iface) {
             mTracker.interfaceRemoved(iface);
-        }
-
-        public void limitReached(String limitName, String iface) {
-            // Ignored.
-        }
-
-        public void interfaceClassDataActivityChanged(String label, boolean active) {
-            // Ignored.
         }
     }
 
@@ -277,6 +271,11 @@ public class EthernetDataTracker implements NetworkStateTracker {
 
     @Override
     public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         // not implemented
     }
 

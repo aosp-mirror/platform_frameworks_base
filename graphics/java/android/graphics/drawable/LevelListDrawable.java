@@ -164,8 +164,8 @@ public class LevelListDrawable extends DrawableContainer {
                 mLows = orig.mLows;
                 mHighs = orig.mHighs;
             } else {
-                mLows = new int[getChildren().length];
-                mHighs = new int[getChildren().length];
+                mLows = new int[getCapacity()];
+                mHighs = new int[getCapacity()];
             }
         }
 

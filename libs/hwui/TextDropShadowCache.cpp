@@ -18,6 +18,7 @@
 
 #include <utils/JenkinsHash.h>
 
+#include "Caches.h"
 #include "Debug.h"
 #include "TextDropShadowCache.h"
 #include "Properties.h"
@@ -154,7 +155,7 @@ void TextDropShadowCache::operator()(ShadowText& text, ShadowTexture*& texture) 
             ALOGD("Shadow texture deleted, size = %d", texture->bitmapSize);
         }
 
-        glDeleteTextures(1, &texture->id);
+        texture->deleteTexture();
         delete texture;
     }
 }
@@ -182,7 +183,9 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
             return NULL;
         }
 
-        texture = new ShadowTexture;
+        Caches& caches = Caches::getInstance();
+
+        texture = new ShadowTexture(caches);
         texture->left = shadow.penX;
         texture->top = shadow.penY;
         texture->width = shadow.width;
@@ -202,7 +205,7 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
 
         glGenTextures(1, &texture->id);
 
-        glBindTexture(GL_TEXTURE_2D, texture->id);
+        caches.bindTexture(texture->id);
         // Textures are Alpha8
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

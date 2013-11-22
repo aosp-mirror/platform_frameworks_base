@@ -869,7 +869,7 @@ public class SearchManager
             intent.setComponent(comp);
             if (inclContext) {
                 IActivityManager am = ActivityManagerNative.getDefault();
-                Bundle extras = am.getTopActivityExtras(0);
+                Bundle extras = am.getAssistContextExtras(0);
                 if (extras != null) {
                     intent.replaceExtras(extras);
                 }

@@ -28,6 +28,9 @@ public class BitmapShader extends Shader {
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     public final Bitmap mBitmap;
 
+    private TileMode mTileX;
+    private TileMode mTileY;
+
     /**
      * Call this to create a new shader that will draw with a bitmap.
      *
@@ -37,9 +40,21 @@ public class BitmapShader extends Shader {
      */
     public BitmapShader(Bitmap bitmap, TileMode tileX, TileMode tileY) {
         mBitmap = bitmap;
+        mTileX = tileX;
+        mTileY = tileY;
         final int b = bitmap.ni();
         native_instance = nativeCreate(b, tileX.nativeInt, tileY.nativeInt);
         native_shader = nativePostCreate(native_instance, b, tileX.nativeInt, tileY.nativeInt);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected Shader copy() {
+        final BitmapShader copy = new BitmapShader(mBitmap, mTileX, mTileY);
+        copyLocalMatrix(copy);
+        return copy;
     }
 
     private static native int nativeCreate(int native_bitmap, int shaderTileModeX,

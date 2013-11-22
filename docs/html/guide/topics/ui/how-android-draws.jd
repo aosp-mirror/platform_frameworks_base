@@ -4,15 +4,19 @@ parent.link=index.html
 @jd:body
 
 
-<p>When an Activity receives focus, it will be requested to draw its layout.
-The Android framework will handle the procedure for drawing, but the Activity must provide
+<p>When an {@link android.app.Activity} receives focus, it will be requested to 
+draw its layout.
+The Android framework will handle the procedure for drawing, but the 
+{@link android.app.Activity} must provide
 the root node of its layout hierarchy.</p>
 
 <p>Drawing begins with the root node of the layout. It is requested to measure and 
-draw the layout tree. Drawing is handled by walking the tree and rendering each View that
-   intersects the invalid region. In turn, each View group is responsible for requesting
-each of its children to be drawn (with the <code>{@link android.view.View#draw(Canvas) draw()}</code> method) 
-and each View is responsible for drawing itself.
+draw the layout tree. Drawing is handled by walking the tree and rendering each 
+{@link android.view.View} that intersects the invalid region. In turn, each 
+{@link android.view.ViewGroup} is responsible for requesting
+each of its children to be drawn 
+(with the {@link android.view.View#draw(Canvas) draw()} method) 
+and each {@link android.view.View} is responsible for drawing itself.
  Because the tree is traversed in-order,
    this means that parents will be drawn before (i.e., behind) their children, with
    siblings drawn in the order they appear in the tree.
@@ -20,76 +24,107 @@ and each View is responsible for drawing itself.
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-  <p>The framework will not draw Views that are not in the invalid region, and also 
-   will take care of drawing the Views background for you.</p>
-   <p>You can force a View to draw, by calling <code>{@link android.view.View#invalidate()}</code>.
+  <p>The framework will not draw {@link android.view.View} objects that are not 
+in the invalid region, and also 
+   will take care of drawing the {@link android.view.View} background for you.</p>
+   <p>You can force a {@link android.view.View} to draw, by calling 
+{@link android.view.View#invalidate()}.
    </p>
 </div>
 </div>
 
 <p>
-   Drawing the layout is a two pass process: a measure pass and a layout pass. The measuring
-   pass is implemented in <code>{@link android.view.View#measure(int, int)}</code> and is a top-down traversal
-   of the View tree. Each View pushes dimension specifications down the tree
-   during the recursion. At the end of the measure pass, every View has stored
+   Drawing the layout is a two pass process: a measure pass and a layout pass. 
+The measuring pass is implemented in {@link android.view.View#measure(int, int)} 
+and is a top-down traversal of the {@link android.view.View} tree. Each {@link android.view.View} 
+pushes dimension specifications down the tree
+   during the recursion. At the end of the measure pass, every 
+{@link android.view.View} has stored
    its measurements. The second pass happens in
-   <code>{@link android.view.View#layout(int,int,int,int)}</code> and is also top-down. During
+   {@link android.view.View#layout(int,int,int,int)} and is also top-down. During
    this pass each parent is responsible for positioning all of its children
    using the sizes computed in the measure pass.
    </p>
    
    <p>
-   When a View's <code>measure()</code> method returns, its <code>{@link android.view.View#getMeasuredWidth()}</code> and
-   <code>{@link android.view.View#getMeasuredHeight()}</code> values must be set, along with those for all of
-   that View's descendants. A View's measured width and measured height values
-   must respect the constraints imposed by the View's parents. This guarantees
+   When a {@link android.view.View} object's 
+{@link android.view.View#measure(int, int) measure()} method 
+returns, its {@link android.view.View#getMeasuredWidth()} and
+   {@link android.view.View#getMeasuredHeight()} values must be set, along 
+   with those for all of that {@link android.view.View} object's descendants. 
+A {@link android.view.View} object's measured width and 
+measured height values must respect the constraints imposed by the 
+{@link android.view.View} object's parents. This guarantees
    that at the end of the measure pass, all parents accept all of their
-   children's measurements. A parent View may call <code>measure()</code> more than once on
+   children's measurements. A parent {@link android.view.View} may call 
+{@link android.view.View#measure(int, int) measure()} more than once on
    its children. For example, the parent may measure each child once with
    unspecified dimensions to find out how big they want to be, then call
-   <code>measure()</code> on them again with actual numbers if the sum of all the children's
-   unconstrained sizes is too big or too small (i.e., if the children don't agree among themselves
-  as to how much space they each get, the parent will intervene and set the rules on the second pass).
+   {@link android.view.View#measure(int, int) measure()} on them again with 
+actual numbers if the sum of all the children's
+   unconstrained sizes is too big or too small (that is, if the children 
+don't agree among themselves
+  as to how much space they each get, the parent will intervene and set 
+the rules on the second pass).
    </p>
    
 <div class="sidebox-wrapper">
 <div class="sidebox"><p>
-   To initiate a layout, call <code>{@link android.view.View#requestLayout}</code>. This method is typically
-   called by a View on itself when it believes that is can no longer fit within
+   To initiate a layout, call {@link android.view.View#requestLayout}. 
+This method is typically
+   called by a {@link android.view.View} on itself 
+when it believes that is can no longer fit within
    its current bounds.</p>
 </div>
 </div>
 
    <p>
    The measure pass uses two classes to communicate dimensions. The
-   {@link android.view.ViewGroup.LayoutParams} class is used by Views to tell their parents how they
-   want to be measured and positioned. The base LayoutParams class just
-   describes how big the View wants to be for both width and height. For each
+   {@link android.view.ViewGroup.LayoutParams} class is used by 
+{@link android.view.View} objects to tell their parents how they
+   want to be measured and positioned. The base 
+{@link android.view.ViewGroup.LayoutParams}  class just
+   describes how big the {@link android.view.View} wants to be for both 
+width and height. For each
    dimension, it can specify one of:</p>
    <ul>
     <li> an exact number
-    <li><var>FILL_PARENT</var>, which means the View wants to be as big as its parent
+    <li>{@link android.view.ViewGroup.LayoutParams#MATCH_PARENT MATCH_PARENT}, 
+which means the {@link android.view.View} wants to be as big as its parent
     (minus padding)</li>
-    <li><var>WRAP_CONTENT</var>, which means that the View wants to be just big enough to
+    <li>{@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT WRAP_CONTENT}, 
+which means that the {@link android.view.View} wants to be just big enough to
     enclose its content (plus padding).</li>
    </ul>
-  <p>There are subclasses of LayoutParams for different subclasses of ViewGroup.
-   For example, RelativeLayout has its own subclass of LayoutParams, which includes
-   the ability to center child Views horizontally and vertically.
+  <p>There are subclasses of {@link android.view.ViewGroup.LayoutParams} for 
+different subclasses of {@link android.view.ViewGroup}.
+   For example, {@link android.widget.RelativeLayout} has its own subclass of 
+{@link android.view.ViewGroup.LayoutParams}, which includes
+   the ability to center child {@link android.view.View} objects 
+horizontally and vertically.
    </p>
    
    <p>
-   MeasureSpecs are used to push requirements down the tree from parent to
-   child. A MeasureSpec can be in one of three modes:</p>
+   {@link android.view.View.MeasureSpec MeasureSpec} objects are used to push 
+requirements down the tree from parent to
+   child. A {@link android.view.View.MeasureSpec MeasureSpec} can be in one of 
+three modes:</p>
    <ul>
-    <li><var>UNSPECIFIED</var>: This is used by a parent to determine the desired dimension
-    of a child View. For example, a LinearLayout may call <code>measure()</code> on its child
-    with the height set to <var>UNSPECIFIED</var> and a width of <var>EXACTLY</var> 240 to find out how
-    tall the child View wants to be given a width of 240 pixels.</li>
-    <li><var>EXACTLY</var>: This is used by the parent to impose an exact size on the
+    <li>{@link android.view.View.MeasureSpec#UNSPECIFIED UNSPECIFIED}: This is 
+used by a parent to determine the desired dimension
+    of a child {@link android.view.View}. For example, a 
+{@link android.widget.LinearLayout} may call 
+{@link android.view.View#measure(int, int) measure()} on its child
+    with the height set to {@link android.view.View.MeasureSpec#UNSPECIFIED UNSPECIFIED} 
+and a width of {@link android.view.View.MeasureSpec#EXACTLY EXACTLY} 240 to 
+find out how tall the child {@link android.view.View} wants to be given a 
+width of 240 pixels.</li>
+    <li>{@link android.view.View.MeasureSpec#EXACTLY EXACTLY}: This is used 
+by the parent to impose an exact size on the
     child. The child must use this size, and guarantee that all of its
     descendants will fit within this size.</li>
-    <li><var>AT_MOST</var>: This is used by the parent to impose a maximum size on the
+    <li>{@link android.view.View.MeasureSpec#AT_MOST AT MOST}: This is used by 
+the parent to impose a maximum size on the
     child. The child must guarantee that it and all of its descendants will fit
     within this size.</li>
    </ul>

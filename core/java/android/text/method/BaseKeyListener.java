@@ -75,7 +75,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         }
 
         // Alt+Backspace or Alt+ForwardDelete deletes the current line, if possible.
-        if (event.isAltPressed() || getMetaState(content, META_ALT_ON) == 1) {
+        if (getMetaState(content, META_ALT_ON, event) == 1) {
             if (deleteLine(view, content)) {
                 return true;
             }

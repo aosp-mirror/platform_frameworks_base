@@ -21,9 +21,9 @@
 #include "PointerController.h"
 #include "InputListener.h"
 
-#include <androidfw/Input.h>
-#include <androidfw/VelocityControl.h>
-#include <androidfw/VelocityTracker.h>
+#include <input/Input.h>
+#include <input/VelocityControl.h>
+#include <input/VelocityTracker.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>
@@ -409,7 +409,7 @@ public:
 
 protected:
     // These members are protected so they can be instrumented by test cases.
-    virtual InputDevice* createDeviceLocked(int32_t deviceId,
+    virtual InputDevice* createDeviceLocked(int32_t deviceId, int32_t controllerNumber,
             const InputDeviceIdentifier& identifier, uint32_t classes);
 
     class ContextImpl : public InputReaderContext {
@@ -507,16 +507,17 @@ private:
 /* Represents the state of a single input device. */
 class InputDevice {
 public:
-    InputDevice(InputReaderContext* context, int32_t id, int32_t generation,
-            const InputDeviceIdentifier& identifier, uint32_t classes);
+    InputDevice(InputReaderContext* context, int32_t id, int32_t generation, int32_t
+            controllerNumber, const InputDeviceIdentifier& identifier, uint32_t classes);
     ~InputDevice();
 
     inline InputReaderContext* getContext() { return mContext; }
-    inline int32_t getId() { return mId; }
-    inline int32_t getGeneration() { return mGeneration; }
-    inline const String8& getName() { return mIdentifier.name; }
-    inline uint32_t getClasses() { return mClasses; }
-    inline uint32_t getSources() { return mSources; }
+    inline int32_t getId() const { return mId; }
+    inline int32_t getControllerNumber() const { return mControllerNumber; }
+    inline int32_t getGeneration() const { return mGeneration; }
+    inline const String8& getName() const { return mIdentifier.name; }
+    inline uint32_t getClasses() const { return mClasses; }
+    inline uint32_t getSources() const { return mSources; }
 
     inline bool isExternal() { return mIsExternal; }
     inline void setExternal(bool external) { mIsExternal = external; }
@@ -573,6 +574,7 @@ public:
 private:
     InputReaderContext* mContext;
     int32_t mId;
+    int32_t mControllerNumber;
     int32_t mGeneration;
     InputDeviceIdentifier mIdentifier;
     String8 mAlias;
@@ -1205,6 +1207,7 @@ protected:
         bool hasAssociatedDisplay;
         bool associatedDisplayIsExternal;
         bool orientationAware;
+        bool hasButtonUnderPad;
 
         enum GestureMode {
             GESTURE_MODE_POINTER,
@@ -1281,6 +1284,9 @@ protected:
             }
             if (haveSizeBias) {
                 *outSize += sizeBias;
+            }
+            if (*outSize < 0) {
+                *outSize = 0;
             }
         }
     } mCalibration;

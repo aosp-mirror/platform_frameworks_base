@@ -23,11 +23,11 @@
 
 #include <androidfw/Asset.h>
 #include <androidfw/StreamingZipInflater.h>
+#include <androidfw/ZipFileRO.h>
+#include <androidfw/ZipUtils.h>
 #include <utils/Atomic.h>
 #include <utils/FileMap.h>
 #include <utils/Log.h>
-#include <utils/ZipFileRO.h>
-#include <utils/ZipUtils.h>
 #include <utils/threads.h>
 
 #include <assert.h>

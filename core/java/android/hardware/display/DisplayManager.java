@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.Surface;
 
 import java.util.ArrayList;
 
@@ -68,15 +69,107 @@ public final class DisplayManager {
      * Display category: Presentation displays.
      * <p>
      * This category can be used to identify secondary displays that are suitable for
-     * use as presentation displays.
+     * use as presentation displays such as HDMI or Wireless displays.  Applications
+     * may automatically project their content to presentation displays to provide
+     * richer second screen experiences.
      * </p>
      *
-     * @see android.app.Presentation for information about presenting content
-     * on secondary displays.
+     * @see android.app.Presentation
+     * @see Display#FLAG_PRESENTATION
      * @see #getDisplays(String)
      */
     public static final String DISPLAY_CATEGORY_PRESENTATION =
             "android.hardware.display.category.PRESENTATION";
+
+    /**
+     * Virtual display flag: Create a public display.
+     *
+     * <h3>Public virtual displays</h3>
+     * <p>
+     * When this flag is set, the virtual display is public.
+     * </p><p>
+     * A public virtual display behaves just like most any other display that is connected
+     * to the system such as an HDMI or Wireless display.  Applications can open
+     * windows on the display and the system may mirror the contents of other displays
+     * onto it.
+     * </p><p>
+     * Creating a public virtual display requires the
+     * {@link android.Manifest.permission#CAPTURE_VIDEO_OUTPUT}
+     * or {@link android.Manifest.permission#CAPTURE_SECURE_VIDEO_OUTPUT} permission.
+     * These permissions are reserved for use by system components and are not available to
+     * third-party applications.
+     * </p>
+     *
+     * <h3>Private virtual displays</h3>
+     * <p>
+     * When this flag is not set, the virtual display is private as defined by the
+     * {@link Display#FLAG_PRIVATE} display flag.
+     * </p>
+     * A private virtual display belongs to the application that created it.
+     * Only the a owner of a private virtual display is allowed to place windows upon it.
+     * The private virtual display also does not participate in display mirroring: it will
+     * neither receive mirrored content from another display nor allow its own content to
+     * be mirrored elsewhere.  More precisely, the only processes that are allowed to
+     * enumerate or interact with the private display are those that have the same UID as the
+     * application that originally created the private virtual display.
+      * </p>
+     *
+     * @see #createVirtualDisplay
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_PUBLIC = 1 << 0;
+
+    /**
+     * Virtual display flag: Create a presentation display.
+     *
+     * <h3>Presentation virtual displays</h3>
+     * <p>
+     * When this flag is set, the virtual display is registered as a presentation
+     * display in the {@link #DISPLAY_CATEGORY_PRESENTATION presentation display category}.
+     * Applications may automatically project their content to presentation displays
+     * to provide richer second screen experiences.
+     * </p>
+     *
+     * <h3>Non-presentation virtual displays</h3>
+     * <p>
+     * When this flag is not set, the virtual display is not registered as a presentation
+     * display.  Applications can still project their content on the display but they
+     * will typically not do so automatically.  This option is appropriate for
+     * more special-purpose displays.
+     * </p>
+     *
+     * @see android.app.Presentation
+     * @see #createVirtualDisplay
+     * @see #DISPLAY_CATEGORY_PRESENTATION
+     * @see Display#FLAG_PRESENTATION
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_PRESENTATION = 1 << 1;
+
+    /**
+     * Virtual display flag: Create a secure display.
+     *
+     * <h3>Secure virtual displays</h3>
+     * <p>
+     * When this flag is set, the virtual display is considered secure as defined
+     * by the {@link Display#FLAG_SECURE} display flag.  The caller promises to take
+     * reasonable measures, such as over-the-air encryption, to prevent the contents
+     * of the display from being intercepted or recorded on a persistent medium.
+     * </p><p>
+     * Creating a secure virtual display requires the
+     * {@link android.Manifest.permission#CAPTURE_SECURE_VIDEO_OUTPUT} permission.
+     * This permission is reserved for use by system components and is not available to
+     * third-party applications.
+     * </p>
+     *
+     * <h3>Non-secure virtual displays</h3>
+     * <p>
+     * When this flag is not set, the virtual display is considered unsecure.
+     * The content of secure windows will be blanked if shown on this display.
+     * </p>
+     *
+     * @see Display#FLAG_SECURE
+     * @see #createVirtualDisplay
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_SECURE = 1 << 2;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -129,11 +222,12 @@ public final class DisplayManager {
         synchronized (mLock) {
             try {
                 if (category == null) {
-                    addMatchingDisplaysLocked(mTempDisplays, displayIds, -1);
+                    addAllDisplaysLocked(mTempDisplays, displayIds);
                 } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
-                    addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
-                    addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_HDMI);
-                    addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
+                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
+                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_HDMI);
+                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
+                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
             } finally {
@@ -142,12 +236,22 @@ public final class DisplayManager {
         }
     }
 
-    private void addMatchingDisplaysLocked(
+    private void addAllDisplaysLocked(ArrayList<Display> displays, int[] displayIds) {
+        for (int i = 0; i < displayIds.length; i++) {
+            Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
+            if (display != null) {
+                displays.add(display);
+            }
+        }
+    }
+
+    private void addPresentationDisplaysLocked(
             ArrayList<Display> displays, int[] displayIds, int matchType) {
         for (int i = 0; i < displayIds.length; i++) {
             Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
             if (display != null
-                    && (matchType < 0 || display.getType() == matchType)) {
+                    && (display.getFlags() & Display.FLAG_PRESENTATION) != 0
+                    && display.getType() == matchType) {
                 displays.add(display);
             }
         }
@@ -157,7 +261,7 @@ public final class DisplayManager {
         Display display = mDisplays.get(displayId);
         if (display == null) {
             display = mGlobal.getCompatibleDisplay(displayId,
-                    mContext.getCompatibilityInfo(displayId));
+                    mContext.getDisplayAdjustments(displayId));
             if (display != null) {
                 mDisplays.put(displayId, display);
             }
@@ -219,6 +323,16 @@ public final class DisplayManager {
         mGlobal.connectWifiDisplay(deviceAddress);
     }
 
+    /** @hide */
+    public void pauseWifiDisplay() {
+        mGlobal.pauseWifiDisplay();
+    }
+
+    /** @hide */
+    public void resumeWifiDisplay() {
+        mGlobal.resumeWifiDisplay();
+    }
+
     /**
      * Disconnects from the current Wifi display.
      * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
@@ -272,6 +386,43 @@ public final class DisplayManager {
      */
     public WifiDisplayStatus getWifiDisplayStatus() {
         return mGlobal.getWifiDisplayStatus();
+    }
+
+    /**
+     * Creates a virtual display.
+     * <p>
+     * The content of a virtual display is rendered to a {@link Surface} provided
+     * by the application.
+     * </p><p>
+     * The virtual display should be {@link VirtualDisplay#release released}
+     * when no longer needed.  Because a virtual display renders to a surface
+     * provided by the application, it will be released automatically when the
+     * process terminates and all remaining windows on it will be forcibly removed.
+     * </p><p>
+     * The behavior of the virtual display depends on the flags that are provided
+     * to this method.  By default, virtual displays are created to be private,
+     * non-presentation and unsecure.  Permissions may be required to use certain flags.
+     * </p>
+     *
+     * @param name The name of the virtual display, must be non-empty.
+     * @param width The width of the virtual display in pixels, must be greater than 0.
+     * @param height The height of the virtual display in pixels, must be greater than 0.
+     * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
+     * @param surface The surface to which the content of the virtual display should
+     * be rendered, must be non-null.
+     * @param flags A combination of virtual display flags:
+     * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION}
+     * or {@link #VIRTUAL_DISPLAY_FLAG_SECURE}.
+     * @return The newly created virtual display, or null if the application could
+     * not create the virtual display.
+     *
+     * @throws SecurityException if the caller does not have permission to create
+     * a virtual display with the specified flags.
+     */
+    public VirtualDisplay createVirtualDisplay(String name,
+            int width, int height, int densityDpi, Surface surface, int flags) {
+        return mGlobal.createVirtualDisplay(mContext,
+                name, width, height, densityDpi, surface, flags);
     }
 
     /**

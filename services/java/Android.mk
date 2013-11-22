@@ -11,7 +11,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_MODULE:= services
 
-LOCAL_JAVA_LIBRARIES := android.policy telephony-common
+LOCAL_JAVA_LIBRARIES := android.policy conscrypt telephony-common
 
 include $(BUILD_JAVA_LIBRARY)
 

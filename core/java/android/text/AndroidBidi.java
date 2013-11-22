@@ -60,6 +60,9 @@ import android.text.Layout.Directions;
      */
     public static Directions directions(int dir, byte[] levels, int lstart,
             char[] chars, int cstart, int len) {
+        if (len == 0) {
+            return Layout.DIRS_ALL_LEFT_TO_RIGHT;
+        }
 
         int baseLevel = dir == Layout.DIR_LEFT_TO_RIGHT ? 0 : 1;
         int curLevel = levels[lstart];

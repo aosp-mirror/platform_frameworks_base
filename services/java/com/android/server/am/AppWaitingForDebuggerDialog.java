@@ -22,7 +22,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.WindowManager;
 
-class AppWaitingForDebuggerDialog extends BaseErrorDialog {
+final class AppWaitingForDebuggerDialog extends BaseErrorDialog {
     final ActivityManagerService mService;
     final ProcessRecord mProc;
     private CharSequence mAppName;

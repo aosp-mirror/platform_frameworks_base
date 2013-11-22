@@ -48,12 +48,26 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
         addMediaRecorderStateUnitTests(suite);
         addMediaPlayerStateUnitTests(suite);
         addMediaScannerUnitTests(suite);
+        addCameraUnitTests(suite);
+        addImageReaderTests(suite);
         return suite;
     }
 
     @Override
     public ClassLoader getLoader() {
         return MediaFrameworkUnitTestRunner.class.getClassLoader();
+    }
+
+    private void addCameraUnitTests(TestSuite suite) {
+        suite.addTestSuite(CameraUtilsDecoratorTest.class);
+        suite.addTestSuite(CameraUtilsRuntimeExceptionTest.class);
+        suite.addTestSuite(CameraUtilsUncheckedThrowTest.class);
+        suite.addTestSuite(CameraUtilsBinderDecoratorTest.class);
+        suite.addTestSuite(CameraMetadataTest.class);
+    }
+
+    private void addImageReaderTests(TestSuite suite) {
+        suite.addTestSuite(ImageReaderTest.class);
     }
 
     // Running all unit tests checking the state machine may be time-consuming.

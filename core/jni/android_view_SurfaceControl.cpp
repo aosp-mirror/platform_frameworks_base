@@ -155,9 +155,7 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
     switch (format) {
     case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
     case PIXEL_FORMAT_RGBA_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGBA_4444:    return SkBitmap::kARGB_4444_Config;
     case PIXEL_FORMAT_RGB_565:      return SkBitmap::kRGB_565_Config;
-    case PIXEL_FORMAT_A_8:          return SkBitmap::kA8_Config;
     default:                        return SkBitmap::kNo_Config;
     }
 }
@@ -197,7 +195,8 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
         bitmap->setPixels(NULL);
     }
 
-    return GraphicsJNI::createBitmap(env, bitmap, false, NULL);
+    return GraphicsJNI::createBitmap(env, bitmap,
+            GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
 static void nativeScreenshot(JNIEnv* env, jclass clazz,
@@ -335,6 +334,12 @@ static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj,
     return javaObjectForIBinder(env, token);
 }
 
+static void nativeDestroyDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return;
+    SurfaceComposerClient::destroyDisplay(token);
+}
+
 static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
         jobject tokenObj, jint nativeSurfaceObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -443,6 +448,8 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetBuiltInDisplay },
     {"nativeCreateDisplay", "(Ljava/lang/String;Z)Landroid/os/IBinder;",
             (void*)nativeCreateDisplay },
+    {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
+            (void*)nativeDestroyDisplay },
     {"nativeSetDisplaySurface", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(Landroid/os/IBinder;I)V",

@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Singleton;
@@ -31,6 +32,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.os.RuntimeInit;
 
+import com.android.internal.util.FastPrintWriter;
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
@@ -782,13 +784,15 @@ public final class StrictMode {
             BlockGuard.setThreadPolicy(BlockGuard.LAX_POLICY);
             return;
         }
-        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
-        if (!(policy instanceof AndroidBlockGuardPolicy)) {
-            BlockGuard.setThreadPolicy(new AndroidBlockGuardPolicy(policyMask));
+        final BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        final AndroidBlockGuardPolicy androidPolicy;
+        if (policy instanceof AndroidBlockGuardPolicy) {
+            androidPolicy = (AndroidBlockGuardPolicy) policy;
         } else {
-            AndroidBlockGuardPolicy androidPolicy = (AndroidBlockGuardPolicy) policy;
-            androidPolicy.setPolicyMask(policyMask);
+            androidPolicy = threadAndroidPolicy.get();
+            BlockGuard.setThreadPolicy(androidPolicy);
         }
+        androidPolicy.setPolicyMask(policyMask);
     }
 
     // Sets up CloseGuard in Dalvik/libcore
@@ -1059,6 +1063,14 @@ public final class StrictMode {
         }
     };
 
+    private static final ThreadLocal<AndroidBlockGuardPolicy>
+            threadAndroidPolicy = new ThreadLocal<AndroidBlockGuardPolicy>() {
+        @Override
+        protected AndroidBlockGuardPolicy initialValue() {
+            return new AndroidBlockGuardPolicy(0);
+        }
+    };
+
     private static boolean tooManyViolationsThisLoop() {
         return violationsBeingTimed.get().size() >= MAX_OFFENSES_PER_LOOP;
     }
@@ -1069,7 +1081,7 @@ public final class StrictMode {
         // Map from violation stacktrace hashcode -> uptimeMillis of
         // last violation.  No locking needed, as this is only
         // accessed by the same thread.
-        private final HashMap<Integer, Long> mLastViolationTime = new HashMap<Integer, Long>();
+        private ArrayMap<Integer, Long> mLastViolationTime;
 
         public AndroidBlockGuardPolicy(final int policyMask) {
             mPolicyMask = policyMask;
@@ -1279,8 +1291,13 @@ public final class StrictMode {
             // Not perfect, but fast and good enough for dup suppression.
             Integer crashFingerprint = info.hashCode();
             long lastViolationTime = 0;
-            if (mLastViolationTime.containsKey(crashFingerprint)) {
-                lastViolationTime = mLastViolationTime.get(crashFingerprint);
+            if (mLastViolationTime != null) {
+                Long vtime = mLastViolationTime.get(crashFingerprint);
+                if (vtime != null) {
+                    lastViolationTime = vtime;
+                }
+            } else {
+                mLastViolationTime = new ArrayMap<Integer, Long>(1);
             }
             long now = SystemClock.uptimeMillis();
             mLastViolationTime.put(crashFingerprint, now);
@@ -1684,7 +1701,9 @@ public final class StrictMode {
     /* package */ static void readAndHandleBinderCallViolations(Parcel p) {
         // Our own stack trace to append
         StringWriter sw = new StringWriter();
-        new LogStackTrace().printStackTrace(new PrintWriter(sw));
+        PrintWriter pw = new FastPrintWriter(sw, false, 256);
+        new LogStackTrace().printStackTrace(pw);
+        pw.flush();
         String ourStack = sw.toString();
 
         int policyMask = getThreadPolicyMask();

@@ -30,16 +30,20 @@ you optimize your app.</p>
 <p>This page provides information about the relative number of devices that share a certain
 characteristic, such as Android version or screen size. This information may
 help you prioritize efforts for <a
-href="{@docRoot}training/basics/supporting-devices/index.html">supporting different devices</a>.</p>
+href="{@docRoot}training/basics/supporting-devices/index.html">supporting different devices</a>
+by revealing which devices are active in the Android and Google Play ecosystem.</p>
 
-<p>Each snapshot of data represents all the devices that visited the Google Play Store in the
-prior 14 days.</p>
+<p>This data reflects devices running the latest Google Play Store app, which is compatible
+with Android 2.2 and higher. Each snapshot of data represents all the devices that visited the
+Google Play Store in the prior 7 days.</p>
 
-<p class="note"><strong>Note:</strong> Beginning in April, 2013, these charts are now built
-using data collected from each device when the user visits the Google Play Store. Previously, the
-data was collected when the device simply checked-in to Google servers. We believe the new
-data more accurately reflects those users who are most engaged in the Android and Google Play
-ecosystem.</p>
+
+<div class="note">
+<p><strong>Note:</strong> Beginning in September, 2013, devices running versions older than Android
+2.2 do not appear in this data because those devices do not support the new Google Play Store
+app. Only the new app is able to measure the number of devices that actively visit Google Play Store
+and we believe this measurement best reflects your potential user-base.</p>
+</div>
 
 
 <h2 id="Platform">Platform Versions</h2>
@@ -57,10 +61,15 @@ Platform Versions</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 14-day period ending on August 1, 2013.
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 2, 2013.
 <br/>Any versions with less than 0.1% distribution are not shown.</em>
 </p>
 
+<p class="note"><strong>Note:</strong> Because this data is gathered from the new Google Play
+Store app, which supports Android 2.2 and above, devices running older versions are not included.
+However, in August, 2013, versions older than Android 2.2 accounted for about 1% of devices that
+<em>checked in</em> to Google servers (not those that actually visited Google Play Store).
+</p>
 
 
 
@@ -83,7 +92,7 @@ Screens</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 14-day period ending on August 1, 2013
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 2, 2013
 <br/>Any screen configurations with less than 0.1% distribution are not shown.</em></p>
 
 
@@ -130,7 +139,7 @@ uses.</p>
 
 
 
-<p style="clear:both"><em>Data collected during a 14-day period ending on August 1, 2013</em></p>
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 2, 2013</em></p>
 
 
 
@@ -148,32 +157,17 @@ uses.</p>
 var VERSION_DATA =
 [
   {
-    "chart": "//chart.googleapis.com/chart?cht=p&chs=500x250&chl=Eclair%7CFroyo%7CGingerbread%7CHoneycomb%7CIce%20Cream%20Sandwich%7CJelly%20Bean&chf=bg%2Cs%2C00000000&chd=t%3A1.3%2C2.5%2C33.1%2C0.1%2C22.5%2C40.5&chco=c4df9b%2C6fad0c",
+    "chart": "//chart.googleapis.com/chart?chs=500x250&cht=p&chco=c4df9b%2C6fad0c&chf=bg%2Cs%2C00000000&chd=t%3A2.2%2C28.5%2C0.1%2C20.6%2C48.6&chl=Froyo%7CGingerbread%7CHoneycomb%7CIce%20Cream%20Sandwich%7CJelly%20Bean",
     "data": [
-      {
-        "api": 4,
-        "name": "Donut",
-        "perc": "0.1"
-      },
-      {
-        "api": 7,
-        "name": "Eclair",
-        "perc": "1.2"
-      },
       {
         "api": 8,
         "name": "Froyo",
-        "perc": "2.5"
-      },
-      {
-        "api": 9,
-        "name": "Gingerbread",
-        "perc": "0.1"
+        "perc": "2.2"
       },
       {
         "api": 10,
         "name": "Gingerbread",
-        "perc": "33.0"
+        "perc": "28.5"
       },
       {
         "api": 13,
@@ -183,17 +177,22 @@ var VERSION_DATA =
       {
         "api": 15,
         "name": "Ice Cream Sandwich",
-        "perc": "22.5"
+        "perc": "20.6"
       },
       {
         "api": 16,
         "name": "Jelly Bean",
-        "perc": "34.0"
+        "perc": "36.5"
       },
       {
         "api": 17,
         "name": "Jelly Bean",
-        "perc": "6.5"
+        "perc": "10.6"
+      },
+      {
+        "api": 18,
+        "name": "Jelly Bean",
+        "perc": "1.5"
       }
     ]
   }
@@ -208,31 +207,30 @@ var SCREEN_DATA =
   {
     "data": {
       "Large": {
-        "hdpi": "0.4",
-        "ldpi": "0.5",
-        "mdpi": "3.2",
-        "tvdpi": "1.1",
-        "xhdpi": "0.5"
+        "hdpi": "0.5",
+        "ldpi": "0.6",
+        "mdpi": "3.5",
+        "tvdpi": "1.2",
+        "xhdpi": "0.6"
       },
       "Normal": {
-        "hdpi": "34.5",
+        "hdpi": "33.5",
         "ldpi": "0.1",
-        "mdpi": "15.9",
-        "xhdpi": "23.9",
-        "xxhdpi": "5.7"
+        "mdpi": "15.3",
+        "xhdpi": "22.8",
+        "xxhdpi": "7.7"
       },
       "Small": {
-        "hdpi": "0.1",
-        "ldpi": "9.7"
+        "ldpi": "9.4"
       },
       "Xlarge": {
-        "hdpi": "0.2",
-        "mdpi": "4.1",
+        "hdpi": "0.3",
+        "mdpi": "4.4",
         "xhdpi": "0.1"
       }
     },
-    "densitychart": "//chart.googleapis.com/chart?cht=p&chs=400x250&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chf=bg%2Cs%2C00000000&chd=t%3A10.3%2C23.2%2C1.1%2C35.2%2C24.5%2C5.7&chco=c4df9b%2C6fad0c",
-    "layoutchart": "//chart.googleapis.com/chart?cht=p&chs=400x250&chl=Xlarge%7CLarge%7CNormal%7CSmall&chf=bg%2Cs%2C00000000&chd=t%3A4.4%2C5.7%2C80.2%2C9.8&chco=c4df9b%2C6fad0c"
+    "densitychart": "//chart.googleapis.com/chart?chs=400x250&cht=p&chco=c4df9b%2C6fad0c&chf=bg%2Cs%2C00000000&chd=t%3A10.1%2C23.3%2C1.2%2C34.3%2C23.5%2C7.7&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi",
+    "layoutchart": "//chart.googleapis.com/chart?chs=400x250&cht=p&chco=c4df9b%2C6fad0c&chf=bg%2Cs%2C00000000&chd=t%3A4.8%2C6.4%2C79.5%2C9.4&chl=Xlarge%7CLarge%7CNormal%7CSmall"
   }
 ];
 
@@ -293,6 +291,11 @@ var VERSION_NAMES =
   {
     "api":17,
     "link":"<a href='/about/versions/android-4.2.html'>4.2.x</a>",
+    "codename":"Jelly Bean"
+  },
+  {
+    "api":18,
+    "link":"<a href='/about/versions/android-4.3.html'>4.3</a>",
     "codename":"Jelly Bean"
   }
 ];

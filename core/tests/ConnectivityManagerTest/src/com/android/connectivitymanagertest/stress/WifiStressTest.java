@@ -29,12 +29,11 @@ import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.KeyEvent;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
-import com.android.connectivitymanagertest.ConnectivityManagerTestActivity;
+import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -50,7 +49,7 @@ import java.util.List;
  *                  -w com.android.connectivitymanagertest/.ConnectivityManagerStressTestRunner
  */
 public class WifiStressTest
-    extends ActivityInstrumentationTestCase2<ConnectivityManagerTestActivity> {
+        extends ConnectivityManagerTestBase {
     private final static String TAG = "WifiStressTest";
 
     /**
@@ -67,7 +66,6 @@ public class WifiStressTest
     private final static long WIFI_SHUTDOWN_DELAY = 2 * 60 * 1000;
 
     private final static String OUTPUT_FILE = "WifiStressTestOutput.txt";
-    private ConnectivityManagerTestActivity mAct;
     private int mReconnectIterations;
     private int mWifiSleepTime;
     private int mScanIterations;
@@ -77,15 +75,10 @@ public class WifiStressTest
     private BufferedWriter mOutputWriter = null;
     private boolean mWifiOnlyFlag;
 
-    public WifiStressTest() {
-        super(ConnectivityManagerTestActivity.class);
-    }
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        mAct = getActivity();
         mRunner = (ConnectivityManagerStressTestRunner) getInstrumentation();
         mReconnectIterations = mRunner.mReconnectIterations;
         mSsid = mRunner.mReconnectSsid;
@@ -98,15 +91,14 @@ public class WifiStressTest
             mPassword, mScanIterations, mWifiSleepTime));
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE), true));
-        mAct.turnScreenOn();
-        if (!mAct.mWifiManager.isWifiEnabled()) {
+        turnScreenOn();
+        if (!mWifiManager.isWifiEnabled()) {
             log("Enable wi-fi before stress tests.");
-            if (!mAct.enableWifi()) {
+            if (!enableWifi()) {
                 tearDown();
                 fail("enable wifi failed.");
             }
-            sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT,
-                    "Interruped while waiting for wifi on");
+            sleep(SHORT_TIMEOUT, "Interruped while waiting for wifi on");
         }
     }
 
@@ -166,33 +158,32 @@ public class WifiStressTest
             writeOutput(String.format("ssid appear %d out of %d scan iterations",
                     ssidAppearInScanResultsCount, i));
             long startTime = System.currentTimeMillis();
-            mAct.scanResultAvailable = false;
-            assertTrue("start scan failed", mAct.mWifiManager.startScan());
+            scanResultAvailable = false;
+            assertTrue("start scan failed", mWifiManager.startScan());
             while (true) {
                 if ((System.currentTimeMillis() - startTime) >
-                ConnectivityManagerTestActivity.WIFI_SCAN_TIMEOUT) {
-                    fail("Wifi scanning takes more than " +
-                            ConnectivityManagerTestActivity.WIFI_SCAN_TIMEOUT + " ms");
+                WIFI_SCAN_TIMEOUT) {
+                    fail("Wifi scanning takes more than " + WIFI_SCAN_TIMEOUT + " ms");
                 }
-                synchronized(mAct) {
+                synchronized(this) {
                     try {
-                        mAct.wait(ConnectivityManagerTestActivity.WAIT_FOR_SCAN_RESULT);
+                        wait(WAIT_FOR_SCAN_RESULT);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (mAct.scanResultAvailable) {
+                    if (scanResultAvailable) {
                         long scanTime = (System.currentTimeMillis() - startTime);
                         scanTimeSum += scanTime;
                         break;
                     }
                 }
             }
-            if ((mAct.mWifiManager.getScanResults() == null) ||
-                    (mAct.mWifiManager.getScanResults().size() <= 0)) {
+            if ((mWifiManager.getScanResults() == null) ||
+                    (mWifiManager.getScanResults().size() <= 0)) {
                 fail("Scan results are empty ");
             }
 
-            List<ScanResult> netList = mAct.mWifiManager.getScanResults();
+            List<ScanResult> netList = mWifiManager.getScanResults();
             if (netList != null) {
                 log("size of scan result list: " + netList.size());
                 for (int s = 0; s < netList.size(); s++) {
@@ -244,13 +235,13 @@ public class WifiStressTest
         config.proxySettings = ProxySettings.NONE;
 
         assertTrue("Failed to connect to Wi-Fi network: " + mSsid,
-                mAct.connectToWifiWithConfiguration(config));
-        assertTrue(mAct.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
-                ConnectivityManagerTestActivity.SHORT_TIMEOUT));
-        assertTrue(mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
+                connectToWifiWithConfiguration(config));
+        assertTrue(waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
+                SHORT_TIMEOUT));
+        assertTrue(waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                WIFI_CONNECTION_TIMEOUT));
         // Run ping test to verify the data connection
-        assertTrue("Wi-Fi is connected, but no data connection.", mAct.pingTest(null));
+        assertTrue("Wi-Fi is connected, but no data connection.", pingTest(null));
 
         int i;
         long sum = 0;
@@ -263,33 +254,33 @@ public class WifiStressTest
             writeOutput(String.format("iteration %d out of %d",
                     i, mReconnectIterations));
             log("iteration: " + i);
-            mAct.turnScreenOff();
+            turnScreenOff();
             PowerManager pm =
                 (PowerManager)mRunner.getContext().getSystemService(Context.POWER_SERVICE);
             assertFalse(pm.isScreenOn());
             sleep(WIFI_IDLE_MS + WIFI_SHUTDOWN_DELAY, "Interruped while wait for wifi to be idle");
             assertTrue("Wait for Wi-Fi to idle timeout",
-                    mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
-                    6 * ConnectivityManagerTestActivity.SHORT_TIMEOUT));
+                    waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
+                    6 * SHORT_TIMEOUT));
             if (!mWifiOnlyFlag) {
                 // use long timeout as the pppd startup may take several retries.
                 assertTrue("Wait for cellular connection timeout",
-                        mAct.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
-                        2 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
+                        2 * LONG_TIMEOUT));
             }
             sleep(mWifiSleepTime, "Interrupted while device is in sleep mode");
             // Verify the wi-fi is still off and data connection is on
             assertEquals("Wi-Fi is reconnected", State.DISCONNECTED,
-                    mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState());
+                    mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState());
 
             if (!mWifiOnlyFlag) {
                 assertEquals("Cellular connection is down", State.CONNECTED,
-                             mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState());
-                assertTrue("Mobile is connected, but no data connection.", mAct.pingTest(null));
+                             mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState());
+                assertTrue("Mobile is connected, but no data connection.", pingTest(null));
             }
 
             // Turn screen on again
-            mAct.turnScreenOn();
+            turnScreenOn();
             // Wait for 2 seconds for the lock screen
             sleep(2 * 1000, "wait 2 seconds for lock screen");
             // Disable lock screen by inject menu key event
@@ -298,16 +289,16 @@ public class WifiStressTest
             // Measure the time for Wi-Fi to get connected
             long startTime = System.currentTimeMillis();
             assertTrue("Wait for Wi-Fi enable timeout after wake up",
-                    mAct.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
-                    ConnectivityManagerTestActivity.SHORT_TIMEOUT));
+                    waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
+                    SHORT_TIMEOUT));
             assertTrue("Wait for Wi-Fi connection timeout after wake up",
-                    mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                    ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
+                    waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                    WIFI_CONNECTION_TIMEOUT));
             long connectionTime = System.currentTimeMillis() - startTime;
             sum += connectionTime;
             log("average reconnection time is: " + sum/(i+1));
 
-            assertTrue("Reconnect to Wi-Fi network, but no data connection.", mAct.pingTest(null));
+            assertTrue("Reconnect to Wi-Fi network, but no data connection.", pingTest(null));
         }
         if (i == mReconnectIterations) {
             writeOutput(String.format("iteration %d out of %d",

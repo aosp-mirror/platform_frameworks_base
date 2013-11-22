@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>MarkerOptions | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -696,7 +703,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -705,7 +712,7 @@ Summary:
   
       implements 
       
-        <a href="/reference/android/os/Parcelable.html">Parcelable</a> 
+        Parcelable 
       
   
   
@@ -721,7 +728,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -967,6 +974,25 @@ android.os.Parcelable
             
             
             
+            <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#flat(boolean)">flat</a></span>(boolean flat)</nobr>
+        
+        <div class="jd-descrdiv">Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
+ the camera <code>false</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -978,7 +1004,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -996,7 +1022,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1014,7 +1040,43 @@ android.os.Parcelable
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            float</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getInfoWindowAnchorU()">getInfoWindowAnchorU</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Horizontal distance, normalized to [0, 1], of the info window anchor from the left edge.</div>
+  
+  </td></tr>
+
+
+	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            float</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getInfoWindowAnchorV()">getInfoWindowAnchorV</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Vertical distance, normalized to [0, 1], of the info window anchor from the top edge.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1032,6 +1094,24 @@ android.os.Parcelable
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            float</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getRotation()">getRotation</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Gets the rotation set for this MarkerOptions object.</div>
+  
+  </td></tr>
+
+
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1039,7 +1119,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getSnippet()">getSnippet</a></span>()</nobr>
@@ -1057,7 +1137,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getTitle()">getTitle</a></span>()</nobr>
@@ -1093,12 +1173,48 @@ android.os.Parcelable
             
             
             
+            <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#infoWindowAnchor(float, float)">infoWindowAnchor</a></span>(float u, float v)</nobr>
+        
+        <div class="jd-descrdiv">Specifies the anchor point of the info window on the marker image.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#isDraggable()">isDraggable</a></span>()</nobr>
         
         <div class="jd-descrdiv">Gets the draggability setting for this MarkerOptions object.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#isFlat()">isFlat</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Gets the flat setting for this MarkerOptions object.</div>
   
   </td></tr>
 
@@ -1150,9 +1266,9 @@ android.os.Parcelable
             <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#snippet(java.lang.String)">snippet</a></span>(<a href="/reference/java/lang/String.html">String</a> snippet)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#rotation(float)">rotation</a></span>(float rotation)</nobr>
         
-        <div class="jd-descrdiv">Sets the snippet for the marker.</div>
+        <div class="jd-descrdiv">Sets the rotation of the marker in degrees clockwise about the marker's anchor point.</div>
   
   </td></tr>
 
@@ -1168,7 +1284,25 @@ android.os.Parcelable
             <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#title(java.lang.String)">title</a></span>(<a href="/reference/java/lang/String.html">String</a> title)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#snippet(java.lang.String)">snippet</a></span>(String snippet)</nobr>
+        
+        <div class="jd-descrdiv">Sets the snippet for the marker.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#title(java.lang.String)">title</a></span>(String title)</nobr>
         
         <div class="jd-descrdiv">Sets the title for the marker.</div>
   
@@ -1176,7 +1310,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1194,7 +1328,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1204,7 +1338,7 @@ android.os.Parcelable
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(<a href="/reference/android/os/Parcel.html">Parcel</a> out, int flags)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel out, int flags)</nobr>
         
   </td></tr>
 
@@ -1232,7 +1366,7 @@ android.os.Parcelable
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1251,7 +1385,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1270,7 +1404,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1299,7 +1433,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1363,7 +1497,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1434,7 +1568,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/os/Parcelable.html">android.os.Parcelable</a>
+  android.os.Parcelable
 
 <div id="inherited-methods-android.os.Parcelable">
   <div id="inherited-methods-android.os.Parcelable-list"
@@ -1472,7 +1606,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">writeToParcel</span>(<a href="/reference/android/os/Parcel.html">Parcel</a> arg0, int arg1)</nobr>
+        <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -1734,6 +1868,44 @@ From interface
 </div>
 
 
+<A NAME="flat(boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a>
+      </span>
+      <span class="sympad">flat</span>
+      <span class="normal">(boolean flat)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
+ the camera <code>false</code>. If the marker is flat against the map, it will remain stuck to the
+ map as the camera rotates and tilts but will still remain the same size as the camera zooms,
+ unlike a <code><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html">GroundOverlay</a></code>. If the marker is a billboard, it will always be drawn facing
+ the camera and will rotate and tilt with the camera. The default value is <code>false</code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the object for which the method was called, with the new flat state set.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getAnchorU()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1837,6 +2009,74 @@ From interface
 </div>
 
 
+<A NAME="getInfoWindowAnchorU()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        float
+      </span>
+      <span class="sympad">getInfoWindowAnchorU</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Horizontal distance, normalized to [0, 1], of the info window anchor from the left edge.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the u value of the info window anchor.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getInfoWindowAnchorV()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        float
+      </span>
+      <span class="sympad">getInfoWindowAnchorV</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Vertical distance, normalized to [0, 1], of the info window anchor from the top edge.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the v value of the info window anchor.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getPosition()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1871,6 +2111,40 @@ From interface
 </div>
 
 
+<A NAME="getRotation()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        float
+      </span>
+      <span class="sympad">getRotation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the rotation set for this MarkerOptions object.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the rotation of the marker in degrees clockwise from the default position.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getSnippet()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1881,7 +2155,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getSnippet</span>
       <span class="normal">()</span>
@@ -1915,7 +2189,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getTitle</span>
       <span class="normal">()</span>
@@ -1982,6 +2256,57 @@ From interface
 </div>
 
 
+<A NAME="infoWindowAnchor(float, float)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a>
+      </span>
+      <span class="sympad">infoWindowAnchor</span>
+      <span class="normal">(float u, float v)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specifies the anchor point of the info window on the marker image. This is specified in the
+ same coordinate system as the anchor. See <code><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#anchor(float, float)">anchor(float, float)</a></code> for more details.
+ The default is the top middle of the image.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>u</td>
+          <td>u-coordinate of the info window anchor, as a ratio of the image width (in the range
+          [0, 1])</td>
+        </tr>
+        <tr>
+          <th>v</td>
+          <td>v-coordinate of the info window anchor, as a ratio of the image height (in the range
+          [0, 1])</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the object for which the method was called, with the new info window anchor set.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="isDraggable()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2009,6 +2334,41 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li><code>true</code> if the marker is draggable; otherwise, returns <code>false</code>.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="isFlat()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isFlat</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the flat setting for this MarkerOptions object.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if the marker is flat against the map; <code>false</code> if the marker
+ should face the camera.
 </li></ul>
   </div>
 
@@ -2084,6 +2444,45 @@ From interface
 </div>
 
 
+<A NAME="rotation(float)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a>
+      </span>
+      <span class="sympad">rotation</span>
+      <span class="normal">(float rotation)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the rotation of the marker in degrees clockwise about the marker's anchor point. The
+ axis of rotation is perpendicular to the marker. A rotation of 0 corresponds to the default
+ position of the marker. When the marker is flat on the map, the default position is North
+ aligned and the rotation is such that the marker always remains flat on the map. When the
+ marker is a billboard, the default position is pointing up and the rotation is such that the
+ marker is always facing the camera. The default value is 0.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the object for which the method was called, with the new rotation set.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="snippet(java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2097,7 +2496,7 @@ From interface
         <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a>
       </span>
       <span class="sympad">snippet</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> snippet)</span>
+      <span class="normal">(String snippet)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2131,7 +2530,7 @@ From interface
         <a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a>
       </span>
       <span class="sympad">title</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> title)</span>
+      <span class="normal">(String title)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2199,7 +2598,7 @@ From interface
         void
       </span>
       <span class="sympad">writeToParcel</span>
-      <span class="normal">(<a href="/reference/android/os/Parcel.html">Parcel</a> out, int flags)</span>
+      <span class="normal">(Parcel out, int flags)</span>
     </h4>
       <div class="api-level">
         <div></div>

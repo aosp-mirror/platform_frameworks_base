@@ -70,10 +70,23 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_LAYERS_UPDATES "debug.hwui.show_layers_updates"
 
 /**
- * Used to enable/disable overdraw debugging. The accepted values are
- * "true" and "false". The default value is "false".
+ * Used to enable/disable overdraw debugging.
+ *
+ * The accepted values are
+ * "show", to show overdraw
+ * "show_deuteranomaly", to show overdraw if you suffer from Deuteranomaly
+ * "count", to show an overdraw counter
+ * "false", to disable overdraw debugging
+ *
+ * The default value is "false".
  */
-#define PROPERTY_DEBUG_OVERDRAW "debug.hwui.show_overdraw"
+#define PROPERTY_DEBUG_OVERDRAW "debug.hwui.overdraw"
+
+/**
+ * Used to enable/disable PerfHUD ES profiling. The accepted values
+ * are "true" and "false". The default value is "false".
+ */
+#define PROPERTY_DEBUG_NV_PROFILING "debug.hwui.nv_profiling"
 
 /**
  * Used to enable/disable non-rectangular clipping debugging.
@@ -123,9 +136,9 @@ enum DebugLevel {
 
 /**
  * Indicates whether PBOs can be used to back pixel buffers.
- * Accepted values are "true" and "false".
+ * Accepted values are "true" and "false". Default is true.
  */
-#define PROPERTY_ENABLE_GPU_PIXEL_BUFFERS "hwui.use_gpu_pixel_buffers"
+#define PROPERTY_ENABLE_GPU_PIXEL_BUFFERS "ro.hwui.use_gpu_pixel_buffers"
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
@@ -133,6 +146,7 @@ enum DebugLevel {
 #define PROPERTY_RENDER_BUFFER_CACHE_SIZE "ro.hwui.r_buffer_cache_size"
 #define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 #define PROPERTY_PATH_CACHE_SIZE "ro.hwui.path_cache_size"
+#define PROPERTY_PATCH_CACHE_SIZE "ro.hwui.patch_cache_size"
 #define PROPERTY_DROP_SHADOW_CACHE_SIZE "ro.hwui.drop_shadow_cache_size"
 #define PROPERTY_FBO_CACHE_SIZE "ro.hwui.fbo_cache_size"
 
@@ -178,7 +192,7 @@ enum DebugLevel {
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
 #define DEFAULT_RENDER_BUFFER_CACHE_SIZE 2.0f
 #define DEFAULT_PATH_CACHE_SIZE 10.0f
-#define DEFAULT_PATCH_CACHE_SIZE 512
+#define DEFAULT_PATCH_CACHE_SIZE 128 // in kB
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
 #define DEFAULT_FBO_CACHE_SIZE 16
@@ -195,6 +209,8 @@ enum DebugLevel {
 
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
+// Converts a number of kilo-bytes into bytes
+#define KB(s) s * 1024
 
 static DebugLevel readDebugLevel() {
     char property[PROPERTY_VALUE_MAX];

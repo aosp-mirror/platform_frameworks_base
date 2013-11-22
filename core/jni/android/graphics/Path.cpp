@@ -25,6 +25,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include "SkPath.h"
+#include "pathops/SkPathOps.h"
 
 #include <Caches.h>
 
@@ -67,8 +68,7 @@ public:
         return obj->getFillType();
     }
  
-    static void setFillType(JNIEnv* env, jobject clazz, SkPath* path,
-                            SkPath::FillType ft) {
+    static void setFillType(JNIEnv* env, jobject clazz, SkPath* path, SkPath::FillType ft) {
         path->setFillType(ft);
     }
  
@@ -200,7 +200,7 @@ public:
     }
  
     static void addRoundRectXY(JNIEnv* env, jobject clazz, SkPath* obj, jobject rect,
-                               jfloat rx, jfloat ry, SkPath::Direction dir) {
+            jfloat rx, jfloat ry, SkPath::Direction dir) {
         SkRect rect_;
         GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
         SkScalar rx_ = SkFloatToScalar(rx);
@@ -209,7 +209,7 @@ public:
     }
     
     static void addRoundRect8(JNIEnv* env, jobject, SkPath* obj, jobject rect,
-                              jfloatArray array, SkPath::Direction dir) {
+            jfloatArray array, SkPath::Direction dir) {
         SkRect rect_;
         GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
         AutoJavaFloatArray  afa(env, array, 8);
@@ -261,7 +261,10 @@ public:
     static void transform__Matrix(JNIEnv* env, jobject clazz, SkPath* obj, SkMatrix* matrix) {
         obj->transform(*matrix);
     }
- 
+
+    static jboolean op(JNIEnv* env, jobject clazz, SkPath* p1, SkPath* p2, SkPathOp op, SkPath* r) {
+         return Op(*p1, *p2, op, r);
+     }
 };
 
 static JNINativeMethod methods[] = {
@@ -301,7 +304,8 @@ static JNINativeMethod methods[] = {
     {"native_offset","(IFF)V", (void*) SkPathGlue::offset__FF},
     {"native_setLastPoint","(IFF)V", (void*) SkPathGlue::setLastPoint},
     {"native_transform","(III)V", (void*) SkPathGlue::transform__MatrixPath},
-    {"native_transform","(II)V", (void*) SkPathGlue::transform__Matrix}
+    {"native_transform","(II)V", (void*) SkPathGlue::transform__Matrix},
+    {"native_op","(IIII)Z", (void*) SkPathGlue::op}
 };
 
 int register_android_graphics_Path(JNIEnv* env) {

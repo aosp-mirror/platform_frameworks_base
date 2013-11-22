@@ -20,7 +20,7 @@
 #include "SpriteController.h"
 
 #include <ui/DisplayInfo.h>
-#include <androidfw/Input.h>
+#include <input/Input.h>
 #include <utils/BitSet.h>
 #include <utils/RefBase.h>
 #include <utils/Looper.h>

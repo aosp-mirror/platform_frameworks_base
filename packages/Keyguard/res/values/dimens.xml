@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/dimens.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources>
+    <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
+    <dimen name="keyguard_lockscreen_outerring_diameter">270dp</dimen>
+
+    <!-- The bottom margin for the GlowPadView container -->
+    <dimen name="glowpadcontainer_bottom_margin">-80dp</dimen>
+
+    <!-- Default target placement radius for GlowPadView. Should be 1/2 of outerring diameter. -->
+    <dimen name="glowpadview_target_placement_radius">135dip</dimen>
+
+    <!-- Default glow radius for GlowPadView -->
+    <dimen name="glowpadview_glow_radius">75dip</dimen>
+
+    <!-- Default distance beyond which GlowPadView snaps to the matching target -->
+    <dimen name="glowpadview_snap_margin">40dip</dimen>
+
+    <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
+    <dimen name="glowpadview_inner_radius">15dip</dimen>
+
+    <!-- Size of status line font on Unsecure unlock LockScreen. -->
+    <dimen name="keyguard_lockscreen_status_line_font_size">14dip</dimen>
+
+    <!-- Size of right margin on Unsecure unlock LockScreen -->
+    <dimen name="keyguard_lockscreen_status_line_font_right_margin">42dip</dimen>
+
+    <!-- Size of top margin on Clock font to edge on unlock LockScreen -->
+    <dimen name="keyguard_lockscreen_status_line_clockfont_top_margin">22dip</dimen>
+
+    <!-- Size of top margin on Clock font to edge on unlock LockScreen -->
+    <dimen name="keyguard_lockscreen_status_line_clockfont_bottom_margin">12dip</dimen>
+
+    <!-- Padding on left margin of PIN text entry field to center it when del button is showing -->
+    <dimen name="keyguard_lockscreen_pin_margin_left">40dip</dimen>
+
+    <!-- Height of FaceUnlock view in keyguard -->
+    <dimen name="face_unlock_height">330dip</dimen>
+
+    <!-- Keyguard dimensions -->
+    <!-- TEMP -->
+    <dimen name="kg_security_panel_height">600dp</dimen>
+
+    <!-- Height of security view in keyguard. -->
+    <dimen name="kg_security_view_height">480dp</dimen>
+
+    <!-- Width of widget view in keyguard. -->
+    <dimen name="kg_widget_view_width">0dp</dimen>
+
+    <!-- Height of widget view in keyguard. -->
+    <dimen name="kg_widget_view_height">0dp</dimen>
+
+    <!-- Size of the clock font in keyguard's status view -->
+    <dimen name="kg_status_clock_font_size">75dp</dimen>
+
+    <!-- Size of the generic status lines keyguard's status view  -->
+    <dimen name="kg_status_line_font_size">12dp</dimen>
+
+    <!-- Size of margin on the right of keyguard's status view -->
+    <dimen name="kg_status_line_font_right_margin">16dp</dimen>
+
+    <!-- Top margin for the clock view -->
+    <dimen name="kg_clock_top_margin">-16dp</dimen>
+
+    <!-- Horizontal gap between keys in PIN and SIM PIN numeric keyboards in keyguard -->
+    <dimen name="kg_key_horizontal_gap">0dp</dimen>
+
+    <!-- Horizontal gap between keys in PIN and SIM PIN numeric keyboards in keyguard -->
+    <dimen name="kg_key_vertical_gap">0dp</dimen>
+
+    <!-- Horizontal gap between keys in PIN and SIM PIN numeric keyboards in keyguard -->
+    <dimen name="kg_pin_key_height">60dp</dimen>
+
+    <!-- Space reserved at the bottom of secure views (pin/pattern/password/SIM pin/SIM puk) -->
+    <dimen name="kg_secure_padding_height">46dp</dimen>
+
+    <!-- The height of the runway lights strip -->
+    <dimen name="kg_runway_lights_height">7dp</dimen>
+
+    <!-- The height of the runway lights strip -->
+    <dimen name="kg_runway_lights_vertical_padding">2dp</dimen>
+
+    <!-- Horizontal padding for the widget pager -->
+    <dimen name="kg_widget_pager_horizontal_padding">16dp</dimen>
+
+    <!-- Top padding for the widget pager -->
+    <dimen name="kg_widget_pager_top_padding">0dp</dimen>
+
+    <!-- Bottom padding for the widget pager -->
+    <dimen name="kg_widget_pager_bottom_padding">64dp</dimen>
+
+    <!-- Top margin for the runway lights. We add a negative margin in large
+        devices to account for the widget pager padding -->
+    <dimen name="kg_runway_lights_top_margin">0dp</dimen>
+
+    <!-- Touch slop for the global toggle accessibility gesture -->
+    <dimen name="accessibility_touch_slop">80dip</dimen>
+
+    <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
+    <dimen name="keyguard_security_width">320dp</dimen>
+
+    <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
+    <dimen name="keyguard_security_height">400dp</dimen>
+
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_security_view_margin">8dp</dimen>
+
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
+
+    <!-- Stroke width of the frame for the circular avatars. -->
+    <dimen name="keyguard_avatar_frame_stroke_width">2dp</dimen>
+
+    <!-- Shadow radius under the frame for the circular avatars. -->
+    <dimen name="keyguard_avatar_frame_shadow_radius">1dp</dimen>
+
+    <!-- Size of the avator on hte multiuser lockscreen. -->
+    <dimen name="keyguard_avatar_size">66dp</dimen>
+
+    <!-- Size of the text under the avator on the multiuser lockscreen. -->
+    <dimen name="keyguard_avatar_name_size">10sp</dimen>
+
+    <!-- Size of the region along the edge of the screen that will accept
+         swipes to scroll the widget area. -->
+    <dimen name="kg_edge_swipe_region_size">24dp</dimen>
+
+    <!-- If the height if keyguard drops below this threshold (most likely
+    due to the appearance of the IME), then drop the multiuser selector. -->
+    <dimen name="kg_squashed_layout_threshold">600dp</dimen>
+
+    <!-- The height of widgets which do not support vertical resizing. This is only
+    used on tablets; on phones, this size is determined by the space left by the
+    security mode. -->
+    <dimen name="kg_small_widget_height">160dp</dimen>
+
+    <!-- Default clock parameters -->
+    <dimen name="bottom_text_spacing_digital">-8dp</dimen>
+    <dimen name="label_font_size">14dp</dimen>
+    <dimen name="widget_label_font_size">14dp</dimen>
+    <dimen name="widget_big_font_size">80dp</dimen>
+    <dimen name="big_font_size">120dp</dimen>
+
+</resources>

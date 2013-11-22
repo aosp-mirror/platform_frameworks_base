@@ -33,13 +33,13 @@ class PreferredActivity extends IntentFilter implements PreferredComponent.Callb
     private static final String TAG = "PreferredActivity";
 
     private static final boolean DEBUG_FILTERS = false;
-    static final String ATTR_USER_ID = "userId";
 
     final PreferredComponent mPref;
 
-    PreferredActivity(IntentFilter filter, int match, ComponentName[] set, ComponentName activity) {
+    PreferredActivity(IntentFilter filter, int match, ComponentName[] set, ComponentName activity,
+            boolean always) {
         super(filter);
-        mPref = new PreferredComponent(this, match, set, activity);
+        mPref = new PreferredComponent(this, match, set, activity, always);
     }
 
     PreferredActivity(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -70,5 +70,11 @@ class PreferredActivity extends IntentFilter implements PreferredComponent.Callb
             XmlUtils.skipCurrentTag(parser);
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "PreferredActivity{0x" + Integer.toHexString(System.identityHashCode(this))
+                + " " + mPref.mComponent.flattenToShortString() + "}";
     }
 }

@@ -23,7 +23,7 @@ import android.util.TimeUtils;
 /**
  * Represents a link between a content provider and client.
  */
-public class ContentProviderConnection extends Binder {
+public final class ContentProviderConnection extends Binder {
     public final ContentProviderRecord provider;
     public final ProcessRecord client;
     public final long createTime;

@@ -22,6 +22,8 @@ package android.graphics;
  * {@link Canvas}.
  */
 public class Camera {
+    private Matrix mMatrix;
+
     /**
      * Creates a new camera, with empty transformations.
      */
@@ -147,7 +149,13 @@ public class Camera {
      * @param canvas The Canvas to set the transform matrix onto
      */
     public void applyToCanvas(Canvas canvas) {
-        nativeApplyToCanvas(canvas.mNativeCanvas);
+        if (canvas.isHardwareAccelerated()) {
+            if (mMatrix == null) mMatrix = new Matrix();
+            getMatrix(mMatrix);
+            canvas.concat(mMatrix);
+        } else {
+            nativeApplyToCanvas(canvas.mNativeCanvas);
+        }
     }
 
     public native float dotWithNormal(float dx, float dy, float dz);

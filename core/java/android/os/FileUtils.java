@@ -17,10 +17,17 @@
 package android.os;
 
 import android.util.Log;
+import android.util.Slog;
+
+import libcore.io.ErrnoException;
+import libcore.io.IoUtils;
+import libcore.io.Libcore;
+import libcore.io.OsConstants;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -58,7 +65,84 @@ public class FileUtils {
     /** Regular expression for safe filenames: no spaces or metacharacters */
     private static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
 
-    public static native int setPermissions(String file, int mode, int uid, int gid);
+    /**
+     * Set owner and mode of of given {@link File}.
+     *
+     * @param mode to apply through {@code chmod}
+     * @param uid to apply through {@code chown}, or -1 to leave unchanged
+     * @param gid to apply through {@code chown}, or -1 to leave unchanged
+     * @return 0 on success, otherwise errno.
+     */
+    public static int setPermissions(File path, int mode, int uid, int gid) {
+        return setPermissions(path.getAbsolutePath(), mode, uid, gid);
+    }
+
+    /**
+     * Set owner and mode of of given path.
+     *
+     * @param mode to apply through {@code chmod}
+     * @param uid to apply through {@code chown}, or -1 to leave unchanged
+     * @param gid to apply through {@code chown}, or -1 to leave unchanged
+     * @return 0 on success, otherwise errno.
+     */
+    public static int setPermissions(String path, int mode, int uid, int gid) {
+        try {
+            Libcore.os.chmod(path, mode);
+        } catch (ErrnoException e) {
+            Slog.w(TAG, "Failed to chmod(" + path + "): " + e);
+            return e.errno;
+        }
+
+        if (uid >= 0 || gid >= 0) {
+            try {
+                Libcore.os.chown(path, uid, gid);
+            } catch (ErrnoException e) {
+                Slog.w(TAG, "Failed to chown(" + path + "): " + e);
+                return e.errno;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Set owner and mode of of given {@link FileDescriptor}.
+     *
+     * @param mode to apply through {@code chmod}
+     * @param uid to apply through {@code chown}, or -1 to leave unchanged
+     * @param gid to apply through {@code chown}, or -1 to leave unchanged
+     * @return 0 on success, otherwise errno.
+     */
+    public static int setPermissions(FileDescriptor fd, int mode, int uid, int gid) {
+        try {
+            Libcore.os.fchmod(fd, mode);
+        } catch (ErrnoException e) {
+            Slog.w(TAG, "Failed to fchmod(): " + e);
+            return e.errno;
+        }
+
+        if (uid >= 0 || gid >= 0) {
+            try {
+                Libcore.os.fchown(fd, uid, gid);
+            } catch (ErrnoException e) {
+                Slog.w(TAG, "Failed to fchown(): " + e);
+                return e.errno;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Return owning UID of given path, otherwise -1.
+     */
+    public static int getUid(String path) {
+        try {
+            return Libcore.os.stat(path).st_uid;
+        } catch (ErrnoException e) {
+            return -1;
+        }
+    }
 
     /** returns the FAT file system volume ID for the volume mounted 
      * at the given mount point, or -1 for failure

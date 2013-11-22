@@ -825,6 +825,14 @@ public final class ContactsContract {
         public static final String STARRED = "starred";
 
         /**
+         * The position at which the contact is pinned. If {@link PinnedPositions.UNPINNED},
+         * the contact is not pinned. Also see {@link PinnedPositions}.
+         * <P>Type: INTEGER </P>
+         * @hide
+         */
+        public static final String PINNED = "pinned";
+
+        /**
          * URI for a custom ringtone associated with the contact. If null or missing,
          * the default ringtone is used.
          * <P>Type: TEXT (URI to the ringtone)</P>
@@ -5105,9 +5113,8 @@ public final class ContactsContract {
          * Value of 1 implies true, 0 implies false when 0 is the default.
          * When a cursor is returned to the client, it should check for an extra with the name
          * {@link ContactsContract#DEFERRED_SNIPPETING} in the cursor. If it exists, the client
-         * should do its own snippeting using {@link ContactsContract#snippetize}. If
-         * it doesn't exist, the snippet column in the cursor should already contain a snippetized
-         * string.
+         * should do its own snippeting. If it doesn't exist, the snippet column in the cursor
+         * should already contain a snippetized string.
          *
          * @hide
          */
@@ -7715,6 +7722,138 @@ public final class ContactsContract {
     }
 
     /**
+     * <p>
+     * API allowing applications to send pinning information for specified contacts to the
+     * Contacts Provider.
+     * </p>
+     *
+     * <p>
+     * This pinning information can be used by individual applications to customize how
+     * they order particular pinned contacts. For example, a Dialer application could
+     * use pinned information to order user-pinned contacts in a top row of favorites.
+     * </p>
+     *
+     * <p>
+     * It is possible for two or more contacts to occupy the same pinned position (due
+     * to aggregation and sync), so this pinning information should be used on a best-effort
+     * basis to order contacts in-application rather than an absolute guide on where a contact
+     * should be positioned. Contacts returned by the ContactsProvider will not be ordered based
+     * on this information, so it is up to the client application to reorder these contacts within
+     * their own UI adhering to (or ignoring as appropriate) information stored in the pinned
+     * column.
+     * </p>
+     *
+     * <p>
+     * By default, unpinned contacts will have a pinned position of
+     * {@link PinnedPositions#UNPINNED}, or {@link Integer#MAX_VALUE} (2^31 - 1). Client-provided
+     * pinned positions can be positive integers that range anywhere from 0 to
+     * {@link PinnedPositions#UNPINNED}.
+     * </p>
+     *
+     * <p>
+     * When using {@link PinnedPositions#UPDATE_URI} to update the pinned positions of
+     * certain contacts, it may make sense for your application to star any pinned contacts
+     * by default. To specify this behavior, set the boolean query parameter
+     * {@link PinnedPositions#STAR_WHEN_PINNING} to true to force all pinned and unpinned
+     * contacts to be automatically starred and unstarred.
+     * </p>
+     * @hide
+     */
+    public static final class PinnedPositions {
+
+        /**
+         * <p>
+         * This URI allows applications to update pinned positions for a provided set of contacts.
+         * </p>
+         *
+         * <p>
+         * The list of contactIds to pin and their corresponding pinned positions should be
+         * provided in key-value pairs stored in a {@link ContentValues} object where the key
+         * is a valid contactId, while each pinned position is a positive integer.
+         * </p>
+         *
+         * <p>
+         * Example:
+         * <pre>
+         * ContentValues values = new ContentValues();
+         * values.put("10", 20);
+         * values.put("12", 2);
+         * values.put("15", PinnedPositions.UNPINNED);
+         * int count = resolver.update(PinnedPositions.UPDATE_URI, values, null, null);
+         * </pre>
+         *
+         * This pins the contact with id 10 at position 20, the contact with id 12 at position 2,
+         * and unpins the contact with id 15.
+         * </p>
+         */
+        public static final Uri UPDATE_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "pinned_position_update");
+
+        /**
+         * Default value for the pinned position of an unpinned contact. Also equal to
+         * {@link Integer#MAX_VALUE}.
+         */
+        public static final int UNPINNED = 0x7FFFFFFF;
+
+        /**
+         * Value of pinned position for a contact that a user has indicated should be considered
+         * of the lowest priority. It is up to the client application to determine how to present
+         * such a contact - for example all the way at the bottom of a contact list, or simply
+         * just hidden from view.
+         */
+        public static final int DEMOTED = -1;
+
+        /**
+         * <p> Clients can provide this value as a pinned position to undemote a formerly demoted
+         * contact. If the contact was formerly demoted, it will be restored to an
+         * {@link #UNPINNED} position. If it was otherwise already pinned at another position,
+         * it will not be affected.
+         * </p>
+         *
+         * <p>
+         * Example:
+         * <pre>
+         * ContentValues values = new ContentValues();
+         * values.put("15", PinnedPositions.UNDEMOTE);
+         * int count = resolver.update(ContactsContract.PinnedPositions.UPDATE_URI.buildUpon()
+         *          .build(), values, null, null);
+         * </pre>
+         *
+         * This restores the contact with id 15 to an {@link #UNPINNED} position, meaning that
+         * other apps (e.g. the Dialer) that were formerly hiding this contact from view based on
+         * its {@link #DEMOTED} position will start displaying it again.
+         * </p>
+         */
+        public static final String UNDEMOTE = "undemote";
+
+        /**
+         * <p>
+         * A boolean query parameter that can be used with {@link #UPDATE_URI}.
+         * If "1" or "true", any contact that is pinned or unpinned will be correspondingly
+         * starred or unstarred. Otherwise, starring information will not be affected by pinned
+         * updates. This is false by default.
+         * </p>
+         *
+         * <p>
+         * Example:
+         * <pre>
+         * ContentValues values = new ContentValues();
+         * values.put("10", 20);
+         * values.put("15", PinnedPositions.UNPINNED);
+         * int count = resolver.update(ContactsContract.PinnedPositions.UPDATE_URI.buildUpon()
+         *          .appendQueryParameter(PinnedPositions.FORCE_STAR_WHEN_PINNING, "true").build(),
+         *          values, null, null);
+         * </pre>
+         *
+         * This will pin the contact with id 10 at position 20 and star it automatically if not
+         * already starred, and unpin the contact with id 15, and unstar it automatically if not
+         * already unstarred.
+         * </p>
+         */
+        public static final String STAR_WHEN_PINNING = "star_when_pinning";
+    }
+
+    /**
      * Helper methods to display QuickContact dialogs that allow users to pivot on
      * a specific {@link Contacts} entry.
      */
@@ -8463,138 +8602,4 @@ public final class ContactsContract {
             public static final String DATA_SET = "com.android.contacts.extra.DATA_SET";
         }
     }
-
-    /**
-     * Creates a snippet out of the given content that matches the given query.
-     * @param content - The content to use to compute the snippet.
-     * @param displayName - Display name for the contact - if this already contains the search
-     *        content, no snippet should be shown.
-     * @param query - String to search for in the content.
-     * @param snippetStartMatch - Marks the start of the matching string in the snippet.
-     * @param snippetEndMatch - Marks the end of the matching string in the snippet.
-     * @param snippetEllipsis - Ellipsis string appended to the end of the snippet (if too long).
-     * @param snippetMaxTokens - Maximum number of words from the snippet that will be displayed.
-     * @return The computed snippet, or null if the snippet could not be computed or should not be
-     *         shown.
-     *
-     *  @hide
-     */
-    public static String snippetize(String content, String displayName, String query,
-            char snippetStartMatch, char snippetEndMatch, String snippetEllipsis,
-            int snippetMaxTokens) {
-
-        String lowerQuery = query != null ? query.toLowerCase() : null;
-        if (TextUtils.isEmpty(content) || TextUtils.isEmpty(query) ||
-                TextUtils.isEmpty(displayName) || !content.toLowerCase().contains(lowerQuery)) {
-            return null;
-        }
-
-        // If the display name already contains the query term, return empty - snippets should
-        // not be needed in that case.
-        String lowerDisplayName = displayName != null ? displayName.toLowerCase() : "";
-        List<String> nameTokens = new ArrayList<String>();
-        List<Integer> nameTokenOffsets = new ArrayList<Integer>();
-        split(lowerDisplayName.trim(), nameTokens, nameTokenOffsets);
-        for (String nameToken : nameTokens) {
-            if (nameToken.startsWith(lowerQuery)) {
-                return null;
-            }
-        }
-
-        String[] contentLines = content.split("\n");
-
-        // Locate the lines of the content that contain the query term.
-        for (String contentLine : contentLines) {
-            if (contentLine.toLowerCase().contains(lowerQuery)) {
-
-                // Line contains the query string - now search for it at the start of tokens.
-                List<String> lineTokens = new ArrayList<String>();
-                List<Integer> tokenOffsets = new ArrayList<Integer>();
-                split(contentLine, lineTokens, tokenOffsets);
-
-                // As we find matches against the query, we'll populate this list with the marked
-                // (or unchanged) tokens.
-                List<String> markedTokens = new ArrayList<String>();
-
-                int firstToken = -1;
-                int lastToken = -1;
-                for (int i = 0; i < lineTokens.size(); i++) {
-                    String token = lineTokens.get(i);
-                    String lowerToken = token.toLowerCase();
-                    if (lowerToken.startsWith(lowerQuery)) {
-
-                        // Query term matched; surround the token with match markers.
-                        markedTokens.add(snippetStartMatch + token + snippetEndMatch);
-
-                        // If this is the first token found with a match, mark the token
-                        // positions to use for assembling the snippet.
-                        if (firstToken == -1) {
-                            firstToken =
-                                    Math.max(0, i - (int) Math.floor(
-                                            Math.abs(snippetMaxTokens)
-                                            / 2.0));
-                            lastToken =
-                                    Math.min(lineTokens.size(), firstToken +
-                                            Math.abs(snippetMaxTokens));
-                        }
-                    } else {
-                        markedTokens.add(token);
-                    }
-                }
-
-                // Assemble the snippet by piecing the tokens back together.
-                if (firstToken > -1) {
-                    StringBuilder sb = new StringBuilder();
-                    if (firstToken > 0) {
-                        sb.append(snippetEllipsis);
-                    }
-                    for (int i = firstToken; i < lastToken; i++) {
-                        String markedToken = markedTokens.get(i);
-                        String originalToken = lineTokens.get(i);
-                        sb.append(markedToken);
-                        if (i < lastToken - 1) {
-                            // Add the characters that appeared between this token and the next.
-                            sb.append(contentLine.substring(
-                                    tokenOffsets.get(i) + originalToken.length(),
-                                    tokenOffsets.get(i + 1)));
-                        }
-                    }
-                    if (lastToken < lineTokens.size()) {
-                        sb.append(snippetEllipsis);
-                    }
-                    return sb.toString();
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Pattern for splitting a line into tokens.  This matches e-mail addresses as a single token,
-     * otherwise splitting on any group of non-alphanumeric characters.
-     *
-     * @hide
-     */
-    private static Pattern SPLIT_PATTERN =
-        Pattern.compile("([\\w-\\.]+)@((?:[\\w]+\\.)+)([a-zA-Z]{2,4})|[\\w]+");
-
-    /**
-     * Helper method for splitting a string into tokens.  The lists passed in are populated with the
-     * tokens and offsets into the content of each token.  The tokenization function parses e-mail
-     * addresses as a single token; otherwise it splits on any non-alphanumeric character.
-     * @param content Content to split.
-     * @param tokens List of token strings to populate.
-     * @param offsets List of offsets into the content for each token returned.
-     *
-     * @hide
-     */
-    private static void split(String content, List<String> tokens, List<Integer> offsets) {
-        Matcher matcher = SPLIT_PATTERN.matcher(content);
-        while (matcher.find()) {
-            tokens.add(matcher.group());
-            offsets.add(matcher.start());
-        }
-    }
-
-
 }

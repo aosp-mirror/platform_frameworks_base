@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -268,5 +269,14 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
             mInflater = LayoutInflater.from(mContext);
         }
         return mInflater;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+
+        if (mItemData != null && mItemData.hasSubMenu()) {
+            info.setCanOpenPopup(true);
+        }
     }
 }

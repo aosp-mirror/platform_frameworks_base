@@ -291,6 +291,20 @@ public class ExifInterface {
     }
 
     /**
+     * Returns the offset and length of thumbnail inside the JPEG file, or
+     * {@code null} if there is no thumbnail.
+     *
+     * @return two-element array, the offset in the first value, and length in
+     *         the second, or {@code null} if no thumbnail was found.
+     * @hide
+     */
+    public long[] getThumbnailRange() {
+        synchronized (sLock) {
+            return getThumbnailRangeNative(mFilename);
+        }
+    }
+
+    /**
      * Stores the latitude and longitude value in a float array. The first element is
      * the latitude, and the second element is the longitude. Returns false if the
      * Exif tags are not available.
@@ -416,4 +430,6 @@ public class ExifInterface {
     private native void commitChangesNative(String fileName);
 
     private native byte[] getThumbnailNative(String fileName);
+
+    private native long[] getThumbnailRangeNative(String fileName);
 }

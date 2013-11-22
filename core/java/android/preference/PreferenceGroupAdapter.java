@@ -153,7 +153,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
             
             preferences.add(preference);
             
-            if (!mHasReturnedViewTypeCount && !preference.hasSpecifiedLayout()) {
+            if (!mHasReturnedViewTypeCount && preference.canRecycleLayout()) {
                 addPreferenceClassName(preference);
             }
             
@@ -255,7 +255,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements OnPreferenceChangeIn
         }
         
         final Preference preference = this.getItem(position);
-        if (preference.hasSpecifiedLayout()) {
+        if (!preference.canRecycleLayout()) {
             return IGNORE_ITEM_VIEW_TYPE;
         }
 

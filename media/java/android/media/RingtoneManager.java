@@ -27,7 +27,6 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.DrmStore;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -85,7 +84,6 @@ public class RingtoneManager {
      * {@link #EXTRA_RINGTONE_SHOW_DEFAULT},
      * {@link #EXTRA_RINGTONE_SHOW_SILENT}, {@link #EXTRA_RINGTONE_TYPE},
      * {@link #EXTRA_RINGTONE_DEFAULT_URI}, {@link #EXTRA_RINGTONE_TITLE},
-     * {@link #EXTRA_RINGTONE_INCLUDE_DRM}.
      * <p>
      * Output: {@link #EXTRA_RINGTONE_PICKED_URI}.
      */
@@ -113,7 +111,9 @@ public class RingtoneManager {
 
     /**
      * Given to the ringtone picker as a boolean. Whether to include DRM ringtones.
+     * @deprecated DRM ringtones are no longer supported
      */
+    @Deprecated
     public static final String EXTRA_RINGTONE_INCLUDE_DRM =
             "android.intent.extra.ringtone.INCLUDE_DRM";
     
@@ -183,12 +183,6 @@ public class RingtoneManager {
         MediaStore.Audio.Media.TITLE_KEY
     };
 
-    private static final String[] DRM_COLUMNS = new String[] {
-        DrmStore.Audio._ID, DrmStore.Audio.TITLE,
-        "\"" + DrmStore.Audio.CONTENT_URI + "\"",
-        DrmStore.Audio.TITLE + " AS " + MediaStore.Audio.Media.TITLE_KEY
-    };
-
     private static final String[] MEDIA_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
         "\"" + MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "\"",
@@ -228,8 +222,6 @@ public class RingtoneManager {
     
     private boolean mStopPreviousRingtone = true;
     private Ringtone mPreviousRingtone;
-
-    private boolean mIncludeDrm;
     
     /**
      * Constructs a RingtoneManager. This constructor is recommended as its
@@ -328,18 +320,26 @@ public class RingtoneManager {
      * 
      * @return Whether DRM ringtones will be included.
      * @see #setIncludeDrm(boolean)
+     * Obsolete - always returns false
+     * @deprecated DRM ringtones are no longer supported
      */
+    @Deprecated
     public boolean getIncludeDrm() {
-        return mIncludeDrm;
+        return false;
     }
 
     /**
      * Sets whether to include DRM ringtones.
      * 
      * @param includeDrm Whether to include DRM ringtones.
+     * Obsolete - no longer has any effect
+     * @deprecated DRM ringtones are no longer supported
      */
+    @Deprecated
     public void setIncludeDrm(boolean includeDrm) {
-        mIncludeDrm = includeDrm;
+        if (includeDrm) {
+            Log.w(TAG, "setIncludeDrm no longer supported");
+        }
     }
 
     /**
@@ -363,10 +363,9 @@ public class RingtoneManager {
         }
         
         final Cursor internalCursor = getInternalRingtones();
-        final Cursor drmCursor = mIncludeDrm ? getDrmRingtones() : null;
         final Cursor mediaCursor = getMediaRingtones();
              
-        return mCursor = new SortCursor(new Cursor[] { internalCursor, drmCursor, mediaCursor },
+        return mCursor = new SortCursor(new Cursor[] { internalCursor, mediaCursor },
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
 
@@ -462,10 +461,6 @@ public class RingtoneManager {
             uri = getValidRingtoneUriFromCursorAndClose(context, rm.getMediaRingtones());
         }
         
-        if (uri == null) {
-            uri = getValidRingtoneUriFromCursorAndClose(context, rm.getDrmRingtones());
-        }
-        
         return uri;
     }
     
@@ -487,15 +482,8 @@ public class RingtoneManager {
     private Cursor getInternalRingtones() {
         return query(
                 MediaStore.Audio.Media.INTERNAL_CONTENT_URI, INTERNAL_COLUMNS,
-                constructBooleanTrueWhereClause(mFilterColumns, mIncludeDrm),
+                constructBooleanTrueWhereClause(mFilterColumns),
                 null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-    }
-    
-    private Cursor getDrmRingtones() {
-        // DRM store does not have any columns to use for filtering 
-        return query(
-                DrmStore.Audio.CONTENT_URI, DRM_COLUMNS,
-                null, null, DrmStore.Audio.TITLE);
     }
 
     private Cursor getMediaRingtones() {
@@ -506,7 +494,7 @@ public class RingtoneManager {
                     status.equals(Environment.MEDIA_MOUNTED_READ_ONLY))
                 ? query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MEDIA_COLUMNS,
-                    constructBooleanTrueWhereClause(mFilterColumns, mIncludeDrm), null,
+                    constructBooleanTrueWhereClause(mFilterColumns), null,
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
                 : null;
     }
@@ -536,7 +524,7 @@ public class RingtoneManager {
      * @param columns The columns that must be true.
      * @return The where clause.
      */
-    private static String constructBooleanTrueWhereClause(List<String> columns, boolean includeDrm) {
+    private static String constructBooleanTrueWhereClause(List<String> columns) {
         
         if (columns == null) return null;
         
@@ -553,15 +541,6 @@ public class RingtoneManager {
         }
 
         sb.append(")");
-
-        if (!includeDrm) {
-            // If not DRM files should be shown, the where clause
-            // will be something like "(is_notification=1) and is_drm=0"
-            sb.append(" and ");
-            sb.append(MediaStore.MediaColumns.IS_DRM);
-            sb.append("=0");
-        }
-
 
         return sb.toString();
     }

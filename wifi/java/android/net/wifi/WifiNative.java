@@ -20,10 +20,12 @@ import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.text.TextUtils;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
+import android.util.LocalLog;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Native calls for bring up/shut down of the supplicant daemon and for
@@ -37,6 +39,7 @@ import java.util.List;
 public class WifiNative {
 
     private static final boolean DBG = false;
+    private static final boolean VDBG = false;
     private final String mTAG;
     private static final int DEFAULT_GROUP_OWNER_INTENT     = 6;
 
@@ -47,7 +50,13 @@ public class WifiNative {
     static final int SCAN_WITHOUT_CONNECTION_SETUP          = 1;
     static final int SCAN_WITH_CONNECTION_SETUP             = 2;
 
-    String mInterface = "";
+    // Hold this lock before calling supplicant - it is required to
+    // mutually exclude access from Wifi and P2p state machines
+    static final Object mLock = new Object();
+
+    public final String mInterfaceName;
+    public final String mInterfacePrefix;
+
     private boolean mSuspendOptEnabled = false;
 
     public native static boolean loadDriver();
@@ -62,52 +71,108 @@ public class WifiNative {
        or when the supplicant is hung */
     public native static boolean killSupplicant(boolean p2pSupported);
 
-    private native boolean connectToSupplicant(String iface);
+    private native boolean connectToSupplicantNative();
 
-    private native void closeSupplicantConnection(String iface);
+    private native void closeSupplicantConnectionNative();
 
     /**
      * Wait for the supplicant to send an event, returning the event string.
      * @return the event string sent by the supplicant.
      */
-    private native String waitForEvent(String iface);
+    private native String waitForEventNative();
 
-    private native boolean doBooleanCommand(String iface, String command);
+    private native boolean doBooleanCommandNative(String command);
 
-    private native int doIntCommand(String iface, String command);
+    private native int doIntCommandNative(String command);
 
-    private native String doStringCommand(String iface, String command);
+    private native String doStringCommandNative(String command);
 
-    public WifiNative(String iface) {
-        mInterface = iface;
-        mTAG = "WifiNative-" + iface;
+    public WifiNative(String interfaceName) {
+        mInterfaceName = interfaceName;
+        mTAG = "WifiNative-" + interfaceName;
+        if (!interfaceName.equals("p2p0")) {
+            mInterfacePrefix = "IFNAME=" + interfaceName + " ";
+        } else {
+            // commands for p2p0 interface don't need prefix
+            mInterfacePrefix = "";
+        }
+    }
+
+    private static final LocalLog mLocalLog = new LocalLog(1024);
+
+    // hold mLock before accessing mCmdIdLock
+    private int mCmdId;
+
+    public LocalLog getLocalLog() {
+        return mLocalLog;
+    }
+
+    private int getNewCmdIdLocked() {
+        return mCmdId++;
+    }
+
+    private void localLog(String s) {
+        if (mLocalLog != null)
+            mLocalLog.log(mInterfaceName + ": " + s);
     }
 
     public boolean connectToSupplicant() {
-        return connectToSupplicant(mInterface);
+        // No synchronization necessary .. it is implemented in WifiMonitor
+        if (VDBG) localLog(mInterfacePrefix + "connectToSupplicant");
+        return connectToSupplicantNative();
     }
 
     public void closeSupplicantConnection() {
-        closeSupplicantConnection(mInterface);
+        if (VDBG) localLog(mInterfacePrefix + "closeSupplicantConnection");
+        closeSupplicantConnectionNative();
     }
 
     public String waitForEvent() {
-        return waitForEvent(mInterface);
+        // No synchronization necessary .. it is implemented in WifiMonitor
+        return waitForEventNative();
     }
 
     private boolean doBooleanCommand(String command) {
         if (DBG) Log.d(mTAG, "doBoolean: " + command);
-        return doBooleanCommand(mInterface, command);
+        synchronized (mLock) {
+            int cmdId = getNewCmdIdLocked();
+            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
+            boolean result = doBooleanCommandNative(mInterfacePrefix + command);
+            if (VDBG) localLog(cmdId + "<-" + result);
+            if (DBG) Log.d(mTAG, "   returned " + result);
+            return result;
+        }
     }
 
     private int doIntCommand(String command) {
         if (DBG) Log.d(mTAG, "doInt: " + command);
-        return doIntCommand(mInterface, command);
+        synchronized (mLock) {
+            int cmdId = getNewCmdIdLocked();
+            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
+            int result = doIntCommandNative(mInterfacePrefix + command);
+            if (VDBG) localLog(cmdId + "<-" + result);
+            if (DBG) Log.d(mTAG, "   returned " + result);
+            return result;
+        }
     }
 
     private String doStringCommand(String command) {
         if (DBG) Log.d(mTAG, "doString: " + command);
-        return doStringCommand(mInterface, command);
+        synchronized (mLock) {
+            int cmdId = getNewCmdIdLocked();
+            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
+            String result = doStringCommandNative(mInterfacePrefix + command);
+            if (VDBG) localLog(cmdId + "<-" + result);
+            if (DBG) Log.d(mTAG, "   returned " + result);
+            return result;
+        }
+    }
+
+    private String doStringCommandWithoutLogging(String command) {
+        if (DBG) Log.d(mTAG, "doString: " + command);
+        synchronized (mLock) {
+            return doStringCommandNative(mInterfacePrefix + command);
+        }
     }
 
     public boolean ping() {
@@ -150,7 +215,9 @@ public class WifiNative {
 
     public String getNetworkVariable(int netId, String name) {
         if (TextUtils.isEmpty(name)) return null;
-        return doStringCommand("GET_NETWORK " + netId + " " + name);
+
+        // GET_NETWORK will likely flood the logs ...
+        return doStringCommandWithoutLogging("GET_NETWORK " + netId + " " + name);
     }
 
     public boolean removeNetwork(int netId) {
@@ -213,7 +280,47 @@ public class WifiNative {
      * MASK=<N> see wpa_supplicant/src/common/wpa_ctrl.h for details
      */
     public String scanResults(int sid) {
-        return doStringCommand("BSS RANGE=" + sid + "- MASK=0x21987");
+        return doStringCommandWithoutLogging("BSS RANGE=" + sid + "- MASK=0x21987");
+    }
+
+    /**
+     * Format of command
+     * DRIVER WLS_BATCHING SET SCANFREQ=x MSCAN=r BESTN=y CHANNEL=<z, w, t> RTT=s
+     * where x is an ascii representation of an integer number of seconds between scans
+     *       r is an ascii representation of an integer number of scans per batch
+     *       y is an ascii representation of an integer number of the max AP to remember per scan
+     *       z, w, t represent a 1..n size list of channel numbers and/or 'A', 'B' values
+     *           indicating entire ranges of channels
+     *       s is an ascii representation of an integer number of highest-strength AP
+     *           for which we'd like approximate distance reported
+     *
+     * The return value is an ascii integer representing a guess of the number of scans
+     * the firmware can remember before it runs out of buffer space or -1 on error
+     */
+    public String setBatchedScanSettings(BatchedScanSettings settings) {
+        if (settings == null) return doStringCommand("DRIVER WLS_BATCHING STOP");
+        String cmd = "DRIVER WLS_BATCHING SET SCANFREQ=" + settings.scanIntervalSec;
+        cmd += " MSCAN=" + settings.maxScansPerBatch;
+        if (settings.maxApPerScan != BatchedScanSettings.UNSPECIFIED) {
+            cmd += " BESTN=" + settings.maxApPerScan;
+        }
+        if (settings.channelSet != null && !settings.channelSet.isEmpty()) {
+            cmd += " CHANNEL=<";
+            int i = 0;
+            for (String channel : settings.channelSet) {
+                cmd += (i > 0 ? "," : "") + channel;
+                ++i;
+            }
+            cmd += ">";
+        }
+        if (settings.maxApForDistance != BatchedScanSettings.UNSPECIFIED) {
+            cmd += " RTT=" + settings.maxApForDistance;
+        }
+        return doStringCommand(cmd);
+    }
+
+    public String getBatchedScanResults() {
+        return doStringCommand("DRIVER WLS_BATCHING GET");
     }
 
     public boolean startDriver() {
@@ -355,7 +462,7 @@ public class WifiNative {
     }
 
     public boolean setCountryCode(String countryCode) {
-        return doBooleanCommand("DRIVER COUNTRY " + countryCode);
+        return doBooleanCommand("DRIVER COUNTRY " + countryCode.toUpperCase(Locale.ROOT));
     }
 
     public void enableBackgroundScan(boolean enable) {
@@ -370,6 +477,15 @@ public class WifiNative {
         doBooleanCommand("SCAN_INTERVAL " + scanInterval);
     }
 
+    public void startTdls(String macAddr, boolean enable) {
+        if (enable) {
+            doBooleanCommand("TDLS_DISCOVER " + macAddr);
+            doBooleanCommand("TDLS_SETUP " + macAddr);
+        } else {
+            doBooleanCommand("TDLS_TEARDOWN " + macAddr);
+        }
+    }
+
     /** Example output:
      * RSSI=-65
      * LINKSPEED=48
@@ -377,7 +493,7 @@ public class WifiNative {
      * FREQUENCY=0
      */
     public String signalPoll() {
-        return doStringCommand("SIGNAL_POLL");
+        return doStringCommandWithoutLogging("SIGNAL_POLL");
     }
 
     /** Example outout:
@@ -386,6 +502,10 @@ public class WifiNative {
      */
     public String pktcntPoll() {
         return doStringCommand("PKTCNT_POLL");
+    }
+
+    public void bssFlush() {
+        doBooleanCommand("BSS_FLUSH 0");
     }
 
     public boolean startWpsPbc(String bssid) {
@@ -397,10 +517,12 @@ public class WifiNative {
     }
 
     public boolean startWpsPbc(String iface, String bssid) {
-        if (TextUtils.isEmpty(bssid)) {
-            return doBooleanCommand("WPS_PBC interface=" + iface);
-        } else {
-            return doBooleanCommand("WPS_PBC interface=" + iface + " " + bssid);
+        synchronized (mLock) {
+            if (TextUtils.isEmpty(bssid)) {
+                return doBooleanCommandNative("IFNAME=" + iface + " WPS_PBC");
+            } else {
+                return doBooleanCommandNative("IFNAME=" + iface + " WPS_PBC " + bssid);
+            }
         }
     }
 
@@ -411,7 +533,9 @@ public class WifiNative {
 
     public boolean startWpsPinKeypad(String iface, String pin) {
         if (TextUtils.isEmpty(pin)) return false;
-        return doBooleanCommand("WPS_PIN interface=" + iface + " any " + pin);
+        synchronized (mLock) {
+            return doBooleanCommandNative("IFNAME=" + iface + " WPS_PIN any " + pin);
+        }
     }
 
 
@@ -424,10 +548,12 @@ public class WifiNative {
     }
 
     public String startWpsPinDisplay(String iface, String bssid) {
-        if (TextUtils.isEmpty(bssid)) {
-            return doStringCommand("WPS_PIN interface=" + iface + " any");
-        } else {
-            return doStringCommand("WPS_PIN interface=" + iface + " " + bssid);
+        synchronized (mLock) {
+            if (TextUtils.isEmpty(bssid)) {
+                return doStringCommandNative("IFNAME=" + iface + " WPS_PIN any");
+            } else {
+                return doStringCommandNative("IFNAME=" + iface + " WPS_PIN " + bssid);
+            }
         }
     }
 
@@ -479,7 +605,9 @@ public class WifiNative {
     }
 
     public boolean setP2pGroupIdle(String iface, int time) {
-        return doBooleanCommand("SET interface=" + iface + " p2p_group_idle " + time);
+        synchronized (mLock) {
+            return doBooleanCommandNative("IFNAME=" + iface + " SET p2p_group_idle " + time);
+        }
     }
 
     public void setPowerSave(boolean enabled) {
@@ -491,10 +619,12 @@ public class WifiNative {
     }
 
     public boolean setP2pPowerSave(String iface, boolean enabled) {
-        if (enabled) {
-            return doBooleanCommand("P2P_SET interface=" + iface + " ps 1");
-        } else {
-            return doBooleanCommand("P2P_SET interface=" + iface + " ps 0");
+        synchronized (mLock) {
+            if (enabled) {
+                return doBooleanCommandNative("IFNAME=" + iface + " P2P_SET ps 1");
+            } else {
+                return doBooleanCommandNative("IFNAME=" + iface + " P2P_SET ps 0");
+            }
         }
     }
 
@@ -538,6 +668,37 @@ public class WifiNative {
             return p2pListen();
         }
         return doBooleanCommand("P2P_LISTEN " + timeout);
+    }
+
+    public boolean p2pExtListen(boolean enable, int period, int interval) {
+        if (enable && interval < period) {
+            return false;
+        }
+        return doBooleanCommand("P2P_EXT_LISTEN"
+                    + (enable ? (" " + period + " " + interval) : ""));
+    }
+
+    public boolean p2pSetChannel(int lc, int oc) {
+        if (DBG) Log.d(mTAG, "p2pSetChannel: lc="+lc+", oc="+oc);
+
+        if (lc >=1 && lc <= 11) {
+            if (!doBooleanCommand("P2P_SET listen_channel " + lc)) {
+                return false;
+            }
+        } else if (lc != 0) {
+            return false;
+        }
+
+        if (oc >= 1 && oc <= 165 ) {
+            int freq = (oc <= 14 ? 2407 : 5000) + oc * 5;
+            return doBooleanCommand("P2P_SET disallow_freq 1000-"
+                    + (freq - 5) + "," + (freq + 5) + "-6000");
+        } else if (oc == 0) {
+            /* oc==0 disables "P2P_SET disallow_freq" (enables all freqs) */
+            return doBooleanCommand("P2P_SET disallow_freq \"\"");
+        }
+
+        return false;
     }
 
     public boolean p2pFlush() {
@@ -632,7 +793,9 @@ public class WifiNative {
 
     public boolean p2pGroupRemove(String iface) {
         if (TextUtils.isEmpty(iface)) return false;
-        return doBooleanCommand("P2P_GROUP_REMOVE " + iface);
+        synchronized (mLock) {
+            return doBooleanCommandNative("IFNAME=" + iface + " P2P_GROUP_REMOVE " + iface);
+        }
     }
 
     public boolean p2pReject(String deviceAddress) {

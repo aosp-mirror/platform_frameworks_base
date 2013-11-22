@@ -122,7 +122,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
             if (clip != null) {
                 clip.prepareToLeaveProcess();
             }
-            getService().setPrimaryClip(clip, mContext.getBasePackageName());
+            getService().setPrimaryClip(clip, mContext.getOpPackageName());
         } catch (RemoteException e) {
         }
     }
@@ -132,7 +132,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public ClipData getPrimaryClip() {
         try {
-            return getService().getPrimaryClip(mContext.getBasePackageName());
+            return getService().getPrimaryClip(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -144,7 +144,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public ClipDescription getPrimaryClipDescription() {
         try {
-            return getService().getPrimaryClipDescription(mContext.getBasePackageName());
+            return getService().getPrimaryClipDescription(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -155,7 +155,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public boolean hasPrimaryClip() {
         try {
-            return getService().hasPrimaryClip(mContext.getBasePackageName());
+            return getService().hasPrimaryClip(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return false;
         }
@@ -166,7 +166,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
             if (mPrimaryClipChangedListeners.size() == 0) {
                 try {
                     getService().addPrimaryClipChangedListener(
-                            mPrimaryClipChangedServiceListener, mContext.getBasePackageName());
+                            mPrimaryClipChangedServiceListener, mContext.getOpPackageName());
                 } catch (RemoteException e) {
                 }
             }
@@ -213,7 +213,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public boolean hasText() {
         try {
-            return getService().hasClipboardText(mContext.getBasePackageName());
+            return getService().hasClipboardText(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return false;
         }

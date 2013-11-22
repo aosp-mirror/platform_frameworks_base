@@ -31,7 +31,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
-class PendingIntentRecord extends IIntentSender.Stub {
+final class PendingIntentRecord extends IIntentSender.Stub {
     final ActivityManagerService owner;
     final Key key;
     final int uid;
@@ -259,7 +259,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_ACTIVITY_RESULT:
-                        key.activity.stack.sendActivityResultLocked(-1, key.activity,
+                        key.activity.task.stack.sendActivityResultLocked(-1, key.activity,
                                 key.who, key.requestCode, code, finalIntent);
                         break;
                     case ActivityManager.INTENT_SENDER_BROADCAST:

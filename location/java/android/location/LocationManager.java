@@ -152,10 +152,23 @@ public class LocationManager {
 
     /**
      * Broadcast intent action when the configured location providers
-     * change.
+     * change. For use with {@link #isProviderEnabled(String)}. If you're interacting with the
+     * {@link android.provider.Settings.Secure#LOCATION_MODE} API, use {@link #MODE_CHANGED_ACTION}
+     * instead.
      */
     public static final String PROVIDERS_CHANGED_ACTION =
         "android.location.PROVIDERS_CHANGED";
+
+    /**
+     * Broadcast intent action when {@link android.provider.Settings.Secure#LOCATION_MODE} changes.
+     * For use with the {@link android.provider.Settings.Secure#LOCATION_MODE} API.
+     * If you're interacting with {@link #isProviderEnabled(String)}, use
+     * {@link #PROVIDERS_CHANGED_ACTION} instead.
+     *
+     * In the future, there may be mode changes that do not result in
+     * {@link #PROVIDERS_CHANGED_ACTION} broadcasts.
+     */
+    public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
 
     /**
      * Broadcast intent action indicating that the GPS has either started or
@@ -176,6 +189,17 @@ public class LocationManager {
      * @hide
      */
     public static final String EXTRA_GPS_ENABLED = "enabled";
+
+    /**
+     * Broadcast intent action indicating that a high power location requests
+     * has either started or stopped being active.  The current state of
+     * active location requests should be read from AppOpsManager using
+     * {@code OP_MONITOR_HIGH_POWER_LOCATION}.
+     *
+     * @hide
+     */
+    public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
+        "android.location.HIGH_POWER_REQUEST_CHANGE";
 
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
@@ -1075,8 +1099,13 @@ public class LocationManager {
      * <p>If the user has enabled this provider in the Settings menu, true
      * is returned otherwise false is returned
      *
+     * <p>Callers should instead use
+     * {@link android.provider.Settings.Secure#LOCATION_MODE}
+     * unless they depend on provider-specific APIs such as
+     * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
+     *
      * @param provider the name of the provider
-     * @return true if the provider is enabled
+     * @return true if the provider exists and is enabled
      *
      * @throws IllegalArgumentException if provider is null
      * @throws SecurityException if no suitable permission is present

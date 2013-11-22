@@ -18,40 +18,40 @@
 */
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:gravity="center"
-              android:orientation="vertical"
+              android:orientation="horizontal"
               android:layout_height="wrap_content"
               android:layout_width="match_parent"
-              android:background="@android:drawable/activity_picker_bg"
-              android:padding="16dp">
-
-    <!-- Extended activity info to distinguish between duplicate activity names -->
-    <TextView android:id="@android:id/text2"
-              android:textAppearance="?android:attr/textAppearance"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:gravity="center"
-              android:minLines="2"
-              android:maxLines="2"
-              android:paddingStart="4dip"
-              android:paddingEnd="4dip" />
+              android:background="?attr/activatedBackgroundIndicator">
 
     <!-- Activity icon when presenting dialog
          Size will be filled in by ResolverActivity -->
     <ImageView android:id="@+id/icon"
                android:layout_width="0dp"
                android:layout_height="0dp"
+               android:layout_marginStart="12dp"
+               android:padding="4dp"
                android:scaleType="fitCenter" />
 
-    <!-- Activity name -->
-    <TextView android:id="@android:id/text1"
-              android:textAppearance="?android:attr/textAppearanceSmall"
-              android:layout_width="wrap_content"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:gravity="start|center_vertical"
+              android:orientation="vertical"
               android:layout_height="wrap_content"
-              android:gravity="center"
-              android:minLines="2"
-              android:maxLines="2"
-              android:paddingStart="4dip"
-              android:paddingEnd="4dip" />
+              android:layout_width="wrap_content"
+              android:layout_gravity="start|center_vertical"
+              android:layout_marginStart="12dp">
+        <!-- Activity name -->
+        <TextView android:id="@android:id/text1"
+                  android:textAppearance="?android:attr/textAppearanceMedium"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:maxLines="2" />
+        <!-- Extended activity info to distinguish between duplicate activity names -->
+        <TextView android:id="@android:id/text2"
+                  android:textAppearance="?android:attr/textAppearanceSmall"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:maxLines="2"
+                  android:paddingTop="4dip" />
+    </LinearLayout>
 </LinearLayout>
 

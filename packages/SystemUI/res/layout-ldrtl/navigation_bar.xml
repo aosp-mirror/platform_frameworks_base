@@ -23,7 +23,7 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="#FF000000"
+    android:background="@drawable/system_bar_background"
     >
 
     <FrameLayout android:id="@+id/rot0"
@@ -153,6 +153,7 @@
             android:src="@drawable/search_light"
             android:scaleType="center"
             android:visibility="gone"
+            android:contentDescription="@string/accessibility_search_light"
             />
 
         <com.android.systemui.statusbar.policy.DeadZone
@@ -297,6 +298,7 @@
             android:src="@drawable/search_light"
             android:scaleType="center"
             android:visibility="gone"
+            android:contentDescription="@string/accessibility_search_light"
             />
 
         <com.android.systemui.statusbar.policy.DeadZone

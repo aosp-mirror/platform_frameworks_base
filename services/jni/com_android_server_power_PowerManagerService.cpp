@@ -26,13 +26,13 @@
 #include <limits.h>
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <utils/Timers.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
 #include <utils/Log.h>
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
-#include <cutils/android_reboot.h>
 #include <suspend/autosuspend.h>
 
 #include "com_android_server_power_PowerManagerService.h"
@@ -189,22 +189,6 @@ static void nativeSetAutoSuspend(JNIEnv *env, jclass clazz, jboolean enable) {
     }
 }
 
-static void nativeShutdown(JNIEnv *env, jclass clazz) {
-    android_reboot(ANDROID_RB_POWEROFF, 0, 0);
-}
-
-static void nativeReboot(JNIEnv *env, jclass clazz, jstring reason) {
-    if (reason == NULL) {
-        android_reboot(ANDROID_RB_RESTART, 0, 0);
-    } else {
-        const char *chars = env->GetStringUTFChars(reason, NULL);
-        android_reboot(ANDROID_RB_RESTART2, 0, (char *) chars);
-        env->ReleaseStringUTFChars(reason, chars);  // In case it fails.
-    }
-    jniThrowIOException(env, errno);
-}
-
-
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gPowerManagerServiceMethods[] = {
@@ -221,10 +205,6 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeSetInteractive },
     { "nativeSetAutoSuspend", "(Z)V",
             (void*) nativeSetAutoSuspend },
-    { "nativeShutdown", "()V",
-            (void*) nativeShutdown },
-    { "nativeReboot", "(Ljava/lang/String;)V",
-            (void*) nativeReboot },
 };
 
 #define FIND_CLASS(var, className) \

@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
 import android.os.Build;
 import android.os.Debug;
@@ -69,7 +70,14 @@ public class RuntimeInit {
                 if (mApplicationObject == null) {
                     Slog.e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
                 } else {
-                    Slog.e(TAG, "FATAL EXCEPTION: " + t.getName(), e);
+                    StringBuilder message = new StringBuilder();
+                    message.append("FATAL EXCEPTION: ").append(t.getName()).append("\n");
+                    final String processName = ActivityThread.currentProcessName();
+                    if (processName != null) {
+                        message.append("Process: ").append(processName).append(", ");
+                    }
+                    message.append("PID: ").append(Process.myPid());
+                    Slog.e(TAG, message.toString(), e);
                 }
 
                 // Bring up crash dialog, wait for it to be dismissed
@@ -334,6 +342,7 @@ public class RuntimeInit {
             }
         } catch (Throwable t2) {
             Slog.e(TAG, "Error reporting WTF", t2);
+            Slog.e(TAG, "Original WTF:", t);
         }
     }
 

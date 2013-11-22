@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.LayoutDirection;
 import android.util.TypedValue;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -52,7 +53,7 @@ import java.io.InputStream;
  */
 public class NinePatchDrawable extends Drawable {
     // dithering helps a lot, and is pretty cheap, so default is true
-    private static final boolean DEFAULT_DITHER = true;
+    private static final boolean DEFAULT_DITHER = false;
     private NinePatchState mNinePatchState;
     private NinePatch mNinePatch;
     private Rect mPadding;
@@ -132,6 +133,7 @@ public class NinePatchDrawable extends Drawable {
             // lazy allocation of a paint
             setDither(state.mDither);
         }
+        setAutoMirrored(state.mAutoMirrored);
         if (mNinePatch != null) {
             computeBitmapSize();
         }
@@ -197,10 +199,8 @@ public class NinePatchDrawable extends Drawable {
             mBitmapHeight = mNinePatch.getHeight();
             mOpticalInsets = mNinePatchState.mOpticalInsets;
         } else {
-            mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(),
-                    sdensity, tdensity);
-            mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(),
-                    sdensity, tdensity);
+            mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(), sdensity, tdensity);
+            mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(), sdensity, tdensity);
             if (mNinePatchState.mPadding != null && mPadding != null) {
                 Rect dest = mPadding;
                 Rect src = mNinePatchState.mPadding;
@@ -218,7 +218,18 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        mNinePatch.draw(canvas, getBounds(), mPaint);
+        final Rect bounds = getBounds();
+        final boolean needsMirroring = needsMirroring();
+        if (needsMirroring) {
+            canvas.save();
+            // Mirror the 9patch
+            canvas.translate(bounds.right - bounds.left, 0);
+            canvas.scale(-1.0f, 1.0f);
+        }
+        mNinePatch.draw(canvas, bounds, mPaint);
+        if (needsMirroring) {
+            canvas.restore();
+        }
     }
 
     @Override
@@ -228,7 +239,11 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public boolean getPadding(Rect padding) {
-        padding.set(mPadding);
+        if (needsMirroring()) {
+            padding.set(mPadding.right, mPadding.top, mPadding.left, mPadding.bottom);
+        } else {
+            padding.set(mPadding);
+        }
         return true;
     }
 
@@ -237,7 +252,12 @@ public class NinePatchDrawable extends Drawable {
      */
     @Override
     public Insets getOpticalInsets() {
-        return mOpticalInsets;
+        if (needsMirroring()) {
+            return Insets.of(mOpticalInsets.right, mOpticalInsets.top, mOpticalInsets.right,
+                    mOpticalInsets.bottom);
+        } else {
+            return mOpticalInsets;
+        }
     }
 
     @Override
@@ -248,6 +268,15 @@ public class NinePatchDrawable extends Drawable {
         }
         getPaint().setAlpha(alpha);
         invalidateSelf();
+    }
+
+    @Override
+    public int getAlpha() {
+        if (mPaint == null) {
+            // Fast common case -- normal alpha.
+            return 0xFF;
+        }
+        return getPaint().getAlpha();
     }
 
     @Override
@@ -262,12 +291,27 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public void setDither(boolean dither) {
+        //noinspection PointlessBooleanExpression
         if (mPaint == null && dither == DEFAULT_DITHER) {
             // Fast common case -- leave at default dither.
             return;
         }
         getPaint().setDither(dither);
         invalidateSelf();
+    }
+
+    @Override
+    public void setAutoMirrored(boolean mirrored) {
+        mNinePatchState.mAutoMirrored = mirrored;
+    }
+
+    private boolean needsMirroring() {
+        return isAutoMirrored() && getLayoutDirection() == LayoutDirection.RTL;
+    }
+
+    @Override
+    public boolean isAutoMirrored() {
+        return mNinePatchState.mAutoMirrored;
     }
 
     @Override
@@ -290,8 +334,7 @@ public class NinePatchDrawable extends Drawable {
         }
 
         final boolean dither = a.getBoolean(
-                com.android.internal.R.styleable.NinePatchDrawable_dither,
-                DEFAULT_DITHER);
+                com.android.internal.R.styleable.NinePatchDrawable_dither, DEFAULT_DITHER);
         final BitmapFactory.Options options = new BitmapFactory.Options();
         if (dither) {
             options.inDither = false;
@@ -321,9 +364,11 @@ public class NinePatchDrawable extends Drawable {
                     ": <nine-patch> requires a valid 9-patch source image");
         }
 
-        setNinePatchState(new NinePatchState(
-                new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"),
-                padding, opticalInsets, dither), r);
+        final boolean automirrored = a.getBoolean(
+                com.android.internal.R.styleable.NinePatchDrawable_autoMirrored, false);
+
+        setNinePatchState(new NinePatchState(new NinePatch(bitmap, bitmap.getNinePatchChunk()),
+                padding, opticalInsets, dither, automirrored), r);
         mNinePatchState.mTargetDensity = mTargetDensity;
 
         a.recycle();
@@ -394,39 +439,49 @@ public class NinePatchDrawable extends Drawable {
         return this;
     }
 
-    private final static class NinePatchState extends ConstantState {
+    final static class NinePatchState extends ConstantState {
         final NinePatch mNinePatch;
         final Rect mPadding;
         final Insets mOpticalInsets;
         final boolean mDither;
         int mChangingConfigurations;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+        boolean mAutoMirrored;
 
         NinePatchState(NinePatch ninePatch, Rect padding) {
-            this(ninePatch, padding, new Rect(), DEFAULT_DITHER);
+            this(ninePatch, padding, new Rect(), DEFAULT_DITHER, false);
         }
 
         NinePatchState(NinePatch ninePatch, Rect padding, Rect opticalInsets) {
-            this(ninePatch, padding, opticalInsets, DEFAULT_DITHER);
+            this(ninePatch, padding, opticalInsets, DEFAULT_DITHER, false);
         }
 
-        NinePatchState(NinePatch ninePatch, Rect rect, Rect opticalInsets, boolean dither) {
+        NinePatchState(NinePatch ninePatch, Rect rect, Rect opticalInsets, boolean dither,
+                       boolean autoMirror) {
             mNinePatch = ninePatch;
             mPadding = rect;
             mOpticalInsets = Insets.of(opticalInsets);
             mDither = dither;
+            mAutoMirrored = autoMirror;
         }
 
         // Copy constructor
 
         NinePatchState(NinePatchState state) {
-            mNinePatch = new NinePatch(state.mNinePatch);
+            // Note we don't copy the nine patch because it is immutable.
+            mNinePatch = state.mNinePatch;
             // Note we don't copy the padding because it is immutable.
             mPadding = state.mPadding;
             mOpticalInsets = state.mOpticalInsets;
             mDither = state.mDither;
             mChangingConfigurations = state.mChangingConfigurations;
             mTargetDensity = state.mTargetDensity;
+            mAutoMirrored = state.mAutoMirrored;
+        }
+
+        @Override
+        public Bitmap getBitmap() {
+            return mNinePatch.getBitmap();
         }
 
         @Override

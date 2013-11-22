@@ -128,6 +128,56 @@ public class MatrixCursorTest extends TestCase {
         } catch (IllegalArgumentException e) { /* expected */ }
     }
 
+    public void testRowBuilderOffer() {
+        MatrixCursor cursor = newMatrixCursor();
+
+        cursor.newRow()
+                .add("float", 4.2f)
+                .add("string", "foobar")
+                .add("blob", new byte[] {(byte) 0xaa, (byte) 0x55})
+                .add("lolwat", "kittens");
+
+        cursor.newRow();
+
+        cursor.newRow()
+                .add("string", "zero")
+                .add("string", "one")
+                .add("string", "two")
+                .add("lolwat", "kittens");
+
+        assertTrue(cursor.moveToFirst());
+        assertEquals("foobar", cursor.getString(0));
+        assertEquals(null, cursor.getString(1));
+        assertEquals(0, cursor.getShort(1));
+        assertEquals(0, cursor.getInt(2));
+        assertEquals(0, cursor.getLong(3));
+        assertEquals(4.2f, cursor.getFloat(4));
+        assertEquals(0.0d, cursor.getDouble(5));
+        MoreAsserts.assertEquals(new byte[] {(byte) 0xaa, (byte) 0x55}, cursor.getBlob(6));
+
+        assertTrue(cursor.moveToNext());
+        assertEquals(null, cursor.getString(0));
+        assertEquals(0, cursor.getShort(1));
+        assertEquals(0, cursor.getInt(2));
+        assertEquals(0, cursor.getLong(3));
+        assertEquals(0.0f, cursor.getFloat(4));
+        assertEquals(0.0d, cursor.getDouble(5));
+        assertEquals(null, cursor.getBlob(6));
+
+        assertTrue(cursor.moveToNext());
+        assertEquals("two", cursor.getString(0));
+        assertEquals(0, cursor.getShort(1));
+        assertEquals(0, cursor.getInt(2));
+        assertEquals(0, cursor.getLong(3));
+        assertEquals(0.0f, cursor.getFloat(4));
+        assertEquals(0.0d, cursor.getDouble(5));
+        assertEquals(null, cursor.getBlob(6));
+
+        assertTrue(cursor.isLast());
+        assertFalse(cursor.moveToNext());
+        assertTrue(cursor.isAfterLast());
+    }
+
     static class NonIterableArrayList<T> extends ArrayList<T> {
 
         NonIterableArrayList() {}

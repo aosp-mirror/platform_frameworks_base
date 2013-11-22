@@ -22,7 +22,11 @@
 #include <SkBitmap.h>
 #include <SkiaColorFilter.h>
 #include <SkiaShader.h>
+
 #include <utils/KeyedVector.h>
+
+#include <androidfw/ResourceTypes.h>
+
 #include "Layer.h"
 
 namespace android {
@@ -35,6 +39,7 @@ enum ResourceType {
     kBitmap,
     kShader,
     kColorFilter,
+    kNinePatch,
     kPath,
     kLayer
 };
@@ -69,35 +74,41 @@ public:
     void incrementRefcount(SkBitmap* resource);
     void incrementRefcount(SkiaShader* resource);
     void incrementRefcount(SkiaColorFilter* resource);
+    void incrementRefcount(Res_png_9patch* resource);
     void incrementRefcount(Layer* resource);
 
     void incrementRefcountLocked(SkPath* resource);
     void incrementRefcountLocked(SkBitmap* resource);
     void incrementRefcountLocked(SkiaShader* resource);
     void incrementRefcountLocked(SkiaColorFilter* resource);
+    void incrementRefcountLocked(Res_png_9patch* resource);
     void incrementRefcountLocked(Layer* resource);
 
     void decrementRefcount(SkBitmap* resource);
     void decrementRefcount(SkPath* resource);
     void decrementRefcount(SkiaShader* resource);
     void decrementRefcount(SkiaColorFilter* resource);
+    void decrementRefcount(Res_png_9patch* resource);
     void decrementRefcount(Layer* resource);
 
     void decrementRefcountLocked(SkBitmap* resource);
     void decrementRefcountLocked(SkPath* resource);
     void decrementRefcountLocked(SkiaShader* resource);
     void decrementRefcountLocked(SkiaColorFilter* resource);
+    void decrementRefcountLocked(Res_png_9patch* resource);
     void decrementRefcountLocked(Layer* resource);
 
     void destructor(SkPath* resource);
     void destructor(SkBitmap* resource);
     void destructor(SkiaShader* resource);
     void destructor(SkiaColorFilter* resource);
+    void destructor(Res_png_9patch* resource);
 
     void destructorLocked(SkPath* resource);
     void destructorLocked(SkBitmap* resource);
     void destructorLocked(SkiaShader* resource);
     void destructorLocked(SkiaColorFilter* resource);
+    void destructorLocked(Res_png_9patch* resource);
 
     bool recycle(SkBitmap* resource);
     bool recycleLocked(SkBitmap* resource);

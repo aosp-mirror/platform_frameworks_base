@@ -16,10 +16,8 @@
 
 package com.android.connectivitymanagertest;
 
-import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import android.util.Log;
 import com.android.connectivitymanagertest.unit.WifiClientTest;
 import com.android.connectivitymanagertest.unit.WifiSoftAPTest;
 

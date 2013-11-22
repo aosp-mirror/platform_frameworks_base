@@ -191,13 +191,25 @@ public class LayoutTransition {
     private long mChangingStagger = 0;
 
     /**
+     * Static interpolators - these are stateless and can be shared across the instances
+     */
+    private static TimeInterpolator ACCEL_DECEL_INTERPOLATOR =
+            new AccelerateDecelerateInterpolator();
+    private static TimeInterpolator DECEL_INTERPOLATOR = new DecelerateInterpolator();
+    private static TimeInterpolator sAppearingInterpolator = ACCEL_DECEL_INTERPOLATOR;
+    private static TimeInterpolator sDisappearingInterpolator = ACCEL_DECEL_INTERPOLATOR;
+    private static TimeInterpolator sChangingAppearingInterpolator = DECEL_INTERPOLATOR;
+    private static TimeInterpolator sChangingDisappearingInterpolator = DECEL_INTERPOLATOR;
+    private static TimeInterpolator sChangingInterpolator = DECEL_INTERPOLATOR;
+
+    /**
      * The default interpolators used for the animations
      */
-    private TimeInterpolator mAppearingInterpolator = new AccelerateDecelerateInterpolator();
-    private TimeInterpolator mDisappearingInterpolator = new AccelerateDecelerateInterpolator();
-    private TimeInterpolator mChangingAppearingInterpolator = new DecelerateInterpolator();
-    private TimeInterpolator mChangingDisappearingInterpolator = new DecelerateInterpolator();
-    private TimeInterpolator mChangingInterpolator = new DecelerateInterpolator();
+    private TimeInterpolator mAppearingInterpolator = sAppearingInterpolator;
+    private TimeInterpolator mDisappearingInterpolator = sDisappearingInterpolator;
+    private TimeInterpolator mChangingAppearingInterpolator = sChangingAppearingInterpolator;
+    private TimeInterpolator mChangingDisappearingInterpolator = sChangingDisappearingInterpolator;
+    private TimeInterpolator mChangingInterpolator = sChangingInterpolator;
 
     /**
      * These hashmaps are used to store the animations that are currently running as part of
@@ -905,14 +917,24 @@ public class LayoutTransition {
                     case APPEARING:
                         startDelay = mChangingAppearingDelay + staggerDelay;
                         staggerDelay += mChangingAppearingStagger;
+                        if (mChangingAppearingInterpolator != sChangingAppearingInterpolator) {
+                            anim.setInterpolator(mChangingAppearingInterpolator);
+                        }
                         break;
                     case DISAPPEARING:
                         startDelay = mChangingDisappearingDelay + staggerDelay;
                         staggerDelay += mChangingDisappearingStagger;
+                        if (mChangingDisappearingInterpolator !=
+                                sChangingDisappearingInterpolator) {
+                            anim.setInterpolator(mChangingDisappearingInterpolator);
+                        }
                         break;
                     case CHANGING:
                         startDelay = mChangingDelay + staggerDelay;
                         staggerDelay += mChangingStagger;
+                        if (mChangingInterpolator != sChangingInterpolator) {
+                            anim.setInterpolator(mChangingInterpolator);
+                        }
                         break;
                 }
                 anim.setStartDelay(startDelay);
@@ -1148,6 +1170,9 @@ public class LayoutTransition {
         anim.setTarget(child);
         anim.setStartDelay(mAppearingDelay);
         anim.setDuration(mAppearingDuration);
+        if (mAppearingInterpolator != sAppearingInterpolator) {
+            anim.setInterpolator(mAppearingInterpolator);
+        }
         if (anim instanceof ObjectAnimator) {
             ((ObjectAnimator) anim).setCurrentPlayTime(0);
         }
@@ -1192,6 +1217,9 @@ public class LayoutTransition {
         Animator anim = mDisappearingAnim.clone();
         anim.setStartDelay(mDisappearingDelay);
         anim.setDuration(mDisappearingDuration);
+        if (mDisappearingInterpolator != sDisappearingInterpolator) {
+            anim.setInterpolator(mDisappearingInterpolator);
+        }
         anim.setTarget(child);
         final float preAnimAlpha = child.getAlpha();
         anim.addListener(new AnimatorListenerAdapter() {

@@ -406,6 +406,10 @@ final class AccessibilityInteractionController {
                         if (host == null || !ViewRootImpl.isViewDescendantOf(host, root)) {
                             break;
                         }
+                        // The focused view not shown, we failed.
+                        if (!isShown(host)) {
+                            break;
+                        }
                         // If the host has a provider ask this provider to search for the
                         // focus instead fetching all provider nodes to do the search here.
                         AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
@@ -419,9 +423,15 @@ final class AccessibilityInteractionController {
                         }
                     } break;
                     case AccessibilityNodeInfo.FOCUS_INPUT: {
-                        // Input focus cannot go to virtual views.
                         View target = root.findFocus();
-                        if (target != null && isShown(target)) {
+                        if (target == null || !isShown(target)) {
+                            break;
+                        }
+                        AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
+                        if (provider != null) {
+                            focused = provider.findFocus(focusType);
+                        }
+                        if (focused == null) {
                             focused = target.createAccessibilityNodeInfo();
                         }
                     } break;

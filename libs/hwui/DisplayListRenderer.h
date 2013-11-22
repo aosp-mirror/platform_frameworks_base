@@ -103,8 +103,7 @@ public:
     virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint);
-    virtual status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
             float left, float top, float right, float bottom, SkPaint* paint);
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
     virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
@@ -122,7 +121,8 @@ public:
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
             const float* positions, SkPaint* paint);
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float length, DrawOpMode drawOpMode);
+            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
+            DrawOpMode drawOpMode);
 
     virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
 
@@ -154,6 +154,10 @@ public:
 
     const Vector<SkiaColorFilter*>& getFilterResources() const {
         return mFilterResources;
+    }
+
+    const Vector<Res_png_9patch*>& getPatchResources() const {
+        return mPatchResources;
     }
 
     const Vector<SkiaShader*>& getShaders() const {
@@ -265,11 +269,14 @@ private:
     }
 
     inline SkMatrix* refMatrix(SkMatrix* matrix) {
-        // Copying the matrix is cheap and prevents against the user changing the original
-        // matrix before the operation that uses it
-        SkMatrix* copy = new SkMatrix(*matrix);
-        mMatrices.add(copy);
-        return copy;
+        if (matrix) {
+            // Copying the matrix is cheap and prevents against the user changing
+            // the original matrix before the operation that uses it
+            SkMatrix* copy = new SkMatrix(*matrix);
+            mMatrices.add(copy);
+            return copy;
+        }
+        return matrix;
     }
 
     inline Layer* refLayer(Layer* layer) {
@@ -315,9 +322,16 @@ private:
         return colorFilter;
     }
 
+    inline Res_png_9patch* refPatch(Res_png_9patch* patch) {
+        mPatchResources.add(patch);
+        mCaches.resourceCache.incrementRefcount(patch);
+        return patch;
+    }
+
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
+    Vector<Res_png_9patch*> mPatchResources;
 
     Vector<SkPaint*> mPaints;
     DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;

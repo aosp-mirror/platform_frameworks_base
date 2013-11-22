@@ -23,7 +23,6 @@ import com.android.layoutlib.bridge.impl.GcSnapshot;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Bitmap.Config;
-import android.graphics.Paint_Delegate.FontInfo;
 import android.text.TextUtils;
 
 import java.awt.Color;
@@ -35,7 +34,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 
 /**
@@ -978,7 +976,8 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_drawText(int nativeCanvas,
             final char[] text, final int index, final int count,
-            final float startX, final float startY, int flags, int paint) {
+            final float startX, final float startY, final int flags, int paint) {
+
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
             @Override
@@ -988,10 +987,10 @@ public final class Canvas_Delegate {
                 // Paint.TextAlign indicates how the text is positioned relative to X.
                 // LEFT is the default and there's nothing to do.
                 float x = startX;
-                float y = startY;
+                int limit = index + count;
+                boolean isRtl = flags == Canvas.DIRECTION_RTL;
                 if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
-                    // TODO: check the value of bidiFlags.
-                    float m = paintDelegate.measureText(text, index, count, 0);
+                    float m = paintDelegate.measureText(text, index, count, isRtl);
                     if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
                         x -= m / 2;
                     } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
@@ -999,87 +998,15 @@ public final class Canvas_Delegate {
                     }
                 }
 
-                List<FontInfo> fonts = paintDelegate.getFonts();
-
-                if (fonts.size() > 0) {
-                    FontInfo mainFont = fonts.get(0);
-                    int i = index;
-                    int lastIndex = index + count;
-                    while (i < lastIndex) {
-                        // always start with the main font.
-                        int upTo = mainFont.mFont.canDisplayUpTo(text, i, lastIndex);
-                        if (upTo == -1) {
-                            // draw all the rest and exit.
-                            graphics.setFont(mainFont.mFont);
-                            graphics.drawChars(text, i, lastIndex - i, (int)x, (int)y);
-                            return;
-                        } else if (upTo > 0) {
-                            // draw what's possible
-                            graphics.setFont(mainFont.mFont);
-                            graphics.drawChars(text, i, upTo - i, (int)x, (int)y);
-
-                            // compute the width that was drawn to increase x
-                            x += mainFont.mMetrics.charsWidth(text, i, upTo - i);
-
-                            // move index to the first non displayed char.
-                            i = upTo;
-
-                            // don't call continue at this point. Since it is certain the main font
-                            // cannot display the font a index upTo (now ==i), we move on to the
-                            // fallback fonts directly.
-                        }
-
-                        // no char supported, attempt to read the next char(s) with the
-                        // fallback font. In this case we only test the first character
-                        // and then go back to test with the main font.
-                        // Special test for 2-char characters.
-                        boolean foundFont = false;
-                        for (int f = 1 ; f < fonts.size() ; f++) {
-                            FontInfo fontInfo = fonts.get(f);
-
-                            // need to check that the font can display the character. We test
-                            // differently if the char is a high surrogate.
-                            int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
-                            upTo = fontInfo.mFont.canDisplayUpTo(text, i, i + charCount);
-                            if (upTo == -1) {
-                                // draw that char
-                                graphics.setFont(fontInfo.mFont);
-                                graphics.drawChars(text, i, charCount, (int)x, (int)y);
-
-                                // update x
-                                x += fontInfo.mMetrics.charsWidth(text, i, charCount);
-
-                                // update the index in the text, and move on
-                                i += charCount;
-                                foundFont = true;
-                                break;
-
-                            }
-                        }
-
-                        // in case no font can display the char, display it with the main font.
-                        // (it'll put a square probably)
-                        if (foundFont == false) {
-                            int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
-
-                            graphics.setFont(mainFont.mFont);
-                            graphics.drawChars(text, i, charCount, (int)x, (int)y);
-
-                            // measure it to advance x
-                            x += mainFont.mMetrics.charsWidth(text, i, charCount);
-
-                            // and move to the next chars.
-                            i += charCount;
-                        }
-                    }
-                }
+                new BidiRenderer(graphics, paintDelegate, text).renderText(
+                        index, limit, isRtl, null, 0, true, x, startY);
             }
         });
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_drawText(int nativeCanvas, String text,
-            int start, int end, float x, float y, int flags, int paint) {
+            int start, int end, float x, float y, final int flags, int paint) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
@@ -1145,14 +1072,6 @@ public final class Canvas_Delegate {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawTextOnPath is not supported.", null, null /*data*/);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawPicture(int nativeCanvas,
-                                                  int nativePicture) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Canvas.drawPicture is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate

@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
-
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,7 +26,7 @@ import android.os.Message;
 import android.util.Slog;
 import android.view.WindowManager;
 
-class AppNotRespondingDialog extends BaseErrorDialog {
+final class AppNotRespondingDialog extends BaseErrorDialog {
     private static final String TAG = "AppNotRespondingDialog";
 
     // Event 'what' codes
@@ -94,10 +92,10 @@ class AppNotRespondingDialog extends BaseErrorDialog {
         if (aboveSystem) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         }
-        getWindow().addFlags(FLAG_SYSTEM_ERROR);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Application Not Responding: " + app.info.processName);
-        attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR |
+                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
     }
 
@@ -128,6 +126,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                         if (app.anrDialog == AppNotRespondingDialog.this) {
                             app.anrDialog = null;
                         }
+                        mService.mServices.scheduleServiceTimeoutLocked(app);
                     }
                     break;
             }

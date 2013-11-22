@@ -82,7 +82,7 @@ public abstract class RegisteredServicesCache<V> {
     @GuardedBy("mServicesLock")
     private boolean mPersistentServicesFileDidNotExist;
     @GuardedBy("mServicesLock")
-    private final SparseArray<UserServices<V>> mUserServices = new SparseArray<UserServices<V>>();
+    private final SparseArray<UserServices<V>> mUserServices = new SparseArray<UserServices<V>>(2);
 
     private static class UserServices<V> {
         @GuardedBy("mServicesLock")

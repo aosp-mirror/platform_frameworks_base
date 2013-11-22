@@ -79,7 +79,7 @@ a valid auth token from the Android Account Manager"/>
 
 <p>To get an auth token you first need to request the
 {@link android.Manifest.permission#ACCOUNT_MANAGER}
-to yourmanifest file. To actually do anything useful with the
+to your manifest file. To actually do anything useful with the
 token, you'll also need to add the {@link android.Manifest.permission#INTERNET}
 permission.</p>
 

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Title of the documents application [CHAR LIMIT=32] -->
+    <string name="app_label">Documents</string>
+
+    <!-- Action bar title prompting user to choose a location to open a document from [CHAR LIMIT=32] -->
+    <string name="title_open">Open from</string>
+    <!-- Action bar title prompting user to choose a location to save a document to [CHAR LIMIT=32] -->
+    <string name="title_save">Save to</string>
+
+    <!-- Menu item that creates a new directory/folder at the current location [CHAR LIMIT=24] -->
+    <string name="menu_create_dir">Create folder</string>
+    <!-- Menu item that switches view to show documents as a large-format grid of thumbnails [CHAR LIMIT=24] -->
+    <string name="menu_grid">Grid view</string>
+    <!-- Menu item that switches view to show documents as a list [CHAR LIMIT=24] -->
+    <string name="menu_list">List view</string>
+    <!-- Menu item that switches the criteria with which documents are sorted [CHAR LIMIT=24] -->
+    <string name="menu_sort">Sort by</string>
+    <!-- Menu item that enters a mode to search for documents [CHAR LIMIT=24] -->
+    <string name="menu_search">Search</string>
+    <!-- Menu item that enters activity to change settings [CHAR LIMIT=24] -->
+    <string name="menu_settings">Settings</string>
+
+    <!-- Menu item title that opens the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_open">Open</string>
+    <!-- Menu item title that saves the current document [CHAR LIMIT=24] -->
+    <string name="menu_save">Save</string>
+    <!-- Menu item title that shares the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_share">Share</string>
+    <!-- Menu item title that deletes the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_delete">Delete</string>
+
+    <!-- Action mode title summarizing the number of documents selected [CHAR LIMIT=32] -->
+    <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
+
+    <!-- Mode that sorts documents by their display name alphabetically [CHAR LIMIT=24] -->
+    <string name="sort_name">By name</string>
+    <!-- Mode that sorts documents by their last modified time in descending order; most recent first [CHAR LIMIT=24] -->
+    <string name="sort_date">By date modified</string>
+    <!-- Mode that sorts documents by their file size in descending order; largest first [CHAR LIMIT=24] -->
+    <string name="sort_size">By size</string>
+
+    <!-- Accessibility title to open the drawer showing all roots where documents can be stored [CHAR LIMIT=32] -->
+    <string name="drawer_open">Show roots</string>
+    <!-- Accessibility title to close the drawer showing all roots where documents can be stored [CHAR LIMIT=32] -->
+    <string name="drawer_close">Hide roots</string>
+
+    <!-- Toast shown when saving a document failed with an error [CHAR LIMIT=48] -->
+    <string name="save_error">Failed to save document</string>
+    <!-- Toast shown when creating a folder failed with an error [CHAR LIMIT=48] -->
+    <string name="create_error">Failed to create folder</string>
+    <!-- Error message shown when querying for a list of documents failed [CHAR LIMIT=48] -->
+    <string name="query_error">Failed to query documents</string>
+
+    <!-- Title of storage root location that contains recently modified or used documents [CHAR LIMIT=24] -->
+    <string name="root_recent">Recent</string>
+    <!-- Subtitle of storage root indicating the total free space available, in bytes [CHAR LIMIT=24] -->
+    <string name="root_available_bytes"><xliff:g id="size" example="3GB">%1$s</xliff:g> free</string>
+
+    <!-- Header title for list of storage roots that contains cloud services [CHAR LIMIT=24] -->
+    <string name="root_type_service">Storage services</string>
+    <!-- Header title for list of storage roots that contains shortcuts to documents that may be available elsewhere [CHAR LIMIT=24] -->
+    <string name="root_type_shortcut">Shortcuts</string>
+    <!-- Header title for list of storage roots that contains physical devices [CHAR LIMIT=24] -->
+    <string name="root_type_device">Devices</string>
+    <!-- Header title for list of additional apps that can provide documents [CHAR LIMIT=24] -->
+    <string name="root_type_apps">More apps</string>
+
+    <!-- Title for setting that will show all advanced storage devices [CHAR LIMIT=32] -->
+    <string name="pref_advanced_devices">Display advanced devices</string>
+    <!-- Title for setting that will show file sizes for all documents [CHAR LIMIT=32] -->
+    <string name="pref_file_size">Display file size</string>
+    <string name="pref_device_size">Display device size</string>
+
+    <!-- Text shown when a directory of documents is empty [CHAR LIMIT=24] -->
+    <string name="empty">No items</string>
+
+    <!-- Toast shown when no app can be found to open the selected document [CHAR LIMIT=48] -->
+    <string name="toast_no_application">Can\'t open file</string>
+    <!-- Toast shown when some of the selected documents failed to be deleted [CHAR LIMIT=48] -->
+    <string name="toast_failed_delete">Unable to delete some documents</string>
+
+    <!-- Title of dialog when prompting user to select an app to share documents with [CHAR LIMIT=32] -->
+    <string name="share_via">Share via</string>
+
+</resources>

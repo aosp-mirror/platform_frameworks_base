@@ -136,10 +136,10 @@ public class WifiP2pServiceRequest implements Parcelable {
     public String getSupplicantQuery() {
         StringBuffer sb = new StringBuffer();
         // length is retained as little endian format.
-        sb.append(String.format("%02x", (mLength) & 0xff));
-        sb.append(String.format("%02x", (mLength >> 8) & 0xff));
-        sb.append(String.format("%02x", mProtocolType));
-        sb.append(String.format("%02x", mTransId));
+        sb.append(String.format(Locale.US, "%02x", (mLength) & 0xff));
+        sb.append(String.format(Locale.US, "%02x", (mLength >> 8) & 0xff));
+        sb.append(String.format(Locale.US, "%02x", mProtocolType));
+        sb.append(String.format(Locale.US, "%02x", mTransId));
         if (mQuery != null) {
             sb.append(mQuery);
         }

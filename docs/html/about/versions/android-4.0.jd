@@ -62,7 +62,7 @@ class="toggle-content-img" alt="" />
       <li><a href="#Multimedia">Multimedia</a></li>
       <li><a href="#Camera">Camera</a></li>
       <li><a href="#AndroidBeam">Android Beam (NDEF Push with NFC)</a></li>
-      <li><a href="#WiFiDirect">Wi-Fi Direct</a></li>
+      <li><a href="#WiFiDirect">Wi-Fi P2P</a></li>
       <li><a href="#Bluetooth">Bluetooth Health Devices</a></li>
       <li><a href="#A11y">Accessibility</a></li>
       <li><a href="#SpellChecker">Spell Checker Services</a></li>
@@ -617,13 +617,16 @@ Beam Demo</a>.</p>
 
 
 
-<h3 id="WiFiDirect">Wi-Fi Direct</h3>
+<h3 id="WiFiDirect">Wi-Fi P2P</h3>
 
-<p>Android now supports Wi-Fi Direct for peer-to-peer (P2P) connections between Android-powered
-devices and other device types without a hotspot or Internet connection. The Android framework
-provides a set of Wi-Fi P2P APIs that allow you to discover and connect to other devices when each
-device supports Wi-Fi Direct, then communicate over a speedy connection across distances much longer
-than a Bluetooth connection.</p>
+<p>Android now supports Wi-Fi peer-to-peer (P2P) connections between Android-powered devices and
+other device types (in compliance with the Wi-Fi Alliance's <a href=
+"http://www.wi-fi.org/discover-and-learn/wi-fi-direct" class="external-link">Wi-Fi Direct&trade;</a>
+certification program) without a hotspot or Internet connection. The Android framework provides a
+set of Wi-Fi P2P APIs that allow you to discover and connect to other devices when each device
+supports Wi-Fi P2P, then communicate over a speedy connection across distances much longer than a
+Bluetooth connection.</p>
+
 
 <p>A new package, {@link android.net.wifi.p2p}, contains all the APIs for performing peer-to-peer
 connections with Wi-Fi. The primary class you need to work with is {@link
@@ -669,7 +672,7 @@ formed and who is the group owner.</li>
 <li>{@link android.Manifest.permission#ACCESS_WIFI_STATE}</li>
 <li>{@link android.Manifest.permission#CHANGE_WIFI_STATE}</li>
 <li>{@link android.Manifest.permission#INTERNET} (although your app doesn’t technically connect
-to the Internet, communicating to Wi-Fi Direct peers with standard java sockets requires Internet
+to the Internet, communicating to Wi-Fi P2P peers with standard java sockets requires Internet
 permission).</li>
 </ul>
 
@@ -696,7 +699,7 @@ this device have changed.</li>
 </ul>
 
 <p>See the  {@link android.net.wifi.p2p.WifiP2pManager} documentation for more information. Also
-look at the <a href="{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a>
+look at the <a href="{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi P2P Demo</a>
 sample application.</p>
 
 

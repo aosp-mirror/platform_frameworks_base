@@ -22,10 +22,6 @@
     <!-- no translation found for app_label (7164937344850004466) -->
     <skip />
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Stizzar"</string>
-    <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
-    <skip />
-    <!-- no translation found for status_bar_please_disturb_button (3345398298841572813) -->
-    <skip />
     <!-- no translation found for status_bar_recent_remove_item_title (6026395868129852968) -->
     <skip />
     <!-- no translation found for status_bar_recent_inspect_item_title (7793624864528818569) -->
@@ -306,12 +302,6 @@
     <skip />
     <!-- no translation found for status_bar_notification_inspect_item_title (1163547729015390250) -->
     <skip />
-    <!-- no translation found for close_universe (3736513750241754348) -->
-    <skip />
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
     <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
     <skip />
     <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
@@ -344,7 +334,9 @@
     <skip />
     <!-- no translation found for quick_settings_ime_label (7073463064369468429) -->
     <skip />
-    <!-- no translation found for quick_settings_location_label (3292451598267467545) -->
+    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
+    <skip />
+    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
     <skip />
     <!-- no translation found for quick_settings_media_device_label (1302906836372603762) -->
     <skip />
@@ -377,5 +369,9 @@
     <!-- no translation found for status_bar_help_title (1199237744086469217) -->
     <skip />
     <!-- no translation found for status_bar_help_text (7874607155052076323) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
     <skip />
 </resources>

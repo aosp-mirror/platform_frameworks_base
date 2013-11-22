@@ -26,10 +26,12 @@ public class PreferredIntentResolver
     protected PreferredActivity[] newArray(int size) {
         return new PreferredActivity[size];
     }
+
     @Override
     protected boolean isPackageForFilter(String packageName, PreferredActivity filter) {
         return packageName.equals(filter.mPref.mComponent.getPackageName());
     }
+
     @Override
     protected void dumpFilter(PrintWriter out, String prefix,
             PreferredActivity filter) {

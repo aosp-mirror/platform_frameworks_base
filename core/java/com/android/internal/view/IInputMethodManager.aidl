@@ -28,11 +28,13 @@ import com.android.internal.view.IInputMethodClient;
 /**
  * Public interface to the global input method manager, used by all client
  * applications.
+ * You need to update BridgeIInputMethodManager.java as well when changing
+ * this file.
  */
 interface IInputMethodManager {
     List<InputMethodInfo> getInputMethodList();
     List<InputMethodInfo> getEnabledInputMethodList();
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi,
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
     // TODO: We should change the return type from List to List<Parcelable>
@@ -54,7 +56,7 @@ interface IInputMethodManager {
     InputBindResult windowGainedFocus(in IInputMethodClient client, in IBinder windowToken,
             int controlFlags, int softInputMode, int windowFlags,
             in EditorInfo attribute, IInputContext inputContext);
-            
+
     void showInputMethodPickerFromClient(in IInputMethodClient client);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     void setInputMethod(in IBinder token, String id);
@@ -69,6 +71,7 @@ interface IInputMethodManager {
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
     boolean switchToLastInputMethod(in IBinder token);
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
+    boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
     boolean setInputMethodEnabled(String id, boolean enabled);
     oneway void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
 }

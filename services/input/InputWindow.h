@@ -17,8 +17,8 @@
 #ifndef _UI_INPUT_WINDOW_H
 #define _UI_INPUT_WINDOW_H
 
-#include <androidfw/Input.h>
-#include <androidfw/InputTransport.h>
+#include <input/Input.h>
+#include <input/InputTransport.h>
 #include <utils/RefBase.h>
 #include <utils/Timers.h>
 #include <utils/String8.h>
@@ -59,13 +59,13 @@ struct InputWindowInfo {
         FLAG_TURN_SCREEN_ON = 0x00200000,
         FLAG_DISMISS_KEYGUARD = 0x00400000,
         FLAG_SPLIT_TOUCH = 0x00800000,
-        FLAG_HARDWARE_ACCELERATED = 0x01000000,
-        FLAG_HARDWARE_ACCELERATED_SYSTEM = 0x02000000,
-        FLAG_SLIPPERY = 0x04000000,
-        FLAG_NEEDS_MENU_KEY = 0x08000000,
-        FLAG_KEEP_SURFACE_WHILE_ANIMATING = 0x10000000,
-        FLAG_COMPATIBLE_WINDOW = 0x20000000,
-        FLAG_SYSTEM_ERROR = 0x40000000,
+        FLAG_SLIPPERY = 0x20000000,
+        FLAG_NEEDS_MENU_KEY = 0x40000000,
+    };
+
+    // Private Window flags from WindowManager.LayoutParams
+    enum {
+        PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100,
     };
 
     // Window types from WindowManager.LayoutParams
@@ -117,6 +117,7 @@ struct InputWindowInfo {
     sp<InputChannel> inputChannel;
     String8 name;
     int32_t layoutParamsFlags;
+    int32_t layoutParamsPrivateFlags;
     int32_t layoutParamsType;
     nsecs_t dispatchingTimeout;
     int32_t frameLeft;

@@ -8,7 +8,7 @@ page.article=true
 <div id="tb">
 
 <h2>In this document</h2>
-<ol>
+<ol class="nolist">
   <li><a href="#anr">What Triggers ANR?</a></li>
   <li><a href="#Avoiding">How to Avoid ANRs</a></li>
   <li><a href="#Reinforcing">Reinforcing Responsiveness</a></li>

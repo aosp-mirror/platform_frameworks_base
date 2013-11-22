@@ -17,12 +17,13 @@
 package com.example.android.rs.fountainfbo;
 
 
-import android.renderscript.RSTextureView;
+import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScriptGL;
 import android.content.Context;
+import android.view.SurfaceHolder;
 import android.view.MotionEvent;
 
-public class FountainFboView extends RSTextureView {
+public class FountainFboView extends RSSurfaceView {
 
     public FountainFboView(Context context) {
         super(context);
@@ -31,13 +32,12 @@ public class FountainFboView extends RSTextureView {
     private RenderScriptGL mRS;
     private FountainFboRS mRender;
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        android.util.Log.e("rs", "onAttachedToWindow");
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        super.surfaceChanged(holder, format, w, h);
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
             mRS = createRenderScriptGL(sc);
+            mRS.setSurface(holder, w, h);
             mRender = new FountainFboRS();
             mRender.init(mRS, getResources());
         }

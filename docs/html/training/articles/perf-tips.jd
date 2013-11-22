@@ -6,7 +6,7 @@ page.article=true
 <div id="tb">
 
 <h2>In this document</h2>
-<ol>
+<ol class="nolist">
   <li><a href="#ObjectCreation">Avoid Creating Unnecessary Objects</a></li>
   <li><a href="#PreferStatic">Prefer Static Over Virtual</a></li>
   <li><a href="#UseFinal">Use Static Final For Constants</a></li>

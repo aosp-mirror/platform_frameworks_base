@@ -17,7 +17,6 @@
 package android.view;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 
@@ -202,6 +201,7 @@ public class GestureDetector {
     private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
+    private static final int DOUBLE_TAP_MIN_TIME = ViewConfiguration.getDoubleTapMinTime();
 
     // constants for Message.what used by GestureHandler below
     private static final int SHOW_PRESS = 1;
@@ -323,7 +323,7 @@ public class GestureDetector {
 
     /**
      * Creates a GestureDetector with the supplied listener.
-     * You may only use this constructor from a UI thread (this is the usual situation).
+     * You may only use this constructor from a {@link android.os.Looper} thread.
      * @see android.os.Handler#Handler()
      *
      * @param context the application's context
@@ -337,14 +337,14 @@ public class GestureDetector {
     }
 
     /**
-     * Creates a GestureDetector with the supplied listener.
-     * You may only use this constructor from a UI thread (this is the usual situation).
+     * Creates a GestureDetector with the supplied listener that runs deferred events on the
+     * thread associated with the supplied {@link android.os.Handler}.
      * @see android.os.Handler#Handler()
      *
      * @param context the application's context
      * @param listener the listener invoked for all the callbacks, this must
      * not be null.
-     * @param handler the handler to use     
+     * @param handler the handler to use for running deferred listener events.
      *
      * @throws NullPointerException if {@code listener} is null.
      */
@@ -362,14 +362,15 @@ public class GestureDetector {
     }
     
     /**
-     * Creates a GestureDetector with the supplied listener.
-     * You may only use this constructor from a UI thread (this is the usual situation).
+     * Creates a GestureDetector with the supplied listener that runs deferred events on the
+     * thread associated with the supplied {@link android.os.Handler}.
      * @see android.os.Handler#Handler()
      *
      * @param context the application's context
      * @param listener the listener invoked for all the callbacks, this must
      * not be null.
-     * @param handler the handler to use
+     * @param handler the handler to use for running deferred listener events.
+     * @param unused currently not used.
      *
      * @throws NullPointerException if {@code listener} is null.
      */
@@ -672,7 +673,8 @@ public class GestureDetector {
             return false;
         }
 
-        if (secondDown.getEventTime() - firstUp.getEventTime() > DOUBLE_TAP_TIMEOUT) {
+        final long deltaTime = secondDown.getEventTime() - firstUp.getEventTime();
+        if (deltaTime > DOUBLE_TAP_TIMEOUT || deltaTime < DOUBLE_TAP_MIN_TIME) {
             return false;
         }
 

@@ -44,6 +44,7 @@ import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * <p>WiredAccessoryManager monitors for a wired headset on the main board or dock using
@@ -408,11 +409,11 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             public String getDevName() { return mDevName; }
 
             public String getDevPath() {
-                return String.format("/devices/virtual/switch/%s", mDevName);
+                return String.format(Locale.US, "/devices/virtual/switch/%s", mDevName);
             }
 
             public String getSwitchStatePath() {
-                return String.format("/sys/class/switch/%s/state", mDevName);
+                return String.format(Locale.US, "/sys/class/switch/%s/state", mDevName);
             }
 
             public boolean checkSwitchExists() {

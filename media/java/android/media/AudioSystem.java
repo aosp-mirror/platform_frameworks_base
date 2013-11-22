@@ -177,12 +177,10 @@ public class AudioSystem
     {
         synchronized (AudioSystem.class) {
             mErrorCallback = cb;
+            if (cb != null) {
+                cb.onError(checkAudioFlinger());
+            }
         }
-        // Calling a method on AudioFlinger here makes sure that we bind to IAudioFlinger
-        // binder interface death. Not doing that would result in not being notified of
-        // media_server process death if no other method is called on AudioSystem that reaches
-        // to AudioFlinger.
-        isMicrophoneMuted();
     }
 
     private static void errorCallbackFromNative(int error)
@@ -403,4 +401,6 @@ public class AudioSystem
     public static native int getPrimaryOutputFrameCount();
     public static native int getOutputLatency(int stream);
 
+    public static native int setLowRamDevice(boolean isLowRamDevice);
+    public static native int checkAudioFlinger();
 }

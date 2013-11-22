@@ -20,9 +20,14 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <EGL/egl_cache.h>
 
+#include <utils/Timers.h>
+
 #include <Caches.h>
+#include <Extensions.h>
 
 #ifdef USE_OPENGL_RENDERER
     EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
@@ -119,6 +124,13 @@ static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz,
     eglBeginFrame(display, surface);
 }
 
+static jlong android_view_HardwareRenderer_getSystemTime(JNIEnv* env, jobject clazz) {
+    if (uirenderer::Extensions::getInstance().hasNvSystemTime()) {
+        return eglGetSystemTimeNV();
+    }
+    return systemTime(SYSTEM_TIME_MONOTONIC);
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -146,6 +158,8 @@ static JNINativeMethod gMethods[] = {
     { "nLoadProperties",        "()Z",   (void*) android_view_HardwareRenderer_loadProperties },
 
     { "nBeginFrame",            "([I)V", (void*) android_view_HardwareRenderer_beginFrame },
+
+    { "nGetSystemTime",         "()J",   (void*) android_view_HardwareRenderer_getSystemTime },
 #endif
 
     { "nSetupShadersDiskCache", "(Ljava/lang/String;)V",

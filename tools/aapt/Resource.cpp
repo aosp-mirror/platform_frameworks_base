@@ -14,7 +14,7 @@
 #include "FileFinder.h"
 #include "CacheUpdater.h"
 
-#include <utils/WorkQueue.h>
+#include "WorkQueue.h"
 
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"
@@ -172,6 +172,7 @@ private:
 bool isValidResourceType(const String8& type)
 {
     return type == "anim" || type == "animator" || type == "interpolator"
+        || type == "transition"
         || type == "drawable" || type == "layout"
         || type == "values" || type == "xml" || type == "raw"
         || type == "color" || type == "menu" || type == "mipmap";
@@ -932,6 +933,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     sp<ResourceTypeSet> anims;
     sp<ResourceTypeSet> animators;
     sp<ResourceTypeSet> interpolators;
+    sp<ResourceTypeSet> transitions;
     sp<ResourceTypeSet> xmls;
     sp<ResourceTypeSet> raws;
     sp<ResourceTypeSet> colors;
@@ -943,6 +945,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     ASSIGN_IT(anim);
     ASSIGN_IT(animator);
     ASSIGN_IT(interpolator);
+    ASSIGN_IT(transition);
     ASSIGN_IT(xml);
     ASSIGN_IT(raw);
     ASSIGN_IT(color);
@@ -965,6 +968,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             !applyFileOverlay(bundle, assets, &anims, "anim") ||
             !applyFileOverlay(bundle, assets, &animators, "animator") ||
             !applyFileOverlay(bundle, assets, &interpolators, "interpolator") ||
+            !applyFileOverlay(bundle, assets, &transitions, "transition") ||
             !applyFileOverlay(bundle, assets, &xmls, "xml") ||
             !applyFileOverlay(bundle, assets, &raws, "raw") ||
             !applyFileOverlay(bundle, assets, &colors, "color") ||
@@ -1019,6 +1023,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     if (animators != NULL) {
         err = makeFileResources(bundle, assets, &table, animators, "animator");
+        if (err != NO_ERROR) {
+            hasErrors = true;
+        }
+    }
+
+    if (transitions != NULL) {
+        err = makeFileResources(bundle, assets, &table, transitions, "transition");
         if (err != NO_ERROR) {
             hasErrors = true;
         }
@@ -1155,6 +1166,21 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     if (interpolators != NULL) {
         ResourceDirIterator it(interpolators, String8("interpolator"));
+        while ((err=it.next()) == NO_ERROR) {
+            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            if (err != NO_ERROR) {
+                hasErrors = true;
+            }
+        }
+
+        if (err < NO_ERROR) {
+            hasErrors = true;
+        }
+        err = NO_ERROR;
+    }
+
+    if (transitions != NULL) {
+        ResourceDirIterator it(transitions, String8("transition"));
         while ((err=it.next()) == NO_ERROR) {
             err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {

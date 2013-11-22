@@ -16,21 +16,21 @@
 
 package com.android.systemui.statusbar.phone;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import java.util.ArrayList;
 
 public class PanelBar extends FrameLayout {
     public static final boolean DEBUG = false;
     public static final String TAG = PanelBar.class.getSimpleName();
     public static final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
-        Slog.v(TAG, String.format(fmt, args));
+        Log.v(TAG, String.format(fmt, args));
     }
 
     public static final int STATE_CLOSED = 0;
@@ -66,7 +66,7 @@ public class PanelBar extends FrameLayout {
 
     public void setPanelHolder(PanelHolder ph) {
         if (ph == null) {
-            Slog.e(TAG, "setPanelHolder: null PanelHolder", new Throwable());
+            Log.e(TAG, "setPanelHolder: null PanelHolder", new Throwable());
             return;
         }
         ph.setBar(this);
@@ -98,7 +98,7 @@ public class PanelBar extends FrameLayout {
         // Allow subclasses to implement enable/disable semantics
         if (!panelsEnabled()) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                Slog.v(TAG, String.format("onTouch: all panels disabled, ignoring touch at (%d,%d)",
+                Log.v(TAG, String.format("onTouch: all panels disabled, ignoring touch at (%d,%d)",
                         (int) event.getX(), (int) event.getY()));
             }
             return false;
@@ -109,7 +109,7 @@ public class PanelBar extends FrameLayout {
             final PanelView panel = selectPanelForTouch(event);
             if (panel == null) {
                 // panel is not there, so we'll eat the gesture
-                Slog.v(TAG, String.format("onTouch: no panel for touch at (%d,%d)",
+                Log.v(TAG, String.format("onTouch: no panel for touch at (%d,%d)",
                         (int) event.getX(), (int) event.getY()));
                 mTouchingPanel = null;
                 return true;
@@ -119,7 +119,7 @@ public class PanelBar extends FrameLayout {
                     (enabled ? "" : " (disabled)"));
             if (!enabled) {
                 // panel is disabled, so we'll eat the gesture
-                Slog.v(TAG, String.format(
+                Log.v(TAG, String.format(
                         "onTouch: panel (%s) is disabled, ignoring touch at (%d,%d)",
                         panel, (int) event.getX(), (int) event.getY()));
                 mTouchingPanel = null;
@@ -194,11 +194,12 @@ public class PanelBar extends FrameLayout {
             } else {
                 pv.setExpandedFraction(0); // just in case
                 pv.setVisibility(View.GONE);
+                pv.cancelPeek();
             }
         }
         if (DEBUG) LOG("collapseAllPanels: animate=%s waiting=%s", animate, waiting);
         if (!waiting && mState != STATE_CLOSED) {
-            // it's possible that nothing animated, so we replicate the termination 
+            // it's possible that nothing animated, so we replicate the termination
             // conditions of panelExpansionChanged here
             go(STATE_CLOSED);
             onAllPanelsCollapsed();

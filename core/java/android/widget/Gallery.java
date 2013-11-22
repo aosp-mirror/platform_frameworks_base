@@ -1228,13 +1228,9 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_CENTER:
-        case KeyEvent.KEYCODE_ENTER: {
-            
+        if (KeyEvent.isConfirmKey(keyCode)) {
             if (mReceivedInvokeKeyDown) {
                 if (mItemCount > 0) {
-    
                     dispatchPress(mSelectedChild);
                     postDelayed(new Runnable() {
                         @Override
@@ -1242,20 +1238,17 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
                             dispatchUnpress();
                         }
                     }, ViewConfiguration.getPressedStateDuration());
-    
+
                     int selectedIndex = mSelectedPosition - mFirstPosition;
                     performItemClick(getChildAt(selectedIndex), mSelectedPosition, mAdapter
                             .getItemId(mSelectedPosition));
                 }
             }
-            
+
             // Clear the flag
             mReceivedInvokeKeyDown = false;
-            
             return true;
         }
-        }
-
         return super.onKeyUp(keyCode, event);
     }
     

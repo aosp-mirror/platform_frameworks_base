@@ -1,12 +1,6 @@
-page.title=Connecting with Wi-Fi Direct
-parent.title=Connecting Devices Wirelessly
-parent.link=index.html
+page.title=Creating P2P Connections with Wi-Fi
 
 trainingnavtop=true
-previous.title=Using Network Service Discovery
-previous.link=nsd.html
-next.title=Service Discovery with Wi-Fi Direct
-next.link=nsd-wifi-direct.html
 
 @jd:body
 
@@ -21,25 +15,32 @@ next.link=nsd-wifi-direct.html
       <li><a href="#fetch">Fetch the List of Peers</a></li>
       <li><a href="#connect">Connect to a Peer</a></li>
     </ol>
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi Peer-to-Peer</a></li>
+    </ul>
   </div>
 </div>
 
-<p>The Wi-Fi Direct&trade; APIs allow applications to connect to nearby devices without
-needing to connect to a network or hotspot.  This allows your application to quickly
+<p>The Wi-Fi peer-to-peer (P2P) APIs allow applications to connect to nearby devices without
+needing to connect to a network or hotspot (Android's Wi-Fi P2P framework complies with the
+<a href="http://www.wi-fi.org/discover-and-learn/wi-fi-direct"
+ class="external-link">Wi-Fi Direct&trade;</a> certification program).
+ Wi-Fi P2P allows your application to quickly
 find and interact with nearby devices, at a range beyond the capabilities of Bluetooth.
 </p>
 <p>
-This lesson shows you how to find and connect to nearby devices using Wi-Fi Direct.
+This lesson shows you how to find and connect to nearby devices using Wi-Fi P2P.
 </p>
 <h2 id="permissions">Set Up Application Permissions</h2>
-<p>In order to use Wi-Fi Direct, add the {@link
+<p>In order to use Wi-Fi P2P, add the {@link
 android.Manifest.permission#CHANGE_WIFI_STATE}, {@link
 android.Manifest.permission#ACCESS_WIFI_STATE},
 and {@link android.Manifest.permission#INTERNET}
-permissions to your manifest.   Wi-Fi Direct doesn't require an internet connection,
+permissions to your manifest.   Wi-Fi P2P doesn't require an internet connection,
 but it does use standard Java sockets, which require the {@link
 android.Manifest.permission#INTERNET} permission.
-So you need the following permissions to use Wi-Fi Direct.</p>
+So you need the following permissions to use Wi-Fi P2P.</p>
 
 <pre>
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -59,13 +60,13 @@ So you need the following permissions to use Wi-Fi Direct.</p>
 </pre>
 
 <h2 id="receiver">Set Up a Broadcast Receiver and Peer-to-Peer Manager</h2>
-<p>To use Wi-Fi Direct, you need to listen for broadcast intents that tell your
+<p>To use Wi-Fi P2P, you need to listen for broadcast intents that tell your
 application when certain events have occurred.  In your application, instantiate
 an {@link
 android.content.IntentFilter} and set it to listen for the following:</p>
 <dl>
   <dt>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_CHANGED_ACTION}</dt>
-  <dd>Indicates whether Wi-Fi Peer-To-Peer (P2P) is enabled</dd>
+  <dd>Indicates whether Wi-Fi P2P is enabled</dd>
   <dt>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION}</dt>
   <dd>Indicates that the available peer list has changed.</dd>
   <dt>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_CONNECTION_CHANGED_ACTION}</dt>
@@ -80,7 +81,7 @@ public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    //  Indicates a change in the Wi-Fi Peer-to-Peer status.
+    //  Indicates a change in the Wi-Fi P2P status.
     intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
 
     // Indicates a change in the list of available peers.
@@ -101,7 +102,7 @@ android.net.wifi.p2p.WifiP2pManager}, and call its {@link
 android.net.wifi.p2p.WifiP2pManager#initialize(Context, Looper, WifiP2pManager.ChannelListener) initialize()}
 method.  This method returns a {@link
 android.net.wifi.p2p.WifiP2pManager.Channel} object, which you'll use later to
-connect your app to the Wi-Fi Direct Framework.</p>
+connect your app to the Wi-Fi P2P framework.</p>
 
 <pre>
 &#64;Override
@@ -126,7 +127,7 @@ method, add a condition to handle each P2P state change listed above.</p>
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
-            // Determine if Wifi Direct mode is enabled or not, alert
+            // Determine if Wifi P2P mode is enabled or not, alert
             // the Activity.
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
             if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
@@ -177,7 +178,7 @@ The best place to do this is the {@link android.app.Activity#onResume()} and
 
 
 <h2 id="discover">Initiate Peer Discovery</h2>
-<p>To start searching for nearby devices with Wi-Fi Direct, call {@link
+<p>To start searching for nearby devices with Wi-Fi P2P, call {@link
 android.net.wifi.p2p.WifiP2pManager#discoverPeers(WifiP2pManager.Channel,
 WifiP2pManager.ActionListener) discoverPeers()}.  This method takes the
 following arguments:</p>
@@ -218,7 +219,7 @@ formed.</p>
 <h2 id="fetch">Fetch the List of Peers</h2>
 <p>Now write the code that fetches and processes the list of peers.  First
 implement the {@link android.net.wifi.p2p.WifiP2pManager.PeerListListener}
-interface, which provides information about the peers that Wi-Fi Direct has
+interface, which provides information about the peers that Wi-Fi P2P has
 detected.  The following code snippet illustrates this.</p>
 
 <pre>

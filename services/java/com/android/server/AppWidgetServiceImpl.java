@@ -86,9 +86,12 @@ import java.util.Set;
 
 class AppWidgetServiceImpl {
 
+    private static final String KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
+    private static final int KEYGUARD_HOST_ID = 0x4b455947;
     private static final String TAG = "AppWidgetServiceImpl";
     private static final String SETTINGS_FILENAME = "appwidgets.xml";
     private static final int MIN_UPDATE_PERIOD = 30 * 60 * 1000; // 30 minutes
+    private static final int CURRENT_VERSION = 1; // Bump if the stored widgets need to be upgraded.
 
     private static boolean DBG = false;
 
@@ -1654,7 +1657,7 @@ class AppWidgetServiceImpl {
             out.setOutput(stream, "utf-8");
             out.startDocument(null, true);
             out.startTag(null, "gs");
-
+            out.attribute(null, "version", String.valueOf(CURRENT_VERSION));
             int providerIndex = 0;
             N = mInstalledProviders.size();
             for (int i = 0; i < N; i++) {
@@ -1723,6 +1726,7 @@ class AppWidgetServiceImpl {
     @SuppressWarnings("unused")
     void readStateFromFileLocked(FileInputStream stream) {
         boolean success = false;
+        int version = 0;
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(stream, null);
@@ -1734,7 +1738,14 @@ class AppWidgetServiceImpl {
                 type = parser.next();
                 if (type == XmlPullParser.START_TAG) {
                     String tag = parser.getName();
-                    if ("p".equals(tag)) {
+                    if ("gs".equals(tag)) {
+                        String attributeValue = parser.getAttributeValue(null, "version");
+                        try {
+                            version = Integer.parseInt(attributeValue);
+                        } catch (NumberFormatException e) {
+                            version = 0;
+                        }
+                    } else if ("p".equals(tag)) {
                         // TODO: do we need to check that this package has the same signature
                         // as before?
                         String pkg = parser.getAttributeValue(null, "pkg");
@@ -1873,6 +1884,8 @@ class AppWidgetServiceImpl {
             for (int i = mHosts.size() - 1; i >= 0; i--) {
                 pruneHostLocked(mHosts.get(i));
             }
+            // upgrade the database if needed
+            performUpgrade(version);
         } else {
             // failed reading, clean up
             Slog.w(TAG, "Failed to read state, clearing widgets and hosts.");
@@ -1883,6 +1896,31 @@ class AppWidgetServiceImpl {
             for (int i = 0; i < N; i++) {
                 mInstalledProviders.get(i).instances.clear();
             }
+        }
+    }
+
+    private void performUpgrade(int fromVersion) {
+        if (fromVersion < CURRENT_VERSION) {
+            Slog.v(TAG, "Upgrading widget database from " + fromVersion + " to " + CURRENT_VERSION
+                    + " for user " + mUserId);
+        }
+
+        int version = fromVersion;
+
+        // Update 1: keyguard moved from package "android" to "com.android.keyguard"
+        if (version == 0) {
+            for (int i = 0; i < mHosts.size(); i++) {
+                Host host = mHosts.get(i);
+                if (host != null && "android".equals(host.packageName)
+                        && host.hostId == KEYGUARD_HOST_ID) {
+                    host.packageName = KEYGUARD_HOST_PACKAGE;
+                }
+            }
+            version = 1;
+        }
+
+        if (version != CURRENT_VERSION) {
+            throw new IllegalStateException("Failed to upgrade widget database");
         }
     }
 

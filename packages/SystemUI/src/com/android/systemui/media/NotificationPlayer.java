@@ -26,7 +26,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 
-import java.lang.Thread;
 import java.util.LinkedList;
 
 /**

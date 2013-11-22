@@ -33,8 +33,16 @@ import java.io.PrintWriter;
 import java.util.List;
 
 public class PreferredComponent {
+    private static final String TAG_SET = "set";
+    private static final String ATTR_ALWAYS = "always"; // boolean
+    private static final String ATTR_MATCH = "match"; // number
+    private static final String ATTR_NAME = "name"; // component name
+    private static final String ATTR_SET = "set"; // number
+
     public final int mMatch;
     public final ComponentName mComponent;
+    // Whether this is to be the one that's always chosen. If false, it's the most recently chosen.
+    public boolean mAlways;
 
     private final String[] mSetPackages;
     private final String[] mSetClasses;
@@ -50,10 +58,11 @@ public class PreferredComponent {
     }
 
     public PreferredComponent(Callbacks callbacks, int match, ComponentName[] set,
-            ComponentName component) {
+            ComponentName component, boolean always) {
         mCallbacks = callbacks;
         mMatch = match&IntentFilter.MATCH_CATEGORY_MASK;
         mComponent = component;
+        mAlways = always;
         mShortComponent = component.flattenToShortString();
         mParseError = null;
         if (set != null) {
@@ -71,7 +80,7 @@ public class PreferredComponent {
                 }
                 myPackages[i] = cn.getPackageName().intern();
                 myClasses[i] = cn.getClassName().intern();
-                myComponents[i] = cn.flattenToShortString().intern();
+                myComponents[i] = cn.flattenToShortString();
             }
             mSetPackages = myPackages;
             mSetClasses = myClasses;
@@ -86,15 +95,17 @@ public class PreferredComponent {
     public PreferredComponent(Callbacks callbacks, XmlPullParser parser)
             throws XmlPullParserException, IOException {
         mCallbacks = callbacks;
-        mShortComponent = parser.getAttributeValue(null, "name");
+        mShortComponent = parser.getAttributeValue(null, ATTR_NAME);
         mComponent = ComponentName.unflattenFromString(mShortComponent);
         if (mComponent == null) {
             mParseError = "Bad activity name " + mShortComponent;
         }
-        String matchStr = parser.getAttributeValue(null, "match");
+        String matchStr = parser.getAttributeValue(null, ATTR_MATCH);
         mMatch = matchStr != null ? Integer.parseInt(matchStr, 16) : 0;
-        String setCountStr = parser.getAttributeValue(null, "set");
+        String setCountStr = parser.getAttributeValue(null, ATTR_SET);
         int setCount = setCountStr != null ? Integer.parseInt(setCountStr) : 0;
+        String alwaysStr = parser.getAttributeValue(null, ATTR_ALWAYS);
+        mAlways = alwaysStr != null ? Boolean.parseBoolean(alwaysStr) : true;
 
         String[] myPackages = setCount > 0 ? new String[setCount] : null;
         String[] myClasses = setCount > 0 ? new String[setCount] : null;
@@ -115,8 +126,8 @@ public class PreferredComponent {
             String tagName = parser.getName();
             //Log.i(TAG, "Parse outerDepth=" + outerDepth + " depth="
             //        + parser.getDepth() + " tag=" + tagName);
-            if (tagName.equals("set")) {
-                String name = parser.getAttributeValue(null, "name");
+            if (tagName.equals(TAG_SET)) {
+                String name = parser.getAttributeValue(null, ATTR_NAME);
                 if (name == null) {
                     if (mParseError == null) {
                         mParseError = "No name in set tag in preferred activity "
@@ -166,16 +177,17 @@ public class PreferredComponent {
 
     public void writeToXml(XmlSerializer serializer, boolean full) throws IOException {
         final int NS = mSetClasses != null ? mSetClasses.length : 0;
-        serializer.attribute(null, "name", mShortComponent);
+        serializer.attribute(null, ATTR_NAME, mShortComponent);
         if (full) {
             if (mMatch != 0) {
-                serializer.attribute(null, "match", Integer.toHexString(mMatch));
+                serializer.attribute(null, ATTR_MATCH, Integer.toHexString(mMatch));
             }
-            serializer.attribute(null, "set", Integer.toString(NS));
+            serializer.attribute(null, ATTR_ALWAYS, Boolean.toString(mAlways));
+            serializer.attribute(null, ATTR_SET, Integer.toString(NS));
             for (int s=0; s<NS; s++) {
-                serializer.startTag(null, "set");
-                serializer.attribute(null, "name", mSetComponents[s]);
-                serializer.endTag(null, "set");
+                serializer.startTag(null, TAG_SET);
+                serializer.attribute(null, ATTR_NAME, mSetComponents[s]);
+                serializer.endTag(null, TAG_SET);
             }
         }
     }
@@ -207,9 +219,10 @@ public class PreferredComponent {
         out.print(prefix); out.print(
                 Integer.toHexString(System.identityHashCode(ident)));
                 out.print(' ');
-                out.print(mComponent.flattenToShortString());
-                out.print(" match=0x");
-                out.println( Integer.toHexString(mMatch));
+                out.println(mShortComponent);
+        out.print(prefix); out.print(" mMatch=0x");
+                out.print(Integer.toHexString(mMatch));
+                out.print(" mAlways="); out.println(mAlways);
         if (mSetComponents != null) {
             out.print(prefix); out.println("  Selected from:");
             for (int i=0; i<mSetComponents.length; i++) {

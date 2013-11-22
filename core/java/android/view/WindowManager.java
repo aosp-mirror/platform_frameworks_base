@@ -219,7 +219,8 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_DREAM, to = "TYPE_DREAM"),
             @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL, to = "TYPE_NAVIGATION_BAR_PANEL"),
             @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY, to = "TYPE_DISPLAY_OVERLAY"),
-            @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY, to = "TYPE_MAGNIFICATION_OVERLAY")
+            @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY, to = "TYPE_MAGNIFICATION_OVERLAY"),
+            @ViewDebug.IntToString(from = TYPE_PRIVATE_PRESENTATION, to = "TYPE_PRIVATE_PRESENTATION")
         })
         public int type;
     
@@ -527,6 +528,20 @@ public interface WindowManager extends ViewManager {
          */
         public static final int TYPE_RECENTS_OVERLAY = FIRST_SYSTEM_WINDOW+28;
 
+
+        /**
+         * Window type: keyguard scrim window. Shows if keyguard needs to be restarted.
+         * In multiuser systems shows on all users' windows.
+         * @hide
+         */
+        public static final int TYPE_KEYGUARD_SCRIM           = FIRST_SYSTEM_WINDOW+29;
+
+        /**
+         * Window type: Window for Presentation on top of private
+         * virtual display.
+         */
+        public static final int TYPE_PRIVATE_PRESENTATION = FIRST_SYSTEM_WINDOW+30;
+
         /**
          * End of types of system windows.
          */
@@ -823,8 +838,55 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_LAYOUT_IN_OVERSCAN = 0x02000000;
 
+        /**
+         * Window flag: request a translucent status bar with minimal system-provided
+         * background protection.
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowTranslucentStatus} attribute; this attribute
+         * is automatically set for you in the standard translucent decor themes
+         * such as
+         * {@link android.R.style#Theme_Holo_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_Holo_Light_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_DeviceDefault_NoActionBar_TranslucentDecor}, and
+         * {@link android.R.style#Theme_DeviceDefault_Light_NoActionBar_TranslucentDecor}.</p>
+         *
+         * <p>When this flag is enabled for a window, it automatically sets
+         * the system UI visibility flags {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+         * {@link View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.</p>
+         */
+        public static final int FLAG_TRANSLUCENT_STATUS = 0x04000000;
+
+        /**
+         * Window flag: request a translucent navigation bar with minimal system-provided
+         * background protection.
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowTranslucentNavigation} attribute; this attribute
+         * is automatically set for you in the standard translucent decor themes
+         * such as
+         * {@link android.R.style#Theme_Holo_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_Holo_Light_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_DeviceDefault_NoActionBar_TranslucentDecor}, and
+         * {@link android.R.style#Theme_DeviceDefault_Light_NoActionBar_TranslucentDecor}.</p>
+         *
+         * <p>When this flag is enabled for a window, it automatically sets
+         * the system UI visibility flags {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+         * {@link View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.</p>
+         */
+        public static final int FLAG_TRANSLUCENT_NAVIGATION = 0x08000000;
+
         // ----- HIDDEN FLAGS.
         // These start at the high bit and go down.
+
+        /**
+         * Flag for a window in local focus mode.
+         * Window in local focus mode can control focus independent of window manager using
+         * {@link Window#setLocalFocus(boolean, boolean)}.
+         * Usually window in this mode will not get touch/key events from window manager, but will
+         * get events only via local injection using {@link Window#injectInputEvent(InputEvent)}.
+         */
+        public static final int FLAG_LOCAL_FOCUS_MODE = 0x10000000;
 
         /** Window flag: Enable touches to slide out of a window into neighboring
          * windows in mid-gesture instead of being captured for the duration of
@@ -836,7 +898,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
-        public static final int FLAG_SLIPPERY = 0x04000000;
+        public static final int FLAG_SLIPPERY = 0x20000000;
 
         /**
          * Flag for a window belonging to an activity that responds to {@link KeyEvent#KEYCODE_MENU}
@@ -849,20 +911,8 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
-        public static final int FLAG_NEEDS_MENU_KEY = 0x08000000;
+        public static final int FLAG_NEEDS_MENU_KEY = 0x40000000;
 
-        /** Window flag: special flag to limit the size of the window to be
-         * original size ([320x480] x density). Used to create window for applications
-         * running under compatibility mode.
-         *
-         * {@hide} */
-        public static final int FLAG_COMPATIBLE_WINDOW = 0x20000000;
-
-        /** Window flag: a special option intended for system dialogs.  When
-         * this flag is set, the window will demand focus unconditionally when
-         * it is created.
-         * {@hide} */
-        public static final int FLAG_SYSTEM_ERROR = 0x40000000;
 
         /**
          * Various behavioral options/flags.  Default is none.
@@ -890,6 +940,7 @@ public interface WindowManager extends ViewManager {
          * @see #FLAG_DISMISS_KEYGUARD
          * @see #FLAG_SPLIT_TOUCH
          * @see #FLAG_HARDWARE_ACCELERATED
+         * @see #FLAG_LOCAL_FOCUS_MODE
          */
         @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
@@ -941,7 +992,13 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_SPLIT_TOUCH, equals = FLAG_SPLIT_TOUCH,
                     name = "FLAG_SPLIT_TOUCH"),
             @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED, equals = FLAG_HARDWARE_ACCELERATED,
-                    name = "FLAG_HARDWARE_ACCELERATED")
+                    name = "FLAG_HARDWARE_ACCELERATED"),
+            @ViewDebug.FlagToString(mask = FLAG_LOCAL_FOCUS_MODE, equals = FLAG_LOCAL_FOCUS_MODE,
+                    name = "FLAG_LOCAL_FOCUS_MODE"),
+            @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_STATUS, equals = FLAG_TRANSLUCENT_STATUS,
+                    name = "FLAG_TRANSLUCENT_STATUS"),
+            @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_NAVIGATION, equals = FLAG_TRANSLUCENT_NAVIGATION,
+                    name = "FLAG_TRANSLUCENT_NAVIGATION")
         })
         public int flags;
 
@@ -1017,6 +1074,24 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide} */
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 0x00000040;
+
+        /** Window flag: special flag to limit the size of the window to be
+         * original size ([320x480] x density). Used to create window for applications
+         * running under compatibility mode.
+         *
+         * {@hide} */
+        public static final int PRIVATE_FLAG_COMPATIBLE_WINDOW = 0x00000080;
+
+        /** Window flag: a special option intended for system dialogs.  When
+         * this flag is set, the window will demand focus unconditionally when
+         * it is created.
+         * {@hide} */
+        public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
+
+        /** Window flag: maintain the previous translucent decor state when this window
+         * becomes top-most.
+         * {@hide} */
+        public static final int PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR = 0x00000200;
 
         /**
          * Control flags that are private to the platform.
@@ -1548,6 +1623,8 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int USER_ACTIVITY_TIMEOUT_CHANGED = 1<<18;
         /** {@hide} */
+        public static final int TRANSLUCENT_FLAGS_CHANGED = 1<<19;
+        /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
         // internal buffer to backup/restore parameters under compatibility mode.
@@ -1593,6 +1670,10 @@ public interface WindowManager extends ViewManager {
                 changes |= TYPE_CHANGED;
             }
             if (flags != o.flags) {
+                final int diff = flags ^ o.flags;
+                if ((diff & (FLAG_TRANSLUCENT_STATUS | FLAG_TRANSLUCENT_NAVIGATION)) != 0) {
+                    changes |= TRANSLUCENT_FLAGS_CHANGED;
+                }
                 flags = o.flags;
                 changes |= FLAGS_CHANGED;
             }
@@ -1726,6 +1807,9 @@ public interface WindowManager extends ViewManager {
             sb.append(" fl=#");
             sb.append(Integer.toHexString(flags));
             if (privateFlags != 0) {
+                if ((privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
+                    sb.append(" compatible=true");
+                }
                 sb.append(" pfl=0x").append(Integer.toHexString(privateFlags));
             }
             if (format != PixelFormat.OPAQUE) {
@@ -1755,9 +1839,6 @@ public interface WindowManager extends ViewManager {
             if (rotationAnimation != ROTATION_ANIMATION_ROTATE) {
                 sb.append(" rotAnim=");
                 sb.append(rotationAnimation);
-            }
-            if ((flags & FLAG_COMPATIBLE_WINDOW) != 0) {
-                sb.append(" compatible=true");
             }
             if (systemUiVisibility != 0) {
                 sb.append(" sysui=0x");

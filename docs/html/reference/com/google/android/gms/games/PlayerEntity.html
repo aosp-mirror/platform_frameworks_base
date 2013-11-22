@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>PlayerEntity | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -679,9 +686,6 @@ Summary:
   
 
 
-  &#124; <a href="#promethods">Protected Methods</a>
-  
-
 
   &#124; <a href="#inhmethods">Inherited Methods</a>
 
@@ -710,7 +714,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -719,7 +723,7 @@ Summary:
   
       implements 
       
-        <a href="/reference/android/os/Parcelable.html">Parcelable</a> 
+        Parcelable 
       
         <a href="/reference/com/google/android/gms/games/Player.html">Player</a> 
       
@@ -737,7 +741,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -872,7 +876,7 @@ android.os.Parcelable
           public
           static
           final
-          <a href="/reference/com/google/android/gms/games/PlayerEntityCreator.html">PlayerEntityCreator</a></nobr></td>
+          Creator&lt;<a href="/reference/com/google/android/gms/games/PlayerEntity.html">PlayerEntity</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#CREATOR">CREATOR</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -923,7 +927,7 @@ android.os.Parcelable
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#equals(java.lang.Object)">equals</a></span>(<a href="/reference/java/lang/Object.html">Object</a> obj)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#equals(java.lang.Object)">equals</a></span>(Object obj)</nobr>
         
   </td></tr>
 
@@ -954,7 +958,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getDisplayName()">getDisplayName</a></span>()</nobr>
@@ -975,7 +979,7 @@ android.os.Parcelable
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getDisplayName(android.database.CharArrayBuffer)">getDisplayName</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getDisplayName(android.database.CharArrayBuffer)">getDisplayName</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Loads the player's display name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
   
@@ -990,7 +994,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getHiResImageUri()">getHiResImageUri</a></span>()</nobr>
@@ -1008,7 +1012,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getIconImageUri()">getIconImageUri</a></span>()</nobr>
@@ -1026,7 +1030,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getPlayerId()">getPlayerId</a></span>()</nobr>
@@ -1132,7 +1136,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#toString()">toString</a></span>()</nobr>
@@ -1151,7 +1155,7 @@ android.os.Parcelable
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(<a href="/reference/android/os/Parcel.html">Parcel</a> dest, int flags)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel dest, int flags)</nobr>
         
   </td></tr>
 
@@ -1160,63 +1164,6 @@ android.os.Parcelable
 </table>
 
 
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="promethods" class="jd-sumtable"><tr><th colspan="12">Protected Methods</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            static
-            
-            <a href="/reference/java/lang/ClassLoader.html">ClassLoader</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getUnparcelClassLoader()">getUnparcelClassLoader</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            static
-            
-            <a href="/reference/java/lang/Integer.html">Integer</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#getUnparcelClientVersion()">getUnparcelClientVersion</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/PlayerEntity.html#shouldDowngrade()">shouldDowngrade</a></span>()</nobr>
-        
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -1236,7 +1183,7 @@ android.os.Parcelable
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1255,7 +1202,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1274,7 +1221,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1303,7 +1250,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1367,7 +1314,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1438,7 +1385,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/os/Parcelable.html">android.os.Parcelable</a>
+  android.os.Parcelable
 
 <div id="inherited-methods-android.os.Parcelable">
   <div id="inherited-methods-android.os.Parcelable-list"
@@ -1476,7 +1423,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">writeToParcel</span>(<a href="/reference/android/os/Parcel.html">Parcel</a> arg0, int arg1)</nobr>
+        <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -1577,7 +1524,7 @@ From interface
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Player.html#getDisplayName()">getDisplayName</a></span>()</nobr>
@@ -1598,7 +1545,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/Player.html#getDisplayName(android.database.CharArrayBuffer)">getDisplayName</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Player.html#getDisplayName(android.database.CharArrayBuffer)">getDisplayName</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Loads the player's display name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
   
@@ -1613,7 +1560,7 @@ From interface
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Player.html#getHiResImageUri()">getHiResImageUri</a></span>()</nobr>
@@ -1631,7 +1578,7 @@ From interface
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Player.html#getIconImageUri()">getIconImageUri</a></span>()</nobr>
@@ -1649,7 +1596,7 @@ From interface
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Player.html#getPlayerId()">getPlayerId</a></span>()</nobr>
@@ -1759,7 +1706,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/com/google/android/gms/games/PlayerEntityCreator.html">PlayerEntityCreator</a>
+        Creator&lt;<a href="/reference/com/google/android/gms/games/PlayerEntity.html">PlayerEntity</a>&gt;
       </span>
         CREATOR
     </h4>
@@ -1838,7 +1785,7 @@ From interface
         boolean
       </span>
       <span class="sympad">equals</span>
-      <span class="normal">(<a href="/reference/java/lang/Object.html">Object</a> obj)</span>
+      <span class="normal">(Object obj)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1911,7 +1858,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDisplayName</span>
       <span class="normal">()</span>
@@ -1948,7 +1895,7 @@ From interface
         void
       </span>
       <span class="sympad">getDisplayName</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1984,7 +1931,7 @@ From interface
          
          
          
-        <a href="/reference/android/net/Uri.html">Uri</a>
+        Uri
       </span>
       <span class="sympad">getHiResImageUri</span>
       <span class="normal">()</span>
@@ -2021,7 +1968,7 @@ From interface
          
          
          
-        <a href="/reference/android/net/Uri.html">Uri</a>
+        Uri
       </span>
       <span class="sympad">getIconImageUri</span>
       <span class="normal">()</span>
@@ -2059,7 +2006,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getPlayerId</span>
       <span class="normal">()</span>
@@ -2260,7 +2207,7 @@ From interface
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">toString</span>
       <span class="normal">()</span>
@@ -2292,7 +2239,7 @@ From interface
         void
       </span>
       <span class="sympad">writeToParcel</span>
-      <span class="normal">(<a href="/reference/android/os/Parcel.html">Parcel</a> dest, int flags)</span>
+      <span class="normal">(Parcel dest, int flags)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2312,113 +2259,6 @@ From interface
 
 
 <!-- ========= METHOD DETAIL ======== -->
-
-<h2>Protected Methods</h2>
-
-
-
-<A NAME="getUnparcelClassLoader()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected 
-        static 
-         
-         
-         
-        <a href="/reference/java/lang/ClassLoader.html">ClassLoader</a>
-      </span>
-      <span class="sympad">getUnparcelClassLoader</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The ClassLoader to use for unparceling, if any.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="getUnparcelClientVersion()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected 
-        static 
-         
-         
-         
-        <a href="/reference/java/lang/Integer.html">Integer</a>
-      </span>
-      <span class="sympad">getUnparcelClientVersion</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The client version to use for unparceling, if known.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="shouldDowngrade()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected 
-         
-         
-         
-         
-        boolean
-      </span>
-      <span class="sympad">shouldDowngrade</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Whether or not this object has been downgraded to hand back to a client.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 

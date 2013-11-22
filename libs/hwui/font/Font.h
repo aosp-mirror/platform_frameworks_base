@@ -69,6 +69,7 @@ public:
         uint8_t mStyle;
         float mStrokeWidth;
         bool mAntiAliasing;
+        uint8_t mHinting;
         SkMatrix mLookupTransform;
         SkMatrix mInverseLookupTransform;
     };

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <RadioGroup android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+        <RadioButton android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:onClick="changeTransitionType"
+                     android:id="@+id/reveal"
+                     android:text="@string/reveal"/>
+        <RadioButton android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:onClick="changeTransitionType"
+                     android:id="@+id/crossfade"
+                     android:text="@string/crossfade"/>
+        <RadioButton android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:onClick="changeTransitionType"
+                     android:id="@+id/inout"
+                     android:text="@string/inout"/>
+        <RadioButton android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:onClick="changeTransitionType"
+                     android:id="@+id/textfade1"
+                     android:text="@string/textfade1"/>
+        <RadioButton android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:onClick="changeTransitionType"
+                     android:id="@+id/textfade2"
+                     android:text="@string/textfade2"/>
+        <RadioButton android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:onClick="changeTransitionType"
+                     android:id="@+id/textfade3"
+                     android:text="@string/textfade3"/>
+    </RadioGroup>
+    <LinearLayout android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="sendMessage"
+                android:text="@string/state1"
+                android:id="@+id/button1"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="sendMessage"
+                android:text="@string/state2"
+                android:id="@+id/button2"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="sendMessage"
+                android:text="@string/state3"
+                android:id="@+id/button3"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical"
+                  android:id="@+id/container"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent">
+        <Button
+                android:layout_width="100dip"
+                android:layout_height="100dip"
+                android:textSize="40dip"
+                android:text="@string/a"
+                android:id="@+id/button"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40dip"
+                android:text="@string/state1"
+                android:id="@+id/textview"/>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/self_portrait_square_100"
+                android:onClick="sendMessage"
+                android:id="@+id/imageview"/>
+    </LinearLayout>
+
+</LinearLayout>

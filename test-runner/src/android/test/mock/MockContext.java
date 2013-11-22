@@ -39,7 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 
 import java.io.File;
@@ -109,6 +109,12 @@ public class MockContext extends Context {
     /** @hide */
     @Override
     public String getBasePackageName() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public String getOpPackageName() {
         throw new UnsupportedOperationException();
     }
 
@@ -574,7 +580,22 @@ public class MockContext extends Context {
 
     /** @hide */
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
+    public DisplayAdjustments getDisplayAdjustments(int displayId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File[] getExternalFilesDirs(String type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File[] getObbDirs() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File[] getExternalCacheDirs() {
         throw new UnsupportedOperationException();
     }
 }

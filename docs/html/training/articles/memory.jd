@@ -1,0 +1,740 @@
+page.title=Managing Your App's Memory
+page.tags="ram","low memory","OutOfMemoryError","onTrimMemory"
+page.article=true
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>In this document</h2>
+<ol class="nolist">
+  <li><a href="#Android">How Android Manages Memory</a>
+    <ol>
+      <li><a href="#SharingRAM">Sharing Memory</a></li>
+      <li><a href="#AllocatingRAM">Allocating and Reclaiming App Memory</a></li>
+      <li><a href="#RestrictingMemory">Restricting App Memory</a></li>
+      <li><a href="#SwitchingApps">Switching Apps</a></li>
+    </ol>
+  </li>
+  <li><a href="#YourApp">How Your App Should Manage Memory</a>
+    <ol>
+      <li><a href="#Services">Use services sparingly</a></li>
+      <li><a href="#ReleaseMemoryAsUiGone">Release memory when your user interface becomes hidden</a></li>
+      <li><a href="#ReleaseMemoryAsTight">Release memory as memory becomes tight</a></li>
+      <li><a href="#CheckHowMuchMemory">Check how much memory you should use</a></li>
+      <li><a href="#Bitmaps">Avoid wasting memory with bitmaps</a></li>
+      <li><a href="#DataContainers">Use optimized data containers</a></li>
+      <li><a href="#Overhead">Be aware of memory overhead</a></li>
+      <li><a href="#Abstractions">Be careful with code abstractions</a></li>
+      <li><a href="#NanoProto">Use nano protobufs for serialized data</a></li>
+      <li><a href="#DependencyInjection">Avoid dependency injection frameworks</a></li>
+      <li><a href="#ExternalLibs">Be careful about using external libraries</a></li>
+      <li><a href="#OverallPerf">Optimize overall performance</a></li>
+      <li><a href="#Proguard">Use ProGuard to strip out any unneeded code</a></li>
+      <li><a href="#Zipalign">Use zipalign on your final APK</a></li>
+      <li><a href="#AnalyzeRam">Analyze your RAM usage</a></li>
+      <li><a href="#MultipleProcesses">Use multiple processes</a></li>
+    </ol>
+  </li>
+</ol>
+<h2>See Also</h2>
+<ul>
+  <li><a href="{@docRoot}tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>
+  </li>
+</ul>
+
+</div>
+</div>
+
+
+<p>Random-access memory (RAM) is a valuable resource in any software development environment, but
+it's even more valuable on a mobile operating system where physical memory is often constrained.
+Although Android's Dalvik virtual machine performs routine garbage collection, this doesn't allow
+you to ignore when and where your app allocates and releases memory.</p>
+
+<p>In order for the garbage collector to reclaim memory from your app, you need to avoid
+introducing memory leaks (usually caused by holding onto object references in global members) and
+release any {@link java.lang.ref.Reference} objects at the appropriate time (as defined by
+lifecycle callbacks discussed further below). For most apps, the Dalvik garbage collector takes
+care of the rest: the system reclaims your memory allocations when the corresponding objects leave
+the scope of your app's active threads.</p>
+
+<p>This document explains how Android manages app processes and memory allocation, and how you can
+proactively reduce memory usage while developing for Android. For more information about general
+practices to clean up your resources when programming in Java, refer to other books or online
+documentation about managing resource references. If you’re looking for information about how to
+analyze your app’s memory once you’ve already built it, read <a
+href="{@docRoot}tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>.</p>
+
+
+
+
+<h2 id="Android">How Android Manages Memory</h2>
+
+<p>Android does not offer swap space for memory, but it does use <a href=
+"http://en.wikipedia.org/wiki/Paging" class="external-link">paging</a> and <a href=
+"http://en.wikipedia.org/wiki/Memory-mapped_files" class="external-link">memory-mapping</a>
+(mmapping) to manage memory. This means that any memory you modify&mdash;whether by allocating
+new objects or touching mmapped pages&mdash;remains resident in RAM and cannot be paged out.
+So the only way to completely release memory from your app is to release object references you may
+be holding, making the memory available to the garbage collector. That is with one exception:
+any files mmapped in without modification, such as code, can be paged out of RAM if the system
+wants to use that memory elsewhere.</p>
+
+
+<h3 id="SharingRAM">Sharing Memory</h3>
+
+<p>In order to fit everything it needs in RAM, Android tries to share RAM pages across processes. It
+can do so in the following ways:</p>
+<ul>
+<li>Each app process is forked from an existing process called Zygote.
+The Zygote process starts when the system boots and loads common framework code and resources
+(such as activity themes). To start a new app process, the system forks the Zygote process then
+loads and runs the app's code in the new process. This allows most of the RAM pages allocated for
+framework code and resources to be shared across all app processes.</li>
+
+<li>Most static data is mmapped into a process. This not only allows that same data to be shared
+between processes but also allows it to be paged out when needed. Example static data include:
+Dalvik code (by placing it in a pre-linked {@code .odex} file for direct mmapping), app resources
+(by designing the resource table to be a structure that can be mmapped and by aligning the zip
+entries of the APK), and traditional project elements like native code in {@code .so} files.</li>
+
+<li>In many places, Android shares the same dynamic RAM across processes using explicitly allocated
+shared memory regions (either with ashmem or gralloc). For example, window surfaces use shared
+memory between the app and screen compositor, and cursor buffers use shared memory between the
+content provider and client.</li>
+</ul>
+
+<p>Due to the extensive use of shared memory, determining how much memory your app is using requires
+care. Techniques to properly determine your app's memory use are discussed in <a
+href="{@docRoot}tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>.</p>
+
+
+<h3 id="AllocatingRAM">Allocating and Reclaiming App Memory</h3>
+
+<p>Here are some facts about how Android allocates then reclaims memory from your app:</p>
+
+<ul>
+<li>The Dalvik heap for each process is constrained to a single virtual memory range. This defines
+the logical heap size, which can grow as it needs to (but only up to a limit that the system defines
+for each app).</li>
+
+<li>The logical size of the heap is not the same as the amount of physical memory used by the heap.
+When inspecting your app's heap, Android computes a value called the Proportional Set Size (PSS),
+which accounts for both dirty and clean pages that are shared with other processes&mdash;but only in an
+amount that's proportional to how many apps share that RAM. This (PSS) total is what the system
+considers to be your physical memory footprint. For more information about PSS, see the <a
+href="{@docRoot}tools/debugging/debugging-memory.html#ViewingAllocations">Investigating Your
+RAM Usage</a> guide.</li>
+
+<li>The Dalvik heap does not compact the logical size of the heap, meaning that Android does not
+defragment the heap to close up space. Android can only shrink the logical heap size when there
+is unused space at the end of the heap. But this doesn't mean the physical memory used by the heap
+can't shrink. After garbage collection, Dalvik walks the heap and finds unused pages, then returns
+those pages to the kernel using madvise. So, paired allocations and deallocations of large
+chunks should result in reclaiming all (or nearly all) the physical memory used. However,
+reclaiming memory from small allocations can be much less efficient because the page used
+for a small allocation may still be shared with something else that has not yet been freed.</li>
+</ul>
+
+
+<h3 id="RestrictingMemory">Restricting App Memory</h3>
+
+<p>To maintain a functional multi-tasking environment, Android sets a hard limit on the heap size
+for each app. The exact heap size limit varies between devices based on how much RAM the device
+has available overall. If your app has reached the heap capacity and tries to allocate more
+memory, it will receive an {@link java.lang.OutOfMemoryError}.</p>
+
+<p>In some cases, you might want to query the system to determine exactly how much heap space you
+have available on the current device&mdash;for example, to determine how much data is safe to keep in a
+cache. You can query the system for this figure by calling {@link
+android.app.ActivityManager#getMemoryClass()}. This returns an integer indicating the number of
+megabytes available for your app's heap. This is discussed further below, under
+<a href="#CheckHowMuchMemory">Check how much memory you should use</a>.</p>
+
+
+<h3 id="SwitchingApps">Switching Apps</h3>
+
+<p>Instead of using swap space when the user switches between apps, Android keeps processes that
+are not hosting a foreground ("user visible") app component in a least-recently used (LRU) cache.
+For example, when the user first launches an app, a process is created for it, but when the user
+leaves the app, that process does <em>not</em> quit. The system keeps the process cached, so if
+the user later returns to the app, the process is reused for faster app switching.</p>
+
+<p>If your app has a cached process and it retains memory that it currently does not need,
+then your app&mdash;even while the user is not using it&mdash;is constraining the system's
+overall performance. So, as the system runs low on memory, it may kill processes in the LRU cache
+beginning with the process least recently used, but also giving some consideration toward
+which processes are most memory intensive. To keep your process cached as long as possible, follow
+the advice in the following sections about when to release your references.</p>
+
+<p>More information about how processes are cached while not running in the foreground and how
+Android decides which ones
+can be killed is available in the <a href="{@docRoot}guide/components/processes-and-threads.html"
+>Processes and Threads</a> guide.</p>
+
+
+
+
+<h2 id="YourApp">How Your App Should Manage Memory</h2>
+
+<p>You should consider RAM constraints throughout all phases of development, including during app
+design (before you begin development). There are many
+ways you can design and write code that lead to more efficient results, through aggregation of the
+same techniques applied over and over.</p>
+
+<p>You should apply the following techniques while designing and implementing your app to make it
+more memory efficient.</p>
+
+
+<h3 id="Services">Use services sparingly</h3>
+
+<p>If your app needs a <a href="{@docRoot}guide/components/services.html">service</a>
+to perform work in the background, do not keep it running unless
+it's actively performing a job. Also be careful to never leak your service by failing to stop it
+when its work is done.</p>
+
+<p>When you start a service, the system prefers to always keep the process for that service
+running. This makes the process very expensive because the RAM used by the service can’t be used by
+anything else or paged out. This reduces the number of cached processes that the system can keep in
+the LRU cache, making app switching less efficient. It can even lead to thrashing in the system
+when memory is tight and the system can’t maintain enough processes to host all the services
+currently running.</p>
+
+<p>The best way to limit the lifespan of your service is to use an {@link
+android.app.IntentService}, which finishes
+itself as soon as it's done handling the intent that started it. For more information, read
+<a href="{@docRoot}training/run-background-service/index.html">Running in a Background Service</a>
+.</p>
+
+<p>Leaving a service running when it’s not needed is <strong>one of the worst memory-management
+mistakes</strong> an Android app can make. So don’t be greedy by keeping a service for your app
+running. Not only will it increase the risk of your app performing poorly due to RAM constraints,
+but users will discover such misbehaving apps and uninstall them.</p>
+
+
+<h3 id="ReleaseMemoryAsUiGone">Release memory when your user interface becomes hidden</h3>
+
+<p>When the user navigates to a different app and your UI is no longer visible, you should
+release any resources that are used by only your UI. Releasing UI resources at this time can
+significantly increase the system's capacity for cached processes, which has a direct impact on the
+quality of the user experience.</p>
+
+<p>To be notified when the user exits your UI, implement the {@link
+android.content.ComponentCallbacks2#onTrimMemory onTrimMemory()} callback in your {@link
+android.app.Activity} classes. You should use this
+method to listen for the {@link android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN} level,
+which indicates your UI is now hidden from view and you should free resources that only your UI
+uses.</p>
+
+
+<p>Notice that your app receives the {@link android.content.ComponentCallbacks2#onTrimMemory
+onTrimMemory()} callback with {@link android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN}
+only when <em>all the UI components</em> of your app process become hidden from the user.
+This is distinct
+from the {@link android.app.Activity#onStop onStop()} callback, which is called when an {@link
+android.app.Activity} instance becomes hidden, which occurs even when the user moves to
+another activity in your app. So although you should implement {@link android.app.Activity#onStop
+onStop()} to release activity resources such as a network connection or to unregister broadcast
+receivers, you usually should not release your UI resources until you receive {@link
+android.content.ComponentCallbacks2#onTrimMemory onTrimMemory(TRIM_MEMORY_UI_HIDDEN)}. This ensures
+that if the user navigates <em>back</em> from another activity in your app, your UI resources are
+still available to resume the activity quickly.</p>
+
+
+
+<h3 id="ReleaseMemoryAsTight">Release memory as memory becomes tight</h3>
+
+<p>During any stage of your app's lifecycle, the {@link
+android.content.ComponentCallbacks2#onTrimMemory onTrimMemory()} callback also tells you when
+the overall device memory is getting low. You should respond by further releasing resources based
+on the following memory levels delivered by {@link android.content.ComponentCallbacks2#onTrimMemory
+onTrimMemory()}:</p>
+
+<ul>
+<li>{@link android.content.ComponentCallbacks2#TRIM_MEMORY_RUNNING_MODERATE}
+<p>Your app is running and not considered killable, but the device is running low on memory and the
+system is actively killing processes in the LRU cache.</p>
+</li>
+
+<li>{@link android.content.ComponentCallbacks2#TRIM_MEMORY_RUNNING_LOW}
+<p>Your app is running and not considered killable, but the device is running much lower on
+memory so you should release unused resources to improve system performance (which directly
+impacts your app's performance).</p>
+</li>
+
+<li>{@link android.content.ComponentCallbacks2#TRIM_MEMORY_RUNNING_CRITICAL}
+<p>Your app is still running, but the system has already killed most of the processes in the
+LRU cache, so you should release all non-critical resources now. If the system cannot reclaim
+sufficient amounts of RAM, it will clear all of the LRU cache and begin killing processes that
+the system prefers to keep alive, such as those hosting a running service.</p>
+</li>
+</ul>
+
+<p>Also, when your app process is currently cached, you may receive one of the following
+levels from {@link android.content.ComponentCallbacks2#onTrimMemory onTrimMemory()}:</p>
+<ul>
+<li>{@link android.content.ComponentCallbacks2#TRIM_MEMORY_BACKGROUND}
+<p>The system is running low on memory and your process is near the beginning of the LRU list.
+Although your app process is not at a high risk of being killed, the system may already be killing
+processes in the LRU cache. You should release resources that are easy to recover so your process
+will remain in the list and resume quickly when the user returns to your app.</p>
+</li>
+
+<li>{@link android.content.ComponentCallbacks2#TRIM_MEMORY_MODERATE}
+<p>The system is running low on memory and your process is near the middle of the LRU list. If the
+system becomes further constrained for memory, there's a chance your process will be killed.</p>
+</li>
+
+<li>{@link android.content.ComponentCallbacks2#TRIM_MEMORY_COMPLETE}
+<p>The system is running low on memory and your process is one of the first to be killed if the
+system does not recover memory now. You should release everything that's not critical to
+resuming your app state.</p>
+
+</li>
+</ul>
+
+<p>Because the {@link android.content.ComponentCallbacks2#onTrimMemory onTrimMemory()} callback was
+added in API level 14, you can use the {@link android.content.ComponentCallbacks#onLowMemory()}
+callback as a fallback for older versions, which is roughly equivalent to the {@link
+android.content.ComponentCallbacks2#TRIM_MEMORY_COMPLETE} event.</p>
+
+<p class="note"><strong>Note:</strong> When the system begins killing processes in the LRU cache,
+although it primarily works bottom-up, it does give some consideration to which processes are
+consuming more memory and will thus provide the system more memory gain if killed.
+So the less memory you consume while in the LRU list overall, the better your chances are
+to remain in the list and be able to quickly resume.</p>
+
+
+
+<h3 id="CheckHowMuchMemory">Check how much memory you should use</h3>
+
+<p>As mentioned earlier, each Android-powered device has a different amount of RAM available to the
+system and thus provides a different heap limit for each app. You can call {@link
+android.app.ActivityManager#getMemoryClass()} to get an estimate of your app's available heap in
+megabytes. If your app tries to allocate more memory than is available here, it will receive an
+{@link java.lang.OutOfMemoryError}.</p>
+
+<p>In very special situations, you can request a larger heap size by setting the <a
+href="{@docRoot}guide/topics/manifest/application-element.html#largeHeap">{@code largeHeap}</a>
+attribute to "true" in the manifest <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+tag. If you do so, you can call {@link
+android.app.ActivityManager#getLargeMemoryClass()} to get an estimate of the large heap size.</p>
+
+<p>However, the ability to request a large heap is intended only for a small set of apps that can
+justify the need to consume more RAM (such as a large photo editing app). <strong>Never request a
+large heap simply because you've run out of memory</strong> and you need a quick fix&mdash;you
+should use it only when you know exactly where all your memory is being allocated and why it must
+be retained. Yet, even when you're confident your app can justify the large heap, you should avoid
+requesting it to whatever extent possible. Using the extra memory will increasingly be to the
+detriment of the overall user experience because garbage collection will take longer and system
+performance may be slower when task switching or performing other common operations.</p>
+
+<p>Additionally, the large heap size is not the same on all devices and, when running on
+devices that have limited RAM, the large heap size may be exactly the same as the regular heap
+size. So even if you do request the large heap size, you should call {@link
+android.app.ActivityManager#getMemoryClass()} to check the regular heap size and strive to always
+stay below that limit.</p>
+
+
+<h3 id="Bitmaps">Avoid wasting memory with bitmaps</h3>
+
+<p>When you load a bitmap, keep it in RAM only at the resolution you need for the current device's
+screen, scaling it down if the original bitmap is a higher resolution. Keep in mind that an
+increase in bitmap resolution results in a corresponding (increase<sup>2</sup>) in memory needed,
+because both the X and Y dimensions increase.</p>
+
+<p class="note"><strong>Note:</strong> On Android 2.3.x (API level 10) and below, bitmap objects
+always appear as the same size in your app heap regardless of the image resolution (the actual
+pixel data is stored separately in native memory). This makes it more difficult to debug the bitmap
+memory allocation because most heap analysis tools do not see the native allocation. However,
+beginning in Android 3.0 (API level 11), the bitmap pixel data is allocated in your app's Dalvik
+heap, improving garbage collection and debuggability. So if your app uses bitmaps and you're having
+trouble discovering why your app is using some memory on an older device, switch to a device
+running Android 3.0 or higher to debug it.</p>
+
+<p>For more tips about working with bitmaps, read <a
+href="{@docRoot}training/displaying-bitmaps/manage-memory.html">Managing Bitmap Memory</a>.</p>
+
+
+<h3 id="DataContainers">Use optimized data containers</h3>
+
+<p>Take advantage of optimized containers in the Android framework, such as {@link
+android.util.SparseArray}, {@link android.util.SparseBooleanArray}, and {@link
+android.support.v4.util.LongSparseArray}. The generic {@link java.util.HashMap}
+implementation can be quite memory
+inefficient because it needs a separate entry object for every mapping. Additionally, the {@link
+android.util.SparseArray} classes are more efficient because they avoid the system's need
+to <acronym title=
+"Automatic conversion from primitive types to object classes (such as int to Integer)"
+>autobox</acronym>
+the key and sometimes value (which creates yet another object or two per entry). And don't be
+afraid of dropping down to raw arrays when that makes sense.</p>
+
+
+
+<h3 id="Overhead">Be aware of memory overhead</h3>
+
+<p>Be knowledgeable about the cost and overhead of the language and libraries you are using, and
+keep this information in mind when you design your app, from start to finish. Often, things on the
+surface that look innocuous may in fact have a large amount of overhead. Examples include:</p>
+<ul>
+<li>Enums often require more than twice as much memory as static constants. You should strictly
+avoid using enums on Android.</li>
+
+<li>Every class in Java (including anonymous inner classes) uses about 500 bytes of code.</li>
+
+<li>Every class instance has 12-16 bytes of RAM overhead.</li>
+
+<li>Putting a single entry into a {@link java.util.HashMap} requires the allocation of an
+additional entry object that takes 32 bytes (see the previous section about <a
+href="#DataContainers">optimized data containers</a>).</li>
+</ul>
+
+<p>A few bytes here and there quickly add up—app designs that are class- or object-heavy will suffer
+from this overhead. That can leave you in the difficult position of looking at a heap analysis and
+realizing your problem is a lot of small objects using up your RAM.</p>
+
+
+<h3 id="Abstractions">Be careful with code abstractions</h3>
+
+<p>Often, developers use abstractions simply as a "good programming practice," because abstractions
+can improve code flexibility and maintenance. However, abstractions come at a significant cost:
+generally they require a fair amount more code that needs to be executed, requiring more time and
+more RAM for that code to be mapped into memory. So if your abstractions aren't supplying a
+significant benefit, you should avoid them.</p>
+
+
+<h3 id="NanoProto">Use nano protobufs for serialized data</h3>
+
+<p><a href="https://developers.google.com/protocol-buffers/docs/overview">Protocol
+buffers</a> are a language-neutral, platform-neutral, extensible mechanism designed by Google for
+serializing structured data&mdash;think XML, but smaller, faster, and simpler. If you decide to use
+protobufs for your data, you should always use nano protobufs in your client-side code. Regular
+protobufs generate extremely verbose code, which will cause many kinds of problems in your app:
+increased RAM use, significant APK size increase, slower execution, and quickly hitting the DEX
+symbol limit.</p>
+
+<p>For more information, see the "Nano version" section in the <a
+href="https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt"
+class="external-link">protobuf readme</a>.</p>
+
+
+
+<h3 id="DependencyInjection">Avoid dependency injection frameworks</h3>
+
+<p>Using a dependency injection framework such as <a
+href="https://code.google.com/p/google-guice/" class="external-link">Guice</a> or
+<a href="https://github.com/roboguice/roboguice" class="external-link">RoboGuice</a> may be
+attractive because they can simplify the code you write and provide an adaptive environment
+that's useful for testing and other configuration changes. However, these frameworks tend to perform
+a lot of process initialization by scanning your code for annotations, which can require significant
+amounts of your code to be mapped into RAM even though you don't need it. These mapped pages are
+allocated into clean memory so Android can drop them, but that won't happen until the pages have
+been left in memory for a long period of time.</p>
+
+
+<h3 id="ExternalLibs">Be careful about using external libraries</h3>
+
+<p>External library code is often not written for mobile environments and can be inefficient when used
+for work on a mobile client. At the very least, when you decide to use an external library, you
+should assume you are taking on a significant porting and maintenance burden to optimize the
+library for mobile. Plan for that work up-front and analyze the library in terms of code size and
+RAM footprint before deciding to use it at all.</p>
+
+<p>Even libraries supposedly designed for use on Android are potentially dangerous because each
+library may do things differently. For example, one library may use nano protobufs while another
+uses micro protobufs. Now you have two different protobuf implementations in your app. This can and
+will also happen with different implementations of logging, analytics, image loading frameworks,
+caching, and all kinds of other things you don't expect. <a
+href="{@docRoot}tools/help/proguard.html">ProGuard</a> won't save you here because these
+will all be lower-level dependencies that are required by the features for which you want the
+library. This becomes especially problematic when you use an {@link android.app.Activity}
+subclass from a library (which
+will tend to have wide swaths of dependencies), when libraries use reflection (which is common and
+means you need to spend a lot of time manually tweaking ProGuard to get it to work), and so on.</p>
+
+<p>Also be careful not to fall into the trap of using a shared library for one or two features out of
+dozens of other things it does; you don't want to pull in a large amount of code and overhead that
+you don't even use. At the end of the day, if there isn't an existing implementation that is a
+strong match for what you need to do, it may be best if you create your own implementation.</p>
+
+
+<h3 id="OverallPerf">Optimize overall performance</h3>
+
+<p>A variety of information about optimizing your app's overall performance is available
+in other documents listed in <a href="{@docRoot}training/best-performance.html">Best Practices
+for Performance</a>. Many of these documents include optimizations tips for CPU performance, but
+many of these tips also help optimize your app's memory use, such as by reducing the number of
+layout objects required by your UI.</p>
+
+<p>You should also read about <a href="{@docRoot}tools/debugging/debugging-ui.html">optimizing
+your UI</a> with the layout debugging tools and take advantage of
+the optimization suggestions provided by the <a
+href="{@docRoot}tools/debugging/improving-w-lint.html">lint tool</a>.</p>
+
+
+<h3 id="Proguard">Use ProGuard to strip out any unneeded code</h3>
+
+<p>The <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> tool shrinks,
+optimizes, and obfuscates your code by removing unused code and renaming classes, fields, and
+methods with semantically obscure names. Using ProGuard can make your code more compact, requiring
+fewer RAM pages to be mapped.</p>
+
+
+<h3 id="Zipalign">Use zipalign on your final APK</h3>
+
+<p>If you do any post-processing of an APK generated by a build system (including signing it
+with your final production certificate), then you must run <a
+href="{@docRoot}tools/help/zipalign.html">zipalign</a> on it to have it re-aligned.
+Failing to do so can cause your app to require significantly more RAM, because things like
+resources can no longer be mmapped from the APK.</p>
+
+<p class="note"><strong>Note:</strong> Google Play Store does not accept APK files that
+are not zipaligned.</p>
+
+
+<h3 id="AnalyzeRam">Analyze your RAM usage</h3>
+
+<p>Once you achieve a relatively stable build, begin analyzing how much RAM your app is using
+throughout all stages of its lifecycle. For information about how to analyze your app, read <a
+href="{@docRoot}tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>.</p>
+
+
+
+
+<h3 id="MultipleProcesses">Use multiple processes</h3>
+
+<p>If it's appropriate for your app, an advanced technique that may help you manage your app's
+memory is dividing components of your app into multiple processes. This technique must always be
+used carefully and <strong>most apps should not run multiple processes</strong>, as it can easily
+increase&mdash;rather than decrease&mdash;your RAM footprint if done incorrectly. It is primarily
+useful to apps that may run significant work in the background as well as the foreground and can
+manage those operations separately.</p>
+
+
+<p>An example of when multiple processes may be appropriate is when building a music player that
+plays music from a service for long period of time. If
+the entire app runs in one process, then many of the allocations performed for its activity UI must
+be kept around as long as it is playing music, even if the user is currently in another app and the
+service is controlling the playback. An app like this may be split into two process: one for its
+UI, and the other for the work that continues running in the background service.</p>
+
+<p>You can specify a separate process for each app component by declaring the <a href=
+"{@docRoot}guide/topics/manifest/service-element.html#proc">{@code android:process}</a> attribute
+for each component in the manifest file. For example, you can specify that your service should run
+in a process separate from your app's main process by declaring a new process named "background"
+(but you can name the process anything you like):</p>
+
+<pre>
+&lt;service android:name=".PlaybackService"
+         android:process=":background" />
+</pre>
+
+<p>Your process name should begin with a colon (':') to ensure that the process remains private to
+your app.</p>
+
+<p>Before you decide to create a new process, you need to understand the memory implications.
+To illustrate the consequences of each process, consider that an empty process doing basically
+nothing has an extra memory footprint of about 1.4MB, as shown by the memory information
+dump below.</p>
+
+<pre class="no-pretty-print">
+adb shell dumpsys meminfo com.example.android.apis:empty
+
+** MEMINFO in pid 10172 [com.example.android.apis:empty] **
+                Pss     Pss  Shared Private  Shared Private    Heap    Heap    Heap
+              Total   Clean   Dirty   Dirty   Clean   Clean    Size   Alloc    Free
+             ------  ------  ------  ------  ------  ------  ------  ------  ------
+  Native Heap     0       0       0       0       0       0    1864    1800      63
+  Dalvik Heap   764       0    5228     316       0       0    5584    5499      85
+ Dalvik Other   619       0    3784     448       0       0
+        Stack    28       0       8      28       0       0
+    Other dev     4       0      12       0       0       4
+     .so mmap   287       0    2840     212     972       0
+    .apk mmap    54       0       0       0     136       0
+    .dex mmap   250     148       0       0    3704     148
+   Other mmap     8       0       8       8      20       0
+      Unknown   403       0     600     380       0       0
+        TOTAL  2417     148   12480    1392    4832     152    7448    7299     148
+</pre>
+
+<p class="note"><strong>Note:</strong> More information about how to read this output is provided
+in <a href="{@docRoot}tools/debugging/debugging-memory.html#ViewingAllocations">Investigating
+Your RAM Usage</a>. The key data here is the <em>Private Dirty</em> and <em>Private
+Clean</em> memory, which shows that this process is using almost 1.4MB of non-pageable RAM
+(distributed across the Dalvik heap, native allocations, book-keeping, and library-loading),
+and another 150K of RAM for code that has been mapped in to execute.</p>
+
+<p>This memory footprint for an empty process is fairly significant and it can quickly
+grow as you start doing work in that process. For
+example, here is the memory use of a process that is created only to show an activity with some
+text in it:</p>
+
+<pre class="no-pretty-print">
+** MEMINFO in pid 10226 [com.example.android.helloactivity] **
+                Pss     Pss  Shared Private  Shared Private    Heap    Heap    Heap
+              Total   Clean   Dirty   Dirty   Clean   Clean    Size   Alloc    Free
+             ------  ------  ------  ------  ------  ------  ------  ------  ------
+  Native Heap     0       0       0       0       0       0    3000    2951      48
+  Dalvik Heap  1074       0    4928     776       0       0    5744    5658      86
+ Dalvik Other   802       0    3612     664       0       0
+        Stack    28       0       8      28       0       0
+       Ashmem     6       0      16       0       0       0
+    Other dev   108       0      24     104       0       4
+     .so mmap  2166       0    2824    1828    3756       0
+    .apk mmap    48       0       0       0     632       0
+    .ttf mmap     3       0       0       0      24       0
+    .dex mmap   292       4       0       0    5672       4
+   Other mmap    10       0       8       8      68       0
+      Unknown   632       0     412     624       0       0
+        TOTAL  5169       4   11832    4032   10152       8    8744    8609     134
+</pre>
+
+<p>The process has now almost tripled in size, to 4MB, simply by showing some text in the UI. This
+leads to an important conclusion: If you are going to split your app into multiple processes, only
+one process should be responsible for UI. Other processes should avoid any UI, as this will quickly
+increase the RAM required by the process (especially once you start loading bitmap assets and other
+resources). It may then be hard or impossible to reduce the memory usage once the UI is drawn.</p>
+
+<p>Additionally, when running more than one process, it's more important than ever that you keep your
+code as lean as possible, because any unnecessary RAM overhead for common implementations are now
+replicated in each process. For example, if you are using enums (though <a
+href="#Overhead">you should not use enums</a>), all of
+the RAM needed to create and initialize those constants is duplicated in each process, and any
+abstractions you have with adapters and temporaries or other overhead will likewise be replicated.</p>
+
+<p>Another concern with multiple processes is the dependencies that exist between them. For example,
+if your app has a content provider that you have running in the default process which also hosts
+your UI, then code in a background process that uses that content provider will also require that
+your UI process remain in RAM. If your goal is to have a background process that can run
+independently of a heavy-weight UI process, it can't have dependencies on content providers or
+services that execute in the UI process.</p>
+
+
+
+
+
+
+
+
+
+
+<!-- THE FOLLOWING IS OVERWHELMING AND NOT NECESSARY FOR MOST APPS, LEAVING OUT FOR NOW
+
+
+<p>You can examine the dependencies between your processes with the command:</p>
+
+<pre class="no-pretty-print">
+adb shell dumpsys activity
+</pre>
+
+<p>This dumps various information about the Activity Manager's state, ending with a list of all
+processes in their memory management order, including the reason each process is at its given
+level. For example, below is a dump with the Music app in the foreground.</p>
+
+<pre class="no-pretty-print">
+ACTIVITY MANAGER RUNNING PROCESSES (dumpsys activity processes)
+  Process LRU list (sorted by oom_adj):
+    PERS # 4: adj=sys  /F  trm= 0 20674:system/1000 (fixed)
+    PERS #39: adj=pers /F  trm= 0 20964:com.android.nfc/1027 (fixed)
+    PERS # 2: adj=pers /F  trm= 0 20959:com.android.phone/1001 (fixed)
+    PERS # 1: adj=pers /F  trm= 0 20779:com.android.systemui/u0a10057 (fixed)
+    Proc #11: adj=fore /FA trm= 0 8663:com.google.android.music:ui/u0a10043 (top-activity)
+    Proc #10: adj=fore /F  trm= 0 30881:com.google.android.music:main/u0a10043 (provider)
+        com.google.android.music/.store.MusicContentProvider<=Proc{8663:com.google.android.music:ui/u0a10043}
+    Proc # 6: adj=fore /F  trm= 0 21014:com.google.process.gapps/u0a10023 (provider)
+        com.google.android.gsf/.settings.GoogleSettingsProvider<=Proc{20935:com.google.process.location/u0a10023}
+    Proc #38: adj=vis  /F  trm= 0 21028:com.android.nfc:handover/1027 (service)
+        com.android.nfc/.handover.HandoverService<=Proc{20964:com.android.nfc/1027}
+    Proc # 7: adj=vis  /B  trm= 0 20935:com.google.process.location/u0a10023 (service)
+        com.google.android.location/.GeocodeService<=Proc{20674:system/1000}
+    Proc # 3: adj=vis  /F  trm= 0 21225:com.android.bluetooth/1002 (service)
+        com.android.bluetooth/.hfp.HeadsetService<=Proc{20674:system/1000}
+    Proc # 0: adj=vis  /F  trm= 0 20908:com.google.android.inputmethod.latin/u0a10035 (service)
+        com.google.android.inputmethod.latin/com.android.inputmethod.latin.LatinIME<=Proc{20674:system/1000}
+    Proc #34: adj=svc  /B  trm= 0 16765:com.google.android.apps.currents/u0a10012 (started-services)
+    Proc #14: adj=svc  /B  trm= 0 21148:com.google.android.gms/u0a10023 (started-services)
+    Proc #12: adj=home /B  trm= 0 20989:com.android.launcher/u0a10036 (home)
+    Proc #37: adj=svcb /B  trm= 0 15194:com.google.android.apps.googlevoice/u0a10089 (started-services)
+    Proc #17: adj=svcb /B  trm= 0 24537:android.process.media/u0a10016 (started-services)
+    Proc #35: adj=bak  /B  trm= 0 16087:com.android.defcontainer/u0a10013 (service)
+        com.android.defcontainer/.DefaultContainerService<=Proc{16050:com.android.settings/1000}
+    Proc #16: adj=bak  /B  trm= 0 7334:com.google.android.gm/u0a10022 (bg-act)
+    Proc #15: adj=bak  /B  trm= 0 22499:com.google.android.googlequicksearchbox/u0a10060 (bg-act)
+    Proc # 9: adj=bak  /B  trm= 0 20856:com.google.android.gsf.login/u0a10023 (bg-empty)
+    Proc #26: adj=bak+1/B  trm= 0 9923:com.android.mms/u0a10042 (bg-act)
+    Proc #23: adj=bak+1/B  trm= 0 16721:com.android.chrome/u0a10010 (bg-act)
+    Proc #22: adj=bak+1/B  trm= 0 17596:com.android.chrome:sandboxed_process0/u0a10010i33 (service)
+        com.android.chrome/org.chromium.content.app.SandboxedProcessService0<=Proc{16721:com.android.chrome/u0a10010}
+    Proc #19: adj=bak+1/B  trm= 0 17442:com.google.android.youtube/u0a10067 (bg-services)
+    Proc #18: adj=bak+2/B  trm= 0 16740:com.google.android.apps.plus/u0a10052 (bg-empty)
+    Proc #13: adj=bak+2/B  trm= 0 7707:com.android.musicfx/u0a10044 (bg-empty)
+    Proc #36: adj=bak+3/B  trm= 0 16050:com.android.settings/1000 (bg-act)
+    Proc #33: adj=bak+3/B  trm= 0 16863:com.android.dialer/u0a10015 (bg-act)
+</pre>
+
+
+<p class="note"><strong>Note:</strong> The exact details of what is shown here will vary across
+platform versions as process management policies are tweaked and improved.</p>
+
+
+<p>Details on the highlighted sections are:</p>
+
+<ol>
+<li>Foreground app: This is the current app running in the foreground -- it is in the "fore" memory
+class because it is the top activity on the activity stack.</li>
+
+<li>Persistent processes: These are processes that are part of the core system that must always be
+running.</li>
+
+<li>Dependent process: This shows how the Music app is using two processes. Its UI process has a
+dependency on the "main" process (through a content provider). So while the UI process is in use,
+the main process must also be kept around. This means the app's memory footprint is actually the
+sum of both processes. You will have this kind of connection on a content provider any time you
+have active calls into it or have unclosed cursors or file streams that came from it.</li>
+
+<li>Visible processes: These are processes that count in some way as "visible" to the user. This
+generally means that it is either something the user can literally see (such as a process hosting a
+paused but visible activity that is behind a non-full-screen dialog) or is something the user might
+notice if the process disappeared (such as a foreground service playing music). You should be
+certain that any process you have running at the "visible" level is indeed critical to the user,
+because they are very expensive to the overall RAM load.</li>
+
+<li>Service processes: These are processes running long-term jobs in a service. This level of the
+list is the start of less-critical processes, which the system has some freedom to kill if RAM is
+needed elsewhere. These services are still quite expensive because they can be killed only
+temporarily and the system tries to keep them running whenever possible.</li>
+
+<li>Home process: A special slot for the process that hosts the current Home activity, to try to
+prevent it from being killed as much as possible. Killing this process is much more damaging to the
+user experience than killing other cached processes, because so much user interaction goes through
+home.</li>
+
+<li>Secondary service processes: These are services that have been running for a relatively long time
+and so should be killed more aggressively when RAM is needed elsewhere.</li>
+
+<li>Cached processes: These are cached processes held in the LRU cache, which allow for fast app
+switching and component launching. These processes are not required and the system will kill them
+as needed to reclaim memory. You will often see a process hosting a running service here—this is
+part of a platform policy of allowing very long-running services to drop down into the LRU list and
+eventually be killed. If the service should continue running (as defined by the {@link
+android.app.Service#onStartCommand onStartCommand()} return value, such as {@link
+android.app.Service#START_STICKY}), the the system eventually restarts it. This avoids issues with
+such services having memory leaks that over time reduce the number of regular cached processes that
+can be kept.</li>
+
+</ol>
+
+<p>This numbered list of processes is essentially the LRU list of processes that the framework
+provides to the kernel to help it determine which processes it should kill as it needs more RAM.
+The kernel's out of memory killer will generally begin from the bottom of this list, killing the
+last process and working its way up. It may not do it in exactly this order, as it can also take
+into consideration other factors such as the relative RAM footprint of processes to some degree.</p>
+
+<p>There are many other options you can use with the activity command to analyze further details of
+your app's state&mdash;use <code>adb shell dumpsys activity -h</code> for help on its use.</p>
+
+-->

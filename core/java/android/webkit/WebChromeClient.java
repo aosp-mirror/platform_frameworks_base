@@ -238,9 +238,10 @@ public class WebChromeClient {
     * @param totalQuota The total quota for all origins, in bytes
     * @param quotaUpdater An instance of {@link WebStorage.QuotaUpdater} which
     *                     must be used to inform the WebView of the new quota.
+    * @deprecated This method is no longer called; WebView now uses the HTML5 / JavaScript Quota
+    *             Management API.
     */
-    // Note that the callback must always be executed at some point to ensure
-    // that the sleeping WebCore thread is woken up.
+    @Deprecated
     public void onExceededDatabaseQuota(String url, String databaseIdentifier,
             long quota, long estimatedDatabaseSize, long totalQuota,
             WebStorage.QuotaUpdater quotaUpdater) {
@@ -263,9 +264,10 @@ public class WebChromeClient {
     * @param quota the current maximum Application Cache size, in bytes
     * @param quotaUpdater An instance of {@link WebStorage.QuotaUpdater} which
     *                     must be used to inform the WebView of the new quota.
+    * @deprecated This method is no longer called; WebView now uses the HTML5 / JavaScript Quota
+    *             Management API.
     */
-    // Note that the callback must always be executed at some point to ensure
-    // that the sleeping WebCore thread is woken up.
+    @Deprecated
     public void onReachedMaxAppCacheSize(long requiredStorage, long quota,
             WebStorage.QuotaUpdater quotaUpdater) {
         quotaUpdater.updateQuota(quota);

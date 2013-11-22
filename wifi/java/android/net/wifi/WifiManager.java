@@ -32,8 +32,10 @@ import android.os.Messenger;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 
+import com.android.internal.R;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
@@ -363,6 +365,14 @@ public class WifiManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
+    /**
+     * A batch of access point scans has been completed and the results areavailable.
+     * Call {@link #getBatchedScanResults()} to obtain the results.
+     * @hide pending review
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String BATCHED_SCAN_RESULTS_AVAILABLE_ACTION =
+            "android.net.wifi.BATCHED_RESULTS";
     /**
      * The RSSI (signal strength) has changed.
      * @see #EXTRA_NEW_RSSI
@@ -758,11 +768,105 @@ public class WifiManager {
      */
     public boolean startScan() {
         try {
-            mService.startScan();
+            final WorkSource workSource = null;
+            mService.startScan(workSource);
             return true;
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    /** @hide */
+    public boolean startScan(WorkSource workSource) {
+        try {
+            mService.startScan(workSource);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Request a batched scan for access points.  To end your requested batched scan,
+     * call stopBatchedScan with the same Settings.
+     *
+     * If there are mulitple requests for batched scans, the more demanding settings will
+     * take precidence.
+     *
+     * @param requested {@link BatchedScanSettings} the scan settings requested.
+     * @return false on known error
+     * @hide
+     */
+    public boolean requestBatchedScan(BatchedScanSettings requested) {
+        try {
+            return mService.requestBatchedScan(requested, new Binder());
+        } catch (RemoteException e) { return false; }
+    }
+
+    /**
+     * Check if the Batched Scan feature is supported.
+     *
+     * @return false if not supported.
+     * @hide
+     */
+    public boolean isBatchedScanSupported() {
+        try {
+            return mService.isBatchedScanSupported();
+        } catch (RemoteException e) { return false; }
+    }
+
+    /**
+     * End a requested batch scan for this applicaiton.  Note that batched scan may
+     * still occur if other apps are using them.
+     *
+     * @param requested {@link BatchedScanSettings} the scan settings you previously requested
+     *        and now wish to stop.  A value of null here will stop all scans requested by the
+     *        calling App.
+     * @hide
+     */
+    public void stopBatchedScan(BatchedScanSettings requested) {
+        try {
+            mService.stopBatchedScan(requested);
+        } catch (RemoteException e) {}
+    }
+
+    /**
+     * Retrieve the latest batched scan result.  This should be called immediately after
+     * {@link BATCHED_SCAN_RESULTS_AVAILABLE_ACTION} is received.
+     * @hide
+     */
+    public List<BatchedScanResult> getBatchedScanResults() {
+        try {
+            return mService.getBatchedScanResults(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Force a re-reading of batched scan results.  This will attempt
+     * to read more information from the chip, but will do so at the expense
+     * of previous data.  Rate limited to the current scan frequency.
+     *
+     * pollBatchedScan will always wait 1 period from the start of the batch
+     * before trying to read from the chip, so if your #scans/batch == 1 this will
+     * have no effect.
+     *
+     * If you had already waited 1 period before calling, this should have
+     * immediate (though async) effect.
+     *
+     * If you call before that 1 period is up this will set up a timer and fetch
+     * results when the 1 period is up.
+     *
+     * Servicing a pollBatchedScan request (immediate or after timed delay) starts a
+     * new batch, so if you were doing 10 scans/batch and called in the 4th scan, you
+     * would get data in the 4th and then again 10 scans later.
+     * @hide
+     */
+    public void pollBatchedScan() {
+        try {
+            mService.pollBatchedScan();
+        } catch (RemoteException e) { }
     }
 
     /**
@@ -783,7 +887,7 @@ public class WifiManager {
      */
     public List<ScanResult> getScanResults() {
         try {
-            return mService.getScanResults(mContext.getBasePackageName());
+            return mService.getScanResults(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -884,7 +988,6 @@ public class WifiManager {
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
-     * @deprecated - use ConnectivityManager.getLinkProperties instead.  TODO - remove 11/2013
      */
     public DhcpInfo getDhcpInfo() {
         try {
@@ -1132,6 +1235,49 @@ public class WifiManager {
         }
     }
 
+
+    /**
+     * Enable/Disable TDLS on a specific local route.
+     *
+     * <p>
+     * TDLS enables two wireless endpoints to talk to each other directly
+     * without going through the access point that is managing the local
+     * network. It saves bandwidth and improves quality of the link.
+     * </p>
+     * <p>
+     * This API enables/disables the option of using TDLS. If enabled, the
+     * underlying hardware is free to use TDLS or a hop through the access
+     * point. If disabled, existing TDLS session is torn down and
+     * hardware is restricted to use access point for transferring wireless
+     * packets. Default value for all routes is 'disabled', meaning restricted
+     * to use access point for transferring packets.
+     * </p>
+     *
+     * @param remoteIPAddress IP address of the endpoint to setup TDLS with
+     * @param enable true = setup and false = tear down TDLS
+     */
+    public void setTdlsEnabled(InetAddress remoteIPAddress, boolean enable) {
+        try {
+            mService.enableTdls(remoteIPAddress.getHostAddress(), enable);
+        } catch (RemoteException e) {
+            // Just ignore the exception
+        }
+    }
+
+    /**
+     * Similar to {@link #setTdlsEnabled(InetAddress, boolean) }, except
+     * this version allows you to specify remote endpoint with a MAC address.
+     * @param remoteMacAddress MAC address of the remote endpoint such as 00:00:0c:9f:f2:ab
+     * @param enable true = setup and false = tear down TDLS
+     */
+    public void setTdlsEnabledWithMacAddress(String remoteMacAddress, boolean enable) {
+        try {
+            mService.enableTdlsWithMacAddress(remoteMacAddress, enable);
+        } catch (RemoteException e) {
+            // Just ignore the exception
+        }
+    }
+
     /* TODO: deprecate synchronous API and open up the following API */
 
     private static final int BASE = Protocol.BASE_WIFI_MANAGER;
@@ -1222,6 +1368,13 @@ public class WifiManager {
     public static final int WPS_AUTH_FAILURE            = 6;
     /** WPS timed out {@hide} */
     public static final int WPS_TIMED_OUT               = 7;
+
+    /**
+     * Passed with {@link ActionListener#onFailure}.
+     * Indicates that the operation failed due to invalid inputs
+     * @hide
+     */
+    public static final int INVALID_ARGS                = 8;
 
     /** Interface for callback invocation on an application action {@hide} */
     public interface ActionListener {
@@ -1713,13 +1866,16 @@ public class WifiManager {
                 boolean changed = true;
                 if (ws == null) {
                     mWorkSource = null;
-                } else if (mWorkSource == null) {
-                    changed = mWorkSource != null;
-                    mWorkSource = new WorkSource(ws);
                 } else {
-                    changed = mWorkSource.diff(ws);
-                    if (changed) {
-                        mWorkSource.set(ws);
+                    ws.clearNames();
+                    if (mWorkSource == null) {
+                        changed = mWorkSource != null;
+                        mWorkSource = new WorkSource(ws);
+                    } else {
+                        changed = mWorkSource.diff(ws);
+                        if (changed) {
+                            mWorkSource.set(ws);
+                        }
                     }
                 }
                 if (changed && mHeld) {

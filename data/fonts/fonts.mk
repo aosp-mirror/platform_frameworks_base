@@ -34,10 +34,8 @@ PRODUCT_PACKAGES := \
     RobotoCondensed-BoldItalic.ttf \
     DroidNaskh-Regular.ttf \
     DroidNaskhUI-Regular.ttf \
-    DroidSansDevanagari-Regular.ttf \
     DroidSansHebrew-Regular.ttf \
     DroidSansHebrew-Bold.ttf \
-    DroidSansThai.ttf \
     DroidSerif-Regular.ttf \
     DroidSerif-Bold.ttf \
     DroidSerif-Italic.ttf \

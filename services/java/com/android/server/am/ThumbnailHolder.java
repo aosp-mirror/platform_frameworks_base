@@ -21,4 +21,9 @@ import android.graphics.Bitmap;
 public class ThumbnailHolder {
     Bitmap lastThumbnail;         // Last thumbnail captured for this item.
     CharSequence lastDescription; // Last description captured for this item.
+
+    void disposeThumbnail() {
+        lastThumbnail = null;
+        lastDescription = null;
+    }
 }

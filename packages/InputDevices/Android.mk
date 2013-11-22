@@ -23,20 +23,27 @@ LOCAL_JAVA_LIBRARIES :=
 
 LOCAL_PACKAGE_NAME := InputDevices
 LOCAL_CERTIFICATE := platform
+LOCAL_PRIVILEGED_MODULE := true
 
 include $(BUILD_PACKAGE)
 
 # Validate all key maps.
 include $(CLEAR_VARS)
 
-validatekeymaps := $(HOST_OUT_EXECUTABLES)/validatekeymaps$(HOST_EXECUTABLE_SUFFIX)
-files := frameworks/base/packages/InputDevices/res/raw/*.kcm
-
 LOCAL_MODULE := validate_input_devices_keymaps
-LOCAL_MODULE_TAGS := optional
-LOCAL_REQUIRED_MODULES := validatekeymaps
+intermediates := $(call intermediates-dir-for,ETC,$(LOCAL_MODULE),,COMMON)
+LOCAL_BUILT_MODULE := $(intermediates)/stamp
 
-validate_input_devices_keymaps: $(files)
-	$(hide) $(validatekeymaps) $(files)
+validatekeymaps := $(HOST_OUT_EXECUTABLES)/validatekeymaps$(HOST_EXECUTABLE_SUFFIX)
+input_devices_keymaps := $(wildcard $(LOCAL_PATH)/res/raw/*.kcm)
+$(LOCAL_BUILT_MODULE): PRIVATE_VALIDATEKEYMAPS := $(validatekeymaps)
+$(LOCAL_BUILT_MODULE) : $(input_devices_keymaps) | $(validatekeymaps)
+	$(hide) $(PRIVATE_VALIDATEKEYMAPS) $^
+	$(hide) mkdir -p $(dir $@) && touch $@
 
-include $(BUILD_PHONY_PACKAGE)
+# Run validatekeymaps unconditionally for platform build.
+droidcore all_modules : $(LOCAL_BUILT_MODULE)
+
+# Reset temp vars.
+validatekeymaps :=
+input_devices_keymaps :=

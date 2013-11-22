@@ -32,27 +32,56 @@ public class LinkAddress implements Parcelable {
     /**
      * IPv4 or IPv6 address.
      */
-    private final InetAddress address;
+    private InetAddress address;
 
     /**
      * Network prefix length
      */
-    private final int prefixLength;
+    private int prefixLength;
 
-    public LinkAddress(InetAddress address, int prefixLength) {
+    private void init(InetAddress address, int prefixLength) {
         if (address == null || prefixLength < 0 ||
                 ((address instanceof Inet4Address) && prefixLength > 32) ||
                 (prefixLength > 128)) {
             throw new IllegalArgumentException("Bad LinkAddress params " + address +
-                    prefixLength);
+                    "/" + prefixLength);
         }
         this.address = address;
         this.prefixLength = prefixLength;
     }
 
+    public LinkAddress(InetAddress address, int prefixLength) {
+        init(address, prefixLength);
+    }
+
     public LinkAddress(InterfaceAddress interfaceAddress) {
-        this.address = interfaceAddress.getAddress();
-        this.prefixLength = interfaceAddress.getNetworkPrefixLength();
+        init(interfaceAddress.getAddress(),
+             interfaceAddress.getNetworkPrefixLength());
+    }
+
+    /**
+     * Constructs a new {@code LinkAddress} from a string such as "192.0.2.5/24" or
+     * "2001:db8::1/64".
+     * @param string The string to parse.
+     */
+    public LinkAddress(String address) {
+        InetAddress inetAddress = null;
+        int prefixLength = -1;
+        try {
+            String [] pieces = address.split("/", 2);
+            prefixLength = Integer.parseInt(pieces[1]);
+            inetAddress = InetAddress.parseNumericAddress(pieces[0]);
+        } catch (NullPointerException e) {            // Null string.
+        } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
+        } catch (NumberFormatException e) {           // Non-numeric prefix.
+        } catch (IllegalArgumentException e) {        // Invalid IP address.
+        }
+
+        if (inetAddress == null || prefixLength == -1) {
+            throw new IllegalArgumentException("Bad LinkAddress params " + address);
+        }
+
+        init(inetAddress, prefixLength);
     }
 
     @Override

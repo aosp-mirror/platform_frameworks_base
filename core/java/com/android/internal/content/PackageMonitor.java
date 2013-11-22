@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.UserHandle;
+import com.android.internal.os.BackgroundThread;
 
 import java.util.HashSet;
 
@@ -36,10 +37,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     static final IntentFilter sPackageFilt = new IntentFilter();
     static final IntentFilter sNonDataFilt = new IntentFilter();
     static final IntentFilter sExternalFilt = new IntentFilter();
-
-    static final Object sLock = new Object();
-    static HandlerThread sBackgroundThread;
-    static Handler sBackgroundHandler;
 
     static {
         sPackageFilt.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -79,15 +76,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         }
         mRegisteredContext = context;
         if (thread == null) {
-            synchronized (sLock) {
-                if (sBackgroundThread == null) {
-                    sBackgroundThread = new HandlerThread("PackageMonitor",
-                            android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                    sBackgroundThread.start();
-                    sBackgroundHandler = new Handler(sBackgroundThread.getLooper());
-                }
-                mRegisteredHandler = sBackgroundHandler;
-            }
+            mRegisteredHandler = BackgroundThread.getHandler();
         } else {
             mRegisteredHandler = new Handler(thread);
         }

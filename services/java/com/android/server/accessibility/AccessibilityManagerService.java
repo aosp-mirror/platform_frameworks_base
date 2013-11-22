@@ -1419,6 +1419,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     Settings.Secure.TOUCH_EXPLORATION_ENABLED, enabled ? 1 : 0,
                     userState.mUserId);
         }
+        try {
+            mWindowManagerService.setTouchExplorationEnabled(enabled);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean canRequestAndRequestsTouchExplorationLocked(Service service) {
@@ -2694,7 +2699,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             | AccessibilityNodeInfo.ACTION_COPY
             | AccessibilityNodeInfo.ACTION_PASTE
             | AccessibilityNodeInfo.ACTION_CUT
-            | AccessibilityNodeInfo.ACTION_SET_SELECTION;
+            | AccessibilityNodeInfo.ACTION_SET_SELECTION
+            | AccessibilityNodeInfo.ACTION_EXPAND
+            | AccessibilityNodeInfo.ACTION_COLLAPSE
+            | AccessibilityNodeInfo.ACTION_DISMISS;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED
@@ -2817,7 +2825,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public int resolveCallingUserIdEnforcingPermissionsLocked(int userId) {
             final int callingUid = Binder.getCallingUid();
-            if (callingUid == Process.SYSTEM_UID
+            if (callingUid == 0
+                    || callingUid == Process.SYSTEM_UID
                     || callingUid == Process.SHELL_UID) {
                 return mCurrentUserId;
             }

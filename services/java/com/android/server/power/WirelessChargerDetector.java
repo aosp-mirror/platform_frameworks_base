@@ -21,7 +21,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.BatteryManager;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 
@@ -69,12 +73,12 @@ final class WirelessChargerDetector {
     private static final String TAG = "WirelessChargerDetector";
     private static final boolean DEBUG = false;
 
-    // Number of nanoseconds per millisecond.
-    private static final long NANOS_PER_MS = 1000000;
-
     // The minimum amount of time to spend watching the sensor before making
     // a determination of whether movement occurred.
-    private static final long SETTLE_TIME_NANOS = 500 * NANOS_PER_MS;
+    private static final long SETTLE_TIME_MILLIS = 800;
+
+    // The sensor sampling interval.
+    private static final int SAMPLING_INTERVAL_MILLIS = 50;
 
     // The minimum number of samples that must be collected.
     private static final int MIN_SAMPLES = 3;
@@ -96,6 +100,7 @@ final class WirelessChargerDetector {
 
     private final SensorManager mSensorManager;
     private final SuspendBlocker mSuspendBlocker;
+    private final Handler mHandler;
 
     // The gravity sensor, or null if none.
     private Sensor mGravitySensor;
@@ -115,6 +120,9 @@ final class WirelessChargerDetector {
     // The suspend blocker is held while this is the case.
     private boolean mDetectionInProgress;
 
+    // The time when detection was last performed.
+    private long mDetectionStartTime;
+
     // True if the rest position should be updated if at rest.
     // Otherwise, the current rest position is simply checked and cleared if movement
     // is detected but no new rest position is stored.
@@ -126,14 +134,17 @@ final class WirelessChargerDetector {
     // The number of samples collected that showed evidence of not being at rest.
     private int mMovingSamples;
 
-    // The time and value of the first sample that was collected.
-    private long mFirstSampleTime;
+    // The value of the first sample that was collected.
     private float mFirstSampleX, mFirstSampleY, mFirstSampleZ;
 
+    // The value of the last sample that was collected.
+    private float mLastSampleX, mLastSampleY, mLastSampleZ;
+
     public WirelessChargerDetector(SensorManager sensorManager,
-            SuspendBlocker suspendBlocker) {
+            SuspendBlocker suspendBlocker, Handler handler) {
         mSensorManager = sensorManager;
         mSuspendBlocker = suspendBlocker;
+        mHandler = handler;
 
         mGravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
     }
@@ -147,12 +158,15 @@ final class WirelessChargerDetector {
             pw.println("  mAtRest=" + mAtRest);
             pw.println("  mRestX=" + mRestX + ", mRestY=" + mRestY + ", mRestZ=" + mRestZ);
             pw.println("  mDetectionInProgress=" + mDetectionInProgress);
+            pw.println("  mDetectionStartTime=" + (mDetectionStartTime == 0 ? "0 (never)"
+                    : TimeUtils.formatUptime(mDetectionStartTime)));
             pw.println("  mMustUpdateRestPosition=" + mMustUpdateRestPosition);
             pw.println("  mTotalSamples=" + mTotalSamples);
             pw.println("  mMovingSamples=" + mMovingSamples);
-            pw.println("  mFirstSampleTime=" + mFirstSampleTime);
             pw.println("  mFirstSampleX=" + mFirstSampleX
                     + ", mFirstSampleY=" + mFirstSampleY + ", mFirstSampleZ=" + mFirstSampleZ);
+            pw.println("  mLastSampleX=" + mLastSampleX
+                    + ", mLastSampleY=" + mLastSampleY + ", mLastSampleZ=" + mLastSampleZ);
         }
     }
 
@@ -209,25 +223,63 @@ final class WirelessChargerDetector {
     private void startDetectionLocked() {
         if (!mDetectionInProgress && mGravitySensor != null) {
             if (mSensorManager.registerListener(mListener, mGravitySensor,
-                    SensorManager.SENSOR_DELAY_UI)) {
+                    SAMPLING_INTERVAL_MILLIS * 1000)) {
                 mSuspendBlocker.acquire();
                 mDetectionInProgress = true;
+                mDetectionStartTime = SystemClock.uptimeMillis();
                 mTotalSamples = 0;
                 mMovingSamples = 0;
+
+                Message msg = Message.obtain(mHandler, mSensorTimeout);
+                msg.setAsynchronous(true);
+                mHandler.sendMessageDelayed(msg, SETTLE_TIME_MILLIS);
             }
         }
     }
 
-    private void processSample(long timeNanos, float x, float y, float z) {
-        synchronized (mLock) {
-            if (!mDetectionInProgress) {
-                return;
+    private void finishDetectionLocked() {
+        if (mDetectionInProgress) {
+            mSensorManager.unregisterListener(mListener);
+            mHandler.removeCallbacks(mSensorTimeout);
+
+            if (mMustUpdateRestPosition) {
+                clearAtRestLocked();
+                if (mTotalSamples < MIN_SAMPLES) {
+                    Slog.w(TAG, "Wireless charger detector is broken.  Only received "
+                            + mTotalSamples + " samples from the gravity sensor but we "
+                            + "need at least " + MIN_SAMPLES + " and we expect to see "
+                            + "about " + SETTLE_TIME_MILLIS / SAMPLING_INTERVAL_MILLIS
+                            + " on average.");
+                } else if (mMovingSamples == 0) {
+                    mAtRest = true;
+                    mRestX = mLastSampleX;
+                    mRestY = mLastSampleY;
+                    mRestZ = mLastSampleZ;
+                }
+                mMustUpdateRestPosition = false;
             }
+
+            if (DEBUG) {
+                Slog.d(TAG, "New state: mAtRest=" + mAtRest
+                        + ", mRestX=" + mRestX + ", mRestY=" + mRestY + ", mRestZ=" + mRestZ
+                        + ", mTotalSamples=" + mTotalSamples
+                        + ", mMovingSamples=" + mMovingSamples);
+            }
+
+            mDetectionInProgress = false;
+            mSuspendBlocker.release();
+        }
+    }
+
+    private void processSampleLocked(float x, float y, float z) {
+        if (mDetectionInProgress) {
+            mLastSampleX = x;
+            mLastSampleY = y;
+            mLastSampleZ = z;
 
             mTotalSamples += 1;
             if (mTotalSamples == 1) {
                 // Save information about the first sample collected.
-                mFirstSampleTime = timeNanos;
                 mFirstSampleX = x;
                 mFirstSampleY = y;
                 mFirstSampleZ = z;
@@ -246,32 +298,6 @@ final class WirelessChargerDetector {
                             + ", x=" + x + ", y=" + y + ", z=" + z);
                 }
                 clearAtRestLocked();
-            }
-
-            // Save the result when done.
-            if (timeNanos - mFirstSampleTime >= SETTLE_TIME_NANOS
-                    && mTotalSamples >= MIN_SAMPLES) {
-                mSensorManager.unregisterListener(mListener);
-                if (mMustUpdateRestPosition) {
-                    if (mMovingSamples == 0) {
-                        mAtRest = true;
-                        mRestX = x;
-                        mRestY = y;
-                        mRestZ = z;
-                    } else {
-                        clearAtRestLocked();
-                    }
-                    mMustUpdateRestPosition = false;
-                }
-                mDetectionInProgress = false;
-                mSuspendBlocker.release();
-
-                if (DEBUG) {
-                    Slog.d(TAG, "New state: mAtRest=" + mAtRest
-                            + ", mRestX=" + mRestX + ", mRestY=" + mRestY + ", mRestZ=" + mRestZ
-                            + ", mTotalSamples=" + mTotalSamples
-                            + ", mMovingSamples=" + mMovingSamples);
-                }
             }
         }
     }
@@ -310,11 +336,22 @@ final class WirelessChargerDetector {
     private final SensorEventListener mListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            processSample(event.timestamp, event.values[0], event.values[1], event.values[2]);
+            synchronized (mLock) {
+                processSampleLocked(event.values[0], event.values[1], event.values[2]);
+            }
         }
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
+
+    private final Runnable mSensorTimeout = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mLock) {
+                finishDetectionLocked();
+            }
         }
     };
 }

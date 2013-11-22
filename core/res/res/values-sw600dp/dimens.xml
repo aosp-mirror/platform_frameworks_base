@@ -113,4 +113,6 @@
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">12dp</dimen>
 
+    <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
+    <dimen name="immersive_mode_cling_width">380dp</dimen>
 </resources>

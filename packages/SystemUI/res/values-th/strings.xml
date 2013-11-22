@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"ส่วนติดต่อผู้ใช้ของระบบ"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ล้างข้อมูล"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"ห้ามรบกวน"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"แสดงการแจ้งเตือน"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ลบจากรายการ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ข้อมูลแอปพลิเคชัน"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ไม่มีแอปพลิเคชันล่าสุด"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"เสียบที่ชาร์จ"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"แบตเตอรี่เหลือน้อย"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"เหลืออีก <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"ไม่สนับสนุนการชาร์จแบบ USB"\n"ใช้เฉพาะที่ชาร์จที่ให้มาเท่านั้น"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"ไม่สนับสนุนการชาร์จแบบ USB\nใช้เฉพาะที่ชาร์จที่ให้มาเท่านั้น"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"การใช้แบตเตอรี่"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"การตั้งค่า"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WiFi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"ใช้ค่าเริ่มต้นสำหรับอุปกรณ์ USB นี้"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"ใช้ค่าเริ่มต้นสำหรับอุปกรณ์เสริม USB นี้"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"อนุญาตให้แก้ไขข้อบกพร่อง USB หรือไม่"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"ลายนิ้วมือหลัก RSA ของคอมพิวเตอร์คือ:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"ลายนิ้วมือหลัก RSA ของคอมพิวเตอร์คือ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"อนุญาตจากคอมพิวเตอร์เครื่องนี้เสมอ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ขยายจนเต็มหน้าจอ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ยืดจนเต็มหน้าจอ"</string>
@@ -160,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"ปิดใช้งานข้อมูล 4G แล้ว"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"ปิดใช้งานข้อมูลมือถือแล้ว"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"ข้อมูลถูกปิดใช้งาน"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"คุณได้มาถึงขีดจำกัดการใช้ข้อมูลที่ระบุไว้แล้ว"\n\n"หากคุณเปิดใช้งานข้อมูลอีกครั้ง ผู้ให้บริการของคุณอาจเรียกเก็บค่าบริการ"</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"คุณได้มาถึงขีดจำกัดการใช้ข้อมูลที่ระบุไว้แล้ว\n\nหากคุณเปิดใช้งานข้อมูลอีกครั้ง ผู้ให้บริการของคุณอาจเรียกเก็บค่าบริการ"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"เปิดใช้งานข้อมูลอีกครั้ง"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ WiFi แล้ว"</string>
@@ -168,9 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ตำแหน่งที่กำหนดโดย GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ล้างการแจ้งเตือนทั้งหมด"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"ข้อมูลแอป"</string>
-    <string name="close_universe" msgid="3736513750241754348">"ปิด"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"การแจ้งเตือนปิดอยู่"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"แตะที่นี่เพื่อเปิดการแจ้งเตือนอีกครั้ง"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"หน้าจอจะหมุนโดยอัตโนมัติ"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวตั้ง"</string>
@@ -187,7 +182,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"หมุนอัตโนมัติ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"ล็อกการหมุนแล้ว"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"วิธีป้อนข้อมูล"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"สถานที่ที่ใช้งาน"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"ตำแหน่ง"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ปิดตำแหน่ง"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"อุปกรณ์สื่อ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"โทรฉุกเฉินเท่านั้น"</string>
@@ -203,5 +199,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ความสว่าง"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"อัตโนมัติ"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"การแจ้งเตือนจะแสดงขึ้นที่นี่"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"เข้าถึงได้ทุกเมื่อด้วยการกวาดนิ้วลง"\n"กวาดนิ้วลงอีกครั้งสำหรับการควบคุมระบบ"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"เข้าถึงได้ทุกเมื่อด้วยการกวาดนิ้วลง\nกวาดนิ้วลงอีกครั้งสำหรับการควบคุมระบบ"</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"กวาดขอบของหน้าจอเพื่อแสดงแถบ"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"กวาดจากขอบของหน้าจอเพื่อแสดงแถบระบบ"</string>
 </resources>

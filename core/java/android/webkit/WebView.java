@@ -28,9 +28,11 @@ import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
+import android.print.PrintDocumentAdapter;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -41,6 +43,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.AbsoluteLayout;
@@ -55,9 +58,6 @@ import java.util.Map;
  * It uses the WebKit rendering engine to display
  * web pages and includes methods to navigate forward and backward
  * through a history, zoom in and out, perform text searches and more.</p>
- * <p>To enable the built-in zoom, set
- * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
- * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).
  * <p>Note that, in order for your Activity to access the Internet and load web pages
  * in a WebView, you must add the {@code INTERNET} permissions to your
  * Android Manifest file:</p>
@@ -158,8 +158,17 @@ import java.util.Map;
  *   }
  * });
  *
- * webview.loadUrl("http://slashdot.org/");
+ * webview.loadUrl("http://developer.android.com/");
  * </pre>
+ *
+ * <h3>Zoom</h3>
+ *
+ * <p>To enable the built-in zoom, set
+ * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
+ * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).</p>
+ * <p>NOTE: Using zoom if either the height or width is set to
+ * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} may lead to undefined behavior
+ * and should be avoided.</p>
  *
  * <h3>Cookie and window management</h3>
  *
@@ -219,6 +228,7 @@ import java.util.Map;
  * <p>The {@code hdpi.css} stylesheet is only used for devices with a screen pixel ration of 1.5,
  * which is the high density pixel ratio.</p>
  * </li>
+ * </ul>
  *
  * <h3>HTML5 Video support</h3>
  *
@@ -240,7 +250,7 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener, ViewDebug.HierarchyHandler {
 
-    private static final String LOGTAG = "webview_proxy";
+    private static final String LOGTAG = "WebView";
 
     // Throwing an exception for incorrect thread usage if the
     // build target is JB MR2 or newer. Defaults to false, and is
@@ -492,9 +502,12 @@ public class WebView extends AbsoluteLayout
         sEnforceThreadChecking = context.getApplicationInfo().targetSdkVersion >=
                 Build.VERSION_CODES.JELLY_BEAN_MR2;
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "WebView<init>");
 
         ensureProviderCreated();
         mProvider.init(javaScriptInterfaces, privateBrowsing);
+        // Post condition of creating a webview is the CookieSyncManager.getInstance() is allowed.
+        CookieSyncManager.setGetInstanceIsAllowed();
     }
 
     /**
@@ -504,6 +517,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setHorizontalScrollbarOverlay(boolean overlay) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setHorizontalScrollbarOverlay=" + overlay);
         mProvider.setHorizontalScrollbarOverlay(overlay);
     }
 
@@ -514,6 +528,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setVerticalScrollbarOverlay(boolean overlay) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setVerticalScrollbarOverlay=" + overlay);
         mProvider.setVerticalScrollbarOverlay(overlay);
     }
 
@@ -568,6 +583,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void setCertificate(SslCertificate certificate) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setCertificate=" + certificate);
         mProvider.setCertificate(certificate);
     }
 
@@ -591,6 +607,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void savePassword(String host, String username, String password) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "savePassword=" + host);
         mProvider.savePassword(host, username, password);
     }
 
@@ -610,6 +627,7 @@ public class WebView extends AbsoluteLayout
     public void setHttpAuthUsernamePassword(String host, String realm,
             String username, String password) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setHttpAuthUsernamePassword=" + host);
         mProvider.setHttpAuthUsernamePassword(host, realm, username, password);
     }
 
@@ -639,6 +657,7 @@ public class WebView extends AbsoluteLayout
      */
     public void destroy() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "destroy");
         mProvider.destroy();
     }
 
@@ -651,7 +670,6 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static void enablePlatformNotifications() {
-        checkThread();
         getFactory().getStatics().setPlatformNotificationsEnabled(true);
     }
 
@@ -664,7 +682,6 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static void disablePlatformNotifications() {
-        checkThread();
         getFactory().getStatics().setPlatformNotificationsEnabled(false);
     }
 
@@ -677,6 +694,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setNetworkAvailable(boolean networkUp) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setNetworkAvailable=" + networkUp);
         mProvider.setNetworkAvailable(networkUp);
     }
 
@@ -693,6 +711,7 @@ public class WebView extends AbsoluteLayout
      */
     public WebBackForwardList saveState(Bundle outState) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "saveState");
         return mProvider.saveState(outState);
     }
 
@@ -709,6 +728,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public boolean savePicture(Bundle b, final File dest) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "savePicture=" + dest.getName());
         return mProvider.savePicture(b, dest);
     }
 
@@ -726,6 +746,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public boolean restorePicture(Bundle b, File src) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "restorePicture=" + src.getName());
         return mProvider.restorePicture(b, src);
     }
 
@@ -743,6 +764,7 @@ public class WebView extends AbsoluteLayout
      */
     public WebBackForwardList restoreState(Bundle inState) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "restoreState");
         return mProvider.restoreState(inState);
     }
 
@@ -759,6 +781,7 @@ public class WebView extends AbsoluteLayout
      */
     public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadUrl(extra headers)=" + url);
         mProvider.loadUrl(url, additionalHttpHeaders);
     }
 
@@ -769,6 +792,7 @@ public class WebView extends AbsoluteLayout
      */
     public void loadUrl(String url) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadUrl=" + url);
         mProvider.loadUrl(url);
     }
 
@@ -778,10 +802,12 @@ public class WebView extends AbsoluteLayout
      * {@link #loadUrl(String)} instead.
      *
      * @param url the URL of the resource to load
-     * @param postData the data will be passed to "POST" request
+     * @param postData the data will be passed to "POST" request, which must be
+     *     be "application/x-www-form-urlencoded" encoded.
      */
     public void postUrl(String url, byte[] postData) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "postUrl=" + url);
         mProvider.postUrl(url, postData);
     }
 
@@ -816,6 +842,7 @@ public class WebView extends AbsoluteLayout
      */
     public void loadData(String data, String mimeType, String encoding) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadData");
         mProvider.loadData(data, mimeType, encoding);
     }
 
@@ -831,7 +858,10 @@ public class WebView extends AbsoluteLayout
      * <p>
      * If the base URL uses the data scheme, this method is equivalent to
      * calling {@link #loadData(String,String,String) loadData()} and the
-     * historyUrl is ignored.
+     * historyUrl is ignored, and the data will be treated as part of a data: URL.
+     * If the base URL uses any other scheme, then the data will be loaded into
+     * the WebView as a plain string (i.e. not part of a data URL) and any URL-encoded
+     * entities in the string will not be decoded.
      *
      * @param baseUrl the URL to use as the page's base URL. If null defaults to
      *                'about:blank'.
@@ -845,7 +875,25 @@ public class WebView extends AbsoluteLayout
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadDataWithBaseURL=" + baseUrl);
         mProvider.loadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl);
+    }
+
+    /**
+     * Asynchronously evaluates JavaScript in the context of the currently displayed page.
+     * If non-null, |resultCallback| will be invoked with any result returned from that
+     * execution. This method must be called on the UI thread and the callback will
+     * be made on the UI thread.
+     *
+     * @param script the JavaScript to execute.
+     * @param resultCallback A callback to be invoked when the script execution
+     *                       completes with the result of the execution (if any).
+     *                       May be null if no notificaion of the result is required.
+     */
+    public void evaluateJavascript(String script, ValueCallback<String> resultCallback) {
+        checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "evaluateJavascript=" + script);
+        mProvider.evaluateJavaScript(script, resultCallback);
     }
 
     /**
@@ -855,6 +903,7 @@ public class WebView extends AbsoluteLayout
      */
     public void saveWebArchive(String filename) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "saveWebArchive=" + filename);
         mProvider.saveWebArchive(filename);
     }
 
@@ -872,6 +921,7 @@ public class WebView extends AbsoluteLayout
      */
     public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "saveWebArchive(auto)=" + basename);
         mProvider.saveWebArchive(basename, autoname, callback);
     }
 
@@ -880,6 +930,7 @@ public class WebView extends AbsoluteLayout
      */
     public void stopLoading() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "stopLoading");
         mProvider.stopLoading();
     }
 
@@ -888,6 +939,7 @@ public class WebView extends AbsoluteLayout
      */
     public void reload() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "reload");
         mProvider.reload();
     }
 
@@ -906,6 +958,7 @@ public class WebView extends AbsoluteLayout
      */
     public void goBack() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "goBack");
         mProvider.goBack();
     }
 
@@ -924,6 +977,7 @@ public class WebView extends AbsoluteLayout
      */
     public void goForward() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "goForward");
         mProvider.goForward();
     }
 
@@ -949,6 +1003,7 @@ public class WebView extends AbsoluteLayout
      */
     public void goBackOrForward(int steps) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "goBackOrForwad=" + steps);
         mProvider.goBackOrForward(steps);
     }
 
@@ -968,6 +1023,7 @@ public class WebView extends AbsoluteLayout
      */
     public boolean pageUp(boolean top) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "pageUp");
         return mProvider.pageUp(top);
     }
 
@@ -979,6 +1035,7 @@ public class WebView extends AbsoluteLayout
      */
     public boolean pageDown(boolean bottom) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "pageDown");
         return mProvider.pageDown(bottom);
     }
 
@@ -991,6 +1048,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void clearView() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearView");
         mProvider.clearView();
     }
 
@@ -1005,12 +1063,42 @@ public class WebView extends AbsoluteLayout
      * {@link android.os.Build.VERSION_CODES#HONEYCOMB} and
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} inclusive, the
      * picture does not include fixed position elements or scrollable divs.
+     * <p>
+     * Note that from {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1} the returned picture
+     * should only be drawn into bitmap-backed Canvas - using any other type of Canvas will involve
+     * additional conversion at a cost in memory and performance. Also the
+     * {@link android.graphics.Picture#createFromStream} and
+     * {@link android.graphics.Picture#writeToStream} methods are not supported on the
+     * returned object.
+     *
+     * @deprecated Use {@link #onDraw} to obtain a bitmap snapshot of the WebView, or
+     * {@link #saveWebArchive} to save the content to a file.
      *
      * @return a picture that captures the current contents of this WebView
      */
+    @Deprecated
     public Picture capturePicture() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "capturePicture");
         return mProvider.capturePicture();
+    }
+
+    /**
+     * Creates a PrintDocumentAdapter that provides the content of this Webview for printing.
+     * Only supported for API levels
+     * {@link android.os.Build.VERSION_CODES#KITKAT} and above.
+     *
+     * The adapter works by converting the Webview contents to a PDF stream. The Webview cannot
+     * be drawn during the conversion process - any such draws are undefined. It is recommended
+     * to use a dedicated off screen Webview for the printing. If necessary, an application may
+     * temporarily hide a visible WebView by using a custom PrintDocumentAdapter instance
+     * wrapped around the object returned and observing the onStart and onFinish methods. See
+     * {@link android.print.PrintDocumentAdapter} for more information.
+     */
+    public PrintDocumentAdapter createPrintDocumentAdapter() {
+        checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "createPrintDocumentAdapter");
+        return mProvider.createPrintDocumentAdapter();
     }
 
     /**
@@ -1030,10 +1118,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Sets the initial scale for this WebView. 0 means default. If
-     * {@link WebSettings#getUseWideViewPort()} is true, it zooms out all the
-     * way. Otherwise it starts with 100%. If initial scale is greater than 0,
-     * WebView starts with this value as initial scale.
+     * Sets the initial scale for this WebView. 0 means default.
+     * The behavior for the default scale depends on the state of
+     * {@link WebSettings#getUseWideViewPort()} and
+     * {@link WebSettings#getLoadWithOverviewMode()}.
+     * If the content fits into the WebView control by width, then
+     * the zoom is set to 100%. For wide content, the behavor
+     * depends on the state of {@link WebSettings#getLoadWithOverviewMode()}.
+     * If its value is true, the content will be zoomed out to be fit
+     * by width into the WebView control, otherwise not.
+     *
+     * If initial scale is greater than 0, WebView starts with this value
+     * as initial scale.
      * Please note that unlike the scale properties in the viewport meta tag,
      * this method doesn't take the screen density into account.
      *
@@ -1041,6 +1137,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setInitialScale(int scaleInPercent) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setInitialScale=" + scaleInPercent);
         mProvider.setInitialScale(scaleInPercent);
     }
 
@@ -1051,6 +1148,7 @@ public class WebView extends AbsoluteLayout
      */
     public void invokeZoomPicker() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "invokeZoomPicker");
         mProvider.invokeZoomPicker();
     }
 
@@ -1074,6 +1172,7 @@ public class WebView extends AbsoluteLayout
      */
     public HitTestResult getHitTestResult() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "getHitTestResult");
         return mProvider.getHitTestResult();
     }
 
@@ -1092,6 +1191,7 @@ public class WebView extends AbsoluteLayout
      */
     public void requestFocusNodeHref(Message hrefMsg) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "requestFocusNodeHref");
         mProvider.requestFocusNodeHref(hrefMsg);
     }
 
@@ -1104,6 +1204,7 @@ public class WebView extends AbsoluteLayout
      */
     public void requestImageRef(Message msg) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "requestImageRef");
         mProvider.requestImageRef(msg);
     }
 
@@ -1208,6 +1309,7 @@ public class WebView extends AbsoluteLayout
      */
     public void pauseTimers() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "pauseTimers");
         mProvider.pauseTimers();
     }
 
@@ -1217,6 +1319,7 @@ public class WebView extends AbsoluteLayout
      */
     public void resumeTimers() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "resumeTimers");
         mProvider.resumeTimers();
     }
 
@@ -1229,6 +1332,7 @@ public class WebView extends AbsoluteLayout
      */
     public void onPause() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "onPause");
         mProvider.onPause();
     }
 
@@ -1237,6 +1341,7 @@ public class WebView extends AbsoluteLayout
      */
     public void onResume() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "onResume");
         mProvider.onResume();
     }
 
@@ -1253,9 +1358,13 @@ public class WebView extends AbsoluteLayout
     /**
      * Informs this WebView that memory is low so that it can free any available
      * memory.
+     * @deprecated Memory caches are automatically dropped when no longer needed, and in response
+     *             to system memory pressure.
      */
+    @Deprecated
     public void freeMemory() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "freeMemory");
         mProvider.freeMemory();
     }
 
@@ -1267,6 +1376,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearCache(boolean includeDiskFiles) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearCache");
         mProvider.clearCache(includeDiskFiles);
     }
 
@@ -1278,6 +1388,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearFormData() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearFormData");
         mProvider.clearFormData();
     }
 
@@ -1286,6 +1397,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearHistory() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearHistory");
         mProvider.clearHistory();
     }
 
@@ -1295,6 +1407,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearSslPreferences() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearSslPreferences");
         mProvider.clearSslPreferences();
     }
 
@@ -1336,6 +1449,7 @@ public class WebView extends AbsoluteLayout
      */
     public void findNext(boolean forward) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "findNext");
         mProvider.findNext(forward);
     }
 
@@ -1351,6 +1465,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public int findAll(String find) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "findAll");
         StrictMode.noteSlowCall("findAll blocks UI: prefer findAllAsync");
         return mProvider.findAll(find);
     }
@@ -1365,6 +1480,7 @@ public class WebView extends AbsoluteLayout
      */
     public void findAllAsync(String find) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "findAllAsync");
         mProvider.findAllAsync(find);
     }
 
@@ -1385,6 +1501,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public boolean showFindDialog(String text, boolean showIme) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "showFindDialog");
         return mProvider.showFindDialog(text, showIme);
     }
 
@@ -1420,6 +1537,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearMatches() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearMatches");
         mProvider.clearMatches();
     }
 
@@ -1480,6 +1598,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void setPictureListener(PictureListener listener) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setPictureListener=" + listener);
         mProvider.setPictureListener(listener);
     }
 
@@ -1529,6 +1648,7 @@ public class WebView extends AbsoluteLayout
      */
     public void addJavascriptInterface(Object object, String name) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "addJavascriptInterface=" + name);
         mProvider.addJavascriptInterface(object, name);
     }
 
@@ -1541,6 +1661,7 @@ public class WebView extends AbsoluteLayout
      */
     public void removeJavascriptInterface(String name) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "removeJavascriptInterface=" + name);
         mProvider.removeJavascriptInterface(name);
     }
 
@@ -1557,6 +1678,21 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Enables debugging of web contents (HTML / CSS / JavaScript)
+     * loaded into any WebViews of this application. This flag can be enabled
+     * in order to facilitate debugging of web layouts and JavaScript
+     * code running inside WebViews. Please refer to WebView documentation
+     * for the debugging guide.
+     *
+     * The default is false.
+     *
+     * @param enabled whether to enable web contents debugging
+     */
+    public static void setWebContentsDebuggingEnabled(boolean enabled) {
+        getFactory().getStatics().setWebContentsDebuggingEnabled(enabled);
+    }
+
+    /**
      * Gets the list of currently loaded plugins.
      *
      * @return the list of currently loaded plugins
@@ -1565,7 +1701,6 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static synchronized PluginList getPluginList() {
-        checkThread();
         return new PluginList();
     }
 
@@ -1630,6 +1765,7 @@ public class WebView extends AbsoluteLayout
 
     public void flingScroll(int vx, int vy) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "flingScroll");
         mProvider.flingScroll(vx, vy);
     }
 
@@ -1832,6 +1968,11 @@ public class WebView extends AbsoluteLayout
             return WebView.this.getHorizontalScrollbarHeight();
         }
 
+        public void super_onDrawVerticalScrollBar(Canvas canvas, Drawable scrollBar,
+                int l, int t, int r, int b) {
+            WebView.super.onDrawVerticalScrollBar(canvas, scrollBar, l, t, r, b);
+        }
+
         // ---- Access to (non-public) fields ----
         /** Raw setter for the scroll X value, without invoking onScrollChanged handlers etc. */
         public void setScrollXRaw(int scrollX) {
@@ -1913,13 +2054,18 @@ public class WebView extends AbsoluteLayout
         return WebViewFactory.getProvider();
     }
 
-    private static void checkThread() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
+    private final Looper mWebViewThread = Looper.myLooper();
+
+    private void checkThread() {
+        // Ignore mWebViewThread == null because this can be called during in the super class
+        // constructor, before this class's own constructor has even started.
+        if (mWebViewThread != null && Looper.myLooper() != mWebViewThread) {
             Throwable throwable = new Throwable(
-                    "Warning: A WebView method was called on thread '" +
+                    "A WebView method was called on thread '" +
                     Thread.currentThread().getName() + "'. " +
-                    "All WebView methods must be called on the UI thread. " +
-                    "Future versions of WebView may not support use on other threads.");
+                    "All WebView methods must be called on the same thread. " +
+                    "(Expected Looper " + mWebViewThread + " called on " + Looper.myLooper() +
+                    ", FYI main Looper is " + Looper.getMainLooper() + ")");
             Log.w(LOGTAG, Log.getStackTraceString(throwable));
             StrictMode.onWebViewMethodCalledOnWrongThread(throwable);
 
@@ -2051,6 +2197,13 @@ public class WebView extends AbsoluteLayout
     }
     */
 
+    @Override
+    public AccessibilityNodeProvider getAccessibilityNodeProvider() {
+        AccessibilityNodeProvider provider =
+                mProvider.getViewDelegate().getAccessibilityNodeProvider();
+        return provider == null ? super.getAccessibilityNodeProvider() : provider;
+    }
+
     @Deprecated
     @Override
     public boolean shouldDelayChildPressedState() {
@@ -2163,7 +2316,6 @@ public class WebView extends AbsoluteLayout
         return mProvider.getViewDelegate().requestFocus(direction, previouslyFocusedRect);
     }
 
-    @Deprecated
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

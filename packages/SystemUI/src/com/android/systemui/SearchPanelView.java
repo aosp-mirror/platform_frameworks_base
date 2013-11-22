@@ -32,7 +32,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.EventLog;
-import android.util.Slog;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
@@ -43,27 +43,22 @@ import android.widget.FrameLayout;
 
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
-
-import com.android.systemui.EventLogTags;
-import com.android.systemui.R;
-import com.android.systemui.recent.StatusBarTouchProxy;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.StatusBarPanel;
+import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
-import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 public class SearchPanelView extends FrameLayout implements
         StatusBarPanel, ActivityOptions.OnAnimationStartedListener {
     private static final int SEARCH_PANEL_HOLD_DURATION = 0;
     static final String TAG = "SearchPanelView";
-    static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
+    static final boolean DEBUG = PhoneStatusBar.DEBUG || false;
     public static final boolean DEBUG_GESTURES = true;
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
     private final Context mContext;
     private BaseStatusBar mBar;
-    private StatusBarTouchProxy mStatusBarTouchProxy;
 
     private boolean mShowing;
     private View mSearchTargetsContainer;
@@ -94,11 +89,7 @@ public class SearchPanelView extends FrameLayout implements
 
         if (isKeyguardShowing) {
             // Have keyguard show the bouncer and launch the activity if the user succeeds.
-            try {
-                mWm.showAssistant();
-            } catch (RemoteException e) {
-                // too bad, so sad...
-            }
+            KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
             onAnimationStarted();
         } else {
             // Otherwise, keyguard isn't showing so launch it from here.
@@ -120,7 +111,7 @@ public class SearchPanelView extends FrameLayout implements
                 mContext.startActivityAsUser(intent, opts.toBundle(),
                         new UserHandle(UserHandle.USER_CURRENT));
             } catch (ActivityNotFoundException e) {
-                Slog.w(TAG, "Activity not found for " + intent.getAction());
+                Log.w(TAG, "Activity not found for " + intent.getAction());
                 onAnimationStarted();
             }
         }
@@ -172,7 +163,6 @@ public class SearchPanelView extends FrameLayout implements
         super.onFinishInflate();
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mSearchTargetsContainer = findViewById(R.id.search_panel_container);
-        mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
         // TODO: fetch views
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
@@ -186,7 +176,7 @@ public class SearchPanelView extends FrameLayout implements
             if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
                     ASSIST_ICON_METADATA_NAME,
                     com.android.internal.R.drawable.ic_action_assist_generic)) {
-                if (DEBUG) Slog.v(TAG, "Couldn't grab icon for component " + component);
+                if (DEBUG) Log.v(TAG, "Couldn't grab icon for component " + component);
             }
         }
     }
@@ -200,14 +190,7 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     public boolean isInContentArea(int x, int y) {
-        if (pointInside(x, y, mSearchTargetsContainer)) {
-            return true;
-        } else if (mStatusBarTouchProxy != null &&
-                pointInside(x, y, mStatusBarTouchProxy)) {
-            return true;
-        } else {
-            return false;
-        }
+        return pointInside(x, y, mSearchTargetsContainer);
     }
 
     private final OnPreDrawListener mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
@@ -295,17 +278,6 @@ public class SearchPanelView extends FrameLayout implements
 
     public void setBar(BaseStatusBar bar) {
         mBar = bar;
-    }
-
-    public void setStatusBarView(final View statusBarView) {
-        if (mStatusBarTouchProxy != null) {
-            mStatusBarTouchProxy.setStatusBar(statusBarView);
-//            mGlowPadView.setOnTouchListener(new OnTouchListener() {
-//                public boolean onTouch(View v, MotionEvent event) {
-//                    return statusBarView.onTouchEvent(event);
-//                }
-//            });
-        }
     }
 
     @Override

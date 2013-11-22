@@ -23,7 +23,7 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="#FF000000"
+    android:background="@drawable/system_bar_background"
     >
 
     <FrameLayout android:id="@+id/rot0"
@@ -145,15 +145,32 @@
                 />
         </LinearLayout>
 
-        <com.android.systemui.statusbar.policy.KeyButtonView
-            android:layout_width="80dp"
-            android:id="@+id/search_light"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/search_light"
-            android:scaleType="center"
-            android:visibility="gone"
-            />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:layout_width="80dp"
+                android:id="@+id/search_light"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/search_light"
+                android:scaleType="center"
+                android:visibility="gone"
+                android:contentDescription="@string/accessibility_search_light"
+                />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/camera_button"
+                android:layout_height="match_parent"
+                android:layout_width="80dp"
+                android:layout_gravity="center_vertical|right"
+                android:src="@drawable/ic_sysbar_camera"
+                android:scaleType="center"
+                android:visibility="gone"
+                android:contentDescription="@string/accessibility_camera_button"
+                />
+        </FrameLayout>
 
         <com.android.systemui.statusbar.policy.DeadZone
             android:id="@+id/deadzone"
@@ -297,7 +314,10 @@
             android:src="@drawable/search_light"
             android:scaleType="center"
             android:visibility="gone"
+            android:contentDescription="@string/accessibility_search_light"
             />
+
+        <!-- No camera button in landscape mode -->
 
         <com.android.systemui.statusbar.policy.DeadZone
             android:id="@+id/deadzone"

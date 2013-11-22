@@ -74,7 +74,7 @@ http://developer.android.com/downloads/design/Android_Design_Fireworks_Stencil_2
 http://developer.android.com/downloads/design/Android_Design_Illustrator_Vectors_20120814.ai
 http://developer.android.com/downloads/design/Android_Design_OmniGraffle_Stencil_20120814.graffle
 http://developer.android.com/downloads/design/Android_Design_Holo_Widgets_20120814.zip
-http://developer.android.com/downloads/design/Android_Design_Icons_20120814.zip
+http://developer.android.com/downloads/design/Android_Design_Icons_20130926.zip
 http://developer.android.com/downloads/design/Roboto_Hinted_20120823.zip
 http://developer.android.com/downloads/design/Roboto_Specimen_Book_20111129.pdf
 http://developer.android.com/downloads/design/Android_Design_Color_Swatches_20120229.zip

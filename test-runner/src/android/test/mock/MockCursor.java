@@ -177,17 +177,18 @@ public class MockCursor implements Cursor {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    @SuppressWarnings("deprecation")
     public void setNotificationUri(ContentResolver cr, Uri uri) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    @SuppressWarnings("deprecation")
+    public Uri getNotificationUri() {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
     public void unregisterContentObserver(ContentObserver observer) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    @SuppressWarnings("deprecation")
     public void unregisterDataSetObserver(DataSetObserver observer) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }

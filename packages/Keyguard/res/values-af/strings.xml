@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Voer PIN-kode in"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Voer PUK en nuwe PIN-kode in"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Nuwe PIN-kode"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Raak om wagwoord in te voer"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Voer wagwoord in om te ontsluit"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Voer PIN in om te ontsluit"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Verkeerde PIN-kode."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Om te ontsluit, druk Kieslys dan 0."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maksimum gesigontsluit-pogings oorskry"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Gelaai"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Laai, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Koppel jou herlaaier."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Druk kieslys om te ontsluit."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Netwerk gesluit"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Geen SIM-kaart nie"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Geen SIM-kaart in tablet nie."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Geen SIM-kaart in foon nie."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Steek \'n SIM-kaart in."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Die SIM-kaart is weg of nie leesbaar nie. Steek \'n SIM-kaart in."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Onbruikbare SIM-kaart."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Jou SIM-kaart is permanent gedeaktiveer.\n Kontak jou draadlose diensverskaffer vir \'n ander SIM-kaart."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-kaart is gesluit."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-kaart is PUK-geslote."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Ontsluit tans SIM-kaart…"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Legstuk %2$d van %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Voeg legstuk by."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Leeg"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Ontsluitruimte uitgevou."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Ontsluitruimte ingevou."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>-legstuk."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Gebruikerkieser"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Media-kontroles"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Herordening van legstuk begin."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Herordening van legstuk beëindig."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Legstuk <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> uitgevee."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Vou ontsluitruimte uit."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Sleep-ontsluit."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Patroon ontsluit."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Gesigslot."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN ontsluit."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Wagwoord ontsluit."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Patroonarea."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Sleep-area."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Vorigesnit-knoppie"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Volgendesnit-knoppie"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Laatwag-knoppie"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Speel-knoppie"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Stop-knoppie"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Kanselleer"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Vee uit"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Klaar"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modus verander"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Invoersleutel"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Ontsluit"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Stil"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Klank aan"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Soek"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Gly op vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"Gly af vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Gly links vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Gly regs vir <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g> ."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Noodoproep"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Het jy die patroon vergeet?"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Verkeerde patroon"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Verkeerde wagwoord"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Verkeerde PIN"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Probeer weer oor <xliff:g id="NUMBER">%d</xliff:g> sekondes."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Teken jou patroon"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Voer SIM-PIN in"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Voer PIN in"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Voer wagwoord in"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Kontak diensverskaffer vir details."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Voer die gewenste PIN-kode in"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bevestig gewenste PIN-kode"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ontsluit tans SIM-kaart…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Verkeerde PIN-kode."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Tik \'n PIN in wat 4 tot 8 syfers lank is."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-kode moet 8 of meer syfers wees."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Voer weer die korrekte PUK-kode in. Herhaalde pogings sal die SIM permanent deaktiveer."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kodes stem nie ooreen nie"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Te veel patroonpogings"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Om te ontsluit, meld met jou Google-rekening aan."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Gebruikernaam (e-pos)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Wagwoord"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Meld aan"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ongeldige gebruikernaam of wagwoord."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Het jy jou gebruikernaam of wagwoord vergeet?\nBesoek "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Kontroleer tans rekening..."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Jy het jou PIN <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingetik. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer jou wagwoord verkeerdelik getik. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die tablet te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die tablet na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die foon na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Jy het <xliff:g id="NUMBER">%d</xliff:g> keer verkeerdelik gepoog om die tablet te ontsluit. Die tablet sal nou na fabrieksverstek teruggestel word."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jy het <xliff:g id="NUMBER">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Die foon sal nou na fabrieksverstek teruggestel word."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou tablet te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Vorigesnit-knoppie"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Volgendesnit-knoppie"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Laatwag-knoppie"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Speel-knoppie"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Stop-knoppie"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Geen diens nie."</string>
+</resources>

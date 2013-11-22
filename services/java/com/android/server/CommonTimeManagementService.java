@@ -40,6 +40,8 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.server.net.BaseNetworkObserver;
+
 /**
  * @hide
  * <p>CommonTimeManagementService manages the configuration of the native Common Time service,
@@ -104,9 +106,7 @@ class CommonTimeManagementService extends Binder {
     /*
      * Callback handler implementations.
      */
-    private INetworkManagementEventObserver mIfaceObserver =
-        new INetworkManagementEventObserver.Stub() {
-
+    private INetworkManagementEventObserver mIfaceObserver = new BaseNetworkObserver() {
         public void interfaceStatusChanged(String iface, boolean up) {
             reevaluateServiceState();
         }
@@ -119,9 +119,6 @@ class CommonTimeManagementService extends Binder {
         public void interfaceRemoved(String iface) {
             reevaluateServiceState();
         }
-        public void limitReached(String limitName, String iface) { }
-
-        public void interfaceClassDataActivityChanged(String label, boolean active) {}
     };
 
     private BroadcastReceiver mConnectivityMangerObserver = new BroadcastReceiver() {
@@ -153,7 +150,7 @@ class CommonTimeManagementService extends Binder {
         mContext = context;
     }
 
-    void systemReady() {
+    void systemRunning() {
         if (ServiceManager.checkService(CommonTimeConfig.SERVICE_NAME) == null) {
             Log.i(TAG, "No common time service detected on this platform.  " +
                        "Common time services will be unavailable.");

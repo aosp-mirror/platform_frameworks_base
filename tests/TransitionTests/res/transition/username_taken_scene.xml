@@ -1,0 +1,2 @@
+<scene xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout="@layout/username_taken"/>

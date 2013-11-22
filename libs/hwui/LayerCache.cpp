@@ -155,9 +155,7 @@ bool LayerCache::put(Layer* layer) {
                     victim->layer.getHeight());
         }
 
-        layer->deferredUpdateScheduled = false;
-        layer->renderer = NULL;
-        layer->displayList = NULL;
+        layer->cancelDefer();
 
         LayerEntry entry(layer);
 

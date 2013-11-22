@@ -25,13 +25,12 @@
     android:layout_removeBorders="true">
 
     <ListView android:id="@android:id/list"
+        style="?attr/preferenceFragmentListStyle"
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="1"
         android:paddingTop="0dip"
         android:paddingBottom="@dimen/preference_fragment_padding_bottom"
-        android:paddingStart="@dimen/preference_fragment_padding_side"
-        android:paddingEnd="@dimen/preference_fragment_padding_side"
         android:scrollbarStyle="@integer/preference_fragment_scrollbarStyle"
         android:clipToPadding="false"
         android:drawSelectorOnTop="false"

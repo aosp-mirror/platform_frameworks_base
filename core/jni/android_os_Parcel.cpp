@@ -35,7 +35,6 @@
 #include <utils/SystemClock.h>
 #include <utils/List.h>
 #include <utils/KeyedVector.h>
-#include <cutils/logger.h>
 #include <binder/Parcel.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>

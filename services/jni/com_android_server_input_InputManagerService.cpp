@@ -29,6 +29,7 @@
 #include "jni.h"
 #include <limits.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 
 #include <utils/Log.h>
 #include <utils/Looper.h>
@@ -191,7 +192,8 @@ public:
             uint32_t policyFlags);
     virtual void notifyConfigurationChanged(nsecs_t when);
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<InputWindowHandle>& inputWindowHandle);
+            const sp<InputWindowHandle>& inputWindowHandle,
+            const String8& reason);
     virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle);
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
@@ -553,7 +555,7 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
 }
 
 nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-        const sp<InputWindowHandle>& inputWindowHandle) {
+        const sp<InputWindowHandle>& inputWindowHandle, const String8& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyANR");
 #endif
@@ -564,15 +566,18 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
             getInputApplicationHandleObjLocalRef(env, inputApplicationHandle);
     jobject inputWindowHandleObj =
             getInputWindowHandleObjLocalRef(env, inputWindowHandle);
+    jstring reasonObj = env->NewStringUTF(reason.string());
 
     jlong newTimeout = env->CallLongMethod(mServiceObj,
-                gServiceClassInfo.notifyANR, inputApplicationHandleObj, inputWindowHandleObj);
+                gServiceClassInfo.notifyANR, inputApplicationHandleObj, inputWindowHandleObj,
+                reasonObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
     } else {
         assert(newTimeout >= 0);
     }
 
+    env->DeleteLocalRef(reasonObj);
     env->DeleteLocalRef(inputWindowHandleObj);
     env->DeleteLocalRef(inputApplicationHandleObj);
     return newTimeout;
@@ -1379,7 +1384,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Lcom/android/server/input/InputApplicationHandle;Lcom/android/server/input/InputWindowHandle;)J");
+            "(Lcom/android/server/input/InputApplicationHandle;Lcom/android/server/input/InputWindowHandle;Ljava/lang/String;)J");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");

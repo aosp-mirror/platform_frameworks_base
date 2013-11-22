@@ -37,7 +37,7 @@ public:
 };
 
 struct JDrm : public BnDrmClient {
-    static bool IsCryptoSchemeSupported(const uint8_t uuid[16]);
+    static bool IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType);
 
     JDrm(JNIEnv *env, jobject thiz, const uint8_t uuid[16]);
 

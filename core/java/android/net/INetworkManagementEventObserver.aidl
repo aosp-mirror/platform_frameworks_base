@@ -53,6 +53,27 @@ interface INetworkManagementEventObserver {
      */
     void interfaceRemoved(String iface);
 
+
+    /**
+     * An interface address has been added or updated
+     *
+     * @param address The address.
+     * @param iface The interface.
+     * @param flags The address flags.
+     * @param scope The address scope.
+     */
+    void addressUpdated(String address, String iface, int flags, int scope);
+
+    /**
+     * An interface address has been removed
+     *
+     * @param address The address.
+     * @param iface The interface.
+     * @param flags The address flags.
+     * @param scope The address scope.
+     */
+    void addressRemoved(String address, String iface, int flags, int scope);
+
     /**
      * A networking quota limit has been reached. The quota might not
      * be specific to an interface.

@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"IU système"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Ne pas déranger"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Afficher les notifications"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Supprimer de la liste"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informations sur l\'application"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Aucune application récente."</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"Brancher le chargeur"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Le niveau de la batterie est faible."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> restant(s)"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Chargement USB non disponible."\n"Vous devez utiliser le chargeur fourni."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Chargement USB non disponible.\nVous devez utiliser le chargeur fourni."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Utilisation de la batterie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Paramètres"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Utiliser par défaut pour ce périphérique USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Utiliser par défaut pour cet accessoire USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Autoriser le débogage USB ?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Empreinte numérique de la clé RSA de l\'ordinateur : "\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Empreinte numérique de la clé RSA de l\'ordinateur : \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Toujours autoriser sur cet ordinateur"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomer pour remplir l\'écran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Étirer pour remplir l\'écran"</string>
@@ -162,7 +160,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Données 4G désactivées"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Données mobiles désactivées"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Données désactivées"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Vous avez atteint le plafond de consommation de données spécifié."\n\n"Si vous utilisez des données supplémentaires, celles-ci pourront être facturées par l\'opérateur."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Vous avez atteint le plafond de consommation de données spécifié.\n\nSi vous utilisez des données supplémentaires, celles-ci pourront être facturées par l\'opérateur."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Réactiver connexion données"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Aucune connexion Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Connecté au Wi-Fi"</string>
@@ -170,9 +168,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Position définie par GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Supprimer toutes les notifications"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informations sur l\'application"</string>
-    <string name="close_universe" msgid="3736513750241754348">"Fermer"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Notifications désactivées"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Appuyez ici pour réactiver les notifications."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"L\'écran pivote automatiquement."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"L\'écran est verrouillé en mode paysage."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"L\'écran est verrouillé en mode portrait."</string>
@@ -189,7 +184,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotation auto"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotation bloquée"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mode de saisie"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"Utilisation des données de localisation"</string>
+    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
+    <skip />
+    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Appareil multimédia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Appels d\'urgence uniquement"</string>
@@ -205,5 +203,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Les notifications s’affichent ici"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Accédez-y à tout moment en faisant glisser le doigt vers le bas."\n"Répétez l\'opération pour accéder aux commandes du système."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Accédez-y à tout moment en faisant glisser le doigt vers le bas.\nRépétez l\'opération pour accéder aux commandes du système."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Faites glisser votre doigt sur le côté de l\'écran pour afficher la barre."</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Faites glisser votre doigt à partir d\'un côté de l\'écran pour afficher la barre système."</string>
 </resources>

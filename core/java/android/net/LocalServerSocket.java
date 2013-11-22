@@ -46,7 +46,7 @@ public class LocalServerSocket {
     {
         impl = new LocalSocketImpl();
 
-        impl.create(true);
+        impl.create(LocalSocket.SOCKET_STREAM);
 
         localAddress = new LocalSocketAddress(name);
         impl.bind(localAddress);
@@ -93,7 +93,7 @@ public class LocalServerSocket {
 
         impl.accept (acceptedImpl);
 
-        return new LocalSocket(acceptedImpl);
+        return new LocalSocket(acceptedImpl, LocalSocket.SOCKET_UNKNOWN);
     }
 
     /**

@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.InputType;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseLongArray;
 import android.view.View;
@@ -267,6 +268,23 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_SET_SELECTION = 0x00020000;
 
     /**
+     * Action to expand an expandable node.
+     */
+    public static final int ACTION_EXPAND = 0x00040000;
+
+    /**
+     * Action to collapse an expandable node.
+     */
+    public static final int ACTION_COLLAPSE = 0x00080000;
+
+    /**
+     * Action to dismiss a dismissable node.
+     */
+    public static final int ACTION_DISMISS = 0x00100000;
+
+    // Action arguments
+
+    /**
      * Argument for which movement granularity to be used when traversing the node text.
      * <p>
      * <strong>Type:</strong> int<br>
@@ -333,6 +351,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_SELECTION_END_INT =
             "ACTION_ARGUMENT_SELECTION_END_INT";
 
+    // Focus types
+
     /**
      * The input focus.
      */
@@ -397,6 +417,14 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final int BOOLEAN_PROPERTY_VISIBLE_TO_USER = 0x00000800;
 
     private static final int BOOLEAN_PROPERTY_EDITABLE = 0x00001000;
+
+    private static final int BOOLEAN_PROPERTY_OPENS_POPUP = 0x00002000;
+
+    private static final int BOOLEAN_PROPERTY_DISMISSABLE = 0x00004000;
+
+    private static final int BOOLEAN_PROPERTY_MULTI_LINE = 0x00008000;
+
+    private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00010000;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -482,8 +510,16 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private int mTextSelectionStart = UNDEFINED;
     private int mTextSelectionEnd = UNDEFINED;
+    private int mInputType = InputType.TYPE_NULL;
+    private int mLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE;
+
+    private Bundle mExtras;
 
     private int mConnectionId = UNDEFINED;
+
+    private RangeInfo mRangeInfo;
+    private CollectionInfo mCollectionInfo;
+    private CollectionItemInfo mCollectionItemInfo;
 
     /**
      * Hide constructor from clients.
@@ -594,22 +630,39 @@ public class AccessibilityNodeInfo implements Parcelable {
      * since it represents a view that is no longer in the view tree and should
      * be recycled.
      * </p>
+     *
+     * @param bypassCache Whether to bypass the cache.
      * @return Whether the refresh succeeded.
+     *
+     * @hide
      */
-    public boolean refresh() {
+    public boolean refresh(boolean bypassCache) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         AccessibilityNodeInfo refreshedInfo = client.findAccessibilityNodeInfoByAccessibilityId(
-                mConnectionId, mWindowId, mSourceNodeId, 0);
+                mConnectionId, mWindowId, mSourceNodeId, bypassCache, 0);
         if (refreshedInfo == null) {
             return false;
         }
         init(refreshedInfo);
         refreshedInfo.recycle();
         return true;
+    }
+
+    /**
+     * Refreshes this info with the latest state of the view it represents.
+     * <p>
+     * <strong>Note:</strong> If this method returns false this info is obsolete
+     * since it represents a view that is no longer in the view tree and should
+     * be recycled.
+     * </p>
+     * @return Whether the refresh succeeded.
+     */
+    public boolean refresh() {
+        return refresh(false);
     }
 
     /**
@@ -652,7 +705,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         final long childId = mChildNodeIds.get(index);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId,
-                childId, FLAG_PREFETCH_DESCENDANTS);
+                childId, false, FLAG_PREFETCH_DESCENDANTS);
     }
 
     /**
@@ -878,7 +931,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mParentNodeId, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mParentNodeId, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1283,7 +1336,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setScrollable(boolean scrollable) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE, scrollable);
     }
 
@@ -1310,6 +1362,216 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setEditable(boolean editable) {
         setBooleanProperty(BOOLEAN_PROPERTY_EDITABLE, editable);
+    }
+
+    /**
+     * Gets the collection info if the node is a collection. A collection
+     * child is always a collection item.
+     *
+     * @return The collection info.
+     */
+    public CollectionInfo getCollectionInfo() {
+        return mCollectionInfo;
+    }
+
+    /**
+     * Sets the collection info if the node is a collection. A collection
+     * child is always a collection item.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param collectionInfo The collection info.
+     */
+    public void setCollectionInfo(CollectionInfo collectionInfo) {
+        enforceNotSealed();
+        mCollectionInfo = collectionInfo;
+    }
+
+    /**
+     * Gets the collection item info if the node is a collection item. A collection
+     * item is always a child of a collection.
+     *
+     * @return The collection item info.
+     */
+    public CollectionItemInfo getCollectionItemInfo() {
+        return mCollectionItemInfo;
+    }
+
+    /**
+     * Sets the collection item info if the node is a collection item. A collection
+     * item is always a child of a collection.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @return collectionItem True if the node is an item.
+     */
+    public void setCollectionItemInfo(CollectionItemInfo collectionItemInfo) {
+        enforceNotSealed();
+        mCollectionItemInfo = collectionItemInfo;
+    }
+
+    /**
+     * Gets the range info if this node is a range.
+     *
+     * @return The range.
+     */
+    public RangeInfo getRangeInfo() {
+        return mRangeInfo;
+    }
+
+    /**
+     * Sets the range info if this node is a range.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param rangeInfo The range info.
+     */
+    public void setRangeInfo(RangeInfo rangeInfo) {
+        enforceNotSealed();
+        mRangeInfo = rangeInfo;
+    }
+
+    /**
+     * Gets if the content of this node is invalid. For example,
+     * a date is not well-formed.
+     *
+     * @return If the node content is invalid.
+     */
+    public boolean isContentInvalid() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_CONTENT_INVALID);
+    }
+
+    /**
+     * Sets if the content of this node is invalid. For example,
+     * a date is not well-formed.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param contentInvalid If the node content is invalid.
+     */
+    public void setContentInvalid(boolean contentInvalid) {
+        setBooleanProperty(BOOLEAN_PROPERTY_CONTENT_INVALID, contentInvalid);
+    }
+
+    /**
+     * Gets the node's live region mode.
+     * <p>
+     * A live region is a node that contains information that is important for
+     * the user and when it changes the user should be notified. For example,
+     * in a login screen with a TextView that displays an "incorrect password"
+     * notification, that view should be marked as a live region with mode
+     * {@link View#ACCESSIBILITY_LIVE_REGION_POLITE}.
+     * <p>
+     * It is the responsibility of the accessibility service to monitor
+     * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} events indicating
+     * changes to live region nodes and their children.
+     *
+     * @return The live region mode, or
+     *         {@link View#ACCESSIBILITY_LIVE_REGION_NONE} if the view is not a
+     *         live region.
+     * @see android.view.View#getAccessibilityLiveRegion()
+     */
+    public int getLiveRegion() {
+        return mLiveRegion;
+    }
+
+    /**
+     * Sets the node's live region mode.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}. This class is
+     * made immutable before being delivered to an AccessibilityService.
+     *
+     * @param mode The live region mode, or
+     *        {@link View#ACCESSIBILITY_LIVE_REGION_NONE} if the view is not a
+     *        live region.
+     * @see android.view.View#setAccessibilityLiveRegion(int)
+     */
+    public void setLiveRegion(int mode) {
+        enforceNotSealed();
+        mLiveRegion = mode;
+    }
+
+    /**
+     * Gets if the node is a multi line editable text.
+     *
+     * @return True if the node is multi line.
+     */
+    public boolean isMultiLine() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_MULTI_LINE);
+    }
+
+    /**
+     * Sets if the node is a multi line editable text.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param multiLine True if the node is multi line.
+     */
+    public void setMultiLine(boolean multiLine) {
+        setBooleanProperty(BOOLEAN_PROPERTY_MULTI_LINE, multiLine);
+    }
+
+    /**
+     * Gets if this node opens a popup or a dialog.
+     *
+     * @return If the the node opens a popup.
+     */
+    public boolean canOpenPopup() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP);
+    }
+
+    /**
+     * Sets if this node opens a popup or a dialog.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param opensPopup If the the node opens a popup.
+     */
+    public void setCanOpenPopup(boolean opensPopup) {
+        enforceNotSealed();
+        setBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP, opensPopup);
+    }
+
+    /**
+     * Gets if the node can be dismissed.
+     *
+     * @return If the node can be dismissed.
+     */
+    public boolean isDismissable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE);
+    }
+
+    /**
+     * Sets if the node can be dismissed.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param dismissable If the node can be dismissed.
+     */
+    public void setDismissable(boolean dismissable) {
+        setBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE, dismissable);
     }
 
     /**
@@ -1470,7 +1732,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabelForId, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mLabelForId, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1527,7 +1789,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabeledById, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                mWindowId, mLabeledById, false, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**
@@ -1597,6 +1859,53 @@ public class AccessibilityNodeInfo implements Parcelable {
         enforceNotSealed();
         mTextSelectionStart = start;
         mTextSelectionEnd = end;
+    }
+
+    /**
+     * Gets the input type of the source as defined by {@link InputType}.
+     *
+     * @return The input type.
+     */
+    public int getInputType() {
+        return mInputType;
+    }
+
+    /**
+     * Sets the input type of the source as defined by {@link InputType}.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an
+     *   AccessibilityService.
+     * </p>
+     *
+     * @param inputType The input type.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setInputType(int inputType) {
+        enforceNotSealed();
+        mInputType = inputType;
+    }
+
+    /**
+     * Gets an optional bundle with extra data. The bundle
+     * is lazily created and never <code>null</code>.
+     * <p>
+     * <strong>Note:</strong> It is recommended to use the package
+     * name of your application as a prefix for the keys to avoid
+     * collisions which may confuse an accessibility service if the
+     * same key has different meaning when emitted from different
+     * applications.
+     * </p>
+     *
+     * @return The bundle.
+     */
+    public Bundle getExtras() {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        return mExtras;
     }
 
     /**
@@ -1845,6 +2154,45 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         parcel.writeInt(mTextSelectionStart);
         parcel.writeInt(mTextSelectionEnd);
+        parcel.writeInt(mInputType);
+        parcel.writeInt(mLiveRegion);
+
+        if (mExtras != null) {
+            parcel.writeInt(1);
+            parcel.writeBundle(mExtras);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (mRangeInfo != null) {
+            parcel.writeInt(1);
+            parcel.writeInt(mRangeInfo.getType());
+            parcel.writeFloat(mRangeInfo.getMin());
+            parcel.writeFloat(mRangeInfo.getMax());
+            parcel.writeFloat(mRangeInfo.getCurrent());
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (mCollectionInfo != null) {
+            parcel.writeInt(1);
+            parcel.writeInt(mCollectionInfo.getRowCount());
+            parcel.writeInt(mCollectionInfo.getColumnCount());
+            parcel.writeInt(mCollectionInfo.isHierarchical() ? 1 : 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (mCollectionItemInfo != null) {
+            parcel.writeInt(1);
+            parcel.writeInt(mCollectionItemInfo.getColumnIndex());
+            parcel.writeInt(mCollectionItemInfo.getColumnSpan());
+            parcel.writeInt(mCollectionItemInfo.getRowIndex());
+            parcel.writeInt(mCollectionItemInfo.getRowSpan());
+            parcel.writeInt(mCollectionItemInfo.isHeading() ? 1 : 0);
+        } else {
+            parcel.writeInt(0);
+        }
 
         // Since instances of this class are fetched via synchronous i.e. blocking
         // calls in IPCs we always recycle as soon as the instance is marshaled.
@@ -1876,10 +2224,21 @@ public class AccessibilityNodeInfo implements Parcelable {
         mMovementGranularities = other.mMovementGranularities;
         final int otherChildIdCount = other.mChildNodeIds.size();
         for (int i = 0; i < otherChildIdCount; i++) {
-            mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));    
+            mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));
         }
         mTextSelectionStart = other.mTextSelectionStart;
         mTextSelectionEnd = other.mTextSelectionEnd;
+        mInputType = other.mInputType;
+        mLiveRegion = other.mLiveRegion;
+        if (other.mExtras != null && !other.mExtras.isEmpty()) {
+            getExtras().putAll(other.mExtras);
+        }
+        mRangeInfo = (other.mRangeInfo != null)
+                ? RangeInfo.obtain(other.mRangeInfo) : null;
+        mCollectionInfo = (other.mCollectionInfo != null)
+                ? CollectionInfo.obtain(other.mCollectionInfo) : null;
+        mCollectionItemInfo =  (other.mCollectionItemInfo != null)
+                ? CollectionItemInfo.obtain(other.mCollectionItemInfo) : null;
     }
 
     /**
@@ -1927,6 +2286,37 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mTextSelectionStart = parcel.readInt();
         mTextSelectionEnd = parcel.readInt();
+
+        mInputType = parcel.readInt();
+        mLiveRegion = parcel.readInt();
+
+        if (parcel.readInt() == 1) {
+            getExtras().putAll(parcel.readBundle());
+        }
+
+        if (parcel.readInt() == 1) {
+            mRangeInfo = RangeInfo.obtain(
+                    parcel.readInt(),
+                    parcel.readFloat(),
+                    parcel.readFloat(),
+                    parcel.readFloat());
+        }
+
+        if (parcel.readInt() == 1) {
+            mCollectionInfo = CollectionInfo.obtain(
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt() == 1);
+        }
+
+        if (parcel.readInt() == 1) {
+            mCollectionItemInfo = CollectionItemInfo.obtain(
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt(),
+                    parcel.readInt() == 1);
+        }
     }
 
     /**
@@ -1953,6 +2343,23 @@ public class AccessibilityNodeInfo implements Parcelable {
         mActions = 0;
         mTextSelectionStart = UNDEFINED;
         mTextSelectionEnd = UNDEFINED;
+        mInputType = InputType.TYPE_NULL;
+        mLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE;
+        if (mExtras != null) {
+            mExtras.clear();
+        }
+        if (mRangeInfo != null) {
+            mRangeInfo.recycle();
+            mRangeInfo = null;
+        }
+        if (mCollectionInfo != null) {
+            mCollectionInfo.recycle();
+            mCollectionInfo = null;
+        }
+        if (mCollectionItemInfo != null) {
+            mCollectionItemInfo.recycle();
+            mCollectionItemInfo = null;
+        }
     }
 
     /**
@@ -2129,6 +2536,360 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("]");
 
         return builder.toString();
+    }
+
+    /**
+     * Class with information if a node is a range. Use
+     * {@link RangeInfo#obtain(int, float, float, float) to get an instance.
+     */
+    public static final class RangeInfo {
+        private static final int MAX_POOL_SIZE = 10;
+
+        /** Range type: integer. */
+        public static final int RANGE_TYPE_INT = 0;
+        /** Range type: float. */
+        public static final int RANGE_TYPE_FLOAT = 1;
+        /** Range type: percent with values from zero to one.*/
+        public static final int RANGE_TYPE_PERCENT = 2;
+
+        private static final SynchronizedPool<RangeInfo> sPool =
+                new SynchronizedPool<AccessibilityNodeInfo.RangeInfo>(MAX_POOL_SIZE);
+
+        private int mType;
+        private float mMin;
+        private float mMax;
+        private float mCurrent;
+
+        /**
+         * Obtains a pooled instance that is a clone of another one.
+         *
+         * @param other The instance to clone.
+         *
+         * @hide
+         */
+        public static RangeInfo obtain(RangeInfo other) {
+            return obtain(other.mType, other.mMin, other.mMax, other.mCurrent);
+        }
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param type The type of the range.
+         * @param min The min value.
+         * @param max The max value.
+         * @param current The current value.
+         */
+        public static RangeInfo obtain(int type, float min, float max, float current) {
+            RangeInfo info = sPool.acquire();
+            return (info != null) ? info : new RangeInfo(type, min, max, current);
+        }
+
+        /**
+         * Creates a new range.
+         *
+         * @param type The type of the range.
+         * @param min The min value.
+         * @param max The max value.
+         * @param current The current value.
+         */
+        private RangeInfo(int type, float min, float max, float current) {
+            mType = type;
+            mMin = min;
+            mMax = max;
+            mCurrent = current;
+        }
+
+        /**
+         * Gets the range type.
+         *
+         * @return The range type.
+         *
+         * @see #RANGE_TYPE_INT
+         * @see #RANGE_TYPE_FLOAT
+         * @see #RANGE_TYPE_PERCENT
+         */
+        public int getType() {
+            return mType;
+        }
+
+        /**
+         * Gets the min value.
+         *
+         * @return The min value.
+         */
+        public float getMin() {
+            return mMin;
+        }
+
+        /**
+         * Gets the max value.
+         *
+         * @return The max value.
+         */
+        public float getMax() {
+            return mMax;
+        }
+
+        /**
+         * Gets the current value.
+         *
+         * @return The current value.
+         */
+        public float getCurrent() {
+            return mCurrent;
+        }
+
+        /**
+         * Recycles this instance.
+         */
+        void recycle() {
+            clear();
+            sPool.release(this);
+        }
+
+        private void clear() {
+            mType = 0;
+            mMin = 0;
+            mMax = 0;
+            mCurrent = 0;
+        }
+    }
+
+    /**
+     * Class with information if a node is a collection. Use
+     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance.
+     * <p>
+     * A collection of items has rows and columns and may be hierarchical.
+     * For example, a horizontal list is a collection with one column, as
+     * many rows as the list items, and is not hierarchical; A table is a
+     * collection with several rows, several columns, and is not hierarchical;
+     * A vertical tree is a hierarchical collection with one column and
+     * as many rows as the first level children.
+     * </p>
+     */
+    public static final class CollectionInfo {
+        private static final int MAX_POOL_SIZE = 20;
+
+        private static final SynchronizedPool<CollectionInfo> sPool =
+                new SynchronizedPool<CollectionInfo>(MAX_POOL_SIZE);
+
+        private int mRowCount;
+        private int mColumnCount;
+        private boolean mHierarchical;
+
+        /**
+         * Obtains a pooled instance that is a clone of another one.
+         *
+         * @param other The instance to clone.
+         *
+         * @hide
+         */
+        public static CollectionInfo obtain(CollectionInfo other) {
+            return CollectionInfo.obtain(other.mRowCount, other.mColumnCount,
+                    other.mHierarchical);
+        }
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param rowCount The number of rows.
+         * @param columnCount The number of columns.
+         * @param hierarchical Whether the collection is hierarchical.
+         */
+        public static CollectionInfo obtain(int rowCount, int columnCount,
+                boolean hierarchical) {
+            CollectionInfo info = sPool.acquire();
+            return (info != null) ? info : new CollectionInfo(rowCount,
+                    columnCount, hierarchical);
+        }
+
+        /**
+         * Creates a new instance.
+         *
+         * @param rowCount The number of rows.
+         * @param columnCount The number of columns.
+         * @param hierarchical Whether the collection is hierarchical.
+         */
+        private CollectionInfo(int rowCount, int columnCount,
+                boolean hierarchical) {
+            mRowCount = rowCount;
+            mColumnCount = columnCount;
+            mHierarchical = hierarchical;
+        }
+
+        /**
+         * Gets the number of rows.
+         *
+         * @return The row count.
+         */
+        public int getRowCount() {
+            return mRowCount;
+        }
+
+        /**
+         * Gets the number of columns.
+         *
+         * @return The column count.
+         */
+        public int getColumnCount() {
+            return mColumnCount;
+        }
+
+        /**
+         * Gets if the collection is a hierarchically ordered.
+         *
+         * @return Whether the collection is hierarchical.
+         */
+        public boolean isHierarchical() {
+            return mHierarchical;
+        }
+
+        /**
+         * Recycles this instance.
+         */
+        void recycle() {
+            clear();
+            sPool.release(this);
+        }
+
+        private void clear() {
+            mRowCount = 0;
+            mColumnCount = 0;
+            mHierarchical = false;
+        }
+    }
+
+    /**
+     * Class with information if a node is a collection item. Use
+     * {@link CollectionItemInfo#obtain(int, int, int, int, boolean)}
+     * to get an instance.
+     * <p>
+     * A collection item is contained in a collection, it starts at
+     * a given row and column in the collection, and spans one or
+     * more rows and columns. For example, a header of two related
+     * table columns starts at the first row and the first column,
+     * spans one row and two columns.
+     * </p>
+     */
+    public static final class CollectionItemInfo {
+        private static final int MAX_POOL_SIZE = 20;
+
+        private static final SynchronizedPool<CollectionItemInfo> sPool =
+                new SynchronizedPool<CollectionItemInfo>(MAX_POOL_SIZE);
+
+        /**
+         * Obtains a pooled instance that is a clone of another one.
+         *
+         * @param other The instance to clone.
+         *
+         * @hide
+         */
+        public static CollectionItemInfo obtain(CollectionItemInfo other) {
+            return CollectionItemInfo.obtain(other.mRowIndex, other.mRowSpan,
+                    other.mColumnIndex, other.mColumnSpan, other.mHeading);
+        }
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
+         * @param heading Whether the item is a heading.
+         */
+        public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
+                int columnIndex, int columnSpan, boolean heading) {
+            CollectionItemInfo info = sPool.acquire();
+            return (info != null) ? info : new CollectionItemInfo(rowIndex,
+                    rowSpan, columnIndex, columnSpan, heading);
+        }
+
+        private boolean mHeading;
+        private int mColumnIndex;
+        private int mRowIndex;
+        private int mColumnSpan;
+        private int mRowSpan;
+
+        /**
+         * Creates a new instance.
+         *
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
+         * @param heading Whether the item is a heading.
+         */
+        private CollectionItemInfo(int rowIndex, int rowSpan,
+                int columnIndex, int columnSpan, boolean heading) {
+            mRowIndex = rowIndex;
+            mRowSpan = rowSpan;
+            mColumnIndex = columnIndex;
+            mColumnSpan = columnSpan;
+            mHeading = heading;
+        }
+
+        /**
+         * Gets the column index at which the item is located.
+         *
+         * @return The column index.
+         */
+        public int getColumnIndex() {
+            return mColumnIndex;
+        }
+
+        /**
+         * Gets the row index at which the item is located.
+         *
+         * @return The row index.
+         */
+        public int getRowIndex() {
+            return mRowIndex;
+        }
+
+        /**
+         * Gets the number of columns the item spans.
+         *
+         * @return The column span.
+         */
+        public int getColumnSpan() {
+            return mColumnSpan;
+        }
+
+        /**
+         * Gets the number of rows the item spans.
+         *
+         * @return The row span.
+         */
+        public int getRowSpan() {
+            return mRowSpan;
+        }
+
+        /**
+         * Gets if the collection item is a heading. For example, section
+         * heading, table header, etc.
+         *
+         * @return If the item is a heading.
+         */
+        public boolean isHeading() {
+            return mHeading;
+        }
+
+        /**
+         * Recycles this instance.
+         */
+        void recycle() {
+            clear();
+            sPool.release(this);
+        }
+
+        private void clear() {
+            mColumnIndex = 0;
+            mColumnSpan = 0;
+            mRowIndex = 0;
+            mRowSpan = 0;
+            mHeading = false;
+        }
     }
 
     /**

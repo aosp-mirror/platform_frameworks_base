@@ -19,6 +19,7 @@
 package com.android.commands.am;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackBoxInfo;
 import android.app.ActivityManagerNative;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -75,6 +76,7 @@ public class Am extends BaseCommand {
         (new Am()).run(args);
     }
 
+    @Override
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: am [subcommand] [options]\n" +
@@ -82,6 +84,7 @@ public class Am extends BaseCommand {
                 "               [--R COUNT] [-S] [--opengl-trace]\n" +
                 "               [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
+                "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am force-stop [--user <USER_ID> | all | current] <PACKAGE>\n" +
                 "       am kill [--user <USER_ID> | all | current] <PACKAGE>\n" +
                 "       am kill-all\n" +
@@ -96,11 +99,18 @@ public class Am extends BaseCommand {
                 "       am clear-debug-app\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
+                "       am restart\n" +
+                "       am idle-maintenance\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
+                "       am stack create <TASK_ID> <RELATIVE_STACK_BOX_ID> <POSITION> <WEIGHT>\n" +
+                "       am stack movetask <STACK_ID> <TASK_ID> [true|false]\n" +
+                "       am stack resize <STACK_ID> <WEIGHT>\n" +
+                "       am stack boxes\n" +
+                "       am stack box <STACK_BOX_ID>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -115,6 +125,10 @@ public class Am extends BaseCommand {
                 "        specified then run as the current user.\n" +
                 "\n" +
                 "am startservice: start a Service.  Options are:\n" +
+                "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
+                "        specified then run as the current user.\n" +
+                "\n" +
+                "am stopservice: stop a Service.  Options are:\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
                 "        specified then run as the current user.\n" +
                 "\n" +
@@ -146,7 +160,7 @@ public class Am extends BaseCommand {
                 "        test runners.\n" +
                 "    --user <USER_ID> | current: Specify user instrumentation runs in;\n" +
                 "        current user if not specified.\n" +
-                "    --no-window-animation: turn off window animations will running.\n" +
+                "    --no-window-animation: turn off window animations while running.\n" +
                 "\n" +
                 "am profile: start and stop profiler on a process.  The given <PROCESS> argument\n" +
                 "  may be either a process name or pid.  Options are:\n" +
@@ -174,6 +188,10 @@ public class Am extends BaseCommand {
                 "am hang: hang the system.\n" +
                 "    --allow-restart: allow watchdog to perform normal system restart\n" +
                 "\n" +
+                "am restart: restart the user-space system.\n" +
+                "\n" +
+                "am idle-maintenance: perform idle maintenance now.\n" +
+                "\n" +
                 "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
                 "\n" +
                 "am to-uri: print the given Intent specification as a URI.\n" +
@@ -185,6 +203,25 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit switch to it.\n" +
+                "\n" +
+                "am stack create: create a new stack relative to an existing one.\n" +
+                "   <TASK_ID>: the task to populate the new stack with. Must exist.\n" +
+                "   <RELATIVE_STACK_BOX_ID>: existing stack box's id.\n" +
+                "   <POSITION>: 0: before <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
+                "               1: after <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
+                "               2: to left of <RELATIVE_STACK_BOX_ID>,\n" +
+                "               3: to right of <RELATIVE_STACK_BOX_ID>," +
+                "               4: above <RELATIVE_STACK_BOX_ID>, 5: below <RELATIVE_STACK_BOX_ID>\n" +
+                "   <WEIGHT>: float between 0.2 and 0.8 inclusive.\n" +
+                "\n" +
+                "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
+                "   bottom (false) of <STACK_ID>.\n" +
+                "\n" +
+                "am stack resize: change <STACK_ID> relative size to new <WEIGHT>.\n" +
+                "\n" +
+                "am stack boxes: list the hierarchy of stack boxes and their contents.\n" +
+                "\n" +
+                "am stack box: list the hierarchy of stack boxes rooted at <STACK_BOX_ID>.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -218,6 +255,7 @@ public class Am extends BaseCommand {
                 );
     }
 
+    @Override
     public void onRun() throws Exception {
 
         mAm = ActivityManagerNative.getDefault();
@@ -232,6 +270,8 @@ public class Am extends BaseCommand {
             runStart();
         } else if (op.equals("startservice")) {
             runStartService();
+        } else if (op.equals("stopservice")) {
+            runStopService();
         } else if (op.equals("force-stop")) {
             runForceStop();
         } else if (op.equals("kill")) {
@@ -256,6 +296,10 @@ public class Am extends BaseCommand {
             runMonitor();
         } else if (op.equals("hang")) {
             runHang();
+        } else if (op.equals("restart")) {
+            runRestart();
+        } else if (op.equals("idle-maintenance")) {
+            runIdleMaintenance();
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
         } else if (op.equals("to-uri")) {
@@ -266,6 +310,8 @@ public class Am extends BaseCommand {
             runSwitchUser();
         } else if (op.equals("stop-user")) {
             runStopUser();
+        } else if (op.equals("stack")) {
+            runStack();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -542,6 +588,23 @@ public class Am extends BaseCommand {
             System.err.println("Error: Requires permission " + cn.getClassName());
         } else if (cn.getPackageName().equals("!!")) {
             System.err.println("Error: " + cn.getClassName());
+        }
+    }
+
+    private void runStopService() throws Exception {
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
+        if (mUserId == UserHandle.USER_ALL) {
+            System.err.println("Error: Can't stop activity with user 'all'");
+            return;
+        }
+        System.out.println("Stopping service: " + intent);
+        int result = mAm.stopService(null, intent, intent.getType(), mUserId);
+        if (result == 0) {
+            System.err.println("Service not stopped: was not running.");
+        } else if (result == 1) {
+            System.err.println("Service stopped");
+        } else if (result == -1) {
+            System.err.println("Error stopping service");
         }
     }
 
@@ -1036,7 +1099,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public boolean activityResuming(String pkg) throws RemoteException {
+        public boolean activityResuming(String pkg) {
             synchronized (this) {
                 System.out.println("** Activity resuming: " + pkg);
             }
@@ -1044,7 +1107,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public boolean activityStarting(Intent intent, String pkg) throws RemoteException {
+        public boolean activityStarting(Intent intent, String pkg) {
             synchronized (this) {
                 System.out.println("** Activity starting: " + pkg);
             }
@@ -1053,7 +1116,7 @@ public class Am extends BaseCommand {
 
         @Override
         public boolean appCrashed(String processName, int pid, String shortMsg, String longMsg,
-                long timeMillis, String stackTrace) throws RemoteException {
+                long timeMillis, String stackTrace) {
             synchronized (this) {
                 System.out.println("** ERROR: PROCESS CRASHED");
                 System.out.println("processName: " + processName);
@@ -1070,8 +1133,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public int appEarlyNotResponding(String processName, int pid, String annotation)
-                throws RemoteException {
+        public int appEarlyNotResponding(String processName, int pid, String annotation) {
             synchronized (this) {
                 System.out.println("** ERROR: EARLY PROCESS NOT RESPONDING");
                 System.out.println("processName: " + processName);
@@ -1084,8 +1146,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public int appNotResponding(String processName, int pid, String processStats)
-                throws RemoteException {
+        public int appNotResponding(String processName, int pid, String processStats) {
             synchronized (this) {
                 System.out.println("** ERROR: PROCESS NOT RESPONDING");
                 System.out.println("processName: " + processName);
@@ -1101,8 +1162,7 @@ public class Am extends BaseCommand {
         }
 
         @Override
-        public int systemNotResponding(String message)
-                throws RemoteException {
+        public int systemNotResponding(String message) {
             synchronized (this) {
                 System.out.println("** ERROR: PROCESS NOT RESPONDING");
                 System.out.println("message: " + message);
@@ -1327,6 +1387,31 @@ public class Am extends BaseCommand {
         mAm.hang(new Binder(), allowRestart);
     }
 
+    private void runRestart() throws Exception {
+        String opt;
+        while ((opt=nextOption()) != null) {
+            System.err.println("Error: Unknown option: " + opt);
+            return;
+        }
+
+        System.out.println("Restart the system...");
+        mAm.restart();
+    }
+
+    private void runIdleMaintenance() throws Exception {
+        String opt;
+        while ((opt=nextOption()) != null) {
+            System.err.println("Error: Unknown option: " + opt);
+            return;
+        }
+
+        System.out.println("Performing idle maintenance...");
+        Intent intent = new Intent(
+                "com.android.server.IdleMaintenanceService.action.FORCE_IDLE_MAINTENANCE");
+        mAm.broadcastIntent(null, intent, null, null, 0, null, null, null,
+                android.app.AppOpsManager.OP_NONE, true, false, UserHandle.USER_ALL);
+    }
+
     private void runScreenCompat() throws Exception {
         String mode = nextArgRequired();
         boolean enabled;
@@ -1361,7 +1446,7 @@ public class Am extends BaseCommand {
 
         @Override
         public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
-                boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
+                boolean ordered, boolean sticky, int sendingUser) {
             String line = "Broadcast completed: result=" + resultCode;
             if (data != null) line = line + ", data=\"" + data + "\"";
             if (extras != null) line = line + ", extras: " + extras;
@@ -1394,6 +1479,7 @@ public class Am extends BaseCommand {
             mRawMode = rawMode;
         }
 
+        @Override
         public void instrumentationStatus(ComponentName name, int resultCode, Bundle results) {
             synchronized (this) {
                 // pretty printer mode?
@@ -1416,6 +1502,7 @@ public class Am extends BaseCommand {
             }
         }
 
+        @Override
         public void instrumentationFinished(ComponentName name, int resultCode,
                 Bundle results) {
             synchronized (this) {
@@ -1454,6 +1541,95 @@ public class Am extends BaseCommand {
                 }
             }
             return true;
+        }
+    }
+
+    private void runStack() throws Exception {
+        String op = nextArgRequired();
+        if (op.equals("create")) {
+            runStackCreate();
+        } else if (op.equals("movetask")) {
+            runStackMoveTask();
+        } else if (op.equals("resize")) {
+            runStackBoxResize();
+        } else if (op.equals("boxes")) {
+            runStackBoxes();
+        } else if (op.equals("box")) {
+            runStackBoxInfo();
+        } else {
+            showError("Error: unknown command '" + op + "'");
+            return;
+        }
+    }
+
+    private void runStackCreate() throws Exception {
+        String taskIdStr = nextArgRequired();
+        int taskId = Integer.valueOf(taskIdStr);
+        String relativeToStr = nextArgRequired();
+        int relativeTo = Integer.valueOf(relativeToStr);
+        String positionStr = nextArgRequired();
+        int position = Integer.valueOf(positionStr);
+        String weightStr = nextArgRequired();
+        float weight = Float.valueOf(weightStr);
+
+        try {
+            int stackId = mAm.createStack(taskId, relativeTo, position, weight);
+            System.out.println("createStack returned new stackId=" + stackId + "\n\n");
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackMoveTask() throws Exception {
+        String taskIdStr = nextArgRequired();
+        int taskId = Integer.valueOf(taskIdStr);
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.valueOf(stackIdStr);
+        String toTopStr = nextArgRequired();
+        final boolean toTop;
+        if ("true".equals(toTopStr)) {
+            toTop = true;
+        } else if ("false".equals(toTopStr)) {
+            toTop = false;
+        } else {
+            System.err.println("Error: bad toTop arg: " + toTopStr);
+            return;
+        }
+
+        try {
+            mAm.moveTaskToStack(taskId, stackId, toTop);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackBoxResize() throws Exception {
+        String stackBoxIdStr = nextArgRequired();
+        int stackBoxId = Integer.valueOf(stackBoxIdStr);
+        String weightStr = nextArgRequired();
+        float weight = Float.valueOf(weightStr);
+
+        try {
+            mAm.resizeStackBox(stackBoxId, weight);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackBoxes() throws Exception {
+        try {
+            List<StackBoxInfo> stackBoxes = mAm.getStackBoxes();
+            for (StackBoxInfo info : stackBoxes) {
+                System.out.println(info);
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackBoxInfo() throws Exception {
+        try {
+            String stackBoxIdStr = nextArgRequired();
+            int stackBoxId = Integer.valueOf(stackBoxIdStr);
+            StackBoxInfo stackBoxInfo = mAm.getStackBoxInfo(stackBoxId); 
+            System.out.println(stackBoxInfo);
+        } catch (RemoteException e) {
         }
     }
 }

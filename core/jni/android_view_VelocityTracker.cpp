@@ -20,8 +20,8 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
-#include <androidfw/Input.h>
-#include <androidfw/VelocityTracker.h>
+#include <input/Input.h>
+#include <input/VelocityTracker.h>
 #include "android_view_MotionEvent.h"
 
 #include <ScopedUtfChars.h>

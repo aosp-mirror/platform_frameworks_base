@@ -19,7 +19,9 @@
 <resources>
     <drawable name="notification_number_text_color">#ffffffff</drawable>
     <drawable name="ticker_background_color">#ff1d1d1d</drawable>
-    <drawable name="status_bar_background">#ff000000</drawable>
+    <drawable name="system_bar_background">@color/system_bar_background_opaque</drawable>
+    <color name="system_bar_background_opaque">#ff000000</color>
+    <color name="system_bar_background_semi_transparent">#66000000</color> <!-- 40% black -->
     <color name="notification_panel_solid_background">#ff000000</color>
     <drawable name="status_bar_recents_app_thumbnail_background">#88000000</drawable>
     <color name="status_bar_recents_app_label_color">#ffffffff</color>
@@ -27,12 +29,11 @@
     <color name="notification_list_shadow_top">#80000000</color>
     <drawable name="recents_callout_line">#99ffffff</drawable>
     <drawable name="notification_item_background_legacy_color">#ffaaaaaa</drawable>
-    <drawable name="intruder_bg_pressed">#ff33B5E5</drawable>
+    <drawable name="heads_up_notification_bg_pressed">#ff33B5E5</drawable>
     <drawable name="notification_header_bg">#FF000000</drawable>
-
-    <!-- ==================== system bar only ==================== -->
-    <drawable name="system_bar_background">#ff000000</drawable>
-    <!-- the darkening filter applied to notifications -->
-    <drawable name="notification_icon_area_smoke">#aa000000</drawable>
     <color name="notification_panel_scrim_color">#B0000000</color>
+    <color name="batterymeter_frame_color">#66FFFFFF</color><!-- 40% white -->
+    <color name="batterymeter_charge_color">#FFFFFFFF</color>
+    <color name="batterymeter_bolt_color">#B2000000</color><!-- 70% black -->
+    <color name="status_bar_clock_color">#FFFFFFFF</color>
 </resources>

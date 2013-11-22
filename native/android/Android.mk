@@ -20,6 +20,7 @@ LOCAL_SHARED_LIBRARIES := \
     liblog \
     libcutils \
     libandroidfw \
+    libinput \
     libutils \
     libbinder \
     libui \

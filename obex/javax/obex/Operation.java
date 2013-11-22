@@ -178,4 +178,6 @@ public interface Operation {
     void close() throws IOException;
 
     int getMaxPacketSize();
+
+    public void noBodyHeader();
 }

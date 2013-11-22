@@ -34,6 +34,8 @@
 
 #include <cutils/compiler.h>
 
+#include <androidfw/ResourceTypes.h>
+
 #include "Debug.h"
 #include "Extensions.h"
 #include "Matrix.h"
@@ -43,12 +45,21 @@
 #include "Vertex.h"
 #include "SkiaShader.h"
 #include "SkiaColorFilter.h"
+#include "UvMapper.h"
 #include "Caches.h"
 
 namespace android {
 namespace uirenderer {
 
 struct DrawModifiers {
+    DrawModifiers() {
+        reset();
+    }
+
+    void reset() {
+        memset(this, 0, sizeof(DrawModifiers));
+    }
+
     SkiaShader* mShader;
     SkiaColorFilter* mColorFilter;
     float mOverrideLayerAlpha;
@@ -77,21 +88,21 @@ enum DrawOpMode {
     kDrawOpMode_Flush
 };
 
-struct DeferredDisplayState {
-    Rect mBounds; // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped.
-
-    // the below are set and used by the OpenGLRenderer at record and deferred playback
-    bool mClipValid;
-    Rect mClip;
-    mat4 mMatrix;
-    DrawModifiers mDrawModifiers;
-    float mAlpha;
+enum ClipSideFlags {
+    kClipSide_None = 0x0,
+    kClipSide_Left = 0x1,
+    kClipSide_Top = 0x2,
+    kClipSide_Right = 0x4,
+    kClipSide_Bottom = 0x8,
+    kClipSide_Full = 0xF,
+    kClipSide_ConservativeFull = 0x1F
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 
+class DeferredDisplayState;
 class DisplayList;
 class TextSetupFunctor;
 class VertexBuffer;
@@ -188,13 +199,23 @@ public:
      */
     virtual void resume();
 
+    ANDROID_API void setCountOverdrawEnabled(bool enabled) {
+        mCountOverdraw = enabled;
+    }
+
+    ANDROID_API float getOverdraw() {
+        return mCountOverdraw ? mOverdraw : 0.0f;
+    }
+
     ANDROID_API status_t invokeFunctors(Rect& dirty);
     ANDROID_API void detachFunctor(Functor* functor);
     ANDROID_API void attachFunctor(Functor* functor);
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
     ANDROID_API void pushLayerUpdate(Layer* layer);
+    ANDROID_API void cancelLayerUpdate(Layer* layer);
     ANDROID_API void clearLayerUpdates();
+    ANDROID_API void flushLayerUpdates();
 
     ANDROID_API int getSaveCount() const;
     virtual int save(int flags);
@@ -228,8 +249,32 @@ public:
     virtual void concatMatrix(SkMatrix* matrix);
 
     ANDROID_API const Rect& getClipBounds();
-    ANDROID_API bool quickReject(float left, float top, float right, float bottom);
-    bool quickRejectNoScissor(float left, float top, float right, float bottom);
+
+    /**
+     * Performs a quick reject but adjust the bounds to account for stroke width if necessary,
+     * and handling snapOut for AA geometry.
+     */
+    bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
+
+    /**
+     * Returns false and sets scissor based upon bounds if drawing won't be clipped out
+     */
+    bool quickReject(float left, float top, float right, float bottom, bool snapOut = false);
+    bool quickReject(const Rect& bounds) {
+        return quickReject(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    }
+
+    /**
+     * Same as quickReject, without the scissor, instead returning clipRequired through pointer.
+     * clipRequired will be only set if not rejected
+     */
+    ANDROID_API bool quickRejectNoScissor(float left, float top, float right, float bottom,
+            bool snapOut = false, bool* clipRequired = NULL);
+    bool quickRejectNoScissor(const Rect& bounds, bool* clipRequired = NULL) {
+        return quickRejectNoScissor(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                clipRequired);
+    }
+
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
     virtual bool clipPath(SkPath* path, SkRegion::Op op);
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
@@ -239,8 +284,8 @@ public:
     virtual void outputDisplayList(DisplayList* displayList);
     virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    status_t drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
-            const Rect& bounds, SkPaint* paint);
+    status_t drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
+            TextureVertex* vertices, bool pureTranslate, const Rect& bounds, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
@@ -248,12 +293,12 @@ public:
     virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint);
-    virtual status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+    status_t drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
+            TextureVertex* vertices, uint32_t indexCount, SkPaint* paint);
+    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
             float left, float top, float right, float bottom, SkPaint* paint);
-    status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
-            float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode);
+    status_t drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
+            float left, float top, float right, float bottom, SkPaint* paint);
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
     virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
@@ -270,7 +315,7 @@ public:
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
             const float* positions, SkPaint* paint);
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float length = -1.0f,
+            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate);
     virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
 
@@ -291,9 +336,15 @@ public:
 
     SkPaint* filterPaint(SkPaint* paint);
 
+    /**
+     * Store the current display state (most importantly, the current clip and transform), and
+     * additionally map the state's bounds from local to window coordinates.
+     *
+     * Returns true if quick-rejected
+     */
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
     void restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore = false);
-    void setFullScreenClip();
+    void setupMergedMultiDraw(const Rect* clipRect);
 
     const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
@@ -310,6 +361,9 @@ public:
     bool isCurrentClipSimple() {
         return mSnapshot->clipRegion->isEmpty();
     }
+
+    int getViewportWidth() { return getSnapshot()->viewport.getWidth(); }
+    int getViewportHeight() { return getSnapshot()->viewport.getHeight(); }
 
     /**
      * Scales the alpha on the current snapshot. This alpha value will be modulated
@@ -356,7 +410,7 @@ public:
         return getXfermode(paint->getXfermode());
     }
 
-    static inline int getAlphaDirect(SkPaint* paint) {
+    static inline int getAlphaDirect(const SkPaint* paint) {
         if (!paint) return 255;
         return paint->getAlpha();
     }
@@ -579,18 +633,6 @@ private:
     void setStencilFromClip();
 
     /**
-     * Performs a quick reject but does not affect the scissor. Returns
-     * the transformed rect to test and the current clip.
-     */
-    bool quickRejectNoScissor(float left, float top, float right, float bottom,
-            Rect& transformed, Rect& clip);
-
-    /**
-     * Performs a quick reject but adjust the bounds to account for stroke width if necessary
-     */
-    bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
-
-    /**
      * Given the local bounds of the layer, calculates ...
      */
     void calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool fboLayer);
@@ -798,22 +840,35 @@ private:
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
             bool ignoreScale = false, bool dirty = true);
 
+    void drawIndexedTextureMesh(float left, float top, float right, float bottom, GLuint texture,
+            float alpha, SkXfermode::Mode mode, bool blend,
+            GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
+            bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
+            bool ignoreScale = false, bool dirty = true);
+
     void drawAlpha8TextureMesh(float left, float top, float right, float bottom,
             GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
             bool ignoreTransform, bool ignoreScale = false, bool dirty = true);
 
     /**
+     * Draws the specified list of vertices as quads using indexed GL_TRIANGLES.
+     * If the number of vertices to draw exceeds the number of indices we have
+     * pre-allocated, this method will generate several glDrawElements() calls.
+     */
+    void drawIndexedQuads(Vertex* mesh, GLsizei quadsCount);
+
+    /**
      * Draws text underline and strike-through if needed.
      *
      * @param text The text to decor
      * @param bytesCount The number of bytes in the text
-     * @param length The length in pixels of the text, can be <= 0.0f to force a measurement
+     * @param totalAdvance The total advance in pixels, defines underline/strikethrough length
      * @param x The x coordinate where the text will be drawn
      * @param y The y coordinate where the text will be drawn
      * @param paint The paint to draw the text with
      */
-    void drawTextDecorations(const char* text, int bytesCount, float length,
+    void drawTextDecorations(const char* text, int bytesCount, float totalAdvance,
             float x, float y, SkPaint* paint);
 
    /**
@@ -868,7 +923,7 @@ private:
      * prior to calling this method.
      */
     inline void bindTexture(GLuint texture) {
-        glBindTexture(GL_TEXTURE_2D, texture);
+        mCaches.bindTexture(texture);
     }
 
     /**
@@ -876,7 +931,7 @@ private:
      * prior to calling this method.
      */
     inline void bindExternalTexture(GLuint texture) {
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
+        mCaches.bindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
     }
 
     /**
@@ -911,7 +966,6 @@ private:
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
     void setupDrawAA();
-    void setupDrawPoint(float pointSize);
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);
@@ -929,7 +983,6 @@ private:
             bool ignoreTransform = false, bool ignoreModelView = false);
     void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
             bool ignoreTransform = false);
-    void setupDrawPointUniforms();
     void setupDrawColorUniforms();
     void setupDrawPureColorUniforms();
     void setupDrawShaderIdentityUniforms();
@@ -943,9 +996,8 @@ private:
     void setupDrawTextGammaUniforms();
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors);
-    void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords);
-    void setupDrawVertices(GLvoid* vertices);
-    void finishDrawTexture();
+    void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
+    void setupDrawIndexedVertices(GLvoid* vertices);
     void accountForClear(SkXfermode::Mode mode);
 
     bool updateLayer(Layer* layer, bool inFrame);
@@ -973,6 +1025,7 @@ private:
 
     void debugOverdraw(bool enable, bool clear);
     void renderOverdraw();
+    void countOverdraw();
 
     /**
      * Should be invoked every time the glScissor is modified.
@@ -984,6 +1037,17 @@ private:
     inline mat4& currentTransform() const {
         return *mSnapshot->transform;
     }
+
+    inline const UvMapper& getMapper(const Texture* texture) {
+        return texture && texture->uvMapper ? *texture->uvMapper : mUvMapper;
+    }
+
+    /**
+     * Returns a texture object for the specified bitmap. The texture can
+     * come from the texture cache or an atlas. If this method returns
+     * NULL, the texture could not be found and/or allocated.
+     */
+    Texture* getTexture(SkBitmap* bitmap);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;
@@ -1009,6 +1073,9 @@ private:
 
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
+
+    // Default UV mapper
+    const UvMapper mUvMapper;
 
     // shader, filters, and shadow
     DrawModifiers mDrawModifiers;
@@ -1050,12 +1117,19 @@ private:
     // No-ops start/endTiling when set
     bool mSuppressTiling;
 
+    // If true, this renderer will setup drawing to emulate
+    // an increment stencil buffer in the color buffer
+    bool mCountOverdraw;
+    float mOverdraw;
+
     // Optional name of the renderer
     String8 mName;
 
     friend class DisplayListRenderer;
     friend class Layer;
     friend class TextSetupFunctor;
+    friend class DrawBitmapOp;
+    friend class DrawPatchOp;
 
 }; // class OpenGLRenderer
 

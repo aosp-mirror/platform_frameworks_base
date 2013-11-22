@@ -21,9 +21,11 @@ import android.content.IntentFilter;
 import android.nfc.NdefMessage;
 import android.nfc.Tag;
 import android.nfc.TechListParcel;
-import android.nfc.INdefPushCallback;
+import android.nfc.IAppCallback;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.INfcTag;
+import android.nfc.INfcCardEmulation;
+import android.os.Bundle;
 
 /**
  * @hide
@@ -31,6 +33,7 @@ import android.nfc.INfcTag;
 interface INfcAdapter
 {
     INfcTag getNfcTagInterface();
+    INfcCardEmulation getNfcCardEmulationInterface();
     INfcAdapterExtras getNfcAdapterExtrasInterface(in String pkg);
 
     int getState();
@@ -42,9 +45,10 @@ interface INfcAdapter
 
     void setForegroundDispatch(in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
-    void setNdefPushCallback(in INdefPushCallback callback);
+    void setAppCallback(in IAppCallback callback);
 
     void dispatch(in Tag tag);
 
+    void setReaderMode (IBinder b, IAppCallback callback, int flags, in Bundle extras);
     void setP2pModes(int initatorModes, int targetModes);
 }

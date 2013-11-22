@@ -152,8 +152,8 @@ public class BluetoothGattService {
      */
     /*package*/ BluetoothGattCharacteristic getCharacteristic(UUID uuid, int instanceId) {
         for(BluetoothGattCharacteristic characteristic : mCharacteristics) {
-            if (uuid.equals(characteristic.getUuid()) &&
-                    mInstanceId == instanceId)
+            if (uuid.equals(characteristic.getUuid())
+             && characteristic.getInstanceId() == instanceId)
                 return characteristic;
         }
         return null;

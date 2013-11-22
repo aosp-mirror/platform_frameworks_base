@@ -24,7 +24,6 @@
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <binder/Parcel.h>
-#include <utils/StringArray.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>
 
@@ -34,6 +33,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "JniInvocation.h"
 #include "android_util_Binder.h"
 
 #include <stdio.h>
@@ -53,6 +53,7 @@ extern int register_android_graphics_Bitmap(JNIEnv*);
 extern int register_android_graphics_BitmapFactory(JNIEnv*);
 extern int register_android_graphics_BitmapRegionDecoder(JNIEnv*);
 extern int register_android_graphics_Camera(JNIEnv* env);
+extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Graphics(JNIEnv* env);
 extern int register_android_graphics_Interpolator(JNIEnv* env);
 extern int register_android_graphics_LayerRasterizer(JNIEnv*);
@@ -76,6 +77,7 @@ extern int register_android_opengl_jni_GLES20(JNIEnv* env);
 extern int register_android_opengl_jni_GLES30(JNIEnv* env);
 
 extern int register_android_hardware_Camera(JNIEnv *env);
+extern int register_android_hardware_camera2_CameraMetadata(JNIEnv *env);
 extern int register_android_hardware_SensorManager(JNIEnv *env);
 extern int register_android_hardware_SerialPort(JNIEnv *env);
 extern int register_android_hardware_UsbDevice(JNIEnv *env);
@@ -115,8 +117,9 @@ extern int register_android_graphics_Rasterizer(JNIEnv* env);
 extern int register_android_graphics_Region(JNIEnv* env);
 extern int register_android_graphics_SurfaceTexture(JNIEnv* env);
 extern int register_android_graphics_Xfermode(JNIEnv* env);
-extern int register_android_graphics_PixelFormat(JNIEnv* env);
+extern int register_android_graphics_pdf_PdfDocument(JNIEnv* env);
 extern int register_android_view_DisplayEventReceiver(JNIEnv* env);
+extern int register_android_view_GraphicBuffer(JNIEnv* env);
 extern int register_android_view_GLES20DisplayList(JNIEnv* env);
 extern int register_android_view_GLES20Canvas(JNIEnv* env);
 extern int register_android_view_HardwareRenderer(JNIEnv* env);
@@ -134,7 +137,6 @@ extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
-extern int register_android_os_ParcelFileDescriptor(JNIEnv *env);
 extern int register_android_os_SELinux(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
@@ -146,7 +148,7 @@ extern int register_android_os_MemoryFile(JNIEnv* env);
 extern int register_android_net_LocalSocketImpl(JNIEnv* env);
 extern int register_android_net_NetworkUtils(JNIEnv* env);
 extern int register_android_net_TrafficStats(JNIEnv* env);
-extern int register_android_net_wifi_WifiManager(JNIEnv* env);
+extern int register_android_net_wifi_WifiNative(JNIEnv* env);
 extern int register_android_text_AndroidCharacter(JNIEnv *env);
 extern int register_android_text_AndroidBidi(JNIEnv *env);
 extern int register_android_opengl_classes(JNIEnv *env);
@@ -447,6 +449,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char heapminfreeOptsBuf[sizeof("-XX:HeapMinFree=")-1 + PROPERTY_VALUE_MAX];
     char heapmaxfreeOptsBuf[sizeof("-XX:HeapMaxFree=")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
+    char jitcodecachesizeOptsBuf[sizeof("-Xjitcodecachesize:")-1 + PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
@@ -538,6 +541,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     opt.optionString = "-XX:mainThreadStackSize=24K";
     mOptions.add(opt);
 
+    // Set the max jit code cache size.  Note: size of 0 will disable the JIT.
+    strcpy(jitcodecachesizeOptsBuf, "-Xjitcodecachesize:");
+    property_get("dalvik.vm.jit.codecachesize", jitcodecachesizeOptsBuf+19,  NULL);
+    if (jitcodecachesizeOptsBuf[19] != '\0') {
+      opt.optionString = jitcodecachesizeOptsBuf;
+      mOptions.add(opt);
+    }
+
     strcpy(heapgrowthlimitOptsBuf, "-XX:HeapGrowthLimit=");
     property_get("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf+20, "");
     if (heapgrowthlimitOptsBuf[20] != '\0') {
@@ -564,6 +575,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     if (heaptargetutilizationOptsBuf[26] != '\0') {
         opt.optionString = heaptargetutilizationOptsBuf;
         mOptions.add(opt);
+    }
+
+    property_get("ro.config.low_ram", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+      opt.optionString = "-XX:LowMemoryMode";
+      mOptions.add(opt);
     }
 
     /*
@@ -816,6 +833,8 @@ void AndroidRuntime::start(const char* className, const char* options)
     //ALOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     /* start the virtual machine */
+    JniInvocation jni_invocation;
+    jni_invocation.Init(NULL);
     JNIEnv* env;
     if (startVm(&mJavaVM, &env) != 0) {
         return;
@@ -1095,8 +1114,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_Parcel),
     REG_JNI(register_android_view_DisplayEventReceiver),
     REG_JNI(register_android_nio_utils),
-    REG_JNI(register_android_graphics_PixelFormat),
     REG_JNI(register_android_graphics_Graphics),
+    REG_JNI(register_android_view_GraphicBuffer),
     REG_JNI(register_android_view_GLES20DisplayList),
     REG_JNI(register_android_view_GLES20Canvas),
     REG_JNI(register_android_view_HardwareRenderer),
@@ -1119,6 +1138,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_BitmapFactory),
     REG_JNI(register_android_graphics_BitmapRegionDecoder),
     REG_JNI(register_android_graphics_Camera),
+    REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),
     REG_JNI(register_android_graphics_Canvas),
     REG_JNI(register_android_graphics_ColorFilter),
     REG_JNI(register_android_graphics_DrawFilter),
@@ -1141,6 +1161,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_Xfermode),
     REG_JNI(register_android_graphics_YuvImage),
+    REG_JNI(register_android_graphics_pdf_PdfDocument),
 
     REG_JNI(register_android_database_CursorWindow),
     REG_JNI(register_android_database_SQLiteConnection),
@@ -1150,17 +1171,17 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_FileObserver),
     REG_JNI(register_android_os_FileUtils),
     REG_JNI(register_android_os_MessageQueue),
-    REG_JNI(register_android_os_ParcelFileDescriptor),
     REG_JNI(register_android_os_SELinux),
     REG_JNI(register_android_os_Trace),
     REG_JNI(register_android_os_UEventObserver),
     REG_JNI(register_android_net_LocalSocketImpl),
     REG_JNI(register_android_net_NetworkUtils),
     REG_JNI(register_android_net_TrafficStats),
-    REG_JNI(register_android_net_wifi_WifiManager),
+    REG_JNI(register_android_net_wifi_WifiNative),
     REG_JNI(register_android_os_MemoryFile),
     REG_JNI(register_com_android_internal_os_ZygoteInit),
     REG_JNI(register_android_hardware_Camera),
+    REG_JNI(register_android_hardware_camera2_CameraMetadata),
     REG_JNI(register_android_hardware_SensorManager),
     REG_JNI(register_android_hardware_SerialPort),
     REG_JNI(register_android_hardware_UsbDevice),

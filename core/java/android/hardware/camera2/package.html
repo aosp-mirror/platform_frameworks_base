@@ -1,0 +1,86 @@
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<HTML>
+<BODY>
+<p>The android.hardware.camera2 package provides an interface to
+individual camera devices connected to an Android device. It replaces
+the deprecated {@link android.hardware.Camera} class.</p>
+
+<p>This package models a camera device as a pipeline, which takes in
+input requests for capturing a single frame, captures the single image
+per the request, and then outputs one capture result metadata packet,
+plus a set of output image buffers for the request. The requests are
+processed in-order, and multiple requests can be in flight at
+once. Since the camera device is a pipeline with multiple stages,
+having multiple requests in flight is required to maintain full
+framerate on most Android devices.</p>
+
+<p>To enumerate, query, and open available camera devices, obtain a
+{@link android.hardware.camera2.CameraManager} instance.</p>
+
+<p>Individual {@link android.hardware.camera2.CameraDevice
+CameraDevices} provide a set of static property information that
+describes the hardware device and the available settings and output
+parameters for the device. This information is provided through the
+{@link android.hardware.camera2.CameraCharacteristics} object.</p>
+
+<p>To capture or stream images from a camera device, the application
+must first configure a set of output Surfaces for use with the camera
+device, with {@link
+android.hardware.camera2.CameraDevice#configureOutputs}. Each
+Surface has to be pre-configured with an appropriate size and format
+(if applicable) to match the sizes and formats available from the
+camera device. A target Surface can be obtained from a variety of
+classes, including {@link android.view.SurfaceView}, {@link
+android.graphics.SurfaceTexture} via {@link
+android.view.Surface#Surface(SurfaceTexture), {@link
+android.media.MediaCodec}, and {@link android.media.ImageReader}.
+</p>
+
+<p>The application then needs to construct a {@link
+android.hardware.camera2.CaptureRequest}, which defines all the
+capture parameters needed by a camera device to capture a single
+image. The request also lists which of the configured output Surfaces
+should be used as targets for this capture. The CameraDevice has a
+{@link android.hardware.camera2.CameraDevice#createCaptureRequest
+convenience factory method} for creating a request for a given use
+case which is optimized for the Android device the application is
+running on.</p>
+
+<p>Once the request has been set up, it can be handed to the
+CameraDevice either for a one-shot {@link
+android.hardware.camera2.CameraDevice#capture} or for an endlessly
+{@link android.hardware.camera2.CameraDevice#setRepeatingRequest
+repeating} use. Both methods also accept a list of requests to use as
+a burst capture / repeating burst. Repeating requests have a lower
+priority than captures, so a request submitted
+through <code>capture()</code> while there's a repeating request
+configured will be captured as soon as the current repeat (burst)
+capture completes.</p>
+
+<p>After processing a request, the camera device will produce a {@link
+android.hardware.camera2.CaptureResult} object, which contains
+information about the state of the camera device at time of capture,
+and the final settings used. These may vary somewhat from the request,
+if rounding or resolving contradictory parameters was necessary. The
+camera device will also send a frame of image data into each of the
+output streams included in the request. These are produced
+asynchronously relative to the output CaptureResult, sometimes
+substantially later.</p>
+
+{@hide}
+
+</BODY>
+</HTML>

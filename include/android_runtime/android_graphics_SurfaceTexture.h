@@ -24,13 +24,16 @@
 namespace android {
 
 class GLConsumer;
+class IGraphicBufferProducer;
 
-extern sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
-        JNIEnv* env, jobject thiz);
+extern sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(JNIEnv* env, jobject thiz);
 extern bool android_SurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz);
 
 /* Gets the underlying GLConsumer from a SurfaceTexture Java object. */
 extern sp<GLConsumer> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz);
+
+/* gets the producer end of the SurfaceTexture */
+extern sp<IGraphicBufferProducer> SurfaceTexture_getProducer(JNIEnv* env, jobject thiz);
 
 } // namespace android
 

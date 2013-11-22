@@ -18,7 +18,6 @@ package com.android.systemui.settings;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -30,9 +29,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.util.Slog;
-import android.view.IWindowManager;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 
 import java.util.ArrayList;

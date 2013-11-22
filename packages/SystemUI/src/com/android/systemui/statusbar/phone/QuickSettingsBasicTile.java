@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.systemui.R;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -25,6 +23,8 @@ import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.systemui.R;
 
 class QuickSettingsBasicTile extends QuickSettingsTileView {
     private final TextView mTextView;
@@ -35,6 +35,10 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
     }
 
     public QuickSettingsBasicTile(Context context, AttributeSet attrs) {
+        this(context, attrs, R.layout.quick_settings_tile_basic);
+    }
+
+    public QuickSettingsBasicTile(Context context, AttributeSet attrs, int layoutId) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -42,8 +46,7 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
         setBackgroundResource(R.drawable.qs_tile_background);
-        addView(LayoutInflater.from(context).inflate(
-                R.layout.quick_settings_tile_basic, null),
+        addView(LayoutInflater.from(context).inflate(layoutId, null),
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT));

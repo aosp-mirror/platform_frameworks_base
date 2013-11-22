@@ -27,10 +27,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.view.Surface.OutOfResourcesException;
 
 /**
  * Displays a watermark on top of the window manager's windows.
@@ -119,7 +119,7 @@ class Watermark {
             ctrl.setPosition(0, 0);
             ctrl.show();
             mSurface.copyFrom(ctrl);
-        } catch (SurfaceControl.OutOfResourcesException e) {
+        } catch (OutOfResourcesException e) {
         }
         mSurfaceControl = ctrl;
     }
@@ -144,11 +144,11 @@ class Watermark {
             try {
                 c = mSurface.lockCanvas(dirty);
             } catch (IllegalArgumentException e) {
-            } catch (OutOfResourcesException e) {
+            } catch (Surface.OutOfResourcesException e) {
             }
             if (c != null) {
                 c.drawColor(0, PorterDuff.Mode.CLEAR);
-                
+
                 int deltaX = mDeltaX;
                 int deltaY = mDeltaY;
 

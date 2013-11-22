@@ -68,6 +68,10 @@ public class IndentingPrintWriter extends PrintWriter {
         print(key + "=" + String.valueOf(value) + " ");
     }
 
+    public void printHexPair(String key, int value) {
+        print(key + "=0x" + Integer.toHexString(value) + " ");
+    }
+
     @Override
     public void write(char[] buf, int offset, int count) {
         final int indentLength = mIndentBuilder.length();

@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -33,6 +35,7 @@ import android.text.TextUtils;
 import java.util.Locale;
 
 public class SettingsHelper {
+    private static final String SILENT_RINGTONE = "_silent";
     private Context mContext;
     private AudioManager mAudioManager;
 
@@ -63,8 +66,58 @@ public class SettingsHelper {
             setAutoRestore(Integer.parseInt(value) == 1);
         } else if (isAlreadyConfiguredCriticalAccessibilitySetting(name)) {
             return false;
+        } else if (Settings.System.RINGTONE.equals(name)
+                || Settings.System.NOTIFICATION_SOUND.equals(name)) {
+            setRingtone(name, value);
+            return false;
         }
         return true;
+    }
+
+    public String onBackupValue(String name, String value) {
+        // Special processing for backing up ringtones
+        if (Settings.System.RINGTONE.equals(name)
+                || Settings.System.NOTIFICATION_SOUND.equals(name)) {
+            if (value == null) {
+                // Silent ringtone
+                return SILENT_RINGTONE;
+            } else {
+                return getCanonicalRingtoneValue(value);
+            }
+        }
+        // Return the original value
+        return value;
+    }
+
+    /**
+     * Sets the ringtone of type specified by the name.
+     *
+     * @param name should be Settings.System.RINGTONE or Settings.System.NOTIFICATION_SOUND.
+     * @param value can be a canonicalized uri or "_silent" to indicate a silent (null) ringtone.
+     */
+    private void setRingtone(String name, String value) {
+        // If it's null, don't change the default
+        if (value == null) return;
+        Uri ringtoneUri = null;
+        if (SILENT_RINGTONE.equals(value)) {
+            ringtoneUri = null;
+        } else {
+            Uri canonicalUri = Uri.parse(value);
+            ringtoneUri = mContext.getContentResolver().uncanonicalize(canonicalUri);
+            if (ringtoneUri == null) {
+                // Unrecognized or invalid Uri, don't restore
+                return;
+            }
+        }
+        final int ringtoneType = Settings.System.RINGTONE.equals(name)
+                ? RingtoneManager.TYPE_RINGTONE : RingtoneManager.TYPE_NOTIFICATION;
+        RingtoneManager.setActualDefaultRingtoneUri(mContext, ringtoneType, ringtoneUri);
+    }
+
+    private String getCanonicalRingtoneValue(String value) {
+        final Uri ringtoneUri = Uri.parse(value);
+        final Uri canonicalUri = mContext.getContentResolver().canonicalize(ringtoneUri);
+        return canonicalUri == null ? null : canonicalUri.toString();
     }
 
     private boolean isAlreadyConfiguredCriticalAccessibilitySetting(String name) {

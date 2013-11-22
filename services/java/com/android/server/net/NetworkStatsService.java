@@ -154,7 +154,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
-    private final IAlarmManager mAlarmManager;
+    private final AlarmManager mAlarmManager;
     private final TrustedTime mTime;
     private final TelephonyManager mTeleManager;
     private final NetworkStatsSettings mSettings;
@@ -240,7 +240,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
 
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
 
     private boolean mSystemReady;
@@ -262,18 +261,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             NetworkStatsSettings settings) {
         mContext = checkNotNull(context, "missing Context");
         mNetworkManager = checkNotNull(networkManager, "missing INetworkManagementService");
-        mAlarmManager = checkNotNull(alarmManager, "missing IAlarmManager");
         mTime = checkNotNull(time, "missing TrustedTime");
         mTeleManager = checkNotNull(TelephonyManager.getDefault(), "missing TelephonyManager");
         mSettings = checkNotNull(settings, "missing NetworkStatsSettings");
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         final PowerManager powerManager = (PowerManager) context.getSystemService(
                 Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        mHandlerThread = new HandlerThread(TAG);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mHandler = new Handler(thread.getLooper(), mHandlerCallback);
 
         mSystemDir = checkNotNull(systemDir);
         mBaseDir = new File(systemDir, "netstats");
@@ -415,6 +414,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         } catch (IOException e) {
             Log.wtf(TAG, "problem during legacy upgrade", e);
+        } catch (OutOfMemoryError e) {
+            Log.wtf(TAG, "problem during legacy upgrade", e);
         }
     }
 
@@ -423,20 +424,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * reschedule based on current {@link NetworkStatsSettings#getPollInterval()}.
      */
     private void registerPollAlarmLocked() {
-        try {
-            if (mPollIntent != null) {
-                mAlarmManager.remove(mPollIntent);
-            }
-
-            mPollIntent = PendingIntent.getBroadcast(
-                    mContext, 0, new Intent(ACTION_NETWORK_STATS_POLL), 0);
-
-            final long currentRealtime = SystemClock.elapsedRealtime();
-            mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
-                    mSettings.getPollInterval(), mPollIntent);
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
+        if (mPollIntent != null) {
+            mAlarmManager.cancel(mPollIntent);
         }
+
+        mPollIntent = PendingIntent.getBroadcast(
+                mContext, 0, new Intent(ACTION_NETWORK_STATS_POLL), 0);
+
+        final long currentRealtime = SystemClock.elapsedRealtime();
+        mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
+                mSettings.getPollInterval(), mPollIntent);
     }
 
     /**
@@ -1193,8 +1190,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private NetworkStats getNetworkStatsTethering() throws RemoteException {
         try {
-            final String[] tetheredIfacePairs = mConnManager.getTetheredIfacePairs();
-            return mNetworkManager.getNetworkStatsTethering(tetheredIfacePairs);
+            return mNetworkManager.getNetworkStatsTethering();
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
             return new NetworkStats(0L, 10);

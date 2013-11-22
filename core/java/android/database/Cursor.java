@@ -25,9 +25,12 @@ import java.io.Closeable;
 /**
  * This interface provides random read-write access to the result set returned
  * by a database query.
- *
+ * <p>
  * Cursor implementations are not required to be synchronized so code using a Cursor from multiple
  * threads should perform its own synchronization when using the Cursor.
+ * </p><p>
+ * Implementations should subclass {@link AbstractCursor}.
+ * </p>
  */
 public interface Cursor extends Closeable {
     /*
@@ -423,6 +426,16 @@ public interface Cursor extends Closeable {
      * @param uri The content URI to watch.
      */
     void setNotificationUri(ContentResolver cr, Uri uri);
+
+    /**
+     * Return the URI at which notifications of changes in this Cursor's data
+     * will be delivered, as previously set by {@link #setNotificationUri}.
+     * @return Returns a URI that can be used with
+     * {@link ContentResolver#registerContentObserver(android.net.Uri, boolean, ContentObserver)
+     * ContentResolver.registerContentObserver} to find out about changes to this Cursor's
+     * data.  May be null if no notification URI has been set.
+     */
+    Uri getNotificationUri();
 
     /**
      * onMove() will only be called across processes if this method returns true.

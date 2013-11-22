@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.ArrayMap;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -27,14 +28,14 @@ import java.util.Iterator;
 /**
  * A particular Intent that has been bound to a Service.
  */
-class IntentBindRecord {
+final class IntentBindRecord {
     /** The running service. */
     final ServiceRecord service;
     /** The intent that is bound.*/
     final Intent.FilterComparison intent; // 
     /** All apps that have bound to this Intent. */
-    final HashMap<ProcessRecord, AppBindRecord> apps
-            = new HashMap<ProcessRecord, AppBindRecord>();
+    final ArrayMap<ProcessRecord, AppBindRecord> apps
+            = new ArrayMap<ProcessRecord, AppBindRecord>();
     /** Binder published from service. */
     IBinder binder;
     /** Set when we have initiated a request for this binder. */
@@ -62,15 +63,12 @@ class IntentBindRecord {
                 pw.print(" received="); pw.print(received);
                 pw.print(" hasBound="); pw.print(hasBound);
                 pw.print(" doRebind="); pw.println(doRebind);
-        if (apps.size() > 0) {
-            Iterator<AppBindRecord> it = apps.values().iterator();
-            while (it.hasNext()) {
-                AppBindRecord a = it.next();
-                pw.print(prefix); pw.print("* Client AppBindRecord{");
-                        pw.print(Integer.toHexString(System.identityHashCode(a)));
-                        pw.print(' '); pw.print(a.client); pw.println('}');
-                a.dumpInIntentBind(pw, prefix + "  ");
-            }
+        for (int i=0; i<apps.size(); i++) {
+            AppBindRecord a = apps.valueAt(i);
+            pw.print(prefix); pw.print("* Client AppBindRecord{");
+                    pw.print(Integer.toHexString(System.identityHashCode(a)));
+                    pw.print(' '); pw.print(a.client); pw.println('}');
+            a.dumpInIntentBind(pw, prefix + "  ");
         }
     }
 
@@ -81,12 +79,11 @@ class IntentBindRecord {
 
     int collectFlags() {
         int flags = 0;
-        if (apps.size() > 0) {
-            for (AppBindRecord app : apps.values()) {
-                if (app.connections.size() > 0) {
-                    for (ConnectionRecord conn : app.connections) {
-                        flags |= conn.flags;
-                    }
+        for (int i=apps.size()-1; i>=0; i--) {
+            AppBindRecord app = apps.valueAt(i);
+            if (app.connections.size() > 0) {
+                for (ConnectionRecord conn : app.connections) {
+                    flags |= conn.flags;
                 }
             }
         }

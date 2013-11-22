@@ -296,23 +296,7 @@ public class ActionBarContainer extends FrameLayout {
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
             final int containerHeight = getMeasuredHeight();
             final int tabHeight = mTabContainer.getMeasuredHeight();
-
-            if ((mActionBarView.getDisplayOptions() & ActionBar.DISPLAY_SHOW_HOME) == 0) {
-                // Not showing home, put tabs on top.
-                final int count = getChildCount();
-                for (int i = 0; i < count; i++) {
-                    final View child = getChildAt(i);
-
-                    if (child == mTabContainer) continue;
-
-                    if (!mActionBarView.isCollapsed()) {
-                        child.offsetTopAndBottom(tabHeight);
-                    }
-                }
-                mTabContainer.layout(l, 0, r, tabHeight);
-            } else {
-                mTabContainer.layout(l, containerHeight - tabHeight, r, containerHeight);
-            }
+            mTabContainer.layout(l, containerHeight - tabHeight, r, containerHeight);
         }
 
         boolean needsInvalidate = false;

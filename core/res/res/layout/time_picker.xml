@@ -20,6 +20,7 @@
 <!-- Layout of time picker-->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/timePickerLayout"
     android:orientation="horizontal"
     android:layout_gravity="center_horizontal"
     android:layout_width="wrap_content"

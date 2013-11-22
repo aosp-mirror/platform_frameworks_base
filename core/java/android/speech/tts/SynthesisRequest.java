@@ -30,7 +30,7 @@ import android.os.Bundle;
  * </ul>
  *
  * Any additional parameters sent to the text to speech service are passed in
- * uninterpreted, see the @code{params} argument in {@link TextToSpeech#speak}
+ * uninterpreted, see the {@code params} argument in {@link TextToSpeech#speak}
  * and {@link TextToSpeech#synthesizeToFile}.
  */
 public final class SynthesisRequest {
@@ -41,6 +41,7 @@ public final class SynthesisRequest {
     private String mVariant;
     private int mSpeechRate;
     private int mPitch;
+    private int mCallerUid;
 
     public SynthesisRequest(String text, Bundle params) {
         mText = text;
@@ -98,6 +99,13 @@ public final class SynthesisRequest {
     }
 
     /**
+     * Gets the request caller Uid.
+     */
+    public int getCallerUid() {
+        return mCallerUid;
+    }
+
+    /**
      * Sets the locale for the request.
      */
     void setLanguage(String language, String country, String variant) {
@@ -118,5 +126,12 @@ public final class SynthesisRequest {
      */
     void setPitch(int pitch) {
         mPitch = pitch;
+    }
+
+    /**
+     * Sets Caller Uid
+     */
+    void setCallerUid(int uid) {
+        mCallerUid = uid;
     }
 }

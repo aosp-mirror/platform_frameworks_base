@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -150,6 +152,11 @@ public class DownloadManager {
     public static final String COLUMN_MEDIAPROVIDER_URI = Downloads.Impl.COLUMN_MEDIAPROVIDER_URI;
 
     /**
+     * @hide
+     */
+    public final static String COLUMN_ALLOW_WRITE = Downloads.Impl.COLUMN_ALLOW_WRITE;
+
+    /**
      * Value of {@link #COLUMN_STATUS} when the download is waiting to start.
      */
     public final static int STATUS_PENDING = 1 << 0;
@@ -262,18 +269,21 @@ public class DownloadManager {
     /**
      * Broadcast intent action sent by the download manager when a download completes.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
 
     /**
      * Broadcast intent action sent by the download manager when the user clicks on a running
      * download, either from a system notification or from the downloads UI.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public final static String ACTION_NOTIFICATION_CLICKED =
             "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
      * Intent action to launch an activity to display all downloads.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public final static String ACTION_VIEW_DOWNLOADS = "android.intent.action.VIEW_DOWNLOADS";
 
     /**
@@ -315,6 +325,7 @@ public class DownloadManager {
         Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
         Downloads.Impl.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
         Downloads.Impl.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
+        Downloads.Impl.COLUMN_ALLOW_WRITE,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator
@@ -1185,6 +1196,14 @@ public class DownloadManager {
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification) {
+        return addCompletedDownload(title, description, isMediaScannerScannable, mimeType, path,
+                length, showNotification, false);
+    }
+
+    /** {@hide} */
+    public long addCompletedDownload(String title, String description,
+            boolean isMediaScannerScannable, String mimeType, String path, long length,
+            boolean showNotification, boolean allowWrite) {
         // make sure the input args are non-null/non-zero
         validateArgumentIsNonEmpty("title", title);
         validateArgumentIsNonEmpty("description", description);
@@ -1210,12 +1229,14 @@ public class DownloadManager {
                         Request.SCANNABLE_VALUE_NO);
         values.put(Downloads.Impl.COLUMN_VISIBILITY, (showNotification) ?
                 Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION : Request.VISIBILITY_HIDDEN);
+        values.put(Downloads.Impl.COLUMN_ALLOW_WRITE, allowWrite ? 1 : 0);
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         if (downloadUri == null) {
             return -1;
         }
         return Long.parseLong(downloadUri.getLastPathSegment());
     }
+
     private static final String NON_DOWNLOADMANAGER_DOWNLOAD =
             "non-dwnldmngr-download-dont-retry2download";
 
@@ -1227,8 +1248,10 @@ public class DownloadManager {
 
     /**
      * Get the DownloadProvider URI for the download with the given ID.
+     *
+     * @hide
      */
-    Uri getDownloadUri(long id) {
+    public Uri getDownloadUri(long id) {
         return ContentUris.withAppendedId(mBaseUri, id);
     }
 

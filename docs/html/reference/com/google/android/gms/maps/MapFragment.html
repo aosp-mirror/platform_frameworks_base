@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>MapFragment | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -738,7 +745,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="3" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="3" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -1045,7 +1052,7 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onActivityCreated(android.os.Bundle)">onActivityCreated</a></span>(<a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onActivityCreated(android.os.Bundle)">onActivityCreated</a></span>(Bundle savedInstanceState)</nobr>
         
   </td></tr>
 
@@ -1061,7 +1068,7 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onAttach(android.app.Activity)">onAttach</a></span>(<a href="/reference/android/app/Activity.html">Activity</a> activity)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onAttach(android.app.Activity)">onAttach</a></span>(Activity activity)</nobr>
         
   </td></tr>
 
@@ -1077,7 +1084,7 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onCreate(android.os.Bundle)">onCreate</a></span>(<a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onCreate(android.os.Bundle)">onCreate</a></span>(Bundle savedInstanceState)</nobr>
         
   </td></tr>
 
@@ -1090,10 +1097,10 @@ android.content.ComponentCallbacks2
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)">onCreateView</a></span>(<a href="/reference/android/view/LayoutInflater.html">LayoutInflater</a> inflater, <a href="/reference/android/view/ViewGroup.html">ViewGroup</a> container, <a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)">onCreateView</a></span>(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)</nobr>
         
   </td></tr>
 
@@ -1141,7 +1148,7 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onInflate(android.app.Activity, android.util.AttributeSet, android.os.Bundle)">onInflate</a></span>(<a href="/reference/android/app/Activity.html">Activity</a> activity, <a href="/reference/android/util/AttributeSet.html">AttributeSet</a> attrs, <a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onInflate(android.app.Activity, android.util.AttributeSet, android.os.Bundle)">onInflate</a></span>(Activity activity, AttributeSet attrs, Bundle savedInstanceState)</nobr>
         
         <div class="jd-descrdiv">Parse attributes during inflation from a view hierarchy into the arguments we handle.</div>
   
@@ -1207,7 +1214,7 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onSaveInstanceState(android.os.Bundle)">onSaveInstanceState</a></span>(<a href="/reference/android/os/Bundle.html">Bundle</a> outState)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#onSaveInstanceState(android.os.Bundle)">onSaveInstanceState</a></span>(Bundle outState)</nobr>
         
   </td></tr>
 
@@ -1223,7 +1230,7 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#setArguments(android.os.Bundle)">setArguments</a></span>(<a href="/reference/android/os/Bundle.html">Bundle</a> args)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapFragment.html#setArguments(android.os.Bundle)">setArguments</a></span>(Bundle args)</nobr>
         
   </td></tr>
 
@@ -1273,7 +1280,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dump</span>(<a href="/reference/java/lang/String.html">String</a> arg0, <a href="/reference/java/io/FileDescriptor.html">FileDescriptor</a> arg1, <a href="/reference/java/io/PrintWriter.html">PrintWriter</a> arg2, <a href="/reference/java/lang/String.html">String[]</a> arg3)</nobr>
+        <span class="sympad">dump</span>(String arg0, FileDescriptor arg1, PrintWriter arg2, String[] arg3)</nobr>
         
   </td></tr>
 
@@ -1289,7 +1296,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1302,7 +1309,7 @@ From class
             final
             
             
-            <a href="/reference/android/app/Activity.html">Activity</a></nobr>
+            Activity</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getActivity</span>()</nobr>
@@ -1318,7 +1325,7 @@ From class
             final
             
             
-            <a href="/reference/android/os/Bundle.html">Bundle</a></nobr>
+            Bundle</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getArguments</span>()</nobr>
@@ -1382,7 +1389,7 @@ From class
             final
             
             
-            <a href="/reference/android/content/res/Resources.html">Resources</a></nobr>
+            Resources</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getResources</span>()</nobr>
@@ -1414,7 +1421,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getString</span>(int arg0)</nobr>
@@ -1430,10 +1437,10 @@ From class
             final
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getString</span>(int arg0, <a href="/reference/java/lang/Object.html">Object...</a> arg1)</nobr>
+        <span class="sympad">getString</span>(int arg0, Object... arg1)</nobr>
         
   </td></tr>
 
@@ -1446,7 +1453,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTag</span>()</nobr>
@@ -1494,7 +1501,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/CharSequence.html">CharSequence</a></nobr>
+            CharSequence</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getText</span>(int arg0)</nobr>
@@ -1526,7 +1533,7 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getView</span>()</nobr>
@@ -1561,7 +1568,7 @@ From class
             Fragment</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">instantiate</span>(<a href="/reference/android/content/Context.html">Context</a> arg0, <a href="/reference/java/lang/String.html">String</a> arg1)</nobr>
+        <span class="sympad">instantiate</span>(Context arg0, String arg1)</nobr>
         
   </td></tr>
 
@@ -1577,7 +1584,7 @@ From class
             Fragment</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">instantiate</span>(<a href="/reference/android/content/Context.html">Context</a> arg0, <a href="/reference/java/lang/String.html">String</a> arg1, <a href="/reference/android/os/Bundle.html">Bundle</a> arg2)</nobr>
+        <span class="sympad">instantiate</span>(Context arg0, String arg1, Bundle arg2)</nobr>
         
   </td></tr>
 
@@ -1705,7 +1712,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onActivityCreated</span>(<a href="/reference/android/os/Bundle.html">Bundle</a> arg0)</nobr>
+        <span class="sympad">onActivityCreated</span>(Bundle arg0)</nobr>
         
   </td></tr>
 
@@ -1721,7 +1728,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onActivityResult</span>(int arg0, int arg1, <a href="/reference/android/content/Intent.html">Intent</a> arg2)</nobr>
+        <span class="sympad">onActivityResult</span>(int arg0, int arg1, Intent arg2)</nobr>
         
   </td></tr>
 
@@ -1737,7 +1744,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onAttach</span>(<a href="/reference/android/app/Activity.html">Activity</a> arg0)</nobr>
+        <span class="sympad">onAttach</span>(Activity arg0)</nobr>
         
   </td></tr>
 
@@ -1753,7 +1760,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onConfigurationChanged</span>(<a href="/reference/android/content/res/Configuration.html">Configuration</a> arg0)</nobr>
+        <span class="sympad">onConfigurationChanged</span>(Configuration arg0)</nobr>
         
   </td></tr>
 
@@ -1769,7 +1776,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onContextItemSelected</span>(<a href="/reference/android/view/MenuItem.html">MenuItem</a> arg0)</nobr>
+        <span class="sympad">onContextItemSelected</span>(MenuItem arg0)</nobr>
         
   </td></tr>
 
@@ -1785,7 +1792,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreate</span>(<a href="/reference/android/os/Bundle.html">Bundle</a> arg0)</nobr>
+        <span class="sympad">onCreate</span>(Bundle arg0)</nobr>
         
   </td></tr>
 
@@ -1817,7 +1824,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateContextMenu</span>(<a href="/reference/android/view/ContextMenu.html">ContextMenu</a> arg0, <a href="/reference/android/view/View.html">View</a> arg1, <a href="/reference/android/view/ContextMenu.ContextMenuInfo.html">ContextMenu.ContextMenuInfo</a> arg2)</nobr>
+        <span class="sympad">onCreateContextMenu</span>(ContextMenu arg0, View arg1, ContextMenu.ContextMenuInfo arg2)</nobr>
         
   </td></tr>
 
@@ -1833,7 +1840,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateOptionsMenu</span>(<a href="/reference/android/view/Menu.html">Menu</a> arg0, <a href="/reference/android/view/MenuInflater.html">MenuInflater</a> arg1)</nobr>
+        <span class="sympad">onCreateOptionsMenu</span>(Menu arg0, MenuInflater arg1)</nobr>
         
   </td></tr>
 
@@ -1846,10 +1853,10 @@ From class
             
             
             
-            <a href="/reference/android/view/View.html">View</a></nobr>
+            View</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateView</span>(<a href="/reference/android/view/LayoutInflater.html">LayoutInflater</a> arg0, <a href="/reference/android/view/ViewGroup.html">ViewGroup</a> arg1, <a href="/reference/android/os/Bundle.html">Bundle</a> arg2)</nobr>
+        <span class="sympad">onCreateView</span>(LayoutInflater arg0, ViewGroup arg1, Bundle arg2)</nobr>
         
   </td></tr>
 
@@ -1945,7 +1952,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInflate</span>(<a href="/reference/android/util/AttributeSet.html">AttributeSet</a> arg0, <a href="/reference/android/os/Bundle.html">Bundle</a> arg1)</nobr>
+        <span class="sympad">onInflate</span>(AttributeSet arg0, Bundle arg1)</nobr>
         
   </td></tr>
 
@@ -1961,7 +1968,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInflate</span>(<a href="/reference/android/app/Activity.html">Activity</a> arg0, <a href="/reference/android/util/AttributeSet.html">AttributeSet</a> arg1, <a href="/reference/android/os/Bundle.html">Bundle</a> arg2)</nobr>
+        <span class="sympad">onInflate</span>(Activity arg0, AttributeSet arg1, Bundle arg2)</nobr>
         
   </td></tr>
 
@@ -1993,7 +2000,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onOptionsItemSelected</span>(<a href="/reference/android/view/MenuItem.html">MenuItem</a> arg0)</nobr>
+        <span class="sympad">onOptionsItemSelected</span>(MenuItem arg0)</nobr>
         
   </td></tr>
 
@@ -2009,7 +2016,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onOptionsMenuClosed</span>(<a href="/reference/android/view/Menu.html">Menu</a> arg0)</nobr>
+        <span class="sympad">onOptionsMenuClosed</span>(Menu arg0)</nobr>
         
   </td></tr>
 
@@ -2041,7 +2048,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onPrepareOptionsMenu</span>(<a href="/reference/android/view/Menu.html">Menu</a> arg0)</nobr>
+        <span class="sympad">onPrepareOptionsMenu</span>(Menu arg0)</nobr>
         
   </td></tr>
 
@@ -2073,7 +2080,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onSaveInstanceState</span>(<a href="/reference/android/os/Bundle.html">Bundle</a> arg0)</nobr>
+        <span class="sympad">onSaveInstanceState</span>(Bundle arg0)</nobr>
         
   </td></tr>
 
@@ -2137,7 +2144,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onViewCreated</span>(<a href="/reference/android/view/View.html">View</a> arg0, <a href="/reference/android/os/Bundle.html">Bundle</a> arg1)</nobr>
+        <span class="sympad">onViewCreated</span>(View arg0, Bundle arg1)</nobr>
         
   </td></tr>
 
@@ -2153,7 +2160,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">registerForContextMenu</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">registerForContextMenu</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2169,7 +2176,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setArguments</span>(<a href="/reference/android/os/Bundle.html">Bundle</a> arg0)</nobr>
+        <span class="sympad">setArguments</span>(Bundle arg0)</nobr>
         
   </td></tr>
 
@@ -2281,7 +2288,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivity</span>(<a href="/reference/android/content/Intent.html">Intent</a> arg0)</nobr>
+        <span class="sympad">startActivity</span>(Intent arg0)</nobr>
         
   </td></tr>
 
@@ -2297,7 +2304,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivity</span>(<a href="/reference/android/content/Intent.html">Intent</a> arg0, <a href="/reference/android/os/Bundle.html">Bundle</a> arg1)</nobr>
+        <span class="sympad">startActivity</span>(Intent arg0, Bundle arg1)</nobr>
         
   </td></tr>
 
@@ -2313,7 +2320,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivityForResult</span>(<a href="/reference/android/content/Intent.html">Intent</a> arg0, int arg1)</nobr>
+        <span class="sympad">startActivityForResult</span>(Intent arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -2329,7 +2336,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">startActivityForResult</span>(<a href="/reference/android/content/Intent.html">Intent</a> arg0, int arg1, <a href="/reference/android/os/Bundle.html">Bundle</a> arg2)</nobr>
+        <span class="sympad">startActivityForResult</span>(Intent arg0, int arg1, Bundle arg2)</nobr>
         
   </td></tr>
 
@@ -2342,7 +2349,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -2361,7 +2368,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">unregisterForContextMenu</span>(<a href="/reference/android/view/View.html">View</a> arg0)</nobr>
+        <span class="sympad">unregisterForContextMenu</span>(View arg0)</nobr>
         
   </td></tr>
 
@@ -2381,7 +2388,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -2400,7 +2407,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -2419,7 +2426,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -2448,7 +2455,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -2512,7 +2519,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -2583,7 +2590,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/content/ComponentCallbacks.html">android.content.ComponentCallbacks</a>
+  android.content.ComponentCallbacks
 
 <div id="inherited-methods-android.content.ComponentCallbacks">
   <div id="inherited-methods-android.content.ComponentCallbacks-list"
@@ -2605,7 +2612,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onConfigurationChanged</span>(<a href="/reference/android/content/res/Configuration.html">Configuration</a> arg0)</nobr>
+        <span class="sympad">onConfigurationChanged</span>(Configuration arg0)</nobr>
         
   </td></tr>
 
@@ -2683,7 +2690,7 @@ From interface
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/view/View.OnCreateContextMenuListener.html">android.view.View.OnCreateContextMenuListener</a>
+  android.view.View.OnCreateContextMenuListener
 
 <div id="inherited-methods-android.view.View.OnCreateContextMenuListener">
   <div id="inherited-methods-android.view.View.OnCreateContextMenuListener-list"
@@ -2705,7 +2712,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreateContextMenu</span>(<a href="/reference/android/view/ContextMenu.html">ContextMenu</a> arg0, <a href="/reference/android/view/View.html">View</a> arg1, <a href="/reference/android/view/ContextMenu.ContextMenuInfo.html">ContextMenu.ContextMenuInfo</a> arg2)</nobr>
+        <span class="sympad">onCreateContextMenu</span>(ContextMenu arg0, View arg1, ContextMenu.ContextMenuInfo arg2)</nobr>
         
   </td></tr>
 
@@ -2908,7 +2915,7 @@ From interface
         void
       </span>
       <span class="sympad">onActivityCreated</span>
-      <span class="normal">(<a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</span>
+      <span class="normal">(Bundle savedInstanceState)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2937,7 +2944,7 @@ From interface
         void
       </span>
       <span class="sympad">onAttach</span>
-      <span class="normal">(<a href="/reference/android/app/Activity.html">Activity</a> activity)</span>
+      <span class="normal">(Activity activity)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2966,7 +2973,7 @@ From interface
         void
       </span>
       <span class="sympad">onCreate</span>
-      <span class="normal">(<a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</span>
+      <span class="normal">(Bundle savedInstanceState)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2992,10 +2999,10 @@ From interface
          
          
          
-        <a href="/reference/android/view/View.html">View</a>
+        View
       </span>
       <span class="sympad">onCreateView</span>
-      <span class="normal">(<a href="/reference/android/view/LayoutInflater.html">LayoutInflater</a> inflater, <a href="/reference/android/view/ViewGroup.html">ViewGroup</a> container, <a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</span>
+      <span class="normal">(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -3082,7 +3089,7 @@ From interface
         void
       </span>
       <span class="sympad">onInflate</span>
-      <span class="normal">(<a href="/reference/android/app/Activity.html">Activity</a> activity, <a href="/reference/android/util/AttributeSet.html">AttributeSet</a> attrs, <a href="/reference/android/os/Bundle.html">Bundle</a> savedInstanceState)</span>
+      <span class="normal">(Activity activity, AttributeSet attrs, Bundle savedInstanceState)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -3199,7 +3206,7 @@ From interface
         void
       </span>
       <span class="sympad">onSaveInstanceState</span>
-      <span class="normal">(<a href="/reference/android/os/Bundle.html">Bundle</a> outState)</span>
+      <span class="normal">(Bundle outState)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -3228,7 +3235,7 @@ From interface
         void
       </span>
       <span class="sympad">setArguments</span>
-      <span class="normal">(<a href="/reference/android/os/Bundle.html">Bundle</a> args)</span>
+      <span class="normal">(Bundle args)</span>
     </h4>
       <div class="api-level">
         <div></div>

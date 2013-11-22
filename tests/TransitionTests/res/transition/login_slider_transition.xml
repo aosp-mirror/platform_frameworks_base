@@ -1,0 +1,22 @@
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+    <slide>
+        <targets>
+            <target android:targetId="@id/retype"/>
+            <target android:targetId="@id/retypeEdit"/>
+        </targets>
+    </slide>
+    <recolor>
+        <targets>
+            <target android:targetId="@id/password"/>
+            <target android:targetId="@id/passwordEdit"/>
+        </targets>
+    </recolor>
+    <fade/>
+</transitionSet>
+
+<!--
+                TransitionSet slider = new TransitionSet();
+        slider.addTransition(new Slide(R.id.retype, R.id.retypeEdit));
+        slider.addTransition(new Recolor(R.id.password, R.id.passwordEdit));
+        slider.addTransition(new Fade());
+-->

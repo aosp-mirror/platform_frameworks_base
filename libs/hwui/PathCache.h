@@ -58,7 +58,7 @@ class Caches;
  * Alpha texture used to represent a path.
  */
 struct PathTexture: public Texture {
-    PathTexture(): Texture() {
+    PathTexture(Caches& caches): Texture(caches) {
     }
 
     ~PathTexture() {
@@ -269,7 +269,7 @@ private:
      * Removes an entry.
      * The pair must define first=path, second=sourcePath
      */
-    void remove(const path_pair_t& pair);
+    void remove(Vector<PathDescription>& pathsToRemove, const path_pair_t& pair);
 
     /**
      * Ensures there is enough space in the cache for a texture of the specified

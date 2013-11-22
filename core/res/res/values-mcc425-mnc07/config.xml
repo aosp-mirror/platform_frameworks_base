@@ -37,4 +37,8 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata">PC HOT mobile,pc.hotm,,,,,,,,,425,07,,DUN</string>
 
+    <!-- Don't use roaming icon for considered operators -->
+    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>42503</item>
+    </string-array>
 </resources>

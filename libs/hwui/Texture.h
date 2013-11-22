@@ -22,75 +22,39 @@
 namespace android {
 namespace uirenderer {
 
+class Caches;
+class UvMapper;
+
 /**
  * Represents an OpenGL texture.
  */
-struct Texture {
-    Texture() {
-        cleanup = false;
-        bitmapSize = 0;
+class Texture {
+public:
+    Texture();
+    Texture(Caches& caches);
 
-        wrapS = GL_CLAMP_TO_EDGE;
-        wrapT = GL_CLAMP_TO_EDGE;
+    virtual ~Texture() { }
 
-        minFilter = GL_NEAREST;
-        magFilter = GL_NEAREST;
-
-        mipMap = false;
-
-        firstFilter = true;
-        firstWrap = true;
-
-        id = 0;
-    }
-
-    void setWrap(GLenum wrap, bool bindTexture = false, bool force = false,
+    inline void setWrap(GLenum wrap, bool bindTexture = false, bool force = false,
                 GLenum renderTarget = GL_TEXTURE_2D) {
         setWrapST(wrap, wrap, bindTexture, force, renderTarget);
     }
 
-    void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false, bool force = false,
-            GLenum renderTarget = GL_TEXTURE_2D) {
+    virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D);
 
-        if (firstWrap || force || wrapS != this->wrapS || wrapT != this->wrapT) {
-            firstWrap = false;
-
-            this->wrapS = wrapS;
-            this->wrapT = wrapT;
-
-            if (bindTexture) {
-                glBindTexture(renderTarget, id);
-            }
-
-            glTexParameteri(renderTarget, GL_TEXTURE_WRAP_S, wrapS);
-            glTexParameteri(renderTarget, GL_TEXTURE_WRAP_T, wrapT);
-        }
-    }
-
-    void setFilter(GLenum filter, bool bindTexture = false, bool force = false,
+    inline void setFilter(GLenum filter, bool bindTexture = false, bool force = false,
                 GLenum renderTarget = GL_TEXTURE_2D) {
         setFilterMinMag(filter, filter, bindTexture, force, renderTarget);
     }
 
-    void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false, bool force = false,
-            GLenum renderTarget = GL_TEXTURE_2D) {
+    virtual void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false,
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D);
 
-        if (firstFilter || force || min != minFilter || mag != magFilter) {
-            firstFilter = false;
-
-            minFilter = min;
-            magFilter = mag;
-
-            if (bindTexture) {
-                glBindTexture(renderTarget, id);
-            }
-
-            if (mipMap && min == GL_LINEAR) min = GL_LINEAR_MIPMAP_LINEAR;
-
-            glTexParameteri(renderTarget, GL_TEXTURE_MIN_FILTER, min);
-            glTexParameteri(renderTarget, GL_TEXTURE_MAG_FILTER, mag);
-        }
-    }
+    /**
+     * Convenience method to call glDeleteTextures() on this texture's id.
+     */
+    void deleteTexture() const;
 
     /**
      * Name of the texture.
@@ -125,21 +89,28 @@ struct Texture {
      */
     bool mipMap;
 
+    /**
+     * Optional, pointer to a texture coordinates mapper.
+     */
+    const UvMapper* uvMapper;
+
 private:
     /**
      * Last wrap modes set on this texture. Defaults to GL_CLAMP_TO_EDGE.
      */
-    GLenum wrapS;
-    GLenum wrapT;
+    GLenum mWrapS;
+    GLenum mWrapT;
 
     /**
      * Last filters set on this texture. Defaults to GL_NEAREST.
      */
-    GLenum minFilter;
-    GLenum magFilter;
+    GLenum mMinFilter;
+    GLenum mMagFilter;
 
-    bool firstFilter;
-    bool firstWrap;
+    bool mFirstFilter;
+    bool mFirstWrap;
+
+    Caches& mCaches;
 }; // struct Texture
 
 class AutoTexture {
@@ -147,7 +118,7 @@ public:
     AutoTexture(const Texture* texture): mTexture(texture) { }
     ~AutoTexture() {
         if (mTexture && mTexture->cleanup) {
-            glDeleteTextures(1, &mTexture->id);
+            mTexture->deleteTexture();
             delete mTexture;
         }
     }

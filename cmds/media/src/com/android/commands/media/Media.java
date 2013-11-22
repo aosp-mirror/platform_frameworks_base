@@ -140,6 +140,11 @@ public class Media extends BaseCommand {
         }
 
         @Override
+        public void setEnabled(boolean enabled) {
+            System.out.println("New enable state= " + (enabled ? "enabled" : "disabled"));
+        }
+
+        @Override
         public void setPlaybackState(int generationId, int state, long stateChangeTimeMs,
                 long currentPosMs, float speed) {
             System.out.println("New state: id=" + generationId + " state=" + state

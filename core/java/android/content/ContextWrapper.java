@@ -35,7 +35,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 
 import java.io.File;
@@ -141,6 +141,12 @@ public class ContextWrapper extends Context {
         return mBase.getBasePackageName();
     }
 
+    /** @hide */
+    @Override
+    public String getOpPackageName() {
+        return mBase.getOpPackageName();
+    }
+
     @Override
     public ApplicationInfo getApplicationInfo() {
         return mBase.getApplicationInfo();
@@ -203,12 +209,22 @@ public class ContextWrapper extends Context {
     public File getExternalFilesDir(String type) {
         return mBase.getExternalFilesDir(type);
     }
-    
+
+    @Override
+    public File[] getExternalFilesDirs(String type) {
+        return mBase.getExternalFilesDirs(type);
+    }
+
     @Override
     public File getObbDir() {
         return mBase.getObbDir();
     }
-    
+
+    @Override
+    public File[] getObbDirs() {
+        return mBase.getObbDirs();
+    }
+
     @Override
     public File getCacheDir() {
         return mBase.getCacheDir();
@@ -217,6 +233,11 @@ public class ContextWrapper extends Context {
     @Override
     public File getExternalCacheDir() {
         return mBase.getExternalCacheDir();
+    }
+
+    @Override
+    public File[] getExternalCacheDirs() {
+        return mBase.getExternalCacheDirs();
     }
 
     @Override
@@ -646,7 +667,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
-        return mBase.getCompatibilityInfo(displayId);
+    public DisplayAdjustments getDisplayAdjustments(int displayId) {
+        return mBase.getDisplayAdjustments(displayId);
     }
 }

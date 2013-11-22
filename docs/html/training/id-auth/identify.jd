@@ -13,7 +13,7 @@ next.link=authenticate.html
   <div id="tb">
 <h2>This lesson teaches you to</h2>
 <ol>
-  <li><a href="#ForYou">Determine if AccountManager for You</a></li>
+  <li><a href="#ForYou">Determine if AccountManager is for You</a></li>
   <li><a href="#TaskTwo">Decide What Type of Account to Use</a></li>
   <li><a href="#GetPermission">Request GET_ACCOUNT permission</a></li>
   <li><a href="#TaskFive">Query AccountManager for a List of Accounts</a></li>
@@ -41,7 +41,7 @@ that the user has stored on their device.</p>
 </ul>
 
 
-<h2 id="ForYou">Determine if AccountManager for You</h2>
+<h2 id="ForYou">Determine if AccountManager is for You</h2>
 
 <p>Applications typically try to remember the user using one of three techniques:</p>
 <ol type="a">

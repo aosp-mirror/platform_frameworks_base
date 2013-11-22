@@ -37,10 +37,6 @@
      interface.  This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.PhoneStatusBar</string>
 
-    <!-- Component to be used as the system bar service.  Must implement the IStatusBar
-     interface.  This name is in the ComponentName flattened format (package/class)  -->
-    <string name="config_systemBarComponent" translatable="false">com.android.systemui.statusbar.tablet.TabletStatusBar</string>
-
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
 
@@ -91,6 +87,9 @@
     <!-- Whether rotation lock shows up in quick settings or not -->
     <bool name="quick_settings_show_rotation_lock">false</bool>
 
+    <!-- Whether or not the RSSI tile is capitalized or not. -->
+    <bool name="quick_settings_rssi_tile_capitalization">true</bool>
+
     <!-- Timeouts for brightness dialog to disappear -->
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
@@ -105,5 +104,11 @@
 
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
     <bool name="config_show4GForLTE">true</bool>
+
+    <!-- milliseconds before the heads up notification auto-dismisses. -->
+    <integer name="heads_up_notification_decay">3700</integer>
+
+    <!-- milliseconds before the heads up notification accepts touches. -->
+    <integer name="heads_up_sensitivity_delay">700</integer>
 </resources>
 

@@ -35,7 +35,7 @@ public:
     virtual FontRenderer& getFontRenderer(const SkPaint* paint) = 0;
 
     virtual uint32_t getFontRendererCount() const = 0;
-    virtual uint32_t getFontRendererSize(uint32_t fontRenderer) const = 0;
+    virtual uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const = 0;
 
     virtual void describe(ProgramDescription& description, const SkPaint* paint) const = 0;
     virtual void setupProgram(ProgramDescription& description, Program* program) const = 0;
@@ -81,8 +81,8 @@ public:
         return 1;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer) const {
-        return mRenderer ? mRenderer->getCacheSize() : 0;
+    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
+        return mRenderer ? mRenderer->getCacheSize(format) : 0;
     }
 
     void describe(ProgramDescription& description, const SkPaint* paint) const;
@@ -128,8 +128,8 @@ public:
         return 1;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer) const {
-        return mRenderer ? mRenderer->getCacheSize() : 0;
+    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
+        return mRenderer ? mRenderer->getCacheSize(format) : 0;
     }
 
     void describe(ProgramDescription& description, const SkPaint* paint) const {
@@ -162,13 +162,13 @@ public:
         return kGammaCount;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer) const {
+    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
         if (fontRenderer >= kGammaCount) return 0;
 
         FontRenderer* renderer = mRenderers[fontRenderer];
         if (!renderer) return 0;
 
-        return renderer->getCacheSize();
+        return renderer->getCacheSize(format);
     }
 
     void describe(ProgramDescription& description, const SkPaint* paint) const {

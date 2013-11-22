@@ -12,7 +12,6 @@
 
 #include <androidfw/ResourceTypes.h>
 #include <utils/String16.h>
-#include <utils/TextOutput.h>
 #include <utils/TypeHelpers.h>
 
 #include <sys/types.h>

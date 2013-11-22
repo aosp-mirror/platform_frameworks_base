@@ -41,7 +41,7 @@ public class AccessibilityNodeInfoCache {
 
     private static final boolean DEBUG = false;
 
-    private static final boolean CHECK_INTEGRITY = true;
+    private static final boolean CHECK_INTEGRITY_IF_DEBUGGABLE_BUILD = true;
 
     private final Object mLock = new Object();
 
@@ -67,16 +67,13 @@ public class AccessibilityNodeInfoCache {
         if (ENABLED) {
             final int eventType = event.getEventType();
             switch (eventType) {
-                case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
-                    // New window so we clear the cache.
-                    mWindowId = event.getWindowId();
-                    clear();
-                } break;
+                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END:
+                case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                    // If the active window changes, clear the cache.
                     final int windowId = event.getWindowId();
                     if (mWindowId != windowId) {
-                        // New window so we clear the cache.
                         mWindowId = windowId;
                         clear();
                     }
@@ -87,31 +84,47 @@ public class AccessibilityNodeInfoCache {
                 case AccessibilityEvent.TYPE_VIEW_SELECTED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-                    // Since we prefetch the descendants of a node we
-                    // just remove the entire subtree since when the node
-                    // is fetched we will gets its descendant anyway.
-                    synchronized (mLock) {
-                        final long sourceId = event.getSourceNodeId();
-                        clearSubTreeLocked(sourceId);
-                        if (eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
-                            clearSubtreeWithOldInputFocusLocked(sourceId);
-                        }
-                        if (eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED) {
-                            clearSubtreeWithOldAccessibilityFocusLocked(sourceId);
-                        }
-                    }
+                    refreshCachedNode(event.getSourceNodeId());
                 } break;
-                case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
                 case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
                     synchronized (mLock) {
-                        final long accessibilityNodeId = event.getSourceNodeId();
-                        clearSubTreeLocked(accessibilityNodeId);
+                        clearSubTreeLocked(event.getSourceNodeId());
+                    }
+                } break;
+                case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
+                    synchronized (mLock) {
+                        final long sourceId = event.getSourceNodeId();
+                        if ((event.getContentChangeTypes()
+                                & AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) != 0) {
+                            clearSubTreeLocked(sourceId);
+                        } else {
+                            refreshCachedNode(sourceId);
+                        }
                     }
                 } break;
             }
-            if (Build.IS_DEBUGGABLE && CHECK_INTEGRITY) {
+            if (CHECK_INTEGRITY_IF_DEBUGGABLE_BUILD && Build.IS_DEBUGGABLE) {
                 checkIntegrity();
             }
+        }
+    }
+
+    private void refreshCachedNode(long sourceId) {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "Refreshing cached node.");
+        }
+        synchronized (mLock) {
+            AccessibilityNodeInfo cachedInfo = mCacheImpl.get(sourceId);
+            // If the source is not in the cache - nothing to do.
+            if (cachedInfo == null) {
+                return;
+            }
+            // The node changed so we will just refresh it right now.
+            if (cachedInfo.refresh(true)) {
+                return;
+            }
+            // Weird, we could not refresh. Just evict the entire sub-tree.
+            clearSubTreeLocked(sourceId);
         }
     }
 
@@ -212,6 +225,13 @@ public class AccessibilityNodeInfoCache {
      * @param rootNodeId The root id.
      */
     private void clearSubTreeLocked(long rootNodeId) {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "Clearing cached subtree.");
+        }
+        clearSubTreeRecursiveLocked(rootNodeId);
+    }
+
+    private void clearSubTreeRecursiveLocked(long rootNodeId) {
         AccessibilityNodeInfo current = mCacheImpl.get(rootNodeId);
         if (current == null) {
             return;
@@ -221,41 +241,7 @@ public class AccessibilityNodeInfoCache {
         final int childCount = childNodeIds.size();
         for (int i = 0; i < childCount; i++) {
             final long childNodeId = childNodeIds.valueAt(i);
-            clearSubTreeLocked(childNodeId);
-        }
-    }
-
-    /**
-     * We are enforcing the invariant for a single input focus.
-     *
-     * @param currentInputFocusId The current input focused node.
-     */
-    private void clearSubtreeWithOldInputFocusLocked(long currentInputFocusId) {
-        final int cacheSize = mCacheImpl.size();
-        for (int i = 0; i < cacheSize; i++) {
-            AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
-            final long infoSourceId = info.getSourceNodeId();
-            if (infoSourceId != currentInputFocusId && info.isFocused()) {
-                clearSubTreeLocked(infoSourceId);
-                return;
-            }
-        }
-    }
-
-    /**
-     * We are enforcing the invariant for a single accessibility focus.
-     *
-     * @param currentAccessibilityFocusId The current input focused node.
-     */
-    private void clearSubtreeWithOldAccessibilityFocusLocked(long currentAccessibilityFocusId) {
-        final int cacheSize = mCacheImpl.size();
-        for (int i = 0; i < cacheSize; i++) {
-            AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
-            final long infoSourceId = info.getSourceNodeId();
-            if (infoSourceId != currentAccessibilityFocusId && info.isAccessibilityFocused()) {
-                clearSubTreeLocked(infoSourceId);
-                return;
-            }
+            clearSubTreeRecursiveLocked(childNodeId);
         }
     }
 
@@ -327,12 +313,11 @@ public class AccessibilityNodeInfoCache {
             }
 
             // Check for disconnected nodes or ones from another window.
-            final int cacheSize = mCacheImpl.size();
-            for (int i = 0; i < cacheSize; i++) {
+            for (int i = 0; i < mCacheImpl.size(); i++) {
                 AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
                 if (!seen.contains(info)) {
                     if (info.getWindowId() == windowId) {
-                        Log.e(LOG_TAG, "Disconneced node: ");
+                        Log.e(LOG_TAG, "Disconneced node: " + info);
                     } else {
                         Log.e(LOG_TAG, "Node from: " + info.getWindowId() + " not from:"
                                 + windowId + " " + info);

@@ -25,7 +25,7 @@
 #include <android_runtime/android_util_AssetManager.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <androidfw/InputTransport.h>
+#include <input/InputTransport.h>
 
 #include <gui/Surface.h>
 
@@ -306,19 +306,23 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
         code->internalDataPath = code->internalDataPathObj.string();
         env->ReleaseStringUTFChars(internalDataDir, dirStr);
     
-        dirStr = env->GetStringUTFChars(externalDataDir, NULL);
-        code->externalDataPathObj = dirStr;
+        if (externalDataDir != NULL) {
+            dirStr = env->GetStringUTFChars(externalDataDir, NULL);
+            code->externalDataPathObj = dirStr;
+            env->ReleaseStringUTFChars(externalDataDir, dirStr);
+        }
         code->externalDataPath = code->externalDataPathObj.string();
-        env->ReleaseStringUTFChars(externalDataDir, dirStr);
 
         code->sdkVersion = sdkVersion;
         
         code->assetManager = assetManagerForJavaObject(env, jAssetMgr);
 
-        dirStr = env->GetStringUTFChars(obbDir, NULL);
-        code->obbPathObj = dirStr;
+        if (obbDir != NULL) {
+            dirStr = env->GetStringUTFChars(obbDir, NULL);
+            code->obbPathObj = dirStr;
+            env->ReleaseStringUTFChars(obbDir, dirStr);
+        }
         code->obbPath = code->obbPathObj.string();
-        env->ReleaseStringUTFChars(obbDir, dirStr);
 
         jbyte* rawSavedState = NULL;
         jsize rawSavedSize = 0;

@@ -24,9 +24,7 @@
 namespace android {
 namespace uirenderer {
 
-///////////////////////////////////////////////////////////////////////////////
-// Defines
-///////////////////////////////////////////////////////////////////////////////
+class Caches;
 
 // Must be a power of two
 #define DITHER_KERNEL_SIZE 4
@@ -39,7 +37,7 @@ namespace uirenderer {
  */
 class Dither {
 public:
-    Dither(): mInitialized(false), mDitherTexture(0) { }
+    Dither();
 
     void clear();
     void setupProgram(Program* program, GLuint* textureUnit);
@@ -47,6 +45,7 @@ public:
 private:
     void bindDitherTexture();
 
+    Caches* mCaches;
     bool mInitialized;
     GLuint mDitherTexture;
 };

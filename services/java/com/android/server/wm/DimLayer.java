@@ -3,10 +3,10 @@
 package com.android.server.wm;
 
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
@@ -27,8 +27,11 @@ public class DimLayer {
     /** Last value passed to mDimSurface.setLayer() */
     int mLayer = -1;
 
-    /** Last values passed to mDimSurface.setSize() */
-    int mLastDimWidth, mLastDimHeight;
+    /** Next values to pass to mDimSurface.setPosition() and mDimSurface.setSize() */
+    Rect mBounds = new Rect();
+
+    /** Last values passed to mDimSurface.setPosition() and mDimSurface.setSize() */
+    Rect mLastBounds = new Rect();
 
     /** True after mDimSurface.show() has been called, false after mDimSurface.hide(). */
     private boolean mShowing = false;
@@ -45,9 +48,14 @@ public class DimLayer {
     /** Time in milliseconds to take to transition from mStartAlpha to mTargetAlpha */
     long mDuration;
 
-    DimLayer(WindowManagerService service, int displayId) {
+    /** Owning stack */
+    final TaskStack mStack;
+
+    DimLayer(WindowManagerService service, TaskStack stack) {
+        mStack = stack;
+        mDisplayContent = stack.getDisplayContent();
+        final int displayId = mDisplayContent.getDisplayId();
         if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
-        mDisplayContent = service.getDisplayContentLocked(displayId);
         SurfaceControl.openTransaction();
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
@@ -117,6 +125,10 @@ public class DimLayer {
         }
     }
 
+    void setBounds(Rect bounds) {
+        mBounds.set(bounds);
+    }
+
     /**
      * @param duration The time to test.
      * @return True if the duration would lead to an earlier end to the current animation.
@@ -152,17 +164,26 @@ public class DimLayer {
             return;
         }
 
-        // Set surface size to screen size.
-        final DisplayInfo info = mDisplayContent.getDisplayInfo();
-        // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose a
-        // corner.
-        final int dw = (int) (info.logicalWidth * 1.5);
-        final int dh = (int) (info.logicalHeight * 1.5);
-        // back off position so 1/4 of Surface is before and 1/4 is after.
-        final float xPos = -1 * dw / 6;
-        final float yPos = -1 * dh / 6;
+        final int dw, dh;
+        final float xPos, yPos;
+        if (mStack.hasSibling()) {
+            dw = mBounds.width();
+            dh = mBounds.height();
+            xPos = mBounds.left;
+            yPos = mBounds.right;
+        } else {
+            // Set surface size to screen size.
+            final DisplayInfo info = mDisplayContent.getDisplayInfo();
+            // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose a
+            // corner.
+            dw = (int) (info.logicalWidth * 1.5);
+            dh = (int) (info.logicalHeight * 1.5);
+            // back off position so 1/4 of Surface is before and 1/4 is after.
+            xPos = -1 * dw / 6;
+            yPos = -1 * dh / 6;
+        }
 
-        if (mLastDimWidth != dw || mLastDimHeight != dh || mLayer != layer) {
+        if (!mLastBounds.equals(mBounds) || mLayer != layer) {
             try {
                 mDimSurface.setPosition(xPos, yPos);
                 mDimSurface.setSize(dw, dh);
@@ -170,8 +191,7 @@ public class DimLayer {
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Failure setting size or layer", e);
             }
-            mLastDimWidth = dw;
-            mLastDimHeight = dh;
+            mLastBounds.set(mBounds);
             mLayer = layer;
         }
 
@@ -255,15 +275,16 @@ public class DimLayer {
     }
 
     public void printTo(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("mDimSurface="); pw.println(mDimSurface);
-        pw.print(prefix); pw.print(" mLayer="); pw.print(mLayer);
+        pw.print(prefix); pw.print("mDimSurface="); pw.print(mDimSurface);
+                pw.print(" mLayer="); pw.print(mLayer);
                 pw.print(" mAlpha="); pw.println(mAlpha);
-        pw.print(prefix); pw.print("mLastDimWidth="); pw.print(mLastDimWidth);
-                pw.print(" mLastDimWidth="); pw.println(mLastDimWidth);
-        pw.print(prefix); pw.print("Last animation: mStartTime="); pw.print(mStartTime);
+        pw.print(prefix); pw.print("mLastBounds="); pw.print(mLastBounds.toShortString());
+                pw.print(" mBounds="); pw.println(mBounds.toShortString());
+        pw.print(prefix); pw.print("Last animation: ");
                 pw.print(" mDuration="); pw.print(mDuration);
+                pw.print(" mStartTime="); pw.print(mStartTime);
                 pw.print(" curTime="); pw.println(SystemClock.uptimeMillis());
-        pw.print(" mStartAlpha="); pw.println(mStartAlpha);
-                pw.print(" mTargetAlpha="); pw.print(mTargetAlpha);
+        pw.print(prefix); pw.print(" mStartAlpha="); pw.print(mStartAlpha);
+                pw.print(" mTargetAlpha="); pw.println(mTargetAlpha);
     }
 }

@@ -1,0 +1,134 @@
+page.title=Creating Unit Tests
+trainingnavtop=true
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#testcase">Create a Test Case for Activity Unit Testing</a>
+  <li><a href="#test_method">Validate Launch of Another Activity</a>
+</ol>
+
+<h2>Try it out</h2>
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/AndroidTestingFun.zip"
+class="button">Download the demo</a>
+ <p class="filename">AndroidTestingFun.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>An {@link android.app.Activity} unit test is an excellent way to quickly
+verify the state of an {@link android.app.Activity} and its interactions with
+other components in isolation (that is, disconnected from the rest of the
+system). A unit test generally tests the smallest possible unit of code
+(which could be a method, class, or component), without dependencies on system
+or network resources. For example, you can write a unit test to check
+that an {@link android.app.Activity} has the correct layout or that it
+triggers an {@link android.content.Intent} object correctly.</p>
+<p>Unit tests are generally not suitable for testing complex UI interaction
+events with the system. Instead, you should use
+the {@link android.test.ActivityInstrumentationTestCase2} class, as described
+in <a href="activity-ui-testing.html">Testing UI Components</a>.</p>
+<p>This lesson shows how you can write a unit test to verify that an
+{@link android.content.Intent} is triggered to launch another
+{@link android.app.Activity}.
+Since the test runs in an isolated environment, the
+{@link android.content.Intent}
+is not actually sent to the Android system, but you can inspect that the
+{@link android.content.Intent} object's payload data is accurate.</p>
+<p>For a complete test case example, take a look at
+{@code LaunchActivityTest.java} in the sample app.</p>
+
+<p class="note"><strong>Note: </strong>To test against system or external
+dependencies, you can use mock objects from a mocking
+framework and inject them into your unit tests. To learn more about the mocking
+framework provided by Android, see
+<a href="{@docRoot}tools/testing/testing_android.html#MockObjectClasses}">Mock
+Object Classes</a>.</p>
+
+<h2 id="testcase">Create a Test Case for Activity Unit Testing</h2>
+<p>The {@link android.test.ActivityUnitTestCase} class provides support for
+isolated testing of a single {@link android.app.Activity}. To create a unit
+test for your {@link android.app.Activity}, your test class should extend
+{@link android.test.ActivityUnitTestCase}.</p>
+
+<p>The {@link android.app.Activity} in an {@link android.test.ActivityUnitTestCase}
+is not automatically started by Android Instrumentation. To start the
+{@link android.app.Activity} in isolation, you need to explicitly call the
+{@link android.test.ActivityUnitTestCase#startActivity(android.content.Intent, android.os.Bundle, java.lang.Object) startActivity()}
+method, and pass in the {@link android.content.Intent} to
+launch your target {@link android.app.Activity}.</p>
+
+<p>For example:</p>
+<pre>
+public class LaunchActivityTest
+        extends ActivityUnitTestCase&lt;LaunchActivity&gt; {
+    ...
+
+    &#64;Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mLaunchIntent = new Intent(getInstrumentation()
+                .getTargetContext(), LaunchActivity.class);
+        startActivity(mLaunchIntent, null, null);
+        final Button launchNextButton =
+                (Button) getActivity()
+                .findViewById(R.id.launch_next_activity_button);
+    }
+}
+</pre>
+
+<h2 id="test_method">Validate Launch of Another Activity</h2>
+<p id="test_goals">Your unit testing goals might include:</p>
+<ul>
+<li>Verifying that {@code LaunchActivity} fires an
+{@link android.content.Intent} when a button is pushed clicked.</li>
+<li>Verifying that the launched {@link android.content.Intent} contains the
+correct payload data.</li>
+</ul>
+
+<p>To verify if an {@link android.content.Intent} was triggered
+following the {@link android.widget.Button} click, you can use the
+{@link android.test.ActivityUnitTestCase#getStartedActivityIntent()} method.
+By using assertion methods, you can verify that the returned
+{@link android.content.Intent} is not null, and that it contains the expected
+string value to launch the next {@link android.app.Activity}. If both assertions
+evaluate to {@code true}, you've successfully verified that the
+{@link android.content.Intent} was correctly sent by your
+{@link android.app.Activity}.</p>
+
+<p>You might implement your test method like this:</p>
+<pre>
+&#64;MediumTest
+public void testNextActivityWasLaunchedWithIntent() {
+    startActivity(mLaunchIntent, null, null);
+    final Button launchNextButton =
+            (Button) getActivity()
+            .findViewById(R.id.launch_next_activity_button);
+    launchNextButton.performClick();
+
+    final Intent launchIntent = getStartedActivityIntent();
+    assertNotNull("Intent was null", launchIntent);
+    assertTrue(isFinishCalled());
+
+    final String payload =
+            launchIntent.getStringExtra(NextActivity.EXTRAS_PAYLOAD_KEY);
+    assertEquals("Payload is empty", LaunchActivity.STRING_PAYLOAD, payload);
+}
+</pre>
+<p>Because {@code LaunchActivity} runs in isolation, you cannot use the
+{@link android.test.TouchUtils} library to manipulate UI controls. To directly
+click a {@link android.widget.Button}, you can call the
+{@link android.view.View#performClick()} method instead.</p>
+
+
+
+
+
+
+

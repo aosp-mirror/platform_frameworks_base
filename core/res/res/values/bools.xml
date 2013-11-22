@@ -26,4 +26,5 @@
     <bool name="show_ongoing_ime_switcher">true</bool>
     <bool name="action_bar_expanded_action_views_exclusive">true</bool>
     <bool name="target_honeycomb_needs_options_menu">true</bool>
+    <bool name="flip_controller_fallback_keys">false</bool>
 </resources>

@@ -30,7 +30,7 @@ class VertexBuffer {
 public:
     VertexBuffer():
         mBuffer(0),
-        mSize(0),
+        mVertexCount(0),
         mCleanupMethod(NULL)
     {}
 
@@ -44,30 +44,42 @@ public:
        multiple regions within a single VertexBuffer, such as with PathTessellator::tesselateLines()
      */
     template <class TYPE>
-    TYPE* alloc(int size) {
-        if (mSize) {
+    TYPE* alloc(int vertexCount) {
+        if (mVertexCount) {
             TYPE* reallocBuffer = (TYPE*)mReallocBuffer;
             // already have allocated the buffer, re-allocate space within
             if (mReallocBuffer != mBuffer) {
                 // not first re-allocation, leave space for degenerate triangles to separate strips
                 reallocBuffer += 2;
             }
-            mReallocBuffer = reallocBuffer + size;
+            mReallocBuffer = reallocBuffer + vertexCount;
             return reallocBuffer;
         }
-        mSize = size;
-        mReallocBuffer = mBuffer = (void*)new TYPE[size];
+        mVertexCount = vertexCount;
+        mReallocBuffer = mBuffer = (void*)new TYPE[vertexCount];
         mCleanupMethod = &(cleanup<TYPE>);
 
         return (TYPE*)mBuffer;
     }
 
-    void* getBuffer() const { return mBuffer; }
-    unsigned int getSize() const { return mSize; }
+    template <class TYPE>
+    void copyInto(const VertexBuffer& srcBuffer, float xOffset, float yOffset) {
+        int verticesToCopy = srcBuffer.getVertexCount();
+
+        TYPE* dst = alloc<TYPE>(verticesToCopy);
+        TYPE* src = (TYPE*)srcBuffer.getBuffer();
+
+        for (int i = 0; i < verticesToCopy; i++) {
+            TYPE::copyWithOffset(&dst[i], src[i], xOffset, yOffset);
+        }
+    }
+
+    void* getBuffer() const { return mBuffer; } // shouldn't be const, since not a const ptr?
+    unsigned int getVertexCount() const { return mVertexCount; }
 
     template <class TYPE>
     void createDegenerateSeparators(int allocSize) {
-        TYPE* end = (TYPE*)mBuffer + mSize;
+        TYPE* end = (TYPE*)mBuffer + mVertexCount;
         for (TYPE* degen = (TYPE*)mBuffer + allocSize; degen < end; degen += 2 + allocSize) {
             memcpy(degen, degen - 1, sizeof(TYPE));
             memcpy(degen + 1, degen + 2, sizeof(TYPE));
@@ -81,7 +93,7 @@ private:
     }
 
     void* mBuffer;
-    unsigned int mSize;
+    unsigned int mVertexCount;
 
     void* mReallocBuffer; // used for multi-allocation
 
@@ -94,6 +106,9 @@ public:
 
     static void tessellatePath(const SkPath& path, const SkPaint* paint,
             const mat4 *transform, VertexBuffer& vertexBuffer);
+
+    static void tessellatePoints(const float* points, int count, SkPaint* paint,
+            const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer);
 
     static void tessellateLines(const float* points, int count, SkPaint* paint,
             const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer);

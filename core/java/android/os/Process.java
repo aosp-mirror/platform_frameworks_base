@@ -100,12 +100,6 @@ public class Process {
     public static final int DRM_UID = 1019;
 
     /**
-     * Defines the GID for the group that allows write access to the SD card.
-     * @hide
-     */
-    public static final int SDCARD_RW_GID = 1015;
-
-    /**
      * Defines the UID/GID for the group that controls VPN services.
      * @hide
      */
@@ -130,11 +124,18 @@ public class Process {
     public static final int MEDIA_RW_GID = 1023;
 
     /**
+     * Access to installed package details
+     * @hide
+     */
+    public static final int PACKAGE_INFO_GID = 1032;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.
      */
     public static final int FIRST_APPLICATION_UID = 10000;
+
     /**
      * Last of application-specific UIDs starting at
      * {@link #FIRST_APPLICATION_UID}.
@@ -654,6 +655,14 @@ public class Process {
     }
 
     /**
+     * Returns the identifier of this process' parent.
+     * @hide
+     */
+    public static final int myPpid() {
+        return Libcore.os.getppid();
+    }
+
+    /**
      * Returns the identifier of the calling thread, which be used with
      * {@link #setThreadPriority(int, int)}.
      */
@@ -896,6 +905,19 @@ public class Process {
     public static final native boolean setOomAdj(int pid, int amt);
 
     /**
+     * Adjust the swappiness level for a process.
+     *
+     * @param pid The process identifier to set.
+     * @param is_increased Whether swappiness should be increased or default.
+     *
+     * @return Returns true if the underlying system supports this
+     *         feature, else false.
+     *
+     * {@hide}
+     */
+    public static final native boolean setSwappiness(int pid, boolean is_increased);
+
+    /**
      * Change this process's argv[0] parameter.  This can be useful to show
      * more descriptive information in things like the 'ps' command.
      * 
@@ -977,6 +999,8 @@ public class Process {
     public static final int PROC_COMBINE = 0x100;
     /** @hide */
     public static final int PROC_PARENS = 0x200;
+    /** @hide */
+    public static final int PROC_QUOTES = 0x400;
     /** @hide */
     public static final int PROC_OUT_STRING = 0x1000;
     /** @hide */

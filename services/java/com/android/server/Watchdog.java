@@ -33,7 +33,6 @@ import android.os.BatteryManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -59,20 +58,7 @@ public class Watchdog extends Thread {
     // Set this to true to have the watchdog record kernel thread stacks when it fires
     static final boolean RECORD_KERNEL_THREADS = true;
 
-    static final int MONITOR = 2718;
-
-    static final int TIME_TO_RESTART = DB ? 15*1000 : 60*1000;
-    static final int TIME_TO_WAIT = TIME_TO_RESTART / 2;
-
-    static final int MEMCHECK_DEFAULT_MIN_SCREEN_OFF = DB ? 1*60 : 5*60;   // 5 minutes
-    static final int MEMCHECK_DEFAULT_MIN_ALARM = DB ? 1*60 : 3*60;        // 3 minutes
-    static final int MEMCHECK_DEFAULT_RECHECK_INTERVAL = DB ? 1*60 : 5*60; // 5 minutes
-
-    static final int REBOOT_DEFAULT_INTERVAL = DB ? 1 : 0;                 // never force reboot
-    static final int REBOOT_DEFAULT_START_TIME = 3*60*60;                  // 3:00am
-    static final int REBOOT_DEFAULT_WINDOW = 60*60;                        // within 1 hour
-
-    static final String REBOOT_ACTION = "com.android.service.Watchdog.REBOOT";
+    static final int TIME_TO_WAIT = DB ? 5*1000 : 30*1000;
 
     static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
         "/system/bin/mediaserver",
@@ -83,100 +69,99 @@ public class Watchdog extends Thread {
     static Watchdog sWatchdog;
 
     /* This handler will be used to post message back onto the main thread */
-    final Handler mHandler;
-    final ArrayList<Monitor> mMonitors = new ArrayList<Monitor>();
+    final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<HandlerChecker>();
+    final HandlerChecker mMonitorChecker;
     ContentResolver mResolver;
     BatteryService mBattery;
     PowerManagerService mPower;
     AlarmManagerService mAlarm;
     ActivityManagerService mActivity;
-    boolean mCompleted;
-    Monitor mCurrentMonitor;
 
     int mPhonePid;
     IActivityController mController;
     boolean mAllowRestart = true;
 
-    final Calendar mCalendar = Calendar.getInstance();
-    int mMinScreenOff = MEMCHECK_DEFAULT_MIN_SCREEN_OFF;
-    int mMinAlarm = MEMCHECK_DEFAULT_MIN_ALARM;
-    boolean mNeedScheduledCheck;
-    PendingIntent mCheckupIntent;
-    PendingIntent mRebootIntent;
-
-    long mBootTime;
-    int mRebootInterval;
-
-    boolean mReqRebootNoWait;     // should wait for one interval before reboot?
-    int mReqRebootInterval = -1;  // >= 0 if a reboot has been requested
-    int mReqRebootStartTime = -1; // >= 0 if a specific start time has been requested
-    int mReqRebootWindow = -1;    // >= 0 if a specific window has been requested
-    int mReqMinScreenOff = -1;    // >= 0 if a specific screen off time has been requested
-    int mReqMinNextAlarm = -1;    // >= 0 if specific time to next alarm has been requested
-    int mReqRecheckInterval= -1;  // >= 0 if a specific recheck interval has been requested
-
     /**
-     * Used for scheduling monitor callbacks and checking memory usage.
+     * Used for checking status of handle threads and scheduling monitor callbacks.
      */
-    final class HeartbeatHandler extends Handler {
-        HeartbeatHandler(Looper looper) {
-            super(looper);
+    public final class HandlerChecker implements Runnable {
+        private final Handler mHandler;
+        private final String mName;
+        private final ArrayList<Monitor> mMonitors = new ArrayList<Monitor>();
+        private boolean mCompleted;
+        private Monitor mCurrentMonitor;
+
+        HandlerChecker(Handler handler, String name) {
+            mHandler = handler;
+            mName = name;
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MONITOR: {
-                    // See if we should force a reboot.
-                    int rebootInterval = mReqRebootInterval >= 0
-                            ? mReqRebootInterval : REBOOT_DEFAULT_INTERVAL;
-                    if (mRebootInterval != rebootInterval) {
-                        mRebootInterval = rebootInterval;
-                        // We have been running long enough that a reboot can
-                        // be considered...
-                        checkReboot(false);
-                    }
+        public void addMonitor(Monitor monitor) {
+            mMonitors.add(monitor);
+        }
 
-                    final int size = mMonitors.size();
-                    for (int i = 0 ; i < size ; i++) {
-                        synchronized (Watchdog.this) {
-                            mCurrentMonitor = mMonitors.get(i);
-                        }
-                        mCurrentMonitor.monitor();
-                    }
+        public void scheduleCheckLocked() {
+            if (mMonitors.size() == 0 && mHandler.getLooper().isIdling()) {
+                // If the target looper is or just recently was idling, then
+                // there is no reason to enqueue our checker on it since that
+                // is as good as it not being deadlocked.  This avoid having
+                // to do a context switch to check the thread.  Note that we
+                // only do this if mCheckReboot is false and we have no
+                // monitors, since those would need to be executed at this point.
+                mCompleted = true;
+                return;
+            }
+            mCompleted = false;
+            mCurrentMonitor = null;
+            mHandler.postAtFrontOfQueue(this);
+        }
 
-                    synchronized (Watchdog.this) {
-                        mCompleted = true;
-                        mCurrentMonitor = null;
-                    }
-                } break;
+        public boolean isCompletedLocked() {
+            return mCompleted;
+        }
+
+        public Thread getThread() {
+            return mHandler.getLooper().getThread();
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public String describeBlockedStateLocked() {
+            if (mCurrentMonitor == null) {
+                return "Blocked in handler on " + mName + " (" + getThread().getName() + ")";
+            } else {
+                return "Blocked in monitor " + mCurrentMonitor.getClass().getName()
+                        + " on " + mName + " (" + getThread().getName() + ")";
             }
         }
-    }
 
-    final class RebootReceiver extends BroadcastReceiver {
         @Override
-        public void onReceive(Context c, Intent intent) {
-            if (localLOGV) Slog.v(TAG, "Alarm went off, checking reboot.");
-            checkReboot(true);
+        public void run() {
+            final int size = mMonitors.size();
+            for (int i = 0 ; i < size ; i++) {
+                synchronized (Watchdog.this) {
+                    mCurrentMonitor = mMonitors.get(i);
+                }
+                mCurrentMonitor.monitor();
+            }
+
+            synchronized (Watchdog.this) {
+                mCompleted = true;
+                mCurrentMonitor = null;
+            }
         }
     }
 
     final class RebootRequestReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context c, Intent intent) {
-            mReqRebootNoWait = intent.getIntExtra("nowait", 0) != 0;
-            mReqRebootInterval = intent.getIntExtra("interval", -1);
-            mReqRebootStartTime = intent.getIntExtra("startTime", -1);
-            mReqRebootWindow = intent.getIntExtra("window", -1);
-            mReqMinScreenOff = intent.getIntExtra("minScreenOff", -1);
-            mReqMinNextAlarm = intent.getIntExtra("minNextAlarm", -1);
-            mReqRecheckInterval = intent.getIntExtra("recheckInterval", -1);
-            EventLog.writeEvent(EventLogTags.WATCHDOG_REQUESTED_REBOOT,
-                    mReqRebootNoWait ? 1 : 0, mReqRebootInterval,
-                            mReqRecheckInterval, mReqRebootStartTime,
-                    mReqRebootWindow, mReqMinScreenOff, mReqMinNextAlarm);
-            checkReboot(true);
+            if (intent.getIntExtra("nowait", 0) != 0) {
+                rebootSystem("Received ACTION_REBOOT broadcast");
+                return;
+            }
+            Slog.w(TAG, "Unsupported ACTION_REBOOT broadcast: " + intent);
         }
     }
 
@@ -194,9 +179,23 @@ public class Watchdog extends Thread {
 
     private Watchdog() {
         super("watchdog");
-        // Explicitly bind the HeartbeatHandler to run on the ServerThread, so
-        // that it can't get accidentally bound to another thread.
-        mHandler = new HeartbeatHandler(Looper.getMainLooper());
+        // Initialize handler checkers for each common thread we want to check.  Note
+        // that we are not currently checking the background thread, since it can
+        // potentially hold longer running operations with no guarantees about the timeliness
+        // of operations there.
+
+        // The shared foreground thread is the main checker.  It is where we
+        // will also dispatch monitor checks and do other work.
+        mMonitorChecker = new HandlerChecker(FgThread.getHandler(), "foreground thread");
+        mHandlerCheckers.add(mMonitorChecker);
+        // Add checker for main thread.  We only do a quick check since there
+        // can be UI running on the thread.
+        mHandlerCheckers.add(new HandlerChecker(new Handler(Looper.getMainLooper()),
+                "main thread"));
+        // Add checker for shared UI thread.
+        mHandlerCheckers.add(new HandlerChecker(UiThread.getHandler(), "ui thread"));
+        // And also check IO thread.
+        mHandlerCheckers.add(new HandlerChecker(IoThread.getHandler(), "i/o thread"));
     }
 
     public void init(Context context, BatteryService battery,
@@ -208,16 +207,9 @@ public class Watchdog extends Thread {
         mAlarm = alarm;
         mActivity = activity;
 
-        context.registerReceiver(new RebootReceiver(),
-                new IntentFilter(REBOOT_ACTION));
-        mRebootIntent = PendingIntent.getBroadcast(context,
-                0, new Intent(REBOOT_ACTION), 0);
-
         context.registerReceiver(new RebootRequestReceiver(),
                 new IntentFilter(Intent.ACTION_REBOOT),
                 android.Manifest.permission.REBOOT, null);
-
-        mBootTime = System.currentTimeMillis();
     }
 
     public void processStarted(String name, int pid) {
@@ -243,87 +235,19 @@ public class Watchdog extends Thread {
     public void addMonitor(Monitor monitor) {
         synchronized (this) {
             if (isAlive()) {
-                throw new RuntimeException("Monitors can't be added while the Watchdog is running");
+                throw new RuntimeException("Monitors can't be added once the Watchdog is running");
             }
-            mMonitors.add(monitor);
+            mMonitorChecker.addMonitor(monitor);
         }
     }
 
-    void checkReboot(boolean fromAlarm) {
-        int rebootInterval = mReqRebootInterval >= 0 ? mReqRebootInterval
-                : REBOOT_DEFAULT_INTERVAL;
-        mRebootInterval = rebootInterval;
-        if (rebootInterval <= 0) {
-            // No reboot interval requested.
-            if (localLOGV) Slog.v(TAG, "No need to schedule a reboot alarm!");
-            mAlarm.remove(mRebootIntent);
-            return;
-        }
-
-        long rebootStartTime = mReqRebootStartTime >= 0 ? mReqRebootStartTime
-                : REBOOT_DEFAULT_START_TIME;
-        long rebootWindowMillis = (mReqRebootWindow >= 0 ? mReqRebootWindow
-                : REBOOT_DEFAULT_WINDOW) * 1000;
-        long recheckInterval = (mReqRecheckInterval >= 0 ? mReqRecheckInterval
-                : MEMCHECK_DEFAULT_RECHECK_INTERVAL) * 1000;
-
-        retrieveBrutalityAmount();
-
-        long realStartTime;
-        long now;
-
+    public void addThread(Handler thread, String name) {
         synchronized (this) {
-            now = System.currentTimeMillis();
-            realStartTime = computeCalendarTime(mCalendar, now,
-                    rebootStartTime);
-
-            long rebootIntervalMillis = rebootInterval*24*60*60*1000;
-            if (DB || mReqRebootNoWait ||
-                    (now-mBootTime) >= (rebootIntervalMillis-rebootWindowMillis)) {
-                if (fromAlarm && rebootWindowMillis <= 0) {
-                    // No reboot window -- just immediately reboot.
-                    EventLog.writeEvent(EventLogTags.WATCHDOG_SCHEDULED_REBOOT, now,
-                            (int)rebootIntervalMillis, (int)rebootStartTime*1000,
-                            (int)rebootWindowMillis, "");
-                    rebootSystem("Checkin scheduled forced");
-                    return;
-                }
-
-                // Are we within the reboot window?
-                if (now < realStartTime) {
-                    // Schedule alarm for next check interval.
-                    realStartTime = computeCalendarTime(mCalendar,
-                            now, rebootStartTime);
-                } else if (now < (realStartTime+rebootWindowMillis)) {
-                    String doit = shouldWeBeBrutalLocked(now);
-                    EventLog.writeEvent(EventLogTags.WATCHDOG_SCHEDULED_REBOOT, now,
-                            (int)rebootInterval, (int)rebootStartTime*1000,
-                            (int)rebootWindowMillis, doit != null ? doit : "");
-                    if (doit == null) {
-                        rebootSystem("Checked scheduled range");
-                        return;
-                    }
-
-                    // Schedule next alarm either within the window or in the
-                    // next interval.
-                    if ((now+recheckInterval) >= (realStartTime+rebootWindowMillis)) {
-                        realStartTime = computeCalendarTime(mCalendar,
-                                now + rebootIntervalMillis, rebootStartTime);
-                    } else {
-                        realStartTime = now + recheckInterval;
-                    }
-                } else {
-                    // Schedule alarm for next check interval.
-                    realStartTime = computeCalendarTime(mCalendar,
-                            now + rebootIntervalMillis, rebootStartTime);
-                }
+            if (isAlive()) {
+                throw new RuntimeException("Threads can't be added once the Watchdog is running");
             }
+            mHandlerCheckers.add(new HandlerChecker(thread, name));
         }
-
-        if (localLOGV) Slog.v(TAG, "Scheduling next reboot alarm for "
-                + ((realStartTime-now)/1000/60) + "m from now");
-        mAlarm.remove(mRebootIntent);
-        mAlarm.set(AlarmManager.RTC_WAKEUP, realStartTime, mRebootIntent);
     }
 
     /**
@@ -335,82 +259,55 @@ public class Watchdog extends Thread {
         pms.reboot(false, reason, false);
     }
 
-    /**
-     * Load the current Gservices settings for when
-     * {@link #shouldWeBeBrutalLocked} will allow the brutality to happen.
-     * Must not be called with the lock held.
-     */
-    void retrieveBrutalityAmount() {
-        mMinScreenOff = (mReqMinScreenOff >= 0 ? mReqMinScreenOff
-                : MEMCHECK_DEFAULT_MIN_SCREEN_OFF) * 1000;
-        mMinAlarm = (mReqMinNextAlarm >= 0 ? mReqMinNextAlarm
-                : MEMCHECK_DEFAULT_MIN_ALARM) * 1000;
+    private boolean haveAllCheckersCompletedLocked() {
+        for (int i=0; i<mHandlerCheckers.size(); i++) {
+            HandlerChecker hc = mHandlerCheckers.get(i);
+            if (!hc.isCompletedLocked()) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    /**
-     * Determine whether it is a good time to kill, crash, or otherwise
-     * plunder the current situation for the overall long-term benefit of
-     * the world.
-     *
-     * @param curTime The current system time.
-     * @return Returns null if this is a good time, else a String with the
-     * text of why it is not a good time.
-     */
-    String shouldWeBeBrutalLocked(long curTime) {
-        if (mBattery == null || !mBattery.isPowered(BatteryManager.BATTERY_PLUGGED_ANY)) {
-            return "battery";
+    private ArrayList<HandlerChecker> getBlockedCheckersLocked() {
+        ArrayList<HandlerChecker> checkers = new ArrayList<HandlerChecker>();
+        for (int i=0; i<mHandlerCheckers.size(); i++) {
+            HandlerChecker hc = mHandlerCheckers.get(i);
+            if (!hc.isCompletedLocked()) {
+                checkers.add(hc);
+            }
         }
-
-        if (mMinScreenOff >= 0 && (mPower == null ||
-                mPower.timeSinceScreenWasLastOn() < mMinScreenOff)) {
-            return "screen";
-        }
-
-        if (mMinAlarm >= 0 && (mAlarm == null ||
-                mAlarm.timeToNextAlarm() < mMinAlarm)) {
-            return "alarm";
-        }
-
-        return null;
+        return checkers;
     }
 
-    static long computeCalendarTime(Calendar c, long curTime,
-            long secondsSinceMidnight) {
-
-        // start with now
-        c.setTimeInMillis(curTime);
-
-        int val = (int)secondsSinceMidnight / (60*60);
-        c.set(Calendar.HOUR_OF_DAY, val);
-        secondsSinceMidnight -= val * (60*60);
-        val = (int)secondsSinceMidnight / 60;
-        c.set(Calendar.MINUTE, val);
-        c.set(Calendar.SECOND, (int)secondsSinceMidnight - (val*60));
-        c.set(Calendar.MILLISECOND, 0);
-
-        long newTime = c.getTimeInMillis();
-        if (newTime < curTime) {
-            // The given time (in seconds since midnight) has already passed for today, so advance
-            // by one day (due to daylight savings, etc., the delta may differ from 24 hours).
-            c.add(Calendar.DAY_OF_MONTH, 1);
-            newTime = c.getTimeInMillis();
+    private String describeCheckersLocked(ArrayList<HandlerChecker> checkers) {
+        StringBuilder builder = new StringBuilder(128);
+        for (int i=0; i<checkers.size(); i++) {
+            if (builder.length() > 0) {
+                builder.append(", ");
+            }
+            builder.append(checkers.get(i).describeBlockedStateLocked());
         }
-
-        return newTime;
+        return builder.toString();
     }
 
     @Override
     public void run() {
         boolean waitedHalf = false;
         while (true) {
-            mCompleted = false;
-            mHandler.sendEmptyMessage(MONITOR);
-
-
-            final String name;
+            final ArrayList<HandlerChecker> blockedCheckers;
+            final String subject;
             final boolean allowRestart;
             synchronized (this) {
                 long timeout = TIME_TO_WAIT;
+                if (!waitedHalf) {
+                    // If we are not at the half-point of waiting, perform a
+                    // new set of checks.  Otherwise we are still waiting for a previous set.
+                    for (int i=0; i<mHandlerCheckers.size(); i++) {
+                        HandlerChecker hc = mHandlerCheckers.get(i);
+                        hc.scheduleCheckLocked();
+                    }
+                }
 
                 // NOTE: We use uptimeMillis() here because we do not want to increment the time we
                 // wait while asleep. If the device is asleep then the thing that we are waiting
@@ -426,7 +323,7 @@ public class Watchdog extends Thread {
                     timeout = TIME_TO_WAIT - (SystemClock.uptimeMillis() - start);
                 }
 
-                if (mCompleted) {
+                if (haveAllCheckersCompletedLocked()) {
                     // The monitors have returned.
                     waitedHalf = false;
                     continue;
@@ -443,15 +340,15 @@ public class Watchdog extends Thread {
                     continue;
                 }
 
-                name = (mCurrentMonitor != null) ?
-                    mCurrentMonitor.getClass().getName() : "null";
+                blockedCheckers = getBlockedCheckersLocked();
+                subject = describeCheckersLocked(blockedCheckers);
                 allowRestart = mAllowRestart;
             }
 
             // If we got here, that means that the system is most likely hung.
             // First collect stack traces from all threads of the system process.
             // Then kill this process so that the system will restart.
-            EventLog.writeEvent(EventLogTags.WATCHDOG, name);
+            EventLog.writeEvent(EventLogTags.WATCHDOG, subject);
 
             ArrayList<Integer> pids = new ArrayList<Integer>();
             pids.add(Process.myPid());
@@ -487,7 +384,7 @@ public class Watchdog extends Thread {
                     public void run() {
                         mActivity.addErrorToDropBox(
                                 "watchdog", null, "system_server", null, null,
-                                name, null, stack, null);
+                                subject, null, stack, null);
                     }
                 };
             dropboxThread.start();
@@ -504,7 +401,7 @@ public class Watchdog extends Thread {
                 try {
                     Binder.setDumpDisabled("Service dumps disabled due to hung system process.");
                     // 1 = keep waiting, -1 = kill system
-                    int res = controller.systemNotResponding(name);
+                    int res = controller.systemNotResponding(subject);
                     if (res >= 0) {
                         Slog.i(TAG, "Activity controller requested to coninue to wait");
                         waitedHalf = false;
@@ -520,7 +417,16 @@ public class Watchdog extends Thread {
             } else if (!allowRestart) {
                 Slog.w(TAG, "Restart not allowed: Watchdog is *not* killing the system process");
             } else {
-                Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + name);
+                Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + subject);
+                for (int i=0; i<blockedCheckers.size(); i++) {
+                    Slog.w(TAG, blockedCheckers.get(i).getName() + " stack trace:");
+                    StackTraceElement[] stackTrace
+                            = blockedCheckers.get(i).getThread().getStackTrace();
+                    for (StackTraceElement element: stackTrace) {
+                        Slog.w(TAG, "    at " + element);
+                    }
+                }
+                Slog.w(TAG, "*** GOODBYE!");
                 Process.killProcess(Process.myPid());
                 System.exit(10);
             }

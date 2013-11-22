@@ -37,13 +37,10 @@ import android.net.NetworkInfo;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.os.Binder;
-import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -53,6 +50,7 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IState;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.server.IoThread;
 import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
@@ -100,7 +98,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private final INetworkStatsService mStatsService;
     private final IConnectivityManager mConnService;
     private Looper mLooper;
-    private HandlerThread mThread;
 
     private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
 
@@ -147,9 +144,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mIfaces = new HashMap<String, TetherInterfaceSM>();
 
         // make our own thread so we don't anr the system
-        mThread = new HandlerThread("Tethering");
-        mThread.start();
-        mLooper = mThread.getLooper();
+        mLooper = IoThread.get().getLooper();
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
@@ -319,6 +314,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             mIfaces.remove(iface);
         }
     }
+
+    public void addressUpdated(String address, String iface, int flags, int scope) {}
+
+    public void addressRemoved(String address, String iface, int flags, int scope) {}
 
     public void limitReached(String limitName, String iface) {}
 
@@ -687,19 +686,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             retVal[i] = list.get(i);
         }
         return retVal;
-    }
-
-    public String[] getTetheredIfacePairs() {
-        final ArrayList<String> list = Lists.newArrayList();
-        synchronized (mPublicSync) {
-            for (TetherInterfaceSM sm : mIfaces.values()) {
-                if (sm.isTethered()) {
-                    list.add(sm.mMyUpstreamIfaceName);
-                    list.add(sm.mIfaceName);
-                }
-            }
-        }
-        return list.toArray(new String[list.size()]);
     }
 
     public String[] getTetherableIfaces() {

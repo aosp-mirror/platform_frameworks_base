@@ -9,7 +9,7 @@
 
 #include <utils/ByteOrder.h>
 #include <utils/SortedVector.h>
-#include <cutils/qsort_r_compat.h>
+#include "qsort_r_compat.h"
 
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"

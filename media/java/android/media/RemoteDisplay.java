@@ -42,6 +42,8 @@ public final class RemoteDisplay {
 
     private native int nativeListen(String iface);
     private native void nativeDispose(int ptr);
+    private native void nativePause(int ptr);
+    private native void nativeResume(int ptr);
 
     private RemoteDisplay(Listener listener, Handler handler) {
         mListener = listener;
@@ -87,6 +89,14 @@ public final class RemoteDisplay {
         dispose(false);
     }
 
+    public void pause() {
+        nativePause(mPtr);
+    }
+
+    public void resume() {
+        nativeResume(mPtr);
+    }
+
     private void dispose(boolean finalized) {
         if (mPtr != 0) {
             if (mGuard != null) {
@@ -113,11 +123,11 @@ public final class RemoteDisplay {
 
     // Called from native.
     private void notifyDisplayConnected(final Surface surface,
-            final int width, final int height, final int flags) {
+            final int width, final int height, final int flags, final int session) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mListener.onDisplayConnected(surface, width, height, flags);
+                mListener.onDisplayConnected(surface, width, height, flags, session);
             }
         });
     }
@@ -146,7 +156,8 @@ public final class RemoteDisplay {
      * Listener invoked when the remote display connection changes state.
      */
     public interface Listener {
-        void onDisplayConnected(Surface surface, int width, int height, int flags);
+        void onDisplayConnected(Surface surface,
+                int width, int height, int flags, int session);
         void onDisplayDisconnected();
         void onDisplayError(int error);
     }

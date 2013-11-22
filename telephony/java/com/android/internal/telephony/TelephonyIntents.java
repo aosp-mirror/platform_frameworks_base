@@ -145,6 +145,29 @@ public class TelephonyIntents {
     public static final String ACTION_ANY_DATA_CONNECTION_STATE_CHANGED
             = "android.intent.action.ANY_DATA_STATE";
 
+    /**
+     * Broadcast Action: Occurs when a data connection connects to a provisioning apn
+     * and is broadcast by the low level data connection code.
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li><em>apn</em> - A string that is the APN associated with this
+     *      connection.</li>
+     *   <li><em>apnType</em> - A string array of APN types associated with
+     *      this connection.  The APN type <code>"*"</code> is a special
+     *      type that means this APN services all types.</li>
+     *   <li><em>linkProperties</em> - The <code>LinkProperties</code> for this APN</li>
+     *   <li><em>linkCapabilities</em> - The <code>linkCapabilities</code> for this APN</li>
+     *   <li><em>iface</em> - A string that is the name of the interface</li>
+     * </ul>
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    public static final String ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN
+            = "android.intent.action.DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN";
 
     /**
      * Broadcast Action: An attempt to establish a data connection has failed.
@@ -237,6 +260,23 @@ public class TelephonyIntents {
     public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
             = "android.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
 
+    /**
+     * Activity Action: Start this activity to invoke the carrier setup app.
+     * To filter the intent, see {@link #CATEGORY_MCCMNC_PREFIX}.
+     *
+     * <p class="note">Callers of this should hold the android.permission.INVOKE_CARRIER_SETUP
+     * permission.</p>
+     */
+    public static final String ACTION_CARRIER_SETUP = "android.intent.action.ACTION_CARRIER_SETUP";
+
+    /**
+     * A <em>prefix</em> for the MCC/MNC filtering used with {@link #ACTION_CARRIER_SETUP}.
+     * The MCC/MNC will be concatenated (zero-padded to 3 digits each) to create a final
+     * string of the form:
+     * <br />
+     * <code>android.intent.category.MCCMNC_310260</code>
+     */
+    public static final String CATEGORY_MCCMNC_PREFIX = "android.intent.category.MCCMNC_";
 
     /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are

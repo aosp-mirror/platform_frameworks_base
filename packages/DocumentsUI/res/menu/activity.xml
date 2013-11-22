@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_create_dir"
+        android:title="@string/menu_create_dir"
+        android:icon="@drawable/ic_menu_new_folder"
+        android:showAsAction="always" />
+    <item
+        android:id="@+id/menu_search"
+        android:title="@string/menu_search"
+        android:icon="@drawable/ic_menu_search"
+        android:showAsAction="always|collapseActionView"
+        android:actionViewClass="android.widget.SearchView"
+        android:imeOptions="actionSearch" />
+    <item
+        android:id="@+id/menu_sort"
+        android:title="@string/menu_sort"
+        android:icon="@drawable/ic_menu_sortby"
+        android:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/menu_sort_name"
+                android:title="@string/sort_name" />
+            <item
+                android:id="@+id/menu_sort_date"
+                android:title="@string/sort_date" />
+            <item
+                android:id="@+id/menu_sort_size"
+                android:title="@string/sort_size" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/menu_grid"
+        android:title="@string/menu_grid"
+        android:icon="@drawable/ic_menu_view_grid"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_list"
+        android:title="@string/menu_list"
+        android:icon="@drawable/ic_menu_view_list"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
+        android:icon="@drawable/ic_menu_settings"
+        android:showAsAction="never" />
+</menu>

@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * An active intent broadcast.
  */
-class BroadcastRecord extends Binder {
+final class BroadcastRecord extends Binder {
     final Intent intent;    // the original intent that generated us
     final ComponentName targetComp; // original component name set on the intent
     final ProcessRecord callerApp; // process that sent this
@@ -47,6 +47,7 @@ class BroadcastRecord extends Binder {
     final boolean sticky;   // originated from existing sticky data?
     final boolean initialSticky; // initial broadcast from register to sticky?
     final int userId;       // user id this broadcast was for
+    final String resolvedType; // the resolved data type
     final String requiredPermission; // a permission the caller has required
     final int appOp;        // an app op that is associated with this broadcast
     final List receivers;   // contains BroadcastFilter and ResolveInfo
@@ -69,6 +70,7 @@ class BroadcastRecord extends Binder {
     static final int APP_RECEIVE = 1;
     static final int CALL_IN_RECEIVE = 2;
     static final int CALL_DONE_RECEIVE = 3;
+    static final int WAITING_SERVICES = 4;
 
     // The following are set when we are calling a receiver (one that
     // was found in our list of registered receivers).
@@ -152,6 +154,7 @@ class BroadcastRecord extends Binder {
                 case APP_RECEIVE:       stateStr=" (APP_RECEIVE)"; break;
                 case CALL_IN_RECEIVE:   stateStr=" (CALL_IN_RECEIVE)"; break;
                 case CALL_DONE_RECEIVE: stateStr=" (CALL_DONE_RECEIVE)"; break;
+                case WAITING_SERVICES:  stateStr=" (WAITING_SERVICES)"; break;
             }
             pw.print(prefix); pw.print("state="); pw.print(state); pw.println(stateStr);
         }
@@ -171,8 +174,8 @@ class BroadcastRecord extends Binder {
 
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
-            int _callingPid, int _callingUid, String _requiredPermission, int _appOp,
-            List _receivers, IIntentReceiver _resultTo, int _resultCode,
+            int _callingPid, int _callingUid, String _resolvedType, String _requiredPermission,
+            int _appOp, List _receivers, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized,
             boolean _sticky, boolean _initialSticky,
             int _userId) {
@@ -183,6 +186,7 @@ class BroadcastRecord extends Binder {
         callerPackage = _callerPackage;
         callingPid = _callingPid;
         callingUid = _callingUid;
+        resolvedType = _resolvedType;
         requiredPermission = _requiredPermission;
         appOp = _appOp;
         receivers = _receivers;

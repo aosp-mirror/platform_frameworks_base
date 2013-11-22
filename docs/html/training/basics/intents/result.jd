@@ -21,7 +21,8 @@ next.link=filters.html
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}training/sharing/index.html">Sharing Content</a></li>
+    <li><a href="{@docRoot}training/sharing/index.html">Sharing Simple Data</a></li>
+    <li><a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>
 </ul>
 
   </div>
@@ -71,7 +72,7 @@ private void pickContact() {
 
 <h2 id="ReceiveResult">Receive the Result</h2>
 
-<p>When the user is done with the subsequent activity and returns, the system calls your activity's 
+<p>When the user is done with the subsequent activity and returns, the system calls your activity's
 {@link android.app.Activity#onActivityResult onActivityResult()} method. This method includes three
 arguments:</p>
 

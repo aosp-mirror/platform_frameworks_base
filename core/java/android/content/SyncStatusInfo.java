@@ -42,7 +42,10 @@ public class SyncStatusInfo implements Parcelable {
     public long initialFailureTime;
     public boolean pending;
     public boolean initialize;
-    public ArrayList<Long> periodicSyncTimes;
+    
+  // Warning: It is up to the external caller to ensure there are
+  // no race conditions when accessing this list
+  private ArrayList<Long> periodicSyncTimes;
 
     private static final String TAG = "Sync";
 
@@ -126,10 +129,58 @@ public class SyncStatusInfo implements Parcelable {
         }
     }
 
+    public SyncStatusInfo(SyncStatusInfo other) {
+        authorityId = other.authorityId;
+        totalElapsedTime = other.totalElapsedTime;
+        numSyncs = other.numSyncs;
+        numSourcePoll = other.numSourcePoll;
+        numSourceServer = other.numSourceServer;
+        numSourceLocal = other.numSourceLocal;
+        numSourceUser = other.numSourceUser;
+        numSourcePeriodic = other.numSourcePeriodic;
+        lastSuccessTime = other.lastSuccessTime;
+        lastSuccessSource = other.lastSuccessSource;
+        lastFailureTime = other.lastFailureTime;
+        lastFailureSource = other.lastFailureSource;
+        lastFailureMesg = other.lastFailureMesg;
+        initialFailureTime = other.initialFailureTime;
+        pending = other.pending;
+        initialize = other.initialize;
+        if (other.periodicSyncTimes != null) {
+            periodicSyncTimes = new ArrayList<Long>(other.periodicSyncTimes);
+        }
+    }
+
     public void setPeriodicSyncTime(int index, long when) {
+        // The list is initialized lazily when scheduling occurs so we need to make sure
+        // we initialize elements < index to zero (zero is ignore for scheduling purposes)
         ensurePeriodicSyncTimeSize(index);
         periodicSyncTimes.set(index, when);
     }
+
+    public long getPeriodicSyncTime(int index) {
+        if (periodicSyncTimes != null && index < periodicSyncTimes.size()) {
+            return periodicSyncTimes.get(index);
+        } else {
+            return 0;
+        }
+    }
+
+    public void removePeriodicSyncTime(int index) {
+        if (periodicSyncTimes != null && index < periodicSyncTimes.size()) {
+            periodicSyncTimes.remove(index);
+        }
+    }
+
+    public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
+        public SyncStatusInfo createFromParcel(Parcel in) {
+            return new SyncStatusInfo(in);
+        }
+
+        public SyncStatusInfo[] newArray(int size) {
+            return new SyncStatusInfo[size];
+        }
+    };
 
     private void ensurePeriodicSyncTimeSize(int index) {
         if (periodicSyncTimes == null) {
@@ -143,26 +194,4 @@ public class SyncStatusInfo implements Parcelable {
             }
         }
     }
-
-    public long getPeriodicSyncTime(int index) {
-        if (periodicSyncTimes == null || periodicSyncTimes.size() < (index + 1)) {
-            return 0;
-        }
-        return periodicSyncTimes.get(index);
-    }
-
-    public void removePeriodicSyncTime(int index) {
-        ensurePeriodicSyncTimeSize(index);
-        periodicSyncTimes.remove(index);
-    }
-
-    public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
-        public SyncStatusInfo createFromParcel(Parcel in) {
-            return new SyncStatusInfo(in);
-        }
-
-        public SyncStatusInfo[] newArray(int size) {
-            return new SyncStatusInfo[size];
-        }
-    };
 }

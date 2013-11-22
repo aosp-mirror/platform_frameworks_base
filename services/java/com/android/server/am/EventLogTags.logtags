@@ -63,7 +63,7 @@ option java_package com.android.server.am
 30024 am_broadcast_discard_filter (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(BroadcastFilter|1|5)
 30025 am_broadcast_discard_app (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(App|3)
 # A service is being created
-30030 am_create_service (User|1|5),(Service Record|1|5),(Name|3),(PID|1|5)
+30030 am_create_service (User|1|5),(Service Record|1|5),(Name|3),(UID|1|5),(PID|1|5)
 # A service is being destroyed
 30031 am_destroy_service (User|1|5),(Service Record|1|5),(PID|1|5)
 # A process has crashed too many times, it is being cleared
@@ -86,3 +86,6 @@ option java_package com.android.server.am
 
 # User switched
 30041 am_switch_user (id|1|5)
+
+# Activity fully drawn time
+30042 am_activity_fully_drawn_time (User|1|5),(Token|1|5),(Component Name|3),(time|2|3)

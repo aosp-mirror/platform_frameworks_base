@@ -20,23 +20,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.AttributeSet;
-import android.util.Slog;
-import android.view.View;
 import android.widget.TextView;
+
+import com.android.systemui.DemoMode;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -45,12 +38,10 @@ import java.util.TimeZone;
 
 import libcore.icu.LocaleData;
 
-import com.android.internal.R;
-
 /**
  * Digital clock for the status bar.
  */
-public class Clock extends TextView {
+public class Clock extends TextView implements DemoMode {
     private boolean mAttached;
     private Calendar mCalendar;
     private String mClockFormatString;
@@ -133,6 +124,7 @@ public class Clock extends TextView {
     };
 
     final void updateClock() {
+        if (mDemoMode) return;
         mCalendar.setTimeInMillis(System.currentTimeMillis());
         setText(getSmallTime());
     }
@@ -204,9 +196,33 @@ public class Clock extends TextView {
                 return formatted;
             }
         }
- 
+
         return result;
 
+    }
+
+    private boolean mDemoMode;
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
+            mDemoMode = true;
+        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
+            mDemoMode = false;
+            updateClock();
+        } else if (mDemoMode && command.equals(COMMAND_CLOCK)) {
+            String millis = args.getString("millis");
+            String hhmm = args.getString("hhmm");
+            if (millis != null) {
+                mCalendar.setTimeInMillis(Long.parseLong(millis));
+            } else if (hhmm != null && hhmm.length() == 4) {
+                int hh = Integer.parseInt(hhmm.substring(0, 2));
+                int mm = Integer.parseInt(hhmm.substring(2));
+                mCalendar.set(Calendar.HOUR, hh);
+                mCalendar.set(Calendar.MINUTE, mm);
+            }
+            setText(getSmallTime());
+        }
     }
 }
 

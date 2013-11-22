@@ -492,11 +492,8 @@ public final class ShutdownThread extends Thread {
     public static void rebootOrShutdown(boolean reboot, String reason) {
         if (reboot) {
             Log.i(TAG, "Rebooting, reason: " + reason);
-            try {
-                PowerManagerService.lowLevelReboot(reason);
-            } catch (Exception e) {
-                Log.e(TAG, "Reboot failed, will attempt shutdown instead", e);
-            }
+            PowerManagerService.lowLevelReboot(reason);
+            Log.e(TAG, "Reboot failed, will attempt shutdown instead");
         } else if (SHUTDOWN_VIBRATE_MS > 0) {
             // vibrate before shutting down
             Vibrator vibrator = new SystemVibrator();

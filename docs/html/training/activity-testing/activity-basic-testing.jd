@@ -1,0 +1,227 @@
+page.title=Creating and Running a Test Case
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#testcase">Create a Test Case for Activity Testing</a>
+      <ol>
+      <li><a href="#fixture">Set Up Your Test Fixture</a></li>
+      <li><a href="#preconditions">Add Test Preconditions</a></li>
+      <li><a href="#test_method">Add Test Methods to Verify Your Activity</a></li>
+      </ol>
+  </li>
+  <li><a href="#build_run">Build and Run Your Test</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+<li><a href="{@docRoot}tools/testing/testing_android.html">Testing
+Fundamentals</a></li>
+</ul>
+
+</div>
+</div>
+<p>In order to verify that there are no regressions in the layout design and
+functional behavior in your application, it's important to
+create a test for each {@link android.app.Activity} in your application. For
+each test, you need to create the individual parts of a test case, including
+the test fixture, preconditions test method, and {@link android.app.Activity}
+test methods. You can then run your test to get a test report. If any test
+method fails, this might indicate a potential defect in your code.</p>
+<p class="note"><strong>Note:</strong> In the Test-Driven Development (TDD)
+approach, instead of writing most or all of your app code up-front and then
+running tests later in the development cycle, you would progressively write
+just enough production code to satisfy your test dependencies, update your
+test cases to reflect new functional requirements, and iterate repeatedly this
+way.</p>
+
+<h2 id="testcase">Create a Test Case</h2>
+<p>{@link android.app.Activity} tests are written in a structured way.
+Make sure to put your tests in a separate package, distinct from the code under
+test.</p>
+<p>By convention, your test package name should follow the same name as the
+application package, suffixed with <strong>".tests"</strong>. In the test package
+you created, add the Java class for your test case. By convention, your test case
+name should also follow the same name as the Java or Android class that you
+want to test, but suffixed with <strong>“Test”</strong>.</p>
+<p>To create a new test case in Eclipse:</p>
+<ol type="a">
+   <li>In the Package Explorer, right-click on the {@code /src} directory for
+your test project and select <strong>New &gt; Package</strong>.</li>
+   <li>Set the <strong>Name</strong> field to
+{@code &lt;your_app_package_name&gt;.tests} (for example,
+{@code com.example.android.testingfun.tests}) and click
+<strong>Finish</strong>.</li>
+   <li>Right-click on the test package you created, and select
+<strong>New &gt; Class</strong>.</li>
+    <li>Set the <strong>Name</strong> field to
+{@code &lt;your_app_activity_name&gt;Test} (for example,
+{@code MyFirstTestActivityTest}) and click <strong>Finish</strong>.</li>
+</ol>
+
+<h3 id="fixture">Set Up Your Test Fixture</h3>
+<p>A <em>test fixture</em> consists of objects that must be initialized for
+running one or more tests. To set up the test fixture, you can override the
+{@link junit.framework.TestCase#setUp()} and
+{@link junit.framework.TestCase#tearDown()} methods in your test. The
+test runner automatically runs {@link junit.framework.TestCase#setUp()} before
+running any other test methods, and {@link junit.framework.TestCase#tearDown()}
+at the end of each test method execution. You can use these methods to keep
+the code for test initialization and clean up separate from the tests methods.
+</p>
+<p>To set up your test fixture in Eclipse:</p>
+<ol>
+<li>In the Package Explorer, double-click on the test case that you created
+earlier to bring up the Eclipse Java editor, then modify your test case class
+to extend one of the sub-classes of {@link android.test.ActivityTestCase}.
+<p>For example:</p>
+<pre>
+public class MyFirstTestActivityTest
+        extends ActivityInstrumentationTestCase2&lt;MyFirstTestActivity&gt; {
+</pre>
+</li>
+<li>Next, add the constructor and {@link junit.framework.TestCase#setUp()}
+methods to your test case, and add variable declarations for the
+{@link android.app.Activity} that you want to test.</p>
+<p>For example:</p>
+<pre>
+public class MyFirstTestActivityTest
+        extends ActivityInstrumentationTestCase2&lt;MyFirstTestActivity&gt; {
+
+    private MyFirstTestActivity mFirstTestActivity;
+    private TextView mFirstTestText;
+
+    public MyFirstTestActivityTest() {
+        super(MyFirstTestActivity.class);
+    }
+
+    &#64;Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mFirstTestActivity = getActivity();
+        mFirstTestText =
+                (TextView) mFirstTestActivity
+                .findViewById(R.id.my_first_test_text_view);
+    }
+}
+</pre>
+<p>The constructor is invoked by the test runner to instantiate the test
+class, while the {@link junit.framework.TestCase#setUp()} method is invoked by
+the test runner before it runs any tests in the test class.</p>
+</li>
+</ol>
+
+<p>Typically, in the {@link junit.framework.TestCase#setUp()} method, you
+should:</p>
+<ul>
+<li>Invoke the superclass constructor for
+{@link junit.framework.TestCase#setUp()}, which is required by JUnit.</li>
+<li>Initialize your test fixture state by:
+   <ul>
+   <li>Defining the instance variables that store the state of the fixture.</li>
+   <li>Creating and storing a reference to an instance of the
+{@link android.app.Activity} under test.</li>
+   <li>Obtaining a reference to any UI components in the
+{@link android.app.Activity} that you want to test.</li>
+   </ul>
+</ul>
+
+<p>You can use the
+{@link android.test.ActivityInstrumentationTestCase2#getActivity()} method to
+get a reference to the {@link android.app.Activity} under test.</p>
+
+<h3 id="preconditions">Add Test Preconditions</h3>
+<p>As a sanity check, it is good practice to verify that the test fixture has
+been set up correctly, and the objects that you want to test have been correctly
+instantiated or initialized. That way, you won’t have to see
+tests failing because something was wrong with the setup of your test fixture.
+By convention, the method for verifying your test fixture is called
+{@code testPreconditions()}.</p>
+
+<p>For example, you might want to add a {@code testPreconditons()} method like
+this to your test case:</p>
+
+<pre>
+public void testPreconditions() {
+    assertNotNull(“mFirstTestActivity is null”, mFirstTestActivity);
+    assertNotNull(“mFirstTestText is null”, mFirstTestText);
+}
+</pre>
+
+<p>The assertion methods are from the JUnit {@link junit.framework.Assert}
+class. Generally, you can use assertions to
+verify if a specific condition that you want to test is true.
+<ul>
+<li>If the condition is false, the assertion method throws an
+{@link android.test.AssertionFailedError} exception, which is then typically
+reported by the test runner. You can provide a string in the first argument of
+your assertion method to give some contextual details if the assertion fails.</li>
+<li>If the condition is true, the test passes.</li>
+</ul>
+<p>In both cases, the test runner proceeds to run the other test methods in the
+test case.</p>
+
+<h3 id="test_method">Add Test Methods to Verify Your Activity</h3>
+<p>Next, add one or more test methods to verify the layout and functional
+behavior of your {@link android.app.Activity}.</p>
+<p>For example, if your {@link android.app.Activity} includes a
+{@link android.widget.TextView}, you can add a test method like this to check
+that it has the correct label text:</p>
+<pre>
+public void testMyFirstTestTextView_labelText() {
+    final String expected =
+            mFirstTestActivity.getString(R.string.my_first_test);
+    final String actual = mFirstTestText.getText().toString();
+    assertEquals(expected, actual);
+}
+</pre>
+
+<p>The {@code testMyFirstTestTextView_labelText()} method simply checks that the
+default text of the {@link android.widget.TextView} that is set by the layout
+is the same as the expected text defined in the {@code strings.xml} resource.</p>
+<p class="note"><strong>Note:</strong> When naming test methods, you can use
+an underscore to separate what is being tested from the specific case being
+tested. This style makes it easier to see exactly what cases are being tested.</p>
+<p>When doing this type of string value comparison, it’s good practice to read
+the expected string from your resources, instead of hardcoding the string in
+your comparison code. This prevents your test from easily breaking whenever the
+string definitions are modified in the resource file.</p>
+<p>To perform the comparison, pass both the expected and actual strings as
+arguments to the
+{@link junit.framework.Assert#assertEquals(java.lang.String, java.lang.String) assertEquals()}
+method. If the values are not the same, the assertion will throw an
+{@link junit.framework.AssertionFailedError} exception.</p>
+<p>If you added a {@code testPreconditions()} method, put your test methods
+after the {@code testPreconditions()} definition in your Java class.</p>
+<p>For a complete test case example, take a look at
+{@code MyFirstTestActivityTest.java} in the sample app.</p>
+
+<h2 id="build_run">Build and Run Your Test</h2>
+<p>You can build and run your test easily from the Package Explorer in
+Eclipse.</p>
+<p>To build and run your test:</p>
+<ol>
+<li>Connect an Android device to your machine. On the device or emulator, open
+the <strong>Settings</strong> menu, select <strong>Developer options</strong>
+and make sure that USB debugging is enabled.</li>
+<li>In the Project Explorer, right-click on the test class that you created
+earlier and select <strong>Run As &gt; Android Junit Test</strong>.</li>
+<li>In the Android Device Chooser dialog, select the device that you just
+connected, then click <strong>OK</strong>.</li>
+<li>In the JUnit view, verify that the test passes with no errors or failures.</li>
+</ol>
+<p>For example, if the test case passes with no errors, the result should look
+like this:</p>
+<img src="{@docRoot}images/training/activity-testing_lesson2_MyFirstTestActivityTest_result.png" alt="" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Result of a test with no errors.
+</p>
+
+
+

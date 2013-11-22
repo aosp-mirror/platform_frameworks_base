@@ -18,6 +18,22 @@ package android.graphics;
 
 public class SweepGradient extends Shader {
 
+    private static final int TYPE_COLORS_AND_POSITIONS = 1;
+    private static final int TYPE_COLOR_START_AND_COLOR_END = 2;
+
+    /**
+     * Type of the LinearGradient: can be either TYPE_COLORS_AND_POSITIONS or
+     * TYPE_COLOR_START_AND_COLOR_END.
+     */
+    private int mType;
+
+    private float mCx;
+    private float mCy;
+    private int[] mColors;
+    private float[] mPositions;
+    private int mColor0;
+    private int mColor1;
+
     /**
      * A subclass of Shader that draws a sweep gradient around a center point.
      *
@@ -41,6 +57,11 @@ public class SweepGradient extends Shader {
             throw new IllegalArgumentException(
                         "color and position arrays must be of equal length");
         }
+        mType = TYPE_COLORS_AND_POSITIONS;
+        mCx = cx;
+        mCy = cy;
+        mColors = colors;
+        mPositions = positions;
         native_instance = nativeCreate1(cx, cy, colors, positions);
         native_shader = nativePostCreate1(native_instance, cx, cy, colors, positions);
     }
@@ -54,8 +75,35 @@ public class SweepGradient extends Shader {
      * @param color1   The color to use at the end of the sweep
      */
     public SweepGradient(float cx, float cy, int color0, int color1) {
+        mType = TYPE_COLOR_START_AND_COLOR_END;
+        mCx = cx;
+        mCy = cy;
+        mColor0 = color0;
+        mColor1 = color1;
         native_instance = nativeCreate2(cx, cy, color0, color1);
         native_shader = nativePostCreate2(native_instance, cx, cy, color0, color1);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected Shader copy() {
+        final SweepGradient copy;
+        switch (mType) {
+            case TYPE_COLORS_AND_POSITIONS:
+                copy = new SweepGradient(mCx, mCy, mColors.clone(),
+                        mPositions != null ? mPositions.clone() : null);
+                break;
+            case TYPE_COLOR_START_AND_COLOR_END:
+                copy = new SweepGradient(mCx, mCy, mColor0, mColor1);
+                break;
+            default:
+                throw new IllegalArgumentException("SweepGradient should be created with either " +
+                        "colors and positions or start color and end color");
+        }
+        copyLocalMatrix(copy);
+        return copy;
     }
 
     private static native int nativeCreate1(float x, float y, int colors[], float positions[]);

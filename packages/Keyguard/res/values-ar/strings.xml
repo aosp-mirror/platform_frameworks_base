@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"اكتب رمز رقم التعريف الشخصي"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"اكتب رمز PUK ورمز رقم التعريف الشخصي الجديد"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"رمز PUK"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"رمز رقم التعريف الشخصي الجديد"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"المس لكتابة كلمة المرور"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"اكتب كلمة المرور لإلغاء التأمين"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"اكتب رقم التعريف الشخصي لإلغاء التأمين"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"رقم التعريف الشخصي غير صحيح."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"لإلغاء التأمين، اضغط على \"القائمة\" ثم على 0."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"تم تجاوز الحد الأقصى لعدد محاولات تأمين الجهاز بالوجه"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"تم الشحن"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"جارٍ الشحن، <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"توصيل جهاز الشحن."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"اضغط على \"القائمة\" لإلغاء القفل."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"الشبكة مؤمّنة"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"ليست هناك بطاقة SIM"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"ليست هناك بطاقة SIM في الجهاز اللوحي."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"ليست هناك بطاقة SIM في الهاتف."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"أدخل بطاقة SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"بطاقة SIM مفقودة أو غير قابلة للقراءة. أدخل بطاقة SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"بطاقة SIM غير قابلة للاستخدام."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"تم تعطيل بطاقة SIM بشكل دائم.\n اتصل بمقدم خدمة اللاسلكي للحصول على بطاقة SIM أخرى."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"بطاقة SIM مؤمّنة."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"بطاقة SIM مؤمّنة بكود PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"جارٍ إلغاء تأمين بطاقة SIM…"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. الأداة %2$d من %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"إضافة أداة."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"فارغة"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"تم توسيع منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"تم تصغير منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"محدد المستخدم"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"الحالة"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"الكاميرا"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"أدوات التحكم في الوسائط"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"بدأت إعادة ترتيب الأدوات."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"انتهت إعادة ترتيب الأدوات."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"تم حذف أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"توسيع منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"إلغاء القفل باستخدام التمرير."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"إلغاء القفل باستخدام النقش."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"تأمين الجهاز بالوجه."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"إلغاء القفل باستخدام رقم التعريف الشخصي."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"إلغاء القفل باستخدام كلمة المرور."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"منطقة النقش."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"منطقة التمرير."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"زر المقطع الصوتي السابق"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"زر المقطع الصوتي التالي"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"زر الإيقاف المؤقت"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"زر التشغيل"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"زر الإيقاف"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ب ت ث"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"إلغاء"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"حذف"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"تم"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"تغيير الوضع"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"العالي"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"إلغاء تأمين"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"الكاميرا"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"صامت"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"تشغيل الصوت"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"بحث"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"تمرير لأعلى لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"تمرير لأسفل لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"تمرير لليسار لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"تمرير لليمين لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"المستخدم الحالي <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"الاتصال بالطوارئ"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"نسيت النقش"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"نقش خاطئ"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"كلمة مرور خاطئة"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"رقم تعريف شخصي خاطئ"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"ارسم نقشك"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"أدخل رقم التعريف الشخصي لبطاقة SIM"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"أدخل رقم التعريف الشخصي"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"أدخل كلمة المرور"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"بطاقة SIM معطلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوال للاطلاع على التفاصيل."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"إدخال رمز رقم التعريف الشخصي المراد"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"تأكيد رمز رقم التعريف الشخصي المراد"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"جارٍ إلغاء تأمين بطاقة SIM…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"رقم التعريف الشخصي غير صحيح."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"اكتب رقم التعريف الشخصي المكون من 4 إلى 8 أرقام."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"يجب أن يتضمن رمز PUK‏ 8 أرقام أو أكثر."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى تعطيل بطاقة SIM نهائيًا."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"لا يتطابق رمزا رقم التعريف الشخصي"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"محاولات النقش كثيرة جدًا"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"لإلغاء التأمين، سجّل الدخول بحسابك في Google."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"اسم المستخدم (البريد إلكتروني)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"كلمة المرور"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"تسجيل الدخول"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"اسم مستخدم غير صحيح أو كلمة مرور غير صالحة."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"هل نسيت اسم المستخدم أو كلمة المرور؟\nانتقل إلى "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"جارٍ فحص الحساب…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"لقد كتبت رقم التعريف الشخصي بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"إزالة"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"زر المقطع الصوتي السابق"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"زر المقطع الصوتي التالي"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"زر الإيقاف المؤقت"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"زر التشغيل"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"زر الإيقاف"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"لا تتوفر خدمة"</string>
+</resources>

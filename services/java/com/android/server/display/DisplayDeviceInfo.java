@@ -61,6 +61,23 @@ final class DisplayDeviceInfo {
     public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1 << 3;
 
     /**
+     * Flag: Indicates that the display device is owned by a particular application
+     * and that no other application should be able to interact with it.
+     */
+    public static final int FLAG_PRIVATE = 1 << 4;
+
+    /**
+     * Flag: Indicates that the display device is not blanked automatically by
+     * the power manager.
+     */
+    public static final int FLAG_NEVER_BLANK = 1 << 5;
+
+    /**
+     * Flag: Indicates that the display is suitable for presentations.
+     */
+    public static final int FLAG_PRESENTATION = 1 << 6;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;
@@ -150,6 +167,23 @@ final class DisplayDeviceInfo {
      */
     public String address;
 
+    /**
+     * The UID of the application that owns this display, or zero if it is owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
+     */
+    public int ownerUid;
+
+    /**
+     * The package name of the application that owns this display, or null if it is
+     * owned by the system.
+     * <p>
+     * If the display is private, then only the owner can use it.
+     * </p>
+     */
+    public String ownerPackageName;
+
     public void setAssumedDensityForExternalDisplay(int width, int height) {
         densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
         // Technically, these values should be smaller than the apparent density
@@ -176,7 +210,9 @@ final class DisplayDeviceInfo {
                 && touch == other.touch
                 && rotation == other.rotation
                 && type == other.type
-                && Objects.equal(address, other.address);
+                && Objects.equal(address, other.address)
+                && ownerUid == other.ownerUid
+                && Objects.equal(ownerPackageName, other.ownerPackageName);
     }
 
     @Override
@@ -197,19 +233,32 @@ final class DisplayDeviceInfo {
         rotation = other.rotation;
         type = other.type;
         address = other.address;
+        ownerUid = other.ownerUid;
+        ownerPackageName = other.ownerPackageName;
     }
 
     // For debugging purposes
     @Override
     public String toString() {
-        return "DisplayDeviceInfo{\"" + name + "\": " + width + " x " + height + ", "
-                + refreshRate + " fps, "
-                + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi"
-                + ", touch " + touchToString(touch) + flagsToString(flags)
-                + ", rotation " + rotation
-                + ", type " + Display.typeToString(type)
-                + ", address " + address
-                + "}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("DisplayDeviceInfo{\"");
+        sb.append(name).append("\": ").append(width).append(" x ").append(height);
+        sb.append(", ").append(refreshRate).append(" fps, ");
+        sb.append("density ").append(densityDpi);
+        sb.append(", ").append(xDpi).append(" x ").append(yDpi).append(" dpi");
+        sb.append(", touch ").append(touchToString(touch));
+        sb.append(", rotation ").append(rotation);
+        sb.append(", type ").append(Display.typeToString(type));
+        if (address != null) {
+            sb.append(", address ").append(address);
+        }
+        if (ownerUid != 0 || ownerPackageName != null) {
+            sb.append(", owner ").append(ownerPackageName);
+            sb.append(" (uid ").append(ownerUid).append(")");
+        }
+        sb.append(flagsToString(flags));
+        sb.append("}");
+        return sb.toString();
     }
 
     private static String touchToString(int touch) {
@@ -238,6 +287,15 @@ final class DisplayDeviceInfo {
         }
         if ((flags & FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
             msg.append(", FLAG_SUPPORTS_PROTECTED_BUFFERS");
+        }
+        if ((flags & FLAG_PRIVATE) != 0) {
+            msg.append(", FLAG_PRIVATE");
+        }
+        if ((flags & FLAG_NEVER_BLANK) != 0) {
+            msg.append(", FLAG_NEVER_BLANK");
+        }
+        if ((flags & FLAG_PRESENTATION) != 0) {
+            msg.append(", FLAG_PRESENTATION");
         }
         return msg.toString();
     }

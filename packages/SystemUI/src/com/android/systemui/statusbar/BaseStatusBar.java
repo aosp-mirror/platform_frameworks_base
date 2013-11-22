@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -17,52 +16,36 @@
 
 package com.android.systemui.statusbar;
 
-import android.service.notification.StatusBarNotification;
-import android.content.res.Configuration;
-import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarIconList;
-import com.android.internal.widget.SizeAdaptiveLayout;
-import com.android.systemui.R;
-import com.android.systemui.SearchPanelView;
-import com.android.systemui.SystemUI;
-import com.android.systemui.recent.RecentTasksLoader;
-import com.android.systemui.recent.RecentsActivity;
-import com.android.systemui.recent.TaskDescription;
-import com.android.systemui.statusbar.policy.NotificationRowLayout;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.ActivityOptions;
 import android.app.KeyguardManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Resources;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
+import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -79,6 +62,16 @@ import android.widget.PopupMenu;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.widget.SizeAdaptiveLayout;
+import com.android.systemui.R;
+import com.android.systemui.RecentsComponent;
+import com.android.systemui.SearchPanelView;
+import com.android.systemui.SystemUI;
+import com.android.systemui.statusbar.policy.NotificationRowLayout;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -94,10 +87,14 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_OPEN_SEARCH_PANEL = 1024;
     protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
-    protected static final int MSG_SHOW_INTRUDER = 1026;
-    protected static final int MSG_HIDE_INTRUDER = 1027;
+    protected static final int MSG_SHOW_HEADS_UP = 1026;
+    protected static final int MSG_HIDE_HEADS_UP = 1027;
+    protected static final int MSG_ESCALATE_HEADS_UP = 1028;
 
-    protected static final boolean ENABLE_INTRUDERS = false;
+    protected static final boolean ENABLE_HEADS_UP = true;
+    // scores above this threshold should be displayed in heads up mode.
+    protected static final int INTERRUPTION_THRESHOLD = 11;
+    protected static final String SETTING_HEADS_UP = "heads_up_enabled";
 
     // Should match the value in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
@@ -113,7 +110,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected NotificationData mNotificationData = new NotificationData();
     protected NotificationRowLayout mPile;
 
-    protected StatusBarNotification mCurrentlyIntrudingNotification;
+    protected NotificationData.Entry mInterruptingNotificationEntry;
+    protected long mInterruptingNotificationTime;
 
     // used to notify status bar for suppressing notification LED
     protected boolean mPanelSlightlyVisible;
@@ -125,8 +123,14 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mCurrentUserId = 0;
 
-    protected int mLayoutDirection;
+    protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
+    protected boolean mUseHeadsUp = false;
+
+    protected IDreamManager mDreamManager;
+    KeyguardManager mKeyguardManager;
+    PowerManager mPowerManager;
+    protected int mRowHeight;
 
     // UI-specific methods
 
@@ -143,6 +147,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+
+    private RecentsComponent mRecents;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -168,7 +174,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         @Override
         public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
             if (DEBUG) {
-                Slog.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
+                Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
@@ -196,10 +202,27 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
+                userSwitched(mCurrentUserId);
+            }
+        }
+    };
+
     public void start() {
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         mDisplay = mWindowManager.getDefaultDisplay();
+
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
         mProvisioningObserver.onChange(false); // set up
         mContext.getContentResolver().registerContentObserver(
@@ -208,6 +231,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+
+        mRecents = getComponent(RecentsComponent.class);
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -259,7 +284,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (DEBUG) {
-            Slog.d(TAG, String.format(
+            Log.d(TAG, String.format(
                     "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
                    iconList.size(),
                    switches[0],
@@ -273,18 +298,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                    mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                    if (true) Slog.v(TAG, "userId " + mCurrentUserId + " is in the house");
-                    userSwitched(mCurrentUserId);
-                }
-            }}, filter);
-
-        mLocale = mContext.getResources().getConfiguration().locale;
+        mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
     public void userSwitched(int newUserId) {
@@ -295,7 +309,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         final int thisUserId = mCurrentUserId;
         final int notificationUserId = n.getUserId();
         if (DEBUG && MULTIUSER_DEBUG) {
-            Slog.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
+            Log.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
                     n, thisUserId, notificationUserId));
         }
         return notificationUserId == UserHandle.USER_ALL
@@ -304,17 +318,24 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        final Locale newLocale = mContext.getResources().getConfiguration().locale;
-        if (! newLocale.equals(mLocale)) {
-            mLocale = newLocale;
-            mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
-            refreshLayout(mLayoutDirection);
+        final Locale locale = mContext.getResources().getConfiguration().locale;
+        final int ld = TextUtils.getLayoutDirectionFromLocale(locale);
+        if (! locale.equals(mLocale) || ld != mLayoutDirection) {
+            if (DEBUG) {
+                Log.v(TAG, String.format(
+                        "config changed locale/LD: %s (%d) -> %s (%d)", mLocale, mLayoutDirection,
+                        locale, ld));
+            }
+            mLocale = locale;
+            mLayoutDirection = ld;
+            refreshLayout(ld);
         }
     }
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
-        if (n.isClearable()) {
+        if (n.isClearable() || (mInterruptingNotificationEntry != null
+                && mInterruptingNotificationEntry.row == row)) {
             final String _pkg = n.getPackageName();
             final String _tag = n.getTag();
             final int _id = n.getId();
@@ -348,7 +369,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
                 version = info.targetSdkVersion;
             } catch (NameNotFoundException ex) {
-                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
+                Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
             }
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
                 content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
@@ -402,8 +423,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    public void dismissIntruder() {
-        // pass
+    public void onHeadsUpDismissed() {
     }
 
     @Override
@@ -440,9 +460,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }
-
-    protected abstract WindowManager.LayoutParams getRecentsLayoutParams(
-            LayoutParams layoutParams);
 
     protected abstract WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams);
@@ -487,141 +504,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected abstract View getStatusBarView();
 
-    protected void toggleRecentsActivity() {
-        try {
-
-            TaskDescription firstTask = RecentTasksLoader.getInstance(mContext).getFirstTask();
-
-            Intent intent = new Intent(RecentsActivity.TOGGLE_RECENTS_INTENT);
-            intent.setClassName("com.android.systemui",
-                    "com.android.systemui.recent.RecentsActivity");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-
-            if (firstTask == null) {
-                if (RecentsActivity.forceOpaqueBackground(mContext)) {
-                    ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                            R.anim.recents_launch_from_launcher_enter,
-                            R.anim.recents_launch_from_launcher_exit);
-                    mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
-                            UserHandle.USER_CURRENT));
-                } else {
-                    // The correct window animation will be applied via the activity's style
-                    mContext.startActivityAsUser(intent, new UserHandle(
-                            UserHandle.USER_CURRENT));
-                }
-
-            } else {
-                Bitmap first = firstTask.getThumbnail();
-                final Resources res = mContext.getResources();
-
-                float thumbWidth = res
-                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
-                float thumbHeight = res
-                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height);
-                if (first == null) {
-                    throw new RuntimeException("Recents thumbnail is null");
-                }
-                if (first.getWidth() != thumbWidth || first.getHeight() != thumbHeight) {
-                    first = Bitmap.createScaledBitmap(first, (int) thumbWidth, (int) thumbHeight,
-                            true);
-                    if (first == null) {
-                        throw new RuntimeException("Recents thumbnail is null");
-                    }
-                }
-
-
-                DisplayMetrics dm = new DisplayMetrics();
-                mDisplay.getMetrics(dm);
-                // calculate it here, but consider moving it elsewhere
-                // first, determine which orientation you're in.
-                // todo: move the system_bar layouts to sw600dp ?
-                final Configuration config = res.getConfiguration();
-                int x, y;
-
-                if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    float appLabelLeftMargin = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_left_margin);
-                    float appLabelWidth = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_width);
-                    float thumbLeftMargin = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_left_margin);
-                    float thumbBgPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_bg_padding);
-
-                    float width = appLabelLeftMargin +
-                            +appLabelWidth
-                            + thumbLeftMargin
-                            + thumbWidth
-                            + 2 * thumbBgPadding;
-
-                    x = (int) ((dm.widthPixels - width) / 2f + appLabelLeftMargin + appLabelWidth
-                            + thumbBgPadding + thumbLeftMargin);
-                    y = (int) (dm.heightPixels
-                            - res.getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height) - thumbBgPadding);
-                    if (mLayoutDirection == View.LAYOUT_DIRECTION_RTL) {
-                        x = dm.widthPixels - x - res
-                                .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
-                    }
-
-                } else { // if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    float thumbTopMargin = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_top_margin);
-                    float thumbBgPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_bg_padding);
-                    float textPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_text_description_padding);
-                    float labelTextSize = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_text_size);
-                    Paint p = new Paint();
-                    p.setTextSize(labelTextSize);
-                    float labelTextHeight = p.getFontMetricsInt().bottom
-                            - p.getFontMetricsInt().top;
-                    float descriptionTextSize = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_description_text_size);
-                    p.setTextSize(descriptionTextSize);
-                    float descriptionTextHeight = p.getFontMetricsInt().bottom
-                            - p.getFontMetricsInt().top;
-
-                    float statusBarHeight = res
-                            .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-                    float recentsItemTopPadding = statusBarHeight;
-
-                    float height = thumbTopMargin
-                            + thumbHeight
-                            + 2 * thumbBgPadding + textPadding + labelTextHeight
-                            + recentsItemTopPadding + textPadding + descriptionTextHeight;
-                    float recentsItemRightPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_item_padding);
-                    float recentsScrollViewRightPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_right_glow_margin);
-                    x = (int) (dm.widthPixels - res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width)
-                            - thumbBgPadding - recentsItemRightPadding - recentsScrollViewRightPadding);
-                    y = (int) ((dm.heightPixels - statusBarHeight - height) / 2f + thumbTopMargin
-                            + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
-                }
-
-                ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(
-                        getStatusBarView(),
-                        first, x, y,
-                        new ActivityOptions.OnAnimationStartedListener() {
-                            public void onAnimationStarted() {
-                                Intent intent = new Intent(RecentsActivity.WINDOW_ANIMATION_START_INTENT);
-                                intent.setPackage("com.android.systemui");
-                                mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-                            }
-                        });
-                intent.putExtra(RecentsActivity.WAITING_FOR_WINDOW_ANIMATION_PARAM, true);
-                mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
-                        UserHandle.USER_CURRENT));
-            }
-            return;
-        } catch (ActivityNotFoundException e) {
-            Log.e(TAG, "Failed to launch RecentAppsIntent", e);
-        }
-    }
-
     protected View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
         // additional optimization when we have software system buttons - start loading the recent
         // tasks on touch down
@@ -642,39 +524,41 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
-    protected void preloadRecentTasksList() {
-        if (DEBUG) Slog.d(TAG, "preloading recents");
-        Intent intent = new Intent(RecentsActivity.PRELOAD_INTENT);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.recent.RecentsPreloadReceiver");
-        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+    protected void toggleRecentsActivity() {
+        if (mRecents != null) {
+            mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+        }
+    }
 
-        RecentTasksLoader.getInstance(mContext).preloadFirstTask();
+    protected void preloadRecentTasksList() {
+        if (mRecents != null) {
+            mRecents.preloadRecentTasksList();
+        }
     }
 
     protected void cancelPreloadingRecentTasksList() {
-        if (DEBUG) Slog.d(TAG, "cancel preloading recents");
-        Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.recent.RecentsPreloadReceiver");
-        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-
-        RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
+        if (mRecents != null) {
+            mRecents.cancelPreloadingRecentTasksList();
+        }
     }
+
+    protected void closeRecents() {
+        if (mRecents != null) {
+            mRecents.closeRecents();
+        }
+    }
+
+    public abstract void resetHeadsUpDecayTimer();
 
     protected class H extends Handler {
         public void handleMessage(Message m) {
             Intent intent;
             switch (m.what) {
              case MSG_TOGGLE_RECENTS_PANEL:
-                 if (DEBUG) Slog.d(TAG, "toggle recents panel");
                  toggleRecentsActivity();
                  break;
              case MSG_CLOSE_RECENTS_PANEL:
-                 if (DEBUG) Slog.d(TAG, "closing recents panel");
-                 intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
-                 intent.setPackage("com.android.systemui");
-                 mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                 closeRecents();
                  break;
              case MSG_PRELOAD_RECENT_APPS:
                   preloadRecentTasksList();
@@ -683,15 +567,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                   cancelPreloadingRecentTasksList();
                   break;
              case MSG_OPEN_SEARCH_PANEL:
-                 if (DEBUG) Slog.d(TAG, "opening search panel");
+                 if (DEBUG) Log.d(TAG, "opening search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
                      mSearchPanelView.show(true, true);
+                     onShowSearchPanel();
                  }
                  break;
              case MSG_CLOSE_SEARCH_PANEL:
-                 if (DEBUG) Slog.d(TAG, "closing search panel");
+                 if (DEBUG) Log.d(TAG, "closing search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isShowing()) {
                      mSearchPanelView.show(false, true);
+                     onHideSearchPanel();
                  }
                  break;
             }
@@ -723,22 +609,29 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void workAroundBadLayerDrawableOpacity(View v) {
     }
 
-    protected  boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+    protected void onHideSearchPanel() {
+    }
+
+    protected void onShowSearchPanel() {
+    }
+
+    public boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
         int minHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_max_height);
         StatusBarNotification sbn = entry.notification;
-        RemoteViews oneU = sbn.getNotification().contentView;
-        RemoteViews large = sbn.getNotification().bigContentView;
-        if (oneU == null) {
+        RemoteViews contentView = sbn.getNotification().contentView;
+        RemoteViews bigContentView = sbn.getNotification().bigContentView;
+        if (contentView == null) {
             return false;
         }
 
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
+        ExpandableNotificationRow row = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row, parent, false);
 
         // for blaming (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.getPackageName());
@@ -765,40 +658,37 @@ public abstract class BaseStatusBar extends SystemUI implements
             content.setOnClickListener(null);
         }
 
-        // TODO(cwren) normalize variable names with those in updateNotification
-        View expandedOneU = null;
-        View expandedLarge = null;
+        View contentViewLocal = null;
+        View bigContentViewLocal = null;
         try {
-            expandedOneU = oneU.apply(mContext, adaptive, mOnClickHandler);
-            if (large != null) {
-                expandedLarge = large.apply(mContext, adaptive, mOnClickHandler);
+            contentViewLocal = contentView.apply(mContext, adaptive, mOnClickHandler);
+            if (bigContentView != null) {
+                bigContentViewLocal = bigContentView.apply(mContext, adaptive, mOnClickHandler);
             }
         }
         catch (RuntimeException e) {
             final String ident = sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId());
-            Slog.e(TAG, "couldn't inflate view for notification " + ident, e);
+            Log.e(TAG, "couldn't inflate view for notification " + ident, e);
             return false;
         }
 
-        if (expandedOneU != null) {
+        if (contentViewLocal != null) {
             SizeAdaptiveLayout.LayoutParams params =
-                    new SizeAdaptiveLayout.LayoutParams(expandedOneU.getLayoutParams());
+                    new SizeAdaptiveLayout.LayoutParams(contentViewLocal.getLayoutParams());
             params.minHeight = minHeight;
             params.maxHeight = minHeight;
-            adaptive.addView(expandedOneU, params);
+            adaptive.addView(contentViewLocal, params);
         }
-        if (expandedLarge != null) {
+        if (bigContentViewLocal != null) {
             SizeAdaptiveLayout.LayoutParams params =
-                    new SizeAdaptiveLayout.LayoutParams(expandedLarge.getLayoutParams());
+                    new SizeAdaptiveLayout.LayoutParams(bigContentViewLocal.getLayoutParams());
             params.minHeight = minHeight+1;
             params.maxHeight = maxHeight;
-            adaptive.addView(expandedLarge, params);
+            adaptive.addView(bigContentViewLocal, params);
         }
         row.setDrawingCacheEnabled(true);
 
         applyLegacyRowBackground(sbn, content);
-
-        row.setTag(R.id.expandable_tag, Boolean.valueOf(large != null));
 
         if (MULTIUSER_DEBUG) {
             TextView debug = (TextView) row.findViewById(R.id.debug_info);
@@ -808,9 +698,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         entry.row = row;
+        entry.row.setRowHeight(mRowHeight);
         entry.content = content;
-        entry.expanded = expandedOneU;
-        entry.setLargeView(expandedLarge);
+        entry.expanded = contentViewLocal;
+        entry.setBigContentView(bigContentViewLocal);
 
         return true;
     }
@@ -819,13 +710,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         return new NotificationClicker(intent, pkg, tag, id);
     }
 
-    private class NotificationClicker implements View.OnClickListener {
+    protected class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
         private String mPkg;
         private String mTag;
         private int mId;
 
-        NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
+        public NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
             mIntent = intent;
             mPkg = pkg;
             mTag = tag;
@@ -855,7 +746,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mIntent.send(mContext, 0, overlay);
                 } catch (PendingIntent.CanceledException e) {
                     // the stack trace isn't very helpful here.  Just log the exception message.
-                    Slog.w(TAG, "Sending contentIntent failed: " + e);
+                    Log.w(TAG, "Sending contentIntent failed: " + e);
                 }
 
                 KeyguardManager kgm =
@@ -872,9 +763,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             // close the shade if it was open
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             visibilityChanged(false);
-
-            // If this click was on the intruder alert, hide that instead
-//            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
         }
     }
     /**
@@ -913,7 +801,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected StatusBarNotification removeNotificationViews(IBinder key) {
         NotificationData.Entry entry = mNotificationData.remove(key);
         if (entry == null) {
-            Slog.w(TAG, "removeNotification for unknown key: " + key);
+            Log.w(TAG, "removeNotification for unknown key: " + key);
             return null;
         }
         // Remove the expanded view.
@@ -925,10 +813,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry.notification;
     }
 
-    protected StatusBarIconView addNotificationViews(IBinder key,
+    protected NotificationData.Entry createNotificationViews(IBinder key,
             StatusBarNotification notification) {
         if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
+            Log.d(TAG, "createNotificationViews(key=" + key + ", notification=" + notification);
         }
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
@@ -953,51 +841,41 @@ public abstract class BaseStatusBar extends SystemUI implements
                     + notification);
             return null;
         }
+        return entry;
+    }
 
+    protected void addNotificationViews(NotificationData.Entry entry) {
         // Add the expanded view and icon.
         int pos = mNotificationData.add(entry);
         if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews: added at " + pos);
+            Log.d(TAG, "addNotificationViews: added at " + pos);
         }
         updateExpansionStates();
         updateNotificationIcons();
-
-        return iconView;
     }
 
-    protected boolean expandView(NotificationData.Entry entry, boolean expand) {
-        int rowHeight =
-                mContext.getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
-        ViewGroup.LayoutParams lp = entry.row.getLayoutParams();
-        if (entry.expandable() && expand) {
-            if (DEBUG) Slog.d(TAG, "setting expanded row height to WRAP_CONTENT");
-            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        } else {
-            if (DEBUG) Slog.d(TAG, "setting collapsed row height to " + rowHeight);
-            lp.height = rowHeight;
-        }
-        entry.row.setLayoutParams(lp);
-        return expand;
+    private void addNotificationViews(IBinder key, StatusBarNotification notification) {
+        addNotificationViews(createNotificationViews(key, notification));
     }
 
     protected void updateExpansionStates() {
         int N = mNotificationData.size();
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = mNotificationData.get(i);
-            if (!entry.userLocked()) {
+            if (!entry.row.isUserLocked()) {
                 if (i == (N-1)) {
-                    if (DEBUG) Slog.d(TAG, "expanding top notification at " + i);
-                    expandView(entry, true);
+                    if (DEBUG) Log.d(TAG, "expanding top notification at " + i);
+                    entry.row.setExpanded(true);
                 } else {
-                    if (!entry.userExpanded()) {
-                        if (DEBUG) Slog.d(TAG, "collapsing notification at " + i);
-                        expandView(entry, false);
+                    if (!entry.row.isUserExpanded()) {
+                        if (DEBUG) Log.d(TAG, "collapsing notification at " + i);
+                        entry.row.setExpanded(false);
                     } else {
-                        if (DEBUG) Slog.d(TAG, "ignoring user-modified notification at " + i);
+                        if (DEBUG) Log.d(TAG, "ignoring user-modified notification at " + i);
                     }
                 }
             } else {
-                if (DEBUG) Slog.d(TAG, "ignoring notification being held by user at " + i);
+                if (DEBUG) Log.d(TAG, "ignoring notification being held by user at " + i);
             }
         }
     }
@@ -1015,11 +893,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
+        if (DEBUG) Log.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
 
         final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
         if (oldEntry == null) {
-            Slog.w(TAG, "updateNotification for unknown key: " + key);
+            Log.w(TAG, "updateNotification for unknown key: " + key);
             return;
         }
 
@@ -1032,13 +910,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         final RemoteViews bigContentView = notification.getNotification().bigContentView;
 
         if (DEBUG) {
-            Slog.d(TAG, "old notification: when=" + oldNotification.getNotification().when
+            Log.d(TAG, "old notification: when=" + oldNotification.getNotification().when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " expanded=" + oldEntry.expanded
                     + " contentView=" + oldContentView
                     + " bigContentView=" + oldBigContentView
                     + " rowParent=" + oldEntry.row.getParent());
-            Slog.d(TAG, "new notification: when=" + notification.getNotification().when
+            Log.d(TAG, "new notification: when=" + notification.getNotification().when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " contentView=" + contentView
                     + " bigContentView=" + bigContentView);
@@ -1055,8 +933,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         // large view may be null
         boolean bigContentsUnchanged =
-                (oldEntry.getLargeView() == null && bigContentView == null)
-                || ((oldEntry.getLargeView() != null && bigContentView != null)
+                (oldEntry.getBigContentView() == null && bigContentView == null)
+                || ((oldEntry.getBigContentView() != null && bigContentView != null)
                     && bigContentView.getPackage() != null
                     && oldBigContentView.getPackage() != null
                     && oldBigContentView.getPackage().equals(bigContentView.getPackage())
@@ -1071,23 +949,23 @@ public abstract class BaseStatusBar extends SystemUI implements
                         oldEntry.notification.getNotification().tickerText);
         boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
         if (contentsUnchanged && bigContentsUnchanged && (orderUnchanged || isTopAnyway)) {
-            if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
+            if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
-                // Reapply the RemoteViews
-                contentView.reapply(mContext, oldEntry.expanded, mOnClickHandler);
-                if (bigContentView != null && oldEntry.getLargeView() != null) {
-                    bigContentView.reapply(mContext, oldEntry.getLargeView(), mOnClickHandler);
+                updateNotificationViews(oldEntry, notification);
+
+                if (ENABLE_HEADS_UP && mInterruptingNotificationEntry != null
+                        && oldNotification == mInterruptingNotificationEntry.notification) {
+                    if (!shouldInterrupt(notification)) {
+                        if (DEBUG) Log.d(TAG, "no longer interrupts!");
+                        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+                    } else {
+                        if (DEBUG) Log.d(TAG, "updating the current heads up:" + notification);
+                        mInterruptingNotificationEntry.notification = notification;
+                        updateNotificationViews(mInterruptingNotificationEntry, notification);
+                    }
                 }
-                // update the contentIntent
-                final PendingIntent contentIntent = notification.getNotification().contentIntent;
-                if (contentIntent != null) {
-                    final View.OnClickListener listener = makeClicker(contentIntent,
-                            notification.getPackageName(), notification.getTag(), notification.getId());
-                    oldEntry.content.setOnClickListener(listener);
-                } else {
-                    oldEntry.content.setOnClickListener(null);
-                }
+
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
                         notification.getUser(),
@@ -1102,22 +980,22 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
-                Slog.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
+                Log.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
                 removeNotificationViews(key);
                 addNotificationViews(key, notification);
             }
         } else {
-            if (DEBUG) Slog.d(TAG, "not reusing notification for key: " + key);
-            if (DEBUG) Slog.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
-            if (DEBUG) Slog.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
-            if (DEBUG) Slog.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
-            final boolean wasExpanded = oldEntry.userExpanded();
+            if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
+            if (DEBUG) Log.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
+            if (DEBUG) Log.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
+            if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
+            final boolean wasExpanded = oldEntry.row.isUserExpanded();
             removeNotificationViews(key);
-            addNotificationViews(key, notification);
+            addNotificationViews(key, notification);  // will also replace the heads up
             if (wasExpanded) {
                 final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
-                expandView(newEntry, true);
-                newEntry.setUserExpanded(true);
+                newEntry.row.setExpanded(true);
+                newEntry.row.setUserExpanded(true);
             }
         }
 
@@ -1127,7 +1005,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Is this for you?
         boolean isForCurrentUser = notificationIsForCurrentUser(notification);
-        if (DEBUG) Slog.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
+        if (DEBUG) Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
 
         // Restart the ticker if it's still running
         if (updateTicker && isForCurrentUser) {
@@ -1138,17 +1016,57 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    }
 
-        // See if we need to update the intruder.
-        if (ENABLE_INTRUDERS && oldNotification == mCurrentlyIntrudingNotification) {
-            if (DEBUG) Slog.d(TAG, "updating the current intruder:" + notification);
-            // XXX: this is a hack for Alarms. The real implementation will need to *update*
-            // the intruder.
-            if (notification.getNotification().fullScreenIntent == null) { // TODO(dsandler): consistent logic with add()
-                if (DEBUG) Slog.d(TAG, "no longer intrudes!");
-                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
-            }
+    private void updateNotificationViews(NotificationData.Entry entry,
+            StatusBarNotification notification) {
+        final RemoteViews contentView = notification.getNotification().contentView;
+        final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        // Reapply the RemoteViews
+        contentView.reapply(mContext, entry.expanded, mOnClickHandler);
+        if (bigContentView != null && entry.getBigContentView() != null) {
+            bigContentView.reapply(mContext, entry.getBigContentView(), mOnClickHandler);
         }
+        // update the contentIntent
+        final PendingIntent contentIntent = notification.getNotification().contentIntent;
+        if (contentIntent != null) {
+            final View.OnClickListener listener = makeClicker(contentIntent,
+                    notification.getPackageName(), notification.getTag(), notification.getId());
+            entry.content.setOnClickListener(listener);
+        } else {
+            entry.content.setOnClickListener(null);
+        }
+    }
+
+    protected void notifyHeadsUpScreenOn(boolean screenOn) {
+        if (!screenOn && mInterruptingNotificationEntry != null) {
+            mHandler.sendEmptyMessage(MSG_ESCALATE_HEADS_UP);
+        }
+    }
+
+    protected boolean shouldInterrupt(StatusBarNotification sbn) {
+        Notification notification = sbn.getNotification();
+        // some predicates to make the boolean logic legible
+        boolean isNoisy = (notification.defaults & Notification.DEFAULT_SOUND) != 0
+                || (notification.defaults & Notification.DEFAULT_VIBRATE) != 0
+                || notification.sound != null
+                || notification.vibrate != null;
+        boolean isHighPriority = sbn.getScore() >= INTERRUPTION_THRESHOLD;
+        boolean isFullscreen = notification.fullScreenIntent != null;
+        boolean isAllowed = notification.extras.getInt(Notification.EXTRA_AS_HEADS_UP,
+                Notification.HEADS_UP_ALLOWED) != Notification.HEADS_UP_NEVER;
+
+        boolean interrupt = (isFullscreen || (isHighPriority && isNoisy))
+                && isAllowed
+                && mPowerManager.isScreenOn()
+                && !mKeyguardManager.isKeyguardLocked();
+        try {
+            interrupt = interrupt && !mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.d(TAG, "failed to query dream manager", e);
+        }
+        if (DEBUG) Log.d(TAG, "interrupt: " + interrupt);
+        return interrupt;
     }
 
     // Q: What kinds of notifications should show during setup?
@@ -1171,5 +1089,16 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean inKeyguardRestrictedInputMode() {
         KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         return km.inKeyguardRestrictedInputMode();
+    }
+
+    public void setInteracting(int barWindow, boolean interacting) {
+        // hook for subclasses
+    }
+
+    public void destroy() {
+        if (mSearchPanelView != null) {
+            mWindowManager.removeViewImmediate(mSearchPanelView);
+        }
+        mContext.unregisterReceiver(mBroadcastReceiver);
     }
 }

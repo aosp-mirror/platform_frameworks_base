@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>GoogleAuthUtil | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -681,7 +688,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -701,7 +708,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -846,22 +853,30 @@ Summary:
 
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#GOOGLE_ACCOUNT_TYPE">GOOGLE_ACCOUNT_TYPE</a></td>
         <td class="jd-descrcol" width="100%">Google Account type string.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_VISIBLE_ACTIVITIES">KEY_REQUEST_VISIBLE_ACTIVITIES</a></td>
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></td>
         <td class="jd-descrcol" width="100%">Bundle key for specifying which user's app activity (moment) types can
  be written to Google.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_VISIBLE_ACTIVITIES">KEY_REQUEST_VISIBLE_ACTIVITIES</a></td>
+        <td class="jd-descrcol" width="100%">See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></code>
+</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_SUPPRESS_PROGRESS_SCREEN">KEY_SUPPRESS_PROGRESS_SCREEN</a></td>
         <td class="jd-descrcol" width="100%">Adding KEY_SUPPRESS_PROGRESS will suppress the progress screen shown
  when getting a token when added as a boolean <code>true</code> option while
@@ -900,10 +915,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">getToken</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">getToken</a></span>(Context context, String accountName, String scope)</nobr>
         
         <div class="jd-descrdiv">See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code>.</div>
   
@@ -918,10 +933,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken</a></span>(Context context, String accountName, String scope, Bundle extras)</nobr>
         
         <div class="jd-descrdiv">Gets a token to be consumed by some specified services on behalf of a
  specified user account.</div>
@@ -937,10 +952,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras)</nobr>
         
         <div class="jd-descrdiv">Authenticates the user and returns a valid Google authentication token, or throws an
  <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.</div>
@@ -956,10 +971,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras, <a href="/reference/android/content/Intent.html">Intent</a> callback)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras, Intent callback)</nobr>
         
         <div class="jd-descrdiv">Authenticates the user and returns a valid Google authentication token, or throws an
  <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.</div>
@@ -975,10 +990,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras, <a href="/reference/java/lang/String.html">String</a> authority, <a href="/reference/android/os/Bundle.html">Bundle</a> syncBundle)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras, String authority, Bundle syncBundle)</nobr>
         
         <div class="jd-descrdiv">Authenticates the user and returns a valid Google authentication token, or throws an
  <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.</div>
@@ -997,7 +1012,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#invalidateToken(android.content.Context, java.lang.String)">invalidateToken</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> token)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#invalidateToken(android.content.Context, java.lang.String)">invalidateToken</a></span>(Context context, String token)</nobr>
         
         <div class="jd-descrdiv">Invalidates the specified token with respect to the <code><a href="/reference/android/content/Context.html">Context</a></code>.</div>
   
@@ -1027,7 +1042,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1046,7 +1061,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1065,7 +1080,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1094,7 +1109,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1158,7 +1173,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1257,7 +1272,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         GOOGLE_ACCOUNT_TYPE
     </h4>
@@ -1287,7 +1302,7 @@ From class
 
 
 
-<A NAME="KEY_REQUEST_VISIBLE_ACTIVITIES"></A>
+<A NAME="KEY_REQUEST_ACTIONS"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1295,9 +1310,9 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
-        KEY_REQUEST_VISIBLE_ACTIVITIES
+        KEY_REQUEST_ACTIONS
     </h4>
       <div class="api-level">
         
@@ -1320,10 +1335,48 @@ From class
  moments</a> for the full list of valid activity types. Example usage:
  <pre>
      Bundle bundle = new Bundle();
-     bundle.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES,
+     bundle.putString(GoogleAuthUtil.KEY_REQUEST_ACTIONS,
               "http://schemas.google.com/AddActivity http://schemas.google.com/BuyActivity");
      String token = GoogleAuthUtil.getToken(context, accountName, Scopes.PLUS_LOGIN, bundle);
  </pre>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "request_visible_actions"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="KEY_REQUEST_VISIBLE_ACTIVITIES"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        KEY_REQUEST_VISIBLE_ACTIVITIES
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></code>
 </p></div>
 
     
@@ -1349,7 +1402,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_SUPPRESS_PROGRESS_SCREEN
     </h4>
@@ -1412,10 +1465,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getToken</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope)</span>
+      <span class="normal">(Context context, String accountName, String scope)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1431,7 +1484,7 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IOException</td>
             <td></td>
         </tr>  
         <tr>
@@ -1459,10 +1512,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getToken</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras)</span>
+      <span class="normal">(Context context, String accountName, String scope, Bundle extras)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1575,11 +1628,11 @@ From class
          authentication error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IOException</td>
             <td>signaling a potentially transient error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if the method is invoked in the main
          event thread.
 </td>
@@ -1601,10 +1654,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getTokenWithNotification</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras)</span>
+      <span class="normal">(Context context, String accountName, String scope, Bundle extras)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1684,11 +1737,11 @@ From class
          authentication error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IOException</td>
             <td>signaling a potentially transient error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if the method is invoked in the main
          event thread.
 </td>
@@ -1710,10 +1763,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getTokenWithNotification</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras, <a href="/reference/android/content/Intent.html">Intent</a> callback)</span>
+      <span class="normal">(Context context, String accountName, String scope, Bundle extras, Intent callback)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1802,11 +1855,11 @@ From class
          authentication error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IOException</td>
             <td>signaling a potentially transient error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if the method is invoked in the main
          event thread.
 </td>
@@ -1828,10 +1881,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getTokenWithNotification</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> accountName, <a href="/reference/java/lang/String.html">String</a> scope, <a href="/reference/android/os/Bundle.html">Bundle</a> extras, <a href="/reference/java/lang/String.html">String</a> authority, <a href="/reference/android/os/Bundle.html">Bundle</a> syncBundle)</span>
+      <span class="normal">(Context context, String accountName, String scope, Bundle extras, String authority, Bundle syncBundle)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1924,11 +1977,11 @@ From class
          authentication error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IOException</td>
             <td>signaling a potentially transient error.</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if the method is invoked in the main
          event thread.
 </td>
@@ -1953,7 +2006,7 @@ From class
         void
       </span>
       <span class="sympad">invalidateToken</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/java/lang/String.html">String</a> token)</span>
+      <span class="normal">(Context context, String token)</span>
     </h4>
       <div class="api-level">
         <div></div>

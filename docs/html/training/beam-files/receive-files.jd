@@ -1,0 +1,313 @@
+page.title=Receiving Files from Another Device
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li><a href="#IntentFilter">Respond to a Request to Display Data</a></li>
+    <li><a href="#RequestPermissions">Request File Permissions</a></li>
+    <li><a href="#GetFilePath">Get the Directory for Copied Files</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html#ContentURIs"
+        >Content URIs</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal"
+        >Using the External Storage</a>
+    </li>
+</ul>
+
+</div>
+</div>
+
+<p>
+    Android Beam file transfer copies files to a special directory on the receiving device. It also
+    scans the copied files using the Android Media Scanner and adds entries for media files to
+    the {@link android.provider.MediaStore} provider. This lesson shows you how to respond when the
+    file copy is complete, and how to locate the copied files on the receiving device.
+</p>
+<h2 id="IntentFilter">Respond to a Request to Display Data</h2>
+<p>
+    When Android Beam file transfer finishes copying files to the receiving device, it posts a
+    notification containing an {@link android.content.Intent} with the action
+    {@link android.content.Intent#ACTION_VIEW ACTION_VIEW}, the MIME type of the first file that
+    was transferred, and a URI that points to the first file. When the user clicks the notification,
+    this intent is sent out to the system. To have your app respond to this intent, add an
+    <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html"
+    >&lt;intent-filter&gt;</a></code> element for the
+    <code><a href="{@docRoot}guide/topics/manifest/activity-element.html"
+    >&lt;activity&gt;</a></code> element of the {@link android.app.Activity} that should respond.
+    In the <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html"
+    >&lt;intent-filter&gt;</a></code> element, add the following child elements:
+</p>
+<dl>
+    <dt>
+        <code><a href="{@docRoot}guide/topics/manifest/action-element.html"
+        >&lt;action android:name="android.intent.action.VIEW" /&gt;</a></code>
+    </dt>
+    <dd>
+        Matches the {@link android.content.Intent#ACTION_VIEW ACTION_VIEW} intent sent from the
+        notification.
+    </dd>
+    <dt>
+        <code><a href="{@docRoot}guide/topics/manifest/category-element.html"
+        >&lt;category android:name="android.intent.category.CATEGORY_DEFAULT" /&gt;</a></code>
+    </dt>
+    <dd>
+        Matches an {@link android.content.Intent} that doesn't have an explicit category.
+    </dd>
+    <dt>
+        <code><a href="{@docRoot}guide/topics/manifest/data-element.html"
+        >&lt;data android:mimeType="<i>mime-type</i>" /&gt;</a></code>
+    </dt>
+    <dd>
+        Matches a MIME type. Specify only those MIME types that your app can handle.
+    </dd>
+</dl>
+<p>
+    For example, the following snippet shows you how to add an intent filter that
+    triggers the activity <code>com.example.android.nfctransfer.ViewActivity</code>:
+</p>
+<pre>
+    &lt;activity
+        android:name="com.example.android.nfctransfer.ViewActivity"
+        android:label="Android Beam Viewer" &gt;
+        ...
+        &lt;intent-filter&gt;
+            &lt;action android:name="android.intent.action.VIEW"/&gt;
+            &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+            ...
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+</pre>
+<p class="note">
+    <strong>Note:</strong> Android Beam file transfer is not the only source of an
+    {@link android.content.Intent#ACTION_VIEW ACTION_VIEW} intent. Other apps on the receiving
+    device can also send an {@link android.content.Intent} with this action.
+    Handling this situation is discussed in the section <a href="#GetDirectory"
+    >Get the directory from a content URI</a>.
+</p>
+<h2 id="RequestPermissions">Request File Permissions</h2>
+<p>
+    To read files that Android Beam file transfer copies to the device, request the permission
+    {@link android.Manifest.permission#READ_EXTERNAL_STORAGE READ_EXTERNAL_STORAGE}. For example:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /&gt;</pre>
+<p>
+    If you want to copy transferred files to your app's own storage area, request the permission
+    {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE} instead.
+    {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE} includes
+    {@link android.Manifest.permission#READ_EXTERNAL_STORAGE READ_EXTERNAL_STORAGE}.
+</p>
+<p class="note">
+    <strong>Note:</strong> As of Android 4.2.2 (API level 17), the permission
+    {@link android.Manifest.permission#READ_EXTERNAL_STORAGE READ_EXTERNAL_STORAGE} is
+    only enforced if the user chooses to do so. Future versions of the platform may require this
+    permission in all cases. To ensure forward compatibility, request the permission now, before it
+    becomes required.
+</p>
+<p>
+    Since your app has control over its internal storage area, you don't need to request
+    write permission to copy a transferred file to your internal storage area.
+</p>
+<h2 id="GetFilePath">Get the Directory for Copied Files</h2>
+<p>
+    Android Beam file transfer copies all the files in a single transfer to one directory
+    on the receiving device. The URI in the content {@link android.content.Intent} sent by the
+    Android Beam file transfer notification points to the first transferred file. However, your
+    app may also receive an {@link android.content.Intent#ACTION_VIEW ACTION_VIEW} intent from a
+    source other than Android Beam file transfer. To determine how you should handle the incoming
+    {@link android.content.Intent}, you need to examine its scheme and authority.
+</p>
+<p>
+    To get the scheme for the URI, call {@link android.net.Uri#getScheme() Uri.getScheme()}. The
+    following code snippet shows you how to determine the scheme and handle the URI accordingly:
+</p>
+<pre>
+public class MainActivity extends Activity {
+    ...
+    // A File object containing the path to the transferred files
+    private File mParentPath;
+    // Incoming Intent
+    private Intent mIntent;
+    ...
+    /*
+     * Called from onNewIntent() for a SINGLE_TOP Activity
+     * or onCreate() for a new Activity. For onNewIntent(),
+     * remember to call setIntent() to store the most
+     * current Intent
+     *
+     */
+    private void handleViewIntent() {
+        ...
+        // Get the Intent action
+        mIntent = getIntent();
+        String action = mIntent.getAction();
+        /*
+         * For ACTION_VIEW, the Activity is being asked to display data.
+         * Get the URI.
+         */
+        if (TextUtils.equals(action, Intent.ACTION_VIEW)) {
+            // Get the URI from the Intent
+            Uri beamUri = mIntent.getData();
+            /*
+             * Test for the type of URI, by getting its scheme value
+             */
+            if (TextUtils.equals(beamUri.getScheme(), "file")) {
+                mParentPath = handleFileUri(beamUri);
+            } else if (TextUtils.equals(
+                    beamUri.getScheme(), "content")) {
+                mParentPath = handleContentUri(beamUri);
+            }
+        }
+        ...
+    }
+    ...
+}
+</pre>
+<h3>Get the directory from a file URI</h3>
+<p>
+    If the incoming {@link android.content.Intent} contains a file URI, the URI contains the
+    absolute file name of a file, including the full directory path and file name. For Android Beam
+    file transfer, the directory path points to the location of the other transferred files, if
+    any. To get the directory path, get the path part of the URI, which contains all of the URI
+    except the <code>file:</code> prefix. Create a {@link java.io.File} from the path part, then
+    get the parent path of the {@link java.io.File}:
+</p>
+<pre>
+    ...
+    public String handleFileUri(Uri beamUri) {
+        // Get the path part of the URI
+        String fileName = beamUri.getPath();
+        // Create a File object for this filename
+        File copiedFile = new File(fileName);
+        // Get a string containing the file's parent directory
+        return copiedFile.getParent();
+    }
+    ...
+</pre>
+
+<h3 id="GetDirectory">Get the directory from a content URI</h3>
+<p>
+    If the incoming {@link android.content.Intent} contains a content URI, the URI may point to a
+    directory and file name stored in the {@link android.provider.MediaStore} content provider. You
+    can detect a content URI for {@link android.provider.MediaStore} by testing the URI's
+    authority value. A content URI for {@link android.provider.MediaStore} may come from
+    Android Beam file transfer or from another app, but in both cases you can retrieve a directory
+    and file name for the content URI.
+</p>
+<p>
+    You can also receive an incoming {@link android.content.Intent#ACTION_VIEW ACTION_VIEW}
+    intent containing a content URI for a content provider other than
+    {@link android.provider.MediaStore}. In this case, the content URI doesn't contain the
+    {@link android.provider.MediaStore} authority value, and the content URI usually doesn't point
+    to a directory.
+</p>
+<p class="note">
+    <strong>Note:</strong> For Android Beam file transfer, you receive a content URI in the
+    {@link android.content.Intent#ACTION_VIEW ACTION_VIEW} intent if the first incoming file
+    has a MIME type of "audio/*", "image/*", or "video/*", indicating that the file is media-
+    related. Android Beam file transfer indexes the media files it transfers by running Media
+    Scanner on the directory where it stores transferred files. Media Scanner writes its results
+    to the {@link android.provider.MediaStore} content provider, then it passes a content URI
+    for the first file back to Android Beam file transfer. This content URI is the one you
+    receive in the notification {@link android.content.Intent}. To get the directory
+    of the first file, you retrieve it from {@link android.provider.MediaStore} using the content
+    URI.
+</p>
+<h3>Determine the content provider</h3>
+<p>
+    To determine if you can retrieve a file directory from the content URI, determine the
+    the content provider associated with the URI by calling
+    {@link android.net.Uri#getAuthority Uri.getAuthority()} to get the URI's authority. The
+    result has two possible values:
+</p>
+<dl>
+    <dt>
+        {@link android.provider.MediaStore#AUTHORITY MediaStore.AUTHORITY}
+    </dt>
+    <dd>
+        The URI is for a file or files tracked by {@link android.provider.MediaStore}. Retrieve the
+        full file name from {@link android.provider.MediaStore}, and get directory from the file
+        name.
+    </dd>
+    <dt>
+        Any other authority value
+    </dt>
+    <dd>
+        A content URI from another content provider. Display the data associated with the content
+        URI, but don't get the file directory.
+    </dd>
+</dl>
+<p>
+    To get the directory for a {@link android.provider.MediaStore} content URI,
+    run a query that specifies the incoming content URI for the {@link android.net.Uri} argument and
+    the column {@link android.provider.MediaStore.MediaColumns#DATA MediaColumns.DATA} for the
+    projection. The returned {@link android.database.Cursor} contains the full path and name for
+    the file represented by the URI. This path also contains all the other files that Android Beam
+    file transfer just copied to the device.
+</p>
+<p>
+    The following snippet shows you how to test the authority of the content URI and retrieve the
+    the path and file name for the transferred file:
+</p>
+<pre>
+    ...
+    public String handleContentUri(Uri beamUri) {
+        // Position of the filename in the query Cursor
+        int filenameIndex;
+        // File object for the filename
+        File copiedFile;
+        // The filename stored in MediaStore
+        String fileName;
+        // Test the authority of the URI
+        if (!TextUtils.equals(beamUri.getAuthority(), MediaStore.AUTHORITY)) {
+            /*
+             * Handle content URIs for other content providers
+             */
+        // For a MediaStore content URI
+        } else {
+            // Get the column that contains the file name
+            String[] projection = { MediaStore.MediaColumns.DATA };
+            Cursor pathCursor =
+                    getContentResolver().query(beamUri, projection,
+                    null, null, null);
+            // Check for a valid cursor
+            if (pathCursor != null &amp;&amp;
+                    pathCursor.moveToFirst()) {
+                // Get the column index in the Cursor
+                filenameIndex = pathCursor.getColumnIndex(
+                        MediaStore.MediaColumns.DATA);
+                // Get the full file name including path
+                fileName = pathCursor.getString(filenameIndex);
+                // Create a File object for the filename
+                copiedFile = new File(fileName);
+                // Return the parent directory of the file
+                return new File(copiedFile.getParent());
+             } else {
+                // The query didn't work; return null
+                return null;
+             }
+        }
+    }
+    ...
+</pre>
+<p>
+    To learn more about retrieving data from a content provider, see the section
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html#SimpleQuery"
+    >Retrieving Data from the Provider</a>.
+</p>

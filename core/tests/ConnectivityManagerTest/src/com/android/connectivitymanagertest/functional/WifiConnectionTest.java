@@ -16,35 +16,19 @@
 
 package com.android.connectivitymanagertest.functional;
 
-import com.android.connectivitymanagertest.ConnectivityManagerTestActivity;
+import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 import com.android.connectivitymanagertest.ConnectivityManagerTestRunner;
 
-import android.R;
-import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Intent;
 import android.content.Context;
-import android.content.res.Resources;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WifiConfiguration.Status;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.ConnectivityManager;
-import android.net.DhcpInfo;
-import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.Settings;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
-import com.android.internal.util.AsyncChannel;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,39 +40,25 @@ import java.util.Set;
  *          -w com.android.connectivitymanagertest/.ConnectivityManagerTestRunner
  */
 public class WifiConnectionTest
-    extends ActivityInstrumentationTestCase2<ConnectivityManagerTestActivity> {
+    extends ConnectivityManagerTestBase {
     private static final String TAG = "WifiConnectionTest";
     private static final boolean DEBUG = false;
     private List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
-    private ConnectivityManagerTestActivity mAct;
-    private ConnectivityManagerTestRunner mRunner;
-    private WifiManager mWifiManager = null;
-    private Set<WifiConfiguration> enabledNetworks = null;
-
-    public WifiConnectionTest() {
-        super(ConnectivityManagerTestActivity.class);
-    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mRunner = ((ConnectivityManagerTestRunner)getInstrumentation());
-        mWifiManager = (WifiManager) mRunner.getContext().getSystemService(Context.WIFI_SERVICE);
-
-        mAct = getActivity();
-
-        networks = mAct.loadNetworkConfigurations();
+        networks = loadNetworkConfigurations();
         if (DEBUG) {
             printNetworkConfigurations();
         }
 
         // enable Wifi and verify wpa_supplicant is started
-        assertTrue("enable Wifi failed", mAct.enableWifi());
-        sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT,
-                "interrupted while waiting for WPA_SUPPLICANT to start");
-        WifiInfo mConnection = mAct.mWifiManager.getConnectionInfo();
+        assertTrue("enable Wifi failed", enableWifi());
+        sleep(2 * SHORT_TIMEOUT, "interrupted while waiting for WPA_SUPPLICANT to start");
+        WifiInfo mConnection = mWifiManager.getConnectionInfo();
         assertNotNull(mConnection);
-        assertTrue("wpa_supplicant is not started ", mAct.mWifiManager.pingSupplicant());
+        assertTrue("wpa_supplicant is not started ", mWifiManager.pingSupplicant());
     }
 
     private void printNetworkConfigurations() {
@@ -101,8 +71,7 @@ public class WifiConnectionTest
 
     @Override
     public void tearDown() throws Exception {
-        log("tearDown()");
-        mAct.removeConfiguredNetworksAndDisableWifi();
+        removeConfiguredNetworksAndDisableWifi();
         super.tearDown();
     }
 
@@ -114,20 +83,20 @@ public class WifiConnectionTest
     private void connectToWifi(WifiConfiguration config) {
         // step 1: connect to the test access point
         assertTrue("failed to connect to " + config.SSID,
-                mAct.connectToWifiWithConfiguration(config));
+                connectToWifiWithConfiguration(config));
 
         // step 2: verify Wifi state and network state;
-        assertTrue(mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.CONNECTED, ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
+        assertTrue(waitForNetworkState(ConnectivityManager.TYPE_WIFI,
+                State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
 
         // step 3: verify the current connected network is the given SSID
-        assertNotNull("Wifi connection returns null", mAct.mWifiManager.getConnectionInfo());
+        assertNotNull("Wifi connection returns null", mWifiManager.getConnectionInfo());
         if (DEBUG) {
             log("config.SSID = " + config.SSID);
-            log("mAct.mWifiManager.getConnectionInfo.getSSID()" +
-                    mAct.mWifiManager.getConnectionInfo().getSSID());
+            log("mWifiManager.getConnectionInfo.getSSID()" +
+                    mWifiManager.getConnectionInfo().getSSID());
         }
-        assertTrue(config.SSID.contains(mAct.mWifiManager.getConnectionInfo().getSSID()));
+        assertTrue(config.SSID.contains(mWifiManager.getConnectionInfo().getSSID()));
     }
 
     private void sleep(long sometime, String errorMsg) {
@@ -149,8 +118,7 @@ public class WifiConnectionTest
             log("-- START Wi-Fi connection test to : " + ssid + " --");
             connectToWifi(networks.get(i));
             // wait for 2 minutes between wifi stop and start
-            sleep(ConnectivityManagerTestActivity.WIFI_STOP_START_INTERVAL,
-                  "interruped while connected to wifi");
+            sleep(WIFI_STOP_START_INTERVAL, "interruped while connected to wifi");
             log("-- END Wi-Fi connection test to " + ssid + " -- ");
         }
     }

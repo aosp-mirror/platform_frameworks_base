@@ -20,11 +20,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.BaseNetworkStateTracker;
 import android.net.LinkCapabilities;
+import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkStateTracker;
+import android.net.SamplingDataTracker;
+import android.net.WifiLinkQualityInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -37,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @hide
  */
-public class WifiStateTracker implements NetworkStateTracker {
+public class WifiStateTracker extends BaseNetworkStateTracker {
 
     private static final String NETWORKTYPE = "WIFI";
     private static final String TAG = "WifiStateTracker";
@@ -48,16 +51,16 @@ public class WifiStateTracker implements NetworkStateTracker {
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
-    private LinkProperties mLinkProperties;
-    private LinkCapabilities mLinkCapabilities;
-    private NetworkInfo mNetworkInfo;
     private NetworkInfo.State mLastState = NetworkInfo.State.UNKNOWN;
+
+    private WifiInfo mWifiInfo;
 
     /* For sending events to connectivity service handler */
     private Handler mCsHandler;
-    private Context mContext;
     private BroadcastReceiver mWifiStateReceiver;
     private WifiManager mWifiManager;
+
+    private SamplingDataTracker mSamplingDataTracker = new SamplingDataTracker();
 
     public WifiStateTracker(int netType, String networkName) {
         mNetworkInfo = new NetworkInfo(netType, 0, networkName, "");
@@ -120,6 +123,11 @@ public class WifiStateTracker implements NetworkStateTracker {
         mWifiManager.captivePortalCheckComplete();
     }
 
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
+        // not implemented
+    }
+
     /**
      * Turn the wireless radio off for a network.
      * @param turnOn {@code true} to turn the radio on, {@code false}
@@ -169,6 +177,7 @@ public class WifiStateTracker implements NetworkStateTracker {
     /**
      * Fetch NetworkInfo for the network
      */
+    @Override
     public NetworkInfo getNetworkInfo() {
         return new NetworkInfo(mNetworkInfo);
     }
@@ -176,6 +185,7 @@ public class WifiStateTracker implements NetworkStateTracker {
     /**
      * Fetch LinkProperties for the network
      */
+    @Override
     public LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
     }
@@ -186,8 +196,45 @@ public class WifiStateTracker implements NetworkStateTracker {
      *
      * @return a copy of this connections capabilities, may be empty but never null.
      */
+    @Override
     public LinkCapabilities getLinkCapabilities() {
         return new LinkCapabilities(mLinkCapabilities);
+    }
+
+    /**
+     * Return link info
+     * @return an object of type WifiLinkQualityInfo
+     */
+    @Override
+    public LinkQualityInfo getLinkQualityInfo() {
+        if (mNetworkInfo == null) {
+            // no data available yet; just return
+            return null;
+        }
+
+        WifiLinkQualityInfo li = new WifiLinkQualityInfo();
+        li.setNetworkType(mNetworkInfo.getType());
+
+        synchronized(mSamplingDataTracker.mSamplingDataLock) {
+            mSamplingDataTracker.setCommonLinkQualityInfoFields(li);
+            li.setTxGood(mSamplingDataTracker.getSampledTxPacketCount());
+            li.setTxBad(mSamplingDataTracker.getSampledTxPacketErrorCount());
+        }
+
+        // li.setTheoreticalRxBandwidth(??);
+        // li.setTheoreticalTxBandwidth(??);
+
+        if (mWifiInfo != null) {
+            li.setBssid(mWifiInfo.getBSSID());
+
+            int rssi = mWifiInfo.getRssi();
+            li.setRssi(rssi);
+
+            li.setNormalizedSignalStrength(mWifiManager.calculateSignalLevel(rssi,
+                    LinkQualityInfo.NORMALIZED_SIGNAL_STRENGTH_RANGE));
+        }
+
+        return li;
     }
 
     /**
@@ -219,6 +266,7 @@ public class WifiStateTracker implements NetworkStateTracker {
             if (intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 mNetworkInfo = (NetworkInfo) intent.getParcelableExtra(
                         WifiManager.EXTRA_NETWORK_INFO);
+
                 mLinkProperties = intent.getParcelableExtra(
                         WifiManager.EXTRA_LINK_PROPERTIES);
                 if (mLinkProperties == null) {
@@ -229,7 +277,9 @@ public class WifiStateTracker implements NetworkStateTracker {
                 if (mLinkCapabilities == null) {
                     mLinkCapabilities = new LinkCapabilities();
                 }
-                // don't want to send redundent state messages
+
+                mWifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
+                // don't want to send redundant state messages
                 // but send portal check detailed state notice
                 NetworkInfo.State state = mNetworkInfo.getState();
                 if (mLastState == state &&
@@ -237,13 +287,15 @@ public class WifiStateTracker implements NetworkStateTracker {
                     return;
                 } else {
                     mLastState = state;
+                    /* lets not sample traffic data across state changes */
+                    mSamplingDataTracker.resetSamplingData();
                 }
+
                 Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED,
                         new NetworkInfo(mNetworkInfo));
                 msg.sendToTarget();
             } else if (intent.getAction().equals(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION)) {
-                mLinkProperties = (LinkProperties) intent.getParcelableExtra(
-                        WifiManager.EXTRA_LINK_PROPERTIES);
+                mLinkProperties = intent.getParcelableExtra(WifiManager.EXTRA_LINK_PROPERTIES);
                 Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
                 msg.sendToTarget();
             }
@@ -268,4 +320,15 @@ public class WifiStateTracker implements NetworkStateTracker {
     public void supplyMessenger(Messenger messenger) {
         // not supported on this network
     }
+
+    @Override
+    public void startSampling(SamplingDataTracker.SamplingSnapshot s) {
+        mSamplingDataTracker.startSampling(s);
+    }
+
+    @Override
+    public void stopSampling(SamplingDataTracker.SamplingSnapshot s) {
+        mSamplingDataTracker.stopSampling(s);
+    }
 }
+

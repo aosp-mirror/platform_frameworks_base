@@ -23,6 +23,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.Display;
+import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -47,7 +48,7 @@ class StrictModeFlash {
             ctrl.setPosition(0, 0);
             ctrl.show();
             mSurface.copyFrom(ctrl);
-        } catch (SurfaceControl.OutOfResourcesException e) {
+        } catch (OutOfResourcesException e) {
         }
         mSurfaceControl = ctrl;
         mDrawNeeded = true;

@@ -155,6 +155,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
                     mInfo.type = Display.TYPE_HDMI;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                     mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;

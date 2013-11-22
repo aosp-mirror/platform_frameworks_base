@@ -58,6 +58,10 @@ static JMetricsID gFontMetricsInt_fieldID;
 static void defaultSettingsForAndroid(SkPaint* paint) {
     // GlyphID encoding is required because we are using Harfbuzz shaping
     paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+
+    SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
+    paintOpts.setUseFontFallbacks(true);
+    paint->setPaintOptionsAndroid(paintOpts);
 }
 
 class SkPaintGlue {
@@ -109,7 +113,7 @@ public:
     static void setHinting(JNIEnv* env, jobject paint, jint mode) {
         NPE_CHECK_RETURN_VOID(env, paint);
         GraphicsJNI::getNativePaint(env, paint)->setHinting(
-                mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kSlight_Hinting);
+                mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kNormal_Hinting);
     }
 
     static void setAntiAlias(JNIEnv* env, jobject paint, jboolean aa) {
@@ -300,7 +304,10 @@ public:
         ScopedUtfChars localeChars(env, locale);
         char langTag[ULOC_FULLNAME_CAPACITY];
         toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, localeChars.c_str());
-        obj->setLanguage(SkLanguage(langTag));
+
+        SkPaintOptionsAndroid paintOpts = obj->getPaintOptionsAndroid();
+        paintOpts.setLanguage(langTag);
+        obj->setPaintOptionsAndroid(paintOpts);
     }
 
     static jfloat getTextSize(JNIEnv* env, jobject paint) {
@@ -757,8 +764,6 @@ public:
     static void doTextBounds(JNIEnv* env, const jchar* text, int count,
                              jobject bounds, const SkPaint& paint, jint bidiFlags) {
         SkRect  r;
-        r.set(0,0,0,0);
-
         SkIRect ir;
 
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,

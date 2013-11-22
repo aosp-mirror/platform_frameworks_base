@@ -1,4 +1,0 @@
-/sdcard/android/layout_tests/http/tests/xmlhttprequest/basic-auth.html
-/sdcard/android/layout_tests/http/tests/xmlhttprequest/failed-auth.html
-/sdcard/android/layout_tests/http/tests/xmlhttprequest/cross-origin-authorization.html
-/sdcard/android/layout_tests/http/tests/xmlhttprequest/cross-origin-no-authorization.html

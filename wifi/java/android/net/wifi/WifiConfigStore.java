@@ -31,26 +31,33 @@ import android.net.wifi.WifiConfiguration.Status;
 import android.net.wifi.NetworkUpdateResult;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.os.Message;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.security.KeyStore;
 import android.text.TextUtils;
+import android.util.LocalLog;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -108,7 +115,10 @@ class WifiConfigStore {
 
     private Context mContext;
     private static final String TAG = "WifiConfigStore";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
+    private static final boolean VDBG = false;
+
+    private static final String SUPPLICANT_CONFIG_FILE = "/data/misc/wifi/wpa_supplicant.conf";
 
     /* configured networks with network id as the key */
     private HashMap<Integer, WifiConfiguration> mConfiguredNetworks =
@@ -141,8 +151,12 @@ class WifiConfigStore {
     private static final String PROXY_SETTINGS_KEY = "proxySettings";
     private static final String PROXY_HOST_KEY = "proxyHost";
     private static final String PROXY_PORT_KEY = "proxyPort";
+    private static final String PROXY_PAC_FILE = "proxyPac";
     private static final String EXCLUSION_LIST_KEY = "exclusionList";
     private static final String EOS = "eos";
+
+    private final LocalLog mLocalLog;
+    private final WpaConfigFileObserver mFileObserver;
 
     private WifiNative mWifiNative;
     private final KeyStore mKeyStore = KeyStore.getInstance();
@@ -150,7 +164,32 @@ class WifiConfigStore {
     WifiConfigStore(Context c, WifiNative wn) {
         mContext = c;
         mWifiNative = wn;
+
+        if (VDBG) {
+            mLocalLog = mWifiNative.getLocalLog();
+            mFileObserver = new WpaConfigFileObserver();
+            mFileObserver.startWatching();
+        } else {
+            mLocalLog = null;
+            mFileObserver = null;
+        }
     }
+
+    class WpaConfigFileObserver extends FileObserver {
+
+        public WpaConfigFileObserver() {
+            super(SUPPLICANT_CONFIG_FILE, CLOSE_WRITE);
+        }
+
+        @Override
+        public void onEvent(int event, String path) {
+            if (event == CLOSE_WRITE) {
+                File file = new File(SUPPLICANT_CONFIG_FILE);
+                if (VDBG) localLog("wpa_supplicant.conf changed; new size = " + file.length());
+            }
+        }
+    }
+
 
     /**
      * Fetch the list of configured networks
@@ -211,6 +250,7 @@ class WifiConfigStore {
      * @return false if the network id is invalid
      */
     boolean selectNetwork(int netId) {
+        if (VDBG) localLog("selectNetwork", netId);
         if (netId == INVALID_NETWORK_ID) return false;
 
         // Reset the priority of each network at start or if it goes too high.
@@ -247,6 +287,7 @@ class WifiConfigStore {
      * @return network update result
      */
     NetworkUpdateResult saveNetwork(WifiConfiguration config) {
+        if (VDBG) localLog("saveNetwork", config.networkId);
         // A new network cannot have null SSID
         if (config == null || (config.networkId == INVALID_NETWORK_ID &&
                 config.SSID == null)) {
@@ -295,6 +336,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean forgetNetwork(int netId) {
+        if (VDBG) localLog("forgetNetwork", netId);
         if (mWifiNative.removeNetwork(netId)) {
             mWifiNative.saveConfig();
             removeConfigAndSendBroadcastIfNeeded(netId);
@@ -315,11 +357,12 @@ class WifiConfigStore {
      * @return network Id
      */
     int addOrUpdateNetwork(WifiConfiguration config) {
+        if (VDBG) localLog("addOrUpdateNetwork", config.networkId);
         NetworkUpdateResult result = addOrUpdateNetworkNative(config);
         if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
             sendConfiguredNetworksChangedBroadcast(mConfiguredNetworks.get(result.getNetworkId()),
                     result.isNewNetwork ? WifiManager.CHANGE_REASON_ADDED :
-                        WifiManager.CHANGE_REASON_CONFIG_CHANGE);
+                            WifiManager.CHANGE_REASON_CONFIG_CHANGE);
         }
         return result.getNetworkId();
     }
@@ -334,6 +377,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean removeNetwork(int netId) {
+        if (VDBG) localLog("removeNetwork", netId);
         boolean ret = mWifiNative.removeNetwork(netId);
         if (ret) {
             removeConfigAndSendBroadcastIfNeeded(netId);
@@ -368,8 +412,10 @@ class WifiConfigStore {
     boolean enableNetwork(int netId, boolean disableOthers) {
         boolean ret = enableNetworkWithoutBroadcast(netId, disableOthers);
         if (disableOthers) {
+            if (VDBG) localLog("enableNetwork(disableOthers=true) ", netId);
             sendConfiguredNetworksChangedBroadcast();
         } else {
+            if (VDBG) localLog("enableNetwork(disableOthers=false) ", netId);
             WifiConfiguration enabledNetwork = null;
             synchronized(mConfiguredNetworks) {
                 enabledNetwork = mConfiguredNetworks.get(netId);
@@ -396,6 +442,7 @@ class WifiConfigStore {
     }
 
     void disableAllNetworks() {
+        if (VDBG) localLog("disableAllNetworks");
         boolean networkDisabled = false;
         for(WifiConfiguration config : mConfiguredNetworks.values()) {
             if(config != null && config.status != Status.DISABLED) {
@@ -428,6 +475,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean disableNetwork(int netId, int reason) {
+        if (VDBG) localLog("disableNetwork", netId);
         boolean ret = mWifiNative.disableNetwork(netId);
         WifiConfiguration network = null;
         WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -618,6 +666,7 @@ class WifiConfigStore {
             try {
                 config.networkId = Integer.parseInt(result[0]);
             } catch(NumberFormatException e) {
+                loge("Failed to read network-id '" + result[0] + "'");
                 continue;
             }
             if (result.length > 3) {
@@ -636,12 +685,46 @@ class WifiConfigStore {
             }
             config.ipAssignment = IpAssignment.DHCP;
             config.proxySettings = ProxySettings.NONE;
-            mConfiguredNetworks.put(config.networkId, config);
-            mNetworkIds.put(configKey(config), config.networkId);
+
+            if (mNetworkIds.containsKey(configKey(config))) {
+                // That SSID is already known, just ignore this duplicate entry
+                if (VDBG) localLog("discarded duplicate network", config.networkId);
+            } else {
+                mConfiguredNetworks.put(config.networkId, config);
+                mNetworkIds.put(configKey(config), config.networkId);
+                if (VDBG) localLog("loaded configured network", config.networkId);
+            }
         }
 
         readIpAndProxyConfigurations();
         sendConfiguredNetworksChangedBroadcast();
+
+        if (VDBG) localLog("loadConfiguredNetworks loaded " + mNetworkIds.size() + " networks");
+
+        if (mNetworkIds.size() == 0) {
+            // no networks? Lets log if the wpa_supplicant.conf file contents
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(SUPPLICANT_CONFIG_FILE));
+                if (VDBG) localLog("--- Begin wpa_supplicant.conf Contents ---");
+                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                    if (VDBG) localLog(line);
+                }
+                if (VDBG) localLog("--- End wpa_supplicant.conf Contents ---");
+            } catch (FileNotFoundException e) {
+                if (VDBG) localLog("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e);
+            } catch (IOException e) {
+                if (VDBG) localLog("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e);
+            } finally {
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    // Just ignore the fact that we couldn't close
+                }
+            }
+        }
     }
 
     /* Mark all networks except specified netId as disabled */
@@ -658,6 +741,26 @@ class WifiConfigStore {
 
     private void markAllNetworksDisabled() {
         markAllNetworksDisabledExcept(INVALID_NETWORK_ID);
+    }
+
+    boolean needsUnlockedKeyStore() {
+
+        // Any network using certificates to authenticate access requires
+        // unlocked key store; unless the certificates can be stored with
+        // hardware encryption
+
+        for(WifiConfiguration config : mConfiguredNetworks.values()) {
+
+            if (config.allowedKeyManagement.get(KeyMgmt.WPA_EAP)
+                    && config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+
+                if (config.enterpriseConfig.needsSoftwareBackedKeyStore()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private void writeIpAndProxyConfigurations() {
@@ -771,6 +874,14 @@ class WifiConfigStore {
                                 out.writeUTF(exclusionList);
                                 writeToFile = true;
                                 break;
+                            case PAC:
+                                ProxyProperties proxyPacProperties = linkProperties.getHttpProxy();
+                                out.writeUTF(PROXY_SETTINGS_KEY);
+                                out.writeUTF(config.proxySettings.toString());
+                                out.writeUTF(PROXY_PAC_FILE);
+                                out.writeUTF(proxyPacProperties.getPacFileUrl());
+                                writeToFile = true;
+                                break;
                             case NONE:
                                 out.writeUTF(PROXY_SETTINGS_KEY);
                                 out.writeUTF(config.proxySettings.toString());
@@ -838,6 +949,7 @@ class WifiConfigStore {
                 ProxySettings proxySettings = ProxySettings.NONE;
                 LinkProperties linkProperties = new LinkProperties();
                 String proxyHost = null;
+                String pacFileUrl = null;
                 int proxyPort = -1;
                 String exclusionList = null;
                 String key;
@@ -879,6 +991,8 @@ class WifiConfigStore {
                             proxyHost = in.readUTF();
                         } else if (key.equals(PROXY_PORT_KEY)) {
                             proxyPort = in.readInt();
+                        } else if (key.equals(PROXY_PAC_FILE)) {
+                            pacFileUrl = in.readUTF();
                         } else if (key.equals(EXCLUSION_LIST_KEY)) {
                             exclusionList = in.readUTF();
                         } else if (key.equals(EOS)) {
@@ -920,6 +1034,12 @@ class WifiConfigStore {
                                     new ProxyProperties(proxyHost, proxyPort, exclusionList);
                                 linkProperties.setHttpProxy(proxyProperties);
                                 break;
+                            case PAC:
+                                config.proxySettings = proxySettings;
+                                ProxyProperties proxyPacProperties = 
+                                        new ProxyProperties(pacFileUrl);
+                                linkProperties.setHttpProxy(proxyPacProperties);
+                                break;
                             case NONE:
                                 config.proxySettings = proxySettings;
                                 break;
@@ -954,6 +1074,9 @@ class WifiConfigStore {
          * network configuration. Otherwise, the networkId should
          * refer to an existing configuration.
          */
+
+        if (VDBG) localLog("addOrUpdateNetworkNative " + config.getPrintableSsid());
+
         int netId = config.networkId;
         boolean newNetwork = false;
         // networkId of INVALID_NETWORK_ID means we want to create a new network
@@ -1121,7 +1244,6 @@ class WifiConfigStore {
                      * Keyguard settings may eventually be controlled by device policy.
                      * We check here if keystore is unlocked before installing
                      * credentials.
-                     * TODO: Figure a way to store these credentials for wifi alone
                      * TODO: Do we need a dialog here ?
                      */
                     if (mKeyStore.state() != KeyStore.State.UNLOCKED) {
@@ -1247,6 +1369,7 @@ class WifiConfigStore {
 
         switch (newConfig.proxySettings) {
             case STATIC:
+            case PAC:
                 ProxyProperties newHttpProxy = newConfig.linkProperties.getHttpProxy();
                 ProxyProperties currentHttpProxy = currentConfig.linkProperties.getHttpProxy();
 
@@ -1480,6 +1603,7 @@ class WifiConfigStore {
         }
 
         config.enterpriseConfig.migrateCerts(mKeyStore);
+        config.enterpriseConfig.initializeSoftwareKeystoreFlag(mKeyStore);
     }
 
     private String removeDoubleQuotes(String string) {
@@ -1558,6 +1682,12 @@ class WifiConfigStore {
             pw.println(conf);
         }
         pw.println();
+
+        if (mLocalLog != null) {
+            pw.println("WifiConfigStore - Log Begin ----");
+            mLocalLog.dump(fd, pw, args);
+            pw.println("WifiConfigStore - Log End ----");
+        }
     }
 
     public String getConfigFile() {
@@ -1571,4 +1701,28 @@ class WifiConfigStore {
     private void log(String s) {
         Log.d(TAG, s);
     }
+
+    private void localLog(String s) {
+        if (mLocalLog != null) {
+            mLocalLog.log(s);
+        }
+    }
+
+    private void localLog(String s, int netId) {
+        if (mLocalLog == null) {
+            return;
+        }
+
+        WifiConfiguration config;
+        synchronized(mConfiguredNetworks) {
+            config = mConfiguredNetworks.get(netId);
+        }
+
+        if (config != null) {
+            mLocalLog.log(s + " " + config.getPrintableSsid());
+        } else {
+            mLocalLog.log(s + " " + netId);
+        }
+    }
+
 }

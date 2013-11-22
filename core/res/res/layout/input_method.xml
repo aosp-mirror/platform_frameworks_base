@@ -18,7 +18,7 @@
 */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.inputmethod.InputMethodRoot xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -52,4 +52,9 @@
         android:layout_height="wrap_content"
         android:visibility="gone">
     </FrameLayout>
-</LinearLayout>
+
+    <View android:id="@+id/navigationGuard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@+color/input_method_navigation_guard"/>
+</com.android.internal.inputmethod.InputMethodRoot>

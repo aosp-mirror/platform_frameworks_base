@@ -2,6 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+    android_media_ImageReader.cpp \
     android_media_MediaCrypto.cpp \
     android_media_MediaCodec.cpp \
     android_media_MediaCodecList.cpp \
@@ -56,6 +57,8 @@ LOCAL_C_INCLUDES += \
     frameworks/av/media/libstagefright/codecs/amrnb/common/include \
     frameworks/av/media/mtp \
     frameworks/native/include/media/openmax \
+    $(call include-path-for, libhardware)/hardware \
+    system/media/camera/include \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)

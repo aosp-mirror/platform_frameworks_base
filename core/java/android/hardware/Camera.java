@@ -31,6 +31,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.RSIllegalArgumentException;
+import android.renderscript.Type;
 import android.util.Log;
 import android.text.TextUtils;
 import android.view.Surface;
@@ -152,6 +157,7 @@ public class Camera {
     private PictureCallback mRawImageCallback;
     private PictureCallback mJpegCallback;
     private PreviewCallback mPreviewCallback;
+    private boolean mUsingPreviewAllocation;
     private PictureCallback mPostviewCallback;
     private AutoFocusCallback mAutoFocusCallback;
     private AutoFocusMoveCallback mAutoFocusMoveCallback;
@@ -327,6 +333,7 @@ public class Camera {
         mJpegCallback = null;
         mPreviewCallback = null;
         mPostviewCallback = null;
+        mUsingPreviewAllocation = false;
         mZoomListener = null;
 
         Looper looper;
@@ -587,6 +594,9 @@ public class Camera {
         mPreviewCallback = cb;
         mOneShot = false;
         mWithBuffer = false;
+        if (cb != null) {
+            mUsingPreviewAllocation = false;
+        }
         // Always use one-shot mode. We fake camera preview mode by
         // doing one-shot preview continuously.
         setHasPreviewCallback(cb != null, false);
@@ -610,6 +620,9 @@ public class Camera {
         mPreviewCallback = cb;
         mOneShot = true;
         mWithBuffer = false;
+        if (cb != null) {
+            mUsingPreviewAllocation = false;
+        }
         setHasPreviewCallback(cb != null, false);
     }
 
@@ -645,6 +658,9 @@ public class Camera {
         mPreviewCallback = cb;
         mOneShot = false;
         mWithBuffer = true;
+        if (cb != null) {
+            mUsingPreviewAllocation = false;
+        }
         setHasPreviewCallback(cb != null, true);
     }
 
@@ -743,6 +759,134 @@ public class Camera {
 
     private native final void _addCallbackBuffer(
                                 byte[] callbackBuffer, int msgType);
+
+    /**
+     * <p>Create a {@link android.renderscript RenderScript}
+     * {@link android.renderscript.Allocation Allocation} to use as a
+     * destination of preview callback frames. Use
+     * {@link #setPreviewCallbackAllocation setPreviewCallbackAllocation} to use
+     * the created Allocation as a destination for camera preview frames.</p>
+     *
+     * <p>The Allocation will be created with a YUV type, and its contents must
+     * be accessed within Renderscript with the {@code rsGetElementAtYuv_*}
+     * accessor methods. Its size will be based on the current
+     * {@link Parameters#getPreviewSize preview size} configured for this
+     * camera.</p>
+     *
+     * @param rs the RenderScript context for this Allocation.
+     * @param usage additional usage flags to set for the Allocation. The usage
+     *   flag {@link android.renderscript.Allocation#USAGE_IO_INPUT} will always
+     *   be set on the created Allocation, but additional flags may be provided
+     *   here.
+     * @return a new YUV-type Allocation with dimensions equal to the current
+     *   preview size.
+     * @throws RSIllegalArgumentException if the usage flags are not compatible
+     *   with an YUV Allocation.
+     * @see #setPreviewCallbackAllocation
+     * @hide
+     */
+    public final Allocation createPreviewAllocation(RenderScript rs, int usage)
+            throws RSIllegalArgumentException {
+        Parameters p = getParameters();
+        Size previewSize = p.getPreviewSize();
+        Type.Builder yuvBuilder = new Type.Builder(rs,
+                Element.createPixel(rs,
+                        Element.DataType.UNSIGNED_8,
+                        Element.DataKind.PIXEL_YUV));
+        // Use YV12 for wide compatibility. Changing this requires also
+        // adjusting camera service's format selection.
+        yuvBuilder.setYuvFormat(ImageFormat.YV12);
+        yuvBuilder.setX(previewSize.width);
+        yuvBuilder.setY(previewSize.height);
+
+        Allocation a = Allocation.createTyped(rs, yuvBuilder.create(),
+                usage | Allocation.USAGE_IO_INPUT);
+
+        return a;
+    }
+
+    /**
+     * <p>Set an {@link android.renderscript.Allocation Allocation} as the
+     * target of preview callback data. Use this method for efficient processing
+     * of camera preview data with RenderScript. The Allocation must be created
+     * with the {@link #createPreviewAllocation createPreviewAllocation }
+     * method.</p>
+     *
+     * <p>Setting a preview allocation will disable any active preview callbacks
+     * set by {@link #setPreviewCallback setPreviewCallback} or
+     * {@link #setPreviewCallbackWithBuffer setPreviewCallbackWithBuffer}, and
+     * vice versa. Using a preview allocation still requires an active standard
+     * preview target to be set, either with
+     * {@link #setPreviewTexture setPreviewTexture} or
+     * {@link #setPreviewDisplay setPreviewDisplay}.</p>
+     *
+     * <p>To be notified when new frames are available to the Allocation, use
+     * {@link android.renderscript.Allocation#setIoInputNotificationHandler Allocation.setIoInputNotificationHandler}. To
+     * update the frame currently accessible from the Allocation to the latest
+     * preview frame, call
+     * {@link android.renderscript.Allocation#ioReceive Allocation.ioReceive}.</p>
+     *
+     * <p>To disable preview into the Allocation, call this method with a
+     * {@code null} parameter.</p>
+     *
+     * <p>Once a preview allocation is set, the preview size set by
+     * {@link Parameters#setPreviewSize setPreviewSize} cannot be changed. If
+     * you wish to change the preview size, first remove the preview allocation
+     * by calling {@code setPreviewCallbackAllocation(null)}, then change the
+     * preview size, create a new preview Allocation with
+     * {@link #createPreviewAllocation createPreviewAllocation}, and set it as
+     * the new preview callback allocation target.</p>
+     *
+     * <p>If you are using the preview data to create video or still images,
+     * strongly consider using {@link android.media.MediaActionSound} to
+     * properly indicate image capture or recording start/stop to the user.</p>
+     *
+     * @param previewAllocation the allocation to use as destination for preview
+     * @throws IOException if configuring the camera to use the Allocation for
+     *   preview fails.
+     * @throws IllegalArgumentException if the Allocation's dimensions or other
+     *   parameters don't meet the requirements.
+     * @see #createPreviewAllocation
+     * @see #setPreviewCallback
+     * @see #setPreviewCallbackWithBuffer
+     * @hide
+     */
+    public final void setPreviewCallbackAllocation(Allocation previewAllocation)
+            throws IOException {
+        Surface previewSurface = null;
+        if (previewAllocation != null) {
+             Parameters p = getParameters();
+             Size previewSize = p.getPreviewSize();
+             if (previewSize.width != previewAllocation.getType().getX() ||
+                     previewSize.height != previewAllocation.getType().getY()) {
+                 throw new IllegalArgumentException(
+                     "Allocation dimensions don't match preview dimensions: " +
+                     "Allocation is " +
+                     previewAllocation.getType().getX() +
+                     ", " +
+                     previewAllocation.getType().getY() +
+                     ". Preview is " + previewSize.width + ", " +
+                     previewSize.height);
+             }
+             if ((previewAllocation.getUsage() &
+                             Allocation.USAGE_IO_INPUT) == 0) {
+                 throw new IllegalArgumentException(
+                     "Allocation usage does not include USAGE_IO_INPUT");
+             }
+             if (previewAllocation.getType().getElement().getDataKind() !=
+                     Element.DataKind.PIXEL_YUV) {
+                 throw new IllegalArgumentException(
+                     "Allocation is not of a YUV type");
+             }
+             previewSurface = previewAllocation.getSurface();
+             mUsingPreviewAllocation = true;
+         } else {
+             mUsingPreviewAllocation = false;
+         }
+         setPreviewCallbackSurface(previewSurface);
+    }
+
+    private native final void setPreviewCallbackSurface(Surface s);
 
     private class EventHandler extends Handler
     {
@@ -1492,6 +1636,17 @@ public class Camera {
      * @see #getParameters()
      */
     public void setParameters(Parameters params) {
+        // If using preview allocations, don't allow preview size changes
+        if (mUsingPreviewAllocation) {
+            Size newPreviewSize = params.getPreviewSize();
+            Size currentPreviewSize = getParameters().getPreviewSize();
+            if (newPreviewSize.width != currentPreviewSize.width ||
+                    newPreviewSize.height != currentPreviewSize.height) {
+                throw new IllegalStateException("Cannot change preview size" +
+                        " while a preview allocation is configured.");
+            }
+        }
+
         native_setParameters(params.flatten());
     }
 
@@ -2614,21 +2769,24 @@ public class Camera {
          * JPEG {@link PictureCallback}. The camera driver may set orientation
          * in the EXIF header without rotating the picture. Or the driver may
          * rotate the picture and the EXIF thumbnail. If the Jpeg picture is
-         * rotated, the orientation in the EXIF header will be missing or 1
-         * (row #0 is top and column #0 is left side).
+         * rotated, the orientation in the EXIF header will be missing or 1 (row
+         * #0 is top and column #0 is left side).
          *
-         * <p>If applications want to rotate the picture to match the orientation
-         * of what users see, apps should use {@link
-         * android.view.OrientationEventListener} and {@link CameraInfo}.
-         * The value from OrientationEventListener is relative to the natural
-         * orientation of the device. CameraInfo.orientation is the angle
-         * between camera orientation and natural device orientation. The sum
-         * of the two is the rotation angle for back-facing camera. The
-         * difference of the two is the rotation angle for front-facing camera.
-         * Note that the JPEG pictures of front-facing cameras are not mirrored
-         * as in preview display.
+         * <p>
+         * If applications want to rotate the picture to match the orientation
+         * of what users see, apps should use
+         * {@link android.view.OrientationEventListener} and
+         * {@link android.hardware.Camera.CameraInfo}. The value from
+         * OrientationEventListener is relative to the natural orientation of
+         * the device. CameraInfo.orientation is the angle between camera
+         * orientation and natural device orientation. The sum of the two is the
+         * rotation angle for back-facing camera. The difference of the two is
+         * the rotation angle for front-facing camera. Note that the JPEG
+         * pictures of front-facing cameras are not mirrored as in preview
+         * display.
          *
-         * <p>For example, suppose the natural orientation of the device is
+         * <p>
+         * For example, suppose the natural orientation of the device is
          * portrait. The device is rotated 270 degrees clockwise, so the device
          * orientation is 270. Suppose a back-facing camera sensor is mounted in
          * landscape and the top side of the camera sensor is aligned with the

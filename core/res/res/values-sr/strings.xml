@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Превише <xliff:g id="CONTENT_TYPE">%s</xliff:g> избрисаних ставки."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Меморија таблета је пуна! Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Складиште телефона је пуно! Избришите неке датотеке како бисте ослободили простор."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежа се можда надгледа"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Од стране непознате треће стране"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Од стране <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Ја"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Опције за таблет"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Опције телефона"</string>
@@ -243,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Дозвољава апликацији да функционише као статусна трака."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"проширење/скупљање статусне траке"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Дозвољава апликацији да проширује или скупља статусну траку."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"инсталирање пречица"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Омогућава апликацији да додаје пречице на почетни екран без интервенције корисника."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"деинсталирање пречица"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Омогућава апликацији да уклања пречице са почетног екрана без интервенције корисника."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"преусмеравање одлазних позива"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Дозвољава апликацији да обрађује одлазне позиве и промени број који се бира. Ова дозвола омогућава апликацији да надгледа, преусмерава или спречава одлазне позиве."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"пријем текстуалних порука (SMS)"</string>
@@ -279,6 +286,8 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Дозвољава апликацији да премешта задатке у први план и у позадину. Апликација може да ради ово без вашег уноса."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"заустављање покренутих апликација"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дозвољава апликацији да уклања задатке и уништава њихове апликације. Злонамерне апликације могу да поремете понашање других апликација."</string>
+    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"управљање групама активности"</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Дозвољава апликацији да додаје, уклања и мења групе активности у којима се покрећу друге апликације. Злонамерне апликације могу да поремете понашање других апликација."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"покретање било које активности"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Омогућава да апликација покрене било коју активност, без обзира на заштиту дозволе или стање извоза."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"подешавање компатибилности екрана"</string>
@@ -356,6 +365,12 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Омогућава да се власник обавеже на интерфејс методе уноса највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"повезивање са услугом приступачности"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Дозвољава власнику да се повеже са интерфејсом услуге приступачности највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
+    <string name="permlab_bindPrintService" msgid="8462815179572748761">"повезивање са услугом штампања"</string>
+    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Дозвољава власнику да се повеже са интерфејсом услуге штампања највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"повезивање са услугом штампања из меморије"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Дозвољава власнику да се повеже са интерфејсом највишег нивоа услуге штампања из меморије. Не би требало никада да буде потребно за нормалне апликације."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"повезивање са NFC услугом"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Дозвољава власнику да се повеже са апликацијама које опонашају NFC картице. Никада не би требало да буде потребно за обичне апликације."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"обавезивање на текстуалну услугу"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Омогућава власнику да се обавеже на интерфејс текстуалне услуге највишег нивоа (нпр. SpellCheckerService). Обичне апликације никада не би требало да је користе."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"везивање за VPN услугу"</string>
@@ -366,6 +381,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дозвољава власнику да се обавеже на интерфејс услуге виџета највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"интеракција са администратором уређаја"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Омогућава да власник шаље своје намере администратору уређаја. Уобичајене апликације никада не би требало да је користе."</string>
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"додавање или уклањање администратора уређаја"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Дозвољава власнику да додаје или уклања активне администраторе уређаја. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"промена положаја екрана"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Дозвољава апликацији да у сваком тренутку промени ротацију екрана. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"промена брзине показивача"</string>
@@ -397,6 +414,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Дозвољава апликацији да чита разне системске датотеке евиденције. То јој омогућава увид у опште информације о начину на који користите телефон, при чему могу да буду обухваћене личне или приватне информације."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"користи било који декодер медија за репродукцију"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Омогућава апликацији да користи било који инсталирани декодер медија за декодирање за репродукцију."</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"управљање поузданим акредитивима"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Дозвољава апликацији да инсталира и деинсталира CA сертификате као поуздане акредитиве."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"читање ресурса у власништву дијагностике и уписивање података у њих"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Дозвољава апликацији да чита и уписује податке у било који ресурс у власништву групе за дијагностиковање, на пример, датотеке у директоријуму /dev. То може да угрози стабилност и безбедност система и треба да је користе САМО произвођач или оператер у сврхе дијагностиковањa хардвера."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"омогућавање или онемогућавање компоненти апликације"</string>
@@ -462,6 +481,16 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Дозвољава апликацији да конфигурише Wi-Fi екране и повезује се са њима."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"контрола Wi-Fi екрана"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Дозвољава апликацији да контролише функције Wi-Fi екрана ниског нивоа."</string>
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"снимање аудио садржаја"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Дозвољава апликацији да снима и преусмерава аудио садржај."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Откривање актуелних речи"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Дозвољава апликацији да снима звук за откривање актуелних речи. Снимање може да се дешава у позадини, али не спречава друга снимања звука (нпр. камкордер)."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"снимање видео садржаја"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Дозвољава апликацији да снима и преусмерава видео садржај."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"снимање безбедног видео садржаја"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Дозвољава апликацији да снима и преусмерава безбедан видео садржај."</string>
+    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"контрола репродукције медија и приступ метаподацима"</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Дозвољава апликацији да контролише репродукцију медија и приступа информацијама о медијима (наслов, аутор...)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"промена аудио подешавања"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дозвољава апликацији да мења глобална аудио подешавања као што су јачина звука и избор звучника који се користи као излаз."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"снимање аудио записа"</string>
@@ -525,6 +554,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"спречавање преласка телефона у стање спавања"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дозвољава апликацији да спречи таблет да пређе у стање спавања."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Дозвољава апликацији да спречи телефон да пређе у стање спавања."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"пренос инфрацрвених зрака"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Дозвољава апликацији да користи одашиљач инфрацрвених зрака таблета."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Дозвољава апликацији да користи одашиљач инфрацрвених зрака телефона."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"укључивање или искључивање таблета"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"укључивање или искључивање телефона"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Дозвољава апликацији да укључује или искључује таблет."</string>
@@ -577,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"приступ Bluetooth подешавањима"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да открије даљинске уређаје и упари се са њима."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозвољава апликацији да конфигурише локални Bluetooth телефон, као и да открије даљинске уређаје и упари се са њима."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"омогућавање упаривања апликације преко Bluetooth-а"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Омогућава апликацији да се упарује са удаљеним уређајима без интеракције корисника."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Омогућава апликацији да се упарује са удаљеним уређајима без интеракције корисника."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"повезивање и прекид везе са WiMAX-ом"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Дозвољава апликацији да утврди да ли је WiMAX омогућен, као и информације о било којим повезаним WiMAX мрежама."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промени WiMAX статус"</string>
@@ -603,32 +638,42 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Дозвољава апликацији да чита све речи, називе и фразе које је корисник можда сачувао у корисничком речнику."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"додавање речи у речник корисника"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозвољава апликацији да уписује нове речи у кориснички речник."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"тестирање приступа заштићеној меморији"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"тестирање приступа заштићеној меморији"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Дозвољава апликацији да тестира дозволу за USB меморију која ће бити доступна на будућим уређајима."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Дозвољава апликацији да тестира дозволу за SD картицу која ће бити доступна на будућим уређајима."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"читање садржаја USB меморије"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"читање садржаја SD картице"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Омогућава апликацији да чита садржај USB меморије."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Омогућава апликацији да чита садржај SD картице."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"измена или брисање садржаја USB меморије"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"мењање или брисање садржаја SD картице"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозвољава апликацији да уписује податке на USB меморију."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозвољава апликацији да уписује податке на SD картицу."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"измена/брисање интерне меморије медија"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Дозвољава апликацији да мења садржај интерне меморије медијума."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"управ. складиштењем докумената"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Дозвољава апликацији да управља складиштењем докумената."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"приступ спољној меморији свих корисника"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Дозвољава апликацији да приступа спољној меморији за све кориснике."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"приступ систему датотека кеша"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Дозвољава апликацији да чита систем датотека кеша и уписује податке у њега."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"упућивање/пријем Интернет позива"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"Дозвољава апликацији да користи SIP услугу за упућивање/пријем интернет позива."</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"интеракција са екраном током позива"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Дозвољава апликацији да контролише када и како се кориснику приказује екран приликом позива."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"чита историју коришћења мреже"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Дозвољава апликацији да чита историју коришћења мреже за посебне мреже и апликације."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"управљање смерницама за мрежу"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Дозвољава апликацији да управља смерницама за мрежу и одређује посебна правила за апликацију."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"измените обрачунавање коришћења мреже"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Дозвољава апликацији да измени начин на који апликације користе мрежу. Не користе је уобичајене апликације."</string>
+    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"измена ознака утичнице"</string>
+    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Дозвољава апликацији да мења ознаке утичнице за усмеравање"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"приступ обавештењима"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Дозвољава апликацији да преузима, испитује и брише обавештења, укључујући она која постављају друге апликације."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"повезивање са услугом монитора обавештења"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Дозвољава власнику да се повеже са интерфејсом услуге монитора обавештења највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"позивање апликације са конфигурацијом коју одређује оператер"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозвољава власнику да позива апликацију са конфигурацијом коју одређује оператер. Уобичајене апликације никада не би требало да је користе."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"праћење података о условима на мрежи"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозвољава апликацији да прати податке о условима на мрежи. Не би никада требало да буде потребно за нормалне апликације."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Подешавање правила за лозинку"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролишите дужину и знакове дозвољене у лозинкама за откључавање екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Надгледање покушаја откључавања екрана"</string>
@@ -738,8 +783,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
-    <skip />
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -796,7 +840,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Уметните SIM картицу."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM недостаје или не може да се прочита. Уметните SIM картицу."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM картица је неупотребљива."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM картица је трајно онемогућена."\n" Обратите се добављачу услуге бежичне мреже да бисте добили другу SIM картицу."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM картица је трајно онемогућена.\n Обратите се добављачу услуге бежичне мреже да бисте добили другу SIM картицу."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Дугме за претходну песму"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Дугме за следећу песму"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Дугме за паузу"</string>
@@ -808,11 +852,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Погледајте Кориснички водич или контактирајте Корисничку подршку."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM картица је закључана."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Откључавање SIM картице…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте неправилно нацртали шаблон за откључавање. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели лозинку. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели PIN. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу података за пријављивање на Google."\n\n" Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу података за пријављивање на Google."\n\n" Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте неправилно нацртали шаблон за откључавање. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели лозинку. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели PIN. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Неправилно сте покушали да откључате таблет <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) таблет ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) телефон ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Неисправно сте покушали да откључате таблет <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
@@ -826,7 +870,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Лозинка"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Пријави ме"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неважеће корисничко име или лозинка."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Заборавили сте корисничко име или лозинку?"\n"Посетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Заборавили сте корисничко име или лозинку?\nПосетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Проверавање..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Откључај"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Укључи звук"</string>
@@ -874,7 +918,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Потврда навигације"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Напусти ову страницу"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Остани на овој страници"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Да ли стварно желите да напустите ову страницу?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nДа ли стварно желите да напустите ову страницу?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Потврда"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Савет: Додирните двапут да бисте увећали и умањили приказ."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Аутом. поп."</string>
@@ -1071,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ДА"</string>
     <string name="capital_off" msgid="6815870386972805832">"НЕ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Довршавање радње помоћу"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Изаберите апликацију за почетну страницу"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Подразумевано користи за ову радњу."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Обришите подразумевано подешавање у менију Подешавања система &gt; Апликације &gt; Преузето."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Изаберите радњу"</string>
@@ -1080,14 +1125,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Нажалост, апликација <xliff:g id="APPLICATION">%1$s</xliff:g> је престала с радом."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Нажалост, процес <xliff:g id="PROCESS">%1$s</xliff:g> је заустављен."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> не реагује."\n\n"Да ли желите да је затворите?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Активност <xliff:g id="ACTIVITY">%1$s</xliff:g> не рeагује."\n\n"Да ли желите да је затворите?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> не реагује.\n\nДа ли желите да је затворите?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Активност <xliff:g id="ACTIVITY">%1$s</xliff:g> не рeагује.\n\nДа ли желите да је затворите?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> не реагује. Да ли желите да је затворите?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не раегује."\n\n"Да ли желите да га затворите?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не раегује.\n\nДа ли желите да га затворите?"</string>
     <string name="force_close" msgid="8346072094521265605">"Потврди"</string>
     <string name="report" msgid="4060218260984795706">"Пријави"</string>
     <string name="wait" msgid="7147118217226317732">"Сачекај"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница је престала да се одазива."\n\n" Да ли желите да је затворите?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница је престала да се одазива.\n\n Да ли желите да је затворите?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Апликација је преусмерена"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је сада покренута."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Првобитно је покренута апликација <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1140,7 +1185,7 @@
     <string name="network_available_sign_in" msgid="8495155593358054676">"Пријављивање на мрежу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није било могуће повезати са Wi-Fi мрежом"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није могуће повезати са Wi-Fi мрежом"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" има лошу интернет везу."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Покрените Wi-Fi Direct. Тиме ћете искључити клијента/хотспот за Wi-Fi."</string>
@@ -1256,6 +1301,10 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Дозвољава апликацији да од подразумеване услуге контејнера захтева да копира садржај. Не користе је уобичајене апликације."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Усмеравање излаза медија"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Дозвољава апликацији да усмерава излаз медија на друге спољне уређаје."</string>
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Приступај безбедној меморији заштићеној шифром"</string>
+    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Дозвољава апликацији да приступа безбедној меморији заштићеној шифром."</string>
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Контролиши приказивање и скривање заштите шифром"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Дозвољава апликацији да контролише заштиту шифром."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Додирните двапут да бисте контролисали зум"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Није могуће додати виџет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Иди"</string>
@@ -1265,15 +1314,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Готово"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Претходно"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Изврши"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Бирај број"\n"користећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Креирајте контакт"\n"користећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Бирај број\nкористећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Креирајте контакт\nкористећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Следеће апликације захтевају дозволу за приступ налогу, како сада, тако и убудуће."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Желите да одобрите овај захтев?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Захтев за приступ"</string>
     <string name="allow" msgid="7225948811296386551">"Дозволи"</string>
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Затражена је дозвола"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Затражена је дозвола"\n"за налог <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Затражена је дозвола\nза налог <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метод уноса"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхронизација"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Приступачност"</string>
@@ -1314,8 +1363,8 @@
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Искључивање SD картице..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Брисање USB меморије..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Брисање SD картице..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Није било могуће избрисати USB меморију."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"Није било могуће избрисати SD картицу."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Није могуће избрисати USB меморију."</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"Није могуће избрисати SD картицу."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD картица није искључена пре него што је уклоњена."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Тренутно је у току провера USB меморије."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Тренутно је у току провера SD картице."</string>
@@ -1420,7 +1469,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Прикажи све"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Избор активности"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Дели са"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Уређај је закључан."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Слање..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Желите ли да покренете прегледач?"</string>
@@ -1441,10 +1489,12 @@
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Повезивање..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Доступна"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Нису доступне"</string>
+    <string name="media_route_status_in_use" msgid="4533786031090198063">"У употреби"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Уграђени екран"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI екран"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Постављени елемент бр. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>×<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безбедно"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Бежични екран је повезан"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Овај екран се приказује на другом уређају"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Прекини везу"</string>
@@ -1453,7 +1503,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Погрешан шаблон"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Погрешан PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Покушајте поново за <xliff:g id="NUMBER">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Покушајте поново за <xliff:g id="NUMBER">%1$d</xliff:g> секунде(и)."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Нацртајте шаблон"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Унесите PIN SIM картице"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Унесите PIN"</string>
@@ -1473,27 +1523,131 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави ме"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважеће корисничко име или лозинка."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Заборавили сте корисничко име или лозинку?"\n"Посетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Заборавили сте корисничко име или лозинку?\nПосетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Провера налога…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте PIN неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте лозинку неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте PIN неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте лозинку неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште."\n\n"Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште."\n\n"Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Уклони"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Желите ли да појачате звук преко препорученог нивоа?"\n"Ако слушате гласну музику током дужег периода, може да дође до оштећења слуха."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Желите ли да појачате звук преко препорученог нивоа?\nАко слушате гласну музику током дужег периода, може да дође до оштећења слуха."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Држите са два прста да бисте омогућили приступачност."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Приступачност је омогућена."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Приступачност је отказана."</string>
     <string name="user_switched" msgid="3768006783166984410">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Власник"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Ова апликација не подржава налоге за ограничене профиле"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Ова апликација не подржава налоге за ограничене профиле"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Није пронађена ниједна апликација која би могла да обави ову радњу"</string>
     <string name="revoke" msgid="5404479185228271586">"Опозови"</string>
+    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
+    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
+    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>
+    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3"</string>
+    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4"</string>
+    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5"</string>
+    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6"</string>
+    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7"</string>
+    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8"</string>
+    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9"</string>
+    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10"</string>
+    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0"</string>
+    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1"</string>
+    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2"</string>
+    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3"</string>
+    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4"</string>
+    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5"</string>
+    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6"</string>
+    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7"</string>
+    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8"</string>
+    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9"</string>
+    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10"</string>
+    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0"</string>
+    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1"</string>
+    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2"</string>
+    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3"</string>
+    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4"</string>
+    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5"</string>
+    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6"</string>
+    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7"</string>
+    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
+    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
+    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch"</string>
+    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto"</string>
+    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap"</string>
+    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
+    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K"</string>
+    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1"</string>
+    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2"</string>
+    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3"</string>
+    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4"</string>
+    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5"</string>
+    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6"</string>
+    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7"</string>
+    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8"</string>
+    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9"</string>
+    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10"</string>
+    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K"</string>
+    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai"</string>
+    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai"</string>
+    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai"</string>
+    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10"</string>
+    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9"</string>
+    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8"</string>
+    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7"</string>
+    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6"</string>
+    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5"</string>
+    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4"</string>
+    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3"</string>
+    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2"</string>
+    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1"</string>
+    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0"</string>
+    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec"</string>
+    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4"</string>
+    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3"</string>
+    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2"</string>
+    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki"</string>
+    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku"</string>
+    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
+    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
+    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Непозната величина, усправно"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Непозната величина, водоравно"</string>
+    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Отказано је"</string>
+    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Грешка при исписивању садржаја"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"непознато"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Услуга штампања није омогућена"</string>
+    <string name="print_service_installed_title" msgid="2246317169444081628">"Услуга <xliff:g id="NAME">%s</xliff:g> је инсталирана"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"Додирните да бисте омогућили"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Унесите PIN администратора"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Унесите PIN"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Нетачно"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Актуелни PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Нови PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Потврдите нови PIN"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Направите PIN за измену ограничења"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-ови се не подударају. Покушајте поново."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN је прекратак. Мора да садржи најмање 4 цифре."</string>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Покушајте опет за 1 сек"</item>
+    <item quantity="other" msgid="4730868920742952817">"Покушајте опет за <xliff:g id="COUNT">%d</xliff:g> сек"</item>
+  </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Покушајте поново касније"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Превуците прстом одозго надоле да бисте изашли из целог екрана."</string>
 </resources>

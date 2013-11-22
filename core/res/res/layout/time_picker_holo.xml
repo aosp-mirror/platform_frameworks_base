@@ -20,14 +20,19 @@
 <!-- Layout of time picker -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/timePickerLayout"
     android:orientation="horizontal"
     android:layout_gravity="center_horizontal"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingStart="8dip"
+    android:paddingEnd="8dip">
 
     <LinearLayout android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingStart="8dip"
+        android:paddingEnd="8dip"
         android:layoutDirection="ltr">
 
         <!-- hour -->
@@ -37,8 +42,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dip"
             android:layout_marginBottom="16dip"
-            android:layout_marginStart="16dip"
-            android:layout_marginEnd="6dip"
             android:focusable="true"
             android:focusableInTouchMode="true"
             />
@@ -48,6 +51,8 @@
             android:id="@+id/divider"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="6dip"
+            android:layout_marginEnd="6dip"
             android:layout_gravity="center_vertical"
             android:importantForAccessibility="no"
             />
@@ -59,8 +64,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dip"
             android:layout_marginBottom="16dip"
-            android:layout_marginStart="6dip"
-            android:layout_marginEnd="8dip"
             android:focusable="true"
             android:focusableInTouchMode="true"
             />
@@ -75,7 +78,7 @@
         android:layout_marginTop="16dip"
         android:layout_marginBottom="16dip"
         android:layout_marginStart="8dip"
-        android:layout_marginEnd="16dip"
+        android:layout_marginEnd="8dip"
         android:focusable="true"
         android:focusableInTouchMode="true"
         />

@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Printer;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -327,7 +328,9 @@ public class ApplicationErrorReport implements Parcelable {
          */
         public CrashInfo(Throwable tr) {
             StringWriter sw = new StringWriter();
-            tr.printStackTrace(new PrintWriter(sw));
+            PrintWriter pw = new FastPrintWriter(sw, false, 256);
+            tr.printStackTrace(pw);
+            pw.flush();
             stackTrace = sw.toString();
             exceptionMessage = tr.getMessage();
 

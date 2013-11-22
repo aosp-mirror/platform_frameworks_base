@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>RoomStatusUpdateListener | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -788,7 +795,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onP2PConnected(java.lang.String)">onP2PConnected</a></span>(<a href="/reference/java/lang/String.html">String</a> participantId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onP2PConnected(java.lang.String)">onP2PConnected</a></span>(String participantId)</nobr>
         
         <div class="jd-descrdiv">Called when the client is successfully connected to a peer participant.</div>
   
@@ -806,7 +813,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onP2PDisconnected(java.lang.String)">onP2PDisconnected</a></span>(<a href="/reference/java/lang/String.html">String</a> participantId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onP2PDisconnected(java.lang.String)">onP2PDisconnected</a></span>(String participantId)</nobr>
         
         <div class="jd-descrdiv">Called when client gets disconnected from a peer participant.</div>
   
@@ -824,7 +831,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerDeclined(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerDeclined</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerDeclined(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerDeclined</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</nobr>
         
         <div class="jd-descrdiv">Called when one or more peers decline the invitation to a room.</div>
   
@@ -842,7 +849,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerInvitedToRoom(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerInvitedToRoom</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerInvitedToRoom(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerInvitedToRoom</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</nobr>
         
         <div class="jd-descrdiv">Called when one or more peers are invited to a room.</div>
   
@@ -860,7 +867,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerJoined(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerJoined</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerJoined(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerJoined</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</nobr>
         
         <div class="jd-descrdiv">Called when one or more peer participants join a room.</div>
   
@@ -878,7 +885,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerLeft(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerLeft</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeerLeft(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeerLeft</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</nobr>
         
         <div class="jd-descrdiv">Called when one or more peer participant leave a room.</div>
   
@@ -896,7 +903,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeersConnected(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeersConnected</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeersConnected(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeersConnected</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</nobr>
         
         <div class="jd-descrdiv">Called when one or more peer participants are connected to a room.</div>
   
@@ -914,7 +921,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeersDisconnected(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeersDisconnected</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomStatusUpdateListener.html#onPeersDisconnected(com.google.android.gms.games.multiplayer.realtime.Room, java.util.List<java.lang.String>)">onPeersDisconnected</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</nobr>
         
         <div class="jd-descrdiv">Called when one or more peer participants are disconnected from a room.</div>
   
@@ -1099,7 +1106,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onP2PConnected</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> participantId)</span>
+      <span class="normal">(String participantId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1138,7 +1145,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onP2PDisconnected</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> participantId)</span>
+      <span class="normal">(String participantId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1177,7 +1184,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeerDeclined</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1221,7 +1228,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeerInvitedToRoom</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1265,7 +1272,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeerJoined</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1309,7 +1316,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeerLeft</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1353,7 +1360,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeersConnected</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1397,7 +1404,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeersDisconnected</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; participantIds)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a> room, List&lt;String&gt; participantIds)</span>
     </h4>
       <div class="api-level">
         <div></div>

@@ -54,7 +54,26 @@ public class ScanResult implements Parcelable {
      * Time Synchronization Function (tsf) timestamp in microseconds when
      * this result was last seen.
      */
-     public long timestamp;
+    public long timestamp;
+
+    /**
+     * The approximate distance to the AP in centimeter, if available.  Else
+     * {@link UNSPECIFIED}.
+     * {@hide}
+     */
+    public int distanceCm;
+
+    /**
+     * The standard deviation of the distance to the AP, if available.
+     * Else {@link UNSPECIFIED}.
+     * {@hide}
+     */
+    public int distanceSdCm;
+
+    /**
+     * {@hide}
+     */
+    public final static int UNSPECIFIED = -1;
 
     /** {@hide} */
     public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
@@ -66,8 +85,23 @@ public class ScanResult implements Parcelable {
         this.level = level;
         this.frequency = frequency;
         this.timestamp = tsf;
+        this.distanceCm = UNSPECIFIED;
+        this.distanceSdCm = UNSPECIFIED;
     }
 
+    /** {@hide} */
+    public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
+            long tsf, int distCm, int distSdCm) {
+        this.wifiSsid = wifiSsid;
+        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
+        this.BSSID = BSSID;
+        this.capabilities = caps;
+        this.level = level;
+        this.frequency = frequency;
+        this.timestamp = tsf;
+        this.distanceCm = distCm;
+        this.distanceSdCm = distSdCm;
+    }
 
     /** copy constructor {@hide} */
     public ScanResult(ScanResult source) {
@@ -79,6 +113,8 @@ public class ScanResult implements Parcelable {
             level = source.level;
             frequency = source.frequency;
             timestamp = source.timestamp;
+            distanceCm = source.distanceCm;
+            distanceSdCm = source.distanceSdCm;
         }
     }
 
@@ -99,6 +135,11 @@ public class ScanResult implements Parcelable {
             append(frequency).
             append(", timestamp: ").
             append(timestamp);
+
+        sb.append(", distance: ").append((distanceCm != UNSPECIFIED ? distanceCm : "?")).
+                append("(cm)");
+        sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).
+                append("(cm)");
 
         return sb.toString();
     }
@@ -121,6 +162,8 @@ public class ScanResult implements Parcelable {
         dest.writeInt(level);
         dest.writeInt(frequency);
         dest.writeLong(timestamp);
+        dest.writeInt(distanceCm);
+        dest.writeInt(distanceSdCm);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -137,7 +180,9 @@ public class ScanResult implements Parcelable {
                     in.readString(),
                     in.readInt(),
                     in.readInt(),
-                    in.readLong()
+                    in.readLong(),
+                    in.readInt(),
+                    in.readInt()
                 );
             }
 

@@ -267,12 +267,12 @@ public class FrameLayout extends ViewGroup {
         return mForeground;
     }
 
-    private int getPaddingLeftWithForeground() {
+    int getPaddingLeftWithForeground() {
         return mForegroundInPadding ? Math.max(mPaddingLeft, mForegroundPaddingLeft) :
             mPaddingLeft + mForegroundPaddingLeft;
     }
 
-    private int getPaddingRightWithForeground() {
+    int getPaddingRightWithForeground() {
         return mForegroundInPadding ? Math.max(mPaddingRight, mForegroundPaddingRight) :
             mPaddingRight + mForegroundPaddingRight;
     }
@@ -385,6 +385,11 @@ public class FrameLayout extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        layoutChildren(left, top, right, bottom, false /* no force left gravity */);
+    }
+
+    void layoutChildren(int left, int top, int right, int bottom,
+                                  boolean forceLeftGravity) {
         final int count = getChildCount();
 
         final int parentLeft = getPaddingLeftWithForeground();
@@ -416,16 +421,16 @@ public class FrameLayout extends ViewGroup {
                 final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
 
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-                    case Gravity.LEFT:
-                        childLeft = parentLeft + lp.leftMargin;
-                        break;
                     case Gravity.CENTER_HORIZONTAL:
                         childLeft = parentLeft + (parentRight - parentLeft - width) / 2 +
                         lp.leftMargin - lp.rightMargin;
                         break;
                     case Gravity.RIGHT:
-                        childLeft = parentRight - width - lp.rightMargin;
-                        break;
+                        if (!forceLeftGravity) {
+                            childLeft = parentRight - width - lp.rightMargin;
+                            break;
+                        }
+                    case Gravity.LEFT:
                     default:
                         childLeft = parentLeft + lp.leftMargin;
                 }
@@ -650,6 +655,18 @@ public class FrameLayout extends ViewGroup {
          */
         public LayoutParams(ViewGroup.MarginLayoutParams source) {
             super(source);
+        }
+
+        /**
+         * Copy constructor. Clones the width, height, margin values, and
+         * gravity of the source.
+         *
+         * @param source The layout params to copy from.
+         */
+        public LayoutParams(LayoutParams source) {
+            super(source);
+
+            this.gravity = source.gravity;
         }
     }
 }

@@ -43,7 +43,7 @@ public:
     /**
      * Returns true if this task  manager can run tasks,
      * false otherwise. This method will typically return
-     * true on a single CPU core device.
+     * false on a single CPU core device.
      */
     bool canRunTasks() const;
 

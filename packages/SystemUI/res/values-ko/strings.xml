@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"시스템 UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"응답 거부"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"알림 표시"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"목록에서 삭제"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"앱 정보"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"최근에 사용한 앱 없음"</string>
@@ -37,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"충전기를 연결하세요."</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"배터리가 얼마 남지 않았습니다."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> 남음"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"USB 충전이 지원되지 않습니다."\n"제공된 충전기만 사용하세요."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB 충전이 지원되지 않습니다.\n제공된 충전기만 사용하세요."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"배터리 사용량"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"설정"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -59,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"이 USB 기기에 기본값으로 사용"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"이 USB 액세서리에 기본값으로 사용"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB 디버깅을 허용하시겠습니까?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"컴퓨터 RSA 키 지문:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"컴퓨터 RSA 키 지문:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"이 컴퓨터에서 항상 허용"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
@@ -160,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 데이터 사용중지됨"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"모바일 데이터 사용중지됨"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"데이터 사용중지됨"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"지정된 데이터 사용 한도에 도달했습니다."\n\n"데이터 연결을 다시 사용하면 통신사에서 요금이 부과될 수도 있습니다."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"지정된 데이터 사용 한도에 도달했습니다.\n\n데이터 연결을 다시 사용하면 통신사에서 요금이 부과될 수도 있습니다."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"데이터 연결 다시 사용"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"인터넷에 연결되지 않음"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 연결됨"</string>
@@ -168,9 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS에서 위치 설정"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"모든 알림 지우기"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"앱 정보"</string>
-    <string name="close_universe" msgid="3736513750241754348">"닫기"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"알림 사용 안함"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"알림을 다시 사용하려면 여기를 터치하세요."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"화면이 자동으로 회전됩니다."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"화면이 가로 방향으로 잠겨 있습니다."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"화면이 세로 방향으로 잠겨 있습니다."</string>
@@ -187,7 +182,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"자동 회전"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"회전 잠금"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"입력 방법"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"위치 사용 중"</string>
+    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
+    <skip />
+    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"미디어 기기"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"긴급 통화만 허용"</string>
@@ -203,5 +201,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"밝기"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"자동"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"알림이 여기에 표시됨"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"아래로 스와이프하여 언제든 액세스하세요."\n"한 번 더 아래로 스와이프하면 시스템 관리로 이동합니다."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"아래로 스와이프하여 언제든 액세스하세요.\n한 번 더 아래로 스와이프하면 시스템 관리로 이동합니다."</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"화면 가장자리에서 스와이프하여 표시줄 표시"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"화면 가장자리에서 스와이프하여 시스템 표시줄 표시"</string>
 </resources>

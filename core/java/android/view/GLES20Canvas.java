@@ -21,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.DrawFilter;
 import android.graphics.Matrix;
+import android.graphics.NinePatch;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
@@ -58,11 +59,11 @@ class GLES20Canvas extends HardwareCanvas {
     private int mWidth;
     private int mHeight;
     
-    private final float[] mPoint = new float[2];
-    private final float[] mLine = new float[4];
+    private float[] mPoint;
+    private float[] mLine;
     
-    private final Rect mClipBounds = new Rect();
-    private final RectF mPathBounds = new RectF();
+    private Rect mClipBounds;
+    private RectF mPathBounds;
 
     private DrawFilter mFilter;
 
@@ -162,6 +163,16 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
+    void cancelLayerUpdate(HardwareLayer layer) {
+        nCancelLayerUpdate(mRenderer, ((GLES20RenderLayer) layer).mLayer);
+    }
+
+    @Override
+    void flushLayerUpdates() {
+        nFlushLayerUpdates(mRenderer);
+    }
+
+    @Override
     void clearLayerUpdates() {
         nClearLayerUpdates(mRenderer);
     }
@@ -183,7 +194,9 @@ class GLES20Canvas extends HardwareCanvas {
     static native boolean nCopyLayer(int layerId, int bitmap);
 
     private static native void nClearLayerUpdates(int renderer);
+    private static native void nFlushLayerUpdates(int renderer);
     private static native void nPushLayerUpdate(int renderer, int layer);
+    private static native void nCancelLayerUpdate(int renderer, int layer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
@@ -273,6 +286,18 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nGetStencilSize();
 
+    void setCountOverdrawEnabled(boolean enabled) {
+        nSetCountOverdrawEnabled(mRenderer, enabled);
+    }
+
+    static native void nSetCountOverdrawEnabled(int renderer, boolean enabled);
+
+    float getOverdraw() {
+        return nGetOverdraw(mRenderer);
+    }
+
+    static native float nGetOverdraw(int renderer);
+
     ///////////////////////////////////////////////////////////////////////////
     // Functor
     ///////////////////////////////////////////////////////////////////////////
@@ -314,21 +339,21 @@ class GLES20Canvas extends HardwareCanvas {
      * 
      * @see #flushCaches(int) 
      */
-    public static final int FLUSH_CACHES_LAYERS = 0;
+    static final int FLUSH_CACHES_LAYERS = 0;
     
     /**
      * Must match Caches::FlushMode values
      * 
      * @see #flushCaches(int) 
      */
-    public static final int FLUSH_CACHES_MODERATE = 1;
+    static final int FLUSH_CACHES_MODERATE = 1;
 
     /**
      * Must match Caches::FlushMode values
      * 
      * @see #flushCaches(int) 
      */
-    public static final int FLUSH_CACHES_FULL = 2;
+    static final int FLUSH_CACHES_FULL = 2;
 
     /**
      * Flush caches to reclaim as much memory as possible. The amount of memory
@@ -338,10 +363,8 @@ class GLES20Canvas extends HardwareCanvas {
      * {@link #FLUSH_CACHES_FULL}.
      * 
      * @param level Hint about the amount of memory to reclaim
-     * 
-     * @hide
      */
-    public static void flushCaches(int level) {
+    static void flushCaches(int level) {
         nFlushCaches(level);
     }
 
@@ -353,21 +376,28 @@ class GLES20Canvas extends HardwareCanvas {
      * 
      * @hide
      */
-    public static void terminateCaches() {
+    static void terminateCaches() {
         nTerminateCaches();
     }
 
     private static native void nTerminateCaches();
 
-    /**
-     * @hide
-     */
-    public static void initCaches() {
-        nInitCaches();
+    static boolean initCaches() {
+        return nInitCaches();
     }
 
-    private static native void nInitCaches();
-    
+    private static native boolean nInitCaches();
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Atlas
+    ///////////////////////////////////////////////////////////////////////////
+
+    static void initAtlas(GraphicBuffer buffer, int[] map) {
+        nInitAtlas(buffer, map, map.length);
+    }
+
+    private static native void nInitAtlas(GraphicBuffer buffer, int[] map, int count);
+
     ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////
@@ -417,6 +447,31 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nInterrupt(int renderer);
     private static native void nResume(int renderer);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Support
+    ///////////////////////////////////////////////////////////////////////////
+
+    private Rect getInternalClipBounds() {
+        if (mClipBounds == null) mClipBounds = new Rect();
+        return mClipBounds;
+    }
+
+
+    private RectF getPathBounds() {
+        if (mPathBounds == null) mPathBounds = new RectF();
+        return mPathBounds;
+    }
+
+    private float[] getPointStorage() {
+        if (mPoint == null) mPoint = new float[2];
+        return mPoint;
+    }
+
+    private float[] getLineStorage() {
+        if (mLine == null) mLine = new float[4];
+        return mLine;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Clipping
@@ -506,9 +561,10 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean quickReject(Path path, EdgeType type) {
-        path.computeBounds(mPathBounds, true);
-        return nQuickReject(mRenderer, mPathBounds.left, mPathBounds.top,
-                mPathBounds.right, mPathBounds.bottom);
+        RectF pathBounds = getPathBounds();
+        path.computeBounds(pathBounds, true);
+        return nQuickReject(mRenderer, pathBounds.left, pathBounds.top,
+                pathBounds.right, pathBounds.bottom);
     }
 
     @Override
@@ -565,7 +621,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void concat(Matrix matrix) {
-        nConcatMatrix(mRenderer, matrix.native_instance);
+        if (matrix != null) nConcatMatrix(mRenderer, matrix.native_instance);
     }
     
     private static native void nConcatMatrix(int renderer, int matrix);
@@ -718,25 +774,41 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
-    public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+    public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
+        Bitmap bitmap = patch.getBitmap();
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing patches
         int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
         try {
             final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, chunks,
+            nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
                     dst.left, dst.top, dst.right, dst.bottom, nativePaint);
         } finally {
             if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
         }
     }
 
-    private static native void nDrawPatch(int renderer, int bitmap, byte[] buffer, byte[] chunks,
+    @Override
+    public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
+        Bitmap bitmap = patch.getBitmap();
+        throwIfCannotDraw(bitmap);
+        // Shaders are ignored when drawing patches
+        int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
+        try {
+            final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+            nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
+                    dst.left, dst.top, dst.right, dst.bottom, nativePaint);
+        } finally {
+            if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
+        }
+    }
+
+    private static native void nDrawPatch(int renderer, int bitmap, byte[] buffer, int chunk,
             float left, float top, float right, float bottom, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -747,12 +819,12 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private static native void nDrawBitmap(
-            int renderer, int bitmap, byte[] buffer, float left, float top, int paint);
+    private static native void nDrawBitmap(int renderer, int bitmap, byte[] buffer,
+            float left, float top, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -764,12 +836,12 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private static native void nDrawBitmap(int renderer, int bitmap, byte[] buff,
+    private static native void nDrawBitmap(int renderer, int bitmap, byte[] buffer,
             int matrix, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -796,7 +868,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -872,7 +944,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmapMesh(Bitmap bitmap, int meshWidth, int meshHeight, float[] verts,
             int vertOffset, int[] colors, int colorOffset, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         if (meshWidth < 0 || meshHeight < 0 || vertOffset < 0 || colorOffset < 0) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -890,7 +962,7 @@ class GLES20Canvas extends HardwareCanvas {
 
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
-            final int nativePaint = paint == null ? 0 : paint.mNativePaint;        
+            final int nativePaint = paint == null ? 0 : paint.mNativePaint;
             nDrawBitmapMesh(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, meshWidth, meshHeight,
                     verts, vertOffset, colors, colorOffset, nativePaint);
         } finally {
@@ -929,11 +1001,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
-        mLine[0] = startX;
-        mLine[1] = startY;
-        mLine[2] = stopX;
-        mLine[3] = stopY;
-        drawLines(mLine, 0, 4, paint);
+        float[] line = getLineStorage();
+        line[0] = startX;
+        line[1] = startY;
+        line[2] = stopX;
+        line[3] = stopY;
+        drawLines(line, 0, 4, paint);
     }
 
     @Override
@@ -974,7 +1047,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPaint(Paint paint) {
-        final Rect r = mClipBounds;
+        final Rect r = getInternalClipBounds();
         nGetClipBounds(mRenderer, r);
         drawRect(r.left, r.top, r.right, r.bottom, paint);
     }
@@ -1051,9 +1124,10 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPoint(float x, float y, Paint paint) {
-        mPoint[0] = x;
-        mPoint[1] = y;
-        drawPoints(mPoint, 0, 2, paint);
+        float[] point = getPointStorage();
+        point[0] = x;
+        point[1] = y;
+        drawPoints(point, 0, 2, paint);
     }
 
     @Override

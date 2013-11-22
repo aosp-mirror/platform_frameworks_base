@@ -16,23 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.internal.view.RotationPolicy;
-import com.android.systemui.R;
-
-import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.WifiState;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-
+import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -57,10 +46,12 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.AlarmClock;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Profile;
 import android.provider.Settings;
+import android.security.KeyChain;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -71,8 +62,20 @@ import android.view.WindowManagerGlobal;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.ActivityState;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.WifiState;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RotationLockController;
 
+import java.util.ArrayList;
 
 /**
  *
@@ -90,6 +93,7 @@ class QuickSettings {
     private ViewGroup mContainerView;
 
     private DisplayManager mDisplayManager;
+    private DevicePolicyManager mDevicePolicyManager;
     private WifiDisplayStatus mWifiDisplayStatus;
     private PhoneStatusBar mStatusBarService;
     private BluetoothState mBluetoothState;
@@ -97,11 +101,11 @@ class QuickSettings {
     private WifiManager mWifiManager;
 
     private BluetoothController mBluetoothController;
+    private RotationLockController mRotationLockController;
+    private LocationController mLocationController;
 
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
-
-    private LevelListDrawable mBatteryLevels;
-    private LevelListDrawable mChargingBatteryLevels;
+    private AsyncTask<Void, Void, Pair<Boolean, Boolean>> mQueryCertTask;
 
     boolean mTilesSetUp = false;
     boolean mUseDefaultAvatar = false;
@@ -113,16 +117,10 @@ class QuickSettings {
     private final ArrayList<QuickSettingsTileView> mDynamicSpannedTiles =
             new ArrayList<QuickSettingsTileView>();
 
-    private final RotationPolicy.RotationPolicyListener mRotationPolicyListener =
-            new RotationPolicy.RotationPolicyListener() {
-        @Override
-        public void onChange() {
-            mModel.onRotationLockChanged();
-        }
-    };
-
     public QuickSettings(Context context, QuickSettingsContainerView container) {
         mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+        mDevicePolicyManager
+            = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mContext = context;
         mContainerView = container;
         mModel = new QuickSettingsModel(context);
@@ -133,17 +131,13 @@ class QuickSettings {
 
         mHandler = new Handler();
 
-        Resources r = mContext.getResources();
-        mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
-        mChargingBatteryLevels =
-                (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery_charging);
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
 
         IntentFilter profileFilter = new IntentFilter();
@@ -170,19 +164,42 @@ class QuickSettings {
     }
 
     void setup(NetworkController networkController, BluetoothController bluetoothController,
-            BatteryController batteryController, LocationController locationController) {
+            BatteryController batteryController, LocationController locationController,
+            RotationLockController rotationLockController) {
         mBluetoothController = bluetoothController;
+        mRotationLockController = rotationLockController;
+        mLocationController = locationController;
 
         setupQuickSettings();
         updateWifiDisplayStatus();
         updateResources();
+        applyLocationEnabledStatus();
 
         networkController.addNetworkSignalChangedCallback(mModel);
         bluetoothController.addStateChangedCallback(mModel);
         batteryController.addStateChangedCallback(mModel);
-        locationController.addStateChangedCallback(mModel);
-        RotationPolicy.registerRotationPolicyListener(mContext, mRotationPolicyListener,
-                UserHandle.USER_ALL);
+        locationController.addSettingsChangedCallback(mModel);
+        rotationLockController.addRotationLockControllerCallback(mModel);
+    }
+
+    private void queryForSslCaCerts() {
+        mQueryCertTask = new AsyncTask<Void, Void, Pair<Boolean, Boolean>>() {
+            @Override
+            protected Pair<Boolean, Boolean> doInBackground(Void... params) {
+                boolean hasCert = DevicePolicyManager.hasAnyCaCertsInstalled();
+                boolean isManaged = mDevicePolicyManager.getDeviceOwner() != null;
+
+                return Pair.create(hasCert, isManaged);
+            }
+            @Override
+            protected void onPostExecute(Pair<Boolean, Boolean> result) {
+                super.onPostExecute(result);
+                boolean hasCert = result.first;
+                boolean isManaged = result.second;
+                mModel.setSslCaCertWarningTileInfo(hasCert, isManaged);
+            }
+        };
+        mQueryCertTask.execute();
     }
 
     private void queryForUserInformation() {
@@ -258,6 +275,7 @@ class QuickSettings {
         addTemporaryTiles(mContainerView, inflater);
 
         queryForUserInformation();
+        queryForSslCaCerts();
         mTilesSetUp = true;
     }
 
@@ -340,26 +358,6 @@ class QuickSettings {
         parent.addView(brightnessTile);
         mDynamicSpannedTiles.add(brightnessTile);
 
-        // Time tile
-        /*
-        QuickSettingsTileView timeTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        timeTile.setContent(R.layout.quick_settings_tile_time, inflater);
-        timeTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Quick. Clock. Quick. Clock. Quick. Clock.
-                startSettingsActivity(Intent.ACTION_QUICK_CLOCK);
-            }
-        });
-        mModel.addTimeTile(timeTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State alarmState) {}
-        });
-        parent.addView(timeTile);
-        mDynamicSpannedTiles.add(timeTile);
-        */
-
         // Settings tile
         final QuickSettingsBasicTile settingsTile = new QuickSettingsBasicTile(mContext);
         settingsTile.setImageResource(R.drawable.ic_qs_settings);
@@ -377,8 +375,9 @@ class QuickSettings {
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
         // Wi-fi
-        final QuickSettingsBasicTile wifiTile
-                = new QuickSettingsBasicTile(mContext);
+        final QuickSettingsTileView wifiTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        wifiTile.setContent(R.layout.quick_settings_tile_wifi, inflater);
         wifiTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -409,12 +408,15 @@ class QuickSettings {
                     return true;
                 }} );
         }
-        mModel.addWifiTile(wifiTile, new QuickSettingsModel.RefreshCallback() {
+        mModel.addWifiTile(wifiTile, new NetworkActivityCallback() {
             @Override
-            public void refreshView(QuickSettingsTileView unused, State state) {
+            public void refreshView(QuickSettingsTileView view, State state) {
                 WifiState wifiState = (WifiState) state;
-                wifiTile.setImageResource(wifiState.iconId);
-                wifiTile.setText(wifiState.label);
+                ImageView iv = (ImageView) view.findViewById(R.id.image);
+                iv.setImageResource(wifiState.iconId);
+                setActivity(view, wifiState);
+                TextView tv = (TextView) view.findViewById(R.id.text);
+                tv.setText(wifiState.label);
                 wifiTile.setContentDescription(mContext.getString(
                         R.string.accessibility_quick_settings_wifi,
                         wifiState.signalContentDescription,
@@ -438,7 +440,7 @@ class QuickSettings {
                     startSettingsActivity(intent);
                 }
             });
-            mModel.addRSSITile(rssiTile, new QuickSettingsModel.RefreshCallback() {
+            mModel.addRSSITile(rssiTile, new NetworkActivityCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
                     RSSIState rssiState = (RSSIState) state;
@@ -454,6 +456,8 @@ class QuickSettings {
                     } else {
                         iov.setImageDrawable(null);
                     }
+                    setActivity(view, rssiState);
+
                     tv.setText(state.label);
                     view.setContentDescription(mContext.getResources().getString(
                             R.string.accessibility_quick_settings_mobile,
@@ -471,18 +475,36 @@ class QuickSettings {
                     = new QuickSettingsBasicTile(mContext);
             rotationLockTile.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    boolean locked = RotationPolicy.isRotationLocked(mContext);
-                    RotationPolicy.setRotationLock(mContext, !locked);
+                public void onClick(View view) {
+                    final boolean locked = mRotationLockController.isRotationLocked();
+                    mRotationLockController.setRotationLocked(!locked);
                 }
             });
-            mModel.addRotationLockTile(rotationLockTile,
-                    new QuickSettingsModel.BasicRefreshCallback(rotationLockTile));
+            mModel.addRotationLockTile(rotationLockTile, mRotationLockController,
+                    new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView view, State state) {
+                            QuickSettingsModel.RotationLockState rotationLockState =
+                                    (QuickSettingsModel.RotationLockState) state;
+                            view.setVisibility(rotationLockState.visible
+                                    ? View.VISIBLE : View.GONE);
+                            if (state.iconId != 0) {
+                                // needed to flush any cached IDs
+                                rotationLockTile.setImageDrawable(null);
+                                rotationLockTile.setImageResource(state.iconId);
+                            }
+                            if (state.label != null) {
+                                rotationLockTile.setText(state.label);
+                            }
+                        }
+                    });
             parent.addView(rotationLockTile);
         }
 
         // Battery
-        final QuickSettingsBasicTile batteryTile = new QuickSettingsBasicTile(mContext);
+        final QuickSettingsTileView batteryTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        batteryTile.setContent(R.layout.quick_settings_tile_battery, inflater);
         batteryTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -494,9 +516,6 @@ class QuickSettings {
             public void refreshView(QuickSettingsTileView unused, State state) {
                 QuickSettingsModel.BatteryState batteryState =
                         (QuickSettingsModel.BatteryState) state;
-                Drawable d = batteryState.pluggedIn
-                        ? mChargingBatteryLevels
-                        : mBatteryLevels;
                 String t;
                 if (batteryState.batteryLevel == 100) {
                     t = mContext.getString(R.string.quick_settings_battery_charged_label);
@@ -507,9 +526,7 @@ class QuickSettings {
                         : mContext.getString(R.string.status_bar_settings_battery_meter_format,
                                 batteryState.batteryLevel);
                 }
-                batteryTile.setImageDrawable(d);
-                batteryTile.getImageView().setImageLevel(batteryState.batteryLevel);
-                batteryTile.setText(t);
+                ((TextView)batteryTile.findViewById(R.id.text)).setText(t);
                 batteryTile.setContentDescription(
                         mContext.getString(R.string.accessibility_quick_settings_battery, t));
             }
@@ -587,6 +604,35 @@ class QuickSettings {
             parent.addView(bluetoothTile);
         }
 
+        // Location
+        final QuickSettingsBasicTile locationTile
+                = new QuickSettingsBasicTile(mContext);
+        locationTile.setImageResource(R.drawable.ic_qs_location_on);
+        locationTile.setTextResource(R.string.quick_settings_location_label);
+        locationTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSettingsActivity(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            }
+        });
+        if (LONG_PRESS_TOGGLES) {
+            locationTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    boolean newLocationEnabledState = !mLocationController.isLocationEnabled();
+                    if (mLocationController.setLocationEnabled(newLocationEnabledState)
+                            && newLocationEnabledState) {
+                        // If we've successfully switched from location off to on, close the
+                        // notifications tray to show the network location provider consent dialog.
+                        Intent closeDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                        mContext.sendBroadcast(closeDialog);
+                    }
+                    return true; // Consume click
+                }} );
+        }
+        mModel.addLocationTile(locationTile,
+                new QuickSettingsModel.BasicRefreshCallback(locationTile));
+        parent.addView(locationTile);
     }
 
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {
@@ -597,12 +643,7 @@ class QuickSettings {
         alarmTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Jump into the alarm application
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(
-                        "com.google.android.deskclock",
-                        "com.android.deskclock.AlarmClock"));
-                startSettingsActivity(intent);
+                startSettingsActivity(AlarmClock.ACTION_SHOW_ALARMS);
             }
         });
         mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
@@ -615,22 +656,6 @@ class QuickSettings {
             }
         });
         parent.addView(alarmTile);
-
-        // Location
-        final QuickSettingsBasicTile locationTile
-                = new QuickSettingsBasicTile(mContext);
-        locationTile.setImageResource(R.drawable.ic_qs_location);
-        locationTile.setTextResource(R.string.quick_settings_location_label);
-        locationTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSettingsActivity(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            }
-        });
-        mModel.addLocationTile(locationTile,
-                new QuickSettingsModel.BasicRefreshCallback(locationTile)
-                        .setShowWhenEnabled(true));
-        parent.addView(locationTile);
 
         // Wifi Display
         QuickSettingsBasicTile wifiDisplayTile
@@ -704,6 +729,26 @@ class QuickSettings {
         });
         parent.addView(imeTile);
         */
+
+        // SSL CA Cert Warning.
+        final QuickSettingsBasicTile sslCaCertWarningTile =
+                new QuickSettingsBasicTile(mContext, null, R.layout.quick_settings_tile_monitoring);
+        sslCaCertWarningTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                collapsePanels();
+                startSettingsActivity(Settings.ACTION_MONITORING_CERT_INFO);
+            }
+        });
+
+        sslCaCertWarningTile.setImageResource(
+                com.android.internal.R.drawable.indicator_input_error);
+        sslCaCertWarningTile.setTextResource(R.string.ssl_ca_cert_warning);
+
+        mModel.addSslCaCertWarningTile(sslCaCertWarningTile,
+                new QuickSettingsModel.BasicRefreshCallback(sslCaCertWarningTile)
+                        .setShowWhenEnabled(true));
+        parent.addView(sslCaCertWarningTile);
     }
 
     void updateResources() {
@@ -773,6 +818,10 @@ class QuickSettings {
         mModel.onBluetoothStateChange(mBluetoothState);
     }
 
+    private void applyLocationEnabledStatus() {
+        mModel.onLocationSettingsChanged(mLocationController.isLocationEnabled());
+    }
+
     void reloadUserInfo() {
         if (mUserInfoTask != null) {
             mUserInfoTask.cancel(false);
@@ -780,6 +829,7 @@ class QuickSettings {
         }
         if (mTilesSetUp) {
             queryForUserInformation();
+            queryForSslCaCerts();
         }
     }
 
@@ -808,6 +858,8 @@ class QuickSettings {
                 if (mUseDefaultAvatar) {
                     queryForUserInformation();
                 }
+            } else if (KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
+                queryForSslCaCerts();
             }
         }
     };
@@ -832,4 +884,25 @@ class QuickSettings {
 
         }
     };
+
+    private abstract static class NetworkActivityCallback
+            implements QuickSettingsModel.RefreshCallback {
+        private final long mDefaultDuration = new ValueAnimator().getDuration();
+        private final long mShortDuration = mDefaultDuration / 3;
+
+        public void setActivity(View view, ActivityState state) {
+            setVisibility(view.findViewById(R.id.activity_in), state.activityIn);
+            setVisibility(view.findViewById(R.id.activity_out), state.activityOut);
+        }
+
+        private void setVisibility(View view, boolean visible) {
+            final float newAlpha = visible ? 1 : 0;
+            if (view.getAlpha() != newAlpha) {
+                view.animate()
+                    .setDuration(visible ? mShortDuration : mDefaultDuration)
+                    .alpha(newAlpha)
+                    .start();
+            }
+        }
+    }
 }

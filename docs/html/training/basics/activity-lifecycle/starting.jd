@@ -220,7 +220,7 @@ public void onCreate(Bundle savedInstanceState) {
 </pre>
 
 <p class="caution"><strong>Caution:</strong> Using the {@link android.os.Build.VERSION#SDK_INT} to
-prevent older system's from executing new APIs works in this way on Android 2.0 (API level
+prevent older systems from executing new APIs works in this way on Android 2.0 (API level
 5) and higher only. Older versions will encounter a runtime exception.</p>
 
 <p>Once the {@link android.app.Activity#onCreate onCreate()} finishes execution, the system

@@ -251,6 +251,11 @@ page.title=Spam
 
 <h2 id="ratings">Spam in Ratings and Reviews</h2>
 
+<div class="example-block bad" style="width:440px;">
+  <div class="heading">Inappropriate content in a review</div>
+  <img src="{@docRoot}images/gp-policy-spam-negreview.png">
+</div>
+
 <p>
   Ratings and reviews are benchmarks of app quality and users depend on them to
   be authentic and relevant. As an app developer, you should not attempt to
@@ -276,12 +281,7 @@ page.title=Spam
   more information.
 </p>
 
-<div class="example-block bad" style="width:440px;">
-  <div class="heading">Inappropriate content in a review</div>
-  <img src="{@docRoot}images/gp-policy-spam-negreview.png">
-</div>
-
-<div class="example-block bad" style="margin-top:3em;">
+<div class="example-block bad" style="margin-top:3em;width:213px;">
   <div class="heading">Soliciting ratings</div>
   <img src="{@docRoot}images/gp-policy-spam-reqrating.png">
 </div>

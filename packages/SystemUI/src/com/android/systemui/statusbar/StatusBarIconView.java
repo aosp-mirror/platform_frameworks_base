@@ -20,24 +20,22 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.util.Log;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 
-import java.text.NumberFormat;
-
 import com.android.internal.statusbar.StatusBarIcon;
-
 import com.android.systemui.R;
+
+import java.text.NumberFormat;
 
 public class StatusBarIconView extends AnimatedImageView {
     private static final String TAG = "StatusBarIconView";
@@ -70,8 +68,6 @@ public class StatusBarIconView extends AnimatedImageView {
             final float scale = (float)imageBounds / (float)outerBounds;
             setScaleX(scale);
             setScaleY(scale);
-            final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
-            setAlpha(alpha);
         }
 
         setScaleType(ImageView.ScaleType.CENTER);
@@ -85,8 +81,6 @@ public class StatusBarIconView extends AnimatedImageView {
         final float scale = (float)imageBounds / (float)outerBounds;
         setScaleX(scale);
         setScaleY(scale);
-        final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
-        setAlpha(alpha);
     }
 
     private static boolean streq(String a, String b) {
@@ -151,7 +145,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private boolean updateDrawable(boolean withClear) {
         Drawable drawable = getIcon(mIcon);
         if (drawable == null) {
-            Slog.w(TAG, "No icon for slot " + mSlot);
+            Log.w(TAG, "No icon for slot " + mSlot);
             return false;
         }
         if (withClear) {
@@ -168,7 +162,7 @@ public class StatusBarIconView extends AnimatedImageView {
     /**
      * Returns the right icon to use for this item, respecting the iconId and
      * iconPackage (if set)
-     * 
+     *
      * @param context Context to use to get resources if iconPackage is not set
      * @return Drawable for this item, or null if the package or item could not
      *         be found
@@ -185,7 +179,7 @@ public class StatusBarIconView extends AnimatedImageView {
                 r = context.getPackageManager()
                         .getResourcesForApplicationAsUser(icon.iconPackage, userId);
             } catch (PackageManager.NameNotFoundException ex) {
-                Slog.e(TAG, "Icon package not found: " + icon.iconPackage);
+                Log.e(TAG, "Icon package not found: " + icon.iconPackage);
                 return null;
             }
         } else {
@@ -195,11 +189,11 @@ public class StatusBarIconView extends AnimatedImageView {
         if (icon.iconId == 0) {
             return null;
         }
-        
+
         try {
             return r.getDrawable(icon.iconId);
         } catch (RuntimeException e) {
-            Slog.w(TAG, "Icon not found in "
+            Log.w(TAG, "Icon not found in "
                   + (icon.iconPackage != null ? icon.iconId : "<system>")
                   + ": " + Integer.toHexString(icon.iconId));
         }
@@ -287,7 +281,7 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public String toString() {
-        return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon 
+        return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon
             + " notification=" + mNotification + ")";
     }
 }

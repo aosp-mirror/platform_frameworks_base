@@ -18,7 +18,6 @@ package com.android.server.firewall;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.PatternMatcher;
 import org.xmlpull.v1.XmlPullParser;
@@ -119,9 +118,9 @@ abstract class StringFilter implements Filter {
     protected abstract boolean matchesValue(String value);
 
     @Override
-    public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
-        String value = mValueProvider.getValue(intent, callerApp, resolvedType, resolvedApp);
+    public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+            int callerUid, int callerPid, String resolvedType, int receivingUid) {
+        String value = mValueProvider.getValue(resolvedComponent, intent, resolvedType);
         return matchesValue(value);
     }
 
@@ -135,8 +134,8 @@ abstract class StringFilter implements Filter {
             return StringFilter.readFromXml(this, parser);
         }
 
-        public abstract String getValue(Intent intent, ApplicationInfo callerApp,
-                String resolvedType, ApplicationInfo resolvedApp);
+        public abstract String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType);
     }
 
     private static class EqualsFilter extends StringFilter {
@@ -230,11 +229,10 @@ abstract class StringFilter implements Filter {
 
     public static final ValueProvider COMPONENT = new ValueProvider("component") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
-            ComponentName cn = intent.getComponent();
-            if (cn != null) {
-                return cn.flattenToString();
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
+            if (resolvedComponent != null) {
+                return resolvedComponent.flattenToString();
             }
             return null;
         }
@@ -242,11 +240,10 @@ abstract class StringFilter implements Filter {
 
     public static final ValueProvider COMPONENT_NAME = new ValueProvider("component-name") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
-            ComponentName cn = intent.getComponent();
-            if (cn != null) {
-                return cn.getClassName();
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
+            if (resolvedComponent != null) {
+                return resolvedComponent.getClassName();
             }
             return null;
         }
@@ -254,11 +251,10 @@ abstract class StringFilter implements Filter {
 
     public static final ValueProvider COMPONENT_PACKAGE = new ValueProvider("component-package") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
-            ComponentName cn = intent.getComponent();
-            if (cn != null) {
-                return cn.getPackageName();
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
+            if (resolvedComponent != null) {
+                return resolvedComponent.getPackageName();
             }
             return null;
         }
@@ -266,16 +262,16 @@ abstract class StringFilter implements Filter {
 
     public static final FilterFactory ACTION = new ValueProvider("action") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
             return intent.getAction();
         }
     };
 
     public static final ValueProvider DATA = new ValueProvider("data") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
             Uri data = intent.getData();
             if (data != null) {
                 return data.toString();
@@ -286,16 +282,16 @@ abstract class StringFilter implements Filter {
 
     public static final ValueProvider MIME_TYPE = new ValueProvider("mime-type") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
             return resolvedType;
         }
     };
 
     public static final ValueProvider SCHEME = new ValueProvider("scheme") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
             Uri data = intent.getData();
             if (data != null) {
                 return data.getScheme();
@@ -306,8 +302,8 @@ abstract class StringFilter implements Filter {
 
     public static final ValueProvider SSP = new ValueProvider("scheme-specific-part") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
             Uri data = intent.getData();
             if (data != null) {
                 return data.getSchemeSpecificPart();
@@ -318,8 +314,8 @@ abstract class StringFilter implements Filter {
 
     public static final ValueProvider HOST = new ValueProvider("host") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
             Uri data = intent.getData();
             if (data != null) {
                 return data.getHost();
@@ -330,8 +326,8 @@ abstract class StringFilter implements Filter {
 
     public static final ValueProvider PATH = new ValueProvider("path") {
         @Override
-        public String getValue(Intent intent, ApplicationInfo callerApp, String resolvedType,
-                ApplicationInfo resolvedApp) {
+        public String getValue(ComponentName resolvedComponent, Intent intent,
+                String resolvedType) {
             Uri data = intent.getData();
             if (data != null) {
                 return data.getPath();

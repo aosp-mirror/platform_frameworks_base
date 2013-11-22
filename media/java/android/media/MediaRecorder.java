@@ -179,6 +179,40 @@ public class MediaRecorder
          *  is applied.
          */
         public static final int VOICE_COMMUNICATION = 7;
+
+        /**
+         * Audio source for a submix of audio streams to be presented remotely.
+         * <p>
+         * An application can use this audio source to capture a mix of audio streams
+         * that should be transmitted to a remote receiver such as a Wifi display.
+         * While recording is active, these audio streams are redirected to the remote
+         * submix instead of being played on the device speaker or headset.
+         * </p><p>
+         * Certain streams are excluded from the remote submix, including
+         * {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_ALARM},
+         * and {@link AudioManager#STREAM_NOTIFICATION}.  These streams will continue
+         * to be presented locally as usual.
+         * </p><p>
+         * Capturing the remote submix audio requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         */
+        public static final int REMOTE_SUBMIX = 8;
+
+        /**
+         * Audio source for preemptible, low-priority software hotword detection
+         * It presents the same gain and pre processing tuning as {@link #VOICE_RECOGNITION}.
+         * <p>
+         * An application should use this audio source when it wishes to do
+         * always-on software hotword detection, while gracefully giving in to any other application
+         * that might want to read from the microphone.
+         * </p>
+         * This is a hidden audio source.
+         * @hide
+         */
+        protected static final int HOTWORD = 1999;
     }
 
     /**
@@ -294,7 +328,7 @@ public class MediaRecorder
      * @see android.media.MediaRecorder.AudioSource
      */
     public static final int getAudioSourceMax() {
-        return AudioSource.VOICE_COMMUNICATION;
+        return AudioSource.REMOTE_SUBMIX;
     }
 
     /**

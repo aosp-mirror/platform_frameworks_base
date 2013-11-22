@@ -55,7 +55,10 @@ public class RecognizerIntent {
      * <p>Starting this intent with just {@link Activity#startActivity(Intent)} is not supported.
      * You must either use {@link Activity#startActivityForResult(Intent, int)}, or provide a
      * PendingIntent, to receive recognition results.
-     * 
+     *
+     * <p>The implementation of this API is likely to stream audio to remote servers to perform
+     * speech recognition which can use a substantial amount of bandwidth.
+     *
      * <p>Required extras:
      * <ul>
      *   <li>{@link #EXTRA_LANGUAGE_MODEL}

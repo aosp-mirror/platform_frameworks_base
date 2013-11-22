@@ -116,6 +116,17 @@ public class ComponentInfo extends PackageItemInfo {
     public final int getIconResource() {
         return icon != 0 ? icon : applicationInfo.icon;
     }
+
+    /**
+     * Return the logo resource identifier to use for this component.  If
+     * the component defines a logo, that is used; else, the application
+     * logo is used.
+     *
+     * @return The logo associated with this component.
+     */
+    public final int getLogoResource() {
+        return logo != 0 ? logo : applicationInfo.logo;
+    }
     
     protected void dumpFront(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);

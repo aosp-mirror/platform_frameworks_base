@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -37,6 +36,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.FileDescriptor;
@@ -63,16 +63,14 @@ class AppWidgetService extends IAppWidgetService.Stub
     AppWidgetService(Context context) {
         mContext = context;
 
-        HandlerThread handlerThread = new HandlerThread("AppWidgetService -- Save state");
-        handlerThread.start();
-        mSaveStateHandler = new Handler(handlerThread.getLooper());
+        mSaveStateHandler = BackgroundThread.getHandler();
 
         mAppWidgetServices = new SparseArray<AppWidgetServiceImpl>(5);
         AppWidgetServiceImpl primary = new AppWidgetServiceImpl(context, 0, mSaveStateHandler);
         mAppWidgetServices.append(0, primary);
     }
 
-    public void systemReady(boolean safeMode) {
+    public void systemRunning(boolean safeMode) {
         mSafeMode = safeMode;
 
         mAppWidgetServices.get(0).systemReady(safeMode);

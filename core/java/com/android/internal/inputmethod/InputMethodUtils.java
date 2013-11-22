@@ -57,6 +57,45 @@ public class InputMethodUtils {
         // This utility class is not publicly instantiable.
     }
 
+    // ----------------------------------------------------------------------
+    // Utilities for debug
+    public static String getStackTrace() {
+        final StringBuilder sb = new StringBuilder();
+        try {
+            throw new RuntimeException();
+        } catch (RuntimeException e) {
+            final StackTraceElement[] frames = e.getStackTrace();
+            // Start at 1 because the first frame is here and we don't care about it
+            for (int j = 1; j < frames.length; ++j) {
+                sb.append(frames[j].toString() + "\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String getApiCallStack() {
+        String apiCallStack = "";
+        try {
+            throw new RuntimeException();
+        } catch (RuntimeException e) {
+            final StackTraceElement[] frames = e.getStackTrace();
+            for (int j = 1; j < frames.length; ++j) {
+                final String tempCallStack = frames[j].toString();
+                if (TextUtils.isEmpty(apiCallStack)) {
+                    // Overwrite apiCallStack if it's empty
+                    apiCallStack = tempCallStack;
+                } else if (tempCallStack.indexOf("Transact(") < 0) {
+                    // Overwrite apiCallStack if it's not a binder call
+                    apiCallStack = tempCallStack;
+                } else {
+                    break;
+                }
+            }
+        }
+        return apiCallStack;
+    }
+    // ----------------------------------------------------------------------
+
     public static boolean isSystemIme(InputMethodInfo inputMethod) {
         return (inputMethod.getServiceInfo().applicationInfo.flags
                 & ApplicationInfo.FLAG_SYSTEM) != 0;
@@ -142,7 +181,7 @@ public class InputMethodUtils {
                 || isSystemImeThatHasEnglishKeyboardSubtype(imi);
     }
 
-    private static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
+    public static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
         final int N = imi.getSubtypeCount();
         for (int i = 0; i < N; ++i) {
             if (!imi.getSubtypeAt(i).getLocale().startsWith(language)) {
@@ -432,6 +471,17 @@ public class InputMethodUtils {
         }
     }
 
+    public static CharSequence getImeAndSubtypeDisplayName(Context context, InputMethodInfo imi,
+            InputMethodSubtype subtype) {
+        final CharSequence imiLabel = imi.loadLabel(context.getPackageManager());
+        return subtype != null
+                ? TextUtils.concat(subtype.getDisplayName(context,
+                        imi.getPackageName(), imi.getServiceInfo().applicationInfo),
+                                (TextUtils.isEmpty(imiLabel) ?
+                                        "" : " - " + imiLabel))
+                : imiLabel;
+    }
+
     /**
      * Utility class for putting and getting settings for InputMethod
      * TODO: Move all putters and getters of settings to this class.
@@ -508,7 +558,7 @@ public class InputMethodUtils {
             return InputMethodSubtype.sort(context, 0, imi, enabledSubtypes);
         }
 
-        private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
+        public List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
                 InputMethodInfo imi) {
             List<Pair<String, ArrayList<String>>> imsList =
                     getEnabledInputMethodsAndSubtypeListLocked();

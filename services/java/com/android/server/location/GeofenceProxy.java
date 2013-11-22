@@ -22,6 +22,7 @@ import android.hardware.location.GeofenceHardwareService;
 import android.hardware.location.IGeofenceHardware;
 import android.location.IGeofenceProvider;
 import android.location.IGpsGeofenceHardware;
+import android.location.IFusedGeofenceHardware;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -40,10 +41,15 @@ public final class GeofenceProxy {
     private static final String TAG = "GeofenceProxy";
     private static final String SERVICE_ACTION =
             "com.android.location.service.GeofenceProvider";
-    private ServiceWatcher mServiceWatcher;
-    private Context mContext;
+    private final ServiceWatcher mServiceWatcher;
+    private final Context mContext;
+    private final IGpsGeofenceHardware mGpsGeofenceHardware;
+    private final IFusedGeofenceHardware mFusedGeofenceHardware;
+
+    private final Object mLock = new Object();
+
+    // Access to mGeofenceHardware needs to be synchronized by mLock.
     private IGeofenceHardware mGeofenceHardware;
-    private IGpsGeofenceHardware mGpsGeofenceHardware;
 
     private static final int GEOFENCE_PROVIDER_CONNECTED = 1;
     private static final int GEOFENCE_HARDWARE_CONNECTED = 2;
@@ -60,9 +66,11 @@ public final class GeofenceProxy {
 
     public static GeofenceProxy createAndBind(Context context,
             int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence) {
+            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence,
+            IFusedGeofenceHardware fusedGeofenceHardware) {
         GeofenceProxy proxy = new GeofenceProxy(context, overlaySwitchResId,
-            defaultServicePackageNameResId, initialPackageNamesResId, handler, gpsGeofence);
+            defaultServicePackageNameResId, initialPackageNamesResId, handler, gpsGeofence,
+            fusedGeofenceHardware);
         if (proxy.bindGeofenceProvider()) {
             return proxy;
         } else {
@@ -72,20 +80,18 @@ public final class GeofenceProxy {
 
     private GeofenceProxy(Context context,
             int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence) {
+            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence,
+            IFusedGeofenceHardware fusedGeofenceHardware) {
         mContext = context;
         mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, overlaySwitchResId,
             defaultServicePackageNameResId, initialPackageNamesResId, mRunnable, handler);
         mGpsGeofenceHardware = gpsGeofence;
+        mFusedGeofenceHardware = fusedGeofenceHardware;
         bindHardwareGeofence();
     }
 
     private boolean bindGeofenceProvider() {
         return mServiceWatcher.start();
-    }
-
-    private IGeofenceProvider getGeofenceProviderService() {
-        return IGeofenceProvider.Stub.asInterface(mServiceWatcher.getBinder());
     }
 
     private void bindHardwareGeofence() {
@@ -96,26 +102,34 @@ public final class GeofenceProxy {
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mGeofenceHardware = IGeofenceHardware.Stub.asInterface(service);
-            mHandler.sendEmptyMessage(GEOFENCE_HARDWARE_CONNECTED);
+            synchronized (mLock) {
+                mGeofenceHardware = IGeofenceHardware.Stub.asInterface(service);
+                mHandler.sendEmptyMessage(GEOFENCE_HARDWARE_CONNECTED);
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mGeofenceHardware = null;
-            mHandler.sendEmptyMessage(GEOFENCE_HARDWARE_DISCONNECTED);
+            synchronized (mLock) {
+                mGeofenceHardware = null;
+                mHandler.sendEmptyMessage(GEOFENCE_HARDWARE_DISCONNECTED);
+            }
         }
     };
 
-    private void setGeofenceHardwareInProvider() {
+    private void setGeofenceHardwareInProviderLocked() {
         try {
-            getGeofenceProviderService().setGeofenceHardware(mGeofenceHardware);
+            IGeofenceProvider provider = IGeofenceProvider.Stub.asInterface(
+                      mServiceWatcher.getBinder());
+            if (provider != null) {
+                provider.setGeofenceHardware(mGeofenceHardware);
+            }
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote Exception: setGeofenceHardwareInProvider: " + e);
+            Log.e(TAG, "Remote Exception: setGeofenceHardwareInProviderLocked: " + e);
         }
     }
 
-    private void setGpsGeofence() {
+    private void setGpsGeofenceLocked() {
         try {
             mGeofenceHardware.setGpsGeofenceHardware(mGpsGeofenceHardware);
         } catch (RemoteException e) {
@@ -123,33 +137,48 @@ public final class GeofenceProxy {
         }
     }
 
+    private void setFusedGeofenceLocked() {
+        try {
+            mGeofenceHardware.setFusedGeofenceHardware(mFusedGeofenceHardware);
+        } catch(RemoteException e) {
+            Log.e(TAG, "Error while connecting to GeofenceHardwareService");
+        }
+    }
 
     // This needs to be reworked, when more services get added,
     // Might need a state machine or add a framework utility class,
     private Handler mHandler = new Handler() {
-        private boolean mGeofenceHardwareConnected = false;
-        private boolean mGeofenceProviderConnected = false;
-
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case GEOFENCE_PROVIDER_CONNECTED:
-                    mGeofenceProviderConnected = true;
-                    if (mGeofenceHardwareConnected) {
-                        setGeofenceHardwareInProvider();
+                    synchronized (mLock) {
+                        if (mGeofenceHardware != null) {
+                            setGeofenceHardwareInProviderLocked();
+                        }
+                        // else: the geofence provider will be notified when the connection to
+                        // GeofenceHardwareService is established.
                     }
                     break;
                 case GEOFENCE_HARDWARE_CONNECTED:
-                    setGpsGeofence();
-                    mGeofenceHardwareConnected = true;
-                    if (mGeofenceProviderConnected) {
-                        setGeofenceHardwareInProvider();
+                    synchronized (mLock) {
+                        // Theoretically this won't happen because once the GeofenceHardwareService
+                        // is connected to, we won't lose connection to it because it's a system
+                        // service. But this check does make the code more robust.
+                        if (mGeofenceHardware != null) {
+                            setGpsGeofenceLocked();
+                            setFusedGeofenceLocked();
+                            setGeofenceHardwareInProviderLocked();
+                        }
                     }
                     break;
                 case GEOFENCE_HARDWARE_DISCONNECTED:
-                    mGeofenceHardwareConnected = false;
-                    setGeofenceHardwareInProvider();
+                    synchronized (mLock) {
+                        if (mGeofenceHardware == null) {
+                            setGeofenceHardwareInProviderLocked();
+                        }
+                    }
                     break;
             }
         }

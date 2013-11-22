@@ -1,0 +1,298 @@
+page.title=Sharing a File
+
+trainingnavtop=true
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ReceiveRequests">Receive File Requests</a></li>
+  <li><a href="#CreateFileSelection">Create a File Selection Activity</a></li>
+  <li><a href="#RespondToRequest">Respond to a File Selection</a></li>
+  <li><a href="#GrantPermissions">Grant Permissions for the File</a></li>
+  <li><a href="#ShareFile">Share the File with the Requesting App</a>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContentURI"
+        >Designing Content URIs</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html#Permissions"
+        >Implementing Content Provider Permissions</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/security/permissions.html">Permissions</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+    </li>
+</ul>
+
+</div>
+</div>
+<p>
+    Once you have set up your app to share files using content URIs, you can respond to other apps'
+    requests for those files. One way to respond to these requests is to provide a file selection
+    interface from the server app that other applications can invoke. This approach allows a client
+    application to let users select a file from the server app and then receive the selected file's
+    content URI.
+</p>
+<p>
+    This lesson shows you how to create a file selection {@link android.app.Activity} in your app
+    that responds to requests for files.
+</p>
+<h2 id="ReceiveRequests">Receive File Requests</h2>
+<p>
+    To receive requests for files from client apps and respond with a content URI, your app should
+    provide a file selection {@link android.app.Activity}. Client apps start this
+    {@link android.app.Activity} by calling {@link android.app.Activity#startActivityForResult
+    startActivityForResult()} with an {@link android.content.Intent} containing the action
+    {@link android.content.Intent#ACTION_PICK ACTION_PICK}. When the client app calls
+    {@link android.app.Activity#startActivityForResult startActivityForResult()}, your app can
+    return a result to the client app, in the form of a content URI for the file the user selected.
+</p>
+<p>
+    To learn how to implement a request for a file in a client app, see the lesson
+    <a href="request-file.html">Requesting a Shared File</a>.
+</p>
+<h2 id="CreateFileSelection">Create a File Selection Activity</h2>
+<p>
+    To set up the file selection {@link android.app.Activity}, start by specifying the
+    {@link android.app.Activity} in your manifest, along with an intent filter
+    that matches the action {@link android.content.Intent#ACTION_PICK ACTION_PICK} and the
+    categories {@link android.content.Intent#CATEGORY_DEFAULT CATEGORY_DEFAULT} and
+    {@link android.content.Intent#CATEGORY_OPENABLE CATEGORY_OPENABLE}.  Also add MIME type filters
+    for the files your app serves to other apps. The following snippet shows you how to specify the
+    new {@link android.app.Activity} and intent filter:
+</p>
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    ...
+        &lt;application&gt;
+        ...
+            &lt;activity
+                android:name=".FileSelectActivity"
+                android:label="&#64;"File Selector" &gt;
+                &lt;intent-filter&gt;
+                    &lt;action
+                        android:name="android.intent.action.PICK"/&gt;
+                    &lt;category
+                        android:name="android.intent.category.DEFAULT"/&gt;
+                    &lt;category
+                        android:name="android.intent.category.OPENABLE"/&gt;
+                    &lt;data android:mimeType="text/plain"/&gt;
+                    &lt;data android:mimeType="image/*"/&gt;
+                &lt;/intent-filter&gt;
+            &lt;/activity&gt;</pre>
+<h3>Define the file selection Activity in code</h3>
+<p>
+    Next, define an {@link android.app.Activity} subclass that displays the files available from
+    your app's <code>files/images/</code> directory in internal storage and allows the user to pick
+    the desired file. The following snippet demonstrates how to define this
+    {@link android.app.Activity} and respond to the user's selection:
+</p>
+<pre>
+public class MainActivity extends Activity {
+    // The path to the root of this app's internal storage
+    private File mPrivateRootDir;
+    // The path to the "images" subdirectory
+    private File mImagesDir;
+    // Array of files in the images subdirectory
+    File[] mImageFiles;
+    // Array of filenames corresponding to mImageFiles
+    String[] mImageFilenames;
+    // Initialize the Activity
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        // Set up an Intent to send back to apps that request a file
+        mResultIntent =
+                new Intent("com.example.myapp.ACTION_RETURN_FILE");
+        // Get the files/ subdirectory of internal storage
+        mPrivateRootDir = getFilesDir();
+        // Get the files/images subdirectory;
+        mImagesDir = new File(mPrivateRootDir, "images");
+        // Get the files in the images subdirectory
+        mImageFiles = mImagesDir.listFiles();
+        // Set the Activity's result to null to begin with
+        setResult(Activity.RESULT_CANCELED, null);
+        /*
+         * Display the file names in the ListView mFileListView.
+         * Back the ListView with the array mImageFilenames, which
+         * you can create by iterating through mImageFiles and
+         * calling File.getAbsolutePath() for each File
+         */
+         ...
+    }
+    ...
+}</pre>
+<h2 id="RespondToRequest">Respond to a File Selection</h2>
+<p>
+    Once a user selects a shared file, your application must determine what file was selected and
+    then generate a content URI for the file. Since the {@link android.app.Activity} displays the
+    list of available files in a {@link android.widget.ListView}, when the user clicks a file name
+    the system calls the method {@link android.widget.AdapterView.OnItemClickListener#onItemClick
+    onItemClick()}, in which you can get the selected file.
+</p>
+<p>
+    In {@link android.widget.AdapterView.OnItemClickListener#onItemClick onItemClick()}, get a
+    {@link java.io.File} object for the file name of the selected file and pass it as an argument to
+    {@link android.support.v4.content.FileProvider#getUriForFile getUriForFile()}, along with the
+    authority that you specified in the
+    <code><a href="{@docRoot}guide/topics/manifest/provider-element.html"
+    >&lt;provider&gt;</a></code> element for the {@link android.support.v4.content.FileProvider}.
+    The resulting content URI contains the authority, a path segment corresponding to the file's
+    directory (as specified in the XML meta-data), and the name of the file including its
+    extension. How {@link android.support.v4.content.FileProvider} maps directories to path
+    segments based on XML meta-data is described in the section
+    <a href="setup-sharing.html#DefineMetaData">Specify Sharable Directories</a>.
+</p>
+<p>
+    The following snippet shows you how to detect the selected file and get a content URI for it:
+</p>
+<pre>
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        // Define a listener that responds to clicks on a file in the ListView
+        mFileListView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+            &#64;Override
+            /*
+             * When a filename in the ListView is clicked, get its
+             * content URI and send it to the requesting app
+             */
+            public void onItemClick(AdapterView&lt;?&gt; adapterView,
+                    View view,
+                    int position,
+                    long rowId) {
+                /*
+                 * Get a File for the selected file name.
+                 * Assume that the file names are in the
+                 * mImageFilename array.
+                 */
+                File requestFile = new File(mImageFilename[position]);
+                /*
+                 * Most file-related method calls need to be in
+                 * try-catch blocks.
+                 */
+                // Use the FileProvider to get a content URI
+                try {
+                    fileUri = FileProvider.getUriForFile(
+                            MainActivity.this,
+                            "com.example.myapp.fileprovider",
+                            requestFile);
+                } catch (IllegalArgumentException e) {
+                    Log.e("File Selector",
+                          "The selected file can't be shared: " +
+                          clickedFilename);
+                }
+                ...
+            }
+        });
+        ...
+    }</pre>
+<p>
+    Remember that you can only generate content URIs for files that reside in a directory
+    you've specified in the meta-data file that contains the <code>&lt;paths&gt;</code> element, as
+    described in the section <a href="setup-sharing.html#DefineMetaData"
+    >Specify Sharable Directories</a>. If you call
+    {@link android.support.v4.content.FileProvider#getUriForFile getUriForFile()} for a
+    {@link java.io.File} in a path that you haven't specified, you receive an
+    {@link java.lang.IllegalArgumentException}.
+</p>
+<h2 id="GrantPermissions">Grant Permissions for the File</h2>
+<p>
+    Now that you have a content URI for the file you want to share with another app, you need to
+    allow the client app to access the file. To allow access, grant permissions to the client app by
+    adding the content URI to an {@link android.content.Intent} and then setting permission flags on
+    the {@link android.content.Intent}. The permissions you grant are temporary and expire
+    automatically when the receiving app's task stack is finished.
+</p>
+<p>
+    The following code snippet shows you how to set read permission for the file:
+</p>
+<pre>
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        // Define a listener that responds to clicks in the ListView
+        mFileListView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+            &#64;Override
+            public void onItemClick(AdapterView&lt;?&gt; adapterView,
+                    View view,
+                    int position,
+                    long rowId) {
+                ...
+                if (fileUri != null) {
+                    // Grant temporary read permission to the content URI
+                    mResultIntent.addFlags(
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+                ...
+             }
+             ...
+        });
+    ...
+    }</pre>
+<p class="caution">
+    <strong>Caution:</strong> Calling {@link android.content.Intent#setFlags setFlags()} is the only
+    way to securely grant access to your files using temporary access permissions. Avoid calling
+    {@link android.content.Context#grantUriPermission Context.grantUriPermission()} method for a
+    file's content URI, since this method grants access that you can only revoke by
+    calling {@link android.content.Context#revokeUriPermission Context.revokeUriPermission()}.
+</p>
+<h2 id="ShareFile">Share the File with the Requesting App</h2>
+<p>
+    To share the file with the app that requested it, pass the {@link android.content.Intent}
+    containing the content URI and permissions to {@link android.app.Activity#setResult
+    setResult()}. When the {@link android.app.Activity} you have just defined is finished, the
+    system sends the {@link android.content.Intent} containing the content URI to the client app.
+    The following code snippet shows you how to do this:
+</p>
+<pre>
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        // Define a listener that responds to clicks on a file in the ListView
+        mFileListView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+            &#64;Override
+            public void onItemClick(AdapterView&lt;?&gt; adapterView,
+                    View view,
+                    int position,
+                    long rowId) {
+                ...
+                if (fileUri != null) {
+                    ...
+                    // Put the Uri and MIME type in the result Intent
+                    mResultIntent.setDataAndType(
+                            fileUri,
+                            getContentResolver().getType(fileUri));
+                    // Set the result
+                    MainActivity.this.setResult(Activity.RESULT_OK,
+                            mResultIntent);
+                    } else {
+                        mResultIntent.setDataAndType(null, "");
+                        MainActivity.this.setResult(RESULT_CANCELED,
+                                mResultIntent);
+                    }
+                }
+        });</pre>
+<p>
+    Provide users with an way to return immediately to the client app once they have chosen a file.
+    One way to do this is to provide a checkmark or <b>Done</b> button. Associate a method with
+    the button using the button's
+    <code><a href="{@docRoot}reference/android/view/View.html#attr_android:onClick"
+    >android:onClick</a></code> attribute. In the method, call
+    {@link android.app.Activity#finish finish()}. For example:
+</p>
+<pre>
+    public void onDoneClick(View v) {
+        // Associate a method with the Done button
+        finish();
+    }</pre>

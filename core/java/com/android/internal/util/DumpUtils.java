@@ -40,7 +40,7 @@ public final class DumpUtils {
         if (handler.runWithScissors(new Runnable() {
             @Override
             public void run() {
-                PrintWriter lpw = new PrintWriter(sw);
+                PrintWriter lpw = new FastPrintWriter(sw);
                 dump.dump(lpw);
                 lpw.close();
             }

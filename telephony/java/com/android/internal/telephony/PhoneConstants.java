@@ -119,5 +119,7 @@ public class PhoneConstants {
     public static final String APN_TYPE_IMS = "ims";
     /** APN type for CBS */
     public static final String APN_TYPE_CBS = "cbs";
+    /** APN type for IA Initial Attach APN */
+    public static final String APN_TYPE_IA = "ia";
 
 }

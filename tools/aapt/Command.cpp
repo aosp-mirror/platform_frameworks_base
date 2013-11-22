@@ -346,6 +346,8 @@ enum {
     LABEL_ATTR = 0x01010001,
     ICON_ATTR = 0x01010002,
     NAME_ATTR = 0x01010003,
+    PERMISSION_ATTR = 0x01010006,
+    RESOURCE_ATTR = 0x01010025,
     DEBUGGABLE_ATTR = 0x0101000f,
     VERSION_CODE_ATTR = 0x0101021b,
     VERSION_NAME_ATTR = 0x0101021c,
@@ -372,6 +374,7 @@ enum {
     COMPATIBLE_WIDTH_LIMIT_DP_ATTR = 0x01010365,
     LARGEST_WIDTH_LIMIT_DP_ATTR = 0x01010366,
     PUBLIC_KEY_ATTR = 0x010103a6,
+    CATEGORY_ATTR = 0x010103e8,
 };
 
 const char *getComponentName(String8 &pkgName, String8 &componentName) {
@@ -422,6 +425,61 @@ static void printCompatibleScreens(ResXMLTree& tree) {
         }
     }
     printf("\n");
+}
+
+Vector<String8> getNfcAidCategories(AssetManager& assets, String8 xmlPath, bool offHost,
+        String8 *outError = NULL)
+{
+    Asset* aidAsset = assets.openNonAsset(xmlPath, Asset::ACCESS_BUFFER);
+    if (aidAsset == NULL) {
+        if (outError != NULL) *outError = "xml resource does not exist";
+        return Vector<String8>();
+    }
+
+    const String8 serviceTagName(offHost ? "offhost-apdu-service" : "host-apdu-service");
+
+    bool withinApduService = false;
+    Vector<String8> categories;
+
+    String8 error;
+    ResXMLTree tree;
+    tree.setTo(aidAsset->getBuffer(true), aidAsset->getLength());
+
+    size_t len;
+    int depth = 0;
+    ResXMLTree::event_code_t code;
+    while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+        if (code == ResXMLTree::END_TAG) {
+            depth--;
+            String8 tag(tree.getElementName(&len));
+
+            if (depth == 0 && tag == serviceTagName) {
+                withinApduService = false;
+            }
+
+        } else if (code == ResXMLTree::START_TAG) {
+            depth++;
+            String8 tag(tree.getElementName(&len));
+
+            if (depth == 1) {
+                if (tag == serviceTagName) {
+                    withinApduService = true;
+                }
+            } else if (depth == 2 && withinApduService) {
+                if (tag == "aid-group") {
+                    String8 category = getAttribute(tree, CATEGORY_ATTR, &error);
+                    if (error != "") {
+                        if (outError != NULL) *outError = error;
+                        return Vector<String8>();
+                    }
+
+                    categories.add(category);
+                }
+            }
+        }
+    }
+    aidAsset->close();
+    return categories;
 }
 
 /*
@@ -621,6 +679,7 @@ int doDump(Bundle* bundle)
             bool isLauncherActivity = false;
             bool isSearchable = false;
             bool withinApplication = false;
+            bool withinSupportsInput = false;
             bool withinReceiver = false;
             bool withinService = false;
             bool withinIntentFilter = false;
@@ -630,12 +689,31 @@ int doDump(Bundle* bundle)
             bool hasOtherServices = false;
             bool hasWallpaperService = false;
             bool hasImeService = false;
+            bool hasAccessibilityService = false;
+            bool hasPrintService = false;
             bool hasWidgetReceivers = false;
+            bool hasDeviceAdminReceiver = false;
             bool hasIntentFilter = false;
+            bool hasPaymentService = false;
             bool actMainActivity = false;
             bool actWidgetReceivers = false;
+            bool actDeviceAdminEnabled = false;
             bool actImeService = false;
             bool actWallpaperService = false;
+            bool actAccessibilityService = false;
+            bool actPrintService = false;
+            bool actHostApduService = false;
+            bool actOffHostApduService = false;
+            bool hasMetaHostPaymentCategory = false;
+            bool hasMetaOffHostPaymentCategory = false;
+
+            // These permissions are required by services implementing services
+            // the system binds to (IME, Accessibility, PrintServices, etc.)
+            bool hasBindDeviceAdminPermission = false;
+            bool hasBindInputMethodPermission = false;
+            bool hasBindAccessibilityServicePermission = false;
+            bool hasBindPrintServicePermission = false;
+            bool hasBindNfcServicePermission = false;
 
             // These two implement the implicit permissions that are granted
             // to pre-1.6 applications.
@@ -711,11 +789,26 @@ int doDump(Bundle* bundle)
             String8 activityIcon;
             String8 receiverName;
             String8 serviceName;
+            Vector<String8> supportedInput;
             while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                 if (code == ResXMLTree::END_TAG) {
                     depth--;
                     if (depth < 2) {
+                        if (withinSupportsInput && !supportedInput.isEmpty()) {
+                            printf("supports-input: '");
+                            const size_t N = supportedInput.size();
+                            for (size_t i=0; i<N; i++) {
+                                printf("%s", supportedInput[i].string());
+                                if (i != N - 1) {
+                                    printf("' '");
+                                } else {
+                                    printf("'\n");
+                                }
+                            }
+                            supportedInput.clear();
+                        }
                         withinApplication = false;
+                        withinSupportsInput = false;
                     } else if (depth < 3) {
                         if (withinActivity && isMainActivity && isLauncherActivity) {
                             const char *aName = getComponentName(pkg, activityName);
@@ -731,6 +824,13 @@ int doDump(Bundle* bundle)
                             hasOtherActivities |= withinActivity;
                             hasOtherReceivers |= withinReceiver;
                             hasOtherServices |= withinService;
+                        } else {
+                            if (withinService) {
+                                hasPaymentService |= (actHostApduService && hasMetaHostPaymentCategory &&
+                                        hasBindNfcServicePermission);
+                                hasPaymentService |= (actOffHostApduService && hasMetaOffHostPaymentCategory &&
+                                        hasBindNfcServicePermission);
+                            }
                         }
                         withinActivity = false;
                         withinService = false;
@@ -744,11 +844,18 @@ int doDump(Bundle* bundle)
                                 hasOtherActivities |= !actMainActivity;
                             } else if (withinReceiver) {
                                 hasWidgetReceivers |= actWidgetReceivers;
-                                hasOtherReceivers |= !actWidgetReceivers;
+                                hasDeviceAdminReceiver |= (actDeviceAdminEnabled &&
+                                        hasBindDeviceAdminPermission);
+                                hasOtherReceivers |= (!actWidgetReceivers && !actDeviceAdminEnabled);
                             } else if (withinService) {
                                 hasImeService |= actImeService;
                                 hasWallpaperService |= actWallpaperService;
-                                hasOtherServices |= (!actImeService && !actWallpaperService);
+                                hasAccessibilityService |= (actAccessibilityService &&
+                                        hasBindAccessibilityServicePermission);
+                                hasPrintService |= (actPrintService && hasBindPrintServicePermission);
+                                hasOtherServices |= (!actImeService && !actWallpaperService &&
+                                        !actAccessibilityService && !actPrintService &&
+                                        !actHostApduService && !actOffHostApduService);
                             }
                         }
                         withinIntentFilter = false;
@@ -910,6 +1017,8 @@ int doDump(Bundle* bundle)
                             printf(" reqFiveWayNav='%d'", reqFiveWayNav);
                         }
                         printf("\n");
+                    } else if (tag == "supports-input") {
+                        withinSupportsInput = true;
                     } else if (tag == "supports-screens") {
                         smallScreen = getIntegerAttribute(tree,
                                 SMALL_SCREEN_ATTR, NULL, 1);
@@ -1086,73 +1195,175 @@ int doDump(Bundle* bundle)
                             }
                         }
                     }
-                } else if (depth == 3 && withinApplication) {
+                } else if (depth == 3) {
                     withinActivity = false;
                     withinReceiver = false;
                     withinService = false;
                     hasIntentFilter = false;
-                    if(tag == "activity") {
-                        withinActivity = true;
-                        activityName = getAttribute(tree, NAME_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
-                            goto bail;
-                        }
+                    hasMetaHostPaymentCategory = false;
+                    hasMetaOffHostPaymentCategory = false;
+                    hasBindDeviceAdminPermission = false;
+                    hasBindInputMethodPermission = false;
+                    hasBindAccessibilityServicePermission = false;
+                    hasBindPrintServicePermission = false;
+                    hasBindNfcServicePermission = false;
+                    if (withinApplication) {
+                        if(tag == "activity") {
+                            withinActivity = true;
+                            activityName = getAttribute(tree, NAME_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
 
-                        activityLabel = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n", error.string());
-                            goto bail;
-                        }
+                            activityLabel = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
 
-                        activityIcon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
-                            goto bail;
-                        }
+                            activityIcon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
 
-                        int32_t orien = getResolvedIntegerAttribute(&res, tree,
-                                SCREEN_ORIENTATION_ATTR, &error);
-                        if (error == "") {
-                            if (orien == 0 || orien == 6 || orien == 8) {
-                                // Requests landscape, sensorLandscape, or reverseLandscape.
-                                reqScreenLandscapeFeature = true;
-                            } else if (orien == 1 || orien == 7 || orien == 9) {
-                                // Requests portrait, sensorPortrait, or reversePortrait.
-                                reqScreenPortraitFeature = true;
+                            int32_t orien = getResolvedIntegerAttribute(&res, tree,
+                                    SCREEN_ORIENTATION_ATTR, &error);
+                            if (error == "") {
+                                if (orien == 0 || orien == 6 || orien == 8) {
+                                    // Requests landscape, sensorLandscape, or reverseLandscape.
+                                    reqScreenLandscapeFeature = true;
+                                } else if (orien == 1 || orien == 7 || orien == 9) {
+                                    // Requests portrait, sensorPortrait, or reversePortrait.
+                                    reqScreenPortraitFeature = true;
+                                }
+                            }
+                        } else if (tag == "uses-library") {
+                            String8 libraryName = getAttribute(tree, NAME_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr,
+                                        "ERROR getting 'android:name' attribute for uses-library"
+                                        " %s\n", error.string());
+                                goto bail;
+                            }
+                            int req = getIntegerAttribute(tree,
+                                    REQUIRED_ATTR, NULL, 1);
+                            printf("uses-library%s:'%s'\n",
+                                    req ? "" : "-not-required", libraryName.string());
+                        } else if (tag == "receiver") {
+                            withinReceiver = true;
+                            receiverName = getAttribute(tree, NAME_ATTR, &error);
+
+                            if (error != "") {
+                                fprintf(stderr,
+                                        "ERROR getting 'android:name' attribute for receiver:"
+                                        " %s\n", error.string());
+                                goto bail;
+                            }
+
+                            String8 permission = getAttribute(tree, PERMISSION_ATTR, &error);
+                            if (error == "") {
+                                if (permission == "android.permission.BIND_DEVICE_ADMIN") {
+                                    hasBindDeviceAdminPermission = true;
+                                }
+                            } else {
+                                fprintf(stderr, "ERROR getting 'android:permission' attribute for"
+                                        " receiver '%s': %s\n", receiverName.string(), error.string());
+                            }
+                        } else if (tag == "service") {
+                            withinService = true;
+                            serviceName = getAttribute(tree, NAME_ATTR, &error);
+
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:name' attribute for"
+                                        " service: %s\n", error.string());
+                                goto bail;
+                            }
+
+                            String8 permission = getAttribute(tree, PERMISSION_ATTR, &error);
+                            if (error == "") {
+                                if (permission == "android.permission.BIND_INPUT_METHOD") {
+                                    hasBindInputMethodPermission = true;
+                                } else if (permission == "android.permission.BIND_ACCESSIBILITY_SERVICE") {
+                                    hasBindAccessibilityServicePermission = true;
+                                } else if (permission == "android.permission.BIND_PRINT_SERVICE") {
+                                    hasBindPrintServicePermission = true;
+                                } else if (permission == "android.permission.BIND_NFC_SERVICE") {
+                                    hasBindNfcServicePermission = true;
+                                }
+                            } else {
+                                fprintf(stderr, "ERROR getting 'android:permission' attribute for"
+                                        " service '%s': %s\n", serviceName.string(), error.string());
                             }
                         }
-                    } else if (tag == "uses-library") {
-                        String8 libraryName = getAttribute(tree, NAME_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute for uses-library: %s\n", error.string());
-                            goto bail;
-                        }
-                        int req = getIntegerAttribute(tree,
-                                REQUIRED_ATTR, NULL, 1);
-                        printf("uses-library%s:'%s'\n",
-                                req ? "" : "-not-required", libraryName.string());
-                    } else if (tag == "receiver") {
-                        withinReceiver = true;
-                        receiverName = getAttribute(tree, NAME_ATTR, &error);
-
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute for receiver: %s\n", error.string());
-                            goto bail;
-                        }
-                    } else if (tag == "service") {
-                        withinService = true;
-                        serviceName = getAttribute(tree, NAME_ATTR, &error);
-
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute for service: %s\n", error.string());
+                    } else if (withinSupportsInput && tag == "input-type") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (name != "" && error == "") {
+                            supportedInput.add(name);
+                        } else {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                    error.string());
                             goto bail;
                         }
                     }
-                } else if ((depth == 4) && (tag == "intent-filter")) {
-                    hasIntentFilter = true;
-                    withinIntentFilter = true;
-                    actMainActivity = actWidgetReceivers = actImeService = actWallpaperService = false;
+                } else if (depth == 4) {
+                    if (tag == "intent-filter") {
+                        hasIntentFilter = true;
+                        withinIntentFilter = true;
+                        actMainActivity = false;
+                        actWidgetReceivers = false;
+                        actImeService = false;
+                        actWallpaperService = false;
+                        actAccessibilityService = false;
+                        actPrintService = false;
+                        actDeviceAdminEnabled = false;
+                        actHostApduService = false;
+                        actOffHostApduService = false;
+                    } else if (withinService && tag == "meta-data") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute for"
+                                    " meta-data tag in service '%s': %s\n", serviceName.string(), error.string());
+                            goto bail;
+                        }
+
+                        if (name == "android.nfc.cardemulation.host_apdu_service" ||
+                                name == "android.nfc.cardemulation.off_host_apdu_service") {
+                            bool offHost = true;
+                            if (name == "android.nfc.cardemulation.host_apdu_service") {
+                                offHost = false;
+                            }
+
+                            String8 xmlPath = getResolvedAttribute(&res, tree, RESOURCE_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:resource' attribute for"
+                                        " meta-data tag in service '%s': %s\n", serviceName.string(), error.string());
+                                goto bail;
+                            }
+
+                            Vector<String8> categories = getNfcAidCategories(assets, xmlPath,
+                                    offHost, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting AID category for service '%s'\n",
+                                        serviceName.string());
+                                goto bail;
+                            }
+
+                            const size_t catLen = categories.size();
+                            for (size_t i = 0; i < catLen; i++) {
+                                bool paymentCategory = (categories[i] == "payment");
+                                if (offHost) {
+                                    hasMetaOffHostPaymentCategory |= paymentCategory;
+                                } else {
+                                    hasMetaHostPaymentCategory |= paymentCategory;
+                                }
+                            }
+                        }
+                    }
                 } else if ((depth == 5) && withinIntentFilter){
                     String8 action;
                     if (tag == "action") {
@@ -1169,12 +1380,22 @@ int doDump(Bundle* bundle)
                         } else if (withinReceiver) {
                             if (action == "android.appwidget.action.APPWIDGET_UPDATE") {
                                 actWidgetReceivers = true;
+                            } else if (action == "android.app.action.DEVICE_ADMIN_ENABLED") {
+                                actDeviceAdminEnabled = true;
                             }
                         } else if (withinService) {
                             if (action == "android.view.InputMethod") {
                                 actImeService = true;
                             } else if (action == "android.service.wallpaper.WallpaperService") {
                                 actWallpaperService = true;
+                            } else if (action == "android.accessibilityservice.AccessibilityService") {
+                                actAccessibilityService = true;
+                            } else if (action == "android.printservice.PrintService") {
+                                actPrintService = true;
+                            } else if (action == "android.nfc.cardemulation.action.HOST_APDU_SERVICE") {
+                                actHostApduService = true;
+                            } else if (action == "android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE") {
+                                actOffHostApduService = true;
                             }
                         }
                         if (action == "android.intent.action.SEARCH") {
@@ -1374,11 +1595,23 @@ int doDump(Bundle* bundle)
             if (hasWidgetReceivers) {
                 printf("app-widget\n");
             }
+            if (hasDeviceAdminReceiver) {
+                printf("device-admin\n");
+            }
             if (hasImeService) {
                 printf("ime\n");
             }
             if (hasWallpaperService) {
                 printf("wallpaper\n");
+            }
+            if (hasAccessibilityService) {
+                printf("accessibility\n");
+            }
+            if (hasPrintService) {
+                printf("print\n");
+            }
+            if (hasPaymentService) {
+                printf("payment\n");
             }
             if (hasOtherActivities) {
                 printf("other-activities\n");

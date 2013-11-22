@@ -20,7 +20,6 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -29,8 +28,10 @@ import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.Xml;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
@@ -42,15 +43,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class IntentFirewall {
-    private static final String TAG = "IntentFirewall";
+    static final String TAG = "IntentFirewall";
 
-    // e.g. /data/system/ifw/ifw.xml or /data/secure/system/ifw/ifw.xml
-    private static final File RULES_FILE =
-            new File(Environment.getSystemSecureDirectory(), "ifw/ifw.xml");
+    // e.g. /data/system/ifw or /data/secure/system/ifw
+    private static final File RULES_DIR = new File(Environment.getSystemSecureDirectory(), "ifw");
 
     private static final int LOG_PACKAGES_MAX_LENGTH = 150;
     private static final int LOG_PACKAGES_SUFFICIENT_LENGTH = 125;
@@ -87,6 +88,7 @@ public class IntentFirewall {
                 StringFilter.DATA,
                 StringFilter.HOST,
                 StringFilter.MIME_TYPE,
+                StringFilter.SCHEME,
                 StringFilter.PATH,
                 StringFilter.SSP,
 
@@ -106,12 +108,12 @@ public class IntentFirewall {
 
     public IntentFirewall(AMSInterface ams) {
         mAms = ams;
-        File rulesFile = getRulesFile();
-        rulesFile.getParentFile().mkdirs();
+        File rulesDir = getRulesDir();
+        rulesDir.mkdirs();
 
-        readRules(rulesFile);
+        readRulesDir(rulesDir);
 
-        mObserver = new RuleObserver(rulesFile);
+        mObserver = new RuleObserver(rulesDir);
         mObserver.startWatching();
     }
 
@@ -119,16 +121,45 @@ public class IntentFirewall {
      * This is called from ActivityManager to check if a start activity intent should be allowed.
      * It is assumed the caller is already holding the global ActivityManagerService lock.
      */
-    public boolean checkStartActivity(Intent intent, ApplicationInfo callerApp, int callerUid,
-            int callerPid, String resolvedType, ActivityInfo resolvedActivity) {
-        List<Rule> matchingRules = mActivityResolver.queryIntent(intent, resolvedType, false, 0);
+    public boolean checkStartActivity(Intent intent, int callerUid, int callerPid,
+            String resolvedType, ApplicationInfo resolvedApp) {
+        return checkIntent(mActivityResolver, intent.getComponent(), TYPE_ACTIVITY, intent,
+                callerUid, callerPid, resolvedType, resolvedApp.uid);
+    }
+
+    public boolean checkService(ComponentName resolvedService, Intent intent, int callerUid,
+            int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+        return checkIntent(mServiceResolver, resolvedService, TYPE_SERVICE, intent, callerUid,
+                callerPid, resolvedType, resolvedApp.uid);
+    }
+
+    public boolean checkBroadcast(Intent intent, int callerUid, int callerPid,
+            String resolvedType, int receivingUid) {
+        return checkIntent(mBroadcastResolver, intent.getComponent(), TYPE_BROADCAST, intent,
+                callerUid, callerPid, resolvedType, receivingUid);
+    }
+
+    public boolean checkIntent(FirewallIntentResolver resolver, ComponentName resolvedComponent,
+            int intentType, Intent intent, int callerUid, int callerPid, String resolvedType,
+            int receivingUid) {
         boolean log = false;
         boolean block = false;
 
-        for (int i=0; i< matchingRules.size(); i++) {
-            Rule rule = matchingRules.get(i);
-            if (rule.matches(this, intent, callerApp, callerUid, callerPid, resolvedType,
-                    resolvedActivity.applicationInfo)) {
+        // For the first pass, find all the rules that have at least one intent-filter or
+        // component-filter that matches this intent
+        List<Rule> candidateRules;
+        candidateRules = resolver.queryIntent(intent, resolvedType, false, 0);
+        if (candidateRules == null) {
+            candidateRules = new ArrayList<Rule>();
+        }
+        resolver.queryByComponent(resolvedComponent, candidateRules);
+
+        // For the second pass, try to match the potentially more specific conditions in each
+        // rule against the intent
+        for (int i=0; i<candidateRules.size(); i++) {
+            Rule rule = candidateRules.get(i);
+            if (rule.matches(this, resolvedComponent, intent, callerUid, callerPid, resolvedType,
+                    receivingUid)) {
                 block |= rule.getBlock();
                 log |= rule.getLog();
 
@@ -141,7 +172,7 @@ public class IntentFirewall {
         }
 
         if (log) {
-            logIntent(TYPE_ACTIVITY, intent, callerUid, resolvedType);
+            logIntent(intentType, intent, callerUid, resolvedType);
         }
 
         return !block;
@@ -216,20 +247,56 @@ public class IntentFirewall {
         return null;
     }
 
-    public static File getRulesFile() {
-        return RULES_FILE;
+    public static File getRulesDir() {
+        return RULES_DIR;
     }
 
     /**
-     * Reads rules from the given file and replaces our set of rules with the newly read rules
+     * Reads rules from all xml files (*.xml) in the given directory, and replaces our set of rules
+     * with the newly read rules.
+     *
+     * We only check for files ending in ".xml", to allow for temporary files that are atomically
+     * renamed to .xml
      *
      * All calls to this method from the file observer come through a handler and are inherently
      * serialized
      */
-    private void readRules(File rulesFile) {
+    private void readRulesDir(File rulesDir) {
         FirewallIntentResolver[] resolvers = new FirewallIntentResolver[3];
         for (int i=0; i<resolvers.length; i++) {
             resolvers[i] = new FirewallIntentResolver();
+        }
+
+        File[] files = rulesDir.listFiles();
+        for (int i=0; i<files.length; i++) {
+            File file = files[i];
+
+            if (file.getName().endsWith(".xml")) {
+                readRules(file, resolvers);
+            }
+        }
+
+        Slog.i(TAG, "Read new rules (A:" + resolvers[TYPE_ACTIVITY].filterSet().size() +
+                " B:" + resolvers[TYPE_BROADCAST].filterSet().size() +
+                " S:" + resolvers[TYPE_SERVICE].filterSet().size() + ")");
+
+        synchronized (mAms.getAMSLock()) {
+            mActivityResolver = resolvers[TYPE_ACTIVITY];
+            mBroadcastResolver = resolvers[TYPE_BROADCAST];
+            mServiceResolver = resolvers[TYPE_SERVICE];
+        }
+    }
+
+    /**
+     * Reads rules from the given file and add them to the given resolvers
+     */
+    private void readRules(File rulesFile, FirewallIntentResolver[] resolvers) {
+        // some temporary lists to hold the rules while we parse the xml file, so that we can
+        // add the rules all at once, after we know there weren't any major structural problems
+        // with the xml file
+        List<List<Rule>> rulesByType = new ArrayList<List<Rule>>(3);
+        for (int i=0; i<3; i++) {
+            rulesByType.add(new ArrayList<Rule>());
         }
 
         FileInputStream fis;
@@ -247,8 +314,6 @@ public class IntentFirewall {
 
             XmlUtils.beginDocument(parser, TAG_RULES);
 
-            int[] numRules = new int[3];
-
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 int ruleType = -1;
@@ -265,41 +330,28 @@ public class IntentFirewall {
                 if (ruleType != -1) {
                     Rule rule = new Rule();
 
-                    FirewallIntentResolver resolver = resolvers[ruleType];
+                    List<Rule> rules = rulesByType.get(ruleType);
 
                     // if we get an error while parsing a particular rule, we'll just ignore
                     // that rule and continue on with the next rule
                     try {
                         rule.readFromXml(parser);
                     } catch (XmlPullParserException ex) {
-                        Slog.e(TAG, "Error reading intent firewall rule", ex);
+                        Slog.e(TAG, "Error reading an intent firewall rule from " + rulesFile, ex);
                         continue;
                     }
 
-                    numRules[ruleType]++;
-
-                    for (int i=0; i<rule.getIntentFilterCount(); i++) {
-                        resolver.addFilter(rule.getIntentFilter(i));
-                    }
+                    rules.add(rule);
                 }
-            }
-
-            Slog.i(TAG, "Read new rules (A:" + numRules[TYPE_ACTIVITY] +
-                    " B:" + numRules[TYPE_BROADCAST] + " S:" + numRules[TYPE_SERVICE] + ")");
-
-            synchronized (mAms.getAMSLock()) {
-                mActivityResolver = resolvers[TYPE_ACTIVITY];
-                mBroadcastResolver = resolvers[TYPE_BROADCAST];
-                mServiceResolver = resolvers[TYPE_SERVICE];
             }
         } catch (XmlPullParserException ex) {
             // if there was an error outside of a specific rule, then there are probably
             // structural problems with the xml file, and we should completely ignore it
-            Slog.e(TAG, "Error reading intent firewall rules", ex);
-            clearRules();
+            Slog.e(TAG, "Error reading intent firewall rules from " + rulesFile, ex);
+            return;
         } catch (IOException ex) {
-            Slog.e(TAG, "Error reading intent firewall rules", ex);
-            clearRules();
+            Slog.e(TAG, "Error reading intent firewall rules from " + rulesFile, ex);
+            return;
         } finally {
             try {
                 fis.close();
@@ -307,21 +359,20 @@ public class IntentFirewall {
                 Slog.e(TAG, "Error while closing " + rulesFile, ex);
             }
         }
-    }
 
-    /**
-     * Clears out all of our rules
-     *
-     * All calls to this method from the file observer come through a handler and are inherently
-     * serialized
-     */
-    private void clearRules() {
-        Slog.i(TAG, "Clearing all rules");
+        for (int ruleType=0; ruleType<rulesByType.size(); ruleType++) {
+            List<Rule> rules = rulesByType.get(ruleType);
+            FirewallIntentResolver resolver = resolvers[ruleType];
 
-        synchronized (mAms.getAMSLock())  {
-            mActivityResolver = new FirewallIntentResolver();
-            mBroadcastResolver = new FirewallIntentResolver();
-            mServiceResolver = new FirewallIntentResolver();
+            for (int ruleIndex=0; ruleIndex<rules.size(); ruleIndex++) {
+                Rule rule = rules.get(ruleIndex);
+                for (int i=0; i<rule.getIntentFilterCount(); i++) {
+                    resolver.addFilter(rule.getIntentFilter(i));
+                }
+                for (int i=0; i<rule.getComponentFilterCount(); i++) {
+                    resolver.addComponentFilter(rule.getComponentFilter(i), rule);
+                }
+            }
         }
     }
 
@@ -336,14 +387,35 @@ public class IntentFirewall {
         return factory.newFilter(parser);
     }
 
+    /**
+     * Represents a single activity/service/broadcast rule within one of the xml files.
+     *
+     * Rules are matched against an incoming intent in two phases. The goal of the first phase
+     * is to select a subset of rules that might match a given intent.
+     *
+     * For the first phase, we use a combination of intent filters (via an IntentResolver)
+     * and component filters to select which rules to check. If a rule has multiple intent or
+     * component filters, only a single filter must match for the rule to be passed on to the
+     * second phase.
+     *
+     * In the second phase, we check the specific conditions in each rule against the values in the
+     * intent. All top level conditions (but not filters) in the rule must match for the rule as a
+     * whole to match.
+     *
+     * If the rule matches, then we block or log the intent, as specified by the rule. If multiple
+     * rules match, we combine the block/log flags from any matching rule.
+     */
     private static class Rule extends AndFilter {
         private static final String TAG_INTENT_FILTER = "intent-filter";
+        private static final String TAG_COMPONENT_FILTER = "component-filter";
+        private static final String ATTR_NAME = "name";
 
         private static final String ATTR_BLOCK = "block";
         private static final String ATTR_LOG = "log";
 
         private final ArrayList<FirewallIntentFilter> mIntentFilters =
                 new ArrayList<FirewallIntentFilter>(1);
+        private final ArrayList<ComponentName> mComponentFilters = new ArrayList<ComponentName>(0);
         private boolean block;
         private boolean log;
 
@@ -358,10 +430,25 @@ public class IntentFirewall {
 
         @Override
         protected void readChild(XmlPullParser parser) throws IOException, XmlPullParserException {
-            if (parser.getName().equals(TAG_INTENT_FILTER)) {
+            String currentTag = parser.getName();
+
+            if (currentTag.equals(TAG_INTENT_FILTER)) {
                 FirewallIntentFilter intentFilter = new FirewallIntentFilter(this);
                 intentFilter.readFromXml(parser);
                 mIntentFilters.add(intentFilter);
+            } else if (currentTag.equals(TAG_COMPONENT_FILTER)) {
+                String componentStr = parser.getAttributeValue(null, ATTR_NAME);
+                if (componentStr == null) {
+                    throw new XmlPullParserException("Component name must be specified.",
+                            parser, null);
+                }
+
+                ComponentName componentName = ComponentName.unflattenFromString(componentStr);
+                if (componentName == null) {
+                    throw new XmlPullParserException("Invalid component name: " + componentStr);
+                }
+
+                mComponentFilters.add(componentName);
             } else {
                 super.readChild(parser);
             }
@@ -375,6 +462,13 @@ public class IntentFirewall {
             return mIntentFilters.get(index);
         }
 
+        public int getComponentFilterCount() {
+            return mComponentFilters.size();
+        }
+
+        public ComponentName getComponentFilter(int index) {
+            return mComponentFilters.get(index);
+        }
         public boolean getBlock() {
             return block;
         }
@@ -419,56 +513,50 @@ public class IntentFirewall {
             // there's no need to sort the results
             return;
         }
-    }
 
-    private static final int READ_RULES = 0;
-    private static final int CLEAR_RULES = 1;
+        public void queryByComponent(ComponentName componentName, List<Rule> candidateRules) {
+            Rule[] rules = mRulesByComponent.get(componentName);
+            if (rules != null) {
+                candidateRules.addAll(Arrays.asList(rules));
+            }
+        }
+
+        public void addComponentFilter(ComponentName componentName, Rule rule) {
+            Rule[] rules = mRulesByComponent.get(componentName);
+            rules = ArrayUtils.appendElement(Rule.class, rules, rule);
+            mRulesByComponent.put(componentName, rules);
+        }
+
+        private final ArrayMap<ComponentName, Rule[]> mRulesByComponent =
+                new ArrayMap<ComponentName, Rule[]>(0);
+    }
 
     final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case READ_RULES:
-                    readRules(getRulesFile());
-                    break;
-                case CLEAR_RULES:
-                    clearRules();
-                    break;
-            }
+            readRulesDir(getRulesDir());
         }
     };
 
     /**
-     * Monitors for the creation/deletion/modification of the rule file
+     * Monitors for the creation/deletion/modification of any .xml files in the rule directory
      */
     private class RuleObserver extends FileObserver {
-        // The file name we're monitoring, with no path component
-        private final String mMonitoredFile;
+        private static final int MONITORED_EVENTS = FileObserver.CREATE|FileObserver.MOVED_TO|
+                FileObserver.CLOSE_WRITE|FileObserver.DELETE|FileObserver.MOVED_FROM;
 
-        private static final int CREATED_FLAGS = FileObserver.CREATE|FileObserver.MOVED_TO|
-                FileObserver.CLOSE_WRITE;
-        private static final int DELETED_FLAGS = FileObserver.DELETE|FileObserver.MOVED_FROM;
-
-        public RuleObserver(File monitoredFile) {
-            super(monitoredFile.getParentFile().getAbsolutePath(), CREATED_FLAGS|DELETED_FLAGS);
-            mMonitoredFile = monitoredFile.getName();
+        public RuleObserver(File monitoredDir) {
+            super(monitoredDir.getAbsolutePath(), MONITORED_EVENTS);
         }
 
         @Override
         public void onEvent(int event, String path) {
-            if (path.equals(mMonitoredFile)) {
+            if (path.endsWith(".xml")) {
                 // we wait 250ms before taking any action on an event, in order to dedup multiple
                 // events. E.g. a delete event followed by a create event followed by a subsequent
-                // write+close event;
-                if ((event & CREATED_FLAGS) != 0) {
-                    mHandler.removeMessages(READ_RULES);
-                    mHandler.removeMessages(CLEAR_RULES);
-                    mHandler.sendEmptyMessageDelayed(READ_RULES, 250);
-                } else if ((event & DELETED_FLAGS) != 0) {
-                    mHandler.removeMessages(READ_RULES);
-                    mHandler.removeMessages(CLEAR_RULES);
-                    mHandler.sendEmptyMessageDelayed(CLEAR_RULES, 250);
-                }
+                // write+close event
+                mHandler.removeMessages(0);
+                mHandler.sendEmptyMessageDelayed(0, 250);
             }
         }
     }
@@ -509,4 +597,5 @@ public class IntentFirewall {
             return false;
         }
     }
+
 }

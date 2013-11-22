@@ -108,6 +108,11 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         mState.mDrawable.setAlpha(alpha);
     }
 
+    @Override
+    public int getAlpha() {
+        return mState.mDrawable.getAlpha();
+    }
+
     public void setColorFilter(ColorFilter cf) {
         mState.mDrawable.setColorFilter(cf);
     }

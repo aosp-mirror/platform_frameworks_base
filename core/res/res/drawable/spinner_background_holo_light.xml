@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+          android:autoMirrored="true">
     <item android:state_enabled="false"
           android:drawable="@drawable/spinner_disabled_holo_light" />
     <item android:state_pressed="true"

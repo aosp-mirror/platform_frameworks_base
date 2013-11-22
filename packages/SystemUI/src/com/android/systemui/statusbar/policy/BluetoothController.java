@@ -23,10 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.view.View;
-import android.widget.ImageView;
-
-import com.android.systemui.R;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,11 +31,6 @@ import java.util.Set;
 public class BluetoothController extends BroadcastReceiver {
     private static final String TAG = "StatusBar.BluetoothController";
 
-    private Context mContext;
-    private ArrayList<ImageView> mIconViews = new ArrayList<ImageView>();
-
-    private int mIconId = R.drawable.stat_sys_data_bluetooth;
-    private int mContentDescriptionId = 0;
     private boolean mEnabled = false;
 
     private Set<BluetoothDevice> mBondedDevices = new HashSet<BluetoothDevice>();
@@ -48,7 +39,6 @@ public class BluetoothController extends BroadcastReceiver {
             new ArrayList<BluetoothStateChangeCallback>();
 
     public BluetoothController(Context context) {
-        mContext = context;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -59,14 +49,9 @@ public class BluetoothController extends BroadcastReceiver {
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             handleAdapterStateChange(adapter.getState());
-            handleConnectionStateChange(adapter.getConnectionState());
         }
-        refreshViews();
+        fireCallbacks();
         updateBondedBluetoothDevices();
-    }
-
-    public void addIconView(ImageView v) {
-        mIconViews.add(v);
     }
 
     public void addStateChangedCallback(BluetoothStateChangeCallback cb) {
@@ -84,14 +69,8 @@ public class BluetoothController extends BroadcastReceiver {
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             handleAdapterStateChange(
                     intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR));
-        } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-            handleConnectionStateChange(
-                    intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
-                        BluetoothAdapter.STATE_DISCONNECTED));
-        } else if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-            // Fall through and update bonded devices and refresh view
         }
-        refreshViews();
+        fireCallbacks();
         updateBondedBluetoothDevices();
     }
 
@@ -111,31 +90,11 @@ public class BluetoothController extends BroadcastReceiver {
         }
     }
 
-    public void handleAdapterStateChange(int adapterState) {
+    private void handleAdapterStateChange(int adapterState) {
         mEnabled = (adapterState == BluetoothAdapter.STATE_ON);
     }
 
-    public void handleConnectionStateChange(int connectionState) {
-        final boolean connected = (connectionState == BluetoothAdapter.STATE_CONNECTED);
-        if (connected) {
-            mIconId = R.drawable.stat_sys_data_bluetooth_connected;
-            mContentDescriptionId = R.string.accessibility_bluetooth_connected;
-        } else {
-            mIconId = R.drawable.stat_sys_data_bluetooth;
-            mContentDescriptionId = R.string.accessibility_bluetooth_disconnected;
-        }
-    }
-
-    public void refreshViews() {
-        int N = mIconViews.size();
-        for (int i=0; i<N; i++) {
-            ImageView v = mIconViews.get(i);
-            v.setImageResource(mIconId);
-            v.setVisibility(mEnabled ? View.VISIBLE : View.GONE);
-            v.setContentDescription((mContentDescriptionId == 0)
-                    ? null
-                    : mContext.getString(mContentDescriptionId));
-        }
+    private void fireCallbacks() {
         for (BluetoothStateChangeCallback cb : mChangeCallbacks) {
             cb.onBluetoothStateChange(mEnabled);
         }

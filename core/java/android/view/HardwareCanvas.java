@@ -202,6 +202,28 @@ public abstract class HardwareCanvas extends Canvas {
     abstract void pushLayerUpdate(HardwareLayer layer);
 
     /**
+     * Cancels a queued layer update. If the specified layer was not
+     * queued for update, this method has no effect.
+     *
+     * @param layer The layer whose update to cancel
+     *
+     * @see #pushLayerUpdate(HardwareLayer)
+     * @see #clearLayerUpdates()
+     *
+     * @hide
+     */
+    abstract void cancelLayerUpdate(HardwareLayer layer);
+
+    /**
+     * Immediately executes all enqueued layer updates.
+     *
+     * @see #pushLayerUpdate(HardwareLayer)
+     *
+     * @hide
+     */
+    abstract void flushLayerUpdates();
+
+    /**
      * Removes all enqueued layer updates.
      * 
      * @see #pushLayerUpdate(HardwareLayer)

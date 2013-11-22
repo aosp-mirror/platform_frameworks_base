@@ -167,7 +167,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onConnectionStateChange(BluetoothGatt.this, status, profileState);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
 
                 synchronized(mStateLock) {
@@ -261,7 +261,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onGetDescriptor(String address, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
-                             ParcelUuid descUuid) {
+                             int descrInstId, ParcelUuid descUuid) {
                 if (DBG) Log.d(TAG, "onGetDescriptor() - Device=" + address + " UUID=" + descUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -276,7 +276,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (characteristic == null) return;
 
                 characteristic.addDescriptor(new BluetoothGattDescriptor(
-                    characteristic, descUuid.getUuid(), 0));
+                    characteristic, descUuid.getUuid(), descrInstId, 0));
             }
 
             /**
@@ -294,7 +294,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onServicesDiscovered(BluetoothGatt.this, status);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
 
@@ -341,7 +341,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onCharacteristicRead(BluetoothGatt.this, characteristic, status);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
 
@@ -387,7 +387,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onCharacteristicWrite(BluetoothGatt.this, characteristic, status);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
 
@@ -418,7 +418,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onCharacteristicChanged(BluetoothGatt.this, characteristic);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
 
@@ -429,7 +429,8 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onDescriptorRead(String address, int status, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
-                             ParcelUuid descrUuid, byte[] value) {
+                             int descrInstId, ParcelUuid descrUuid,
+                             byte[] value) {
                 if (DBG) Log.d(TAG, "onDescriptorRead() - Device=" + address + " UUID=" + charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -444,7 +445,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (characteristic == null) return;
 
                 BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                        descrUuid.getUuid());
+                        descrUuid.getUuid(), descrInstId);
                 if (descriptor == null) return;
 
                 if (status == 0) descriptor.setValue(value);
@@ -456,7 +457,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                         mAuthRetry = true;
                         mService.readDescriptor(mClientIf, address,
                             srvcType, srvcInstId, srvcUuid, charInstId, charUuid,
-                            descrUuid, AUTHENTICATION_MITM);
+                            descrInstId, descrUuid, AUTHENTICATION_MITM);
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
@@ -467,7 +468,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
 
@@ -478,7 +479,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onDescriptorWrite(String address, int status, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
-                             ParcelUuid descrUuid) {
+                             int descrInstId, ParcelUuid descrUuid) {
                 if (DBG) Log.d(TAG, "onDescriptorWrite() - Device=" + address + " UUID=" + charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -493,7 +494,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (characteristic == null) return;
 
                 BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                        descrUuid.getUuid());
+                        descrUuid.getUuid(), descrInstId);
                 if (descriptor == null) return;
 
                 if ((status == GATT_INSUFFICIENT_AUTHENTICATION
@@ -503,7 +504,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                         mAuthRetry = true;
                         mService.writeDescriptor(mClientIf, address,
                             srvcType, srvcInstId, srvcUuid, charInstId, charUuid,
-                            descrUuid, characteristic.getWriteType(),
+                            descrInstId, descrUuid, characteristic.getWriteType(),
                             AUTHENTICATION_MITM, descriptor.getValue());
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
@@ -515,7 +516,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onDescriptorWrite(BluetoothGatt.this, descriptor, status);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
 
@@ -532,7 +533,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onReliableWriteCompleted(BluetoothGatt.this, status);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
             }
 
@@ -549,8 +550,16 @@ public final class BluetoothGatt implements BluetoothProfile {
                 try {
                     mCallback.onReadRemoteRssi(BluetoothGatt.this, rssi, status);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Unhandled exception: " + ex);
+                    Log.w(TAG, "Unhandled exception in callback", ex);
                 }
+            }
+
+            /**
+             * Listen command status callback
+             * @hide
+             */
+            public void onListen(int status) {
+                if (DBG) Log.d(TAG, "onListen() - status=" + status);
             }
         };
 
@@ -682,6 +691,71 @@ public final class BluetoothGatt implements BluetoothProfile {
         // the connection will continue after successful callback registration
         mAutoConnect = autoConnect;
         return true;
+    }
+
+   /**
+     * Starts or stops sending of advertisement packages to listen for connection
+     * requests from a central devices.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param start Start or stop advertising
+     */
+    /*package*/ void listen(boolean start) {
+        if (mContext == null || !mContext.getResources().
+            getBoolean(com.android.internal.R.bool.config_bluetooth_le_peripheral_mode_supported)) {
+            throw new UnsupportedOperationException("BluetoothGatt#listen is blocked");
+        }
+        if (DBG) Log.d(TAG, "listen() - start: " + start);
+        if (mService == null || mClientIf == 0) return;
+
+        try {
+            mService.clientListen(mClientIf, start);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+        }
+    }
+
+    /**
+     * Sets the advertising data contained in the adv. response packet.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param advData true to set adv. data, false to set scan response
+     * @param includeName Inlucde the name in the adv. response
+     * @param includeTxPower Include TX power value
+     * @param minInterval Minimum desired scan interval (optional)
+     * @param maxInterval Maximum desired scan interval (optional)
+     * @param appearance The appearance flags for the device (optional)
+     * @param manufacturerData Manufacturer specific data including company ID (optional)
+     */
+    /*package*/ void setAdvData(boolean advData, boolean includeName, boolean includeTxPower,
+                           Integer minInterval, Integer maxInterval,
+                           Integer appearance, Byte[] manufacturerData) {
+        if (mContext == null || !mContext.getResources().
+            getBoolean(com.android.internal.R.bool.config_bluetooth_le_peripheral_mode_supported)) {
+            throw new UnsupportedOperationException("BluetoothGatt#setAdvData is blocked");
+        }
+        if (DBG) Log.d(TAG, "setAdvData()");
+        if (mService == null || mClientIf == 0) return;
+
+        byte[] data = new byte[0];
+        if (manufacturerData != null) {
+            data = new byte[manufacturerData.length];
+            for(int i = 0; i != manufacturerData.length; ++i) {
+                data[i] = manufacturerData[i];
+            }
+        }
+
+        try {
+            mService.setAdvData(mClientIf, !advData,
+                includeName, includeTxPower,
+                minInterval != null ? minInterval : 0,
+                maxInterval != null ? maxInterval : 0,
+                appearance != null ? appearance : 0, data);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+        }
     }
 
     /**
@@ -915,11 +989,11 @@ public final class BluetoothGatt implements BluetoothProfile {
         if (device == null) return false;
 
         try {
-            mService.readDescriptor(mClientIf, device.getAddress(),
-                service.getType(), service.getInstanceId(),
-                new ParcelUuid(service.getUuid()), characteristic.getInstanceId(),
-                new ParcelUuid(characteristic.getUuid()),
-                new ParcelUuid(descriptor.getUuid()), AUTHENTICATION_NONE);
+            mService.readDescriptor(mClientIf, device.getAddress(), service.getType(),
+                service.getInstanceId(), new ParcelUuid(service.getUuid()),
+                characteristic.getInstanceId(), new ParcelUuid(characteristic.getUuid()),
+                descriptor.getInstanceId(), new ParcelUuid(descriptor.getUuid()),
+                AUTHENTICATION_NONE);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             return false;
@@ -953,11 +1027,10 @@ public final class BluetoothGatt implements BluetoothProfile {
         if (device == null) return false;
 
         try {
-            mService.writeDescriptor(mClientIf, device.getAddress(),
-                service.getType(), service.getInstanceId(),
-                new ParcelUuid(service.getUuid()), characteristic.getInstanceId(),
-                new ParcelUuid(characteristic.getUuid()),
-                new ParcelUuid(descriptor.getUuid()),
+            mService.writeDescriptor(mClientIf, device.getAddress(), service.getType(),
+                service.getInstanceId(), new ParcelUuid(service.getUuid()),
+                characteristic.getInstanceId(), new ParcelUuid(characteristic.getUuid()),
+                descriptor.getInstanceId(), new ParcelUuid(descriptor.getUuid()),
                 characteristic.getWriteType(), AUTHENTICATION_NONE,
                 descriptor.getValue());
         } catch (RemoteException e) {
@@ -1037,7 +1110,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      */
-    public void abortReliableWrite(BluetoothDevice mDevice) {
+    public void abortReliableWrite() {
         if (DBG) Log.d(TAG, "abortReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return;
 
@@ -1046,6 +1119,13 @@ public final class BluetoothGatt implements BluetoothProfile {
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
         }
+    }
+
+    /**
+     * @deprecated Use {@link #abortReliableWrite()}
+     */
+    public void abortReliableWrite(BluetoothDevice mDevice) {
+        abortReliableWrite();
     }
 
     /**

@@ -25,17 +25,19 @@ final class StartingData {
     final CharSequence nonLocalizedLabel;
     final int labelRes;
     final int icon;
+    final int logo;
     final int windowFlags;
 
     StartingData(String _pkg, int _theme, CompatibilityInfo _compatInfo,
             CharSequence _nonLocalizedLabel,
-            int _labelRes, int _icon, int _windowFlags) {
+            int _labelRes, int _icon, int _logo, int _windowFlags) {
         pkg = _pkg;
         theme = _theme;
         compatInfo = _compatInfo;
         nonLocalizedLabel = _nonLocalizedLabel;
         labelRes = _labelRes;
         icon = _icon;
+        logo = _logo;
         windowFlags = _windowFlags;
     }
 }

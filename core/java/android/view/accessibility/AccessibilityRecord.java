@@ -164,7 +164,7 @@ public class AccessibilityRecord {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mSourceWindowId,
-                mSourceNodeId, GET_SOURCE_PREFETCH_FLAGS);
+                mSourceNodeId, false, GET_SOURCE_PREFETCH_FLAGS);
     }
 
     /**

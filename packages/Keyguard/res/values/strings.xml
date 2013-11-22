@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_pin_code">Type PIN code</string>
+
+    <!-- Instructions telling the user to enter their SIM PUK to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_puk_code">Type PUK and new PIN code</string>
+
+    <!-- Prompt to enter SIM PUK in Edit Text Box in unlock screen -->
+    <string name="keyguard_password_enter_puk_prompt">PUK code</string>
+    <!-- Prompt to enter New SIM PIN in Edit Text Box in unlock screen -->
+    <string name="keyguard_password_enter_pin_prompt">New PIN code</string>
+
+    <!-- Displayed as hint in passwordEntry EditText on PasswordUnlockScreen [CHAR LIMIT=30]-->
+    <string name="keyguard_password_entry_touch_hint"><font size="17">Touch to type password</font></string>
+
+    <!-- Instructions telling the user to enter their text password to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_password_code">Type password to unlock</string>
+
+    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_pin_password_code">Type PIN to unlock</string>
+
+    <!-- Instructions telling the user that they entered the wrong pin while trying
+         to unlock the keyguard.  Displayed in one line in a large font.  -->
+    <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
+
+    <!-- Instructions telling the user how to unlock the phone. -->
+    <string name="keyguard_label_text">To unlock, press Menu then 0.</string>
+
+    <!-- Shown when face unlock failed multiple times so we're just using the backup -->
+    <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
+
+    <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
+         charged, say that it is charged. -->
+    <string name="keyguard_charged">Charged</string>
+
+    <!-- When the lock screen is showing and the phone plugged in, and the battery
+         is not fully charged, show the current charge %.  -->
+    <string name="keyguard_plugged_in">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
+
+    <!-- When the lock screen is showing and the battery is low, warn user to plug
+         in the phone soon. -->
+    <string name="keyguard_low_battery">Connect your charger.</string>
+
+    <!-- On the keyguard screen, when pattern lock is disabled, only tell them to press menu to unlock.  This is shown in small font at the bottom. -->
+    <string name="keyguard_instructions_when_pattern_disabled">Press Menu to unlock.</string>
+
+    <!-- SIM messages --><skip />
+    <!-- When the user inserts a sim card from an unsupported network, it becomes network locked -->
+    <string name="keyguard_network_locked_message">Network locked</string>
+    <!-- Shown when there is no SIM card. -->
+    <string name="keyguard_missing_sim_message_short">No SIM card</string>
+    <!-- Shown when there is no SIM card. -->
+    <string name="keyguard_missing_sim_message" product="tablet">No SIM card in tablet.</string>
+    <!-- Shown when there is no SIM card. -->
+    <string name="keyguard_missing_sim_message" product="default">No SIM card in phone.</string>
+    <!-- Shown to ask the user to insert a SIM card. -->
+    <string name="keyguard_missing_sim_instructions">Insert a SIM card.</string>
+    <!-- Shown to ask the user to insert a SIM card when sim is missing or not readable. -->
+    <string name="keyguard_missing_sim_instructions_long">The SIM card is missing or not readable. Insert a SIM card.</string>
+    <!-- Shown when SIM card is permanently disabled. -->
+    <string name="keyguard_permanent_disabled_sim_message_short">Unusable SIM card.</string>
+    <!-- Shown to inform the user to SIM card is permanently disabled. -->
+    <string name="keyguard_permanent_disabled_sim_instructions">Your SIM card has been permanently disabled.\n
+    Contact your wireless service provider for another SIM card.</string>
+    <!-- Shown to tell the user that their SIM is locked and they must unlock it. -->
+    <string name="keyguard_sim_locked_message">SIM card is locked.</string>
+    <!-- When the user enters a wrong sim pin too many times, it becomes PUK locked (Pin Unlock Kode) -->
+    <string name="keyguard_sim_puk_locked_message">SIM card is PUK-locked.</string>
+    <!-- For the unlock screen, When the user enters a sim unlock code, it takes a little while to check
+         whether it is valid, and to unlock the sim if it is valid.  we display a
+         progress dialog in the meantime.  this is the emssage. -->
+    <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+
+    <!-- Time format strings for fall-back clock widget -->
+    <string name="keyguard_widget_12_hours_format" translatable="false">h&#58;mm</string>
+    <!-- Time format strings for fall-back clock widget -->
+    <string name="keyguard_widget_24_hours_format" translatable="false">kk&#58;mm</string>
+
+    <!-- Accessibility description sent when user changes the current lock screen widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_changed">%1$s. Widget %2$d of %3$d.</string>
+    <!-- Accessibility description of the add widget button. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_add_widget">Add widget.</string>
+    <!-- Accessibility description of the empty sidget slot (place holder for a new widget). [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_empty_slot">Empty</string>
+    <!-- Accessibility description of the event of expanding an unlock area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_unlock_area_expanded">Unlock area expanded.</string>
+    <!-- Accessibility description of the event of collapsing an unlock area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_unlock_area_collapsed">Unlock area collapsed.</string>
+    <!-- Accessibility description of a lock screen widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget"><xliff:g id="widget_index">%1$s</xliff:g> widget.</string>
+    <!-- Accessibility description of the lock screen user selector widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_user_selector">User selector</string>
+    <!-- Accessibility description of the lock screen status widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_status">Status</string>
+    <!-- Accessibility description of the camera widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_camera">Camera</string>
+    <!-- Accessibility description of the lock media control widget. [CHAR_LIMIT=none] -->
+    <string name="keygaurd_accessibility_media_controls">Media controls</string>
+    <!-- Accessibility description of widget reordering start. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_reorder_start">Widget reordering started.</string>
+    <!-- Accessibility description of widget reordering end. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_reorder_end">Widget reordering ended.</string>
+    <!-- Accessibility description of the a widget deletion event. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_deleted">Widget <xliff:g id="widget_index">%1$s</xliff:g> deleted.</string>
+    <!-- Accessibility description of the button to expand the lock area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_expand_lock_area">Expand unlock area.</string>
+    <!-- Accessibility description of the slide unlock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_slide_unlock">Slide unlock.</string>
+    <!-- Accessibility description of the pattern unlock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_pattern_unlock">Pattern unlock.</string>
+    <!-- Accessibility description of the face unlock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
+    <!-- Accessibility description of the pin lock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_pin_unlock">Pin unlock.</string>
+    <!-- Accessibility description of the password lock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_password_unlock">Password unlock.</string>
+    <!-- Accessibility description of the unlock pattern area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_pattern_area">Pattern area.</string>
+    <!-- Accessibility description of the unlock slide area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_slide_area">Slide area.</string>
+
+    <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
+    <string name="keyguard_accessibility_transport_prev_description">Previous track button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button goes to next track. -->
+    <string name="keyguard_accessibility_transport_next_description">Next track button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="keyguard_accessibility_transport_pause_description">Pause button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="keyguard_accessibility_transport_play_description">Play button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="keyguard_accessibility_transport_stop_description">Stop button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button rates the track as "thumbs up." -->
+    <string name="keyguard_accessibility_transport_thumbs_up_description">Thumbs up</string>
+    <!-- Shown on transport control of lockscreen. Pressing button rates the track as "thumbs down." -->
+    <string name="keyguard_accessibility_transport_thumbs_down_description">Thumbs down</string>
+    <!-- Shown on transport control of lockscreen. Pressing button toggles the "heart" rating. -->
+    <string name="keyguard_accessibility_transport_heart_description">Heart</string>
+
+
+    <!-- Accessibility description for when the device prompts the user to dismiss keyguard
+         in order to complete an action. This will be followed by a message about the current
+         security option (e.g. "Pattern unlock."). [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_show_bouncer">Unlock to continue</string>
+
+    <!-- Accessibility description for when the bouncer prompt is dismissed. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_hide_bouncer">Launch canceled</string>
+
+    <!-- Accessibility description announced when user drags widget over the delete drop target [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_delete_widget_start">Drop <xliff:g id="widget_index">%1$s</xliff:g> to delete.</string>
+
+    <!-- Accessibility description announced when user drags widget away from delete drop target [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_delete_widget_end"><xliff:g id="widget_index">%1$s</xliff:g> will not be deleted.</string>
+
+    <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
+    <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
+    <string name="password_keyboard_label_symbol_key">\?123</string>
+    <!-- Label for "switch to alphabetic" key.  Must be short to fit on key! -->
+    <string name="password_keyboard_label_alpha_key">ABC</string>
+    <!-- Label for ALT modifier key.  Must be short to fit on key! -->
+    <string name="password_keyboard_label_alt_key">ALT</string>
+
+    <!-- KeyboardView - accessibility support --><skip />
+    <!-- Description of the Alt button in a KeyboardView. [CHAR LIMIT=NONE] -->
+    <string name="keyboardview_keycode_alt">Alt</string>
+    <!-- Description of the Cancel button in a KeyboardView. [CHAR LIMIT=NONE] -->
+    <string name="keyboardview_keycode_cancel">Cancel</string>
+    <!-- Description of the Delete button in a KeyboardView. [CHAR LIMIT=NONE] -->
+    <string name="keyboardview_keycode_delete">Delete</string>
+    <!-- Description of the Done button in a KeyboardView. [CHAR LIMIT=NONE] -->
+    <string name="keyboardview_keycode_done">Done</string>
+    <!-- Description of the Mode change button in a KeyboardView. [CHAR LIMIT=NONE] -->
+    <string name="keyboardview_keycode_mode_change">Mode change</string>
+    <!-- Description of the Shift button in a KeyboardView. [CHAR LIMIT=NONE] -->
+    <string name="keyboardview_keycode_shift">Shift</string>
+    <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
+    <string name="keyboardview_keycode_enter">Enter</string>
+
+    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_unlock">Unlock</string>
+    <!-- Description of the camera target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_camera">Camera</string>
+    <!-- Description of the silent target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_silent">Silent</string>
+    <!-- Description of the sound on target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_soundon">Sound on</string>
+    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_search">Search</string>
+
+    <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_up">Slide up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
+    <!-- Description of the down direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_down">Slide down for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
+    <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
+    <!-- Description of the right direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_direction_right">Slide right for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
+
+    <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
+    <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
+
+    <!-- Label shown on emergency call button in keyguard -->
+    <string name="kg_emergency_call_label">Emergency call</string>
+    <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
+    <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
+    <!-- Message shown when user enters wrong pattern -->
+    <string name="kg_wrong_pattern">Wrong Pattern</string>
+    <!-- Message shown when user enters wrong password -->
+    <string name="kg_wrong_password">Wrong Password</string>
+    <!-- Message shown when user enters wrong PIN -->
+    <string name="kg_wrong_pin">Wrong PIN</string>
+    <!-- Countdown message shown after too many failed unlock attempts -->
+    <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <!-- Instructions for using the pattern unlock screen -->
+    <string name="kg_pattern_instructions">Draw your pattern</string>
+    <!-- Instructions for using the SIM PIN unlock screen -->
+    <string name="kg_sim_pin_instructions">Enter SIM PIN</string>
+    <!-- Instructions for using the PIN unlock screen -->
+    <string name="kg_pin_instructions">Enter PIN</string>
+    <!-- Instructions for using the password unlock screen -->
+    <string name="kg_password_instructions">Enter Password</string>
+    <!-- Hint shown in the PUK screen that asks the user to enter the PUK code given to them by their provider -->
+    <string name="kg_puk_enter_puk_hint">SIM is now disabled. Enter PUK code to continue. Contact carrier for details.</string>
+    <!-- Hint shown in the PUK unlock screen PIN TextView -->
+    <string name="kg_puk_enter_pin_hint">Enter desired PIN code</string>
+    <!-- Message shown when the user needs to confirm the PIN they just entered in the PUK screen -->
+    <string name="kg_enter_confirm_pin_hint">Confirm desired PIN code</string>
+    <!-- Message shown in dialog while the device is unlocking the SIM card -->
+    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <!-- Message shown when the user enters the wrong PIN code -->
+    <string name="kg_password_wrong_pin_code">Incorrect PIN code.</string>
+    <!-- Message shown when the user enters an invalid SIM pin password in PUK screen -->
+    <string name="kg_invalid_sim_pin_hint">Type a PIN that is 4 to 8 numbers.</string>
+    <!-- Message shown when the user enters an invalid PUK code in the PUK screen -->
+    <string name="kg_invalid_sim_puk_hint">PUK code should be 8 numbers or more.</string>
+    <!-- Message shown when the user enters an invalid PUK code -->
+    <string name="kg_invalid_puk">Re-enter the correct PUK code. Repeated attempts will permanently disable the SIM.</string>
+      <!-- String shown in PUK screen when PIN codes don't match -->
+    <string name="kg_invalid_confirm_pin_hint" product="default">PIN codes does not match</string>
+    <!-- Message shown when the user exceeds the maximum number of pattern attempts -->
+    <string name="kg_login_too_many_attempts">Too many pattern attempts</string>
+    <!-- Instructions show in account unlock screen allowing user to enter their email password -->
+    <string name="kg_login_instructions">To unlock, sign in with your Google account.</string>
+    <!-- Hint shown in TextView in account unlock screen of keyguard -->
+    <string name="kg_login_username_hint">Username (email)</string>
+    <!-- Hint shown in TextView in account unlock screen of keyguard -->
+    <string name="kg_login_password_hint">Password</string>
+    <!-- Label shown on sign in button on account unlock screen of keyguard -->
+    <string name="kg_login_submit_button">Sign in</string>
+    <!-- Message shown when the user enters an invalid username/password combination in account unlock screen of keyguard -->
+    <string name="kg_login_invalid_input">Invalid username or password.</string>
+    <!-- Hint text shown when user has too many failed password attempts in account unlock screen of keyguard -->
+    <string name="kg_login_account_recovery_hint">Forgot your username or password\?\nVisit <b>google.com/accounts/recovery</b>.</string>
+    <!-- Message shown while device checks username/password in account unlock screen of keyguard -->
+    <string name="kg_login_checking_password">Checking account\u2026</string>
+    <!-- Message shown in dialog when max number of attempts are reached for PIN screen of keyguard -->
+    <string name="kg_too_many_failed_pin_attempts_dialog_message">
+        You have incorrectly typed your PIN <xliff:g id="number">%d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+    <!-- Message shown in dialog when max number of attempts are reached for password screen of keyguard -->
+    <string name="kg_too_many_failed_password_attempts_dialog_message">
+        You have incorrectly typed your password <xliff:g id="number">%d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message">
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+    <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet">
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
+       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       the tablet will be reset to factory default and all user data will be lost.
+    </string>
+    <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
+    <string name="kg_failed_attempts_almost_at_wipe" product="default">
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
+       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       the phone will be reset to factory default and all user data will be lost.
+    </string>
+    <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped -->
+    <string name="kg_failed_attempts_now_wiping" product="tablet">
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
+       The tablet will now be reset to factory default.
+    </string>
+    <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped -->
+    <string name="kg_failed_attempts_now_wiping" product="default">
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
+       The phone will now be reset to factory default.
+    </string>
+    <!-- Message shown in dialog when user is almost at the limit where they will be
+    locked out and may have to enter an alternate username/password to unlock the phone -->
+    <string name="kg_failed_attempts_almost_at_login" product="tablet">
+       You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
+       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       you will be asked to unlock your tablet using an email account.\n\n
+       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+    <!-- Message shown in dialog when user is almost at the limit where they will be
+    locked out and may have to enter an alternate username/password to unlock the phone -->
+    <string name="kg_failed_attempts_almost_at_login" product="default">
+       You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
+       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       you will be asked to unlock your phone using an email account.\n\n
+       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+    <!-- Sequence of characters used to separate message strings in keyguard. Typically just em-dash
+         with spaces on either side. [CHAR LIMIT=3] -->
+    <string name="kg_text_message_separator" product="default">" \u2014 "</string>
+    <!-- The delete-widget drop target button text -->
+    <string name="kg_reordering_delete_drop_target_text">Remove</string>
+
+    <!-- Transport control strings -->
+    <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
+    <string name="keyguard_transport_prev_description">Previous track button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button goes to next track. -->
+    <string name="keyguard_transport_next_description">Next track button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="keyguard_transport_pause_description">Pause button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="keyguard_transport_play_description">Play button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
+    <string name="keyguard_transport_stop_description">Stop button</string>
+
+    <!-- On the keyguard screen, it shows the carrier the phone is connected to.
+        This is displayed if the phone is not connected to a carrier.-->
+    <string name="keyguard_carrier_default">No service.</string>
+
+</resources>

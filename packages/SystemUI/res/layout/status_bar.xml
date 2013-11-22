@@ -23,7 +23,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/status_bar"
-    android:background="@drawable/status_bar_background"
+    android:background="@drawable/system_bar_background"
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
@@ -95,11 +95,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     />
-                <ImageView
+                <!-- battery must be padded below by 2px to match assets -->
+                <com.android.systemui.BatteryMeterView
                     android:id="@+id/battery"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:paddingStart="4dip"
+                    android:layout_height="16dp"
+                    android:layout_width="10.5dp"
+                    android:layout_marginBottom="2px"
+                    android:layout_marginStart="4dip"
                     />
             </LinearLayout>
     

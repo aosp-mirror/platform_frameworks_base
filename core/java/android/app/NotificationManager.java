@@ -133,7 +133,7 @@ public class NotificationManager
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         try {
-            service.enqueueNotificationWithTag(pkg, mContext.getBasePackageName(), tag, id,
+            service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     notification, idOut, UserHandle.myUserId());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
@@ -158,7 +158,7 @@ public class NotificationManager
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         try {
-            service.enqueueNotificationWithTag(pkg, mContext.getBasePackageName(), tag, id,
+            service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     notification, idOut, user.getIdentifier());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);

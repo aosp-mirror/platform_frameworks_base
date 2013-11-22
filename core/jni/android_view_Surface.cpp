@@ -26,6 +26,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
+#include <android_runtime/Log.h>
 
 #include <binder/Parcel.h>
 
@@ -107,7 +108,7 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         return NULL;
     }
 
-    sp<Surface> surface(new Surface(bufferProducer));
+    sp<Surface> surface(new Surface(bufferProducer, true));
     if (surface == NULL) {
         return NULL;
     }
@@ -135,15 +136,14 @@ static inline bool isSurfaceValid(const sp<Surface>& sur) {
 
 static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
-    sp<GLConsumer> st(SurfaceTexture_getSurfaceTexture(env, surfaceTextureObj));
-    if (st == NULL) {
+    sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surfaceTextureObj));
+    if (producer == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "SurfaceTexture has already been released");
         return 0;
     }
 
-    sp<IGraphicBufferProducer> bq = st->getBufferQueue();
-    sp<Surface> surface(new Surface(bq));
+    sp<Surface> surface(new Surface(producer, true));
     if (surface == NULL) {
         jniThrowException(env, OutOfResourcesException, NULL);
         return 0;
@@ -183,9 +183,7 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
     switch (format) {
     case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
     case PIXEL_FORMAT_RGBA_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGBA_4444:    return SkBitmap::kARGB_4444_Config;
     case PIXEL_FORMAT_RGB_565:      return SkBitmap::kRGB_565_Config;
-    case PIXEL_FORMAT_A_8:          return SkBitmap::kA8_Config;
     default:                        return SkBitmap::kNo_Config;
     }
 }
@@ -199,40 +197,34 @@ static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCa
   SkSafeUnref(previousCanvas);
 }
 
-static void nativeLockCanvas(JNIEnv* env, jclass clazz,
+static jint nativeLockCanvas(JNIEnv* env, jclass clazz,
         jint nativeObject, jobject canvasObj, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
         doThrowIAE(env);
-        return;
+        return 0;
     }
 
-    // get dirty region
-    Region dirtyRegion;
+    Rect dirtyRect;
+    Rect* dirtyRectPtr = NULL;
+
     if (dirtyRectObj) {
-        Rect dirty;
-        dirty.left = env->GetIntField(dirtyRectObj, gRectClassInfo.left);
-        dirty.top = env->GetIntField(dirtyRectObj, gRectClassInfo.top);
-        dirty.right = env->GetIntField(dirtyRectObj, gRectClassInfo.right);
-        dirty.bottom = env->GetIntField(dirtyRectObj, gRectClassInfo.bottom);
-        if (!dirty.isEmpty()) {
-            dirtyRegion.set(dirty);
-        }
-    } else {
-        dirtyRegion.set(Rect(0x3FFF, 0x3FFF));
+        dirtyRect.left   = env->GetIntField(dirtyRectObj, gRectClassInfo.left);
+        dirtyRect.top    = env->GetIntField(dirtyRectObj, gRectClassInfo.top);
+        dirtyRect.right  = env->GetIntField(dirtyRectObj, gRectClassInfo.right);
+        dirtyRect.bottom = env->GetIntField(dirtyRectObj, gRectClassInfo.bottom);
+        dirtyRectPtr = &dirtyRect;
     }
 
     ANativeWindow_Buffer outBuffer;
-    Rect dirtyBounds(dirtyRegion.getBounds());
-    status_t err = surface->lock(&outBuffer, &dirtyBounds);
-    dirtyRegion.set(dirtyBounds);
+    status_t err = surface->lock(&outBuffer, dirtyRectPtr);
     if (err < 0) {
         const char* const exception = (err == NO_MEMORY) ?
                 OutOfResourcesException :
                 "java/lang/IllegalArgumentException";
         jniThrowException(env, exception, NULL);
-        return;
+        return 0;
     }
 
     // Associate a SkCanvas object to this surface
@@ -254,28 +246,23 @@ static void nativeLockCanvas(JNIEnv* env, jclass clazz,
     SkCanvas* nativeCanvas = SkNEW_ARGS(SkCanvas, (bitmap));
     swapCanvasPtr(env, canvasObj, nativeCanvas);
 
-    SkRegion clipReg;
-    if (dirtyRegion.isRect()) { // very common case
-        const Rect b(dirtyRegion.getBounds());
-        clipReg.setRect(b.left, b.top, b.right, b.bottom);
-    } else {
-        size_t count;
-        Rect const* r = dirtyRegion.getArray(&count);
-        while (count) {
-            clipReg.op(r->left, r->top, r->right, r->bottom, SkRegion::kUnion_Op);
-            r++, count--;
-        }
+    if (dirtyRectPtr) {
+        nativeCanvas->clipRect( SkRect::Make(reinterpret_cast<const SkIRect&>(dirtyRect)) );
     }
-
-    nativeCanvas->clipRegion(clipReg);
 
     if (dirtyRectObj) {
-        const Rect& bounds(dirtyRegion.getBounds());
-        env->SetIntField(dirtyRectObj, gRectClassInfo.left, bounds.left);
-        env->SetIntField(dirtyRectObj, gRectClassInfo.top, bounds.top);
-        env->SetIntField(dirtyRectObj, gRectClassInfo.right, bounds.right);
-        env->SetIntField(dirtyRectObj, gRectClassInfo.bottom, bounds.bottom);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.left,   dirtyRect.left);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.top,    dirtyRect.top);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.right,  dirtyRect.right);
+        env->SetIntField(dirtyRectObj, gRectClassInfo.bottom, dirtyRect.bottom);
     }
+
+    // Create another reference to the surface and return it.  This reference
+    // should be passed to nativeUnlockCanvasAndPost in place of mNativeObject,
+    // because the latter could be replaced while the surface is locked.
+    sp<Surface> lockedSurface(surface);
+    lockedSurface->incStrong(&sRefBaseOwner);
+    return (int) lockedSurface.get();
 }
 
 static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
@@ -337,7 +324,7 @@ static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
     sp<IGraphicBufferProducer> gbp(interface_cast<IGraphicBufferProducer>(binder));
     if (gbp != NULL) {
         // we have a new IGraphicBufferProducer, create a new Surface for it
-        sur = new Surface(gbp);
+        sur = new Surface(gbp, true);
         // and keep a reference before passing to java
         sur->incStrong(&sRefBaseOwner);
     }
@@ -372,7 +359,7 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeIsValid },
     {"nativeIsConsumerRunningBehind", "(I)Z",
             (void*)nativeIsConsumerRunningBehind },
-    {"nativeLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)V",
+    {"nativeLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)I",
             (void*)nativeLockCanvas },
     {"nativeUnlockCanvasAndPost", "(ILandroid/graphics/Canvas;)V",
             (void*)nativeUnlockCanvasAndPost },
@@ -392,7 +379,7 @@ int register_android_view_Surface(JNIEnv* env)
     jclass clazz = env->FindClass("android/view/Surface");
     gSurfaceClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
     gSurfaceClassInfo.mNativeObject =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeSurface", "I");
+            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "I");
     gSurfaceClassInfo.mLock =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mLock", "Ljava/lang/Object;");
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");

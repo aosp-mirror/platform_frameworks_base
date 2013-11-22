@@ -135,7 +135,7 @@ public class BaseMovementMethod implements MovementMethod {
      */
     protected int getMovementMetaState(Spannable buffer, KeyEvent event) {
         // We ignore locked modifiers and SHIFT.
-        int metaState = (event.getMetaState() | MetaKeyKeyListener.getMetaState(buffer))
+        int metaState = MetaKeyKeyListener.getMetaState(buffer, event)
                 & ~(MetaKeyKeyListener.META_ALT_LOCKED | MetaKeyKeyListener.META_SYM_LOCKED);
         return KeyEvent.normalizeMetaState(metaState) & ~KeyEvent.META_SHIFT_MASK;
     }

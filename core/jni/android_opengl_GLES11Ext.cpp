@@ -294,6 +294,7 @@ getarray
     int _needed = 0;
 
     params = (CTYPE *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    _remaining /= sizeof(CTYPE);    // convert from bytes to item count
     _needed = getNeededCount(pname);
     // if we didn't find this pname, we just assume the user passed
     // an array of the right size -- this might happen with extensions

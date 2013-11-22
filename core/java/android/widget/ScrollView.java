@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -148,6 +151,8 @@ public class ScrollView extends FrameLayout {
      * Used by {@link #mActivePointerId}.
      */
     private static final int INVALID_POINTER = -1;
+
+    private SavedState mSavedState;
 
     public ScrollView(Context context) {
         this(context, null);
@@ -631,12 +636,13 @@ public class ScrollView extends FrameLayout {
                     final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
                             (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
 
+                    // Calling overScrollBy will call onOverScrolled, which
+                    // calls onScrollChanged if applicable.
                     if (overScrollBy(0, deltaY, 0, mScrollY,
                             0, range, 0, mOverscrollDistance, true)) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
                     }
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
                     if (canOverscroll) {
                         final int pulledToY = oldY + deltaY;
@@ -753,9 +759,12 @@ public class ScrollView extends FrameLayout {
             boolean clampedX, boolean clampedY) {
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
+            final int oldX = mScrollX;
+            final int oldY = mScrollY;
             mScrollX = scrollX;
             mScrollY = scrollY;
             invalidateParentIfNeeded();
+            onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             if (clampedY) {
                 mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange());
             }
@@ -1464,6 +1473,24 @@ public class ScrollView extends FrameLayout {
         }
         mChildToScrollTo = null;
 
+        if (!isLaidOut()) {
+            if (mSavedState != null) {
+                mScrollY = mSavedState.scrollPosition;
+                mSavedState = null;
+            } // mScrollY default value is "0"
+
+            final int childHeight = (getChildCount() > 0) ? getChildAt(0).getMeasuredHeight() : 0;
+            final int scrollRange = Math.max(0,
+                    childHeight - (b - t - mPaddingBottom - mPaddingTop));
+
+            // Don't forget to clamp
+            if (mScrollY > scrollRange) {
+                mScrollY = scrollRange;
+            } else if (mScrollY < 0) {
+                mScrollY = 0;
+            }
+        }
+
         // Calling this with the present values causes it to re-claim them
         scrollTo(mScrollX, mScrollY);
     }
@@ -1633,4 +1660,69 @@ public class ScrollView extends FrameLayout {
         }
         return n;
     }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            // Some old apps reused IDs in ways they shouldn't have.
+            // Don't break them, but they don't get scroll state restoration.
+            super.onRestoreInstanceState(state);
+            return;
+        }
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mSavedState = ss;
+        requestLayout();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            // Some old apps reused IDs in ways they shouldn't have.
+            // Don't break them, but they don't get scroll state restoration.
+            return super.onSaveInstanceState();
+        }
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.scrollPosition = mScrollY;
+        return ss;
+    }
+
+    static class SavedState extends BaseSavedState {
+        public int scrollPosition;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        public SavedState(Parcel source) {
+            super(source);
+            scrollPosition = source.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(scrollPosition);
+        }
+
+        @Override
+        public String toString() {
+            return "HorizontalScrollView.SavedState{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " scrollPosition=" + scrollPosition + "}";
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
 }

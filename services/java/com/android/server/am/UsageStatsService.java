@@ -16,8 +16,10 @@
 
 package com.android.server.am;
 
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -25,8 +27,10 @@ import android.os.IBinder;
 import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -73,7 +77,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private static final String TAG = "UsageStats";
     
     // Current on-disk Parcel version
-    private static final int VERSION = 1007;
+    private static final int VERSION = 1008;
 
     private static final int CHECKIN_VERSION = 4;
     
@@ -93,10 +97,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
     static IUsageStats sService;
     private Context mContext;
     // structure used to maintain statistics since the last checkin.
-    final private Map<String, PkgUsageStatsExtended> mStats;
+    final private ArrayMap<String, PkgUsageStatsExtended> mStats;
 
     // Maintains the last time any component was resumed, for all time.
-    final private Map<String, Map<String, Long>> mLastResumeTimes;
+    final private ArrayMap<String, ArrayMap<String, Long>> mLastResumeTimes;
 
     // To remove last-resume time stats when a pacakge is removed.
     private PackageMonitor mPackageMonitor;
@@ -162,8 +166,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
     }
     
     private class PkgUsageStatsExtended {
-        final HashMap<String, TimeStats> mLaunchTimes
-                = new HashMap<String, TimeStats>();
+        final ArrayMap<String, TimeStats> mLaunchTimes
+                = new ArrayMap<String, TimeStats>();
+        final ArrayMap<String, TimeStats> mFullyDrawnTimes
+                = new ArrayMap<String, TimeStats>();
         int mLaunchCount;
         long mUsageTime;
         long mPausedTime;
@@ -180,13 +186,24 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (localLOGV) Slog.v(TAG, "Launch count: " + mLaunchCount
                     + ", Usage time:" + mUsageTime);
             
-            final int numTimeStats = in.readInt();
-            if (localLOGV) Slog.v(TAG, "Reading comps: " + numTimeStats);
-            for (int i=0; i<numTimeStats; i++) {
+            final int numLaunchTimeStats = in.readInt();
+            if (localLOGV) Slog.v(TAG, "Reading launch times: " + numLaunchTimeStats);
+            mLaunchTimes.ensureCapacity(numLaunchTimeStats);
+            for (int i=0; i<numLaunchTimeStats; i++) {
                 String comp = in.readString();
                 if (localLOGV) Slog.v(TAG, "Component: " + comp);
                 TimeStats times = new TimeStats(in);
                 mLaunchTimes.put(comp, times);
+            }
+
+            final int numFullyDrawnTimeStats = in.readInt();
+            if (localLOGV) Slog.v(TAG, "Reading fully drawn times: " + numFullyDrawnTimeStats);
+            mFullyDrawnTimes.ensureCapacity(numFullyDrawnTimeStats);
+            for (int i=0; i<numFullyDrawnTimeStats; i++) {
+                String comp = in.readString();
+                if (localLOGV) Slog.v(TAG, "Component: " + comp);
+                TimeStats times = new TimeStats(in);
+                mFullyDrawnTimes.put(comp, times);
             }
         }
 
@@ -219,31 +236,44 @@ public final class UsageStatsService extends IUsageStats.Stub {
             }
             times.add(millis);
         }
-        
+
+        void addFullyDrawnTime(String comp, int millis) {
+            TimeStats times = mFullyDrawnTimes.get(comp);
+            if (times == null) {
+                times = new TimeStats();
+                mFullyDrawnTimes.put(comp, times);
+            }
+            times.add(millis);
+        }
+
         void writeToParcel(Parcel out) {
             out.writeInt(mLaunchCount);
             out.writeLong(mUsageTime);
-            final int numTimeStats = mLaunchTimes.size();
-            out.writeInt(numTimeStats);
-            if (numTimeStats > 0) {
-                for (Map.Entry<String, TimeStats> ent : mLaunchTimes.entrySet()) {
-                    out.writeString(ent.getKey());
-                    TimeStats times = ent.getValue();
-                    times.writeToParcel(out);
-                }
+            final int numLaunchTimeStats = mLaunchTimes.size();
+            out.writeInt(numLaunchTimeStats);
+            for (int i=0; i<numLaunchTimeStats; i++) {
+                out.writeString(mLaunchTimes.keyAt(i));
+                mLaunchTimes.valueAt(i).writeToParcel(out);
+            }
+            final int numFullyDrawnTimeStats = mFullyDrawnTimes.size();
+            out.writeInt(numFullyDrawnTimeStats);
+            for (int i=0; i<numFullyDrawnTimeStats; i++) {
+                out.writeString(mFullyDrawnTimes.keyAt(i));
+                mFullyDrawnTimes.valueAt(i).writeToParcel(out);
             }
         }
         
         void clear() {
             mLaunchTimes.clear();
+            mFullyDrawnTimes.clear();
             mLaunchCount = 0;
             mUsageTime = 0;
         }
     }
     
     UsageStatsService(String dir) {
-        mStats = new HashMap<String, PkgUsageStatsExtended>();
-        mLastResumeTimes = new HashMap<String, Map<String, Long>>();
+        mStats = new ArrayMap<String, PkgUsageStatsExtended>();
+        mLastResumeTimes = new ArrayMap<String, ArrayMap<String, Long>>();
         mStatsLock = new Object();
         mFileLock = new Object();
         mDir = new File(dir);
@@ -386,9 +416,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
                                 try {
                                     long lastResumeTime = Long.parseLong(lastResumeTimeStr);
                                     synchronized (mStatsLock) {
-                                        Map<String, Long> lrt = mLastResumeTimes.get(pkg);
+                                        ArrayMap<String, Long> lrt = mLastResumeTimes.get(pkg);
                                         if (lrt == null) {
-                                            lrt = new HashMap<String, Long>();
+                                            lrt = new ArrayMap<String, Long>();
                                             mLastResumeTimes.put(pkg, lrt);
                                         }
                                         lrt.put(comp, lastResumeTime);
@@ -591,14 +621,15 @@ public final class UsageStatsService extends IUsageStats.Stub {
     /** Filter out stats for any packages which aren't present anymore. */
     private void filterHistoryStats() {
         synchronized (mStatsLock) {
-            // Copy and clear the last resume times map, then copy back stats
-            // for all installed packages.
-            Map<String, Map<String, Long>> tmpLastResumeTimes =
-                new HashMap<String, Map<String, Long>>(mLastResumeTimes);
-            mLastResumeTimes.clear();
-            for (PackageInfo info : mContext.getPackageManager().getInstalledPackages(0)) {
-                if (tmpLastResumeTimes.containsKey(info.packageName)) {
-                    mLastResumeTimes.put(info.packageName, tmpLastResumeTimes.get(info.packageName));
+            IPackageManager pm = AppGlobals.getPackageManager();
+            for (int i=0; i<mLastResumeTimes.size(); i++) {
+                String pkg = mLastResumeTimes.keyAt(i);
+                try {
+                    if (pm.getPackageUid(pkg, 0) < 0) {
+                        mLastResumeTimes.removeAt(i);
+                        i--;
+                    }
+                } catch (RemoteException e) {
                 }
             }
         }
@@ -614,13 +645,14 @@ public final class UsageStatsService extends IUsageStats.Stub {
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "usage-history");
             synchronized (mStatsLock) {
-                for (Map.Entry<String, Map<String, Long>> pkgEntry : mLastResumeTimes.entrySet()) {
+                for (int i=0; i<mLastResumeTimes.size(); i++) {
                     out.startTag(null, "pkg");
-                    out.attribute(null, "name", pkgEntry.getKey());
-                    for (Map.Entry<String, Long> compEntry : pkgEntry.getValue().entrySet()) {
+                    out.attribute(null, "name", mLastResumeTimes.keyAt(i));
+                    ArrayMap<String, Long> comp = mLastResumeTimes.valueAt(i);
+                    for (int j=0; j<comp.size(); j++) {
                         out.startTag(null, "comp");
-                        out.attribute(null, "name", compEntry.getKey());
-                        out.attribute(null, "lrt", compEntry.getValue().toString());
+                        out.attribute(null, "name", comp.keyAt(j));
+                        out.attribute(null, "lrt", comp.valueAt(j).toString());
                         out.endTag(null, "comp");
                     }
                     out.endTag(null, "pkg");
@@ -718,9 +750,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 pus.addLaunchCount(mLastResumedComp);
             }
 
-            Map<String, Long> componentResumeTimes = mLastResumeTimes.get(pkgName);
+            ArrayMap<String, Long> componentResumeTimes = mLastResumeTimes.get(pkgName);
             if (componentResumeTimes == null) {
-                componentResumeTimes = new HashMap<String, Long>();
+                componentResumeTimes = new ArrayMap<String, Long>();
                 mLastResumeTimes.put(pkgName, componentResumeTimes);
             }
             componentResumeTimes.put(mLastResumedComp, System.currentTimeMillis());
@@ -777,6 +809,25 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
     }
     
+    public void noteFullyDrawnTime(ComponentName componentName, int millis) {
+        enforceCallingPermission();
+        String pkgName;
+        if ((componentName == null) ||
+                ((pkgName = componentName.getPackageName()) == null)) {
+            return;
+        }
+
+        // Persist current data to file if needed.
+        writeStatsToFile(false, false);
+
+        synchronized (mStatsLock) {
+            PkgUsageStatsExtended pus = mStats.get(pkgName);
+            if (pus != null) {
+                pus.addFullyDrawnTime(componentName.getClassName(), millis);
+            }
+        }
+    }
+
     public void enforceCallingPermission() {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;
@@ -814,9 +865,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 return null;
             }
             PkgUsageStats retArr[] = new PkgUsageStats[size];
-            int i = 0;
-            for (Map.Entry<String, Map<String, Long>> entry : mLastResumeTimes.entrySet()) {
-                String pkg = entry.getKey();
+            for (int i=0; i<size; i++) {
+                String pkg = mLastResumeTimes.keyAt(i);
                 long usageTime = 0;
                 int launchCount = 0;
 
@@ -825,8 +875,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     usageTime = pus.mUsageTime;
                     launchCount = pus.mLaunchCount;
                 }
-                retArr[i] = new PkgUsageStats(pkg, launchCount, usageTime, entry.getValue());
-                i++;
+                retArr[i] = new PkgUsageStats(pkg, launchCount, usageTime,
+                        mLastResumeTimes.valueAt(i));
             }
             return retArr;
         }
@@ -866,6 +916,11 @@ public final class UsageStatsService extends IUsageStats.Stub {
             }
             File dFile = new File(mDir, file);
             String dateStr = file.substring(FILE_PREFIX.length());
+            if (dateStr.length() > 0 && (dateStr.charAt(0) <= '0' || dateStr.charAt(0) >= '9')) {
+                // If the remainder does not start with a number, it is not a date,
+                // so we should ignore it for purposes here.
+                continue;
+            }
             try {
                 Parcel in = getParcelForFile(dFile);
                 collectDumpInfoFromParcelFLOCK(in, pw, dateStr, isCompactOutput,
@@ -925,29 +980,33 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 sb.append(',');
                 sb.append(pus.mUsageTime);
                 sb.append('\n');
-                final int NC = pus.mLaunchTimes.size();
-                if (NC > 0) {
-                    for (Map.Entry<String, TimeStats> ent : pus.mLaunchTimes.entrySet()) {
-                        sb.append("A:");
-                        String activity = ent.getKey();
-                        if (activity.startsWith(pkgName)) {
-                            sb.append('*');
-                            sb.append(activity.substring(
-                                    pkgName.length(), activity.length()));
-                        } else {
-                            sb.append(activity);
-                        }
-                        TimeStats times = ent.getValue();
-                        sb.append(',');
-                        sb.append(times.count);
-                        for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
-                            sb.append(",");
-                            sb.append(times.times[i]);
-                        }
-                        sb.append('\n');
+                final int NLT = pus.mLaunchTimes.size();
+                for (int i=0; i<NLT; i++) {
+                    sb.append("A:");
+                    String activity = pus.mLaunchTimes.keyAt(i);
+                    sb.append(activity);
+                    TimeStats times = pus.mLaunchTimes.valueAt(i);
+                    sb.append(',');
+                    sb.append(times.count);
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS; j++) {
+                        sb.append(",");
+                        sb.append(times.times[j]);
                     }
+                    sb.append('\n');
                 }
-                
+                final int NFDT = pus.mFullyDrawnTimes.size();
+                for (int i=0; i<NFDT; i++) {
+                    sb.append("A:");
+                    String activity = pus.mFullyDrawnTimes.keyAt(i);
+                    sb.append(activity);
+                    TimeStats times = pus.mFullyDrawnTimes.valueAt(i);
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS; j++) {
+                        sb.append(",");
+                        sb.append(times.times[j]);
+                    }
+                    sb.append('\n');
+                }
+
             } else {
                 sb.append("  ");
                 sb.append(pkgName);
@@ -957,36 +1016,68 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 sb.append(pus.mUsageTime);
                 sb.append(" ms");
                 sb.append('\n');
-                final int NC = pus.mLaunchTimes.size();
-                if (NC > 0) {
-                    for (Map.Entry<String, TimeStats> ent : pus.mLaunchTimes.entrySet()) {
-                        sb.append("    ");
-                        sb.append(ent.getKey());
-                        TimeStats times = ent.getValue();
-                        sb.append(": ");
-                        sb.append(times.count);
-                        sb.append(" starts");
-                        int lastBin = 0;
-                        for (int i=0; i<NUM_LAUNCH_TIME_BINS-1; i++) {
-                            if (times.times[i] != 0) {
-                                sb.append(", ");
-                                sb.append(lastBin);
-                                sb.append('-');
-                                sb.append(LAUNCH_TIME_BINS[i]);
-                                sb.append("ms=");
-                                sb.append(times.times[i]);
-                            }
-                            lastBin = LAUNCH_TIME_BINS[i];
-                        }
-                        if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
+                final int NLT = pus.mLaunchTimes.size();
+                for (int i=0; i<NLT; i++) {
+                    sb.append("    ");
+                    sb.append(pus.mLaunchTimes.keyAt(i));
+                    TimeStats times = pus.mLaunchTimes.valueAt(i);
+                    sb.append(": ");
+                    sb.append(times.count);
+                    sb.append(" starts");
+                    int lastBin = 0;
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS-1; j++) {
+                        if (times.times[j] != 0) {
                             sb.append(", ");
-                            sb.append(">=");
                             sb.append(lastBin);
+                            sb.append('-');
+                            sb.append(LAUNCH_TIME_BINS[j]);
                             sb.append("ms=");
-                            sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
+                            sb.append(times.times[j]);
                         }
-                        sb.append('\n');
+                        lastBin = LAUNCH_TIME_BINS[j];
                     }
+                    if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
+                        sb.append(", ");
+                        sb.append(">=");
+                        sb.append(lastBin);
+                        sb.append("ms=");
+                        sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
+                    }
+                    sb.append('\n');
+                }
+                final int NFDT = pus.mFullyDrawnTimes.size();
+                for (int i=0; i<NFDT; i++) {
+                    sb.append("    ");
+                    sb.append(pus.mFullyDrawnTimes.keyAt(i));
+                    TimeStats times = pus.mFullyDrawnTimes.valueAt(i);
+                    sb.append(": fully drawn ");
+                    boolean needComma = false;
+                    int lastBin = 0;
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS-1; j++) {
+                        if (times.times[j] != 0) {
+                            if (needComma) {
+                                sb.append(", ");
+                            } else {
+                                needComma = true;
+                            }
+                            sb.append(lastBin);
+                            sb.append('-');
+                            sb.append(LAUNCH_TIME_BINS[j]);
+                            sb.append("ms=");
+                            sb.append(times.times[j]);
+                        }
+                        lastBin = LAUNCH_TIME_BINS[j];
+                    }
+                    if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
+                        if (needComma) {
+                            sb.append(", ");
+                        }
+                        sb.append(">=");
+                        sb.append(lastBin);
+                        sb.append("ms=");
+                        sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
+                    }
+                    sb.append('\n');
                 }
             }
             

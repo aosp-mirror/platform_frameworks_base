@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.app;
 
 import android.content.Context;
@@ -23,17 +24,15 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.AttributeSet;
 import android.view.InputQueue;
-import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
@@ -176,14 +175,18 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
                 ? savedInstanceState.getByteArray(KEY_NATIVE_SAVED_STATE) : null;
 
         mNativeHandle = loadNativeCode(path, funcname, Looper.myQueue(),
-                 getFilesDir().toString(), getObbDir().toString(),
-                 Environment.getExternalStorageAppFilesDirectory(ai.packageName).toString(),
-                 Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
-        
+                getAbsolutePath(getFilesDir()), getAbsolutePath(getObbDir()),
+                getAbsolutePath(getExternalFilesDir(null)),
+                Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
+
         if (mNativeHandle == 0) {
             throw new IllegalArgumentException("Unable to load native library: " + path);
         }
         super.onCreate(savedInstanceState);
+    }
+
+    private static String getAbsolutePath(File file) {
+        return (file != null) ? file.getAbsolutePath() : null;
     }
 
     @Override

@@ -27,7 +27,7 @@
     <item android:state_window_focused="false" android:state_enabled="true" android:drawable="@drawable/textfield_default_holo_light" />
     <item android:state_window_focused="false" android:state_enabled="false" android:drawable="@drawable/textfield_disabled_holo_light" />
     <item android:state_enabled="true" android:state_focused="true" android:drawable="@drawable/textfield_activated_holo_light" />
-    <iten android:state_enabled="true" android:state_activated="true" android:drawable="@drawable/textfield_focused_holo_light" />
+    <item android:state_enabled="true" android:state_activated="true" android:drawable="@drawable/textfield_focused_holo_light" />
     <item android:state_enabled="true" android:drawable="@drawable/textfield_default_holo_light" />
     <item android:state_focused="true" android:drawable="@drawable/textfield_disabled_focused_holo_light" />
     <item android:drawable="@drawable/textfield_disabled_holo_light" />

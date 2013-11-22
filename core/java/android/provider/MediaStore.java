@@ -19,8 +19,8 @@ package android.provider;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -118,6 +118,7 @@ public final class MediaStore {
      * sense for apps that can support large-scale search of music, such as services connected
      * to an online database of music which can be streamed and played on the device.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH =
             "android.media.action.MEDIA_PLAY_FROM_SEARCH";
 
@@ -134,6 +135,7 @@ public final class MediaStore {
      * sense for apps that can support large-scale search of text media, such as services connected
      * to an online database of books and/or magazines which can be read on the device.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_TEXT_OPEN_FROM_SEARCH =
             "android.media.action.TEXT_OPEN_FROM_SEARCH";
 
@@ -150,6 +152,7 @@ public final class MediaStore {
      * sense for apps that can support large-scale search of video, such as services connected to an
      * online database of videos which can be streamed and played on the device.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_VIDEO_PLAY_FROM_SEARCH =
             "android.media.action.VIDEO_PLAY_FROM_SEARCH";
 
@@ -202,6 +205,7 @@ public final class MediaStore {
     /**
      * The name of the Intent action used to launch a camera in still image mode.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_STILL_IMAGE_CAMERA = "android.media.action.STILL_IMAGE_CAMERA";
 
     /**
@@ -216,12 +220,14 @@ public final class MediaStore {
      * this flag is used, so launching more than one activity is strongly
      * discouraged.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE =
             "android.media.action.STILL_IMAGE_CAMERA_SECURE";
 
     /**
      * The name of the Intent action used to launch a camera in video mode.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String INTENT_ACTION_VIDEO_CAMERA = "android.media.action.VIDEO_CAMERA";
 
     /**
@@ -235,6 +241,7 @@ public final class MediaStore {
      * value of EXTRA_OUTPUT.
      * @see #EXTRA_OUTPUT
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public final static String ACTION_IMAGE_CAPTURE = "android.media.action.IMAGE_CAPTURE";
 
     /**
@@ -256,6 +263,7 @@ public final class MediaStore {
      * @see #ACTION_IMAGE_CAPTURE
      * @see #EXTRA_OUTPUT
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_IMAGE_CAPTURE_SECURE =
             "android.media.action.IMAGE_CAPTURE_SECURE";
 
@@ -274,6 +282,7 @@ public final class MediaStore {
      * @see #EXTRA_SIZE_LIMIT
      * @see #EXTRA_DURATION_LIMIT
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public final static String ACTION_VIDEO_CAPTURE = "android.media.action.VIDEO_CAPTURE";
 
     /**
@@ -532,7 +541,8 @@ public final class MediaStore {
         private static final Object sThumbBufLock = new Object();
         private static byte[] sThumbBuf;
 
-        private static Bitmap getMiniThumbFromFile(Cursor c, Uri baseUri, ContentResolver cr, BitmapFactory.Options options) {
+        private static Bitmap getMiniThumbFromFile(
+                Cursor c, Uri baseUri, ContentResolver cr, BitmapFactory.Options options) {
             Bitmap bitmap = null;
             Uri thumbUri = null;
             try {
@@ -577,6 +587,7 @@ public final class MediaStore {
                 if (c != null) c.close();
             }
         }
+
         /**
          * This method ensure thumbnails associated with origId are generated and decode the byte
          * stream from database (MICRO_KIND) or file (MINI_KIND).

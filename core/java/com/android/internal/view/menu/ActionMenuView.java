@@ -15,8 +15,6 @@
  */
 package com.android.internal.view.menu;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -27,6 +25,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.LinearLayout;
+import com.android.internal.R;
 
 /**
  * @hide
@@ -101,7 +100,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
         // Special formatting can change whether items can fit as action buttons.
         // Kick the menu and update presenters when this changes.
-        final int widthSize = MeasureSpec.getMode(widthMeasureSpec);
+        final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         if (mFormatItems && mMenu != null && widthSize != mFormatItemsWidth) {
             mFormatItemsWidth = widthSize;
             mMenu.onItemsChanged(true);

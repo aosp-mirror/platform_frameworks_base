@@ -16,10 +16,13 @@
 
 package android.app;
 
-import android.R;
+import android.os.BatteryStats;
+import android.os.IBinder;
 import com.android.internal.app.IUsageStats;
+import com.android.internal.app.ProcessStats;
 import com.android.internal.os.PkgUsageStats;
-import com.android.internal.util.MemInfoReader;
+import com.android.internal.os.TransferPipe;
+import com.android.internal.util.FastPrintWriter;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,10 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.hardware.display.DisplayManager;
-import android.hardware.display.DisplayManagerGlobal;
-import android.os.Binder;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -49,8 +49,10 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +66,14 @@ public class ActivityManager {
 
     private final Context mContext;
     private final Handler mHandler;
+
+    /**
+     * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
+     * &lt;meta-data>}</a> name for a 'home' Activity that declares a package that is to be
+     * uninstalled in lieu of the declaring one.  The package named here must be
+     * signed with the same certificate as the one declaring the {@code &lt;meta-data>}.
+     */
+    public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
 
     /**
      * Result for IActivityManager.startActivity: an error where the
@@ -222,6 +232,56 @@ public class ActivityManager {
     /** @hide User operation call: given user id is the current user, can't be stopped. */
     public static final int USER_OP_IS_CURRENT = -2;
 
+    /** @hide Process is a persistent system process. */
+    public static final int PROCESS_STATE_PERSISTENT = 0;
+
+    /** @hide Process is a persistent system process and is doing UI. */
+    public static final int PROCESS_STATE_PERSISTENT_UI = 1;
+
+    /** @hide Process is hosting the current top activities.  Note that this covers
+     * all activities that are visible to the user. */
+    public static final int PROCESS_STATE_TOP = 2;
+
+    /** @hide Process is important to the user, and something they are aware of. */
+    public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 3;
+
+    /** @hide Process is important to the user, but not something they are aware of. */
+    public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 4;
+
+    /** @hide Process is in the background running a backup/restore operation. */
+    public static final int PROCESS_STATE_BACKUP = 5;
+
+    /** @hide Process is in the background, but it can't restore its state so we want
+     * to try to avoid killing it. */
+    public static final int PROCESS_STATE_HEAVY_WEIGHT = 6;
+
+    /** @hide Process is in the background running a service.  Unlike oom_adj, this level
+     * is used for both the normal running in background state and the executing
+     * operations state. */
+    public static final int PROCESS_STATE_SERVICE = 7;
+
+    /** @hide Process is in the background running a receiver.   Note that from the
+     * perspective of oom_adj receivers run at a higher foreground level, but for our
+     * prioritization here that is not necessary and putting them below services means
+     * many fewer changes in some process states as they receive broadcasts. */
+    public static final int PROCESS_STATE_RECEIVER = 8;
+
+    /** @hide Process is in the background but hosts the home activity. */
+    public static final int PROCESS_STATE_HOME = 9;
+
+    /** @hide Process is in the background but hosts the last shown activity. */
+    public static final int PROCESS_STATE_LAST_ACTIVITY = 10;
+
+    /** @hide Process is being cached for later use and contains activities. */
+    public static final int PROCESS_STATE_CACHED_ACTIVITY = 11;
+
+    /** @hide Process is being cached for later use and is a client of another cached
+     * process that contains activities. */
+    public static final int PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 12;
+
+    /** @hide Process is being cached for later use and is empty. */
+    public static final int PROCESS_STATE_CACHED_EMPTY = 13;
+
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;
@@ -370,7 +430,23 @@ public class ActivityManager {
         // Really brain dead right now -- just take this from the configured
         // vm heap size, and assume it is in megabytes and thus ends with "m".
         String vmHeapSize = SystemProperties.get("dalvik.vm.heapsize", "16m");
-        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length() - 1));
+        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+    }
+
+    /**
+     * Returns true if this is a low-RAM device.  Exactly whether a device is low-RAM
+     * is ultimately up to the device configuration, but currently it generally means
+     * something in the class of a 512MB device with about a 800x480 or less screen.
+     * This is mostly intended to be used by apps to determine whether they should turn
+     * off certain features that require more RAM.
+     */
+    public boolean isLowRamDevice() {
+        return isLowRamDeviceStatic();
+    }
+
+    /** @hide */
+    public static boolean isLowRamDeviceStatic() {
+        return "true".equals(SystemProperties.get("ro.config.low_ram", "false"));
     }
 
     /**
@@ -380,43 +456,8 @@ public class ActivityManager {
      * @hide
      */
     static public boolean isHighEndGfx() {
-        MemInfoReader reader = new MemInfoReader();
-        reader.readMemInfo();
-        if (reader.getTotalSize() >= (512*1024*1024)) {
-            // If the device has at least 512MB RAM available to the kernel,
-            // we can afford the overhead of graphics acceleration.
-            return true;
-        }
-
-        Display display = DisplayManagerGlobal.getInstance().getRealDisplay(
-                Display.DEFAULT_DISPLAY);
-        Point p = new Point();
-        display.getRealSize(p);
-        int pixels = p.x * p.y;
-        if (pixels >= (1024*600)) {
-            // If this is a sufficiently large screen, then there are enough
-            // pixels on it that we'd really like to use hw drawing.
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Use to decide whether the running device can be considered a "large
-     * RAM" device.  Exactly what memory limit large RAM is will vary, but
-     * it essentially means there is plenty of RAM to have lots of background
-     * processes running under decent loads.
-     * @hide
-     */
-    static public boolean isLargeRAM() {
-        MemInfoReader reader = new MemInfoReader();
-        reader.readMemInfo();
-        if (reader.getTotalSize() >= (640*1024*1024)) {
-            // Currently 640MB RAM available to the kernel is the point at
-            // which we have plenty of RAM to spare.
-            return true;
-        }
-        return false;
+        return !isLowRamDeviceStatic() &&
+                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
     }
 
     /**
@@ -454,14 +495,22 @@ public class ActivityManager {
          * Description of the task's last state.
          */
         public CharSequence description;
-        
+
+        /**
+         * The id of the ActivityStack this Task was on most recently.
+         * @hide
+         */
+        public int stackId;
+
         public RecentTaskInfo() {
         }
 
+        @Override
         public int describeContents() {
             return 0;
         }
 
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(persistentId);
@@ -474,6 +523,7 @@ public class ActivityManager {
             ComponentName.writeToParcel(origActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            dest.writeInt(stackId);
         }
 
         public void readFromParcel(Parcel source) {
@@ -486,8 +536,9 @@ public class ActivityManager {
             }
             origActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+            stackId = source.readInt();
         }
-        
+
         public static final Creator<RecentTaskInfo> CREATOR
                 = new Creator<RecentTaskInfo>() {
             public RecentTaskInfo createFromParcel(Parcel source) {
@@ -628,6 +679,12 @@ public class ActivityManager {
          * and persisted) in this task.
          */
         public int numRunning;
+
+        /**
+         * Last time task was run. For sorting.
+         * @hide
+         */
+        public long lastActiveTime;
 
         public RunningTaskInfo() {
         }
@@ -1230,7 +1287,169 @@ public class ActivityManager {
         } catch (RemoteException e) {
         }
     }
-    
+
+    /**
+     * Information you can retrieve about the WindowManager StackBox hierarchy.
+     * @hide
+     */
+    public static class StackBoxInfo implements Parcelable {
+        public int stackBoxId;
+        public float weight;
+        public boolean vertical;
+        public Rect bounds;
+        public StackBoxInfo[] children;
+        public int stackId;
+        public StackInfo stack;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(stackBoxId);
+            dest.writeFloat(weight);
+            dest.writeInt(vertical ? 1 : 0);
+            bounds.writeToParcel(dest, flags);
+            dest.writeInt(stackId);
+            if (children != null) {
+                children[0].writeToParcel(dest, flags);
+                children[1].writeToParcel(dest, flags);
+            } else {
+                stack.writeToParcel(dest, flags);
+            }
+        }
+
+        public void readFromParcel(Parcel source) {
+            stackBoxId = source.readInt();
+            weight = source.readFloat();
+            vertical = source.readInt() == 1;
+            bounds = Rect.CREATOR.createFromParcel(source);
+            stackId = source.readInt();
+            if (stackId == -1) {
+                children = new StackBoxInfo[2];
+                children[0] = StackBoxInfo.CREATOR.createFromParcel(source);
+                children[1] = StackBoxInfo.CREATOR.createFromParcel(source);
+            } else {
+                stack = StackInfo.CREATOR.createFromParcel(source);
+            }
+        }
+
+        public static final Creator<StackBoxInfo> CREATOR =
+                new Creator<ActivityManager.StackBoxInfo>() {
+
+            @Override
+            public StackBoxInfo createFromParcel(Parcel source) {
+                return new StackBoxInfo(source);
+            }
+
+            @Override
+            public StackBoxInfo[] newArray(int size) {
+                return new StackBoxInfo[size];
+            }
+        };
+
+        public StackBoxInfo() {
+        }
+
+        public StackBoxInfo(Parcel source) {
+            readFromParcel(source);
+        }
+
+        public String toString(String prefix) {
+            StringBuilder sb = new StringBuilder(256);
+            sb.append(prefix); sb.append("Box id=" + stackBoxId); sb.append(" weight=" + weight);
+            sb.append(" vertical=" + vertical); sb.append(" bounds=" + bounds.toShortString());
+            sb.append("\n");
+            if (children != null) {
+                sb.append(prefix); sb.append("First child=\n");
+                sb.append(children[0].toString(prefix + "  "));
+                sb.append(prefix); sb.append("Second child=\n");
+                sb.append(children[1].toString(prefix + "  "));
+            } else {
+                sb.append(prefix); sb.append("Stack=\n");
+                sb.append(stack.toString(prefix + "  "));
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public String toString() {
+            return toString("");
+        }
+    }
+
+    /**
+     * Information you can retrieve about an ActivityStack in the system.
+     * @hide
+     */
+    public static class StackInfo implements Parcelable {
+        public int stackId;
+        public Rect bounds;
+        public int[] taskIds;
+        public String[] taskNames;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(stackId);
+            dest.writeInt(bounds.left);
+            dest.writeInt(bounds.top);
+            dest.writeInt(bounds.right);
+            dest.writeInt(bounds.bottom);
+            dest.writeIntArray(taskIds);
+            dest.writeStringArray(taskNames);
+        }
+
+        public void readFromParcel(Parcel source) {
+            stackId = source.readInt();
+            bounds = new Rect(
+                    source.readInt(), source.readInt(), source.readInt(), source.readInt());
+            taskIds = source.createIntArray();
+            taskNames = source.createStringArray();
+        }
+
+        public static final Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
+            @Override
+            public StackInfo createFromParcel(Parcel source) {
+                return new StackInfo(source);
+            }
+            @Override
+            public StackInfo[] newArray(int size) {
+                return new StackInfo[size];
+            }
+        };
+
+        public StackInfo() {
+        }
+
+        private StackInfo(Parcel source) {
+            readFromParcel(source);
+        }
+
+        public String toString(String prefix) {
+            StringBuilder sb = new StringBuilder(256);
+            sb.append(prefix); sb.append("Stack id="); sb.append(stackId);
+                    sb.append(" bounds="); sb.append(bounds.toShortString()); sb.append("\n");
+            prefix = prefix + "  ";
+            for (int i = 0; i < taskIds.length; ++i) {
+                sb.append(prefix); sb.append("taskId="); sb.append(taskIds[i]);
+                        sb.append(": "); sb.append(taskNames[i]); sb.append("\n");
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public String toString() {
+            return toString("");
+        }
+    }
+
     /**
      * @hide
      */
@@ -1242,7 +1461,21 @@ public class ActivityManager {
             return false;
         }
     }
-    
+
+    /**
+     * Permits an application to erase its own data from disk.  This is equivalent to
+     * the user choosing to clear the app's data from within the device settings UI.  It
+     * erases all dynamic data associated with the app -- its private data and data in its
+     * private area on external storage -- but does not remove the installed application
+     * itself, nor any OBB files.
+     *
+     * @return {@code true} if the application successfully requested that the application's
+     *     data be erased; {@code false} otherwise.
+     */
+    public boolean clearApplicationUserData() {
+        return clearApplicationUserData(mContext.getPackageName(), null);
+    }
+
     /**
      * Information you can retrieve about any processes that are in an error condition.
      */
@@ -1304,10 +1537,12 @@ public class ActivityManager {
         public ProcessErrorStateInfo() {
         }
 
+        @Override
         public int describeContents() {
             return 0;
         }
 
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(condition);
             dest.writeString(processName);
@@ -1318,7 +1553,7 @@ public class ActivityManager {
             dest.writeString(longMsg);
             dest.writeString(stackTrace);
         }
-        
+
         public void readFromParcel(Parcel source) {
             condition = source.readInt();
             processName = source.readString();
@@ -1538,7 +1773,7 @@ public class ActivityManager {
         public ComponentName importanceReasonComponent;
         
         /**
-         * When {@link importanceReasonPid} is non-0, this is the importance
+         * When {@link #importanceReasonPid} is non-0, this is the importance
          * of the other pid. @hide
          */
         public int importanceReasonImportance;
@@ -1888,7 +2123,12 @@ public class ActivityManager {
         }
         // If the target is not exported, then nobody else can get to it.
         if (!exported) {
-            Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid);
+            /*
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid,
+                    here);
+            */
             return PackageManager.PERMISSION_DENIED;
         }
         if (permission == null) {
@@ -2008,6 +2248,62 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().isUserRunning(userid, false);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * Perform a system dump of various state associated with the given application
+     * package name.  This call blocks while the dump is being performed, so should
+     * not be done on a UI thread.  The data will be written to the given file
+     * descriptor as text.  An application must hold the
+     * {@link android.Manifest.permission#DUMP} permission to make this call.
+     * @param fd The file descriptor that the dump should be written to.  The file
+     * descriptor is <em>not</em> closed by this function; the caller continues to
+     * own it.
+     * @param packageName The name of the package that is to be dumped.
+     */
+    public void dumpPackageState(FileDescriptor fd, String packageName) {
+        dumpPackageStateStatic(fd, packageName);
+    }
+
+    /**
+     * @hide
+     */
+    public static void dumpPackageStateStatic(FileDescriptor fd, String packageName) {
+        FileOutputStream fout = new FileOutputStream(fd);
+        PrintWriter pw = new FastPrintWriter(fout);
+        dumpService(pw, fd, Context.ACTIVITY_SERVICE, new String[] { "package", packageName });
+        pw.println();
+        dumpService(pw, fd, ProcessStats.SERVICE_NAME, new String[] { packageName });
+        pw.println();
+        dumpService(pw, fd, "usagestats", new String[] { "--packages", packageName });
+        pw.println();
+        dumpService(pw, fd, "package", new String[] { packageName });
+        pw.println();
+        dumpService(pw, fd, BatteryStats.SERVICE_NAME, new String[] { packageName });
+        pw.flush();
+    }
+
+    private static void dumpService(PrintWriter pw, FileDescriptor fd, String name, String[] args) {
+        pw.print("DUMP OF SERVICE "); pw.print(name); pw.println(":");
+        IBinder service = ServiceManager.checkService(name);
+        if (service == null) {
+            pw.println("  (Service not found)");
+            return;
+        }
+        TransferPipe tp = null;
+        try {
+            pw.flush();
+            tp = new TransferPipe();
+            tp.setBufferPrefix("  ");
+            service.dump(tp.getWriteFd().getFileDescriptor(), args);
+            tp.go(fd);
+        } catch (Throwable e) {
+            if (tp != null) {
+                tp.kill();
+            }
+            pw.println("Failure dumping service:");
+            e.printStackTrace(pw);
         }
     }
 }

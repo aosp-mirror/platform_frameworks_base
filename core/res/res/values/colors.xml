@@ -23,7 +23,7 @@
     <drawable name="status_bar_closed_default_background">#ff000000</drawable>
     <drawable name="status_bar_opened_default_background">#ff000000</drawable>
     <drawable name="notification_item_background_color">#ff111111</drawable>
-    <drawable name="notification_item_background_color_pressed">#ff257390</drawable>
+    <drawable name="notification_item_background_color_pressed">#ff454545</drawable>
     <drawable name="search_bar_default_color">#ff000000</drawable>
     <drawable name="safe_mode_background">#60000000</drawable>
     <!-- Background drawable that can be used for a transparent activity to
@@ -78,6 +78,7 @@
 
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     <drawable name="input_method_fullscreen_background_holo">@drawable/screen_background_holo_dark</drawable>
+    <color name="input_method_navigation_guard">#ff000000</color>
 
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
@@ -168,6 +169,8 @@
 
     <!-- A light Holo shade of blue -->
     <color name="holo_blue_light">#ff33b5e5</color>
+    <!-- A light Holo shade of gray -->
+    <color name="holo_gray_light">#33999999</color>
     <!-- A light Holo shade of green -->
     <color name="holo_green_light">#ff99cc00</color>
     <!-- A light Holo shade of red -->
@@ -186,6 +189,8 @@
     <color name="holo_orange_dark">#ffff8800</color>
     <!-- A really bright Holo shade of blue -->
     <color name="holo_blue_bright">#ff00ddff</color>
+    <!-- A really bright Holo shade of gray -->
+    <color name="holo_gray_bright">#33CCCCCC</color>
 
     <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
@@ -195,5 +200,7 @@
     <color name="keyguard_avatar_frame_shadow_color">#80000000</color>
     <color name="keyguard_avatar_nick_color">#ffffffff</color>
     <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
+
+    <color name="accessibility_focus_highlight">#80ffff00</color>
 </resources>
 

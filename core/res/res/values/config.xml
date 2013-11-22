@@ -26,7 +26,7 @@
        <item><xliff:g id="id">ime</xliff:g></item>
        <item><xliff:g id="id">sync_failing</xliff:g></item>
        <item><xliff:g id="id">sync_active</xliff:g></item>
-       <item><xliff:g id="id">gps</xliff:g></item>
+       <item><xliff:g id="id">location</xliff:g></item>
        <item><xliff:g id="id">bluetooth</xliff:g></item>
        <item><xliff:g id="id">nfc</xliff:g></item>
        <item><xliff:g id="id">tty</xliff:g></item>
@@ -123,6 +123,49 @@
          of them.  This should not normally be modified. -->
     <bool name="config_closeDialogWhenTouchOutside">true</bool>
 
+    <!-- Device configuration indicating whether we should avoid using accelerated graphics
+         in certain places to reduce RAM footprint.  This is ignored if ro.config.low_ram
+         is true (in that case this is assumed true as well).  It can allow you to tune down
+         your device's memory use without going to the point of causing applications to turn
+         off features. -->
+    <bool name="config_avoidGfxAccel">false</bool>
+
+    <!-- Device configuration setting the minfree tunable in the lowmemorykiller in the kernel.
+         A high value will cause the lowmemorykiller to fire earlier, keeping more memory
+         in the file cache and preventing I/O thrashing, but allowing fewer processes to
+         stay in memory.  A low value will keep more processes in memory but may cause
+         thrashing if set too low.  Overrides the default value chosen by ActivityManager
+         based on screen size and total memory for the largest lowmemorykiller bucket, and
+         scaled proportionally to the smaller buckets.  -1 keeps the default. -->
+    <integer name="config_lowMemoryKillerMinFreeKbytesAbsolute">-1</integer>
+
+    <!-- Device configuration adjusting the minfree tunable in the lowmemorykiller in the
+         kernel.  A high value will cause the lowmemorykiller to fire earlier, keeping more
+         memory in the file cache and preventing I/O thrashing, but allowing fewer processes
+         to stay in memory.  A low value will keep more processes in memory but may cause
+         thrashing if set too low.  Directly added to the default value chosen by
+         ActivityManager based on screen size and total memory for the largest lowmemorykiller
+         bucket, and scaled proportionally to the smaller buckets. 0 keeps the default. -->
+    <integer name="config_lowMemoryKillerMinFreeKbytesAdjust">0</integer>
+
+    <!-- Device configuration setting the /proc/sys/vm/extra_free_kbytes tunable in the kernel
+         (if it exists).  A high value will increase the amount of memory that the kernel
+         tries to keep free, reducing allocation time and causing the lowmemorykiller to kill
+         earlier.  A low value allows more memory to be used by processes but may cause more
+         allocations to block waiting on disk I/O or lowmemorykiller.  Overrides the default
+         value chosen by ActivityManager based on screen size.  0 prevents keeping any extra
+         memory over what the kernel keeps by default.  -1 keeps the default. -->
+    <integer name="config_extraFreeKbytesAbsolute">-1</integer>
+
+    <!-- Device configuration adjusting the /proc/sys/vm/extra_free_kbytes tunable in the kernel
+         (if it exists).  0 uses the default value chosen by ActivityManager.  A positive value
+         will increase the amount of memory that the kernel tries to keep free, reducing
+         allocation time and causing the lowmemorykiller to kill earlier.  A negative value
+         allows more memory to be used by processes but may cause more allocations to block
+         waiting on disk I/O or lowmemorykiller.  Directly added to the default value chosen by
+         ActivityManager based on screen size. -->
+    <integer name="config_extraFreeKbytesAdjust">0</integer>
+
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
@@ -149,6 +192,7 @@
         <item>"mobile_ims,11,0,2,60000,true"</item>
         <item>"mobile_cbs,12,0,2,60000,true"</item>
         <item>"wifi_p2p,13,1,0,-1,true"</item>
+        <item>"mobile_ia,14,0,2,-1,true"</item>
     </string-array>
 
     <!-- Array of ConnectivityManager.TYPE_xxxx constants for networks that may only
@@ -157,6 +201,7 @@
         <item>10</item>
         <item>11</item>
         <item>12</item>
+        <item>14</item>
     </integer-array>
 
     <!-- This string array should be overridden by the device to present a list of radio
@@ -179,6 +224,7 @@
         <item>10</item> <!-- TYPE_MOBILE_FOTA -->
         <item>11</item> <!-- TYPE_MOBILE_IMS -->
         <item>12</item> <!-- TYPE_MOBILE_CBS -->
+        <item>14</item> <!-- TYPE_MOBILE_IA -->
     </integer-array>
 
     <!-- The maximum duration (in milliseconds) we expect a network transition to take -->
@@ -303,6 +349,9 @@
          Default value is 2 minutes. -->
     <integer translatable="false" name="config_wifi_driver_stop_delay">120000</integer>
 
+    <!-- Wifi driver supports batched scan -->
+    <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
+
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
@@ -400,6 +449,13 @@
          it causes the device to wake up.
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
+
+    <!-- Indicate whether to allow the device to suspend when the screen is off
+         due to the proximity sensor.  This resource should only be set to true
+         if the sensor HAL correctly handles the proximity sensor as a wake-up source.
+         Otherwise, the device may fail to wake out of suspend reliably.
+         The default is false. -->
+    <bool name="config_suspendWhenScreenOffDueToProximity">false</bool>
 
     <!-- Control the behavior when the user long presses the power button.
             0 - Nothing
@@ -526,8 +582,14 @@
     <!-- Don't show lock screen before unlock screen (PIN/pattern/password) -->
     <bool name="config_enableLockBeforeUnlockScreen">false</bool>
 
-    <!-- Diable lockscreen rotation by default -->
+    <!-- Disable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
+
+    <!-- Disable lockscreen translucent decor by default -->
+    <bool name="config_enableLockScreenTranslucentDecor">false</bool>
+
+    <!-- Enable translucent decor by default -->
+    <bool name="config_enableTranslucentDecor">true</bool>
 
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
@@ -725,6 +787,9 @@
          re-validation -->
     <bool name="config_bluetooth_address_validation">false</bool>
 
+    <!-- Boolean indicating if current platform supports BLE peripheral mode -->
+    <bool name="config_bluetooth_le_peripheral_mode_supported">false</bool>
+
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
 
@@ -740,6 +805,11 @@
     <!-- The default reduced-datarate notification mask -->
     <!-- 2 means give warning -->
     <integer name="config_datause_notification_type">2</integer>
+
+    <!-- If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 this is the value
+         that should be used instead. A value of RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means
+         there is no replacement value and VoLTE is assumed to be supported -->
+    <integer name="config_volte_replacement_rat">0</integer>
 
     <!-- Flag indicating whether the current device is "voice capable".
          If true, this means that the device supports circuit-switched
@@ -764,12 +834,23 @@
                cell broadcasting sms, and MMS. -->
     <bool name="config_sms_capable">true</bool>
 
+    <!-- Default SMS Application. This will be the default SMS application when
+         the phone first boots. The user can then change the default app to oe
+         of their choosing.
+         This can be overridden for devices where a different default SMS
+         application is desired. -->
+    <string name="default_sms_application" translatable="false">com.android.mms</string>
+
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
     <bool name="config_bluetooth_default_profiles">true</bool>
 
     <!-- IP address of the dns server to use if nobody else suggests one -->
     <string name="config_default_dns_server" translatable="false">8.8.8.8</string>
+
+    <!-- The default mobile provisioning apn. Empty by default, maybe overridden by
+         an mcc/mnc specific config.xml -->
+    <string name="mobile_provisioning_apn" translatable="false"></string>
 
     <!-- The default mobile provisioning url. Empty by default, maybe overridden by
          an mcc/mnc specific config.xml -->
@@ -878,6 +959,12 @@
     <!-- If this value is true, The mms content-disposition field is supported correctly.
          If false, Content-disposition fragments are ignored -->
     <bool name="config_mms_content_disposition_support">true</bool>
+
+    <!-- MMS user agent string -->
+    <string name="config_mms_user_agent" translatable="false"></string>
+
+    <!-- MMS user agent prolfile url -->
+    <string name="config_mms_user_agent_profile_url" translatable="false"></string>
 
     <!-- National Language Identifier codes for the following two config items.
          (from 3GPP TS 23.038 V9.1.1 Table 6.2.1.2.4.1):
@@ -1041,6 +1128,10 @@
     players. -->
     <integer name="config_safe_media_volume_index">10</integer>
 
+    <!-- Configure mobile network MTU. The standard default is set here but each carrier
+         may have a specific value set in an overlay config.xml file. -->
+    <integer name="config_mobile_mtu">1500</integer>
+
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:
@@ -1118,6 +1209,11 @@
     <string name="config_chooseTypeAndAccountActivity"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
 
+    <!-- Component name of a custom ResolverActivity (Intent resolver) to be used instead of
+         the default framework version. If left empty, then the framework version will be used.
+         Example: com.google.android.myapp/.resolver.MyResolverActivity  -->
+    <string name="config_customResolverActivity"></string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
 
@@ -1141,4 +1237,55 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
+    <string-array name="config_notificationScorers">
+        <item>com.android.internal.notification.DemoContactNotificationScorer</item>
+    </string-array>
+
+    <!-- Flag indicating that this device does not rotate and will always remain in its default
+         orientation. Activities that desire to run in a non-compatible orientation will be run
+         from an emulated display within the physical display. -->
+    <bool name="config_forceDefaultOrientation">false</bool>
+
+    <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
+    <integer name="config_toastDefaultGravity">0x00000051</integer>
+
+    <!-- set to false if we need to show user confirmation
+         when alpha identifier is not provided by the UICC -->
+    <bool name="config_stkNoAlphaUsrCnf">true</bool>
+
+    <!-- Don't use roaming icon for considered operators.
+         Can use mcc or mcc+mnc as item. For example, 302 or 21407.
+         If operators, 21404 and 21407, make roaming agreements, user of 21404 should not see
+         the roaming icon as using 21407 network.
+         To do this, add 21407 item to values-mcc214-mnc04/config.xml -->
+    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+    </string-array>
+
+    <!-- Threshold (in ms) under which a screen off / screen on will be considered a reset of the
+         immersive mode confirmation prompt.-->
+    <integer name="config_immersive_mode_confirmation_panic">5000</integer>
+
+    <!-- For some operators, PDU has garbages. To fix it, need to use valid index -->
+    <integer name="config_valid_wappush_index">-1</integer>
+
+    <!-- Show roaming icon though same named operators.
+         Uses "startsWith" so you can use a leading substring like the mcc or
+         use the complete mcc+mnc string.
+         Though same mcc and same operator name, some operator want to roam.
+         user of 40485 should see the roaming icon as using 40483 network
+         though same Reliance network.
+         To do this, add 40483 item to values-mcc404-mnc85/config.xml -->
+    <string-array translatable="false" name="config_sameNamedOperatorConsideredRoaming">
+    </string-array>
+    <!-- call barring MMI code from TS 22.030 Annex B -->
+    <string-array translatable="false" name="config_callBarringMMI">
+        <item>33</item>
+        <item>331</item>
+        <item>332</item>
+        <item>35</item>
+        <item>351</item>
+        <item>330</item>
+        <item>333</item>
+        <item>353</item>
+    </string-array>
 </resources>

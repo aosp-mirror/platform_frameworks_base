@@ -29,7 +29,7 @@ public class EGLSurface extends EGLObjectHandle {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof EGLSurface)) return false;
 
         EGLSurface that = (EGLSurface) o;
         return getHandle() == that.getHandle();

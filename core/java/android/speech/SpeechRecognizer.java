@@ -39,8 +39,14 @@ import java.util.Queue;
  * This class provides access to the speech recognition service. This service allows access to the
  * speech recognizer. Do not instantiate this class directly, instead, call
  * {@link SpeechRecognizer#createSpeechRecognizer(Context)}. This class's methods must be
- * invoked only from the main application thread. Please note that the application must have
- * {@link android.Manifest.permission#RECORD_AUDIO} permission to use this class.
+ * invoked only from the main application thread. 
+ *
+ * <p>The implementation of this API is likely to stream audio to remote servers to perform speech
+ * recognition. As such this API is not intended to be used for continuous recognition, which would
+ * consume a significant amount of battery and bandwidth.
+ *
+ * <p>Please note that the application must have {@link android.Manifest.permission#RECORD_AUDIO}
+ * permission to use this class.
  */
 public class SpeechRecognizer {
     /** DEBUG value to enable verbose debug prints */

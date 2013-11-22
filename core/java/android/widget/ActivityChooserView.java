@@ -29,11 +29,14 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionProvider;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
+import android.widget.ListPopupWindow.ForwardingListener;
 
 /**
  * This class is a view for choosing an activity for handling a given {@link Intent}.
@@ -227,10 +230,37 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         mDefaultActivityButton.setOnLongClickListener(mCallbacks);
         mDefaultActivityButtonImage = (ImageView) mDefaultActivityButton.findViewById(R.id.image);
 
-        mExpandActivityOverflowButton = (FrameLayout) findViewById(R.id.expand_activities_button);
-        mExpandActivityOverflowButton.setOnClickListener(mCallbacks);
+        final FrameLayout expandButton = (FrameLayout) findViewById(R.id.expand_activities_button);
+        expandButton.setOnClickListener(mCallbacks);
+        expandButton.setAccessibilityDelegate(new AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.setCanOpenPopup(true);
+            }
+        });
+        expandButton.setOnTouchListener(new ForwardingListener(expandButton) {
+            @Override
+            public ListPopupWindow getPopup() {
+                return getListPopupWindow();
+            }
+
+            @Override
+            protected boolean onForwardingStarted() {
+                showPopup();
+                return true;
+            }
+
+            @Override
+            protected boolean onForwardingStopped() {
+                dismissPopup();
+                return true;
+            }
+        });
+        mExpandActivityOverflowButton = expandButton;
+
         mExpandActivityOverflowButtonImage =
-            (ImageView) mExpandActivityOverflowButton.findViewById(R.id.image);
+            (ImageView) expandButton.findViewById(R.id.image);
         mExpandActivityOverflowButtonImage.setImageDrawable(expandActivityOverflowButtonDrawable);
 
         mAdapter = new ActivityChooserViewAdapter();

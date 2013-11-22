@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"已抓取错误报告"</string>
+    <string name="bugreport_finished_text" msgid="3559904746859400732">"触摸即可分享您的错误报告"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"错误报告包含的数据来自于系统的各个日志文件，其中包含个人信息和隐私信息。请务必只与您信任的应用和用户分享错误报告。"</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"下次再显示这条讯息"</string>
+</resources>

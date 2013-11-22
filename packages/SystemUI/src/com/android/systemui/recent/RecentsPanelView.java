@@ -23,12 +23,14 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
@@ -61,21 +63,19 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.StatusBarPanel;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
-import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 import java.util.ArrayList;
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
         StatusBarPanel, Animator.AnimatorListener {
     static final String TAG = "RecentsPanelView";
-    static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
+    static final boolean DEBUG = PhoneStatusBar.DEBUG || false;
     private PopupMenu mPopup;
     private View mRecentsScrim;
     private View mRecentsNoApps;
-    private ViewGroup mRecentsContainer;
-    private StatusBarTouchProxy mStatusBarTouchProxy;
+    private RecentsScrollView mRecentsContainer;
 
     private boolean mShowing;
     private boolean mWaitingToShow;
@@ -99,6 +99,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         public void setCallback(RecentsCallback callback);
         public void setMinSwipeAlpha(float minAlpha);
         public View findViewForTask(int persistentTaskId);
+        public void drawFadedEdges(Canvas c, int left, int right, int top, int bottom);
+        public void setOnScrollListener(Runnable listener);
     }
 
     private final class OnLongClickDelegate implements View.OnLongClickListener {
@@ -114,7 +116,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     /* package */ final static class ViewHolder {
         View thumbnailView;
         ImageView thumbnailViewImage;
-        Bitmap thumbnailViewImageBitmap;
+        Drawable thumbnailViewDrawable;
         ImageView iconView;
         TextView labelView;
         TextView descriptionView;
@@ -152,7 +154,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             // the thumbnail later (if they both have the same dimensions)
             updateThumbnail(holder, mRecentTasksLoader.getDefaultThumbnail(), false, false);
             holder.iconView = (ImageView) convertView.findViewById(R.id.app_icon);
-            holder.iconView.setImageBitmap(mRecentTasksLoader.getDefaultIcon());
+            holder.iconView.setImageDrawable(mRecentTasksLoader.getDefaultIcon());
             holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
             holder.calloutLine = convertView.findViewById(R.id.recents_callout_line);
             holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
@@ -228,7 +230,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         public void recycleView(View v) {
             ViewHolder holder = (ViewHolder) v.getTag();
             updateThumbnail(holder, mRecentTasksLoader.getDefaultThumbnail(), false, false);
-            holder.iconView.setImageBitmap(mRecentTasksLoader.getDefaultIcon());
+            holder.iconView.setImageDrawable(mRecentTasksLoader.getDefaultIcon());
             holder.iconView.setVisibility(INVISIBLE);
             holder.iconView.animate().cancel();
             holder.labelView.setText(null);
@@ -271,13 +273,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public int numItemsInOneScreenful() {
-        if (mRecentsContainer instanceof RecentsScrollView){
-            RecentsScrollView scrollView
-                    = (RecentsScrollView) mRecentsContainer;
-            return scrollView.numItemsInOneScreenful();
-        }  else {
-            throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
-        }
+        return mRecentsContainer.numItemsInOneScreenful();
     }
 
     private boolean pointInside(int x, int y, View v) {
@@ -289,14 +285,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public boolean isInContentArea(int x, int y) {
-        if (pointInside(x, y, mRecentsContainer)) {
-            return true;
-        } else if (mStatusBarTouchProxy != null &&
-                pointInside(x, y, mStatusBarTouchProxy)) {
-            return true;
-        } else {
-            return false;
-        }
+        return pointInside(x, y, (View) mRecentsContainer);
     }
 
     public void show(boolean show) {
@@ -430,12 +419,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         return mShowing;
     }
 
-    public void setStatusBarView(View statusBarView) {
-        if (mStatusBarTouchProxy != null) {
-            mStatusBarTouchProxy.setStatusBar(statusBarView);
-        }
-    }
-
     public void setRecentTasksLoader(RecentTasksLoader loader) {
         mRecentTasksLoader = loader;
     }
@@ -450,17 +433,16 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
-        mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
+        mRecentsContainer = (RecentsScrollView) findViewById(R.id.recents_container);
+        mRecentsContainer.setOnScrollListener(new Runnable() {
+            public void run() {
+                // need to redraw the faded edges
+                invalidate();
+            }
+        });
         mListAdapter = new TaskDescriptionAdapter(mContext);
-        if (mRecentsContainer instanceof RecentsScrollView){
-            RecentsScrollView scrollView
-                    = (RecentsScrollView) mRecentsContainer;
-            scrollView.setAdapter(mListAdapter);
-            scrollView.setCallback(this);
-        } else {
-            throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
-        }
+        mRecentsContainer.setAdapter(mListAdapter);
+        mRecentsContainer.setCallback(this);
 
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
@@ -477,11 +459,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
-        if (mRecentsContainer instanceof RecentsScrollView){
-            RecentsScrollView scrollView
-                = (RecentsScrollView) mRecentsContainer;
-            scrollView.setMinSwipeAlpha(minAlpha);
-        }
+        mRecentsContainer.setMinSwipeAlpha(minAlpha);
     }
 
     private void createCustomAnimations(LayoutTransition transitioner) {
@@ -503,23 +481,23 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    private void updateThumbnail(ViewHolder h, Bitmap thumbnail, boolean show, boolean anim) {
+    private void updateThumbnail(ViewHolder h, Drawable thumbnail, boolean show, boolean anim) {
         if (thumbnail != null) {
             // Should remove the default image in the frame
             // that this now covers, to improve scrolling speed.
             // That can't be done until the anim is complete though.
-            h.thumbnailViewImage.setImageBitmap(thumbnail);
+            h.thumbnailViewImage.setImageDrawable(thumbnail);
 
             // scale the image to fill the full width of the ImageView. do this only if
             // we haven't set a bitmap before, or if the bitmap size has changed
-            if (h.thumbnailViewImageBitmap == null ||
-                h.thumbnailViewImageBitmap.getWidth() != thumbnail.getWidth() ||
-                h.thumbnailViewImageBitmap.getHeight() != thumbnail.getHeight()) {
+            if (h.thumbnailViewDrawable == null ||
+                h.thumbnailViewDrawable.getIntrinsicWidth() != thumbnail.getIntrinsicWidth() ||
+                h.thumbnailViewDrawable.getIntrinsicHeight() != thumbnail.getIntrinsicHeight()) {
                 if (mFitThumbnailToXY) {
                     h.thumbnailViewImage.setScaleType(ScaleType.FIT_XY);
                 } else {
                     Matrix scaleMatrix = new Matrix();
-                    float scale = mThumbnailWidth / (float) thumbnail.getWidth();
+                    float scale = mThumbnailWidth / (float) thumbnail.getIntrinsicWidth();
                     scaleMatrix.setScale(scale, scale);
                     h.thumbnailViewImage.setScaleType(ScaleType.MATRIX);
                     h.thumbnailViewImage.setImageMatrix(scaleMatrix);
@@ -532,14 +510,14 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 }
                 h.thumbnailView.setVisibility(View.VISIBLE);
             }
-            h.thumbnailViewImageBitmap = thumbnail;
+            h.thumbnailViewDrawable = thumbnail;
         }
     }
 
     void onTaskThumbnailLoaded(TaskDescription td) {
         synchronized (td) {
             if (mRecentsContainer != null) {
-                ViewGroup container = mRecentsContainer;
+                ViewGroup container = (ViewGroup) mRecentsContainer;
                 if (container instanceof RecentsScrollView) {
                     container = (ViewGroup) container.findViewById(
                             R.id.recents_linear_layout);
@@ -648,7 +626,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         final int items = mRecentTaskDescriptions != null
                 ? mRecentTaskDescriptions.size() : 0;
 
-        mRecentsContainer.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
+        ((View) mRecentsContainer).setVisibility(items > 0 ? View.VISIBLE : View.GONE);
 
         // Set description for accessibility
         int numRecentApps = mRecentTaskDescriptions != null
@@ -665,33 +643,33 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public boolean simulateClick(int persistentTaskId) {
-        if (mRecentsContainer instanceof RecentsScrollView){
-            RecentsScrollView scrollView
-                = (RecentsScrollView) mRecentsContainer;
-            View v = scrollView.findViewForTask(persistentTaskId);
-            if (v != null) {
-                handleOnClick(v);
-                return true;
-            }
+        View v = mRecentsContainer.findViewForTask(persistentTaskId);
+        if (v != null) {
+            handleOnClick(v);
+            return true;
         }
         return false;
     }
 
     public void handleOnClick(View view) {
-        ViewHolder holder = (ViewHolder)view.getTag();
+        ViewHolder holder = (ViewHolder) view.getTag();
         TaskDescription ad = holder.taskDescription;
         final Context context = view.getContext();
         final ActivityManager am = (ActivityManager)
                 context.getSystemService(Context.ACTIVITY_SERVICE);
-        Bitmap bm = holder.thumbnailViewImageBitmap;
-        boolean usingDrawingCache;
-        if (bm.getWidth() == holder.thumbnailViewImage.getWidth() &&
-                bm.getHeight() == holder.thumbnailViewImage.getHeight()) {
-            usingDrawingCache = false;
-        } else {
+
+        Bitmap bm = null;
+        boolean usingDrawingCache = true;
+        if (holder.thumbnailViewDrawable instanceof BitmapDrawable) {
+            bm = ((BitmapDrawable) holder.thumbnailViewDrawable).getBitmap();
+            if (bm.getWidth() == holder.thumbnailViewImage.getWidth() &&
+                    bm.getHeight() == holder.thumbnailViewImage.getHeight()) {
+                usingDrawingCache = false;
+            }
+        }
+        if (usingDrawingCache) {
             holder.thumbnailViewImage.setDrawingCacheEnabled(true);
             bm = holder.thumbnailViewImage.getDrawingCache();
-            usingDrawingCache = true;
         }
         Bundle opts = (bm == null) ?
                 null :
@@ -714,6 +692,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                         new UserHandle(UserHandle.USER_CURRENT));
             } catch (SecurityException e) {
                 Log.e(TAG, "Recents does not have the permission to launch " + intent, e);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "Error launching activity " + intent, e);
             }
         }
         if (usingDrawingCache) {
@@ -784,7 +764,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.recent_remove_item) {
-                    mRecentsContainer.removeViewInLayout(selectedView);
+                    ((ViewGroup) mRecentsContainer).removeViewInLayout(selectedView);
                 } else if (item.getItemId() == R.id.recent_inspect_item) {
                     ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
                     if (viewHolder != null) {
@@ -807,5 +787,27 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
         });
         popup.show();
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+
+        int paddingLeft = mPaddingLeft;
+        final boolean offsetRequired = isPaddingOffsetRequired();
+        if (offsetRequired) {
+            paddingLeft += getLeftPaddingOffset();
+        }
+
+        int left = mScrollX + paddingLeft;
+        int right = left + mRight - mLeft - mPaddingRight - paddingLeft;
+        int top = mScrollY + getFadeTop(offsetRequired);
+        int bottom = top + getFadeHeight(offsetRequired);
+
+        if (offsetRequired) {
+            right += getRightPaddingOffset();
+            bottom += getBottomPaddingOffset();
+        }
+        mRecentsContainer.drawFadedEdges(canvas, left, right, top, bottom);
     }
 }

@@ -24,8 +24,6 @@
     <bool name="lockscreen_isPortrait">true</bool>
     <!-- @hide DO NOT TRANSLATE. Control aspect ratio of lock pattern -->
     <string name="lock_pattern_view_aspect">square</string>
-    <!-- @hide DO NOT TRANSLATE. Separator between the hour and minute elements in a TimePicker widget -->
-    <string name="time_picker_separator">:</string>
     <!-- @hide DO NOT TRANSLATE. ICU pattern for "Mon, 14 January" -->
     <string name="icu_abbrev_wday_month_day_no_year">eeeMMMMd</string>
     <!-- @hide DO NOT TRANSLATE. date formatting pattern for system ui.-->

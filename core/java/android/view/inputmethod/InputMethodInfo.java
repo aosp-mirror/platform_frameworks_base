@@ -36,6 +36,7 @@ import android.util.AttributeSet;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,12 +79,17 @@ public final class InputMethodInfo implements Parcelable {
      */
     private final ArrayList<InputMethodSubtype> mSubtypes = new ArrayList<InputMethodSubtype>();
 
-    private boolean mIsAuxIme;
+    private final boolean mIsAuxIme;
 
     /**
-     * Cavert: mForceDefault must be false for production. This flag is only for test.
+     * Caveat: mForceDefault must be false for production. This flag is only for test.
      */
     private final boolean mForceDefault;
+
+    /**
+     * The flag whether this IME supports ways to switch to a next input method (e.g. globe key.)
+     */
+    private final boolean mSupportsSwitchingToNextInputMethod;
 
     /**
      * Constructor.
@@ -112,7 +118,8 @@ public final class InputMethodInfo implements Parcelable {
         mService = service;
         ServiceInfo si = service.serviceInfo;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
-        mIsAuxIme = true;
+        boolean isAuxIme = true;
+        boolean supportsSwitchingToNextInputMethod = false; // false as default
         mForceDefault = false;
 
         PackageManager pm = context.getPackageManager();
@@ -148,6 +155,9 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod_settingsActivity);
             isDefaultResId = sa.getResourceId(
                     com.android.internal.R.styleable.InputMethod_isDefault, 0);
+            supportsSwitchingToNextInputMethod = sa.getBoolean(
+                    com.android.internal.R.styleable.InputMethod_supportsSwitchingToNextInputMethod,
+                    false);
             sa.recycle();
 
             final int depth = parser.getDepth();
@@ -162,26 +172,28 @@ public final class InputMethodInfo implements Parcelable {
                     }
                     final TypedArray a = res.obtainAttributes(
                             attrs, com.android.internal.R.styleable.InputMethod_Subtype);
-                    InputMethodSubtype subtype = new InputMethodSubtype(
-                            a.getResourceId(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_label, 0),
-                            a.getResourceId(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_icon, 0),
-                            a.getString(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_imeSubtypeLocale),
-                            a.getString(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_imeSubtypeMode),
-                            a.getString(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_imeSubtypeExtraValue),
-                            a.getBoolean(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_isAuxiliary, false),
-                            a.getBoolean(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_overridesImplicitlyEnabledSubtype, false),
-                            a.getInt(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */)
-                            );
+                    final InputMethodSubtype subtype = new InputMethodSubtypeBuilder()
+                            .setSubtypeNameResId(a.getResourceId(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_label, 0))
+                            .setSubtypeIconResId(a.getResourceId(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_icon, 0))
+                            .setSubtypeLocale(a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeLocale))
+                            .setSubtypeMode(a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeMode))
+                            .setSubtypeExtraValue(a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeExtraValue))
+                            .setIsAuxiliary(a.getBoolean(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_isAuxiliary, false))
+                            .setOverridesImplicitlyEnabledSubtype(a.getBoolean(
+                                    com.android.internal.R.styleable
+                                    .InputMethod_Subtype_overridesImplicitlyEnabledSubtype, false))
+                            .setSubtypeId(a.getInt(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */))
+                            .setIsAsciiCapable(a.getBoolean(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_isAsciiCapable, false)).build();
                     if (!subtype.isAuxiliary()) {
-                        mIsAuxIme = false;
+                        isAuxIme = false;
                     }
                     mSubtypes.add(subtype);
                 }
@@ -194,7 +206,7 @@ public final class InputMethodInfo implements Parcelable {
         }
 
         if (mSubtypes.size() == 0) {
-            mIsAuxIme = false;
+            isAuxIme = false;
         }
 
         if (additionalSubtypesMap != null && additionalSubtypesMap.containsKey(mId)) {
@@ -212,6 +224,8 @@ public final class InputMethodInfo implements Parcelable {
         }
         mSettingsActivityName = settingsActivityComponent;
         mIsDefaultResId = isDefaultResId;
+        mIsAuxIme = isAuxIme;
+        mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
     }
 
     InputMethodInfo(Parcel source) {
@@ -219,6 +233,7 @@ public final class InputMethodInfo implements Parcelable {
         mSettingsActivityName = source.readString();
         mIsDefaultResId = source.readInt();
         mIsAuxIme = source.readInt() == 1;
+        mSupportsSwitchingToNextInputMethod = source.readInt() == 1;
         mService = ResolveInfo.CREATOR.createFromParcel(source);
         source.readTypedList(mSubtypes, InputMethodSubtype.CREATOR);
         mForceDefault = false;
@@ -250,6 +265,7 @@ public final class InputMethodInfo implements Parcelable {
             mSubtypes.addAll(subtypes);
         }
         mForceDefault = forceDefault;
+        mSupportsSwitchingToNextInputMethod = true;
     }
 
     private static ResolveInfo buildDummyResolveInfo(String packageName, String className,
@@ -431,6 +447,14 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * @return true if this input method supports ways to switch to a next input method.
+     * @hide
+     */
+    public boolean supportsSwitchingToNextInputMethod() {
+        return mSupportsSwitchingToNextInputMethod;
+    }
+
+    /**
      * Used to package this object into a {@link Parcel}.
      * 
      * @param dest The {@link Parcel} to be written.
@@ -442,6 +466,7 @@ public final class InputMethodInfo implements Parcelable {
         dest.writeString(mSettingsActivityName);
         dest.writeInt(mIsDefaultResId);
         dest.writeInt(mIsAuxIme ? 1 : 0);
+        dest.writeInt(mSupportsSwitchingToNextInputMethod ? 1 : 0);
         mService.writeToParcel(dest, flags);
         dest.writeTypedList(mSubtypes);
     }

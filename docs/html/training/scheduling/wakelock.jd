@@ -1,0 +1,215 @@
+page.title=Keeping the Device Awake
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#screen">Keep the Screen On</a></li>
+  <li><a href="#cpu">Keep the CPU On</a></li>
+</ol>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/Scheduler.zip"
+class="button">Download the sample</a>
+ <p class="filename">Scheduler.zip</p>
+</div>
+
+</div>
+</div>
+
+
+<p>To avoid draining the battery, an Android device that is left idle quickly falls asleep.
+However, there are times when an application needs to wake up the screen or the CPU
+and keep it awake to complete some work.</p>
+
+<p>The approach you take depends on the needs of your app. However, a general rule of thumb
+is that you should use the most lightweight approach possible for your app, to minimize your
+app's impact on system resources. The following sections describe how to handle the cases
+where the device's default sleep behavior is incompatible with the requirements of your app.</p>
+
+<h2 id="screen">Keep the Screen On</h2>
+
+<p>Certain apps need to keep the screen turned on, such as games or movie apps. The best
+way to do this is to use the
+{@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON FLAG_KEEP_SCREEN_ON}
+in your activity (and only in an activity, never in a service or
+other app component). For example:</p>
+
+<pre>public class MainActivity extends Activity {
+  &#64;Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    <strong>getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);</strong>
+  }</pre>
+
+<p>The advantage of this approach is that unlike wake locks (discussed in <a href="#cpu">
+Keep the CPU On</a>), it doesn't require special permission, and the platform correctly
+manages the user moving between applications, without your app needing to worry about
+releasing unused resources.</p>
+
+<p>Another way to implement this is in your application's layout XML file, by using the
+{@link android.R.attr#keepScreenOn android:keepScreenOn} attribute:</p>
+
+<pre>&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    <strong>android:keepScreenOn=&quot;true&quot;&gt;</strong>
+    ...
+&lt;/RelativeLayout&gt;</pre>
+
+<p>Using <code>android:keepScreenOn=&quot;true&quot;</code> is equivalent to using
+{@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON FLAG_KEEP_SCREEN_ON}.
+You can use whichever approach is best for your app. The advantage of setting the flag
+programmatically in your activity is that it gives you the option of programmatically
+clearing the flag later and thereby allowing the screen to turn off.</p>
+
+<p class="note"><strong>Note:</strong> You don't need to clear the
+{@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON FLAG_KEEP_SCREEN_ON}
+flag unless you no longer want the screen to
+stay on in your running application (for example, if you want the screen to time out
+after a certain period of inactivity). The window manager takes care of
+ensuring that the right things happen when the app goes into the background or returns to
+the foreground. But if you want to explicitly clear the flag and thereby allow the screen to
+turn off again, use {@link android.view.Window#clearFlags clearFlags()}:
+{@code getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}.</p>
+
+<h2 id="cpu">Keep the CPU On</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h2>Alternatives to using wake locks</h2>
+
+<ul>
+
+<li>If your app is performing long-running HTTP downloads, consider using
+{@link android.app.DownloadManager}.</li>
+
+<li>If your app is synchronizing data from an external server, consider creating a
+<a href="{@docRoot}training/sync-adapters/index.html">sync
+adapter</a>.</li>
+
+<li>If your app relies on background services, consider using
+<a href="{@docRoot}training/scheduling/alarms.html">repeating alarms</a>
+or <a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> to trigger these
+services at specific intervals.</li>
+
+</ul>
+</div>
+</div>
+
+
+<p>If you need to keep the CPU running in order to complete some work before the device goes
+to sleep, you can use a {@link android.os.PowerManager} system service feature called
+wake locks. Wake locks allow your application to control the power state of the host device.</p>
+
+<p>Creating and holding wake locks can have a dramatic impact on the host device's battery
+life. Thus you should use wake locks only when strictly necessary
+and hold them for as short a time as possible. For example, you should never need to use a
+wake lock in an activity. As described above, if you want
+to keep the screen on in your activity, use
+{@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON FLAG_KEEP_SCREEN_ON}.</p>
+
+
+<p>One legitimate case for using a wake lock might be a background service
+that needs to grab a wake lock to keep the CPU running to do work while the screen is off.
+Again, though, this practice should be minimized because of its impact on battery life.</p>
+
+<p>To use a wake lock, the first step is to add the {@link android.Manifest.permission#WAKE_LOCK}
+ permission to your application's manifest file:</p>
+
+<pre>&lt;uses-permission android:name=&quot;android.permission.WAKE_LOCK&quot; /&gt;</pre>
+
+<p>If your app includes a broadcast receiver that uses a service to do some
+work, you can manage your wake lock through a
+{@link android.support.v4.content.WakefulBroadcastReceiver}, as described in
+<a href="#wakeful">Using a WakefulBroadcastReceiver</a>. This is the preferred approach.
+If your app doesn't follow that pattern, here is how you set a wake lock
+directly:</p>
+
+<pre>
+PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+Wakelock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+        "MyWakelockTag");
+wakeLock.acquire();</pre>
+
+<p>To release the wake lock, call
+{@link android.os.PowerManager.WakeLock#release wakelock.release()}. This releases your
+claim to the CPU. It's important to release a wake lock as soon as your app is finished
+using it to avoid draining the battery.</p>
+
+<h3 id="wakeful">Using WakefulBroadcastReceiver</h3>
+
+<p>Using a broadcast receiver in conjunction with a service lets you manage the life cycle
+of a background task.</p>
+
+<p>A {@link android.support.v4.content.WakefulBroadcastReceiver} is a special type of
+broadcast receiver that takes care of
+creating and managing a
+{@link android.os.PowerManager#PARTIAL_WAKE_LOCK} for your app. A
+{@link android.support.v4.content.WakefulBroadcastReceiver}
+passes off the work to a {@link android.app.Service}
+(typically an
+{@link android.app.IntentService}), while ensuring that the device does not
+go back to sleep in the transition. If you don't hold a wake lock while transitioning
+the work to a service, you are effectively allowing the device to go back to sleep before
+the work completes. The net result is that the app might not finish doing the work until
+some arbitrary point in the future, which is not what you want.</p>
+
+<p>The first step in using a
+{@link android.support.v4.content.WakefulBroadcastReceiver} is to add it to your
+manifest, as with any other broadcast receiver:</p>
+
+<pre>&lt;receiver android:name=&quot;.MyWakefulReceiver&quot;&gt;&lt;/receiver&gt;</pre>
+
+<p>The following code starts {@code MyIntentService} with the method
+{@link android.support.v4.content.WakefulBroadcastReceiver#startWakefulService startWakefulService()}.
+This method is comparable to {@link android.content.Context#startService startService()}, except that
+the {@link android.support.v4.content.WakefulBroadcastReceiver} is holding a
+wake lock when the service starts. The intent that is passed with
+{@link android.support.v4.content.WakefulBroadcastReceiver#startWakefulService startWakefulService()}
+holds an extra identifying the wake lock:</p>
+
+<pre>public class MyWakefulReceiver extends WakefulBroadcastReceiver {
+
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+
+        // Start the service, keeping the device awake while the service is
+        // launching. This is the Intent to deliver to the service.
+        Intent service = new Intent(context, MyIntentService.class);
+        startWakefulService(context, service);
+    }
+}</pre>
+
+<p>When the service is finished, it calls
+{@link android.support.v4.content.WakefulBroadcastReceiver#completeWakefulIntent MyWakefulReceiver.completeWakefulIntent()}
+to release the wake lock. The
+{@link android.support.v4.content.WakefulBroadcastReceiver#completeWakefulIntent completeWakefulIntent()}
+method has as its parameter the same intent that was
+passed in from the {@link android.support.v4.content.WakefulBroadcastReceiver}:</p>
+<pre>
+public class MyIntentService extends IntentService {
+    public static final int NOTIFICATION_ID = 1;
+    private NotificationManager mNotificationManager;
+    NotificationCompat.Builder builder;
+    public MyIntentService() {
+        super("MyIntentService");
+    }
+    &#64;Override
+    protected void onHandleIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        // Do the work that requires your app to keep the CPU running.
+        // ...
+        // Release the wake lock provided by the WakefulBroadcastReceiver.
+        MyWakefulReceiver.completeWakefulIntent(intent);
+    }
+}</pre>

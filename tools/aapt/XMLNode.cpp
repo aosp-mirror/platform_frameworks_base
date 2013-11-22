@@ -6,8 +6,8 @@
 
 #include "XMLNode.h"
 #include "ResourceTable.h"
+#include "pseudolocalize.h"
 
-#include <host/pseudolocalize.h>
 #include <utils/ByteOrder.h>
 #include <errno.h>
 #include <string.h>

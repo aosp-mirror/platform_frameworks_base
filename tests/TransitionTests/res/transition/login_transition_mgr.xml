@@ -1,0 +1,14 @@
+<transitionManager xmlns:android="http://schemas.android.com/apk/res/android">
+    <transition android:fromScene="@layout/activity_login" android:toScene="@layout/new_user"
+                android:transition="@transition/login_slider_transition"/>
+    <transition android:fromScene="@layout/login_password" android:toScene="@layout/new_user"
+                android:transition="@transition/login_slider_transition"/>
+    <transition android:fromScene="@layout/new_user" android:toScene="@layout/activity_login"
+                android:transition="@transition/login_slider_transition"/>
+    <transition android:fromScene="@layout/new_user" android:toScene="@layout/login_password"
+                android:transition="@transition/login_slider_transition"/>
+    <transition android:fromScene="@layout/activity_login" android:toScene="@layout/login_password"
+                android:transition="@transition/colorizer_transition"/>
+    <transition android:fromScene="@layout/login_password" android:toScene="@layout/activity_login"
+                android:transition="@transition/colorizer_transition"/>
+</transitionManager>

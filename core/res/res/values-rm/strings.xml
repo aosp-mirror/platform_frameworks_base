@@ -158,6 +158,12 @@
     <skip />
     <!-- no translation found for low_memory (3475999286680000541) -->
     <skip />
+    <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"Jau"</string>
     <!-- no translation found for power_dialog (8545351420865202853) -->
     <skip />
@@ -343,6 +349,14 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expander/reducir la trav da status"</string>
     <!-- no translation found for permdesc_expandStatusBar (6917549437129401132) -->
     <skip />
+    <!-- no translation found for permlab_install_shortcut (4279070216371564234) -->
+    <skip />
+    <!-- no translation found for permdesc_install_shortcut (8341295916286736996) -->
+    <skip />
+    <!-- no translation found for permlab_uninstall_shortcut (4729634524044003699) -->
+    <skip />
+    <!-- no translation found for permdesc_uninstall_shortcut (6745743474265057975) -->
+    <skip />
     <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
     <skip />
     <!-- no translation found for permdesc_processOutgoingCalls (5331318931937402040) -->
@@ -413,6 +427,10 @@
     <!-- no translation found for permlab_removeTasks (6821513401870377403) -->
     <skip />
     <!-- no translation found for permdesc_removeTasks (1394714352062635493) -->
+    <skip />
+    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
+    <skip />
+    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
     <skip />
     <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
     <skip />
@@ -553,6 +571,18 @@
     <skip />
     <!-- no translation found for permdesc_bindAccessibilityService (7034615928609331368) -->
     <skip />
+    <!-- no translation found for permlab_bindPrintService (8462815179572748761) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPrintService (7960067623209111135) -->
+    <skip />
+    <!-- no translation found for permlab_bindPrintSpoolerService (6807762783744125954) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPrintSpoolerService (3680552285933318372) -->
+    <skip />
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
     <skip />
     <!-- no translation found for permdesc_bindTextService (8151968910973998670) -->
@@ -570,6 +600,10 @@
     <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacziun cun in administratur dad apparats"</string>
     <!-- no translation found for permdesc_bindDeviceAdmin (569715419543907930) -->
+    <skip />
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
     <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"midar l\'orientaziun dal visur"</string>
     <!-- no translation found for permdesc_setOrientation (3046126619316671476) -->
@@ -631,6 +665,10 @@
     <!-- no translation found for permlab_anyCodecForPlayback (715805555823881818) -->
     <skip />
     <!-- no translation found for permdesc_anyCodecForPlayback (8283912488433189010) -->
+    <skip />
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
     <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leger/scriver en resursas che appartegnan a diagnostics"</string>
     <!-- no translation found for permdesc_diagnostic (6608295692002452283) -->
@@ -753,6 +791,26 @@
     <skip />
     <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
     <skip />
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
+    <!-- no translation found for permlab_mediaContentControl (8749790560720562511) -->
+    <skip />
+    <!-- no translation found for permdesc_mediaContentControl (1637478200272062) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifitgar Voss parameters audio"</string>
     <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
     <skip />
@@ -864,6 +922,12 @@
     <skip />
     <!-- no translation found for permdesc_wakeLock (8559100677372928754) -->
     <skip />
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <!-- no translation found for permlab_devicePower (2787034722616350417) -->
     <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"metter en/ord funcziun l\'apparat"</string>
@@ -957,6 +1021,12 @@
     <skip />
     <!-- no translation found for permdesc_bluetoothAdmin (8931682159331542137) -->
     <skip />
+    <!-- no translation found for permlab_bluetoothPriv (4009494246009513828) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetoothPriv (8045735193417468857) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetoothPriv (8045735193417468857) -->
+    <skip />
     <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
     <skip />
     <!-- no translation found for permdesc_accessWimaxState (6360102877261978887) -->
@@ -1005,13 +1075,13 @@
     <skip />
     <!-- no translation found for permdesc_writeDictionary (8185385716255065291) -->
     <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
+    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
     <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
+    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
     <skip />
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <!-- no translation found for permdesc_sdcardRead (3446988712598386079) -->
     <skip />
-    <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
+    <!-- no translation found for permdesc_sdcardRead (2607362473654975411) -->
     <skip />
     <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
     <skip />
@@ -1025,6 +1095,10 @@
     <skip />
     <!-- no translation found for permdesc_mediaStorageWrite (8189160597698529185) -->
     <skip />
+    <!-- no translation found for permlab_manageDocs (5778318598448849829) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDocs (8704323176914121484) -->
+    <skip />
     <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
     <skip />
     <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
@@ -1035,6 +1109,10 @@
     <!-- no translation found for permlab_use_sip (5986952362795870502) -->
     <skip />
     <!-- no translation found for permdesc_use_sip (4717632000062674294) -->
+    <skip />
+    <!-- no translation found for permlab_bind_call_service (6724009726671246551) -->
+    <skip />
+    <!-- no translation found for permdesc_bind_call_service (8732547662442572435) -->
     <skip />
     <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
     <skip />
@@ -1048,6 +1126,10 @@
     <skip />
     <!-- no translation found for permdesc_modifyNetworkAccounting (5443412866746198123) -->
     <skip />
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <!-- no translation found for permlab_accessNotifications (7673416487873432268) -->
     <skip />
     <!-- no translation found for permdesc_accessNotifications (458457742683431387) -->
@@ -1055,6 +1137,14 @@
     <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
     <skip />
     <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
+    <skip />
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
+    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
     <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
@@ -1671,6 +1761,8 @@
     <string name="capital_on" msgid="1544682755514494298">"ACTIVÀ"</string>
     <string name="capital_off" msgid="6815870386972805832">"DEACTIVÀ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Cumplettar l\'acziun cun"</string>
+    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"Utilisar questa applicaziun sco standard per questa acziun."</string>
     <!-- no translation found for clearDefaultHintMsg (3252584689512077257) -->
     <skip />
@@ -1982,6 +2074,14 @@
     <skip />
     <!-- no translation found for permdesc_route_media_output (4932818749547244346) -->
     <skip />
+    <!-- no translation found for permlab_access_keyguard_secure_storage (7565552237977815047) -->
+    <skip />
+    <!-- no translation found for permdesc_access_keyguard_secure_storage (5866245484303285762) -->
+    <skip />
+    <!-- no translation found for permlab_control_keyguard (172195184207828387) -->
+    <skip />
+    <!-- no translation found for permdesc_control_keyguard (3043732290518629061) -->
+    <skip />
     <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4070433208160063538) -->
     <skip />
     <!-- no translation found for gadget_host_error_inflating (4882004314906466162) -->
@@ -1994,8 +2094,8 @@
     <!-- no translation found for ime_action_previous (1443550039250105948) -->
     <skip />
     <string name="ime_action_default" msgid="2840921885558045721">"Exequir"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Cumponer il numer"\n"cun utilisar <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Agiuntar in contact"\n"cun il numer <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Cumponer il numer\ncun utilisar <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Agiuntar in contact\ncun il numer <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <!-- no translation found for grant_credentials_permission_message_header (2106103817937859662) -->
     <skip />
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vulais Vus autorisar questa dumonda?"</string>
@@ -2277,8 +2377,6 @@
     <skip />
     <!-- no translation found for share_action_provider_share_with (5247684435979149216) -->
     <skip />
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
     <!-- no translation found for list_delimeter (3975117572185494152) -->
     <skip />
     <!-- no translation found for sending (3245653681008218030) -->
@@ -2319,6 +2417,8 @@
     <skip />
     <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
     <skip />
+    <!-- no translation found for media_route_status_in_use (4533786031090198063) -->
+    <skip />
     <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
     <skip />
     <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
@@ -2326,6 +2426,8 @@
     <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
     <skip />
     <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
+    <skip />
+    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
     <skip />
     <!-- no translation found for wifi_display_notification_title (2223050649240326557) -->
     <skip />
@@ -2424,10 +2526,213 @@
     <skip />
     <!-- no translation found for error_message_title (4510373083082500195) -->
     <skip />
-    <!-- no translation found for app_no_restricted_accounts (4011285085817350390) -->
+    <!-- no translation found for app_no_restricted_accounts (5739463249673727736) -->
     <skip />
     <!-- no translation found for app_not_found (3429141853498927379) -->
     <skip />
     <!-- no translation found for revoke (5404479185228271586) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a0 (1994474252931294172) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a1 (3333060421529791786) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a2 (3097535991925798280) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a3 (3023213259314236123) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a4 (231745325296873764) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a5 (3484327407340865411) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a6 (4861908487129577530) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a7 (5890208588072936130) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a8 (4319425041085816612) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a9 (4882220529506432008) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_a10 (2382866026365359391) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b0 (3651827147402009675) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b1 (6072859628278739957) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b2 (1348731852150380378) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b3 (2612510181259261379) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b4 (695151378838115434) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b5 (4863754285582212487) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b6 (5305816292139647241) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b7 (531673542602786624) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b8 (9164474595708850034) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b9 (282102976764774160) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_b10 (4517141714407898976) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c0 (3103521357901591100) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c1 (1231954105985048595) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c2 (927702816980087462) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c3 (835154173518304159) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c4 (5095951985108194011) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c5 (1985397450332305739) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c6 (8147421924174693013) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c7 (8993994925276122950) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c8 (6871178104139598957) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c9 (7983532635227561362) -->
+    <skip />
+    <!-- no translation found for mediasize_iso_c10 (5040764293406765584) -->
+    <skip />
+    <!-- no translation found for mediasize_na_letter (2841414839888344296) -->
+    <skip />
+    <!-- no translation found for mediasize_na_gvrnmt_letter (5295836838862962809) -->
+    <skip />
+    <!-- no translation found for mediasize_na_legal (8621364037680465666) -->
+    <skip />
+    <!-- no translation found for mediasize_na_junior_legal (3309324162155085904) -->
+    <skip />
+    <!-- no translation found for mediasize_na_ledger (5567030340509075333) -->
+    <skip />
+    <!-- no translation found for mediasize_na_tabloid (4571735038501661757) -->
+    <skip />
+    <!-- no translation found for mediasize_na_index_3x5 (5182901917818625126) -->
+    <skip />
+    <!-- no translation found for mediasize_na_index_4x6 (7687620625422312396) -->
+    <skip />
+    <!-- no translation found for mediasize_na_index_5x8 (8834215284646872800) -->
+    <skip />
+    <!-- no translation found for mediasize_na_monarch (213639906956550754) -->
+    <skip />
+    <!-- no translation found for mediasize_na_quarto (835778493593023223) -->
+    <skip />
+    <!-- no translation found for mediasize_na_foolscap (1573911237983677138) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_roc_8k (3626855847189438896) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_roc_16k (9182191577022943355) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_1 (4793232644980170500) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_2 (5404109730975720670) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_3 (1335092253339363526) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_4 (9167997800486569834) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_5 (845875168823541497) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_6 (3220325667692648789) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_7 (1776792138507038527) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_8 (1417176642687456692) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_9 (4785983473123798365) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_10 (7847982299391851899) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_prc_16k (262793383539980677) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_om_pa_kai (5256815579447959814) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_om_dai_pa_kai (7336412963441354407) -->
+    <skip />
+    <!-- no translation found for mediasize_chinese_om_jurro_ku_kai (6324465444100490742) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b10 (1787262845627694376) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b9 (3336035783663287470) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b8 (6195398299104345731) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b7 (1674621886902828884) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b6 (4170576286062657435) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b5 (4899297958100032533) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b4 (4213158129126666847) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b3 (8513715307410310696) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b2 (4777690211897131190) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b1 (4608142385457034603) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_b0 (7587108366572243991) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_jis_exec (5244075432263649068) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_chou4 (4941652015032631361) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_chou3 (6387319169263957010) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_chou2 (1299112025415343982) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_hagaki (8070115620644254565) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_oufuku (6049065587307896564) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_kahu (6872696027560065173) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_kaku2 (2359077233775455405) -->
+    <skip />
+    <!-- no translation found for mediasize_japanese_you4 (2091777168747058008) -->
+    <skip />
+    <!-- no translation found for mediasize_unknown_portrait (3088043641616409762) -->
+    <skip />
+    <!-- no translation found for mediasize_unknown_landscape (4876995327029361552) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
+    <skip />
+    <!-- no translation found for reason_unknown (6048913880184628119) -->
+    <skip />
+    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
+    <skip />
+    <!-- no translation found for print_service_installed_title (2246317169444081628) -->
+    <skip />
+    <!-- no translation found for print_service_installed_message (5897362931070459152) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_admin_pin (783643731895143970) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
+    <skip />
+    <!-- no translation found for restr_pin_incorrect (8571512003955077924) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
+    <skip />
+    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
+    <skip />
+    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
+    <skip />
+    <!-- no translation found for restr_pin_countdown:one (311050995198548675) -->
+    <!-- no translation found for restr_pin_countdown:other (4730868920742952817) -->
+    <!-- no translation found for restr_pin_try_later (973144472490532377) -->
+    <skip />
+    <!-- no translation found for immersive_mode_confirmation (7227416894979047467) -->
+    <!-- no translation found for immersive_mode_confirmation (8554991488096662508) -->
     <skip />
 </resources>

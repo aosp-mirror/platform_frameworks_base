@@ -29,6 +29,7 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -127,6 +128,7 @@ public class ChooseTypeAndAccountActivity extends Activity
     private int mCallingUid;
     private String mCallingPackage;
     private boolean mDisallowAddAccounts;
+    private boolean mDontShowPicker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -189,11 +191,23 @@ public class ChooseTypeAndAccountActivity extends Activity
         mSetOfRelevantAccountTypes = getReleventAccountTypes(intent);
         mAlwaysPromptForAccount = intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false);
         mDescriptionOverride = intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
+
+        // Need to do this once here to request the window feature. Can't do it in onResume
+        mAccounts = getAcceptableAccountChoices(AccountManager.get(this));
+        if (mAccounts.isEmpty()
+                && mDisallowAddAccounts) {
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+            setContentView(R.layout.app_not_authorized);
+            mDontShowPicker = true;
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (mDontShowPicker) return;
+
         final AccountManager accountManager = AccountManager.get(this);
 
         mAccounts = getAcceptableAccountChoices(accountManager);
@@ -206,11 +220,6 @@ public class ChooseTypeAndAccountActivity extends Activity
             // If there are no relevant accounts and only one relevant account type go directly to
             // add account. Otherwise let the user choose.
             if (mAccounts.isEmpty()) {
-                if (mDisallowAddAccounts) {
-                    setContentView(R.layout.app_not_authorized);
-                    setTitle(R.string.error_message_title);
-                    return;
-                }
                 if (mSetOfRelevantAccountTypes.size() == 1) {
                     runAddAccountForAuthenticator(mSetOfRelevantAccountTypes.iterator().next());
                 } else {

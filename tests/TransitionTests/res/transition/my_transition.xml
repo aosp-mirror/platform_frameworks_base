@@ -1,0 +1,20 @@
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+    <fade></fade>
+    <transitionSet>
+        <changeBounds android:duration="500">
+            <targets>
+                <target android:targetId="@id/container"/>
+                <target android:targetId="@id/resultsList"/>
+            </targets>
+        </changeBounds>
+        <transitionSet>
+            <targets>
+                <target android:targetId="@id/container"/>
+                <target android:targetId="@id/resultsList"/>
+            </targets>
+            <fade android:startOffset="25"/>
+        </transitionSet>
+        <recolor/>
+    </transitionSet>
+    <changeBounds/>
+</transitionSet>

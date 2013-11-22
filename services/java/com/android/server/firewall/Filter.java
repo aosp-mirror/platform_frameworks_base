@@ -16,24 +16,21 @@
 
 package com.android.server.firewall;
 
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 
 interface Filter {
     /**
      * Does the given intent + context info match this filter?
      *
      * @param ifw The IntentFirewall instance
+     * @param resolvedComponent The actual component that the intent was resolved to
      * @param intent The intent being started/bound/broadcast
-     * @param callerApp An ApplicationInfo of an application in the caller's process. This may not
-     *                  be the specific app that is actually sending the intent. This also may be
-     *                  null, if the caller is the system process, or an unrecognized process (e.g.
-     *                  am start)
-     * @param callerUid
-     * @param callerPid
+     * @param callerUid The uid of the caller
+     * @param callerPid The pid of the caller
      * @param resolvedType The resolved mime type of the intent
-     * @param resolvedApp The application that contains the resolved component that the intent is
+     * @param receivingUid The uid of the component receiving the intent
      */
-    boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp);
+    boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+            int callerUid, int callerPid, String resolvedType, int receivingUid);
 }

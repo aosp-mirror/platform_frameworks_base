@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;

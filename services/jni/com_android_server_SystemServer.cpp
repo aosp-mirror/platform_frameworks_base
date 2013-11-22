@@ -13,19 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <jni.h>
+#include <JNIHelp.h>
+
+#include <sensorservice/SensorService.h>
+
+#include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
-
 namespace android {
 
-extern "C" int system_init();
-
-static void android_server_SystemServer_init1(JNIEnv* env, jobject clazz)
-{
-    system_init();
+static void android_server_SystemServer_nativeInit(JNIEnv* env, jobject clazz) {
+    char propBuf[PROPERTY_VALUE_MAX];
+    property_get("system_init.startsensorservice", propBuf, "1");
+    if (strcmp(propBuf, "1") == 0) {
+        // Start the sensor service
+        SensorService::instantiate();
+    }
 }
 
 /*
@@ -33,7 +39,7 @@ static void android_server_SystemServer_init1(JNIEnv* env, jobject clazz)
  */
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "init1", "([Ljava/lang/String;)V", (void*) android_server_SystemServer_init1 },
+    { "nativeInit", "()V", (void*) android_server_SystemServer_nativeInit },
 };
 
 int register_android_server_SystemServer(JNIEnv* env)
@@ -43,5 +49,3 @@ int register_android_server_SystemServer(JNIEnv* env)
 }
 
 }; // namespace android
-
-

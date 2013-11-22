@@ -18,6 +18,7 @@ package android.net.wifi.p2p.nsd;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -98,7 +99,7 @@ public class WifiP2pUpnpServiceInfo extends WifiP2pServiceInfo {
     private static String createSupplicantQuery(String uuid, String data) {
         StringBuffer sb = new StringBuffer();
         sb.append("upnp ");
-        sb.append(String.format("%02x ", VERSION_1_0));
+        sb.append(String.format(Locale.US, "%02x ", VERSION_1_0));
         sb.append("uuid:");
         sb.append(uuid);
         if (data != null) {

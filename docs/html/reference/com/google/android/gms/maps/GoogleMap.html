@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>GoogleMap | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -684,7 +691,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -704,7 +711,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -1256,7 +1263,7 @@ Summary:
             final
             
             
-            <a href="/reference/android/location/Location.html">Location</a></nobr>
+            Location</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#getMyLocation()">getMyLocation</a></span>()</nobr>
@@ -1636,9 +1643,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#setTrafficEnabled(boolean)">setTrafficEnabled</a></span>(boolean enabled)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#setPadding(int, int, int, int)">setPadding</a></span>(int left, int top, int right, int bottom)</nobr>
         
-        <div class="jd-descrdiv">Toggles the traffic layer on or off.</div>
+        <div class="jd-descrdiv">Sets padding on the map.</div>
   
   </td></tr>
 
@@ -1654,7 +1661,25 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback, android.graphics.Bitmap)">snapshot</a></span>(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback, <a href="/reference/android/graphics/Bitmap.html">Bitmap</a> bitmap)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#setTrafficEnabled(boolean)">setTrafficEnabled</a></span>(boolean enabled)</nobr>
+        
+        <div class="jd-descrdiv">Toggles the traffic layer on or off.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback, android.graphics.Bitmap)">snapshot</a></span>(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback, Bitmap bitmap)</nobr>
         
         <div class="jd-descrdiv">Takes a snapshot of the map.</div>
   
@@ -1662,7 +1687,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1680,7 +1705,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1720,7 +1745,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1739,7 +1764,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1758,7 +1783,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1787,7 +1812,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1851,7 +1876,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -2237,7 +2262,7 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if either the image or the position is unspecified in the
              options.
 </td>
@@ -2429,7 +2454,7 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if the <code><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></code> is unspecified in the options.
 </td>
         </tr>
@@ -2769,7 +2794,7 @@ From class
         final 
          
          
-        <a href="/reference/android/location/Location.html">Location</a>
+        Location
       </span>
       <span class="sympad">getMyLocation</span>
       <span class="normal">()</span>
@@ -2802,7 +2827,7 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/IllegalStateException.html">IllegalStateException</a></td>
+            <th>IllegalStateException</td>
             <td>if the my-location layer is not enabled.</td>
         </tr>
       </table>
@@ -3581,6 +3606,63 @@ From class
 </div>
 
 
+<A NAME="setPadding(int, int, int, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+        final 
+         
+         
+        void
+      </span>
+      <span class="sympad">setPadding</span>
+      <span class="normal">(int left, int top, int right, int bottom)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets padding on the map.
+
+ <p>This method allows you to define a visible region on the map, to signal to the map that
+ portions of the map around the edges may be obscured, by setting padding on each of the four
+ edges of the map. Map functions will be adapted to the padding. For example, the zoom
+ controls, compass, copyright notices and Google logo will be moved to fit inside the defined
+ region, camera movements will be relative to the center of the visible region, etc.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>left</td>
+          <td>the number of pixels of padding to be added on the left of the map.</td>
+        </tr>
+        <tr>
+          <th>top</td>
+          <td>the number of pixels of padding to be added on the top of the map.</td>
+        </tr>
+        <tr>
+          <th>right</td>
+          <td>the number of pixels of padding to be added on the right of the map.</td>
+        </tr>
+        <tr>
+          <th>bottom</td>
+          <td>the number of pixels of padding to be added on the bottom of the map.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="setTrafficEnabled(boolean)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -3623,7 +3705,7 @@ From class
         void
       </span>
       <span class="sympad">snapshot</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback, <a href="/reference/android/graphics/Bitmap.html">Bitmap</a> bitmap)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback, Bitmap bitmap)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -3634,11 +3716,11 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Takes a snapshot of the map.
- <p>
+
  <p>This method is equivalent to <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html#snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback)">snapshot(SnapshotReadyCallback)</a></code> but lets you
  provide a preallocated <code><a href="/reference/android/graphics/Bitmap.html">Bitmap</a></code>. If the bitmap does not match the current dimensions of
  the map, another bitmap will be allocated that fits the map's dimensions.
- <p>
+
  <p>Although in most cases the object passed by the callback method is the same as the one
  given in parameter to this method, in some cases the returned object can be different (e.g.
  if the view's dimensions have changed by the time the snapshot is actually taken). Thus, you

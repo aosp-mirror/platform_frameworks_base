@@ -23,6 +23,7 @@ import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.SystemClock;
+import android.util.SparseArray;
 
 /**
  * A helper class that contains several {@link Drawable}s and selects which one to use.
@@ -76,7 +77,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 | mDrawableContainerState.mChangingConfigurations
                 | mDrawableContainerState.mChildrenChangingConfigurations;
     }
-    
+
     @Override
     public boolean getPadding(Rect padding) {
         final Rect r = mDrawableContainerState.getConstantPadding();
@@ -114,6 +115,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public int getAlpha() {
+        return mAlpha;
+    }
+
+    @Override
     public void setDither(boolean dither) {
         if (mDrawableContainerState.mDither != dither) {
             mDrawableContainerState.mDither = dither;
@@ -132,7 +138,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             }
         }
     }
-    
+
     /**
      * Change the global fade duration when a new drawable is entering
      * the scene.
@@ -141,7 +147,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     public void setEnterFadeDuration(int ms) {
         mDrawableContainerState.mEnterFadeDuration = ms;
     }
-    
+
     /**
      * Change the global fade duration when a new drawable is leaving
      * the scene.
@@ -150,7 +156,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     public void setExitFadeDuration(int ms) {
         mDrawableContainerState.mExitFadeDuration = ms;
     }
-    
+
     @Override
     protected void onBoundsChange(Rect bounds) {
         if (mLastDrawable != null) {
@@ -160,12 +166,25 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCurrDrawable.setBounds(bounds);
         }
     }
-    
+
     @Override
     public boolean isStateful() {
         return mDrawableContainerState.isStateful();
     }
-    
+
+    @Override
+    public void setAutoMirrored(boolean mirrored) {
+        mDrawableContainerState.mAutoMirrored = mirrored;
+        if (mCurrDrawable != null) {
+            mCurrDrawable.mutate().setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+        }
+    }
+
+    @Override
+    public boolean isAutoMirrored() {
+        return mDrawableContainerState.mAutoMirrored;
+    }
+
     @Override
     public void jumpToCurrentState() {
         boolean changed = false;
@@ -228,7 +247,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         return mCurrDrawable != null ? mCurrDrawable.getIntrinsicHeight() : -1;
     }
-    
+
     @Override
     public int getMinimumWidth() {
         if (mDrawableContainerState.isConstantSize()) {
@@ -245,18 +264,21 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return mCurrDrawable != null ? mCurrDrawable.getMinimumHeight() : 0;
     }
 
+    @Override
     public void invalidateDrawable(Drawable who) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().invalidateDrawable(this);
         }
     }
 
+    @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().scheduleDrawable(this, what, when);
         }
     }
 
+    @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().unscheduleDrawable(this, what);
@@ -308,7 +330,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         if (idx >= 0 && idx < mDrawableContainerState.mNumChildren) {
-            Drawable d = mDrawableContainerState.mDrawables[idx];
+            final Drawable d = mDrawableContainerState.getChild(idx);
             mCurrDrawable = d;
             mCurIndex = idx;
             if (d != null) {
@@ -325,6 +347,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.setLevel(getLevel());
                 d.setBounds(getBounds());
                 d.setLayoutDirection(getLayoutDirection());
+                d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
             }
         } else {
             mCurrDrawable = null;
@@ -350,7 +373,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
         return true;
     }
-    
+
     void animate(boolean schedule) {
         final long now = SystemClock.uptimeMillis();
         boolean animating = false;
@@ -410,11 +433,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            final int N = mDrawableContainerState.getChildCount();
-            final Drawable[] drawables = mDrawableContainerState.getChildren();
-            for (int i = 0; i < N; i++) {
-                if (drawables[i] != null) drawables[i].mutate();
-            }
+            mDrawableContainerState.mutate();
             mMutated = true;
         }
         return this;
@@ -428,90 +447,108 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      */
     public abstract static class DrawableContainerState extends ConstantState {
         final DrawableContainer mOwner;
+        final Resources mRes;
 
-        int         mChangingConfigurations;
-        int         mChildrenChangingConfigurations;
-        
-        Drawable[]  mDrawables;
-        int         mNumChildren;
+        SparseArray<ConstantStateFuture> mDrawableFutures;
 
-        boolean     mVariablePadding = false;
-        Rect        mConstantPadding = null;
+        int mChangingConfigurations;
+        int mChildrenChangingConfigurations;
 
-        boolean     mConstantSize = false;
-        boolean     mComputedConstantSize = false;
-        int         mConstantWidth;
-        int         mConstantHeight;
-        int         mConstantMinimumWidth;
-        int         mConstantMinimumHeight;
+        Drawable[] mDrawables;
+        int mNumChildren;
 
-        int         mOpacity;
+        boolean mVariablePadding;
+        boolean mPaddingChecked;
+        Rect mConstantPadding;
 
-        boolean     mHaveStateful = false;
-        boolean     mStateful;
+        boolean mConstantSize;
+        boolean mComputedConstantSize;
+        int mConstantWidth;
+        int mConstantHeight;
+        int mConstantMinimumWidth;
+        int mConstantMinimumHeight;
 
-        boolean     mCheckedConstantState;
-        boolean     mCanConstantState;
+        boolean mCheckedOpacity;
+        int mOpacity;
 
-        boolean     mPaddingChecked = false;
-        
-        boolean     mDither = DEFAULT_DITHER;        
+        boolean mCheckedStateful;
+        boolean mStateful;
 
-        int         mEnterFadeDuration;
-        int         mExitFadeDuration;
+        boolean mCheckedConstantState;
+        boolean mCanConstantState;
+
+        boolean mDither = DEFAULT_DITHER;
+
+        boolean mMutated;
+        int mLayoutDirection;
+
+        int mEnterFadeDuration;
+        int mExitFadeDuration;
+
+        boolean mAutoMirrored;
 
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
+            mRes = res;
 
             if (orig != null) {
                 mChangingConfigurations = orig.mChangingConfigurations;
                 mChildrenChangingConfigurations = orig.mChildrenChangingConfigurations;
-                
-                final Drawable[] origDr = orig.mDrawables;
 
+                mCheckedConstantState = true;
+                mCanConstantState = true;
+
+                mVariablePadding = orig.mVariablePadding;
+                mConstantSize = orig.mConstantSize;
+                mDither = orig.mDither;
+                mMutated = orig.mMutated;
+                mLayoutDirection = orig.mLayoutDirection;
+                mEnterFadeDuration = orig.mEnterFadeDuration;
+                mExitFadeDuration = orig.mExitFadeDuration;
+                mAutoMirrored = orig.mAutoMirrored;
+
+                // Cloning the following values may require creating futures.
+                mConstantPadding = orig.getConstantPadding();
+                mPaddingChecked = true;
+
+                mConstantWidth = orig.getConstantWidth();
+                mConstantHeight = orig.getConstantHeight();
+                mConstantMinimumWidth = orig.getConstantMinimumWidth();
+                mConstantMinimumHeight = orig.getConstantMinimumHeight();
+                mComputedConstantSize = true;
+
+                mOpacity = orig.getOpacity();
+                mCheckedOpacity = true;
+
+                mStateful = orig.isStateful();
+                mCheckedStateful = true;
+
+                // Postpone cloning children and futures until we're absolutely
+                // sure that we're done computing values for the original state.
+                final Drawable[] origDr = orig.mDrawables;
                 mDrawables = new Drawable[origDr.length];
                 mNumChildren = orig.mNumChildren;
 
+                final SparseArray<ConstantStateFuture> origDf = orig.mDrawableFutures;
+                if (origDf != null) {
+                    mDrawableFutures = origDf.clone();
+                } else {
+                    mDrawableFutures = new SparseArray<ConstantStateFuture>(mNumChildren);
+                }
+
                 final int N = mNumChildren;
-                for (int i=0; i<N; i++) {
-                    if (res != null) {
-                        mDrawables[i] = origDr[i].getConstantState().newDrawable(res);
-                    } else {
-                        mDrawables[i] = origDr[i].getConstantState().newDrawable();
+                for (int i = 0; i < N; i++) {
+                    if (origDr[i] != null) {
+                        mDrawableFutures.put(i, new ConstantStateFuture(origDr[i]));
                     }
-                    mDrawables[i].setCallback(owner);
-                    mDrawables[i].setLayoutDirection(origDr[i].getLayoutDirection());
                 }
-
-                mCheckedConstantState = mCanConstantState = true;
-                mVariablePadding = orig.mVariablePadding;
-                if (orig.mConstantPadding != null) {
-                    mConstantPadding = new Rect(orig.mConstantPadding);
-                }
-                mConstantSize = orig.mConstantSize;
-                mComputedConstantSize = orig.mComputedConstantSize;
-                mConstantWidth = orig.mConstantWidth;
-                mConstantHeight = orig.mConstantHeight;
-                mConstantMinimumWidth = orig.mConstantMinimumWidth;
-                mConstantMinimumHeight = orig.mConstantMinimumHeight;
-                
-                mOpacity = orig.mOpacity;
-                mHaveStateful = orig.mHaveStateful;
-                mStateful = orig.mStateful;
-                
-                mDither = orig.mDither;
-
-                mEnterFadeDuration = orig.mEnterFadeDuration;
-                mExitFadeDuration = orig.mExitFadeDuration;
-
             } else {
                 mDrawables = new Drawable[10];
                 mNumChildren = 0;
-                mCheckedConstantState = mCanConstantState = false;
             }
         }
-        
+
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations | mChildrenChangingConfigurations;
@@ -530,7 +567,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mDrawables[pos] = dr;
             mNumChildren++;
             mChildrenChangingConfigurations |= dr.getChangingConfigurations();
-            mHaveStateful = false;
+            mCheckedStateful = false;
+            mCheckedOpacity = false;
 
             mConstantPadding = null;
             mPaddingChecked = false;
@@ -539,18 +577,89 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return pos;
         }
 
+        final int getCapacity() {
+            return mDrawables.length;
+        }
+
+        private final void createAllFutures() {
+            if (mDrawableFutures != null) {
+                final int futureCount = mDrawableFutures.size();
+                for (int keyIndex = 0; keyIndex < futureCount; keyIndex++) {
+                    final int index = mDrawableFutures.keyAt(keyIndex);
+                    mDrawables[index] = mDrawableFutures.valueAt(keyIndex).get(this);
+                }
+
+                mDrawableFutures = null;
+            }
+        }
+
         public final int getChildCount() {
             return mNumChildren;
         }
 
+        /*
+         * @deprecated Use {@link #getChild} instead.
+         */
         public final Drawable[] getChildren() {
+            // Create all futures for backwards compatibility.
+            createAllFutures();
+
             return mDrawables;
         }
 
-        /** A boolean value indicating whether to use the maximum padding value of 
-          * all frames in the set (false), or to use the padding value of the frame 
-          * being shown (true). Default value is false. 
-          */
+        public final Drawable getChild(int index) {
+            final Drawable result = mDrawables[index];
+            if (result != null) {
+                return result;
+            }
+
+            // Prepare future drawable if necessary.
+            if (mDrawableFutures != null) {
+                final int keyIndex = mDrawableFutures.indexOfKey(index);
+                if (keyIndex >= 0) {
+                    final Drawable prepared = mDrawableFutures.valueAt(keyIndex).get(this);
+                    mDrawables[index] = prepared;
+                    mDrawableFutures.removeAt(keyIndex);
+                    return prepared;
+                }
+            }
+
+            return null;
+        }
+
+        final void setLayoutDirection(int layoutDirection) {
+            // No need to call createAllFutures, since future drawables will
+            // change layout direction when they are prepared.
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                if (drawables[i] != null) {
+                    drawables[i].setLayoutDirection(layoutDirection);
+                }
+            }
+
+            mLayoutDirection = layoutDirection;
+        }
+
+        final void mutate() {
+            // No need to call createAllFutures, since future drawables will
+            // mutate when they are prepared.
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                if (drawables[i] != null) {
+                    drawables[i].mutate();
+                }
+            }
+
+            mMutated = true;
+        }
+
+        /**
+         * A boolean value indicating whether to use the maximum padding value
+         * of all frames in the set (false), or to use the padding value of the
+         * frame being shown (true). Default value is false.
+         */
         public final void setVariablePadding(boolean variable) {
             mVariablePadding = variable;
         }
@@ -559,13 +668,16 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             if (mVariablePadding) {
                 return null;
             }
-            if (mConstantPadding != null || mPaddingChecked) {
+
+            if ((mConstantPadding != null) || mPaddingChecked) {
                 return mConstantPadding;
             }
 
+            createAllFutures();
+
             Rect r = null;
             final Rect t = new Rect();
-            final int N = getChildCount();
+            final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
             for (int i = 0; i < N; i++) {
                 if (drawables[i].getPadding(t)) {
@@ -576,6 +688,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                     if (t.bottom > r.bottom) r.bottom = t.bottom;
                 }
             }
+
             mPaddingChecked = true;
             return (mConstantPadding = r);
         }
@@ -623,12 +736,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         protected void computeConstantSize() {
             mComputedConstantSize = true;
 
-            final int N = getChildCount();
+            createAllFutures();
+
+            final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
             mConstantWidth = mConstantHeight = -1;
             mConstantMinimumWidth = mConstantMinimumHeight = 0;
             for (int i = 0; i < N; i++) {
-                Drawable dr = drawables[i];
+                final Drawable dr = drawables[i];
                 int s = dr.getIntrinsicWidth();
                 if (s > mConstantWidth) mConstantWidth = s;
                 s = dr.getIntrinsicHeight();
@@ -657,33 +772,45 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         public final int getOpacity() {
-            final int N = getChildCount();
+            if (mCheckedOpacity) {
+                return mOpacity;
+            }
+
+            createAllFutures();
+
+            mCheckedOpacity = true;
+
+            final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
-            int op = N > 0 ? drawables[0].getOpacity() : PixelFormat.TRANSPARENT;
+            int op = (N > 0) ? drawables[0].getOpacity() : PixelFormat.TRANSPARENT;
             for (int i = 1; i < N; i++) {
                 op = Drawable.resolveOpacity(op, drawables[i].getOpacity());
             }
+
             mOpacity = op;
             return op;
         }
 
         public final boolean isStateful() {
-            if (mHaveStateful) {
+            if (mCheckedStateful) {
                 return mStateful;
             }
-            
-            boolean stateful = false;
-            final int N = getChildCount();
+
+            createAllFutures();
+
+            mCheckedStateful = true;
+
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
             for (int i = 0; i < N; i++) {
-                if (mDrawables[i].isStateful()) {
-                    stateful = true;
-                    break;
+                if (drawables[i].isStateful()) {
+                    mStateful = true;
+                    return true;
                 }
             }
-            
-            mStateful = stateful;
-            mHaveStateful = true;
-            return stateful;
+
+            mStateful = false;
+            return false;
         }
 
         public void growArray(int oldSize, int newSize) {
@@ -693,24 +820,60 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         public synchronized boolean canConstantState() {
-            if (!mCheckedConstantState) {
-                mCanConstantState = true;
-                final int N = mNumChildren;
-                for (int i=0; i<N; i++) {
-                    if (mDrawables[i].getConstantState() == null) {
-                        mCanConstantState = false;
-                        break;
-                    }
-                }
-                mCheckedConstantState = true;
+            if (mCheckedConstantState) {
+                return mCanConstantState;
             }
 
-            return mCanConstantState;
+            createAllFutures();
+
+            mCheckedConstantState = true;
+
+            final int N = mNumChildren;
+            final Drawable[] drawables = mDrawables;
+            for (int i = 0; i < N; i++) {
+                if (drawables[i].getConstantState() == null) {
+                    mCanConstantState = false;
+                    return false;
+                }
+            }
+
+            mCanConstantState = true;
+            return true;
+        }
+
+        /**
+         * Class capable of cloning a Drawable from another Drawable's
+         * ConstantState.
+         */
+        private static class ConstantStateFuture {
+            private final ConstantState mConstantState;
+
+            private ConstantStateFuture(Drawable source) {
+                mConstantState = source.getConstantState();
+            }
+
+            /**
+             * Obtains and prepares the Drawable represented by this future.
+             *
+             * @param state the container into which this future will be placed
+             * @return a prepared Drawable
+             */
+            public Drawable get(DrawableContainerState state) {
+                final Drawable result = (state.mRes == null) ?
+                        mConstantState.newDrawable() : mConstantState.newDrawable(state.mRes);
+                result.setLayoutDirection(state.mLayoutDirection);
+                result.setCallback(state.mOwner);
+
+                if (state.mMutated) {
+                    result.mutate();
+                }
+
+                return result;
+            }
         }
     }
 
-    protected void setConstantState(DrawableContainerState state)
-    {
+    protected void setConstantState(DrawableContainerState state) {
         mDrawableContainerState = state;
     }
 }

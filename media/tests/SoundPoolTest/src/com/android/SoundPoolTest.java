@@ -143,7 +143,7 @@ public class SoundPoolTest extends Activity
                 if (DEBUG) Log.d(LOG_TAG, "Stop note " + id);
                 sleep(50);
             }
-            if (DEBUG) Log.d(LOG_TAG, "End scale test");
+            if (DEBUG) Log.d(LOG_TAG, "End sounds test");
             return true;
         }
 
@@ -165,7 +165,7 @@ public class SoundPoolTest extends Activity
                 if (DEBUG) Log.d(LOG_TAG, "Stop note " + id);
                 sleep(50);
             }
-            if (DEBUG) Log.d(LOG_TAG, "End sounds test");
+            if (DEBUG) Log.d(LOG_TAG, "End scale test");
             return true;
         }
 
@@ -189,6 +189,7 @@ public class SoundPoolTest extends Activity
                 if (DEBUG) Log.d(LOG_TAG, "Change rate " + mScale[step]);
             }
             mSoundPool.stop(id);
+            if (DEBUG) Log.d(LOG_TAG, "Stop note " + id);
             if (DEBUG) Log.d(LOG_TAG, "End rate test");
             return true;
         }
@@ -205,34 +206,38 @@ public class SoundPoolTest extends Activity
                 Log.e(LOG_TAG, "Error occurred starting note");
                 return false;
             }
-            sleep(250);
+            sleep(1000);
 
             // play a low priority sound
-            int id = mSoundPool.play(mSounds[0], DEFAULT_VOLUME, DEFAULT_VOLUME,
+            int id = mSoundPool.play(mSounds[1], DEFAULT_VOLUME, DEFAULT_VOLUME,
                     LOW_PRIORITY, DEFAULT_LOOP, 1.0f);
-            if (id > 0) {
+            if (id != 0) {
                 Log.e(LOG_TAG, "Normal > Low priority test failed");
                 result = false;
                 mSoundPool.stop(id);
             } else {
-                Log.e(LOG_TAG, "Normal > Low priority test passed");
+                sleep(1000);
+                Log.i(LOG_TAG, "Normal > Low priority test passed");
             }
-            sleep(250);
 
             // play a high priority sound
-            id = mSoundPool.play(mSounds[0], DEFAULT_VOLUME, DEFAULT_VOLUME,
+            id = mSoundPool.play(mSounds[2], DEFAULT_VOLUME, DEFAULT_VOLUME,
                     HIGH_PRIORITY, DEFAULT_LOOP, 1.0f);
             if (id == 0) {
                 Log.e(LOG_TAG, "High > Normal priority test failed");
                 result = false;
             } else {
-                Log.e(LOG_TAG, "High > Normal priority test passed");
+                sleep(1000);
+                Log.i(LOG_TAG, "Stopping high priority");
+                mSoundPool.stop(id);
+                sleep(1000);
+                Log.i(LOG_TAG, "High > Normal priority test passed");
             }
-            sleep(250);
-            mSoundPool.stop(id);
 
             // stop normal note
+            Log.i(LOG_TAG, "Stopping normal priority");
             mSoundPool.stop(normalId);
+            sleep(1000);
 
             if (DEBUG) Log.d(LOG_TAG, "End priority test");
             return result;
@@ -250,17 +255,21 @@ public class SoundPoolTest extends Activity
                 Log.e(LOG_TAG, "Error occurred starting note");
                 return false;
             }
-            sleep(250);
+            sleep(2500);
 
             // pause and resume sound a few times
             for (int count = 0; count < 5; count++) {
+                if (DEBUG) Log.d(LOG_TAG, "Pause note " + id);
                 mSoundPool.pause(id);
-                sleep(250);
+                sleep(1000);
+                if (DEBUG) Log.d(LOG_TAG, "Resume note " + id);
                 mSoundPool.resume(id);
-                sleep(250);
+                sleep(1000);
             }
 
+            if (DEBUG) Log.d(LOG_TAG, "Stop note " + id);
             mSoundPool.stop(id);
+            sleep(1000);
 
             // play 5 sounds, forces one to be stolen
             int ids[] = new int[5];
@@ -272,18 +281,21 @@ public class SoundPoolTest extends Activity
                     Log.e(LOG_TAG, "Error occurred starting note");
                     return false;
                 }
-                sleep(250);
+                sleep(1000);
             }
 
             // pause and resume sound a few times
             for (int count = 0; count < 5; count++) {
+                if (DEBUG) Log.d(LOG_TAG, "autoPause");
                 mSoundPool.autoPause();
-                sleep(250);
+                sleep(1000);
+                if (DEBUG) Log.d(LOG_TAG, "autoResume");
                 mSoundPool.autoResume();
-                sleep(250);
+                sleep(1000);
             }
 
             for (int i = 0; i < 5; i++) {
+                if (DEBUG) Log.d(LOG_TAG, "Stop note " + ids[i]);
                 mSoundPool.stop(ids[i]);
             }
 
@@ -302,9 +314,9 @@ public class SoundPoolTest extends Activity
                 return false;
             }
 
-            // pan from left to right
+            // pan from right to left
             for (int count = 0; count < 101; count++) {
-                sleep(20);
+                sleep(50);
                 double radians = PI_OVER_2 * count / 100.0;
                 float leftVolume = (float) Math.sin(radians);
                 float rightVolume = (float) Math.cos(radians);

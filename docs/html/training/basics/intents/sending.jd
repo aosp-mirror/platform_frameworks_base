@@ -22,7 +22,7 @@ next.link=result.html
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}training/sharing/index.html">Sharing Content</a></li>
+    <li><a href="{@docRoot}training/sharing/index.html">Sharing Simple Data</a></li>
 </ul>
 
   </div>
@@ -200,7 +200,7 @@ Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
 PackageManager packageManager = {@link android.content.Context#getPackageManager()};
 List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
 boolean isIntentSafe = activities.size() > 0;
-  
+
 // Start an activity if it's safe
 if (isIntentSafe) {
     startActivity(mapIntent);

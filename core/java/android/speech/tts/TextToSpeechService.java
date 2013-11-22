@@ -557,11 +557,13 @@ public abstract class TextToSpeechService extends Service {
         // guarded by 'this'.
         private AbstractSynthesisCallback mSynthesisCallback;
         private final EventLogger mEventLogger;
+        private final int mCallerUid;
 
         public SynthesisSpeechItem(Object callerIdentity, int callerUid, int callerPid,
                 Bundle params, String text) {
             super(callerIdentity, callerUid, callerPid, params);
             mText = text;
+            mCallerUid = callerUid;
             mSynthesisRequest = new SynthesisRequest(mText, mParams);
             mDefaultLocale = getSettingsLocale();
             setRequestParams(mSynthesisRequest);
@@ -611,7 +613,7 @@ public abstract class TextToSpeechService extends Service {
         private void setRequestParams(SynthesisRequest request) {
             request.setLanguage(getLanguage(), getCountry(), getVariant());
             request.setSpeechRate(getSpeechRate());
-
+            request.setCallerUid(mCallerUid);
             request.setPitch(getPitch());
         }
 

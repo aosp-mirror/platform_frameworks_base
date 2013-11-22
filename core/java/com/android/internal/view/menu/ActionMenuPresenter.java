@@ -16,22 +16,28 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.ActionBarPolicy;
-import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.transition.Transition;
+import android.transition.TransitionManager;
 import android.util.SparseBooleanArray;
 import android.view.ActionProvider;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageButton;
+import android.widget.ListPopupWindow;
+import android.widget.ListPopupWindow.ForwardingListener;
+import com.android.internal.transition.ActionBarTransition;
+import com.android.internal.view.ActionBarPolicy;
+import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 
 import java.util.ArrayList;
 
@@ -151,15 +157,33 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     @Override
-    public View getItemView(MenuItemImpl item, View convertView, ViewGroup parent) {
+    public View getItemView(final MenuItemImpl item, View convertView, ViewGroup parent) {
         View actionView = item.getActionView();
         if (actionView == null || item.hasCollapsibleActionView()) {
-            if (!(convertView instanceof ActionMenuItemView)) {
-                convertView = null;
-            }
             actionView = super.getItemView(item, convertView, parent);
         }
         actionView.setVisibility(item.isActionViewExpanded() ? View.GONE : View.VISIBLE);
+
+        if (item.hasSubMenu()) {
+            actionView.setOnTouchListener(new ForwardingListener(actionView) {
+                @Override
+                public ListPopupWindow getPopup() {
+                    return mActionButtonPopup != null ? mActionButtonPopup.getPopup() : null;
+                }
+
+                @Override
+                protected boolean onForwardingStarted() {
+                    return onSubMenuSelected((SubMenuBuilder) item.getSubMenu());
+                }
+
+                @Override
+                protected boolean onForwardingStopped() {
+                    return dismissPopupMenus();
+                }
+            });
+        } else {
+            actionView.setOnTouchListener(null);
+        }
 
         final ActionMenuView menuParent = (ActionMenuView) parent;
         final ViewGroup.LayoutParams lp = actionView.getLayoutParams();
@@ -185,7 +209,13 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     @Override
     public void updateMenuView(boolean cleared) {
+        final ViewGroup menuViewParent = (ViewGroup) ((View) mMenuView).getParent();
+        if (menuViewParent != null) {
+            ActionBarTransition.beginDelayedTransition(menuViewParent);
+        }
         super.updateMenuView(cleared);
+
+        ((View) mMenuView).requestLayout();
 
         if (mMenu != null) {
             final ArrayList<MenuItemImpl> actionItems = mMenu.getActionItems();
@@ -341,6 +371,10 @@ public class ActionMenuPresenter extends BaseMenuPresenter
      */
     public boolean isOverflowMenuShowing() {
         return mOverflowPopup != null && mOverflowPopup.isShowing();
+    }
+
+    public boolean isOverflowMenuShowPending() {
+        return mPostedOpenRunnable != null || isOverflowMenuShowing();
     }
 
     /**
@@ -559,6 +593,36 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             setFocusable(true);
             setVisibility(VISIBLE);
             setEnabled(true);
+
+            setOnTouchListener(new ForwardingListener(this) {
+                @Override
+                public ListPopupWindow getPopup() {
+                    if (mOverflowPopup == null) {
+                        return null;
+                    }
+
+                    return mOverflowPopup.getPopup();
+                }
+
+                @Override
+                public boolean onForwardingStarted() {
+                    showOverflowMenu();
+                    return true;
+                }
+
+                @Override
+                public boolean onForwardingStopped() {
+                    // Displaying the popup occurs asynchronously, so wait for
+                    // the runnable to finish before deciding whether to stop
+                    // forwarding.
+                    if (mPostedOpenRunnable != null) {
+                        return false;
+                    }
+
+                    hideOverflowMenu();
+                    return true;
+                }
+            });
         }
 
         @Override
@@ -572,10 +636,12 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             return true;
         }
 
+        @Override
         public boolean needsDividerBefore() {
             return false;
         }
 
+        @Override
         public boolean needsDividerAfter() {
             return false;
         }
@@ -589,12 +655,19 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             }
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
+
+        @Override
+        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(info);
+            info.setCanOpenPopup(true);
+        }
     }
 
     private class OverflowPopup extends MenuPopupHelper {
         public OverflowPopup(Context context, MenuBuilder menu, View anchorView,
                 boolean overflowOnly) {
             super(context, menu, anchorView, overflowOnly);
+            setGravity(Gravity.END);
             setCallback(mPopupPresenterCallback);
         }
 

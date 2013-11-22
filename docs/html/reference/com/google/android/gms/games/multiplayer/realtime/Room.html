@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>Room | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -703,7 +710,7 @@ Summary:
   
       implements 
       
-        <a href="/reference/android/os/Parcelable.html">Parcelable</a> 
+        Parcelable 
       
         <a href="/reference/com/google/android/gms/common/data/Freezable.html">Freezable</a>&lt;T&gt; 
       
@@ -936,7 +943,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/android/os/Bundle.html">Bundle</a></nobr>
+            Bundle</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getAutoMatchCriteria()">getAutoMatchCriteria</a></span>()</nobr>
@@ -954,6 +961,26 @@ android.os.Parcelable
             
             
             
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getAutoMatchWaitEstimateSeconds()">getAutoMatchWaitEstimateSeconds</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Retrieves the estimated wait time for automatching to finish for players who are not
+ automatched immediately, as measured from the time that the room entered the
+ automatching pool.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -963,14 +990,14 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getCreatorId()">getCreatorId</a></span>()</nobr>
@@ -979,14 +1006,14 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getDescription()">getDescription</a></span>()</nobr>
@@ -995,7 +1022,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1005,27 +1032,9 @@ android.os.Parcelable
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Loads the room description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            <a href="/reference/java/lang/String.html">String</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getParticipantId(java.lang.String)">getParticipantId</a></span>(<a href="/reference/java/lang/String.html">String</a> playerId)</nobr>
-        
-        <div class="jd-descrdiv">Get the participant ID for a given player.</div>
   
   </td></tr>
 
@@ -1038,7 +1047,25 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt;</nobr>
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getParticipantId(java.lang.String)">getParticipantId</a></span>(String playerId)</nobr>
+        
+        <div class="jd-descrdiv">Get the participant ID for a given player.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            ArrayList&lt;String&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getParticipantIds()">getParticipantIds</a></span>()</nobr>
@@ -1047,7 +1074,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1057,7 +1084,7 @@ android.os.Parcelable
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getParticipantStatus(java.lang.String)">getParticipantStatus</a></span>(<a href="/reference/java/lang/String.html">String</a> participantId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getParticipantStatus(java.lang.String)">getParticipantStatus</a></span>(String participantId)</nobr>
         
         <div class="jd-descrdiv">Get the status of a participant in a room.</div>
   
@@ -1065,14 +1092,14 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#getRoomId()">getRoomId</a></span>()</nobr>
@@ -1081,7 +1108,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1097,7 +1124,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1135,7 +1162,7 @@ android.os.Parcelable
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/os/Parcelable.html">android.os.Parcelable</a>
+  android.os.Parcelable
 
 <div id="inherited-methods-android.os.Parcelable">
   <div id="inherited-methods-android.os.Parcelable-list"
@@ -1173,7 +1200,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">writeToParcel</span>(<a href="/reference/android/os/Parcel.html">Parcel</a> arg0, int arg1)</nobr>
+        <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -1274,7 +1301,7 @@ From interface
             
             
             
-            <a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
+            ArrayList&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participatable.html#getParticipants()">getParticipants</a></span>()</nobr>
@@ -1548,7 +1575,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/android/os/Bundle.html">Bundle</a>
+        Bundle
       </span>
       <span class="sympad">getAutoMatchCriteria</span>
       <span class="normal">()</span>
@@ -1566,6 +1593,43 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>A bundle containing the automatch criteria for this room.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getAutoMatchWaitEstimateSeconds()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        int
+      </span>
+      <span class="sympad">getAutoMatchWaitEstimateSeconds</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the estimated wait time for automatching to finish for players who are not
+ automatched immediately, as measured from the time that the room entered the
+ automatching pool.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The estimated wait time in seconds, or -1 if the room is not
+         automatching or no estimate could be provided.
 </li></ul>
   </div>
 
@@ -1617,7 +1681,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getCreatorId</span>
       <span class="normal">()</span>
@@ -1651,7 +1715,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDescription</span>
       <span class="normal">()</span>
@@ -1688,7 +1752,7 @@ From interface
         void
       </span>
       <span class="sympad">getDescription</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1724,10 +1788,10 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getParticipantId</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> playerId)</span>
+      <span class="normal">(String playerId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1769,7 +1833,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt;
+        ArrayList&lt;String&gt;
       </span>
       <span class="sympad">getParticipantIds</span>
       <span class="normal">()</span>
@@ -1807,7 +1871,7 @@ From interface
         int
       </span>
       <span class="sympad">getParticipantStatus</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> participantId)</span>
+      <span class="normal">(String participantId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1859,7 +1923,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getRoomId</span>
       <span class="normal">()</span>

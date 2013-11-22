@@ -14,9 +14,10 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+          android:autoMirrored="true">
     <item android:state_pressed="true"
-        android:drawable="@drawable/btn_cab_done_pressed_holo_dark" />
+        android:drawable="@drawable/list_pressed_holo_dark" />
     <item android:state_focused="true" android:state_enabled="true"
         android:drawable="@drawable/btn_cab_done_focused_holo_dark" />
     <item android:state_enabled="true"

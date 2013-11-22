@@ -28,7 +28,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
-public class CompatModeDialog extends Dialog {
+public final class CompatModeDialog extends Dialog {
     final ActivityManagerService mService;
     final ApplicationInfo mAppInfo;
 

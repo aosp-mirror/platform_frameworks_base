@@ -66,4 +66,16 @@ public class Preconditions {
             throw new IllegalStateException();
         }
     }
+
+    /**
+     * Check the requested flags, throwing if any requested flags are outside
+     * the allowed set.
+     */
+    public static void checkFlagsArgument(int requestedFlags, int allowedFlags) {
+        if ((requestedFlags & allowedFlags) != requestedFlags) {
+            throw new IllegalArgumentException("Requested flags 0x"
+                    + Integer.toHexString(requestedFlags) + ", but only 0x"
+                    + Integer.toHexString(allowedFlags) + " are allowed");
+        }
+    }
 }

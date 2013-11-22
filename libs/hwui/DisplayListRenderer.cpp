@@ -57,6 +57,10 @@ void DisplayListRenderer::reset() {
         mCaches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
     }
 
+    for (size_t i = 0; i < mPatchResources.size(); i++) {
+        mCaches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
+    }
+
     for (size_t i = 0; i < mShaders.size(); i++) {
         mCaches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
     }
@@ -74,6 +78,7 @@ void DisplayListRenderer::reset() {
     mBitmapResources.clear();
     mOwnedBitmapResources.clear();
     mFilterResources.clear();
+    mPatchResources.clear();
     mSourcePaths.clear();
 
     mShaders.clear();
@@ -313,20 +318,13 @@ status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, in
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs,
-        const int32_t* yDivs, const uint32_t* colors, uint32_t width, uint32_t height,
-        int8_t numColors, float left, float top, float right, float bottom, SkPaint* paint) {
-    int alpha;
-    SkXfermode::Mode mode;
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
-
+status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
+        float left, float top, float right, float bottom, SkPaint* paint) {
     bitmap = refBitmap(bitmap);
-    xDivs = refBuffer<int>(xDivs, width);
-    yDivs = refBuffer<int>(yDivs, height);
-    colors = refBuffer<uint32_t>(colors, numColors);
+    patch = refPatch(patch);
+    paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawPatchOp(bitmap, xDivs, yDivs, colors, width, height, numColors,
-                    left, top, right, bottom, alpha, mode));
+    addDrawOp(new (alloc()) DrawPatchOp(bitmap, patch, left, top, right, bottom, paint));
     return DrawGlInfo::kStatusDone;
 }
 
@@ -423,17 +421,16 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
 
 status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, SkPaint* paint,
-        float length, DrawOpMode drawOpMode) {
+        float totalAdvance, const Rect& bounds, DrawOpMode drawOpMode) {
 
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
-
-    if (length < 0.0f) length = paint->measureText(text, bytesCount);
 
     text = refText(text, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
     paint = refPaint(paint);
 
-    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count, x, y, positions, paint, length);
+    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
+            x, y, positions, paint, totalAdvance, bounds);
     addDrawOp(op);
     return DrawGlInfo::kStatusDone;
 }
@@ -467,10 +464,12 @@ void DisplayListRenderer::setupColorFilter(SkiaColorFilter* filter) {
 
 void DisplayListRenderer::resetShadow() {
     addStateOp(new (alloc()) ResetShadowOp());
+    OpenGLRenderer::resetShadow();
 }
 
 void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int color) {
     addStateOp(new (alloc()) SetupShadowOp(radius, dx, dy, color));
+    OpenGLRenderer::setupShadow(radius, dx, dy, color);
 }
 
 void DisplayListRenderer::resetPaintFilter() {
@@ -506,11 +505,12 @@ void DisplayListRenderer::addStateOp(StateOp* op) {
 
 void DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
-    if (op->getLocalBounds(localBounds)) {
+    if (op->getLocalBounds(mDrawModifiers, localBounds)) {
         bool rejected = quickRejectNoScissor(localBounds.left, localBounds.top,
                 localBounds.right, localBounds.bottom);
         op->setQuickRejected(rejected);
     }
+
     mHasDrawOps = true;
     addOpInternal(op);
 }

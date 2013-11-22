@@ -40,6 +40,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Forward declarations
+class Caches;
 class OpenGLRenderer;
 class DisplayList;
 class DeferredDisplayList;
@@ -221,50 +222,19 @@ struct Layer {
 
     ANDROID_API void setColorFilter(SkiaColorFilter* filter);
 
-    inline void bindTexture() const {
-        if (texture.id) {
-            glBindTexture(renderTarget, texture.id);
-        }
-    }
+    void bindStencilRenderBuffer() const;
 
-    inline void bindStencilRenderBuffer() const {
-        if (stencil) {
-            stencil->bind();
-        }
-    }
-
-    inline void generateTexture() {
-        if (!texture.id) {
-            glGenTextures(1, &texture.id);
-        }
-    }
-
-    inline void deleteTexture() {
-        if (texture.id) {
-            glDeleteTextures(1, &texture.id);
-            texture.id = 0;
-        }
-    }
+    void bindTexture() const;
+    void generateTexture();
+    void allocateTexture();
+    void deleteTexture();
 
     /**
      * When the caller frees the texture itself, the caller
      * must call this method to tell this layer that it lost
      * the texture.
      */
-    void clearTexture() {
-        texture.id = 0;
-    }
-
-    inline void allocateTexture() {
-#if DEBUG_LAYERS
-        ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
-#endif
-        if (texture.id) {
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-            glTexImage2D(renderTarget, 0, GL_RGBA, getWidth(), getHeight(), 0,
-                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        }
-    }
+    ANDROID_API void clearTexture();
 
     inline mat4& getTexTransform() {
         return texTransform;
@@ -275,6 +245,7 @@ struct Layer {
     }
 
     void defer();
+    void cancelDefer();
     void flush();
     void render();
 
@@ -306,7 +277,6 @@ struct Layer {
      * If the layer can be rendered as a mesh, this is non-null.
      */
     TextureVertex* mesh;
-    uint16_t* meshIndices;
     GLsizei meshElementCount;
 
     /**
@@ -320,6 +290,8 @@ struct Layer {
     bool hasDrawnSinceUpdate;
 
 private:
+    Caches& caches;
+
     /**
      * Name of the FBO used to render the layer. If the name is 0
      * this layer is not backed by an FBO, but a simple texture.

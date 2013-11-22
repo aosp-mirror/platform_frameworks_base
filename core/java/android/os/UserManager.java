@@ -140,6 +140,13 @@ public class UserManager {
      */
     public static final String DISALLOW_REMOVE_USER = "no_remove_user";
 
+    /** @hide */
+    public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
+    /** @hide */
+    public static final int PIN_VERIFICATION_FAILED_NOT_SET = -2;
+    /** @hide */
+    public static final int PIN_VERIFICATION_SUCCESS = -1;
+
     private static UserManager sInstance = null;
 
     /** @hide */
@@ -340,7 +347,18 @@ public class UserManager {
      * @param restrictionKey the string key representing the restriction
      */
     public boolean hasUserRestriction(String restrictionKey) {
-        return getUserRestrictions().getBoolean(restrictionKey, false);
+        return hasUserRestriction(restrictionKey, Process.myUserHandle());
+    }
+
+    /**
+     * @hide
+     * Returns whether the given user has been disallowed from performing certain actions
+     * or setting certain settings.
+     * @param restrictionKey the string key representing the restriction
+     * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+     */
+    public boolean hasUserRestriction(String restrictionKey, UserHandle userHandle) {
+        return getUserRestrictions(userHandle).getBoolean(restrictionKey, false);
     }
 
     /**
@@ -618,6 +636,66 @@ public class UserManager {
             mService.setApplicationRestrictions(packageName, restrictions, user.getIdentifier());
         } catch (RemoteException re) {
             Log.w(TAG, "Could not set application restrictions for user " + user.getIdentifier());
+        }
+    }
+
+    /**
+     * Sets a new challenge PIN for restrictions. This is only for use by pre-installed
+     * apps and requires the MANAGE_USERS permission.
+     * @param newPin the PIN to use for challenge dialogs.
+     * @return Returns true if the challenge PIN was set successfully.
+     */
+    public boolean setRestrictionsChallenge(String newPin) {
+        try {
+            return mService.setRestrictionsChallenge(newPin);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not change restrictions pin");
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     * @param pin The PIN to verify, or null to get the number of milliseconds to wait for before
+     * allowing the user to enter the PIN.
+     * @return Returns a positive number (including zero) for how many milliseconds before
+     * you can accept another PIN, when the input is null or the input doesn't match the saved PIN.
+     * Returns {@link #PIN_VERIFICATION_SUCCESS} if the input matches the saved PIN. Returns
+     * {@link #PIN_VERIFICATION_FAILED_NOT_SET} if there is no PIN set.
+     */
+    public int checkRestrictionsChallenge(String pin) {
+        try {
+            return mService.checkRestrictionsChallenge(pin);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not check restrictions pin");
+        }
+        return PIN_VERIFICATION_FAILED_INCORRECT;
+    }
+
+    /**
+     * @hide
+     * Checks whether the user has restrictions that are PIN-protected. An application that
+     * participates in restrictions can check if the owner has requested a PIN challenge for
+     * any restricted operations. If there is a PIN in effect, the application should launch
+     * the PIN challenge activity {@link android.content.Intent#ACTION_RESTRICTIONS_CHALLENGE}.
+     * @see android.content.Intent#ACTION_RESTRICTIONS_CHALLENGE
+     * @return whether a restrictions PIN is in effect.
+     */
+    public boolean hasRestrictionsChallenge() {
+        try {
+            return mService.hasRestrictionsChallenge();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not change restrictions pin");
+        }
+        return false;
+    }
+
+    /** @hide */
+    public void removeRestrictions() {
+        try {
+            mService.removeRestrictions();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not change restrictions pin");
         }
     }
 }

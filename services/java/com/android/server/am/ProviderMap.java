@@ -22,6 +22,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
+import com.android.internal.os.TransferPipe;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -35,7 +36,7 @@ import java.util.Map;
  * Keeps track of content providers by authority (name) and class. It separates the mapping by
  * user and ones that are not user-specific (system providers).
  */
-public class ProviderMap {
+public final class ProviderMap {
 
     private static final String TAG = "ProviderMap";
 
@@ -230,58 +231,87 @@ public class ProviderMap {
         return didSomething;
     }
 
-    private void dumpProvidersByClassLocked(PrintWriter pw, boolean dumpAll,
-            HashMap<ComponentName, ContentProviderRecord> map) {
+    private boolean dumpProvidersByClassLocked(PrintWriter pw, boolean dumpAll, String dumpPackage,
+            String header, boolean needSep, HashMap<ComponentName, ContentProviderRecord> map) {
         Iterator<Map.Entry<ComponentName, ContentProviderRecord>> it = map.entrySet().iterator();
+        boolean written = false;
         while (it.hasNext()) {
             Map.Entry<ComponentName, ContentProviderRecord> e = it.next();
             ContentProviderRecord r = e.getValue();
+            if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
+                continue;
+            }
+            if (needSep) {
+                pw.println("");
+                needSep = false;
+            }
+            if (header != null) {
+                pw.println(header);
+                header = null;
+            }
+            written = true;
             pw.print("  * ");
             pw.println(r);
             r.dump(pw, "    ", dumpAll);
         }
+        return written;
     }
 
-    private void dumpProvidersByNameLocked(PrintWriter pw,
-            HashMap<String, ContentProviderRecord> map) {
+    private boolean dumpProvidersByNameLocked(PrintWriter pw, String dumpPackage,
+            String header, boolean needSep, HashMap<String, ContentProviderRecord> map) {
         Iterator<Map.Entry<String, ContentProviderRecord>> it = map.entrySet().iterator();
+        boolean written = false;
         while (it.hasNext()) {
             Map.Entry<String, ContentProviderRecord> e = it.next();
             ContentProviderRecord r = e.getValue();
+            if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
+                continue;
+            }
+            if (needSep) {
+                pw.println("");
+                needSep = false;
+            }
+            if (header != null) {
+                pw.println(header);
+                header = null;
+            }
+            written = true;
             pw.print("  ");
             pw.print(e.getKey());
             pw.print(": ");
             pw.println(r.toShortString());
         }
+        return written;
     }
 
-    void dumpProvidersLocked(PrintWriter pw, boolean dumpAll) {
+    boolean dumpProvidersLocked(PrintWriter pw, boolean dumpAll, String dumpPackage) {
+        boolean needSep = false;
+
         if (mSingletonByClass.size() > 0) {
-            pw.println("  Published single-user content providers (by class):");
-            dumpProvidersByClassLocked(pw, dumpAll, mSingletonByClass);
+            needSep |= dumpProvidersByClassLocked(pw, dumpAll, dumpPackage,
+                    "  Published single-user content providers (by class):", needSep,
+                    mSingletonByClass);
         }
 
-        pw.println("");
         for (int i = 0; i < mProvidersByClassPerUser.size(); i++) {
             HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.valueAt(i);
-            pw.println("");
-            pw.println("  Published user " + mProvidersByClassPerUser.keyAt(i)
-                    + " content providers (by class):");
-            dumpProvidersByClassLocked(pw, dumpAll, map);
+            needSep |= dumpProvidersByClassLocked(pw, dumpAll, dumpPackage,
+                    "  Published user " + mProvidersByClassPerUser.keyAt(i)
+                            + " content providers (by class):", needSep, map);
         }
 
         if (dumpAll) {
-            pw.println("");
-            pw.println("  Single-user authority to provider mappings:");
-            dumpProvidersByNameLocked(pw, mSingletonByName);
+            needSep |= dumpProvidersByNameLocked(pw, dumpPackage,
+                    "  Single-user authority to provider mappings:", needSep, mSingletonByName);
 
             for (int i = 0; i < mProvidersByNamePerUser.size(); i++) {
-                pw.println("");
-                pw.println("  User " + mProvidersByNamePerUser.keyAt(i)
-                        + " authority to provider mappings:");
-                dumpProvidersByNameLocked(pw, mProvidersByNamePerUser.valueAt(i));
+                needSep |= dumpProvidersByNameLocked(pw, dumpPackage,
+                        "  User " + mProvidersByNamePerUser.keyAt(i)
+                                + " authority to provider mappings:", needSep,
+                        mProvidersByNamePerUser.valueAt(i));
             }
         }
+        return needSep;
     }
 
     protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,

@@ -616,7 +616,7 @@ public final class MenuItemImpl implements MenuItem {
 
     @Override
     public boolean expandActionView() {
-        if ((mShowAsAction & SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW) == 0 || mActionView == null) {
+        if (!hasCollapsibleActionView()) {
             return false;
         }
 
@@ -653,7 +653,13 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     public boolean hasCollapsibleActionView() {
-        return (mShowAsAction & SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW) != 0 && mActionView != null;
+        if ((mShowAsAction & SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW) != 0) {
+            if (mActionView == null && mActionProvider != null) {
+                mActionView = mActionProvider.onCreateActionView(this);
+            }
+            return mActionView != null;
+        }
+        return false;
     }
 
     public void setActionViewExpanded(boolean isExpanded) {

@@ -198,7 +198,6 @@ public class AppWidgetHost {
      * @return a appWidgetId
      */
     public int allocateAppWidgetId() {
-
         try {
             if (mPackageName == null) {
                 mPackageName = mContext.getPackageName();
@@ -211,20 +210,17 @@ public class AppWidgetHost {
     }
 
     /**
-     * Get a appWidgetId for a host in the calling process.
+     * Get a appWidgetId for a host in the given package.
      *
      * @return a appWidgetId
      * @hide
      */
-    public static int allocateAppWidgetIdForSystem(int hostId, int userId) {
+    public static int allocateAppWidgetIdForPackage(int hostId, int userId, String packageName) {
         checkCallerIsSystem();
         try {
             if (sService == null) {
                 bindService();
             }
-            Context systemContext =
-                    (Context) ActivityThread.currentActivityThread().getSystemContext();
-            String packageName = systemContext.getPackageName();
             return sService.allocateAppWidgetId(packageName, hostId, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);

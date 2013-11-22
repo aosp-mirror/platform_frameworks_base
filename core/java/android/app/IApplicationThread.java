@@ -50,11 +50,12 @@ public interface IApplicationThread extends IInterface {
             int configChanges) throws RemoteException;
     void scheduleWindowVisibility(IBinder token, boolean showWindow) throws RemoteException;
     void scheduleSleeping(IBinder token, boolean sleeping) throws RemoteException;
-    void scheduleResumeActivity(IBinder token, boolean isForward) throws RemoteException;
+    void scheduleResumeActivity(IBinder token, int procState, boolean isForward)
+            throws RemoteException;
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-            Bundle state, List<ResultInfo> pendingResults,
+            int procState, Bundle state, List<ResultInfo> pendingResults,
     		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
     		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
     		throws RemoteException;
@@ -66,7 +67,7 @@ public interface IApplicationThread extends IInterface {
             int configChanges) throws RemoteException;
     void scheduleReceiver(Intent intent, ActivityInfo info, CompatibilityInfo compatInfo,
             int resultCode, String data, Bundle extras, boolean sync,
-            int sendingUser) throws RemoteException;
+            int sendingUser, int processState) throws RemoteException;
     static final int BACKUP_MODE_INCREMENTAL = 0;
     static final int BACKUP_MODE_FULL = 1;
     static final int BACKUP_MODE_RESTORE = 2;
@@ -76,9 +77,9 @@ public interface IApplicationThread extends IInterface {
     void scheduleDestroyBackupAgent(ApplicationInfo app, CompatibilityInfo compatInfo)
             throws RemoteException;
     void scheduleCreateService(IBinder token, ServiceInfo info,
-            CompatibilityInfo compatInfo) throws RemoteException;
+            CompatibilityInfo compatInfo, int processState) throws RemoteException;
     void scheduleBindService(IBinder token,
-            Intent intent, boolean rebind) throws RemoteException;
+            Intent intent, boolean rebind, int processState) throws RemoteException;
     void scheduleUnbindService(IBinder token,
             Intent intent) throws RemoteException;
     void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
@@ -100,7 +101,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
     void updateTimeZone() throws RemoteException;
     void clearDnsCache() throws RemoteException;
-    void setHttpProxy(String proxy, String port, String exclList) throws RemoteException;
+    void setHttpProxy(String proxy, String port, String exclList,
+            String pacFileUrl) throws RemoteException;
     void processInBackground() throws RemoteException;
     void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
@@ -108,7 +110,7 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
             int resultCode, String data, Bundle extras, boolean ordered,
-            boolean sticky, int sendingUser) throws RemoteException;
+            boolean sticky, int sendingUser, int processState) throws RemoteException;
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
     void profilerControl(boolean start, String path, ParcelFileDescriptor fd, int profileType)
@@ -116,7 +118,6 @@ public interface IApplicationThread extends IInterface {
     void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
             throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
-    void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException;
     static final int PACKAGE_REMOVED = 0;
     static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
     void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
@@ -126,13 +127,17 @@ public interface IApplicationThread extends IInterface {
     void setCoreSettings(Bundle coreSettings) throws RemoteException;
     void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info) throws RemoteException;
     void scheduleTrimMemory(int level) throws RemoteException;
-    Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin, boolean all,
-            String[] args) throws RemoteException;
+    void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin, boolean dumpInfo,
+            boolean dumpDalvik, String[] args) throws RemoteException;
     void dumpGfxInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void dumpDbInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void unstableProviderDied(IBinder provider) throws RemoteException;
-    void requestActivityExtras(IBinder activityToken, IBinder requestToken, int requestType)
+    void requestAssistContextExtras(IBinder activityToken, IBinder requestToken, int requestType)
             throws RemoteException;
+    void scheduleTranslucentConversionComplete(IBinder token, boolean timeout)
+            throws RemoteException;
+    void setProcessState(int state) throws RemoteException;
+    void scheduleInstallProvider(ProviderInfo provider) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -166,7 +171,7 @@ public interface IApplicationThread extends IInterface {
     int SET_SCHEDULING_GROUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
-    int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
+
     int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int DISPATCH_PACKAGE_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int SCHEDULE_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;
@@ -182,5 +187,8 @@ public interface IApplicationThread extends IInterface {
     int DUMP_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+44;
     int DUMP_DB_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+45;
     int UNSTABLE_PROVIDER_DIED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+46;
-    int REQUEST_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+47;
+    int REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+47;
+    int SCHEDULE_TRANSLUCENT_CONVERSION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+48;
+    int SET_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+49;
+    int SCHEDULE_INSTALL_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+50;
 }

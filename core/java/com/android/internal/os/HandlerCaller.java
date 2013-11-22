@@ -65,7 +65,11 @@ public class HandlerCaller {
         
         mH.sendMessage(msg);
     }
-    
+
+    public void sendMessageDelayed(Message msg, long delayMillis) {
+        mH.sendMessageDelayed(msg, delayMillis);
+    }
+
     public boolean hasMessages(int what) {
         return mH.hasMessages(what);
     }

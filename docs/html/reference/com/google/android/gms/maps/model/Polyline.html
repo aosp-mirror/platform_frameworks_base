@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>Polyline | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -681,7 +688,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -701,7 +708,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -867,7 +874,7 @@ Summary:
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#equals(java.lang.Object)">equals</a></span>(<a href="/reference/java/lang/Object.html">Object</a> other)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#equals(java.lang.Object)">equals</a></span>(Object other)</nobr>
         
   </td></tr>
 
@@ -898,7 +905,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#getId()">getId</a></span>()</nobr>
@@ -916,7 +923,7 @@ Summary:
             
             
             
-            <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt;</nobr>
+            List&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#getPoints()">getPoints</a></span>()</nobr>
@@ -1079,7 +1086,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setPoints(java.util.List<com.google.android.gms.maps.model.LatLng>)">setPoints</a></span>(<a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt; points)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setPoints(java.util.List<com.google.android.gms.maps.model.LatLng>)">setPoints</a></span>(List&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt; points)</nobr>
         
         <div class="jd-descrdiv">Sets the points of this polyline.</div>
   
@@ -1163,7 +1170,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1182,7 +1189,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1201,7 +1208,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1230,7 +1237,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1294,7 +1301,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1447,7 +1454,7 @@ From class
         boolean
       </span>
       <span class="sympad">equals</span>
-      <span class="normal">(<a href="/reference/java/lang/Object.html">Object</a> other)</span>
+      <span class="normal">(Object other)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1507,7 +1514,7 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getId</span>
       <span class="normal">()</span>
@@ -1520,12 +1527,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets this polyline's id.
- <p>
- When a map is restored from a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code>, polylines that were on that map are
- also restored. However, those polylines will then be represented by different
- <code>Polyline</code> objects. A polyline's id can be used to retrieve the new instance of a
- Polyline object after such restoration.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Gets this polyline's id. The id will be unique amongst all Polylines on a map.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>this polyline's id.
@@ -1546,7 +1548,7 @@ From class
          
          
          
-        <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt;
+        List&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt;
       </span>
       <span class="sympad">getPoints</span>
       <span class="normal">()</span>
@@ -1858,7 +1860,7 @@ From class
         void
       </span>
       <span class="sympad">setPoints</span>
-      <span class="normal">(<a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt; points)</span>
+      <span class="normal">(List&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt; points)</span>
     </h4>
       <div class="api-level">
         <div></div>

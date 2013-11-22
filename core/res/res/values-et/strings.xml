@@ -279,6 +279,8 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Võimaldab rakendusel teisaldada ülesanded esiplaanile ja taustale. Rakendus võib seda teha teie sisendita."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käitatud rakenduste peatamine"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Võimaldab rakendusel eemaldada ülesanded ja peatada nende rakendused. Pahatahtlikud rakendused võivad häirida teiste rakenduste käitumist."</string>
+    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"tegevusvirnade haldamine"</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Lubab rakendusel lisada, eemaldada ja muuta tegevusvirnasid, kus teised rakendused töötavad. Pahatahtlikud rakendused võivad häirida teiste rakenduste käitumist."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"mis tahes toimingu alustamine"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Võimaldab rakendusel käivitada mis tahes toimingu loa kaitsest või eksporditud olekust sõltumata."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"kuva ühilduvuse seadmine"</string>
@@ -356,6 +358,12 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lubab omanikul siduda sisestusmeetodi ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"sidumine juurdepääsuteenusega"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lubab omanikul luua sideme juurdepääsuteenuse ülataseme liidesega. Tavarakenduste puhul ei tohiks seda kunagi vaja minna."</string>
+    <string name="permlab_bindPrintService" msgid="8462815179572748761">"sidumine printimisteenusega"</string>
+    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Lubab omanikul siduda printimisteenuse ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
+    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"juurdepääs kõikidele printimistöödele"</string>
+    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Lubab omanikule juurdepääsu teise rakenduse loodud printimistöödele. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC-teenusega sidumine"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Lubab kasutajal luua seosed rakendustega, mis jäljendavad NFC-kaarte. Pole kunagi vajalik tavaliste rakenduste korral."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tekstiteenusega sidumine"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Võimaldab omanikul siduda tekstiteenuse (nt SpellCheckerService) ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"seo VPN-teenusega"</string>
@@ -366,6 +374,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lubab omanikul siduda vidina teenuse ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"seadme administraatoriga suhtlemine"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Võimaldab omanikul saata kavatsusi seadme administraatorile. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"seadme administraatori lisamine või eemaldamine"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Võimaldab omanikul lisada või eemaldada aktiivseid seadme administraatoreid. Tavarakenduste puhul ei tohiks see kunagi vajalik olla."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuda ekraani paigutust"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Võimaldab rakendusel muuta ekraani pööramist mis tahes ajal. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"kursorikiiruse muutmine"</string>
@@ -458,10 +468,22 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Võimaldab rakendusel kasutada SurfaceFlingeri madalatasemelisi funktsioone."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"loe kaadripuhvrit"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Võimaldab rakendusel kaadripuhvri sisu lugeda."</string>
+    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"juurdepääs InputFlingerile"</string>
+    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Lubab rakendusel kasutada InputFlingeri madalatasemelisi funktsioone."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"WiFi-ekraanide seadistamine"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Lubab rakendusel seadistada WiFi-ekraane ja nendega ühendus luua."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WiFi-ekraanide juhtimine"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lubab rakendusel juhtida WiFi-ekraanide madala taseme funktsioone."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuda heliseadeid"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Võimaldab rakendusel muuta üldiseid heliseadeid, näiteks helitugevust ja seda, millist kõlarit kasutatakse väljundiks."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"salvesta heli"</string>
@@ -613,6 +635,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Võimaldab rakendusel kirjutada SD-kaardile."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"sisemälu sisu muutm./kustut."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Võimaldab rakendusel muuta sisemise andmekandja sisu."</string>
+    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"dokumendi talletuse haldamine"</string>
+    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Lubab rakendusel hallata dokumendi talletamist."</string>
     <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"juurdepääs välismäluseadmele (kõikidele kasutajatele)"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Võimaldab rakenduse kõikidel kasutajatel pöörduda välismäluseadme poole."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"juurdepääs vahemälu failisüsteemile"</string>
@@ -625,10 +649,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Võimaldab rakendusel hallata võrgueeskirju ja määratleda rakendusespetsiifilisi reegleid."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"võrgukasutuse arvestamise muutmine"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Võimaldab rakendusel muuta võrgukasutuse loendamist rakenduste suhtes. Mitte kasutada tavarakenduste puhul."</string>
+    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"sokli märkide muutmine"</string>
+    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Lubab rakendusel muuta marsruutimiseks sokli märke"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"juurdepääsu märguanded"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Võimaldab rakendusel tuua, kontrollida ja kustutada märguandeid, sh neid, mille on postitanud teised rakendused."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"seo märguannete kuulamisteenusega"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Võimaldab omanikul siduda märguannete kuulamisteenuse ülemise taseme kasutajaliidese. Seda ei tohiks tavarakenduste puhul kunagi vaja olla."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operaatoripoolse konfiguratsioonirakenduse aktiveerimine"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lubab omanikul aktiveerida operaatoripoolse konfiguratsioonirakenduse. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrollige ekraaniluku avamise paroolide pikkust ja tähemärke."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekraani avamiskatsed"</string>
@@ -738,8 +766,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
-    <skip />
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -796,7 +823,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Sisestage SIM-kaart."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kaart puudub või on loetamatu. Sisestage SIM-kaart."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Kasutamiskõlbmatu SIM-kaart."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kaart on jäädavalt keelatud."\n" Teise SIM-kaardi saamiseks võtke ühendust oma traadita side teenusepakkujaga."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kaart on jäädavalt keelatud.\n Teise SIM-kaardi saamiseks võtke ühendust oma traadita side teenusepakkujaga."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Eelmise loo nupp"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Nupp Järgmine rada"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Nupp Peata"</string>
@@ -808,11 +835,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Vaadake kasutusjuhendit või võtke ühendust klienditeenindusega."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-kaart on lukus."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-kaardi avamine ..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Olete oma avamismustrit <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti koostanud. "\n\n"Proovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Olete parooli <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. "\n\n"Proovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Olete PIN-koodi <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. "\n\n"Proovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil tahvelarvuti avada Google\'i sisselogimisega."\n\n" Proovige <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast uuesti."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada Google\'i sisselogimisega."\n\n" Proovige <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Olete oma avamismustrit <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti koostanud. \n\nProovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Olete parooli <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. \n\nProovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Olete PIN-koodi <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. \n\nProovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil tahvelarvuti avada Google\'i sisselogimisega.\n\n Proovige <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada Google\'i sisselogimisega.\n\n Proovige <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast uuesti."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Olete üritanud <xliff:g id="NUMBER_0">%d</xliff:g> korda tahvelarvutit valesti avada. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> edutut katset lähtestatakse tahvelarvuti tehase vaikeseadetele ja kõik kasutajaandmed lähevad kaotsi."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Olete üritanud <xliff:g id="NUMBER_0">%d</xliff:g> korda telefoni valesti avada. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset lähtestatakse telefon tehase vaikeseadetele ja kõik kasutajaandmed lähevad kaotsi."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Olete püüdnud tahvelarvutit <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Tahvelarvuti lähtestatakse nüüd tehase vaikeseadetele."</string>
@@ -826,7 +853,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Parool"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logi sisse"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Vale kasutajanimi või parool."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Kas unustasite oma kasutajanime või parooli?"\n"Külastage aadressi "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Kas unustasite oma kasutajanime või parooli?\nKülastage aadressi "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Kontrollimine ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ava"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Heli sisse"</string>
@@ -874,7 +901,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Navigeerimise kinnitamine"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Lahku sellelt lehelt"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Jää sellele lehele"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Kas soovite kindlasti sellelt lehelt lahkuda?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nKas soovite kindlasti sellelt lehelt lahkuda?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Kinnita"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Vihje: suurendamiseks ja vähendamiseks puudutage kaks korda."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Automaatne täitmine"</string>
@@ -1080,14 +1107,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Kahjuks on rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> peatunud."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Kahjuks on protsess <xliff:g id="PROCESS">%1$s</xliff:g> peatunud."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ei vasta."\n\n"Kas soovite selle sulgeda?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Tegevus <xliff:g id="ACTIVITY">%1$s</xliff:g> ei vasta."\n\n"Kas soovite selle sulgeda?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ei vasta.\n\nKas soovite selle sulgeda?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Tegevus <xliff:g id="ACTIVITY">%1$s</xliff:g> ei vasta.\n\nKas soovite selle sulgeda?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ei vasta. Kas soovite selle sulgeda?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Protsess <xliff:g id="PROCESS">%1$s</xliff:g> ei vasta."\n\n"Kas soovite selle sulgeda?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Protsess <xliff:g id="PROCESS">%1$s</xliff:g> ei vasta.\n\nKas soovite selle sulgeda?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Teata"</string>
     <string name="wait" msgid="7147118217226317732">"Oodake"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Leht ei reageeri."\n\n"Kas soovite selle sulgeda?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Leht ei reageeri.\n\nKas soovite selle sulgeda?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Rakendus on ümber suunatud"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> on nüüd käivitunud."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Algselt käivitati rakendus <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1256,6 +1283,10 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Võimaldab rakendusel võtta sisu kopeerimiseks appi vaikekonteinerteenuse. Mitte kasutada tavarakenduste puhul."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Meediaväljundi teekonna koostamine"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Võimaldab rakendusel koostada teekonna meediaväljundist teistesse välistesse seadmetesse."</string>
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Juurdepääs võtmekaitsega turvalisele talletusruumile"</string>
+    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Lubab rakendusel hankida juurdepääsu võtmekaitsega turvalisele talletusruumile."</string>
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"Võtmekaitse kuvamise ja peitmise juhtimine"</string>
+    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Lubab rakendusel võtmekaitset juhtida."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Suumi juhtimiseks puudutage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>
@@ -1265,15 +1296,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Valmis"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Eelm."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Täida"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Vali number"\n" kasutades numbrit <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Loo kontakt"\n"numbriga <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Vali number\n kasutades numbrit <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Loo kontakt\nnumbriga <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Üks või mitu rakendust taotlevad luba pääseda nüüd ja edaspidi teie kontole juurde."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Kas soovite taotluse lubada?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Juurdepääsutaotlus"</string>
     <string name="allow" msgid="7225948811296386551">"Luba"</string>
     <string name="deny" msgid="2081879885755434506">"Keela"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Taotletud luba"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Luba on taotletud"\n"kontole <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Luba on taotletud\nkontole <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Sisestusmeetod"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sünkroonimine"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Juurdepääsetavus"</string>
@@ -1441,10 +1472,12 @@
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Ühendan..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Saadaval"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Ei ole saadaval"</string>
+    <string name="media_route_status_in_use" msgid="4533786031090198063">"Kasutusel"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Sisseehitatud ekraan"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-ekraan"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Ülekate nr .<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", turvaline"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Juhtmeta ekraaniühendus on loodud"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Ekraan on näha teises seadmes"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Katkesta ühendus"</string>
@@ -1453,7 +1486,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Vale muster"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Vale parool"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Vale PIN-kood"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Proovige uuesti <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Proovige uuesti <xliff:g id="NUMBER">%1$d</xliff:g> sekundi pärast."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Joonistage oma muster"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Sisestage SIM-i PIN-kood"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Sisestage PIN-kood"</string>
@@ -1473,27 +1506,79 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Parool"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Logi sisse"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Vale kasutajanimi või parool."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Kas unustasite kasutajanime või parooli?"\n"Külastage aadressi "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Kas unustasite kasutajanime või parooli?\nKülastage aadressi "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Konto kontrollimine ..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olete PIN-koodi <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud."\n\n"Proovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olete parooli <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. "\n\n"Proovige uuesti <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti."\n\n"Proovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olete PIN-koodi <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud.\n\nProovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olete parooli <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. \n\nProovige uuesti <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti.\n\nProovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Olete üritanud <xliff:g id="NUMBER_0">%d</xliff:g> korda tahvelarvutit valesti avada. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset lähtestatakse tahvelarvuti tehase vaikeseadetele ja kõik kasutajaandmed lähevad kaotsi."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Olete üritanud <xliff:g id="NUMBER_0">%d</xliff:g> korda telefoni valesti avada. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset lähtestatakse telefon tehase vaikeseadetele ja kõik kasutajaandmed lähevad kaotsi."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Olete püüdnud tahvelarvutit <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Tahvelarvuti lähtestatakse nüüd tehase vaikeseadetele."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Olete püüdnud telefoni <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Telefon lähtestatakse nüüd tehase vaikeseadetele."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil tahvelarvuti avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil tahvelarvuti avada meilikontoga.\n\n Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga.\n\n Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eemalda"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Kas suurendada helitugevust üle soovitatud taseme?"\n"Pikaajaline suure helitugevusega muusika kuulamine võib kahjustada kuulmist."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Kas suurendada helitugevust üle soovitatud taseme?\nPikaajaline suure helitugevusega muusika kuulamine võib kahjustada kuulmist."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hõlbustuse lubamiseks hoidke kaht sõrme all."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hõlbustus on lubatud."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hõlbustus on tühistatud."</string>
     <string name="user_switched" msgid="3768006783166984410">"Praegune kasutaja <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Omanik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Viga"</string>
-    <string name="app_no_restricted_accounts" msgid="4011285085817350390">"See rakendus ei toeta piiratud profiilide kontosid"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"See rakendus ei toeta piiratud profiilide kontosid"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Selle toimingu käsitlemiseks ei leitud ühtegi rakendust"</string>
     <string name="revoke" msgid="5404479185228271586">"Tühista"</string>
+    <string name="mediaSize_iso_a0" msgid="7875427489420821793">"ISO A0"</string>
+    <string name="mediaSize_iso_a1" msgid="3760734499050875356">"ISO A1"</string>
+    <string name="mediaSize_iso_a2" msgid="5973266378020144382">"ISO A2"</string>
+    <string name="mediaSize_iso_a3" msgid="1373407105687300884">"ISO A3"</string>
+    <string name="mediaSize_iso_a4" msgid="6689772807982597254">"ISO A4"</string>
+    <string name="mediaSize_iso_a5" msgid="5353549652015741040">"ISO A5"</string>
+    <string name="mediaSize_iso_a6" msgid="8585038048674911907">"ISO A6"</string>
+    <string name="mediaSize_iso_a7" msgid="6641836716963839119">"ISO A7"</string>
+    <string name="mediaSize_iso_a8" msgid="7571139437465693355">"ISO A8"</string>
+    <string name="mediaSize_iso_a9" msgid="1378455891957115079">"ISO A9"</string>
+    <string name="mediaSize_iso_a10" msgid="2480747457429475344">"ISO A10"</string>
+    <string name="mediaSize_iso_b0" msgid="3965935097661108039">"ISO B0"</string>
+    <string name="mediaSize_iso_b1" msgid="2505753285010115437">"ISO B1"</string>
+    <string name="mediaSize_iso_b2" msgid="8763874709859458453">"ISO B2"</string>
+    <string name="mediaSize_iso_b3" msgid="4210506688191764076">"ISO B3"</string>
+    <string name="mediaSize_iso_b4" msgid="5749404165888526034">"ISO B4"</string>
+    <string name="mediaSize_iso_b5" msgid="7640627414621904733">"ISO B5"</string>
+    <string name="mediaSize_iso_b6" msgid="7342988864712748544">"ISO B6"</string>
+    <string name="mediaSize_iso_b7" msgid="5069844065235382429">"ISO B7"</string>
+    <string name="mediaSize_iso_b8" msgid="7316818922278779774">"ISO B8"</string>
+    <string name="mediaSize_iso_b9" msgid="5414727094026532341">"ISO B9"</string>
+    <string name="mediaSize_iso_b10" msgid="5251253731832048185">"ISO B10"</string>
+    <string name="mediaSize_iso_c0" msgid="4003138342671964217">"ISO C0"</string>
+    <string name="mediaSize_iso_c1" msgid="1935188063393553008">"ISO C1"</string>
+    <string name="mediaSize_iso_c2" msgid="3197307969712069904">"ISO C2"</string>
+    <string name="mediaSize_iso_c3" msgid="4335826087321913508">"ISO C3"</string>
+    <string name="mediaSize_iso_c4" msgid="3745639598281015005">"ISO C4"</string>
+    <string name="mediaSize_iso_c5" msgid="8269457765822791013">"ISO C5"</string>
+    <string name="mediaSize_iso_c6" msgid="566666105260346930">"ISO C6"</string>
+    <string name="mediaSize_iso_c7" msgid="8678413180782608498">"ISO C7"</string>
+    <string name="mediaSize_iso_c8" msgid="8392376206627041730">"ISO C8"</string>
+    <string name="mediaSize_iso_c9" msgid="9191613372324845405">"ISO C9"</string>
+    <string name="mediaSize_iso_c10" msgid="7327709699184920822">"ISO C10"</string>
+    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Letter"</string>
+    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Government Letter"</string>
+    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Legal"</string>
+    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
+    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
+    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
+    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Tühistatud"</string>
+    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Viga sisu kirjutamisel"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Sisestage PIN-kood"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Praegune PIN-kood"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Uus PIN-kood"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Kinnitage uus PIN-kood"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Looge PIN-kood piirangute muutmiseks"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-kood ei sobi. Proovige uuesti."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-kood on liiga lühike. Peab olema vähemalt 4-kohaline."</string>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="4835639969503729874">"Vale PIN-kood. Proovige 1 s pärast."</item>
+    <item quantity="other" msgid="8030607343223287654">"Vale PIN-kood. Proovige <xliff:g id="COUNT">%d</xliff:g> s pärast."</item>
+  </plurals>
 </resources>

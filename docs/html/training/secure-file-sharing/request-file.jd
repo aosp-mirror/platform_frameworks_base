@@ -1,0 +1,147 @@
+page.title=Requesting a Shared File
+
+trainingnavtop=true
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#SendRequest">Send a Request for the File</a></li>
+  <li><a href="#OpenFile">Access the Requested File</a>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html#SimpleQuery"
+        >Retrieving Data from the Provider</a>
+    </li>
+</ul>
+
+</div>
+</div>
+
+<p>
+    When an app wants to access a file shared by another app, the requesting app (the client)
+    usually sends a request to the app sharing the files (the server). In most cases, the request
+    starts an {@link android.app.Activity} in the server app that displays the files it can share.
+    The user picks a file, after which the server app returns the file's content URI to the
+    client app.
+</p>
+<p>
+    This lesson shows you how a client app requests a file from a server app, receives the file's
+    content URI from the server app, and opens the file using the content URI.
+</p>
+
+<h2 id="SendRequest">Send a Request for the File</h2>
+<p>
+    To request a file from the server app, the client app calls
+    {@link android.app.Activity#startActivityForResult startActivityForResult} with an
+    {@link android.content.Intent} containing the action such as
+    {@link android.content.Intent#ACTION_PICK ACTION_PICK} and a MIME type that the client app
+    can handle.
+</p>
+<p>
+    For example, the following code snippet demonstrates how to send an
+    {@link android.content.Intent} to a server app in order to start the
+    {@link android.app.Activity} described in <a href="share-file.html#SendURI"
+    >Sharing a File</a>:
+</p>
+<pre>
+public class MainActivity extends Activity {
+    private Intent mRequestFileIntent;
+    private ParcelFileDescriptor mInputPFD;
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        mRequestFileIntent = new Intent(Intent.ACTION_PICK);
+        mRequestFileIntent.setType("image/jpg");
+        ...
+    }
+    ...
+    protected void requestFile() {
+        /**
+         * When the user requests a file, send an Intent to the
+         * server app.
+         * files.
+         */
+            startActivityForResult(mRequestFileIntent, 0);
+        ...
+    }
+    ...
+}
+</pre>
+<h2 id="OpenFile">Access the Requested File</h2>
+<p>
+    The server app sends the file's content URI back to the client app in an
+    {@link android.content.Intent}. This {@link android.content.Intent} is passed to the client
+    app in its override of {@link android.app.Activity#onActivityResult onActivityResult()}. Once
+    the client app has the file's content URI, it can access the file by getting its
+    {@link java.io.FileDescriptor}.
+</p>
+<p>
+<p>
+    File security is preserved in this process because the content URI is the only piece of data
+    that the client app receives. Since this URI doesn't contain a directory path, the client app
+    can't discover and open any other files in the server app. Only the client app gets access to
+    the file, and only for the permissions granted by the server app. The permissions are temporary,
+    so once the client app's task stack is finished, the file is no longer accessible outside the
+    server app.
+</p>
+<p>
+    The next snippet demonstrates how the client app handles the
+    {@link android.content.Intent} sent from the server app, and how the client app gets the
+    {@link java.io.FileDescriptor} using the content URI:
+</p>
+<pre>
+    /*
+     * When the Activity of the app that hosts files sets a result and calls
+     * finish(), this method is invoked. The returned Intent contains the
+     * content URI of a selected file. The result code indicates if the
+     * selection worked or not.
+     */
+    &#64;Override
+    public void onActivityResult(int requestCode, int resultCode,
+            Intent returnIntent) {
+        // If the selection didn't work
+        if (resultCode != RESULT_OK) {
+            // Exit without doing anything else
+            return;
+        } else {
+            // Get the file's content URI from the incoming Intent
+            Uri returnUri = returnIntent.getData();
+            /*
+             * Try to open the file for "read" access using the
+             * returned URI. If the file isn't found, write to the
+             * error log and return.
+             */
+            try {
+                /*
+                 * Get the content resolver instance for this context, and use it
+                 * to get a ParcelFileDescriptor for the file.
+                 */
+                mInputPFD = getContentResolver().openFileDescriptor(returnUri, "r");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Log.e("MainActivity", "File not found.");
+                return;
+            }
+            // Get a regular file descriptor for the file
+            FileDescriptor fd = mInputPFD.getFileDescriptor();
+            ...
+        }
+    }
+</pre>
+<p>
+    The method {@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()}
+    returns a {@link android.os.ParcelFileDescriptor} for the file. From this object, the client
+    app gets a {@link java.io.FileDescriptor} object, which it can then use to read the file.
+</p>

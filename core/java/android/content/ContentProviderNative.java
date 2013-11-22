@@ -18,22 +18,20 @@ package android.content;
 
 import android.content.res.AssetFileDescriptor;
 import android.database.BulkCursorDescriptor;
-import android.database.BulkCursorNative;
 import android.database.BulkCursorToCursorAdaptor;
 import android.database.Cursor;
 import android.database.CursorToBulkCursorAdaptor;
 import android.database.DatabaseUtils;
-import android.database.IBulkCursor;
 import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.RemoteException;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -227,9 +225,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String callingPkg = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mode = data.readString();
+                    ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
+                            data.readStrongBinder());
 
                     ParcelFileDescriptor fd;
-                    fd = openFile(callingPkg, url, mode);
+                    fd = openFile(callingPkg, url, mode, signal);
                     reply.writeNoException();
                     if (fd != null) {
                         reply.writeInt(1);
@@ -247,9 +247,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String callingPkg = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mode = data.readString();
+                    ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
+                            data.readStrongBinder());
 
                     AssetFileDescriptor fd;
-                    fd = openAssetFile(callingPkg, url, mode);
+                    fd = openAssetFile(callingPkg, url, mode, signal);
                     reply.writeNoException();
                     if (fd != null) {
                         reply.writeInt(1);
@@ -296,9 +298,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mimeType = data.readString();
                     Bundle opts = data.readBundle();
+                    ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
+                            data.readStrongBinder());
 
                     AssetFileDescriptor fd;
-                    fd = openTypedAssetFile(callingPkg, url, mimeType, opts);
+                    fd = openTypedAssetFile(callingPkg, url, mimeType, opts, signal);
                     reply.writeNoException();
                     if (fd != null) {
                         reply.writeInt(1);
@@ -317,6 +321,30 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     ICancellationSignal cancellationSignal = createCancellationSignal();
                     reply.writeNoException();
                     reply.writeStrongBinder(cancellationSignal.asBinder());
+                    return true;
+                }
+
+                case CANONICALIZE_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    String callingPkg = data.readString();
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+
+                    Uri out = canonicalize(callingPkg, url);
+                    reply.writeNoException();
+                    Uri.writeToParcel(reply, out);
+                    return true;
+                }
+
+                case UNCANONICALIZE_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    String callingPkg = data.readString();
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+
+                    Uri out = uncanonicalize(callingPkg, url);
+                    reply.writeNoException();
+                    Uri.writeToParcel(reply, out);
                     return true;
                 }
             }
@@ -538,7 +566,9 @@ final class ContentProviderProxy implements IContentProvider
         }
     }
 
-    public ParcelFileDescriptor openFile(String callingPkg, Uri url, String mode)
+    @Override
+    public ParcelFileDescriptor openFile(
+            String callingPkg, Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -548,6 +578,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeString(callingPkg);
             url.writeToParcel(data, 0);
             data.writeString(mode);
+            data.writeStrongBinder(signal != null ? signal.asBinder() : null);
 
             mRemote.transact(IContentProvider.OPEN_FILE_TRANSACTION, data, reply, 0);
 
@@ -561,7 +592,9 @@ final class ContentProviderProxy implements IContentProvider
         }
     }
 
-    public AssetFileDescriptor openAssetFile(String callingPkg, Uri url, String mode)
+    @Override
+    public AssetFileDescriptor openAssetFile(
+            String callingPkg, Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -571,6 +604,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeString(callingPkg);
             url.writeToParcel(data, 0);
             data.writeString(mode);
+            data.writeStrongBinder(signal != null ? signal.asBinder() : null);
 
             mRemote.transact(IContentProvider.OPEN_ASSET_FILE_TRANSACTION, data, reply, 0);
 
@@ -629,8 +663,9 @@ final class ContentProviderProxy implements IContentProvider
         }
     }
 
+    @Override
     public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri url, String mimeType,
-            Bundle opts) throws RemoteException, FileNotFoundException {
+            Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
@@ -640,6 +675,7 @@ final class ContentProviderProxy implements IContentProvider
             url.writeToParcel(data, 0);
             data.writeString(mimeType);
             data.writeBundle(opts);
+            data.writeStrongBinder(signal != null ? signal.asBinder() : null);
 
             mRemote.transact(IContentProvider.OPEN_TYPED_ASSET_FILE_TRANSACTION, data, reply, 0);
 
@@ -667,6 +703,47 @@ final class ContentProviderProxy implements IContentProvider
             ICancellationSignal cancellationSignal = ICancellationSignal.Stub.asInterface(
                     reply.readStrongBinder());
             return cancellationSignal;
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public Uri canonicalize(String callingPkg, Uri url) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            data.writeString(callingPkg);
+            url.writeToParcel(data, 0);
+
+            mRemote.transact(IContentProvider.CANONICALIZE_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            Uri out = Uri.CREATOR.createFromParcel(reply);
+            return out;
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public Uri uncanonicalize(String callingPkg, Uri url) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            data.writeString(callingPkg);
+            url.writeToParcel(data, 0);
+
+            mRemote.transact(IContentProvider.UNCANONICALIZE_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            Uri out = Uri.CREATOR.createFromParcel(reply);
+            return out;
         } finally {
             data.recycle();
             reply.recycle();

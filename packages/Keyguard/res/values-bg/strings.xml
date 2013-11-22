@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Въведете ПИН кода"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Въведете PUK и новия ПИН код"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK код"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Нов ПИН код"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Докоснете и въведете парола"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Въведете парола, за да отключите"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Въведете ПИН, за да отключите"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Неправилен ПИН код."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"За да отключите, натиснете „Меню“ и после 0."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Максималният брой опити за отключване с лице е надвишен"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Заредена"</string>
+    <string name="keyguard_plugged_in" msgid="8117572000639998388">"Зарежда се, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Свържете зарядното си устройство."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Натиснете иконата за меню, за да отключите."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Мрежата е заключена"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Няма SIM карта"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"В таблета няма SIM карта."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"В телефона няма SIM карта."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Поставете SIM карта."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM картата липсва или е нечетима. Поставете SIM карта."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Неизползваема SIM карта."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"SIM картата ви е деактивирана за постоянно.\nЗа да получите друга, се свържете с доставчика на безжичната си услуга."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM картата е заключена."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM картата е заключена с PUK код."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM картата се отключва…"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Приспособление %2$d от %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Добавяне на приспособление."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Празно"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Областта за отключване е разгъната."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Областта за отключване е свита."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Приспособление за <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Инструмент за избор на потребители"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Състояние"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Камера"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Контроли за мултимедията"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Пренареждането на приспособленията започна."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Пренареждането на приспособленията завърши."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Приспособлението за <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> е изтрито."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Разгъване на областта за отключване."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Отключване с плъзгане."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Отключване с фигура."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Отключване с лице."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Отключване с ПИН код."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Отключване с парола."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Област на фигурата."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Област на плъзгане."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Бутон за предишния запис"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Бутон за следващия запис"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Бутон за пауза"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Бутон за пускане"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Бутон за спиране"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Отказ"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Изтриване"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Готово"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Промяна на режима"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"Отключване"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"Тих режим"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"Включване на звука"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Търсене"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"Плъзнете нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"Плъзнете надолу за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Плъзнете наляво за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Плъзнете надясно за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Спешно обаждане"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забравена фигура"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Грешна фигура"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Грешна парола"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Грешен ПИН код"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Опитайте отново след <xliff:g id="NUMBER">%d</xliff:g> секунди."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Начертайте фигурата си"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Въведете ПИН кода за SIM картата"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Въведете ПИН код"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Въведете паролата"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM картата вече е деактивирана. Въведете PUK кода, за да продължите. Свържете се с оператора за подробности."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Въведете желания ПИН код"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Потвърдете желания ПИН код"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM картата се отключва…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Неправилен ПИН код."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Въведете ПИН код с четири до осем цифри."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK кодът трябва да е с 8 или повече цифри."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Въведете отново правилния PUK код. Многократните опити ще деактивират за постоянно SIM картата."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ПИН кодовете не съвпадат"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Опитите за фигурата са твърде много"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"За да отключите, влезте с профила си в Google."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Потребителско име (имейл)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Парола"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Вход"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Невалидно потребителско име или парола."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Забравили сте потребителското име или паролата си?\nПосетете "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Профилът се проверява…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Въведохте неправилно ПИН кода си <xliff:g id="NUMBER_0">%d</xliff:g> пъти. \n\nОпитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Въведохте неправилно паролата си <xliff:g id="NUMBER_0">%d</xliff:g> пъти. \n\nОпитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. \n\nОпитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Направихте опит да отключите неправилно таблета <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Направихте опит да отключите неправилно телефона <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Направихте опит да отключите неправилно таблета <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Направихте опит да отключите неправилно телефона <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Премахване"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Бутон за предишния запис"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Бутон за следващия запис"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Бутон за пауза"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Бутон за пускане"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Бутон за спиране"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Няма покритие."</string>
+</resources>

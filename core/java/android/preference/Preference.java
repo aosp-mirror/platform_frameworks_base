@@ -77,7 +77,7 @@ import java.util.Set;
  * @attr ref android.R.styleable#Preference_defaultValue
  * @attr ref android.R.styleable#Preference_shouldDisableView
  */
-public class Preference implements Comparable<Preference>, OnDependencyChangeListener { 
+public class Preference implements Comparable<Preference> {
     /**
      * Specify for {@link #setOrder(int)} if a specific order is not required.
      */
@@ -115,6 +115,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     private String mDependencyKey;
     private Object mDefaultValue;
     private boolean mDependencyMet = true;
+    private boolean mParentDependencyMet = true;
     
     /**
      * @see #setShouldDisableView(boolean)
@@ -123,7 +124,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     
     private int mLayoutResId = com.android.internal.R.layout.preference;
     private int mWidgetLayoutResId;
-    private boolean mHasSpecifiedLayout = false;
+    private boolean mCanRecycleLayout = true;
     
     private OnPreferenceChangeInternalListener mListener;
     
@@ -274,9 +275,10 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         }
         a.recycle();
 
-        if (!getClass().getName().startsWith("android.preference")) {
-            // For subclasses not in this package, assume the worst and don't cache views
-            mHasSpecifiedLayout = true;
+        if (!getClass().getName().startsWith("android.preference")
+                && !getClass().getName().startsWith("com.android")) {
+            // For non-framework subclasses, assume the worst and don't cache views.
+            mCanRecycleLayout = false;
         }
     }
     
@@ -398,7 +400,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     public void setLayoutResource(int layoutResId) {
         if (layoutResId != mLayoutResId) {
             // Layout changed
-            mHasSpecifiedLayout = true;
+            mCanRecycleLayout = false;
         }
 
         mLayoutResId = layoutResId;
@@ -414,7 +416,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     }
     
     /**
-     * Sets The layout for the controllable widget portion of this Preference. This
+     * Sets the layout for the controllable widget portion of this Preference. This
      * is inflated into the main layout. For example, a {@link CheckBoxPreference}
      * would specify a custom layout (consisting of just the CheckBox) here,
      * instead of creating its own main layout.
@@ -426,7 +428,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     public void setWidgetLayoutResource(int widgetLayoutResId) {
         if (widgetLayoutResId != mWidgetLayoutResId) {
             // Layout changed
-            mHasSpecifiedLayout = true;
+            mCanRecycleLayout = false;
         }
         mWidgetLayoutResId = widgetLayoutResId;
     }
@@ -733,7 +735,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @return True if this Preference is enabled, false otherwise.
      */
     public boolean isEnabled() {
-        return mEnabled && mDependencyMet;
+        return mEnabled && mDependencyMet && mParentDependencyMet;
     }
 
     /**
@@ -1259,7 +1261,24 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
             notifyChanged();
         }
     }
-    
+
+    /**
+     * Called when the implicit parent dependency changes.
+     *
+     * @param parent The Preference that this Preference depends on.
+     * @param disableChild Set true to disable this Preference.
+     */
+    public void onParentChanged(Preference parent, boolean disableChild) {
+        if (mParentDependencyMet == disableChild) {
+            mParentDependencyMet = !disableChild;
+
+            // Enabled state can change dependent preferences' states, so notify
+            notifyDependencyChange(shouldDisableDependents());
+
+            notifyChanged();
+        }
+    }
+
     /**
      * Checks whether this preference's dependents should currently be
      * disabled.
@@ -1641,8 +1660,8 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         return mPreferenceManager.getSharedPreferences().getBoolean(mKey, defaultReturnValue);
     }
     
-    boolean hasSpecifiedLayout() {
-        return mHasSpecifiedLayout;
+    boolean canRecycleLayout() {
+        return mCanRecycleLayout;
     }
     
     @Override

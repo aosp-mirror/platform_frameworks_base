@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -157,6 +158,38 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SECURITY_SETTINGS =
             "android.settings.SECURITY_SETTINGS";
+
+    /**
+     * Activity Action: Show trusted credentials settings, opening to the user tab,
+     * to allow management of installed credentials.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TRUSTED_CREDENTIALS_USER =
+            "com.android.settings.TRUSTED_CREDENTIALS_USER";
+
+    /**
+     * Activity Action: Show dialog explaining that an installed CA cert may enable
+     * monitoring of encrypted network traffic.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MONITORING_CERT_INFO =
+            "com.android.settings.MONITORING_CERT_INFO";
 
     /**
      * Activity Action: Show settings to allow configuration of privacy options.
@@ -342,8 +375,9 @@ public final class Settings {
     /**
      * Activity Action: Show settings to manage the user input dictionary.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
+     * Starting with {@link android.os.Build.VERSION_CODES#KITKAT},
+     * it is guaranteed there will always be an appropriate implementation for this Intent action.
+     * In prior releases of the platform this was optional, so ensure you safeguard against it.
      * <p>
      * Input: Nothing.
      * <p>
@@ -642,6 +676,23 @@ public final class Settings {
         "android.settings.NFCSHARING_SETTINGS";
 
     /**
+     * Activity Action: Show NFC Tap & Pay settings
+     * <p>
+     * This shows UI that allows the user to configure Tap&Pay
+     * settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NFC_PAYMENT_SETTINGS =
+        "android.settings.NFC_PAYMENT_SETTINGS";
+
+    /**
      * Activity Action: Show Daydream settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -670,6 +721,33 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_LISTENER_SETTINGS
             = "android.settings.NOTIFICATION_LISTENER_SETTINGS";
+
+    /**
+     * Activity Action: Show settings for video captioning.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CAPTIONING_SETTINGS = "android.settings.CAPTIONING_SETTINGS";
+
+    /**
+     * Activity Action: Show the top level print settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PRINT_SETTINGS =
+            "android.settings.ACTION_PRINT_SETTINGS";
 
     // End of Intent actions for Settings
 
@@ -735,6 +813,10 @@ public final class Settings {
 
     private static final String TAG = "Settings";
     private static final boolean LOCAL_LOGV = false;
+
+    // Lock ensures that when enabling/disabling the master location switch, we don't end up
+    // with a partial enable/disable state in multi-threaded situations.
+    private static final Object mLocationSettingsLock = new Object();
 
     public static class SettingNotFoundException extends AndroidException {
         public SettingNotFoundException(String msg) {
@@ -1011,6 +1093,14 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WAIT_FOR_DEBUGGER);
             MOVED_TO_GLOBAL.add(Settings.Global.SHOW_PROCESSES);
             MOVED_TO_GLOBAL.add(Settings.Global.ALWAYS_FINISH_ACTIVITIES);
+            MOVED_TO_GLOBAL.add(Settings.Global.TZINFO_UPDATE_CONTENT_URL);
+            MOVED_TO_GLOBAL.add(Settings.Global.TZINFO_UPDATE_METADATA_URL);
+            MOVED_TO_GLOBAL.add(Settings.Global.SELINUX_UPDATE_CONTENT_URL);
+            MOVED_TO_GLOBAL.add(Settings.Global.SELINUX_UPDATE_METADATA_URL);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL);
+            MOVED_TO_GLOBAL.add(Settings.Global.CERT_PIN_UPDATE_CONTENT_URL);
+            MOVED_TO_GLOBAL.add(Settings.Global.CERT_PIN_UPDATE_METADATA_URL);
         }
 
         /** @hide */
@@ -2317,6 +2407,15 @@ public final class Settings {
         public static final String POINTER_SPEED = "pointer_speed";
 
         /**
+         * I am the lolrus.
+         * <p>
+         * Nonzero values indicate that the user has a bukkit.
+         * Backward-compatible with <code>PrefGetPreference(prefAllowEasterEggs)</code>.
+         * @hide
+         */
+        public static final String EGG_MODE = "egg_mode";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -2342,9 +2441,7 @@ public final class Settings {
             SCREEN_BRIGHTNESS_MODE,
             SCREEN_AUTO_BRIGHTNESS_ADJ,
             VIBRATE_INPUT_DEVICES,
-            MODE_RINGER,                // moved to global
             MODE_RINGER_STREAMS_AFFECTED,
-            MUTE_STREAMS_AFFECTED,
             VOLUME_VOICE,
             VOLUME_SYSTEM,
             VOLUME_RING,
@@ -2381,7 +2478,9 @@ public final class Settings {
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
             POINTER_SPEED,
-            VIBRATE_WHEN_RINGING
+            VIBRATE_WHEN_RINGING,
+            RINGTONE,
+            NOTIFICATION_SOUND
         };
 
         // Settings moved to Settings.Secure
@@ -2864,6 +2963,11 @@ public final class Settings {
 
         /** @hide */
         public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
+            if (LOCATION_MODE.equals(name)) {
+                // HACK ALERT: temporary hack to work around b/10491283.
+                // TODO: once b/10491283 fixed, remove this hack
+                return getLocationModeForUser(cr, userHandle);
+            }
             String v = getStringForUser(cr, name, userHandle);
             try {
                 return v != null ? Integer.parseInt(v) : def;
@@ -2898,6 +3002,11 @@ public final class Settings {
         /** @hide */
         public static int getIntForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
+            if (LOCATION_MODE.equals(name)) {
+                // HACK ALERT: temporary hack to work around b/10491283.
+                // TODO: once b/10491283 fixed, remove this hack
+                return getLocationModeForUser(cr, userHandle);
+            }
             String v = getStringForUser(cr, name, userHandle);
             try {
                 return Integer.parseInt(v);
@@ -2926,6 +3035,11 @@ public final class Settings {
         /** @hide */
         public static boolean putIntForUser(ContentResolver cr, String name, int value,
                 int userHandle) {
+            if (LOCATION_MODE.equals(name)) {
+                // HACK ALERT: temporary hack to work around b/10491283.
+                // TODO: once b/10491283 fixed, remove this hack
+                return setLocationModeForUser(cr, value, userHandle);
+            }
             return putStringForUser(cr, name, Integer.toString(value), userHandle);
         }
 
@@ -3184,6 +3298,13 @@ public final class Settings {
                 "input_method_selector_visibility";
 
         /**
+         * bluetooth HCI snoop log configuration
+         * @hide
+         */
+        public static final String BLUETOOTH_HCI_LOG =
+                "bluetooth_hci_log";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead
          */
         @Deprecated
@@ -3227,8 +3348,41 @@ public final class Settings {
 
         /**
          * Comma-separated list of location providers that activities may access.
+         *
+         * @deprecated use {@link #LOCATION_MODE}
          */
+        @Deprecated
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
+
+        /**
+         * The degree of location access enabled by the user.
+         * <p/>
+         * When used with {@link #putInt(ContentResolver, String, int)}, must be one of {@link
+         * #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY}, {@link
+         * #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}. When used with {@link
+         * #getInt(ContentResolver, String)}, the caller must gracefully handle additional location
+         * modes that might be added in the future.
+         */
+        public static final String LOCATION_MODE = "location_mode";
+
+        /**
+         * Location access disabled.
+         */
+        public static final int LOCATION_MODE_OFF = 0;
+        /**
+         * Network Location Provider disabled, but GPS and other sensors enabled.
+         */
+        public static final int LOCATION_MODE_SENSORS_ONLY = 1;
+        /**
+         * Reduced power usage, such as limiting the number of GPS updates per hour. Requests
+         * with {@link android.location.Criteria#POWER_HIGH} may be downgraded to
+         * {@link android.location.Criteria#POWER_MEDIUM}.
+         */
+        public static final int LOCATION_MODE_BATTERY_SAVING = 2;
+        /**
+         * Best-effort location computation allowed.
+         */
+        public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
 
         /**
          * A flag containing settings used for biometric weak
@@ -3494,10 +3648,137 @@ public final class Settings {
                 "accessibility_display_magnification_auto_update";
 
         /**
+         * Setting that specifies whether timed text (captions) should be
+         * displayed in video content. Text display properties are controlled by
+         * the following settings:
+         * <ul>
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_LOCALE}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_EDGE_COLOR}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_EDGE_TYPE}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_TYPEFACE}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_FONT_SCALE}
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_ENABLED =
+                "accessibility_captioning_enabled";
+
+        /**
+         * Setting that specifies the language for captions as a locale string,
+         * e.g. en_US.
+         *
+         * @see java.util.Locale#toString
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_LOCALE =
+                "accessibility_captioning_locale";
+
+        /**
+         * Integer property that specifies the preset style for captions, one
+         * of:
+         * <ul>
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#PRESET_CUSTOM}
+         * <li>a valid index of {@link android.view.accessibility.CaptioningManager.CaptionStyle#PRESETS}
+         * </ul>
+         *
+         * @see java.util.Locale#toString
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_PRESET =
+                "accessibility_captioning_preset";
+
+        /**
+         * Integer property that specifes the background color for captions as a
+         * packed 32-bit color.
+         *
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR =
+                "accessibility_captioning_background_color";
+
+        /**
+         * Integer property that specifes the foreground color for captions as a
+         * packed 32-bit color.
+         *
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR =
+                "accessibility_captioning_foreground_color";
+
+        /**
+         * Integer property that specifes the edge type for captions, one of:
+         * <ul>
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#EDGE_TYPE_NONE}
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#EDGE_TYPE_OUTLINE}
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#EDGE_TYPE_DROP_SHADOW}
+         * </ul>
+         *
+         * @see #ACCESSIBILITY_CAPTIONING_EDGE_COLOR
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_EDGE_TYPE =
+                "accessibility_captioning_edge_type";
+
+        /**
+         * Integer property that specifes the edge color for captions as a
+         * packed 32-bit color.
+         *
+         * @see #ACCESSIBILITY_CAPTIONING_EDGE_TYPE
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_EDGE_COLOR =
+                "accessibility_captioning_edge_color";
+
+        /**
+         * String property that specifies the typeface for captions, one of:
+         * <ul>
+         * <li>DEFAULT
+         * <li>MONOSPACE
+         * <li>SANS_SERIF
+         * <li>SERIF
+         * </ul>
+         *
+         * @see android.graphics.Typeface
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_TYPEFACE =
+                "accessibility_captioning_typeface";
+
+        /**
+         * Floating point property that specifies font scaling for captions.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_FONT_SCALE =
+                "accessibility_captioning_font_scale";
+
+        /**
          * The timout for considering a press to be a long press in milliseconds.
          * @hide
          */
         public static final String LONG_PRESS_TIMEOUT = "long_press_timeout";
+
+        /**
+         * List of the enabled print services.
+         * @hide
+         */
+        public static final String ENABLED_PRINT_SERVICES =
+            "enabled_print_services";
+
+        /**
+         * List of the system print services we enabled on first boot. On
+         * first boot we enable all system, i.e. bundled print services,
+         * once, so they work out-of-the-box.
+         * @hide
+         */
+        public static final String ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES =
+            "enabled_on_first_boot_system_print_services";
 
         /**
          * Setting to always use the default text-to-speech settings regardless
@@ -3968,6 +4249,14 @@ public final class Settings {
          */
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
 
+        /**
+         * Stores whether an user has consented to have apps verified through PAM.
+         * The value is boolean (1 or 0).
+         *
+         * @hide
+         */
+        public static final String PACKAGE_VERIFIER_USER_CONSENT =
+            "package_verifier_user_consent";
 
         /**
          * The {@link ComponentName} string of the selected spell checker service which is
@@ -4067,6 +4356,18 @@ public final class Settings {
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
 
         /**
+         * The default NFC payment component
+         * @hide
+         */
+        public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
+
+        /**
+         * Specifies the package name currently configured to be the primary sms application
+         * @hide
+         */
+        public static final String SMS_DEFAULT_APPLICATION = "sms_default_application";
+
+        /**
          * Name of a package that the current user has explicitly allowed to see all of that
          * user's notifications.
          *
@@ -4074,12 +4375,25 @@ public final class Settings {
          */
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
+        /** @hide */
+        public static final String BAR_SERVICE_COMPONENT = "bar_service_component";
+
+        /** @hide */
+        public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
+
         /**
-         * Whether or not to enable the dial pad autocomplete functionality.
+         * This is the query URI for finding a print service to install.
          *
          * @hide
          */
-        public static final String DIALPAD_AUTOCOMPLETE = "dialpad_autocomplete";
+        public static final String PRINT_SERVICE_SEARCH_URI = "print_service_search_uri";
+
+        /**
+         * This is the query URI for finding a NFC payment service to install.
+         *
+         * @hide
+         */
+        public static final String PAYMENT_SERVICE_SEARCH_URI = "payment_service_search_uri";
 
         /**
          * This are the settings to be backed up.
@@ -4106,6 +4420,14 @@ public final class Settings {
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
             ACCESSIBILITY_SPEAK_PASSWORD,
+            ACCESSIBILITY_CAPTIONING_ENABLED,
+            ACCESSIBILITY_CAPTIONING_LOCALE,
+            ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
+            ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
+            ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
+            ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
+            ACCESSIBILITY_CAPTIONING_TYPEFACE,
+            ACCESSIBILITY_CAPTIONING_FONT_SCALE,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
             TTS_DEFAULT_PITCH,
@@ -4121,16 +4443,20 @@ public final class Settings {
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
-            UI_NIGHT_MODE,
-            DIALPAD_AUTOCOMPLETE
+            UI_NIGHT_MODE
         };
 
         /**
          * Helper method for determining if a location provider is enabled.
+         *
          * @param cr the content resolver to use
          * @param provider the location provider to query
          * @return true if the provider is enabled
+         *
+         * @deprecated use {@link #LOCATION_MODE} or
+         *             {@link LocationManager#isProviderEnabled(String)}
          */
+        @Deprecated
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
             return isLocationProviderEnabledForUser(cr, provider, UserHandle.myUserId());
         }
@@ -4141,8 +4467,11 @@ public final class Settings {
          * @param provider the location provider to query
          * @param userId the userId to query
          * @return true if the provider is enabled
+         * @deprecated use {@link #LOCATION_MODE} or
+         *             {@link LocationManager#isProviderEnabled(String)}
          * @hide
          */
+        @Deprecated
         public static final boolean isLocationProviderEnabledForUser(ContentResolver cr, String provider, int userId) {
             String allowedProviders = Settings.Secure.getStringForUser(cr,
                     LOCATION_PROVIDERS_ALLOWED, userId);
@@ -4154,7 +4483,9 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
+         * @deprecated use {@link #putInt(ContentResolver, String, int)} and {@link #LOCATION_MODE}
          */
+        @Deprecated
         public static final void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
             setLocationProviderEnabledForUser(cr, provider, enabled, UserHandle.myUserId());
@@ -4162,24 +4493,99 @@ public final class Settings {
 
         /**
          * Thread-safe method for enabling or disabling a single location provider.
+         *
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
          * @param userId the userId for which to enable/disable providers
+         * @return true if the value was set, false on database errors
+         * @deprecated use {@link #putIntForUser(ContentResolver, String, int, int)} and
+         *             {@link #LOCATION_MODE}
          * @hide
          */
-        public static final void setLocationProviderEnabledForUser(ContentResolver cr,
+        @Deprecated
+        public static final boolean setLocationProviderEnabledForUser(ContentResolver cr,
                 String provider, boolean enabled, int userId) {
-            // to ensure thread safety, we write the provider name with a '+' or '-'
-            // and let the SettingsProvider handle it rather than reading and modifying
-            // the list of enabled providers.
-            if (enabled) {
-                provider = "+" + provider;
-            } else {
-                provider = "-" + provider;
+            synchronized (mLocationSettingsLock) {
+                // to ensure thread safety, we write the provider name with a '+' or '-'
+                // and let the SettingsProvider handle it rather than reading and modifying
+                // the list of enabled providers.
+                if (enabled) {
+                    provider = "+" + provider;
+                } else {
+                    provider = "-" + provider;
+                }
+                return putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
+                        userId);
             }
-            putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
-                    userId);
+        }
+
+        /**
+         * Thread-safe method for setting the location mode to one of
+         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         *
+         * @param cr the content resolver to use
+         * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
+         * @param userId the userId for which to change mode
+         * @return true if the value was set, false on database errors
+         *
+         * @throws IllegalArgumentException if mode is not one of the supported values
+         */
+        private static final boolean setLocationModeForUser(ContentResolver cr, int mode,
+                int userId) {
+            synchronized (mLocationSettingsLock) {
+                boolean gps = false;
+                boolean network = false;
+                switch (mode) {
+                    case LOCATION_MODE_OFF:
+                        break;
+                    case LOCATION_MODE_SENSORS_ONLY:
+                        gps = true;
+                        break;
+                    case LOCATION_MODE_BATTERY_SAVING:
+                        network = true;
+                        break;
+                    case LOCATION_MODE_HIGH_ACCURACY:
+                        gps = true;
+                        network = true;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid location mode: " + mode);
+                }
+                boolean gpsSuccess = Settings.Secure.setLocationProviderEnabledForUser(
+                        cr, LocationManager.GPS_PROVIDER, gps, userId);
+                boolean nlpSuccess = Settings.Secure.setLocationProviderEnabledForUser(
+                        cr, LocationManager.NETWORK_PROVIDER, network, userId);
+                return gpsSuccess && nlpSuccess;
+            }
+        }
+
+        /**
+         * Thread-safe method for reading the location mode, returns one of
+         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         *
+         * @param cr the content resolver to use
+         * @param userId the userId for which to read the mode
+         * @return the location mode
+         */
+        private static final int getLocationModeForUser(ContentResolver cr, int userId) {
+            synchronized (mLocationSettingsLock) {
+                boolean gpsEnabled = Settings.Secure.isLocationProviderEnabledForUser(
+                        cr, LocationManager.GPS_PROVIDER, userId);
+                boolean networkEnabled = Settings.Secure.isLocationProviderEnabledForUser(
+                        cr, LocationManager.NETWORK_PROVIDER, userId);
+                if (gpsEnabled && networkEnabled) {
+                    return LOCATION_MODE_HIGH_ACCURACY;
+                } else if (gpsEnabled) {
+                    return LOCATION_MODE_SENSORS_ONLY;
+                } else if (networkEnabled) {
+                    return LOCATION_MODE_BATTERY_SAVING;
+                } else {
+                    return LOCATION_MODE_OFF;
+                }
+            }
         }
     }
 
@@ -4776,6 +5182,29 @@ public final class Settings {
        public static final String WIFI_DISPLAY_ON = "wifi_display_on";
 
        /**
+        * Whether Wifi display certification mode is enabled/disabled
+        * 0=disabled. 1=enabled.
+        * @hide
+        */
+       public static final String WIFI_DISPLAY_CERTIFICATION_ON =
+               "wifi_display_certification_on";
+
+       /**
+        * WPS Configuration method used by Wifi display, this setting only
+        * takes effect when WIFI_DISPLAY_CERTIFICATION_ON is 1 (enabled).
+        *
+        * Possible values are:
+        *
+        * WpsInfo.INVALID: use default WPS method chosen by framework
+        * WpsInfo.PBC    : use Push button
+        * WpsInfo.KEYPAD : use Keypad
+        * WpsInfo.DISPLAY: use Display
+        * @hide
+        */
+       public static final String WIFI_DISPLAY_WPS_CONFIG =
+           "wifi_display_wps_config";
+
+       /**
         * Whether to notify the user of open networks.
         * <p>
         * If not connected and the scan results have an open network, we will
@@ -4935,6 +5364,13 @@ public final class Settings {
         */
        public static final String DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS =
                "data_stall_alarm_aggressive_delay_in_ms";
+
+       /**
+        * The number of milliseconds to allow the provisioning apn to remain active
+        * @hide
+        */
+       public static final String PROVISIONING_APN_ALARM_DELAY_IN_MS =
+               "provisioning_apn_alarm_delay_in_ms";
 
        /**
         * The interval in milliseconds at which to check gprs registration
@@ -5124,6 +5560,25 @@ public final class Settings {
          */
         public static final String CONNECTIVITY_CHANGE_DELAY = "connectivity_change_delay";
 
+
+        /**
+         * Network sampling interval, in seconds. We'll generate link information
+         * about bytes/packets sent and error rates based on data sampled in this interval
+         *
+         * @hide
+         */
+
+        public static final String CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS =
+                "connectivity_sampling_interval_in_seconds";
+
+        /**
+         * The series of successively longer delays used in retrying to download PAC file.
+         * Last delay is used between successful PAC downloads.
+         *
+         * @hide
+         */
+        public static final String PAC_CHANGE_DELAY = "pac_change_delay";
+
         /**
          * Setting to turn off captive portal detection. Feature is enabled by
          * default and the setting needs to be set to 0 to disable it.
@@ -5219,6 +5674,13 @@ public final class Settings {
                 GLOBAL_HTTP_PROXY_EXCLUSION_LIST = "global_http_proxy_exclusion_list";
 
         /**
+         * The location PAC File for the proxy.
+         * @hide
+         */
+        public static final String
+                GLOBAL_HTTP_PROXY_PAC = "global_proxy_pac_url";
+
+        /**
          * Enables the UI setting to allow the user to specify the global HTTP
          * proxy and associated exclusion list.
          *
@@ -5242,6 +5704,9 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX = "bluetooth_input_device_priority_";
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_MAP_PRIORITY_PREFIX = "bluetooth_map_priority_";
 
         /**
          * Get the key that retrieves a bluetooth headset's priority.
@@ -5267,6 +5732,13 @@ public final class Settings {
             return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
 
+        /**
+         * Get the key that retrieves a bluetooth map priority.
+         * @hide
+         */
+        public static final String getBluetoothMapPriorityKey(String address) {
+            return BLUETOOTH_MAP_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
         /**
          * Scaling factor for normal window animations. Setting to 0 will
          * disable window animations.
@@ -5442,6 +5914,22 @@ public final class Settings {
         public static final String SELINUX_STATUS = "selinux_status";
 
         /**
+         * Developer setting to force RTL layout.
+         * @hide
+         */
+        public static final String DEVELOPMENT_FORCE_RTL = "debug.force_rtl";
+
+        /**
+         * Milliseconds after screen-off after which low battery sounds will be silenced.
+         *
+         * If zero, battery sounds will always play.
+         * Defaults to @integer/def_low_battery_sound_timeout in SettingsProvider.
+         *
+         * @hide
+         */
+        public static final String LOW_BATTERY_SOUND_TIMEOUT = "low_battery_sound_timeout";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5460,7 +5948,6 @@ public final class Settings {
         public static final String[] SETTINGS_TO_BACKUP = {
             BUGREPORT_IN_POWER_MENU,
             STAY_ON_WHILE_PLUGGED_IN,
-            MODE_RINGER,
             AUTO_TIME,
             AUTO_TIME_ZONE,
             POWER_SOUNDS_ENABLED,

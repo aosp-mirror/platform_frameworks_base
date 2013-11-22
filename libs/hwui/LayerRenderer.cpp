@@ -130,10 +130,7 @@ void LayerRenderer::generateMesh() {
     if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
         if (mLayer->mesh) {
             delete[] mLayer->mesh;
-            delete[] mLayer->meshIndices;
-
             mLayer->mesh = NULL;
-            mLayer->meshIndices = NULL;
             mLayer->meshElementCount = 0;
         }
 
@@ -154,17 +151,11 @@ void LayerRenderer::generateMesh() {
 
     if (mLayer->mesh && mLayer->meshElementCount < elementCount) {
         delete[] mLayer->mesh;
-        delete[] mLayer->meshIndices;
-
         mLayer->mesh = NULL;
-        mLayer->meshIndices = NULL;
     }
 
-    bool rebuildIndices = false;
     if (!mLayer->mesh) {
         mLayer->mesh = new TextureVertex[count * 4];
-        mLayer->meshIndices = new uint16_t[elementCount];
-        rebuildIndices = true;
     }
     mLayer->meshElementCount = elementCount;
 
@@ -173,7 +164,6 @@ void LayerRenderer::generateMesh() {
     const float height = mLayer->layer.getHeight();
 
     TextureVertex* mesh = mLayer->mesh;
-    uint16_t* indices = mLayer->meshIndices;
 
     for (size_t i = 0; i < count; i++) {
         const android::Rect* r = &rects[i];
@@ -187,17 +177,6 @@ void LayerRenderer::generateMesh() {
         TextureVertex::set(mesh++, r->right, r->top, u2, v1);
         TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
         TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
-
-        if (rebuildIndices) {
-            uint16_t quad = i * 4;
-            int index = i * 6;
-            indices[index    ] = quad;       // top-left
-            indices[index + 1] = quad + 1;   // top-right
-            indices[index + 2] = quad + 2;   // bottom-left
-            indices[index + 3] = quad + 2;   // bottom-left
-            indices[index + 4] = quad + 1;   // top-right
-            indices[index + 5] = quad + 3;   // bottom-right
-        }
     }
 }
 
@@ -436,7 +415,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
         if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         caches.activeTexture(0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        caches.bindTexture(texture);
 
         glPixelStorei(GL_PACK_ALIGNMENT, bitmap->bytesPerPixel());
 
@@ -467,7 +446,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
             mat4 texTransform(layer->getTexTransform());
 
             mat4 invert;
-            invert.translate(0.0f, 1.0f, 0.0f);
+            invert.translate(0.0f, 1.0f);
             invert.scale(1.0f, -1.0f, 1.0f);
             layer->getTexTransform().multiply(invert);
 
@@ -498,7 +477,7 @@ error:
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
         layer->setAlpha(alpha, mode);
         layer->setFbo(previousLayerFbo);
-        glDeleteTextures(1, &texture);
+        caches.deleteTexture(texture);
         caches.fboCache.put(fbo);
         glViewport(previousViewport[0], previousViewport[1],
                 previousViewport[2], previousViewport[3]);

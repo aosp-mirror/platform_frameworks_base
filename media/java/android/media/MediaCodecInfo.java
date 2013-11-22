@@ -72,7 +72,8 @@ public final class MediaCodecInfo {
     /**
      * Encapsulates the capabilities of a given codec component.
      * For example, what profile/level combinations it supports and what colorspaces
-     * it is capable of providing the decoded data in.
+     * it is capable of providing the decoded data in, as well as some
+     * codec-type specific capability flags.
      * <p>You can get an instance for a given {@link MediaCodecInfo} object with
      * {@link MediaCodecInfo#getCapabilitiesForType getCapabilitiesForType()}, passing a MIME type.
      */
@@ -139,6 +140,24 @@ public final class MediaCodecInfo {
          * OMX_COLOR_FORMATTYPE.
          */
         public int[] colorFormats;
+
+        private final static int FLAG_SupportsAdaptivePlayback       = (1 << 0);
+        private int flags;
+
+        /**
+         * <b>video decoder only</b>: codec supports seamless resolution changes.
+         */
+        public final static String FEATURE_AdaptivePlayback       = "adaptive-playback";
+
+        /**
+         * Query codec feature capabilities.
+         */
+        public final boolean isFeatureSupported(String name) {
+            if (name.equals(FEATURE_AdaptivePlayback)) {
+                return (flags & FLAG_SupportsAdaptivePlayback) != 0;
+            }
+            return false;
+        }
     };
 
     /**

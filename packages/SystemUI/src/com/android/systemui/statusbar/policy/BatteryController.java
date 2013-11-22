@@ -16,26 +16,17 @@
 
 package com.android.systemui.statusbar.policy;
 
-import java.util.ArrayList;
-
-import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.util.Slog;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.android.systemui.R;
+import java.util.ArrayList;
 
 public class BatteryController extends BroadcastReceiver {
     private static final String TAG = "StatusBar.BatteryController";
 
-    private Context mContext;
-    private ArrayList<ImageView> mIconViews = new ArrayList<ImageView>();
-    private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
 
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
             new ArrayList<BatteryStateChangeCallback>();
@@ -45,19 +36,9 @@ public class BatteryController extends BroadcastReceiver {
     }
 
     public BatteryController(Context context) {
-        mContext = context;
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(this, filter);
-    }
-
-    public void addIconView(ImageView v) {
-        mIconViews.add(v);
-    }
-
-    public void addLabelView(TextView v) {
-        mLabelViews.add(v);
     }
 
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
@@ -73,28 +54,10 @@ public class BatteryController extends BroadcastReceiver {
 
             boolean plugged = false;
             switch (status) {
-                case BatteryManager.BATTERY_STATUS_CHARGING: 
+                case BatteryManager.BATTERY_STATUS_CHARGING:
                 case BatteryManager.BATTERY_STATUS_FULL:
                     plugged = true;
                     break;
-            }
-
-            final int icon = plugged ? R.drawable.stat_sys_battery_charge
-                                     : R.drawable.stat_sys_battery;
-
-            int N = mIconViews.size();
-            for (int i=0; i<N; i++) {
-                ImageView v = mIconViews.get(i);
-                v.setImageResource(icon);
-                v.setImageLevel(level);
-                v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
-                        level));
-            }
-            N = mLabelViews.size();
-            for (int i=0; i<N; i++) {
-                TextView v = mLabelViews.get(i);
-                v.setText(mContext.getString(R.string.status_bar_settings_battery_meter_format,
-                        level));
             }
 
             for (BatteryStateChangeCallback cb : mChangeCallbacks) {

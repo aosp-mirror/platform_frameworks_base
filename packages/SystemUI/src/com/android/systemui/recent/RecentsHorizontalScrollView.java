@@ -49,16 +49,17 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     private RecentsCallback mCallback;
     protected int mLastScrollPosition;
     private SwipeHelper mSwipeHelper;
-    private RecentsScrollViewPerformanceHelper mPerformanceHelper;
+    private FadedEdgeDrawHelper mFadedEdgeDrawHelper;
     private HashSet<View> mRecycledViews;
     private int mNumItemsInOneScreenful;
+    private Runnable mOnScrollListener;
 
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, densityScale, pagingTouchSlop);
-        mPerformanceHelper = RecentsScrollViewPerformanceHelper.create(context, attrs, this, false);
+        mFadedEdgeDrawHelper = FadedEdgeDrawHelper.create(context, attrs, this, false);
         mRecycledViews = new HashSet<View>();
     }
 
@@ -108,8 +109,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
             final View view = mAdapter.getView(i, old, mLinearLayout);
 
-            if (mPerformanceHelper != null) {
-                mPerformanceHelper.addViewCallback(view);
+            if (mFadedEdgeDrawHelper != null) {
+                mFadedEdgeDrawHelper.addViewCallback(view);
             }
 
             OnTouchListener noOpListener = new OnTouchListener() {
@@ -234,26 +235,10 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
+    public void drawFadedEdges(Canvas canvas, int left, int right, int top, int bottom) {
+        if (mFadedEdgeDrawHelper != null) {
 
-        if (mPerformanceHelper != null) {
-            int paddingLeft = mPaddingLeft;
-            final boolean offsetRequired = isPaddingOffsetRequired();
-            if (offsetRequired) {
-                paddingLeft += getLeftPaddingOffset();
-            }
-
-            int left = mScrollX + paddingLeft;
-            int right = left + mRight - mLeft - mPaddingRight - paddingLeft;
-            int top = mScrollY + getFadeTop(offsetRequired);
-            int bottom = top + getFadeHeight(offsetRequired);
-
-            if (offsetRequired) {
-                right += getRightPaddingOffset();
-                bottom += getBottomPaddingOffset();
-            }
-            mPerformanceHelper.drawCallback(canvas,
+            mFadedEdgeDrawHelper.drawCallback(canvas,
                     left, right, top, bottom, mScrollX, mScrollY,
                     0, 0,
                     getLeftFadingEdgeStrength(), getRightFadingEdgeStrength(), mPaddingTop);
@@ -261,9 +246,21 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+       super.onScrollChanged(l, t, oldl, oldt);
+       if (mOnScrollListener != null) {
+           mOnScrollListener.run();
+       }
+    }
+
+    public void setOnScrollListener(Runnable listener) {
+        mOnScrollListener = listener;
+    }
+
+    @Override
     public int getVerticalFadingEdgeLength() {
-        if (mPerformanceHelper != null) {
-            return mPerformanceHelper.getVerticalFadingEdgeLengthCallback();
+        if (mFadedEdgeDrawHelper != null) {
+            return mFadedEdgeDrawHelper.getVerticalFadingEdgeLength();
         } else {
             return super.getVerticalFadingEdgeLength();
         }
@@ -271,8 +268,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
     @Override
     public int getHorizontalFadingEdgeLength() {
-        if (mPerformanceHelper != null) {
-            return mPerformanceHelper.getHorizontalFadingEdgeLengthCallback();
+        if (mFadedEdgeDrawHelper != null) {
+            return mFadedEdgeDrawHelper.getHorizontalFadingEdgeLength();
         } else {
             return super.getHorizontalFadingEdgeLength();
         }
@@ -290,9 +287,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
     @Override
     public void onAttachedToWindow() {
-        if (mPerformanceHelper != null) {
-            mPerformanceHelper.onAttachedToWindowCallback(
-                    mCallback, mLinearLayout, isHardwareAccelerated());
+        if (mFadedEdgeDrawHelper != null) {
+            mFadedEdgeDrawHelper.onAttachedToWindowCallback(mLinearLayout, isHardwareAccelerated());
         }
     }
 

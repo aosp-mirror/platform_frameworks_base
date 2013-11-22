@@ -139,7 +139,7 @@ files for further customization.
 </p>
 <p>
 <a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Action Bar Icons (@iconography page)']);"
-   href="{@docRoot}downloads/design/Android_Design_Icons_20120814.zip">Download the Action Bar Icon Pack</a>
+   href="{@docRoot}downloads/design/Android_Design_Icons_20130926.zip">Download the Action Bar Icon Pack</a>
 </p>
 
 <div class="layout-content-row">

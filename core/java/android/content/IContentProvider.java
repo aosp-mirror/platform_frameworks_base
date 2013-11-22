@@ -46,9 +46,11 @@ public interface IContentProvider extends IInterface {
             throws RemoteException;
     public int update(String callingPkg, Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException;
-    public ParcelFileDescriptor openFile(String callingPkg, Uri url, String mode)
+    public ParcelFileDescriptor openFile(
+            String callingPkg, Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
-    public AssetFileDescriptor openAssetFile(String callingPkg, Uri url, String mode)
+    public AssetFileDescriptor openAssetFile(
+            String callingPkg, Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
     public ContentProviderResult[] applyBatch(String callingPkg,
             ArrayList<ContentProviderOperation> operations)
@@ -57,10 +59,13 @@ public interface IContentProvider extends IInterface {
             throws RemoteException;
     public ICancellationSignal createCancellationSignal() throws RemoteException;
 
+    public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException;
+    public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException;
+
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
     public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri url, String mimeType,
-            Bundle opts) throws RemoteException, FileNotFoundException;
+            Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException;
 
     /* IPC constants */
     static final String descriptor = "android.content.IContentProvider";
@@ -78,4 +83,6 @@ public interface IContentProvider extends IInterface {
     static final int GET_STREAM_TYPES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 21;
     static final int OPEN_TYPED_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 22;
     static final int CREATE_CANCELATION_SIGNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 23;
+    static final int CANONICALIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 24;
+    static final int UNCANONICALIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 25;
 }

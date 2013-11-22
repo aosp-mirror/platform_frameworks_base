@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "VideoEditorClasses"
 
 #include <VideoEditorClasses.h>
 #include <VideoEditorJava.h>

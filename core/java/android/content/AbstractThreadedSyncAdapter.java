@@ -147,6 +147,7 @@ public abstract class AbstractThreadedSyncAdapter {
     }
 
     private class ISyncAdapterImpl extends ISyncAdapter.Stub {
+        @Override
         public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) {
             final SyncContext syncContextClient = new SyncContext(syncContext);
@@ -187,6 +188,7 @@ public abstract class AbstractThreadedSyncAdapter {
             }
         }
 
+        @Override
         public void cancelSync(ISyncContext syncContext) {
             // synchronize to make sure that mSyncThreads doesn't change between when we
             // check it and when we use it

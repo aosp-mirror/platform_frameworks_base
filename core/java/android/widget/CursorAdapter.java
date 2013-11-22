@@ -26,9 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Adapter that exposes data from a {@link android.database.Cursor Cursor} to a 
- * {@link android.widget.ListView ListView} widget. The Cursor must include 
- * a column named "_id" or this class will not work.
+ * Adapter that exposes data from a {@link android.database.Cursor Cursor} to a
+ * {@link android.widget.ListView ListView} widget.
+ * <p>
+ * The Cursor must include a column named "_id" or this class will not work.
+ * Additionally, using {@link android.database.MergeCursor} with this class will
+ * not work if the merged Cursors have overlapping values in their "_id"
+ * columns.
  */
 public abstract class CursorAdapter extends BaseAdapter implements Filterable,
         CursorFilter.CursorFilterClient {
