@@ -64,4 +64,9 @@ public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
     public void limitReached(String limitName, String iface) {
         // default no-op
     }
+
+    @Override
+    public void interfaceDnsServerInfo(String iface, long lifetime, String[] servers) {
+        // default no-op
+    }
 }

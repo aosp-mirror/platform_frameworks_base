@@ -136,6 +136,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int BandwidthControl          = 601;
         public static final int InterfaceClassActivity    = 613;
         public static final int InterfaceAddressChange    = 614;
+        public static final int InterfaceDnsServerInfo    = 615;
     }
 
     /**
@@ -431,6 +432,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mObservers.finishBroadcast();
     }
 
+    /**
+     * Notify our observers of DNS server information received.
+     */
+    private void notifyInterfaceDnsServerInfo(String iface, long lifetime, String[] addresses) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            try {
+                mObservers.getBroadcastItem(i).interfaceDnsServerInfo(iface, lifetime, addresses);
+            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
+            }
+        }
+        mObservers.finishBroadcast();
+    }
+
     //
     // Netd Callback handling
     //
@@ -532,6 +548,26 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         notifyAddressUpdated(cooked[3], cooked[4], flags, scope);
                     } else {
                         notifyAddressRemoved(cooked[3], cooked[4], flags, scope);
+                    }
+                    return true;
+                    // break;
+            case NetdResponseCode.InterfaceDnsServerInfo:
+                    /*
+                     * Information about available DNS servers has been received.
+                     * Format: "NNN DnsInfo servers <interface> <lifetime> <servers>"
+                     */
+                    long lifetime;  // Actually a 32-bit unsigned integer.
+
+                    if (cooked.length == 6 &&
+                        cooked[1].equals("DnsInfo") &&
+                        cooked[2].equals("servers")) {
+                        try {
+                            lifetime = Long.parseLong(cooked[4]);
+                        } catch (NumberFormatException e) {
+                            throw new IllegalStateException(errorMessage);
+                        }
+                        String[] servers = cooked[5].split(",");
+                        notifyInterfaceDnsServerInfo(cooked[3], lifetime, servers);
                     }
                     return true;
                     // break;
