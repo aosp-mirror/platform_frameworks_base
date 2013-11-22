@@ -2648,6 +2648,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.bool.def_guest_user_enabled);
             loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED, ImsConfig.FeatureValueConstants.ON);
             // --- New global settings start here
+            loadIntegerSetting(stmt, Settings.Global.TETHER_DUN_REQUIRED,
+                    R.integer.def_tether_dun_required);
+
         } finally {
             if (stmt != null) stmt.close();
         }
