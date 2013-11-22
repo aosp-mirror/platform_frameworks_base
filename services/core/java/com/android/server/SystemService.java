@@ -27,6 +27,7 @@ public abstract class SystemService {
     /*
      * Boot Phases
      */
+    public static final int PHASE_LOCK_SETTINGS_READY = 480;
     public static final int PHASE_SYSTEM_SERVICES_READY = 500;
     public static final int PHASE_THIRD_PARTY_APPS_CAN_START = 600;
     public static final int PHASE_BOOT_COMPLETE = 1000;
@@ -38,6 +39,10 @@ public abstract class SystemService {
         mContext = context;
         mManager = manager;
         onCreate(context);
+    }
+
+    public final boolean isSafeMode() {
+        return mManager.isSafeMode();
     }
 
     /**
