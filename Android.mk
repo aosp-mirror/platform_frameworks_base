@@ -681,10 +681,10 @@ LOCAL_MODULE := online-sdk
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
-		-hdf android.whichdoc online
-#		$(sample_groups) \
-#		-hdf android.hasSamples true \
-#		-samplesdir $(samples_dir)
+		-hdf android.whichdoc online \
+		$(sample_groups) \
+		-hdf android.hasSamples true \
+		-samplesdir $(samples_dir)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
