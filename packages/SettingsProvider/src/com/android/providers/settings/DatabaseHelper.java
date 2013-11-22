@@ -2721,6 +2721,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     ImsConfig.FeatureValueConstants.ON);
 
+            loadIntegerSetting(stmt, Settings.Global.TETHER_DUN_REQUIRED,
+                    R.integer.def_tether_dun_required);
+
             /*
              * IMPORTANT: Do not add any more upgrade steps here as the global,
              * secure, and system settings are no longer stored in a database
