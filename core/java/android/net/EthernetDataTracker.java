@@ -402,7 +402,7 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
      * for this network.
      */
     public String getTcpBufferSizesPropName() {
-        return "net.tcp.buffersize.wifi";
+        return "net.tcp.buffersize.ethernet";
     }
 
     public void setDependencyMet(boolean met) {
