@@ -182,9 +182,12 @@ public:
     }
 
     inline float strokeWidthOutset() {
-        float width = mPaint->getStrokeWidth();
-        if (width == 0) return 0.5f; // account for hairline
-        return width * 0.5f;
+        // since anything AA stroke with less than 1.0 pixel width is drawn with an alpha-reduced
+        // 1.0 stroke, treat 1.0 as minimum.
+
+        // TODO: it would be nice if this could take scale into account, but scale isn't stable
+        // since higher levels of the view hierarchy can change scale out from underneath it.
+        return fmaxf(mPaint->getStrokeWidth(), 1) * 0.5f;
     }
 
 protected:

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "PathTessellator"
+#define LOG_TAG "OpenGLRenderer"
 #define LOG_NDEBUG 1
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
@@ -57,9 +57,12 @@ namespace uirenderer {
 #define ROUND_CAP_THRESH 0.25f
 #define PI 3.1415926535897932f
 
-void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint,
-        bool forceExpand) {
-    if (forceExpand || paint->getStyle() != SkPaint::kFill_Style) {
+/**
+ * Note: this function doesn't account for the AA case with sub-pixel line thickness (not just 0 <
+ * width < 1.0, canvas scale factors in as well) so this can't be used for points/lines
+ */
+void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint) {
+    if (paint->getStyle() != SkPaint::kFill_Style) {
         float outset = paint->getStrokeWidth() * 0.5f;
         if (outset == 0) outset = 0.5f; // account for hairline
         bounds.outset(outset, outset);
@@ -158,6 +161,17 @@ public:
             return neededDivisions;
         }
         return 0;
+    }
+
+    /**
+     * Outset the bounds of point data (for line endpoints or points) to account for AA stroke
+     * geometry.
+     */
+    void expandBoundsForStrokeAA(SkRect& bounds) const {
+        float outset = halfStrokeWidth;
+        if (outset == 0) outset = 0.5f;
+        bounds.outset(outset * inverseScaleX + Vertex::gGeometryFudgeFactor,
+                outset * inverseScaleY + Vertex::gGeometryFudgeFactor);
     }
 };
 
@@ -329,7 +343,7 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
  * 3 - zig zag back and forth inside the shape to fill it (using perimeter.size() vertices)
  */
 void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Vertex>& perimeter,
-        VertexBuffer& vertexBuffer) {
+        VertexBuffer& vertexBuffer, float maxAlpha = 1.0f) {
     AlphaVertex* buffer = vertexBuffer.alloc<AlphaVertex>(perimeter.size() * 3 + 2);
 
     // generate alpha points - fill Alpha vertex gaps in between each point with
@@ -357,7 +371,7 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
         AlphaVertex::set(&buffer[currentIndex++],
                 current->x - totalOffset.x,
                 current->y - totalOffset.y,
-                1.0f);
+                maxAlpha);
 
         last = current;
         current = next;
@@ -829,11 +843,14 @@ void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* 
         getFillVerticesFromPerimeter(outlineVertices, tempBuffer);
         instanceVertices<Vertex>(tempBuffer, vertexBuffer, points, count, bounds);
     } else {
-        getFillVerticesFromPerimeterAA(paintInfo, outlineVertices, tempBuffer);
+        // note: pass maxAlpha directly, since we want fill to be alpha modulated
+        getFillVerticesFromPerimeterAA(paintInfo, outlineVertices, tempBuffer, paintInfo.maxAlpha);
         instanceVertices<AlphaVertex>(tempBuffer, vertexBuffer, points, count, bounds);
     }
 
-    expandBoundsForStroke(bounds, paint, true); // force-expand bounds to incorporate stroke
+    // expand bounds from vertex coords to pixel data
+    paintInfo.expandBoundsForStrokeAA(bounds);
+
 }
 
 void PathTessellator::tessellateLines(const float* points, int count, SkPaint* paint,
@@ -873,14 +890,15 @@ void PathTessellator::tessellateLines(const float* points, int count, SkPaint* p
         expandRectToCoverVertex(bounds, tempVerticesData[1]);
     }
 
-    expandBoundsForStroke(bounds, paint, true); // force-expand bounds to incorporate stroke
-
     // since multiple objects tessellated into buffer, separate them with degen tris
     if (paintInfo.isAA) {
         vertexBuffer.createDegenerateSeparators<AlphaVertex>(lineAllocSize);
     } else {
         vertexBuffer.createDegenerateSeparators<Vertex>(lineAllocSize);
     }
+
+    // expand bounds from vertex coords to pixel data
+    paintInfo.expandBoundsForStrokeAA(bounds);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

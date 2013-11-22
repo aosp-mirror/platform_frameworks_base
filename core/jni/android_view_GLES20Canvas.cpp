@@ -298,7 +298,7 @@ static jint android_view_GLES20Canvas_saveLayerAlphaClip(JNIEnv* env, jobject cl
 
 static bool android_view_GLES20Canvas_quickReject(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom) {
-    return renderer->quickRejectNoScissor(left, top, right, bottom);
+    return renderer->quickRejectConservative(left, top, right, bottom);
 }
 
 static bool android_view_GLES20Canvas_clipRectF(JNIEnv* env, jobject clazz,

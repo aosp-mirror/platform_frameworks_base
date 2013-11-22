@@ -213,6 +213,13 @@ public:
         bottom = floorf(bottom + 0.5f);
     }
 
+    void roundOut() {
+        left = floorf(left);
+        top = floorf(top);
+        right = ceilf(right);
+        bottom = ceilf(bottom);
+    }
+
     void dump() const {
         ALOGD("Rect[l=%f t=%f r=%f b=%f]", left, top, right, bottom);
     }
