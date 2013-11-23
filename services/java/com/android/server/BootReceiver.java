@@ -120,6 +120,8 @@ public class BootReceiver extends BroadcastReceiver {
             // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
             addFileToDropBox(db, prefs, headers, "/proc/last_kmsg",
                     -LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addFileToDropBox(db, prefs, headers, "/sys/fs/pstore/console-ramoops",
+                    -LOG_SIZE, "SYSTEM_LAST_KMSG");
             addFileToDropBox(db, prefs, headers, "/cache/recovery/log",
                     -LOG_SIZE, "SYSTEM_RECOVERY_LOG");
             addFileToDropBox(db, prefs, headers, "/data/dontpanic/apanic_console",
@@ -184,6 +186,11 @@ public class BootReceiver extends BroadcastReceiver {
 
         File file = new File("/proc/last_kmsg");
         long fileTime = file.lastModified();
+        if (fileTime <= 0) {
+            file = new File("/sys/fs/pstore/console-ramoops");
+            fileTime = file.lastModified();
+        }
+
         if (fileTime <= 0) return;  // File does not exist
 
         if (prefs != null) {
