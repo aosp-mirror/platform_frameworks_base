@@ -20058,16 +20058,24 @@ package android.provider {
   public static class CallLog.Calls implements android.provider.BaseColumns {
     ctor public CallLog.Calls();
     method public static java.lang.String getLastOutgoingCall(android.content.Context);
+    field public static final java.lang.String CACHED_FORMATTED_NUMBER = "formatted_number";
+    field public static final java.lang.String CACHED_LOOKUP_URI = "lookup_uri";
+    field public static final java.lang.String CACHED_MATCHED_NUMBER = "matched_number";
     field public static final java.lang.String CACHED_NAME = "name";
+    field public static final java.lang.String CACHED_NORMALIZED_NUMBER = "normalized_number";
     field public static final java.lang.String CACHED_NUMBER_LABEL = "numberlabel";
     field public static final java.lang.String CACHED_NUMBER_TYPE = "numbertype";
+    field public static final java.lang.String CACHED_PHOTO_ID = "photo_id";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/calls";
     field public static final android.net.Uri CONTENT_URI;
+    field public static final android.net.Uri CONTENT_URI_WITH_VOICEMAIL;
+    field public static final java.lang.String COUNTRY_ISO = "countryiso";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
     field public static final java.lang.String DURATION = "duration";
+    field public static final java.lang.String GEOCODED_LOCATION = "geocoded_location";
     field public static final int INCOMING_TYPE = 1; // 0x1
     field public static final java.lang.String IS_READ = "is_read";
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
@@ -20082,6 +20090,8 @@ package android.provider {
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
     field public static final java.lang.String TYPE = "type";
+    field public static final int VOICEMAIL_TYPE = 4; // 0x4
+    field public static final java.lang.String VOICEMAIL_URI = "voicemail_uri";
   }
 
   public deprecated class Contacts {
