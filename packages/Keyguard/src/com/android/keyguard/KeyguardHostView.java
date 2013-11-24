@@ -72,7 +72,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     // Use this to debug all of keyguard
     public static boolean DEBUG = KeyguardViewMediator.DEBUG;
-    public static boolean DEBUGXPORT = true; // debug music transport control
+    public static boolean DEBUGXPORT = false; // debug music transport control
 
     // Found in KeyguardAppWidgetPickActivity.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
