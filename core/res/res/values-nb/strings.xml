@@ -874,7 +874,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Glemt mønsteret?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Opplåsing av konto"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"For mange forsøk på tegning av mønster"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Logg deg på med Google-kontoen din for å låse opp."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Logg på med Google-kontoen din for å låse opp."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Brukernavn (e-post)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Passord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logg på"</string>
@@ -1191,7 +1191,7 @@
     <item quantity="other" msgid="7915895323644292768">"Åpne trådløsnett i nærheten"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Pålogging til Wi-Fi-nettverk"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Logg deg på nettverket"</string>
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Logg på nettverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
@@ -1534,7 +1534,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Skriv inn den korrekte PUK-koden på nytt. Gjentatte forsøk kommer til å deaktivere SIM-kortet."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kodene stemmer ikke overens"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøk på tegning av mønster"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Logg deg på med Google-kontoen din for å låse opp."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Logg på med Google-kontoen din for å låse opp."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Brukernavn (e-postadresse)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Passord"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Logg på"</string>
