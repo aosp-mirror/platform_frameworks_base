@@ -257,8 +257,6 @@ public final class DocumentsContract {
          * {@link #MIME_TYPE_DIR}.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#createDocument(ContentResolver, Uri, String,
-         *      String)
          * @see DocumentsProvider#createDocument(String, String, String)
          */
         public static final int FLAG_DIR_SUPPORTS_CREATE = 1 << 3;
