@@ -4415,7 +4415,7 @@ public class Intent implements Parcelable, Cloneable {
      * Return the {@link ClipData} associated with this Intent.  If there is
      * none, returns null.  See {@link #setClipData} for more information.
      *
-     * @see #setClipData;
+     * @see #setClipData
      */
     public ClipData getClipData() {
         return mClipData;
@@ -7153,8 +7153,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param type MIME data type to normalize
      * @return normalized MIME data type, or null if the input was null
-     * @see {@link #setType}
-     * @see {@link #setTypeAndNormalize}
+     * @see #setType
+     * @see #setTypeAndNormalize
      */
     public static String normalizeMimeType(String type) {
         if (type == null) {
