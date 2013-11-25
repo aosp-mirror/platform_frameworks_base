@@ -2483,6 +2483,14 @@ public final class Settings {
             NOTIFICATION_SOUND
         };
 
+        /**
+         * When to use Wi-Fi calling
+         *
+         * @see android.telephony.TelephonyManager.WifiCallingChoices
+         * @hide
+         */
+        public static final String WHEN_TO_MAKE_WIFI_CALLS = "when_to_make_wifi_calls";
+
         // Settings moved to Settings.Secure
 
         /**

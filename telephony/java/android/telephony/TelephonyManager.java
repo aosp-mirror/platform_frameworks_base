@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.telephony.Rlog;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
@@ -62,6 +61,20 @@ public class TelephonyManager {
 
     private static ITelephonyRegistry sRegistry;
     private final Context mContext;
+
+    /**
+     * The allowed states of Wi-Fi calling.
+     *
+     * @hide
+     */
+    public interface WifiCallingChoices {
+        /** Always use Wi-Fi calling */
+        static final int ALWAYS_USE = 0;
+        /** Never use Wi-Fi calling */
+        static final int NEVER_USE = 1;
+        /** Ask the user whether to use Wi-Fi on every call */
+        static final int ASK_EVERY_TIME = 2;
+    }
 
     /** @hide */
     public TelephonyManager(Context context) {
@@ -1457,5 +1470,32 @@ public class TelephonyManager {
         if (mContext == null) return null;
         return mContext.getResources().getString(
                 com.android.internal.R.string.config_mms_user_agent_profile_url);
+    }
+
+    /**
+     * Obtain the current state of Wi-Fi calling.
+     *
+     * @hide
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    public int getWhenToMakeWifiCalls() {
+        try {
+            return getITelephony().getWhenToMakeWifiCalls();
+        } catch (RemoteException ex) {
+            return WifiCallingChoices.NEVER_USE;
+        }
+    }
+
+    /**
+     * Set the current state of Wi-Fi calling.
+     *
+     * @hide
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    public void setWhenToMakeWifiCalls(int state) {
+        try {
+            getITelephony().setWhenToMakeWifiCalls(state);
+        } catch (RemoteException ex) {
+        }
     }
 }
