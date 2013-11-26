@@ -22228,15 +22228,18 @@ package android.provider {
 package android.renderscript {
 
   public class Allocation extends android.renderscript.BaseObj {
+    method public void copy1DRangeFrom(int, int, java.lang.Object);
     method public void copy1DRangeFrom(int, int, int[]);
     method public void copy1DRangeFrom(int, int, short[]);
     method public void copy1DRangeFrom(int, int, byte[]);
     method public void copy1DRangeFrom(int, int, float[]);
     method public void copy1DRangeFrom(int, int, android.renderscript.Allocation, int);
+    method public void copy1DRangeFromUnchecked(int, int, java.lang.Object);
     method public void copy1DRangeFromUnchecked(int, int, int[]);
     method public void copy1DRangeFromUnchecked(int, int, short[]);
     method public void copy1DRangeFromUnchecked(int, int, byte[]);
     method public void copy1DRangeFromUnchecked(int, int, float[]);
+    method public void copy2DRangeFrom(int, int, int, int, java.lang.Object);
     method public void copy2DRangeFrom(int, int, int, int, byte[]);
     method public void copy2DRangeFrom(int, int, int, int, short[]);
     method public void copy2DRangeFrom(int, int, int, int, int[]);
@@ -22244,17 +22247,20 @@ package android.renderscript {
     method public void copy2DRangeFrom(int, int, int, int, android.renderscript.Allocation, int, int);
     method public void copy2DRangeFrom(int, int, android.graphics.Bitmap);
     method public void copyFrom(android.renderscript.BaseObj[]);
+    method public void copyFrom(java.lang.Object);
     method public void copyFrom(int[]);
     method public void copyFrom(short[]);
     method public void copyFrom(byte[]);
     method public void copyFrom(float[]);
     method public void copyFrom(android.graphics.Bitmap);
     method public void copyFrom(android.renderscript.Allocation);
+    method public void copyFromUnchecked(java.lang.Object);
     method public void copyFromUnchecked(int[]);
     method public void copyFromUnchecked(short[]);
     method public void copyFromUnchecked(byte[]);
     method public void copyFromUnchecked(float[]);
     method public void copyTo(android.graphics.Bitmap);
+    method public void copyTo(java.lang.Object);
     method public void copyTo(byte[]);
     method public void copyTo(short[]);
     method public void copyTo(int[]);
