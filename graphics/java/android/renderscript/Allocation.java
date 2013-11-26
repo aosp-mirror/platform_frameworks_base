@@ -654,7 +654,7 @@ public class Allocation extends BaseObj {
      * android.renderscript.Element} does not match the array's
      * primitive type.
      *
-     * @param d the source data array
+     * @param array The source data array
      */
     public void copyFrom(Object array) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyFrom");
@@ -1032,7 +1032,7 @@ public class Allocation extends BaseObj {
      * @param yoff Y offset of the region to update in this Allocation
      * @param w Width of the region to update
      * @param h Height of the region to update
-     * @param data to be placed into the Allocation
+     * @param array Data to be placed into the Allocation
      */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, Object array) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFrom");
@@ -1863,4 +1863,3 @@ public class Allocation extends BaseObj {
     }
 
 }
-
