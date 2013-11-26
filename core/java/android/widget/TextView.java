@@ -7378,8 +7378,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * to turn off ellipsizing.
      *
      * If {@link #setMaxLines} has been used to set two or more lines,
-     * {@link android.text.TextUtils.TruncateAt#END} and
-     * {@link android.text.TextUtils.TruncateAt#MARQUEE}* are only supported
+     * only {@link android.text.TextUtils.TruncateAt#END} and
+     * {@link android.text.TextUtils.TruncateAt#MARQUEE} are supported
      * (other ellipsizing types will not do anything).
      *
      * @attr ref android.R.styleable#TextView_ellipsize
