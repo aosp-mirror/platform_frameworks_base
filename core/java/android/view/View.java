@@ -5033,7 +5033,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <strong>Note:</strong> When a View clears focus the framework is trying
      * to give focus to the first focusable View from the top. Hence, if this
      * View is the first from the top that can take focus, then all callbacks
-     * related to clearing focus will be invoked after wich the framework will
+     * related to clearing focus will be invoked after which the framework will
      * give focus to this view.
      * </p>
      */
@@ -6379,7 +6379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setFitsSystemWindows(boolean)
      * @see #setSystemUiVisibility(int)
      *
-     * @deprecated As of API XX use {@link #dispatchApplyWindowInsets(WindowInsets)} to apply
+     * @deprecated As of API 20 use {@link #dispatchApplyWindowInsets(WindowInsets)} to apply
      * insets to views. Views should override {@link #onApplyWindowInsets(WindowInsets)} or use
      * {@link #setOnApplyWindowInsetsListener(android.view.View.OnApplyWindowInsetsListener)}
      * to implement handling their own insets.
