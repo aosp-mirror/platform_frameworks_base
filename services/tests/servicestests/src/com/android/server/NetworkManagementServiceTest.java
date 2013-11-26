@@ -172,6 +172,46 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         sendMessage("666 Address added 2001:db8::1/64 wlan0 1 0");
         // Invalid code.
 
+
+        /**
+         * DNS information broadcasts.
+         */
+        sendMessage("615 DnsInfo servers rmnet_usb0 3600 2001:db8::1");
+        expectSoon(observer).interfaceDnsServerInfo("rmnet_usb0", 3600,
+                new String[]{"2001:db8::1"});
+
+        sendMessage("615 DnsInfo servers wlan0 14400 2001:db8::1,2001:db8::2");
+        expectSoon(observer).interfaceDnsServerInfo("wlan0", 14400,
+                new String[]{"2001:db8::1", "2001:db8::2"});
+
+        // We don't check for negative lifetimes, only for parse errors.
+        sendMessage("615 DnsInfo servers wlan0 -3600 ::1");
+        expectSoon(observer).interfaceDnsServerInfo("wlan0", -3600,
+                new String[]{"::1"});
+
+        sendMessage("615 DnsInfo servers wlan0 SIXHUNDRED ::1");
+        // Non-numeric lifetime.
+
+        sendMessage("615 DnsInfo servers wlan0 2001:db8::1");
+        // Missing lifetime.
+
+        sendMessage("615 DnsInfo servers wlan0 3600");
+        // No servers.
+
+        sendMessage("615 DnsInfo servers 3600 wlan0 2001:db8::1,2001:db8::2");
+        // Non-numeric lifetime.
+
+        sendMessage("615 DnsInfo wlan0 7200 2001:db8::1,2001:db8::2");
+        // Invalid tokens.
+
+        sendMessage("666 DnsInfo servers wlan0 5400 2001:db8::1");
+        // Invalid code.
+
+        // No syntax checking on the addresses.
+        sendMessage("615 DnsInfo servers wlan0 600 ,::,,foo,::1,");
+        expectSoon(observer).interfaceDnsServerInfo("wlan0", 600,
+                new String[]{"", "::", "", "foo", "::1"});
+
         // Make sure nothing else was called.
         verifyNoMoreInteractions(observer);
     }
