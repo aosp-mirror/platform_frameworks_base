@@ -11,8 +11,8 @@ trainingnavtop=true
 <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#compare">Choose an Approach</a></li>
-  <li><a href="#nonsticky">Use IMMERSIVE</a></li>
-  <li><a href="#sticky">Use IMMERSIVE_STICKY</a></li>
+  <li><a href="#nonsticky">Use Non-Sticky Immersion</a></li>
+  <li><a href="#sticky">Use Sticky Immersion</a></li>
 </ol>
 
 
@@ -72,14 +72,6 @@ again after a few moments, you can instead use the
 shown in this mode are in a transient state.
 </p>
 
- <p>When you use {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE IMMERSIVE} or
- {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY IMMERSIVE_STICKY},
- the system UI stays hidden, even while users are interacting with your
-app or game. You can capture touch events from anywhere across the screen, even areas that
-would otherwise be occupied by the system bars. This gives you a great way to create a
-larger, richer, more <a href="{@docRoot}design/patterns/fullscreen.html">
-immersive</a> UI in your app or game and reduce visual distraction at the same time.</p>
-
 <p>Figure 1 illustrates the different "immersive mode" states:</p>
 
  <img src="{@docRoot}images/training/imm-states.png"
@@ -137,12 +129,8 @@ if you use them in conjunction with {@link android.view.View#SYSTEM_UI_FLAG_HIDE
 
  <p>The flags  {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE} and
  {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY} both provide an immersive
- experience. But whereas the
- {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY IMMERSIVE_STICKY}
- flag causes semi-transparent system bars to briefly show and then hide again in response to
- a swipe gesture, the same swipe gesture causes the system bars to reappear and remain
- visible if you instead use the {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE IMMERSIVE}
- flag. Here are examples of when you would use one vs. the other:</p>
+ experience, but with the differences in behavior described above. Here are
+ examples of when you would use one flag vs. the other:</p>
 
 <ul>
 <li>If you're building a book reader, news reader, or a magazine, use
@@ -171,7 +159,7 @@ Android 4.0 (API Level 14). For this type of app, simply using
 sufficient. Don't use the "immersive" flags in this case.</li>
 </ul>
 
-<h2 id="nonsticky">Use IMMERSIVE</h2>
+<h2 id="nonsticky">Use Non-Sticky Immersion</h2>
 
  <p>When you use the {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE} flag, it hides
  the system bars based on what other UI flags you have set
@@ -242,7 +230,7 @@ For more discussion of these topics, watch the video
 <a class ="external-link" href="http://www.youtube.com/embed/cBi8fjv90E4">DevBytes:
  Android 4.4 Immersive Mode</a>.</p>
 
-<h2 id="sticky">Use IMMERSIVE_STICKY</h2>
+<h2 id="sticky">Use Sticky Immersion</h2>
 
 <p>When you use the {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY} flag,
 an inward swipe in the system bars areas causes the bars to temporarily appear in a
