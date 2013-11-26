@@ -7,4 +7,5 @@
   public void setGlowScale(float);
 }
 
+-keep class com.android.systemui.statusbar.phone.PhoneStatusBar
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
