@@ -624,6 +624,14 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+            return inflateViews(entry, parent, false);
+    }
+
+    public boolean inflateViewsForHeadsUp(NotificationData.Entry entry, ViewGroup parent) {
+            return inflateViews(entry, parent, true);
+    }
+
+    public boolean inflateViews(NotificationData.Entry entry, ViewGroup parent, boolean isHeadsUp) {
         int minHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight =
@@ -666,8 +674,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
-            final View.OnClickListener listener = new NotificationClicker(contentIntent,
-                    sbn.getPackageName(), sbn.getTag(), sbn.getId());
+            final View.OnClickListener listener = makeClicker(contentIntent,
+                    sbn.getPackageName(), sbn.getTag(), sbn.getId(), isHeadsUp);
             content.setOnClickListener(listener);
         } else {
             content.setOnClickListener(null);
@@ -778,8 +786,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         return true;
     }
 
-    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag, int id) {
-        return new NotificationClicker(intent, pkg, tag, id);
+    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag, int id,
+            boolean forHun) {
+        return new NotificationClicker(intent, pkg, tag, id, forHun);
     }
 
     protected class NotificationClicker implements View.OnClickListener {
@@ -787,12 +796,15 @@ public abstract class BaseStatusBar extends SystemUI implements
         private String mPkg;
         private String mTag;
         private int mId;
+        private boolean mIsHeadsUp;
 
-        public NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
+        public NotificationClicker(PendingIntent intent, String pkg, String tag, int id,
+                boolean forHun) {
             mIntent = intent;
             mPkg = pkg;
             mTag = tag;
             mId = id;
+            mIsHeadsUp = forHun;
         }
 
         public void onClick(View v) {
@@ -825,6 +837,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
 
             try {
+                if (mIsHeadsUp) {
+                    mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+                }
                 mBarService.onNotificationClick(mPkg, mTag, mId);
             } catch (RemoteException ex) {
                 // system process is dead if we're here.
@@ -835,6 +850,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             visibilityChanged(false);
         }
     }
+
     /**
      * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
      * This was added last-minute and is inconsistent with the way the rest of the notifications
@@ -1050,7 +1066,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     } else {
                         if (DEBUG) Log.d(TAG, "updating the current heads up:" + notification);
                         mInterruptingNotificationEntry.notification = notification;
-                        updateNotificationViews(mInterruptingNotificationEntry, notification);
+                        updateHeadsUpViews(mInterruptingNotificationEntry, notification);
                     }
                 }
 
@@ -1108,6 +1124,16 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private void updateNotificationViews(NotificationData.Entry entry,
             StatusBarNotification notification) {
+        updateNotificationViews(entry, notification, false);
+    }
+
+    private void updateHeadsUpViews(NotificationData.Entry entry,
+            StatusBarNotification notification) {
+        updateNotificationViews(entry, notification, true);
+    }
+
+    private void updateNotificationViews(NotificationData.Entry entry,
+            StatusBarNotification notification, boolean isHeadsUp) {
         final RemoteViews contentView = notification.getNotification().contentView;
         final RemoteViews bigContentView = notification.getNotification().bigContentView;
         final RemoteViews publicContentView
@@ -1125,7 +1151,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         final PendingIntent contentIntent = notification.getNotification().contentIntent;
         if (contentIntent != null) {
             final View.OnClickListener listener = makeClicker(contentIntent,
-                    notification.getPackageName(), notification.getTag(), notification.getId());
+                    notification.getPackageName(), notification.getTag(), notification.getId(),
+                    isHeadsUp);
             entry.content.setOnClickListener(listener);
         } else {
             entry.content.setOnClickListener(null);
