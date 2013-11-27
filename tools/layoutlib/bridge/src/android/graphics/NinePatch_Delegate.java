@@ -167,6 +167,7 @@ public final class NinePatch_Delegate {
         return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nativeFinalize(int chunk) {
         sManager.removeJavaReferenceFor(chunk);
     }

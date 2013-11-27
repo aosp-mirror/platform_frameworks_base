@@ -44,61 +44,12 @@ import java.util.Set;
  */
 /*package*/ class BitmapFactory_Delegate {
 
-    // ------ Java delegates ------
-
-    @LayoutlibDelegate
-    /*package*/ static Bitmap finishDecode(Bitmap bm, Rect outPadding, Options opts) {
-        if (bm == null || opts == null) {
-            return bm;
-        }
-
-        final int density = opts.inDensity;
-        if (density == 0) {
-            return bm;
-        }
-
-        bm.setDensity(density);
-        final int targetDensity = opts.inTargetDensity;
-        if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
-            return bm;
-        }
-
-        byte[] np = bm.getNinePatchChunk();
-        final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
-        // DELEGATE CHANGE: never scale 9-patch
-        if (opts.inScaled && isNinePatch == false) {
-            float scale = targetDensity / (float)density;
-            // TODO: This is very inefficient and should be done in native by Skia
-            final Bitmap oldBitmap = bm;
-            bm = Bitmap.createScaledBitmap(oldBitmap, (int) (bm.getWidth() * scale + 0.5f),
-                    (int) (bm.getHeight() * scale + 0.5f), true);
-            oldBitmap.recycle();
-
-            if (isNinePatch) {
-                np = nativeScaleNinePatch(np, scale, outPadding);
-                bm.setNinePatchChunk(np);
-            }
-            bm.setDensity(targetDensity);
-        }
-
-        return bm;
-    }
-
-
     // ------ Native Delegates ------
 
     @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts) {
-        return nativeDecodeStream(is, storage, padding, opts, false, 1.f);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static  Bitmap nativeDecodeStream(InputStream is, byte[] storage,
-            Rect padding, Options opts, boolean applyScale, float scale) {
         Bitmap bm = null;
-
-        //TODO support rescaling
 
         Density density = Density.MEDIUM;
         Set<BitmapCreateFlags> bitmapCreateFlags = EnumSet.of(BitmapCreateFlags.MUTABLE);
@@ -157,24 +108,10 @@ import java.util.Set;
     }
 
     @LayoutlibDelegate
-    /*package*/ static Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts,
-            boolean applyScale, float scale) {
-        opts.inBitmap = null;
-        return null;
-    }
-
-    @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts) {
         opts.inBitmap = null;
         return null;
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static byte[] nativeScaleNinePatch(byte[] chunk, float scale, Rect pad) {
-        // don't scale for now. This should not be called anyway since we re-implement
-        // BitmapFactory.finishDecode();
-        return chunk;
     }
 
     @LayoutlibDelegate
