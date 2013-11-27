@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.content.Context;
+import android.net.LinkAddress;
 import android.net.LocalSocket;
 import android.net.LocalServerSocket;
 import android.os.Binder;
@@ -157,19 +158,22 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
          * IP address changes.
          */
         sendMessage("614 Address updated fe80::1/64 wlan0 128 253");
-        expectSoon(observer).addressUpdated("fe80::1/64", "wlan0", 128, 253);
+        expectSoon(observer).addressUpdated(
+                new LinkAddress("fe80::1/64"), "wlan0", 128, 253);
 
-        // There is no "added".
+        // There is no "added", so we take this as "removed".
         sendMessage("614 Address added fe80::1/64 wlan0 128 253");
-        expectSoon(observer).addressRemoved("fe80::1/64", "wlan0", 128, 253);
+        expectSoon(observer).addressRemoved(
+                new LinkAddress("fe80::1/64"), "wlan0", 128, 253);
 
         sendMessage("614 Address removed 2001:db8::1/64 wlan0 1 0");
-        expectSoon(observer).addressRemoved("2001:db8::1/64", "wlan0", 1, 0);
+        expectSoon(observer).addressRemoved(
+                new LinkAddress("2001:db8::1/64"), "wlan0", 1, 0);
 
         sendMessage("614 Address removed 2001:db8::1/64 wlan0 1");
         // Not enough arguments.
 
-        sendMessage("666 Address added 2001:db8::1/64 wlan0 1 0");
+        sendMessage("666 Address removed 2001:db8::1/64 wlan0 1 0");
         // Invalid code.
 
 

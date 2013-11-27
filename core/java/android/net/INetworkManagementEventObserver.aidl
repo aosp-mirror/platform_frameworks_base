@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.net.LinkAddress;
+
 /**
  * Callback class for receiving events from an INetworkManagementService
  *
@@ -62,7 +64,7 @@ interface INetworkManagementEventObserver {
      * @param flags The address flags.
      * @param scope The address scope.
      */
-    void addressUpdated(String address, String iface, int flags, int scope);
+    void addressUpdated(in LinkAddress address, String iface, int flags, int scope);
 
     /**
      * An interface address has been removed
@@ -72,7 +74,7 @@ interface INetworkManagementEventObserver {
      * @param flags The address flags.
      * @param scope The address scope.
      */
-    void addressRemoved(String address, String iface, int flags, int scope);
+    void addressRemoved(in LinkAddress address, String iface, int flags, int scope);
 
     /**
      * A networking quota limit has been reached. The quota might not
