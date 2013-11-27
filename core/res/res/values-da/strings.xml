@@ -688,11 +688,11 @@
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Overvåg antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås din tablet, eller slet alle data i den, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Overvåg antallet af forkerte adgangskoder ved oplåsning af skærmen, og lås telefonen eller slet alle data på telefonen, hvis der er indtastet for mange forkerte adgangskoder."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Skift adgangskode til oplåsning af skærm"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Skift adgangskode til oplåsning af skærmen."</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Skifte adgangskode til oplåsning af skærm"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"Skifter adgangskode til oplåsning af skærmen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skærmen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontroller, hvordan og hvornår skærmen låses."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Slet alle data"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollerer, hvordan og hvornår skærmen låses."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Slette alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Slet din tablets data uden varsel ved at gendanne fabriksindstillingerne."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Slet telefonens data uden varsel ved at gendanne fabriksindstillingerne."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Angiv enhedens globale proxy"</string>
