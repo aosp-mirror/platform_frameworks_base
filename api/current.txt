@@ -20388,6 +20388,8 @@ package android.provider {
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
     field public static final java.lang.String PRIMARY_ACCOUNT_NAME = "name_for_primary_account";
     field public static final java.lang.String PRIMARY_ACCOUNT_TYPE = "type_for_primary_account";
+    field public static final java.lang.String REMOVE_DUPLICATE_ENTRIES = "remove_duplicate_entries";
+    field public static final java.lang.String STREQUENT_PHONE_ONLY = "strequent_phone_only";
   }
 
   public static final class ContactsContract.AggregationExceptions implements android.provider.BaseColumns {
@@ -20414,6 +20416,12 @@ package android.provider {
 
   public static abstract interface ContactsContract.CommonDataKinds.BaseTypes {
     field public static final int TYPE_CUSTOM = 0; // 0x0
+  }
+
+  public static final class ContactsContract.CommonDataKinds.Callable implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
+    ctor public ContactsContract.CommonDataKinds.Callable();
+    field public static final android.net.Uri CONTENT_FILTER_URI;
+    field public static final android.net.Uri CONTENT_URI;
   }
 
   protected static abstract interface ContactsContract.CommonDataKinds.CommonColumns implements android.provider.ContactsContract.CommonDataKinds.BaseTypes {
@@ -20594,6 +20602,7 @@ package android.provider {
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/name";
     field public static final java.lang.String DISPLAY_NAME = "data1";
     field public static final java.lang.String FAMILY_NAME = "data3";
+    field public static final java.lang.String FULL_NAME_STYLE = "data10";
     field public static final java.lang.String GIVEN_NAME = "data2";
     field public static final java.lang.String MIDDLE_NAME = "data5";
     field public static final java.lang.String PHONETIC_FAMILY_NAME = "data9";
@@ -20647,6 +20656,7 @@ package android.provider {
   protected static abstract interface ContactsContract.ContactOptionsColumns {
     field public static final java.lang.String CUSTOM_RINGTONE = "custom_ringtone";
     field public static final java.lang.String LAST_TIME_CONTACTED = "last_time_contacted";
+    field public static final java.lang.String PINNED = "pinned";
     field public static final java.lang.String SEND_TO_VOICEMAIL = "send_to_voicemail";
     field public static final java.lang.String STARRED = "starred";
     field public static final java.lang.String TIMES_CONTACTED = "times_contacted";
@@ -20673,6 +20683,7 @@ package android.provider {
     field public static final android.net.Uri CONTENT_GROUP_URI;
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact";
     field public static final android.net.Uri CONTENT_LOOKUP_URI;
+    field public static final android.net.Uri CONTENT_MULTI_VCARD_URI;
     field public static final android.net.Uri CONTENT_STREQUENT_FILTER_URI;
     field public static final android.net.Uri CONTENT_STREQUENT_URI;
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/contact";
@@ -20905,6 +20916,7 @@ package android.provider {
 
   public static final class ContactsContract.PhoneLookup implements android.provider.BaseColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.PhoneLookupColumns {
     field public static final android.net.Uri CONTENT_FILTER_URI;
+    field public static final java.lang.String QUERY_PARAMETER_SIP_ADDRESS = "sip";
   }
 
   protected static abstract interface ContactsContract.PhoneLookupColumns {
@@ -20919,6 +20931,25 @@ package android.provider {
     field public static final int KOREAN = 5; // 0x5
     field public static final int PINYIN = 3; // 0x3
     field public static final int UNDEFINED = 0; // 0x0
+  }
+
+  public static final class ContactsContract.PinnedPositions {
+    ctor public ContactsContract.PinnedPositions();
+    field public static final int DEMOTED = -1; // 0xffffffff
+    field public static final java.lang.String STAR_WHEN_PINNING = "star_when_pinning";
+    field public static final java.lang.String UNDEMOTE = "undemote";
+    field public static final int UNPINNED = 2147483647; // 0x7fffffff
+    field public static final android.net.Uri UPDATE_URI;
+  }
+
+  public static final class ContactsContract.Preferences {
+    ctor public ContactsContract.Preferences();
+    field public static final java.lang.String DISPLAY_ORDER = "android.contacts.DISPLAY_ORDER";
+    field public static final int DISPLAY_ORDER_ALTERNATIVE = 2; // 0x2
+    field public static final int DISPLAY_ORDER_PRIMARY = 1; // 0x1
+    field public static final java.lang.String SORT_ORDER = "android.contacts.SORT_ORDER";
+    field public static final int SORT_ORDER_ALTERNATIVE = 2; // 0x2
+    field public static final int SORT_ORDER_PRIMARY = 1; // 0x1
   }
 
   public static final deprecated class ContactsContract.Presence extends android.provider.ContactsContract.StatusUpdates {

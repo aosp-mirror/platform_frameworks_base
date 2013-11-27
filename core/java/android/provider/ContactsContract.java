@@ -162,8 +162,6 @@ public final class ContactsContract {
      * {@link Contacts#CONTENT_STREQUENT_FILTER_URI}, which requires the ContactsProvider to
      * return only phone-related results. For example, frequently contacted person list should
      * include persons contacted via phone (not email, sms, etc.)
-     *
-     * @hide
      */
     public static final String STREQUENT_PHONE_ONLY = "strequent_phone_only";
 
@@ -188,8 +186,6 @@ public final class ContactsContract {
      * {@link CommonDataKinds.Email#CONTENT_URI}, and
      * {@link CommonDataKinds.StructuredPostal#CONTENT_URI}.
      * This enables a content provider to remove duplicate entries in results.
-     *
-     * @hide
      */
     public static final String REMOVE_DUPLICATE_ENTRIES = "remove_duplicate_entries";
 
@@ -246,30 +242,21 @@ public final class ContactsContract {
         public static final String KEY_AUTHORIZED_URI = "authorized_uri";
     }
 
-    /**
-     * @hide
-     */
     public static final class Preferences {
 
         /**
          * A key in the {@link android.provider.Settings android.provider.Settings} provider
          * that stores the preferred sorting order for contacts (by given name vs. by family name).
-         *
-         * @hide
          */
         public static final String SORT_ORDER = "android.contacts.SORT_ORDER";
 
         /**
          * The value for the SORT_ORDER key corresponding to sorting by given name first.
-         *
-         * @hide
          */
         public static final int SORT_ORDER_PRIMARY = 1;
 
         /**
          * The value for the SORT_ORDER key corresponding to sorting by family name first.
-         *
-         * @hide
          */
         public static final int SORT_ORDER_ALTERNATIVE = 2;
 
@@ -277,22 +264,16 @@ public final class ContactsContract {
          * A key in the {@link android.provider.Settings android.provider.Settings} provider
          * that stores the preferred display order for contacts (given name first vs. family
          * name first).
-         *
-         * @hide
          */
         public static final String DISPLAY_ORDER = "android.contacts.DISPLAY_ORDER";
 
         /**
          * The value for the DISPLAY_ORDER key corresponding to showing the given name first.
-         *
-         * @hide
          */
         public static final int DISPLAY_ORDER_PRIMARY = 1;
 
         /**
          * The value for the DISPLAY_ORDER key corresponding to showing the family name first.
-         *
-         * @hide
          */
         public static final int DISPLAY_ORDER_ALTERNATIVE = 2;
     }
@@ -822,10 +803,9 @@ public final class ContactsContract {
         public static final String STARRED = "starred";
 
         /**
-         * The position at which the contact is pinned. If {@link PinnedPositions.UNPINNED},
+         * The position at which the contact is pinned. If {@link PinnedPositions#UNPINNED},
          * the contact is not pinned. Also see {@link PinnedPositions}.
          * <P>Type: INTEGER </P>
-         * @hide
          */
         public static final String PINNED = "pinned";
 
@@ -1465,17 +1445,43 @@ public final class ContactsContract {
          * Base {@link Uri} for referencing multiple {@link Contacts} entry,
          * created by appending {@link #LOOKUP_KEY} using
          * {@link Uri#withAppendedPath(Uri, String)}. The lookup keys have to be
-         * encoded and joined with the colon (":") separator. The resulting string
-         * has to be encoded again. Provides
-         * {@link OpenableColumns} columns when queried, or returns the
+         * joined with the colon (":") separator, and the resulting string encoded.
+         *
+         * Provides {@link OpenableColumns} columns when queried, or returns the
          * referenced contact formatted as a vCard when opened through
          * {@link ContentResolver#openAssetFileDescriptor(Uri, String)}.
          *
-         * This is private API because we do not have a well-defined way to
-         * specify several entities yet. The format of this Uri might change in the future
-         * or the Uri might be completely removed.
+         * <p>
+         * Usage example:
+         * <dl>
+         * <dt>The following code snippet creates a multi-vcard URI that references all the
+         * contacts in a user's database.</dt>
+         * <dd>
          *
-         * @hide
+         * <pre>
+         * public Uri getAllContactsVcardUri() {
+         *     Cursor cursor = getActivity().getContentResolver().query(Contacts.CONTENT_URI,
+         *         new String[] {Contacts.LOOKUP_KEY}, null, null, null);
+         *     if (cursor == null) {
+         *         return null;
+         *     }
+         *     try {
+         *         StringBuilder uriListBuilder = new StringBuilder();
+         *         int index = 0;
+         *         while (cursor.moveToNext()) {
+         *             if (index != 0) uriListBuilder.append(':');
+         *             uriListBuilder.append(cursor.getString(0));
+         *             index++;
+         *         }
+         *         return Uri.withAppendedPath(Contacts.CONTENT_MULTI_VCARD_URI,
+         *                 Uri.encode(uriListBuilder.toString()));
+         *     } finally {
+         *         cursor.close();
+         *     }
+         * }
+         * </pre>
+         *
+         * </p>
          */
         public static final Uri CONTENT_MULTI_VCARD_URI = Uri.withAppendedPath(CONTENT_URI,
                 "as_multi_vcard");
@@ -4789,11 +4795,11 @@ public final class ContactsContract {
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone_lookup";
 
-       /**
-        * Boolean parameter that is used to look up a SIP address.
-        *
-        * @hide
-        */
+        /**
+         * If this boolean parameter is set to true, then the appended query is treated as a
+         * SIP address and the lookup will be performed against SIP addresses in the user's
+         * contacts.
+         */
         public static final String QUERY_PARAMETER_SIP_ADDRESS = "sip";
     }
 
@@ -5302,8 +5308,6 @@ public final class ContactsContract {
             /**
              * The style used for combining given/middle/family name into a full name.
              * See {@link ContactsContract.FullNameStyle}.
-             *
-             * @hide
              */
             public static final String FULL_NAME_STYLE = DATA10;
 
@@ -6895,8 +6899,6 @@ public final class ContactsContract {
          * each column. For example the meaning for {@link Phone}'s type is different than
          * {@link SipAddress}'s.
          * </p>
-         *
-         * @hide
          */
         public static final class Callable implements DataColumnsWithJoins, CommonColumns {
             /**
@@ -7754,7 +7756,6 @@ public final class ContactsContract {
      * {@link PinnedPositions#STAR_WHEN_PINNING} to true to force all pinned and unpinned
      * contacts to be automatically starred and unstarred.
      * </p>
-     * @hide
      */
     public static final class PinnedPositions {
 
