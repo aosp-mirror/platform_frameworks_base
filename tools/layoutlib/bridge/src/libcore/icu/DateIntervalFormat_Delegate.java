@@ -21,6 +21,7 @@ import java.text.FieldPosition;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import com.ibm.icu.text.DateIntervalFormat;
 import com.ibm.icu.util.DateInterval;
 import com.ibm.icu.util.TimeZone;
@@ -38,6 +39,7 @@ public class DateIntervalFormat_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/static String formatDateInterval(long address, long fromDate, long toDate) {
         DateIntervalFormat_Delegate delegate = sManager.getDelegate((int)address);
         if (delegate == null) {
@@ -52,6 +54,7 @@ public class DateIntervalFormat_Delegate {
         return sb.toString();
     }
 
+    @LayoutlibDelegate
     /*package*/ static long createDateIntervalFormat(String skeleton, String localeName,
             String tzName) {
         TimeZone prevDefaultTz = TimeZone.getDefault();
@@ -63,6 +66,7 @@ public class DateIntervalFormat_Delegate {
         return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static void destroyDateIntervalFormat(long address) {
         sManager.removeJavaReferenceFor((int)address);
     }
