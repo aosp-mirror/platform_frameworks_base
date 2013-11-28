@@ -6941,7 +6941,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Returns whether this View is accessibility focused.
      *
      * @return True if this View is accessibility focused.
-     * @hide
      */
     public boolean isAccessibilityFocused() {
         return (mPrivateFlags2 & PFLAG2_ACCESSIBILITY_FOCUSED) != 0;
@@ -7289,11 +7288,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets whether this view should be exposed for accessibility.
+     * Computes whether this view should be exposed for accessibility. In
+     * general, views that are interactive or provide information are exposed
+     * while views that serve only as containers are hidden.
+     * <p>
+     * If an ancestor of this view has importance
+     * {@link #IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS}, this method
+     * returns <code>false</code>.
+     * <p>
+     * Otherwise, the value is computed according to the view's
+     * {@link #getImportantForAccessibility()} value:
+     * <ol>
+     * <li>{@link #IMPORTANT_FOR_ACCESSIBILITY_NO} or
+     * {@link #IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS}, return <code>false
+     * </code>
+     * <li>{@link #IMPORTANT_FOR_ACCESSIBILITY_YES}, return <code>true</code>
+     * <li>{@link #IMPORTANT_FOR_ACCESSIBILITY_AUTO}, return <code>true</code> if
+     * view satisfies any of the following:
+     * <ul>
+     * <li>Is actionable, e.g. {@link #isClickable()},
+     * {@link #isLongClickable()}, or {@link #isFocusable()}
+     * <li>Has an {@link AccessibilityDelegate}
+     * <li>Has an interaction listener, e.g. {@link OnTouchListener},
+     * {@link OnKeyListener}, etc.
+     * <li>Is an accessibility live region, e.g.
+     * {@link #getAccessibilityLiveRegion()} is not
+     * {@link #ACCESSIBILITY_LIVE_REGION_NONE}.
+     * </ul>
+     * </ol>
      *
      * @return Whether the view is exposed for accessibility.
-     *
-     * @hide
+     * @see #setImportantForAccessibility(int)
+     * @see #getImportantForAccessibility()
      */
     public boolean isImportantForAccessibility() {
         final int mode = (mPrivateFlags2 & PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK)
