@@ -470,11 +470,13 @@ public class WifiNative {
         return doBooleanCommand("DRIVER COUNTRY " + countryCode.toUpperCase(Locale.ROOT));
     }
 
-    public void enableBackgroundScan(boolean enable) {
+    public boolean enableBackgroundScan(boolean enable) {
         if (enable) {
-            doBooleanCommand("SET pno 1");
+            Log.e(mTAG, "doBoolean: enable");
+            return doBooleanCommand("SET pno 1");
         } else {
-            doBooleanCommand("SET pno 0");
+            Log.e(mTAG, "doBoolean: disable");
+            return doBooleanCommand("SET pno 0");
         }
     }
 
