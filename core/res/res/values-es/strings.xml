@@ -1650,4 +1650,23 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Volver a intentar más tarde"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Desliza el dedo hacia abajo para salir de la pantalla completa"</string>
+    <string name="reboot_system" product="tablet">Reiniciar tablet</string>
+    <string name="reboot_system" product="default">Reiniciar teléfono</string>
+    <string name="global_action_screenshot">Captura de pantalla</string>
+    <string name="reboot_reboot">Reiniciar</string>
+    <string name="reboot_recovery">Modo Recovery</string>
+    <string name="reboot_bootloader">Modo Bootloader</string>
+    <string name="reboot_bootmenu">Modo Bootmenu</string>
+    <string name="reboot_fastboot">Modo Fastboot</string>
+    <string name="reboot_download">Modo Download</string>
+    <string name="reboot_progress">Reiniciando\u2026</string>
+    <string name="reboot_confirm" product="tablet">Tu tableta se reiniciará.</string>
+    <string name="reboot_confirm" product="default">Tu teléfono se reiniciará.</string>
+    <string name="power_dialog" product="tablet">Opciones del tablet</string>
+    <string name="power_dialog" product="default">Opciones del teléfono</string>
+    <string name="silent_mode">Modo silencio</string>
+    <string name="turn_on_radio">Activar conexión inalámbrica</string>
+    <string name="turn_off_radio">Desactivar función inalámbrica</string>
+    <string name="screen_lock">Bloqueo de pantalla</string>
+    <string name="power_off">Apagar</string>
 </resources>
