@@ -2329,6 +2329,7 @@ public class WifiStateMachine extends StateMachine {
         * or when the driver is hung. Ensure supplicant is stopped here.
         */
         mWifiMonitor.killSupplicant(mP2pSupported);
+        mWifiNative.closeSupplicantConnection();
         sendSupplicantConnectionChangedBroadcast(false);
         setWifiState(WIFI_STATE_DISABLED);
     }
