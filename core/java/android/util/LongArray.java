@@ -83,7 +83,7 @@ public class LongArray implements Cloneable {
         final int count = values.mSize;
         ensureCapacity(count);
 
-        System.arraycopy(mValues, mSize, values.mValues, 0, count);
+        System.arraycopy(values.mValues, 0, mValues, mSize, count);
         mSize += count;
     }
 
@@ -127,6 +127,9 @@ public class LongArray implements Cloneable {
      * Returns the value at the specified position in this array.
      */
     public long get(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException(mSize, index);
+        }
         return mValues[index];
     }
 
@@ -148,6 +151,9 @@ public class LongArray implements Cloneable {
      * Removes the value at the specified index from this array.
      */
     public void remove(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException(mSize, index);
+        }
         System.arraycopy(mValues, index, mValues, index + 1, mSize - index);
     }
 
