@@ -29,7 +29,9 @@ import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.app.AppOpsManager;
 import android.appwidget.AppWidgetManager;
+import android.graphics.Rect;
 import android.util.ArrayMap;
+import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -52,7 +54,6 @@ import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.AppTransition;
-import com.android.server.wm.StackBox;
 import com.android.server.wm.WindowManagerService;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -68,7 +69,6 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackBoxInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -1770,7 +1770,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
         mStackSupervisor.setWindowManager(wm);
-        wm.createStack(HOME_STACK_ID, -1, StackBox.TASK_STACK_GOES_OVER, 1.0f);
+        wm.createStack(HOME_STACK_ID, Display.DEFAULT_DISPLAY);
     }
 
     public void startObservingNativeCrashes() {
@@ -7096,16 +7096,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public int createStack(int taskId, int relativeStackBoxId, int position, float weight) {
+    public int createStack(int taskId) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "createStack()");
-        if (DEBUG_STACK) Slog.d(TAG, "createStack: taskId=" + taskId + " relStackBoxId=" +
-                relativeStackBoxId + " position=" + position + " weight=" + weight);
+        if (DEBUG_STACK) Slog.d(TAG, "createStack: taskId=" + taskId);
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
                 int stackId = mStackSupervisor.createStack();
-                mWindowManager.createStack(stackId, relativeStackBoxId, position, weight);
+                mWindowManager.createStack(stackId, Display.DEFAULT_DISPLAY);
                 if (taskId > 0) {
                     moveTaskToStack(taskId, stackId, true);
                 }
@@ -7137,99 +7136,40 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void resizeStackBox(int stackBoxId, float weight) {
+    public void resizeStack(int stackBoxId, Rect bounds) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "resizeStackBox()");
         long ident = Binder.clearCallingIdentity();
         try {
-            mWindowManager.resizeStackBox(stackBoxId, weight);
+            mWindowManager.resizeStack(stackBoxId, bounds);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private ArrayList<StackInfo> getStacks() {
-        synchronized (this) {
-            ArrayList<ActivityManager.StackInfo> list = new ArrayList<ActivityManager.StackInfo>();
-            ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
-            for (ActivityStack stack : stacks) {
-                ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
-                int stackId = stack.mStackId;
-                stackInfo.stackId = stackId;
-                stackInfo.bounds = mWindowManager.getStackBounds(stackId);
-                ArrayList<TaskRecord> tasks = stack.getAllTasks();
-                final int numTasks = tasks.size();
-                int[] taskIds = new int[numTasks];
-                String[] taskNames = new String[numTasks];
-                for (int i = 0; i < numTasks; ++i) {
-                    final TaskRecord task = tasks.get(i);
-                    taskIds[i] = task.taskId;
-                    taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
-                            : task.realActivity != null ? task.realActivity.flattenToString()
-                            : task.getTopActivity() != null ? task.getTopActivity().packageName
-                            : "unknown";
-                }
-                stackInfo.taskIds = taskIds;
-                stackInfo.taskNames = taskNames;
-                list.add(stackInfo);
-            }
-            return list;
-        }
-    }
-
-    private void addStackInfoToStackBoxInfo(StackBoxInfo stackBoxInfo, List<StackInfo> stackInfos) {
-        final int stackId = stackBoxInfo.stackId;
-        if (stackId >= 0) {
-            for (StackInfo stackInfo : stackInfos) {
-                if (stackId == stackInfo.stackId) {
-                    stackBoxInfo.stack = stackInfo;
-                    stackInfos.remove(stackInfo);
-                    return;
-                }
-            }
-        } else {
-            addStackInfoToStackBoxInfo(stackBoxInfo.children[0], stackInfos);
-            addStackInfoToStackBoxInfo(stackBoxInfo.children[1], stackInfos);
-        }
-    }
-
     @Override
-    public List<StackBoxInfo> getStackBoxes() {
+    public List<StackInfo> getAllStackInfos() {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "getStackBoxes()");
         long ident = Binder.clearCallingIdentity();
         try {
-            List<StackBoxInfo> stackBoxInfos = mWindowManager.getStackBoxInfos();
             synchronized (this) {
-                List<StackInfo> stackInfos = getStacks();
-                for (StackBoxInfo stackBoxInfo : stackBoxInfos) {
-                    addStackInfoToStackBoxInfo(stackBoxInfo, stackInfos);
-                }
+                return mStackSupervisor.getAllStackInfos();
             }
-            return stackBoxInfos;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override
-    public StackBoxInfo getStackBoxInfo(int stackBoxId) {
+    public StackInfo getStackInfo(int stackId) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getStackBoxInfo()");
+                "getStackInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
-            List<StackBoxInfo> stackBoxInfos = mWindowManager.getStackBoxInfos();
-            StackBoxInfo info = null;
             synchronized (this) {
-                List<StackInfo> stackInfos = getStacks();
-                for (StackBoxInfo stackBoxInfo : stackBoxInfos) {
-                    addStackInfoToStackBoxInfo(stackBoxInfo, stackInfos);
-                    if (stackBoxInfo.stackBoxId == stackBoxId) {
-                        info = stackBoxInfo;
-                    }
-                }
+                return mStackSupervisor.getStackInfo(stackId);
             }
-            return info;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
