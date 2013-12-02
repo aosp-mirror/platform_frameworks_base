@@ -4419,7 +4419,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final String pkgName = pkg.packageName;
-        
+
+        if (pkgName == null) {
+            Slog.e(TAG, "NULL package name found in " + pkg.mScanPath + ", skipping!");
+            mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            return null;
+        }
+
         final long scanFileTime = scanFile.lastModified();
         final boolean forceDex = (scanMode&SCAN_FORCE_DEX) != 0;
         pkg.applicationInfo.processName = fixProcessName(
