@@ -405,7 +405,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a new or updated interface address.
      */
-    private void notifyAddressUpdated(String address, String iface, int flags, int scope) {
+    private void notifyAddressUpdated(LinkAddress address, String iface, int flags, int scope) {
         final int length = mObservers.beginBroadcast();
         for (int i = 0; i < length; i++) {
             try {
@@ -420,7 +420,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a deleted interface address.
      */
-    private void notifyAddressRemoved(String address, String iface, int flags, int scope) {
+    private void notifyAddressRemoved(LinkAddress address, String iface, int flags, int scope) {
         final int length = mObservers.beginBroadcast();
         for (int i = 0; i < length; i++) {
             try {
@@ -537,17 +537,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
                     int flags;
                     int scope;
+                    LinkAddress address;
                     try {
                         flags = Integer.parseInt(cooked[5]);
                         scope = Integer.parseInt(cooked[6]);
-                    } catch(NumberFormatException e) {
-                        throw new IllegalStateException(errorMessage);
+                        address = new LinkAddress(cooked[3]);
+                    } catch(NumberFormatException e) {     // Non-numeric lifetime or scope.
+                        throw new IllegalStateException(errorMessage, e);
+                    } catch(IllegalArgumentException e) {  // Malformed IP address.
+                        throw new IllegalStateException(errorMessage, e);
                     }
 
                     if (cooked[2].equals("updated")) {
-                        notifyAddressUpdated(cooked[3], cooked[4], flags, scope);
+                        notifyAddressUpdated(address, cooked[4], flags, scope);
                     } else {
-                        notifyAddressRemoved(cooked[3], cooked[4], flags, scope);
+                        notifyAddressRemoved(address, cooked[4], flags, scope);
                     }
                     return true;
                     // break;

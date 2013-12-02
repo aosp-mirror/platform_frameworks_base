@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import android.net.INetworkManagementEventObserver;
+import android.net.LinkAddress;
 
 /**
  * Base {@link INetworkManagementEventObserver} that provides no-op
@@ -36,12 +37,12 @@ public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
     }
 
     @Override
-    public void addressUpdated(String address, String iface, int flags, int scope) {
+    public void addressUpdated(LinkAddress address, String iface, int flags, int scope) {
         // default no-op
     }
 
     @Override
-    public void addressRemoved(String address, String iface, int flags, int scope) {
+    public void addressRemoved(LinkAddress address, String iface, int flags, int scope) {
         // default no-op
     }
 
