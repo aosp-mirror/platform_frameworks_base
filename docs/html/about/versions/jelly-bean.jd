@@ -578,9 +578,10 @@ graphs</strong>, with colors indicating time spent creating drawing commands
 graph for each visible Activity, including the navigation bar and notification
 bar. </p>
 
-<p>A green line highlights the <strong>60ms threshold</strong> for rendering
+<p>A green line highlights the <strong>16ms threshold</strong> for rendering
 operations, so you can assess the your app’s effective framerate relative
-to a 60 fps goal. If you see operations that cross the green line, you
+to a 60 fps goal (because 1/60th of a second equals roughly 16ms).
+If you see operations that cross the green line, you
 can analyze them further using Systrace and other tools.</p>
 
 <p class="caution" style="clear:both">On devices running Android 4.2 and higher,
