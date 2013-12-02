@@ -83,6 +83,10 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		LOCAL_CFLAGS += -fno-omit-frame-pointer -marm -mapcs
 	endif
 
+	ifeq ($(call is-vendor-board-platform,QCOM),true)
+		LOCAL_CFLAGS += -DQCOM_HARDWARE
+	endif
+
 	include $(BUILD_SHARED_LIBRARY)
 
 	include $(call all-makefiles-under,$(LOCAL_PATH))
