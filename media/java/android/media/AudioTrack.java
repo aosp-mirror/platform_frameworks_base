@@ -1319,7 +1319,7 @@ public class AudioTrack
     //--------------------
 
     private native final int native_setup(Object audiotrack_this,
-            int streamType, int sampleRate, int nbChannels, int audioFormat,
+            int streamType, int sampleRate, int channelMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId);
 
     private native final void native_finalize();
