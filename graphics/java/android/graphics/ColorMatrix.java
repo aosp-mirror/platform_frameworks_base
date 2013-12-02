@@ -21,8 +21,8 @@ import android.util.FloatMath;
 import java.util.Arrays;
 
 /**
- * 5x4 matrix for transforming the color+alpha components of a Bitmap.
- * The matrix is stored in a single array, and its treated as follows:
+ *  4x5 matrix for transforming the color+alpha components of a Bitmap.
+ *  The matrix is stored in a single array, and its treated as follows:
  * <pre>
  *  [ a, b, c, d, e,
  *    f, g, h, i, j,
