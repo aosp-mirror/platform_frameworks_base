@@ -20,7 +20,7 @@
     >
     <!-- the large icon extends 12dp beyond the edge of the status bar -->
     <item
-        android:drawable="@*android:drawable/notification_item_background_color"
+        android:drawable="@drawable/notification_item_background_color"
         android:top="12dp"
         />
 </layer-list>

@@ -37,12 +37,12 @@
         prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
         prvandroid:outerRingDrawable="@drawable/navbar_search_outerring"
         prvandroid:outerRadius="@dimen/navbar_search_outerring_radius"
-        prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"
+        prvandroid:innerRadius="@dimen/glowpadview_inner_radius"
         prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
         prvandroid:feedbackCount="0"
         prvandroid:vibrationDuration="@integer/config_vibration_duration"
         prvandroid:alwaysTrackFinger="true"
-        prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
-        prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"/>
+        prvandroid:glowRadius="@dimen/glowpadview_glow_radius"
+        prvandroid:pointDrawable="@drawable/ic_lockscreen_glowdot"/>
 
 </com.android.systemui.SearchPanelView>

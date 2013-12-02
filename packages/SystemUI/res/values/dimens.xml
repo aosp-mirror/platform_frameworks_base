@@ -220,4 +220,10 @@
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
+
+    <!-- Default glow radius for GlowPadView -->
+    <dimen name="glowpadview_glow_radius">75dip</dimen>
+
+    <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
+    <dimen name="glowpadview_inner_radius">15dip</dimen>
 </resources>
