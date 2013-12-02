@@ -1056,8 +1056,8 @@ public abstract class SensorManager {
      *        is mapped.
      *
      * @param outR
-     *        the transformed rotation matrix. inR and outR can be the same
-     *        array, but it is not recommended for performance reason.
+     *        the transformed rotation matrix. inR and outR should not be the same
+     *        array.
      *
      * @return <code>true</code> on success. <code>false</code> if the input
      *         parameters are incorrect, for instance if X and Y define the same

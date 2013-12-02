@@ -122,8 +122,8 @@ public final class PendingIntent implements Parcelable {
     public static final int FLAG_ONE_SHOT = 1<<30;
     /**
      * Flag for use with {@link #getActivity}, {@link #getBroadcast}, and
-     * {@link #getService}: if the described PendingIntent does not already
-     * exist, then simply return null instead of creating it.
+     * {@link #getService}: if the described PendingIntent already exists,
+     * then simply return null instead of creating it.
      */
     public static final int FLAG_NO_CREATE = 1<<29;
     /**
