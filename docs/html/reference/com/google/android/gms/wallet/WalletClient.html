@@ -97,6 +97,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
 <script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
 <script type="text/javascript">
   var toRoot = "/";
+  var metaTags = [];
   var devsite = false;
 </script>
 <script src="/assets/js/docs.js" type="text/javascript"></script>
@@ -308,6 +309,9 @@ onkeyup="return search_changed(event, false, '/')" />
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
                         
+                          <li><a href="/samples/index.html">Samples</a>
+                          </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -374,6 +378,10 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
+                  <li class="samples"><a href="/samples/index.html"
+                    >Samples</a>
+                  </li>
                 
             </ul>
         </div>
@@ -517,28 +525,31 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-  <li class="nav-section">
+   <li class="nav-section">
       <div class="nav-section-header"><a href="/google/gcm/index.html">
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -782,9 +793,9 @@ Summary:
  new account and do not reuse the Google transaction ID associated with the old account - this is
  a new transaction.
  <p>
- We recommend that you <a href="http://getinstantbuy.withgoogle.com/">apply for API access</a>
- before starting development. During development, use the sandbox environment by specifying
- <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></code> in the constructor.
+ We recommend that you <a class="external-link" href="http://getinstantbuy.withgoogle.com/">apply
+ for API access</a> before starting development. During development, use the sandbox environment by
+ specifying <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></code> in the constructor.
 </p>
 
 
