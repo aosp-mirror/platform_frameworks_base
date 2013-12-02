@@ -235,13 +235,13 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få adgang til USB-lager."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Tilgængelighedsfunktioner"</string>
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Hjælpefunktioner"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funktioner, som hjælpeteknologier kan anmode om."</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente indholdet i vinduet"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"undersøge indholdet i et vindue, du interagerer med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"aktivere Udforsk ved berøring"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"De emner, der trykkes på, læses højt, og skærmen kan udforskes ved hjælp af bevægelser."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"aktivere forbedret webtilgængelighed"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"aktivere forbedret webhjælpefunktioner"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Der installeres muligvis scripts for at gøre appindhold mere tilgængeligt."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere tekst, du skriver"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data såsom kreditkortnumre og adgangskoder."</string>
@@ -313,8 +313,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Tillader, at appen kan hente systemets interne tilstand. Ondsindede apps kan hente en lang række fortrolige og beskyttede oplysninger, som de normalt aldrig ville have brug for."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"hente skærmindhold"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Tillader, at appen kan hente indholdet i det aktive vindue. Ondsindede apps kan hente al indholdet i vinduet og undersøge al dens tekst med undtagelse af adgangskoder."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktivér tilgængelighed midlertidigt"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Tillader, at en applikation midlertidigt kan aktivere tilgængelighed på enheden. Skadelige apps kan muligvis aktivere tilgængelighed uden brugerens samtykke."</string>
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktivere hjælpefunktioner midlertidigt"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Tillader, at en app midlertidigt kan aktivere hjælpefunktioner på enheden. Skadelige apps kan muligvis aktivere hjælpefunktioner uden brugerens samtykke."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"hent oplysninger om vinduer"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Tillader, at en applikation henter oplysninger om vinduerne i vinduesadministratoren. Skadelige apps kan muligvis hente oplysninger, der er beregnet til intern systembrug."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrer begivenheder"</string>
@@ -368,8 +368,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Tillader, at appen kan se de taster, som du trykker på, selv i en anden app (såsom indtastning af adgangskode). Dette bør aldrig være nødvendigt for normale apps."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"forpligt til en inputmetode"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Tillader, at brugeren kan forpligter sig til en inputmetodes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"bind dig til en tilgængelighedstjeneste"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Tillader, at brugeren binder sig til en grænseflade for en tilgængelighedstjeneste på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"binde dig til en hjælpetjeneste"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Tillader, at appen kan binde sig til en grænseflade for en hjælpetjeneste på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"forbinde til en udskriftstjeneste"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Tillader, at brugeren forbinder til grænsefladen for en udskriftstjeneste på øverste niveau. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"forbinde til en udskriftsspoolertjeneste"</string>
@@ -1332,7 +1332,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Der er anmodet om tilladelse\nfor kontoen <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Inputmetode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkroniser"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Tilgængelighed"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Hjælpefunktioner"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapet"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Skift tapet"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Underretningslytter"</string>
@@ -1551,9 +1551,9 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Skal lydstyrken være over det anbefalede niveau?\nDu kan skade din hørelse ved at lytte ved høj lydstyrke i længere tid."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hold fortsat to fingre nede for at aktivere tilgængelighed."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgængelighed aktiveret."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Tilgængelighed er annulleret."</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Bliv ved med at holde to fingre nede for at aktivere hjælpefunktioner."</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Hjælpefunktioner er aktiveret."</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hjælpefunktioner er annulleret."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Ejer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fejl"</string>
