@@ -1227,7 +1227,7 @@
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Aldri tillat"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort er fjernet"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile nettverket forblir utilgjengelig inntil du starter på nytt med et gyldig SIM-kort."</string>
-    <string name="sim_done_button" msgid="827949989369963775">"Fullført"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Ferdig"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kort er lagt til"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Start enheten på nytt for å få tilgang til det mobile nettverket."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Start på nytt"</string>
