@@ -125,25 +125,11 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
         SystemProperties.set("selinux.reload_policy", "1");
     }
 
-    private void setEnforcingMode(Context context) {
-        String mode = Settings.Global.getString(context.getContentResolver(),
-            Settings.Global.SELINUX_STATUS);
-        if ("1".equals(mode)) {
-            Slog.i(TAG, "Setting enforcing mode");
-            SystemProperties.set("persist.selinux.enforcing", mode);
-        } else if ("0".equals(mode)) {
-            Slog.i(TAG, "Tried to set permissive mode, ignoring");
-        } else {
-            Slog.e(TAG, "Got invalid enforcing mode: " + mode);
-        }
-    }
-
     @Override
     protected void postInstall(Context context, Intent intent) {
         try {
             unpackBundle();
             applyUpdate();
-            setEnforcingMode(context);
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, "SELinux policy update malformed: ", e);
         } catch (IOException e) {
