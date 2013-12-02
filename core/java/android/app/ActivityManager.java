@@ -1289,106 +1289,15 @@ public class ActivityManager {
     }
 
     /**
-     * Information you can retrieve about the WindowManager StackBox hierarchy.
-     * @hide
-     */
-    public static class StackBoxInfo implements Parcelable {
-        public int stackBoxId;
-        public float weight;
-        public boolean vertical;
-        public Rect bounds;
-        public StackBoxInfo[] children;
-        public int stackId;
-        public StackInfo stack;
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(stackBoxId);
-            dest.writeFloat(weight);
-            dest.writeInt(vertical ? 1 : 0);
-            bounds.writeToParcel(dest, flags);
-            dest.writeInt(stackId);
-            if (children != null) {
-                children[0].writeToParcel(dest, flags);
-                children[1].writeToParcel(dest, flags);
-            } else {
-                stack.writeToParcel(dest, flags);
-            }
-        }
-
-        public void readFromParcel(Parcel source) {
-            stackBoxId = source.readInt();
-            weight = source.readFloat();
-            vertical = source.readInt() == 1;
-            bounds = Rect.CREATOR.createFromParcel(source);
-            stackId = source.readInt();
-            if (stackId == -1) {
-                children = new StackBoxInfo[2];
-                children[0] = StackBoxInfo.CREATOR.createFromParcel(source);
-                children[1] = StackBoxInfo.CREATOR.createFromParcel(source);
-            } else {
-                stack = StackInfo.CREATOR.createFromParcel(source);
-            }
-        }
-
-        public static final Creator<StackBoxInfo> CREATOR =
-                new Creator<ActivityManager.StackBoxInfo>() {
-
-            @Override
-            public StackBoxInfo createFromParcel(Parcel source) {
-                return new StackBoxInfo(source);
-            }
-
-            @Override
-            public StackBoxInfo[] newArray(int size) {
-                return new StackBoxInfo[size];
-            }
-        };
-
-        public StackBoxInfo() {
-        }
-
-        public StackBoxInfo(Parcel source) {
-            readFromParcel(source);
-        }
-
-        public String toString(String prefix) {
-            StringBuilder sb = new StringBuilder(256);
-            sb.append(prefix); sb.append("Box id=" + stackBoxId); sb.append(" weight=" + weight);
-            sb.append(" vertical=" + vertical); sb.append(" bounds=" + bounds.toShortString());
-            sb.append("\n");
-            if (children != null) {
-                sb.append(prefix); sb.append("First child=\n");
-                sb.append(children[0].toString(prefix + "  "));
-                sb.append(prefix); sb.append("Second child=\n");
-                sb.append(children[1].toString(prefix + "  "));
-            } else {
-                sb.append(prefix); sb.append("Stack=\n");
-                sb.append(stack.toString(prefix + "  "));
-            }
-            return sb.toString();
-        }
-
-        @Override
-        public String toString() {
-            return toString("");
-        }
-    }
-
-    /**
      * Information you can retrieve about an ActivityStack in the system.
      * @hide
      */
     public static class StackInfo implements Parcelable {
         public int stackId;
-        public Rect bounds;
+        public Rect bounds = new Rect();
         public int[] taskIds;
         public String[] taskNames;
+        public int displayId;
 
         @Override
         public int describeContents() {
@@ -1404,6 +1313,7 @@ public class ActivityManager {
             dest.writeInt(bounds.bottom);
             dest.writeIntArray(taskIds);
             dest.writeStringArray(taskNames);
+            dest.writeInt(displayId);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1412,6 +1322,7 @@ public class ActivityManager {
                     source.readInt(), source.readInt(), source.readInt(), source.readInt());
             taskIds = source.createIntArray();
             taskNames = source.createStringArray();
+            displayId = source.readInt();
         }
 
         public static final Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
@@ -1435,7 +1346,9 @@ public class ActivityManager {
         public String toString(String prefix) {
             StringBuilder sb = new StringBuilder(256);
             sb.append(prefix); sb.append("Stack id="); sb.append(stackId);
-                    sb.append(" bounds="); sb.append(bounds.toShortString()); sb.append("\n");
+                    sb.append(" bounds="); sb.append(bounds.toShortString());
+                    sb.append(" displayId="); sb.append(displayId);
+                    sb.append("\n");
             prefix = prefix + "  ";
             for (int i = 0; i < taskIds.length; ++i) {
                 sb.append(prefix); sb.append("taskId="); sb.append(taskIds[i]);

@@ -18,7 +18,7 @@ package android.app;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
@@ -36,6 +36,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Debug;
@@ -117,12 +118,11 @@ public interface IActivityManager extends IInterface {
     public void moveTaskToBack(int task) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
-    public int createStack(int taskId, int relativeStackBoxId, int position, float weight)
-            throws RemoteException;
+    public int createStack(int taskId) throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
-    public void resizeStackBox(int stackBoxId, float weight) throws RemoteException;
-    public List<StackBoxInfo> getStackBoxes() throws RemoteException;
-    public StackBoxInfo getStackBoxInfo(int stackBoxId) throws RemoteException;
+    public void resizeStack(int stackId, Rect bounds) throws RemoteException;
+    public List<StackInfo> getAllStackInfos() throws RemoteException;
+    public StackInfo getStackInfo(int stackId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     /* oneway */
@@ -681,9 +681,9 @@ public interface IActivityManager extends IInterface {
     int CREATE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
     int MOVE_TASK_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+168;
     int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+169;
-    int GET_STACK_BOXES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
+    int GET_ALL_STACK_INFOS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
     int SET_FOCUSED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+171;
-    int GET_STACK_BOX_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+172;
+    int GET_STACK_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+172;
     int CONVERT_FROM_TRANSLUCENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+173;
     int CONVERT_TO_TRANSLUCENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+174;
     int NOTIFY_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+175;

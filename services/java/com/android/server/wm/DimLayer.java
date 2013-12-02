@@ -166,7 +166,7 @@ public class DimLayer {
 
         final int dw, dh;
         final float xPos, yPos;
-        if (mStack.hasSibling()) {
+        if (!mStack.isFullscreen()) {
             dw = mBounds.width();
             dh = mBounds.height();
             xPos = mBounds.left;

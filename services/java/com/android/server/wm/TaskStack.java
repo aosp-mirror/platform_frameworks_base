@@ -26,8 +26,6 @@ import android.util.Slog;
 import android.util.TypedValue;
 import com.android.server.EventLogTags;
 
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -49,8 +47,9 @@ public class TaskStack {
      * mTaskHistory in the ActivityStack with the same mStackId */
     private final ArrayList<Task> mTasks = new ArrayList<Task>();
 
-    /** The StackBox this sits in. */
-    StackBox mStackBox;
+    /** Content limits relative to the DisplayContent this sits in. Empty indicates fullscreen,
+     * Nonempty is size of this TaskStack but is also used to scale if DisplayContent changes. */
+    Rect mBounds = new Rect();
 
     /** Used to support {@link android.view.WindowManager.LayoutParams#FLAG_DIM_BEHIND} */
     final DimLayer mDimLayer;
@@ -74,6 +73,9 @@ public class TaskStack {
         mDisplayContent = displayContent;
         mDimLayer = new DimLayer(service, this);
         mAnimationBackgroundSurface = new DimLayer(service, this);
+        // TODO: remove bounds from log, they are always 0.
+        EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, mBounds.left, mBounds.top,
+                mBounds.right, mBounds.bottom);
     }
 
     DisplayContent getDisplayContent() {
@@ -84,12 +86,64 @@ public class TaskStack {
         return mTasks;
     }
 
-    boolean isHomeStack() {
-        return mStackId == HOME_STACK_ID;
+    private void resizeWindows() {
+        final boolean underStatusBar = mBounds.top == 0;
+
+        final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
+                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                    final WindowState win = windows.get(winNdx);
+                    if (!resizingWindows.contains(win)) {
+                        if (WindowManagerService.DEBUG_RESIZE) Slog.d(TAG,
+                                "setBounds: Resizing " + win);
+                        resizingWindows.add(win);
+                    }
+                    win.mUnderStatusBar = underStatusBar;
+                }
+            }
+        }
     }
 
-    boolean hasSibling() {
-        return mStackBox.mParent != null;
+    boolean setBounds(Rect bounds) {
+        if (mBounds.equals(bounds)) {
+            return false;
+        }
+
+        mDimLayer.setBounds(bounds);
+        mAnimationBackgroundSurface.setBounds(bounds);
+        mBounds.set(bounds);
+
+        resizeWindows();
+        return true;
+    }
+
+    void getBounds(Rect out) {
+        if (mBounds.isEmpty()) {
+            mDisplayContent.getLogicalDisplayRect(out);
+        } else {
+            out.set(mBounds);
+        }
+        out.intersect(mDisplayContent.mContentRect);
+    }
+
+    boolean isFullscreen() {
+        return mBounds.isEmpty();
+    }
+
+    void resizeBounds(float oldWidth, float oldHeight, float newWidth, float newHeight) {
+        if (oldWidth == newWidth && oldHeight == newHeight) {
+            return;
+        }
+        float widthScale = newWidth / oldWidth;
+        float heightScale = newHeight / oldHeight;
+        mBounds.left = (int)(mBounds.left * widthScale + 0.5);
+        mBounds.top = (int)(mBounds.top * heightScale + 0.5);
+        mBounds.right = (int)(mBounds.right * widthScale + 0.5);
+        mBounds.bottom = (int)(mBounds.bottom * heightScale + 0.5);
+        resizeWindows();
     }
 
     /**
@@ -97,9 +151,7 @@ public class TaskStack {
      * @param task The task to add.
      * @param toTop Whether to add it to the top or bottom.
      */
-    boolean addTask(Task task, boolean toTop) {
-        mStackBox.makeDirty();
-
+    void addTask(Task task, boolean toTop) {
         int stackNdx;
         if (!toTop) {
             stackNdx = 0;
@@ -122,20 +174,20 @@ public class TaskStack {
 
         task.mStack = this;
         mDisplayContent.addTask(task, toTop);
-        return mDisplayContent.moveHomeStackBox(mStackId == HOME_STACK_ID);
+        mDisplayContent.moveStack(this, true);
     }
 
-    boolean moveTaskToTop(Task task) {
+    void moveTaskToTop(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToTop: task=" + task + " Callers="
                 + Debug.getCallers(6));
         mTasks.remove(task);
-        return addTask(task, true);
+        addTask(task, true);
     }
 
-    boolean moveTaskToBottom(Task task) {
+    void moveTaskToBottom(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToBottom: task=" + task);
         mTasks.remove(task);
-        return addTask(task, false);
+        addTask(task, false);
     }
 
     /**
@@ -145,7 +197,6 @@ public class TaskStack {
      */
     void removeTask(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
-        mStackBox.makeDirty();
         mTasks.remove(task);
         mDisplayContent.removeTask(task);
     }
@@ -154,7 +205,7 @@ public class TaskStack {
         mAnimationBackgroundSurface.destroySurface();
         mDimLayer.destroySurface();
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
-        return mStackBox.remove();
+        return mDisplayContent.topStack().mStackId;
     }
 
     void resetAnimationBackgroundAnimator() {
@@ -259,28 +310,6 @@ public class TaskStack {
         }
     }
 
-    void setBounds(Rect bounds, boolean underStatusBar) {
-        mDimLayer.setBounds(bounds);
-        mAnimationBackgroundSurface.setBounds(bounds);
-
-        final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
-                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                    final WindowState win = windows.get(winNdx);
-                    if (!resizingWindows.contains(win)) {
-                        if (WindowManagerService.DEBUG_RESIZE) Slog.d(TAG,
-                                "setBounds: Resizing " + win);
-                        resizingWindows.add(win);
-                    }
-                    win.mUnderStatusBar = underStatusBar;
-                }
-            }
-        }
-    }
-
     void switchUser(int userId) {
         int top = mTasks.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
@@ -291,6 +320,11 @@ public class TaskStack {
                 --top;
             }
         }
+    }
+
+    void close() {
+        mDimLayer.mDimSurface.destroy();
+        mAnimationBackgroundSurface.mDimSurface.destroy();
     }
 
     public void dump(String prefix, PrintWriter pw) {
