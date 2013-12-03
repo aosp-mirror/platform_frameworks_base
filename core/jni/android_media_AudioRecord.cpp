@@ -175,7 +175,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // compare the format against the Java constants
     if ((audioFormat != ENCODING_PCM_16BIT)
         && (audioFormat != ENCODING_PCM_8BIT)) {
-        ALOGE("Error creating AudioRecord: unsupported audio format.");
+        ALOGE("Error creating AudioRecord: unsupported audio format %d.", audioFormat);
         return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
     }
 
@@ -191,7 +191,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     size_t frameCount = buffSizeInBytes / frameSize;
 
     if ((uint32_t(source) >= AUDIO_SOURCE_CNT) && (uint32_t(source) != AUDIO_SOURCE_HOTWORD)) {
-        ALOGE("Error creating AudioRecord: unknown source.");
+        ALOGE("Error creating AudioRecord: unknown source %d.", source);
         return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
     }
 
@@ -237,8 +237,10 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         true,          // threadCanCallJava
         sessionId);
 
-    if (lpRecorder->initCheck() != NO_ERROR) {
-        ALOGE("Error creating AudioRecord instance: initialization check failed.");
+    const status_t status = lpRecorder->initCheck();
+    if (status != NO_ERROR) {
+        ALOGE("Error creating AudioRecord instance: initialization check failed with status %d.",
+                status);
         goto native_init_failure;
     }
 
