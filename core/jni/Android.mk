@@ -152,6 +152,7 @@ LOCAL_SRC_FILES:= \
 
 ifeq ($(call is-vendor-board-platform,QCOM),true)
 LOCAL_SRC_FILES += com_android_internal_app_ActivityTrigger.cpp
+LOCAL_CFLAGS += -DQCOM_ACTIVITY_TRIGGER
 endif
 
 LOCAL_C_INCLUDES += \
