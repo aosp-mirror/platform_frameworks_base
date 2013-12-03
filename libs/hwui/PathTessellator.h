@@ -22,83 +22,10 @@
 #include "Matrix.h"
 #include "Rect.h"
 #include "Vertex.h"
+#include "VertexBuffer.h"
 
 namespace android {
 namespace uirenderer {
-
-class VertexBuffer {
-public:
-    VertexBuffer():
-        mBuffer(0),
-        mVertexCount(0),
-        mCleanupMethod(NULL)
-    {}
-
-    ~VertexBuffer() {
-        if (mCleanupMethod) mCleanupMethod(mBuffer);
-    }
-
-    /**
-       This should be the only method used by the PathTessellator. Subsequent calls to alloc will
-       allocate space within the first allocation (useful if you want to eventually allocate
-       multiple regions within a single VertexBuffer, such as with PathTessellator::tesselateLines()
-     */
-    template <class TYPE>
-    TYPE* alloc(int vertexCount) {
-        if (mVertexCount) {
-            TYPE* reallocBuffer = (TYPE*)mReallocBuffer;
-            // already have allocated the buffer, re-allocate space within
-            if (mReallocBuffer != mBuffer) {
-                // not first re-allocation, leave space for degenerate triangles to separate strips
-                reallocBuffer += 2;
-            }
-            mReallocBuffer = reallocBuffer + vertexCount;
-            return reallocBuffer;
-        }
-        mVertexCount = vertexCount;
-        mReallocBuffer = mBuffer = (void*)new TYPE[vertexCount];
-        mCleanupMethod = &(cleanup<TYPE>);
-
-        return (TYPE*)mBuffer;
-    }
-
-    template <class TYPE>
-    void copyInto(const VertexBuffer& srcBuffer, float xOffset, float yOffset) {
-        int verticesToCopy = srcBuffer.getVertexCount();
-
-        TYPE* dst = alloc<TYPE>(verticesToCopy);
-        TYPE* src = (TYPE*)srcBuffer.getBuffer();
-
-        for (int i = 0; i < verticesToCopy; i++) {
-            TYPE::copyWithOffset(&dst[i], src[i], xOffset, yOffset);
-        }
-    }
-
-    void* getBuffer() const { return mBuffer; } // shouldn't be const, since not a const ptr?
-    unsigned int getVertexCount() const { return mVertexCount; }
-
-    template <class TYPE>
-    void createDegenerateSeparators(int allocSize) {
-        TYPE* end = (TYPE*)mBuffer + mVertexCount;
-        for (TYPE* degen = (TYPE*)mBuffer + allocSize; degen < end; degen += 2 + allocSize) {
-            memcpy(degen, degen - 1, sizeof(TYPE));
-            memcpy(degen + 1, degen + 2, sizeof(TYPE));
-        }
-    }
-
-private:
-    template <class TYPE>
-    static void cleanup(void* buffer) {
-        delete[] (TYPE*)buffer;
-    }
-
-    void* mBuffer;
-    unsigned int mVertexCount;
-
-    void* mReallocBuffer; // used for multi-allocation
-
-    void (*mCleanupMethod)(void*);
-};
 
 class PathTessellator {
 public:

@@ -10,6 +10,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		thread/TaskManager.cpp \
 		font/CacheTexture.cpp \
 		font/Font.cpp \
+		AmbientShadow.cpp \
 		AssetAtlas.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
@@ -37,6 +38,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		ProgramCache.cpp \
 		RenderBufferCache.cpp \
 		ResourceCache.cpp \
+		ShadowTessellator.cpp \
 		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
 		Snapshot.cpp \

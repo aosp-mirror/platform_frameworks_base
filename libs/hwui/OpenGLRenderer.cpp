@@ -36,7 +36,9 @@
 #include "Fence.h"
 #include "PathTessellator.h"
 #include "Properties.h"
+#include "ShadowTessellator.h"
 #include "Vector.h"
+#include "VertexBuffer.h"
 
 namespace android {
 namespace uirenderer {
@@ -2579,7 +2581,7 @@ status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPa
     setupDrawColorFilterUniforms();
     setupDrawShaderUniforms();
 
-    void* vertices = vertexBuffer.getBuffer();
+    const void* vertices = vertexBuffer.getBuffer();
     bool force = mCaches.unbindMeshBuffer();
     mCaches.bindPositionVertexPointer(true, vertices, isAA ? gAlphaVertexStride : gVertexStride);
     mCaches.resetTexCoordsVertexPointer();
@@ -3393,22 +3395,13 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
 
     SkPaint paint;
     paint.setColor(0x3f000000);
+    // Force the draw to use alpha values.
     paint.setAntiAlias(true);
-    VertexBuffer vertexBuffer;
-    {
-        //TODO: populate vertex buffer with better shadow geometry.
-        Vector3 pivot(width/2, height/2, 0.0f);
-        casterTransform.mapPoint3d(pivot);
 
-        float zScaleFactor = 0.5 + 0.0005f * pivot.z;
-
-        SkPath path;
-        path.addRect(pivot.x - width * zScaleFactor, pivot.y - height * zScaleFactor,
-                pivot.x + width * zScaleFactor, pivot.y + height * zScaleFactor);
-        PathTessellator::tessellatePath(path, &paint, mSnapshot->transform, vertexBuffer);
-    }
-
-    return drawVertexBuffer(vertexBuffer, &paint);
+    VertexBuffer shadowVertexBuffer;
+    ShadowTessellator::tessellateAmbientShadow(width, height, casterTransform,
+            shadowVertexBuffer);
+    return drawVertexBuffer(shadowVertexBuffer, &paint);
 }
 
 status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,
