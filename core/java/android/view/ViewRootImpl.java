@@ -28,6 +28,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -1122,6 +1123,28 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         return windowSizeMayChange;
+    }
+
+    /**
+     * Modifies the input matrix such that it maps view-local coordinates to
+     * on-screen coordinates.
+     *
+     * @param m input matrix to modify
+     */
+    void transformMatrixToGlobal(Matrix m) {
+        final View.AttachInfo attachInfo = mAttachInfo;
+        m.postTranslate(attachInfo.mWindowLeft, attachInfo.mWindowTop);
+    }
+
+    /**
+     * Modifies the input matrix such that it maps on-screen coordinates to
+     * view-local coordinates.
+     *
+     * @param m input matrix to modify
+     */
+    void transformMatrixToLocal(Matrix m) {
+        final View.AttachInfo attachInfo = mAttachInfo;
+        m.preTranslate(-attachInfo.mWindowLeft, -attachInfo.mWindowTop);
     }
 
     private void performTraversals() {
