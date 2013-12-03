@@ -28,6 +28,7 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.IntProperty;
@@ -201,22 +202,8 @@ class FastScroller {
     private boolean mMatchDragPosition;
 
     private float mInitialTouchY;
-    private boolean mHasPendingDrag;
+    private long mPendingDrag = -1;
     private int mScaledTouchSlop;
-
-    private final Runnable mDeferStartDrag = new Runnable() {
-        @Override
-        public void run() {
-            if (mList.isAttachedToWindow()) {
-                beginDrag();
-
-                final float pos = getPosFromMotionEvent(mInitialTouchY);
-                scrollTo(pos);
-            }
-
-            mHasPendingDrag = false;
-        }
-    };
 
     /**
      * Used to delay hiding fast scroll decorations.
@@ -1264,8 +1251,7 @@ class FastScroller {
      * @see #startPendingDrag()
      */
     private void cancelPendingDrag() {
-        mList.removeCallbacks(mDeferStartDrag);
-        mHasPendingDrag = false;
+        mPendingDrag = -1;
     }
 
     /**
@@ -1273,11 +1259,12 @@ class FastScroller {
      * scrolling, rather than tapping.
      */
     private void startPendingDrag() {
-        mHasPendingDrag = true;
-        mList.postDelayed(mDeferStartDrag, TAP_TIMEOUT);
+        mPendingDrag = SystemClock.uptimeMillis() + TAP_TIMEOUT;
     }
 
     private void beginDrag() {
+        mPendingDrag = -1;
+
         setState(STATE_DRAGGING);
 
         if (mListAdapter == null && mList != null) {
@@ -1317,6 +1304,13 @@ class FastScroller {
             case MotionEvent.ACTION_MOVE:
                 if (!isPointInside(ev.getX(), ev.getY())) {
                     cancelPendingDrag();
+                } else if (mPendingDrag >= 0 && mPendingDrag <= SystemClock.uptimeMillis()) {
+                    beginDrag();
+
+                    final float pos = getPosFromMotionEvent(mInitialTouchY);
+                    scrollTo(pos);
+
+                    return onTouchEvent(ev);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -1351,7 +1345,7 @@ class FastScroller {
 
         switch (me.getActionMasked()) {
             case MotionEvent.ACTION_UP: {
-                if (mHasPendingDrag) {
+                if (mPendingDrag >= 0) {
                     // Allow a tap to scroll.
                     beginDrag();
 
@@ -1359,7 +1353,6 @@ class FastScroller {
                     setThumbPos(pos);
                     scrollTo(pos);
 
-                    cancelPendingDrag();
                     // Will hit the STATE_DRAGGING check below
                 }
 
@@ -1380,20 +1373,9 @@ class FastScroller {
             } break;
 
             case MotionEvent.ACTION_MOVE: {
-                if (mHasPendingDrag && Math.abs(me.getY() - mInitialTouchY) > mScaledTouchSlop) {
-                    setState(STATE_DRAGGING);
+                if (mPendingDrag >= 0 && Math.abs(me.getY() - mInitialTouchY) > mScaledTouchSlop) {
+                    beginDrag();
 
-                    if (mListAdapter == null && mList != null) {
-                        getSectionsFromIndexer();
-                    }
-
-                    if (mList != null) {
-                        mList.requestDisallowInterceptTouchEvent(true);
-                        mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
-                    }
-
-                    cancelFling();
-                    cancelPendingDrag();
                     // Will hit the STATE_DRAGGING check below
                 }
 
