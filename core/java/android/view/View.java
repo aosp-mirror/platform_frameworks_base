@@ -15933,8 +15933,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        transformMotionEventToGlobal(ev);
-        ev.offsetLocation(info.mWindowLeft, info.mWindowTop);
+        final Matrix m = info.mTmpMatrix;
+        m.set(Matrix.IDENTITY_MATRIX);
+        transformMatrixToGlobal(m);
+        ev.transform(m);
         return true;
     }
 
@@ -15952,54 +15954,60 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        ev.offsetLocation(-info.mWindowLeft, -info.mWindowTop);
-        transformMotionEventToLocal(ev);
+        final Matrix m = info.mTmpMatrix;
+        m.set(Matrix.IDENTITY_MATRIX);
+        transformMatrixToLocal(m);
+        ev.transform(m);
         return true;
     }
 
     /**
-     * Recursive helper method that applies transformations in post-order.
+     * Modifies the input matrix such that it maps view-local coordinates to
+     * on-screen coordinates.
      *
-     * @param ev the on-screen motion event
+     * @param m input matrix to modify
      */
-    private void transformMotionEventToLocal(MotionEvent ev) {
+    void transformMatrixToGlobal(Matrix m) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
             final View vp = (View) parent;
-            vp.transformMotionEventToLocal(ev);
-            ev.offsetLocation(vp.mScrollX, vp.mScrollY);
+            vp.transformMatrixToGlobal(m);
+            m.postTranslate(-vp.mScrollX, -vp.mScrollY);
         } else if (parent instanceof ViewRootImpl) {
             final ViewRootImpl vr = (ViewRootImpl) parent;
-            ev.offsetLocation(0, vr.mCurScrollY);
+            vr.transformMatrixToGlobal(m);
+            m.postTranslate(0, -vr.mCurScrollY);
         }
 
-        ev.offsetLocation(-mLeft, -mTop);
+        m.postTranslate(mLeft, mTop);
 
         if (!hasIdentityMatrix()) {
-            ev.transform(getInverseMatrix());
+            m.postConcat(getMatrix());
         }
     }
 
     /**
-     * Recursive helper method that applies transformations in pre-order.
+     * Modifies the input matrix such that it maps on-screen coordinates to
+     * view-local coordinates.
      *
-     * @param ev the on-screen motion event
+     * @param m input matrix to modify
      */
-    private void transformMotionEventToGlobal(MotionEvent ev) {
-        if (!hasIdentityMatrix()) {
-            ev.transform(getMatrix());
-        }
-
-        ev.offsetLocation(mLeft, mTop);
-
+    void transformMatrixToLocal(Matrix m) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
             final View vp = (View) parent;
-            ev.offsetLocation(-vp.mScrollX, -vp.mScrollY);
-            vp.transformMotionEventToGlobal(ev);
+            vp.transformMatrixToLocal(m);
+            m.preTranslate(vp.mScrollX, vp.mScrollY);
         } else if (parent instanceof ViewRootImpl) {
             final ViewRootImpl vr = (ViewRootImpl) parent;
-            ev.offsetLocation(0, -vr.mCurScrollY);
+            vr.transformMatrixToLocal(m);
+            m.preTranslate(0, vr.mCurScrollY);
+        }
+
+        m.preTranslate(-mLeft, -mTop);
+
+        if (!hasIdentityMatrix()) {
+            m.preConcat(getInverseMatrix());
         }
     }
 
