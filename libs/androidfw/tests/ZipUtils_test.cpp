@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "ZipFileRO_test"
+#define LOG_TAG "ZipUtils_test"
 #include <utils/Log.h>
-#include <androidfw/ZipFileRO.h>
+#include <androidfw/ZipUtils.h>
 
 #include <gtest/gtest.h>
 
@@ -25,7 +25,7 @@
 
 namespace android {
 
-class ZipFileROTest : public testing::Test {
+class ZipUtilsTest : public testing::Test {
 protected:
     virtual void SetUp() {
     }
@@ -34,13 +34,13 @@ protected:
     }
 };
 
-TEST_F(ZipFileROTest, ZipTimeConvertSuccess) {
+TEST_F(ZipUtilsTest, ZipTimeConvertSuccess) {
     struct tm t;
 
     // 2011-06-29 14:40:40
     long when = 0x3EDD7514;
 
-    ZipFileRO::zipTimeToTimespec(when, &t);
+    ZipUtils::zipTimeToTimespec(when, &t);
 
     EXPECT_EQ(2011, t.tm_year + 1900)
             << "Year was improperly converted.";

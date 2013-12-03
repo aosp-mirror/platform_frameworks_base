@@ -63,14 +63,19 @@ extern "C" int clock_nanosleep(clockid_t clock_id, int flags,
 
 namespace android {
 
+static const int ANIM_ENTRY_NAME_MAX = 256;
+
 // ---------------------------------------------------------------------------
 
-BootAnimation::BootAnimation() : Thread(false)
+BootAnimation::BootAnimation() : Thread(false), mZip(NULL)
 {
     mSession = new SurfaceComposerClient();
 }
 
 BootAnimation::~BootAnimation() {
+    if (mZip != NULL) {
+        delete mZip;
+    }
 }
 
 void BootAnimation::onFirstRef() {
@@ -86,7 +91,7 @@ sp<SurfaceComposerClient> BootAnimation::session() const {
 }
 
 
-void BootAnimation::binderDied(const wp<IBinder>& who)
+void BootAnimation::binderDied(const wp<IBinder>&)
 {
     // woah, surfaceflinger died!
     ALOGD("SurfaceFlinger died, exiting...");
@@ -268,8 +273,6 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurfaceControl = control;
     mFlingerSurface = s;
 
-    mAndroidAnimation = true;
-
     // If the device has encryption turned on or is in process
     // of being encrypted we show the encrypted boot animation.
     char decrypt[PROPERTY_VALUE_MAX];
@@ -277,16 +280,17 @@ status_t BootAnimation::readyToRun() {
 
     bool encryptedAnimation = atoi(decrypt) != 0 || !strcmp("trigger_restart_min_framework", decrypt);
 
+    ZipFileRO* zipFile = NULL;
     if ((encryptedAnimation &&
             (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0) &&
-            (mZip.open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE) == NO_ERROR)) ||
+            ((zipFile = ZipFileRO::open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE)) != NULL)) ||
 
             ((access(USER_BOOTANIMATION_FILE, R_OK) == 0) &&
-            (mZip.open(USER_BOOTANIMATION_FILE) == NO_ERROR)) ||
+            ((zipFile = ZipFileRO::open(USER_BOOTANIMATION_FILE)) != NULL)) ||
 
             ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
-            (mZip.open(SYSTEM_BOOTANIMATION_FILE) == NO_ERROR))) {
-        mAndroidAnimation = false;
+            ((zipFile = ZipFileRO::open(SYSTEM_BOOTANIMATION_FILE)) != NULL))) {
+        mZip = zipFile;
     }
 
     return NO_ERROR;
@@ -295,7 +299,9 @@ status_t BootAnimation::readyToRun() {
 bool BootAnimation::threadLoop()
 {
     bool r;
-    if (mAndroidAnimation) {
+    // We have no bootanimation file, so we use the stock android logo
+    // animation.
+    if (mZip == NULL) {
         r = android();
     } else {
         r = movie();
@@ -392,11 +398,14 @@ void BootAnimation::checkExit() {
 
 bool BootAnimation::movie()
 {
-    ZipFileRO& zip(mZip);
+    ZipEntryRO desc = mZip->findEntryByName("desc.txt");
+    ALOGE_IF(!desc, "couldn't find desc.txt");
+    if (!desc) {
+        return false;
+    }
 
-    size_t numEntries = zip.getNumEntries();
-    ZipEntryRO desc = zip.findEntryByName("desc.txt");
-    FileMap* descMap = zip.createEntryFileMap(desc);
+    FileMap* descMap = mZip->createEntryFileMap(desc);
+    mZip->releaseEntry(desc);
     ALOGE_IF(!descMap, "descMap is null");
     if (!descMap) {
         return false;
@@ -415,7 +424,7 @@ bool BootAnimation::movie()
         String8 line(s, endl - s);
         const char* l = line.string();
         int fps, width, height, count, pause;
-        char path[256];
+        char path[ANIM_ENTRY_NAME_MAX];
         char pathType;
         if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
             //LOGD("> w=%d, h=%d, fps=%d", width, height, fps);
@@ -438,28 +447,37 @@ bool BootAnimation::movie()
 
     // read all the data structures
     const size_t pcount = animation.parts.size();
-    for (size_t i=0 ; i<numEntries ; i++) {
-        char name[256];
-        ZipEntryRO entry = zip.findEntryByIndex(i);
-        if (zip.getEntryFileName(entry, name, 256) == 0) {
-            const String8 entryName(name);
-            const String8 path(entryName.getPathDir());
-            const String8 leaf(entryName.getPathLeaf());
-            if (leaf.size() > 0) {
-                for (int j=0 ; j<pcount ; j++) {
-                    if (path == animation.parts[j].path) {
-                        int method;
-                        // supports only stored png files
-                        if (zip.getEntryInfo(entry, &method, 0, 0, 0, 0, 0)) {
-                            if (method == ZipFileRO::kCompressStored) {
-                                FileMap* map = zip.createEntryFileMap(entry);
-                                if (map) {
-                                    Animation::Frame frame;
-                                    frame.name = leaf;
-                                    frame.map = map;
-                                    Animation::Part& part(animation.parts.editItemAt(j));
-                                    part.frames.add(frame);
-                                }
+    void *cookie = NULL;
+    if (!mZip->startIteration(&cookie)) {
+        return false;
+    }
+
+    ZipEntryRO entry;
+    char name[ANIM_ENTRY_NAME_MAX];
+    while ((entry = mZip->nextEntry(cookie)) != NULL) {
+        const int foundEntryName = mZip->getEntryFileName(entry, name, ANIM_ENTRY_NAME_MAX);
+        if (foundEntryName > ANIM_ENTRY_NAME_MAX || foundEntryName == -1) {
+            ALOGE("Error fetching entry file name");
+            continue;
+        }
+
+        const String8 entryName(name);
+        const String8 path(entryName.getPathDir());
+        const String8 leaf(entryName.getPathLeaf());
+        if (leaf.size() > 0) {
+            for (size_t j=0 ; j<pcount ; j++) {
+                if (path == animation.parts[j].path) {
+                    int method;
+                    // supports only stored png files
+                    if (mZip->getEntryInfo(entry, &method, NULL, NULL, NULL, NULL, NULL)) {
+                        if (method == ZipFileRO::kCompressStored) {
+                            FileMap* map = mZip->createEntryFileMap(entry);
+                            if (map) {
+                                Animation::Frame frame;
+                                frame.name = leaf;
+                                frame.map = map;
+                                Animation::Part& part(animation.parts.editItemAt(j));
+                                part.frames.add(frame);
                             }
                         }
                     }
@@ -467,6 +485,8 @@ bool BootAnimation::movie()
             }
         }
     }
+
+    mZip->endIteration(cookie);
 
     // clear screen
     glShadeModel(GL_FLAT);
@@ -494,7 +514,7 @@ bool BootAnimation::movie()
     Region clearReg(Rect(mWidth, mHeight));
     clearReg.subtractSelf(Rect(xc, yc, xc+animation.width, yc+animation.height));
 
-    for (int i=0 ; i<pcount ; i++) {
+    for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -504,7 +524,7 @@ bool BootAnimation::movie()
             if(exitPending() && !part.playUntilComplete)
                 break;
 
-            for (int j=0 ; j<fcount && (!exitPending() || part.playUntilComplete) ; j++) {
+            for (size_t j=0 ; j<fcount && (!exitPending() || part.playUntilComplete) ; j++) {
                 const Animation::Frame& frame(part.frames[j]);
                 nsecs_t lastFrame = systemTime();
 
@@ -564,7 +584,7 @@ bool BootAnimation::movie()
 
         // free the textures for this part
         if (part.count != 1) {
-            for (int j=0 ; j<fcount ; j++) {
+            for (size_t j=0 ; j<fcount ; j++) {
                 const Animation::Frame& frame(part.frames[j]);
                 glDeleteTextures(1, &frame.tid);
             }
