@@ -148,7 +148,8 @@ public:
 
     static void setFilterBitmap(JNIEnv* env, jobject paint, jboolean filterBitmap) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setFilterBitmap(filterBitmap);
+        GraphicsJNI::getNativePaint(env, paint)->setFilterLevel(
+                filterBitmap ? SkPaint::kLow_FilterLevel : SkPaint::kNone_FilterLevel);
     }
 
     static void setDither(JNIEnv* env, jobject paint, jboolean dither) {
