@@ -242,7 +242,7 @@ public class AudioRecord
 
 
     // Convenience method for the constructor's parameter checks.
-    // This is where constructor IllegalArgumentException-s are thrown
+    // This and audioBuffSizeCheck are where constructor IllegalArgumentException-s are thrown
     // postconditions:
     //    mRecordSource is valid
     //    mChannelCount is valid
@@ -250,7 +250,8 @@ public class AudioRecord
     //    mAudioFormat is valid
     //    mSampleRate is valid
     private void audioParamCheck(int audioSource, int sampleRateInHz,
-                                 int channelConfig, int audioFormat) {
+                                 int channelConfig, int audioFormat)
+            throws IllegalArgumentException {
 
         //--------------
         // audio source
@@ -314,7 +315,7 @@ public class AudioRecord
     //    mAudioFormat is AudioFormat.ENCODING_PCM_8BIT OR AudioFormat.ENCODING_PCM_16BIT
     // postcondition:
     //    mNativeBufferSizeInBytes is valid (multiple of frame size, positive)
-    private void audioBuffSizeCheck(int audioBufferSize) {
+    private void audioBuffSizeCheck(int audioBufferSize) throws IllegalArgumentException {
         // NB: this section is only valid with PCM data.
         // To update when supporting compressed formats
         int frameSizeInBytes = mChannelCount
