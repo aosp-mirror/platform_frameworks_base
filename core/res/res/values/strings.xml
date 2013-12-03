@@ -3926,26 +3926,6 @@
     <!-- Description of the sliding handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="content_description_sliding_handle">"Sliding handle. Touch &amp; hold."</string>
 
-    <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_up">Slide up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the down direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_down">Slide down for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the right direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_right">Slide right for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-
-    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_unlock">Unlock</string>
-    <!-- Description of the camera target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_camera">Camera</string>
-    <!-- Description of the silent target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_silent">Silent</string>
-    <!-- Description of the sound on target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_soundon">Sound on</string>
-    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_search">Search</string>
-
     <!-- Description of the unlock handle in the Slide unlock screen for tablets. [CHAR LIMIT=NONE] -->
     <string name="description_target_unlock_tablet">Swipe to unlock.</string>
 
