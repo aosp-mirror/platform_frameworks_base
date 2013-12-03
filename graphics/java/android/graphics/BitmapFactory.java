@@ -153,8 +153,12 @@ public class BitmapFactory {
          *
          * <p>This does not affect bitmaps without an alpha channel.</p>
          *
+         * <p>Setting this flag to false while setting {@link #inScaled} to true
+         * may result in incorrect colors.</p>
+         *
          * @see Bitmap#hasAlpha()
          * @see Bitmap#isPremultiplied()
+         * @see #inScaled
          */
         public boolean inPremultiplied;
 
@@ -249,6 +253,9 @@ public class BitmapFactory {
          * <p>This flag is turned on by default and should be turned off if you need
          * a non-scaled version of the bitmap.  Nine-patch bitmaps ignore this
          * flag and are always scaled.
+         *
+         * <p>If {@link #inPremultiplied} is set to false, and the image has alpha,
+         * setting this flag to true may result in incorrect colors.
          */
         public boolean inScaled;
 

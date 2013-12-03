@@ -352,6 +352,18 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+// Assert that bitmap's SkAlphaType is consistent with isPremultiplied.
+static void assert_premultiplied(const SkBitmap& bitmap, bool isPremultiplied) {
+    // kOpaque_SkAlphaType and kIgnore_SkAlphaType mean that isPremultiplied is
+    // irrelevant. This just tests to ensure that the SkAlphaType is not
+    // opposite of isPremultiplied.
+    if (isPremultiplied) {
+        SkASSERT(bitmap.alphaType() != kUnpremul_SkAlphaType);
+    } else {
+        SkASSERT(bitmap.alphaType() != kPremul_SkAlphaType);
+    }
+}
+
 jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
         int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density)
 {
@@ -359,6 +371,10 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buff
     SkASSERT(bitmap->pixelRef());
     bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
     bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
+
+    // The caller needs to have already set the alpha type properly, so the
+    // native SkBitmap stays in sync with the Java Bitmap.
+    assert_premultiplied(*bitmap, isPremultiplied);
 
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
             static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)), buffer,
@@ -377,6 +393,10 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreat
 void GraphicsJNI::reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
         bool isPremultiplied)
 {
+    // The caller needs to have already set the alpha type properly, so the
+    // native SkBitmap stays in sync with the Java Bitmap.
+    assert_premultiplied(*bitmap, isPremultiplied);
+
     env->CallVoidMethod(javaBitmap, gBitmap_reinitMethodID,
             bitmap->width(), bitmap->height(), isPremultiplied);
 }

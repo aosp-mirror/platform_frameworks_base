@@ -401,8 +401,11 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
         // TODO: avoid copying when scaled size equals decodingBitmap size
         SkBitmap::Config config = configForScaledOutput(decodingBitmap.config());
-        outputBitmap->setConfig(config, scaledWidth, scaledHeight);
-        outputBitmap->setIsOpaque(decodingBitmap.isOpaque());
+        // FIXME: If the alphaType is kUnpremul and the image has alpha, the
+        // colors may not be correct, since Skia does not yet support drawing
+        // to/from unpremultiplied bitmaps.
+        outputBitmap->setConfig(config, scaledWidth, scaledHeight, 0,
+                                decodingBitmap.alphaType());
         if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
