@@ -447,6 +447,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char heapgrowthlimitOptsBuf[sizeof("-XX:HeapGrowthLimit=")-1 + PROPERTY_VALUE_MAX];
     char heapminfreeOptsBuf[sizeof("-XX:HeapMinFree=")-1 + PROPERTY_VALUE_MAX];
     char heapmaxfreeOptsBuf[sizeof("-XX:HeapMaxFree=")-1 + PROPERTY_VALUE_MAX];
+    char gctypeOptsBuf[sizeof("-Xgc:")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
     char jitcodecachesizeOptsBuf[sizeof("-Xjitcodecachesize:")-1 + PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
@@ -580,6 +581,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     if (strcmp(propBuf, "true") == 0) {
       opt.optionString = "-XX:LowMemoryMode";
       mOptions.add(opt);
+    }
+
+    strcpy(gctypeOptsBuf, "-Xgc:");
+    property_get("dalvik.vm.gctype", gctypeOptsBuf+5, "");
+    if (gctypeOptsBuf[5] != '\0') {
+        opt.optionString = gctypeOptsBuf;
+        mOptions.add(opt);
     }
 
     /*
