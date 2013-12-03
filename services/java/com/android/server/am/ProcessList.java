@@ -119,15 +119,7 @@ final class ProcessList {
     // we have no limit on the number of service, visible, foreground, or other such
     // processes and the number of those processes does not count against the cached
     // process limit.
-    static final int MAX_CACHED_APPS;
-
-    static {
-        // Allow more hidden apps on huge memory devices (1.5GB or higher)
-        // or fetch from the system property
-        MemInfoReader mi = new MemInfoReader();
-        MAX_CACHED_APPS = SystemProperties.getInt("sys.mem.max_hidden_apps",
-                mi.getTotalSize() > 1572864 ? 40 : 24);
-    }
+    static final int MAX_CACHED_APPS = 24;
 
     // We allow empty processes to stick around for at most 30 minutes.
     static final long MAX_EMPTY_TIME = 30*60*1000;
