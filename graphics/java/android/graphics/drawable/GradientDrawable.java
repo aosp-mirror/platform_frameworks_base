@@ -288,11 +288,15 @@ public class GradientDrawable extends Drawable {
      */
     public void setStroke(
             int width, ColorStateList colorStateList, float dashWidth, float dashGap) {
-        mGradientState.setStroke(width, colorStateList, dashWidth, dashGap);
+        if (colorStateList == null) {
+            setStroke(width, Color.TRANSPARENT, dashWidth, dashGap);
+        } else {
+            mGradientState.setStroke(width, colorStateList, dashWidth, dashGap);
 
-        final int[] stateSet = getState();
-        final int color = colorStateList.getColorForState(stateSet, 0);
-        setStrokeInternal(width, color, dashWidth, dashGap);
+            final int[] stateSet = getState();
+            final int color = colorStateList.getColorForState(stateSet, 0);
+            setStrokeInternal(width, color, dashWidth, dashGap);
+        }
     }
 
     private void setStrokeInternal(int width, int color, float dashWidth, float dashGap) {
@@ -675,7 +679,9 @@ public class GradientDrawable extends Drawable {
 
     /**
      * Changes this drawable to use a single color state list instead of a
-     * gradient.
+     * gradient. Calling this method with a null argument will clear the color
+     * and is equivalent to calling {@link #setColor(int)} with the argument
+     * {@link Color#TRANSPARENT}.
      * <p>
      * <strong>Note</strong>: changing color will affect all instances of a
      * drawable loaded from a resource. It is recommended to invoke
@@ -685,10 +691,14 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      */
     public void setColor(ColorStateList colorStateList) {
-        final int color = colorStateList.getColorForState(getState(), 0);
-        mGradientState.setColorStateList(colorStateList);
-        mFillPaint.setColor(color);
-        invalidateSelf();
+        if (colorStateList == null) {
+            setColor(Color.TRANSPARENT);
+        } else {
+            final int color = colorStateList.getColorForState(getState(), 0);
+            mGradientState.setColorStateList(colorStateList);
+            mFillPaint.setColor(color);
+            invalidateSelf();
+        }
     }
 
     @Override
@@ -1295,7 +1305,7 @@ public class GradientDrawable extends Drawable {
         }
         
         public void setSolidColor(int argb) {
-            mHasSolidColor = true;
+            mHasSolidColor = argb != Color.TRANSPARENT;
             mSolidColor = argb;
             mColors = null;
             mColorStateList = null;
