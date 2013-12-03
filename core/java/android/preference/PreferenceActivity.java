@@ -794,8 +794,8 @@ public abstract class PreferenceActivity extends ListActivity implements
                 if ("header".equals(nodeName)) {
                     Header header = new Header();
 
-                    TypedArray sa = getResources().obtainAttributes(attrs,
-                            com.android.internal.R.styleable.PreferenceHeader);
+                    TypedArray sa = obtainStyledAttributes(
+                            attrs, com.android.internal.R.styleable.PreferenceHeader);
                     header.id = sa.getResourceId(
                             com.android.internal.R.styleable.PreferenceHeader_id,
                             (int)HEADER_ID_UNDEFINED);
