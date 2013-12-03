@@ -186,6 +186,9 @@ public class AudioRecord
     //--------------------
     /**
      * Class constructor.
+     * Though some invalid parameters will result in an {@link IllegalArgumentException} exception,
+     * other errors do not.  Thus you should call {@link #getState()} immediately after construction
+     * to confirm that the object is usable.
      * @param audioSource the recording source. See {@link MediaRecorder.AudioSource} for
      *    recording source definitions.
      * @param sampleRateInHz the sample rate expressed in Hertz. 44100Hz is currently the only
