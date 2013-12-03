@@ -237,7 +237,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
 
     Caches::getInstance().bindTexture(texture->id);
 
-    switch (bitmap->getConfig()) {
+    switch (bitmap->config()) {
     case SkBitmap::kA8_Config:
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(),
@@ -265,7 +265,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         texture->blend = !bitmap->isOpaque();
         break;
     default:
-        ALOGW("Unsupported bitmap config: %d", bitmap->getConfig());
+        ALOGW("Unsupported bitmap config: %d", bitmap->config());
         break;
     }
 

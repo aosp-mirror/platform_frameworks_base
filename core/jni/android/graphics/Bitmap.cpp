@@ -543,7 +543,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     p->writeInt32(bitmap->rowBytes());
     p->writeInt32(density);
 
-    if (bitmap->getConfig() == SkBitmap::kIndex8_Config) {
+    if (bitmap->config() == SkBitmap::kIndex8_Config) {
         SkColorTable* ctable = bitmap->getColorTable();
         if (ctable != NULL) {
             int count = ctable->count();

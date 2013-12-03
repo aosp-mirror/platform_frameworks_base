@@ -157,7 +157,7 @@ public:
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
         // accounts for scale in final allocation, using eventual size and config
         const int bytesPerPixel = SkBitmap::ComputeBytesPerPixel(
-                configForScaledOutput(bitmap->getConfig()));
+                configForScaledOutput(bitmap->config()));
         const int requestedSize = bytesPerPixel *
                 int(bitmap->width() * mScale + 0.5f) *
                 int(bitmap->height() * mScale + 0.5f);
