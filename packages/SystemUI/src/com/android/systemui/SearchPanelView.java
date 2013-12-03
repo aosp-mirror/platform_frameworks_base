@@ -135,7 +135,7 @@ public class SearchPanelView extends FrameLayout implements
         public void onTrigger(View v, final int target) {
             final int resId = mGlowPadView.getResourceIdForTarget(target);
             switch (resId) {
-                case com.android.internal.R.drawable.ic_action_assist_generic:
+                case R.drawable.ic_action_assist_generic:
                     mWaitingForLaunch = true;
                     startAssistActivity();
                     vibrate();
@@ -175,7 +175,7 @@ public class SearchPanelView extends FrameLayout implements
             ComponentName component = intent.getComponent();
             if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
                     ASSIST_ICON_METADATA_NAME,
-                    com.android.internal.R.drawable.ic_action_assist_generic)) {
+                    R.drawable.ic_action_assist_generic)) {
                 if (DEBUG) Log.v(TAG, "Couldn't grab icon for component " + component);
             }
         }

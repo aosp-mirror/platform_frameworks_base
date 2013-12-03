@@ -21,21 +21,21 @@
 
     <array name="navbar_search_targets">
         <item>@null</item>
-        <item>@*android:drawable/ic_action_assist_generic</item>
+        <item>@drawable/ic_action_assist_generic</item>
         <item>@null</item>
         <item>@null</item>
     </array>
 
     <array name="navbar_search_target_descriptions">
         <item>@null</item>
-        <item>@*android:string/description_target_search</item>
+        <item>@string/description_target_search</item>
         <item>@null</item>
         <item>@null</item>
     </array>
 
     <array name="navbar_search_direction_descriptions">
         <item>@null</item>
-        <item>@*android:string/description_direction_left</item>
+        <item>@string/description_direction_left</item>
         <item>@null</item>
         <item>@null</item>
     </array>

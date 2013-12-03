@@ -1087,7 +1087,6 @@
   <java-symbol type="drawable" name="unlock_halo" />
   <java-symbol type="drawable" name="unlock_ring" />
   <java-symbol type="drawable" name="unlock_wave" />
-  <java-symbol type="drawable" name="ic_action_assist_generic" />
   <java-symbol type="drawable" name="notification_bg" />
   <java-symbol type="drawable" name="notification_bg_low" />
   <java-symbol type="drawable" name="notification_template_icon_bg" />
