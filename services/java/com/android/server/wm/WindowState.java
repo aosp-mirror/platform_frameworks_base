@@ -463,8 +463,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHaveFrame = true;
 
         TaskStack stack = mAppToken != null ? getStack() : null;
-        if (stack != null && stack.hasSibling()) {
-            mContainingFrame.set(getStackBounds(stack));
+        if (stack != null && !stack.isFullscreen()) {
+            getStackBounds(stack, mContainingFrame);
             if (mUnderStatusBar) {
                 mContainingFrame.top = pf.top;
             }
@@ -723,15 +723,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDisplayContent.getHomeStack();
     }
 
-    Rect getStackBounds() {
-        return getStackBounds(getStack());
+    void getStackBounds(Rect bounds) {
+        getStackBounds(getStack(), bounds);
     }
 
-    private Rect getStackBounds(TaskStack stack) {
+    private void getStackBounds(TaskStack stack, Rect bounds) {
         if (stack != null) {
-            return stack.mStackBox.mBounds;
+            stack.getBounds(bounds);
+            return;
         }
-        return mFrame;
+        bounds.set(mFrame);
     }
 
     public long getInputDispatchingTimeoutNanos() {

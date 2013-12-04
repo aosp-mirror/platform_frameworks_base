@@ -34,6 +34,7 @@ import static com.android.server.am.ActivityManagerService.TAG;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -70,11 +71,11 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
+import android.view.Display;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.TransferPipe;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.wm.StackBox;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -1288,8 +1289,7 @@ public final class ActivityStackSupervisor {
             }
 
             // Time to create the first app stack for this user.
-            int stackId =
-                    mService.createStack(-1, HOME_STACK_ID, StackBox.TASK_STACK_GOES_OVER, 1.0f);
+            int stackId = mService.createStack(-1);
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "adjustStackFocus: New stack r=" + r +
                     " stackId=" + stackId);
             mFocusedStack = getStack(stackId);
@@ -2643,5 +2643,44 @@ public final class ActivityStackSupervisor {
                 } break;
             }
         }
+    }
+
+    StackInfo getStackInfo(ActivityStack stack) {
+        StackInfo info = new StackInfo();
+        mWindowManager.getStackBounds(stack.mStackId, info.bounds);
+        info.displayId = Display.DEFAULT_DISPLAY;
+        info.stackId = stack.mStackId;
+
+        ArrayList<TaskRecord> tasks = stack.getAllTasks();
+        final int numTasks = tasks.size();
+        int[] taskIds = new int[numTasks];
+        String[] taskNames = new String[numTasks];
+        for (int i = 0; i < numTasks; ++i) {
+            final TaskRecord task = tasks.get(i);
+            taskIds[i] = task.taskId;
+            taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
+                    : task.realActivity != null ? task.realActivity.flattenToString()
+                    : task.getTopActivity() != null ? task.getTopActivity().packageName
+                    : "unknown";
+        }
+        info.taskIds = taskIds;
+        info.taskNames = taskNames;
+        return info;
+    }
+
+    StackInfo getStackInfo(int stackId) {
+        ActivityStack stack = getStack(stackId);
+        if (stack != null) {
+            return getStackInfo(stack);
+        }
+        return null;
+    }
+
+    ArrayList<StackInfo> getAllStackInfos() {
+        ArrayList<StackInfo> list = new ArrayList<StackInfo>();
+        for (int ndx = mStacks.size() - 1; ndx >= 0; --ndx) {
+            list.add(getStackInfo(mStacks.get(ndx)));
+        }
+        return list;
     }
 }
