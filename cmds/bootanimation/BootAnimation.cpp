@@ -123,7 +123,7 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     glGenTextures(1, &texture->name);
     glBindTexture(GL_TEXTURE_2D, texture->name);
 
-    switch (bitmap.getConfig()) {
+    switch (bitmap.config()) {
         case SkBitmap::kA8_Config:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, w, h, 0, GL_ALPHA,
                     GL_UNSIGNED_BYTE, p);
@@ -181,7 +181,7 @@ status_t BootAnimation::initTexture(void* buffer, size_t len)
     if (tw < w) tw <<= 1;
     if (th < h) th <<= 1;
 
-    switch (bitmap.getConfig()) {
+    switch (bitmap.config()) {
         case SkBitmap::kARGB_8888_Config:
             if (tw != w || th != h) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,

@@ -632,7 +632,7 @@ static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.getConfig();
+    SkBitmap::Config config = bitmap.config();
     return getInternalFormat(config);
 }
 
@@ -642,7 +642,7 @@ static jint util_getType(JNIEnv *env, jclass clazz,
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.getConfig();
+    SkBitmap::Config config = bitmap.config();
     return getType(config);
 }
 
@@ -653,7 +653,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.getConfig();
+    SkBitmap::Config config = bitmap.config();
     if (internalformat < 0) {
         internalformat = getInternalFormat(config);
     }
@@ -702,7 +702,7 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.getConfig();
+    SkBitmap::Config config = bitmap.config();
     if (format < 0) {
         format = getInternalFormat(config);
         if (format == GL_PALETTE8_RGBA8_OES)

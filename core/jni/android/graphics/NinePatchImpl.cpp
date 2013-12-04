@@ -38,7 +38,7 @@
 #include <utils/Log.h>
 
 static bool getColor(const SkBitmap& bitmap, int x, int y, SkColor* c) {
-    switch (bitmap.getConfig()) {
+    switch (bitmap.config()) {
         case SkBitmap::kARGB_8888_Config:
             *c = SkUnPreMultiply::PMColorToColor(*bitmap.getAddr32(x, y));
             break;
