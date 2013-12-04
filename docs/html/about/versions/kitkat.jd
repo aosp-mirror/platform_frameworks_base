@@ -54,8 +54,8 @@ window.onhashchange = function () {
 <!-- BEGIN ANDROID 4.4 -->
 <div id="44-android-44" class="version-section">
 
-  <div style="padding:0px 0px 0px 60px;margin-top:-3px;float:right;">
-    <img src="{@docRoot}design/media/index_landing_page.png" alt="Android 4.4 on phone and tablet" width="380">
+  <div style="padding:0px 0px 0px 60px;margin-top:-20px;float:right;">
+    <img src="{@docRoot}images/kk-devices.png" alt="Android 4.4 on phone and tablet" width="380">
   </div>
 
   <div class="landing-docs" style="float:right;clear:both;margin:22px 0 2em 3em;">
