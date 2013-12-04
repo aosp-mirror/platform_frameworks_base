@@ -1427,15 +1427,6 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"공유 대상:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>와(과) 공유"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"슬라이딩 핸들을 길게 터치하세요."</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 아래로 슬라이드"</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 오른쪽으로 슬라이드"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"잠금 해제"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"카메라"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"무음"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"사운드 켜기"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"스와이프하여 잠급니다."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"비밀번호 키를 음성으로 들으려면 헤드셋을 연결하세요."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"점"</string>

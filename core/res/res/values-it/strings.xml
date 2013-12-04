@@ -1427,15 +1427,6 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Condividi con"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Condividi con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Maniglia scorrevole. Tocca e tieni premuto."</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Su per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"Giù per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"A sinistra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"A destra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Sblocca"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Fotocamera"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Silenzioso"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Audio attivato"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Ricerca"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Fai scorrere per sbloccare."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Collega gli auricolari per ascoltare la pronuncia dei tasti premuti per la password."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punto."</string>

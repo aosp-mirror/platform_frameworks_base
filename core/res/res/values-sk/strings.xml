@@ -1427,15 +1427,6 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Zdieľať s"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Zdieľať s aplikáciou <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Posuvné tlačidlo. Dotknite sa a podržte."</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Prejdite prstom nahor: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"Prejdite prstom nadol: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Prejdite prstom doľava: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"Prejdite prstom doprava: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Odomknúť"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Fotoaparát"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Tichý"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Zapnúť zvuk"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Vyhľadávanie"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Posunom odomknúť."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Ak si chcete vypočuť vyslovené klávesy hesla, pripojte náhlavnú súpravu."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Bodka."</string>
