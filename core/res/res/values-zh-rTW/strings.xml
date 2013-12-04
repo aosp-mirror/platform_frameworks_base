@@ -1427,15 +1427,6 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"分享對象："</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"與「<xliff:g id="APPLICATION_NAME">%s</xliff:g>」分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑動控制。持續輕觸。"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"向下滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"向右滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"解除鎖定"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"相機"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"靜音"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"開啟音效"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"滑動即可解鎖。"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"連接耳機即可聽取系統朗讀密碼按鍵。"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"點。"</string>

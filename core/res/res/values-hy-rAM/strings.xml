@@ -1427,15 +1427,6 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Տարածել"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Համօգտագործել <xliff:g id="APPLICATION_NAME">%s</xliff:g>-ի հետ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Սահող բռնակ: Հպել &amp; պահել:"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Սահեցրեք վերև <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"Սահեցրեք ցած <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Սահեցրեք ձախ` <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"Սահեցրեք աջ` <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-ի համար:"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Ապակողպել"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Ֆոտոխցիկ"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Լուռ"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Ձայնը միացնել"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Որոնել"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Սահեցրեք` ապակողպելու համար:"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Միացրեք ականջակալները` արտասանվող գաղտնաբառը լսելու համար:"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Կետ:"</string>
