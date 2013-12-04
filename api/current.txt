@@ -219,6 +219,7 @@ package android {
     ctor public R.array();
     field public static final int emailAddressTypes = 17235968; // 0x1070000
     field public static final int imProtocols = 17235969; // 0x1070001
+    field public static final int networkAttributes = 17235979; // 0x107000b
     field public static final int organizationTypes = 17235970; // 0x1070002
     field public static final int phoneTypes = 17235971; // 0x1070003
     field public static final int postalAddressTypes = 17235972; // 0x1070004
@@ -1236,6 +1237,7 @@ package android {
 
   public static final class R.bool {
     ctor public R.bool();
+    field public static final int config_useFixedVolume = 17891414; // 0x1110056
   }
 
   public static final class R.color {
