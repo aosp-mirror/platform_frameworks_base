@@ -25,7 +25,7 @@ import java.net.InterfaceAddress;
 import java.net.UnknownHostException;
 
 /**
- * Identifies an address of a network link
+ * Identifies an IP address on a network link.
  * @hide
  */
 public class LinkAddress implements Parcelable {
@@ -35,7 +35,7 @@ public class LinkAddress implements Parcelable {
     private InetAddress address;
 
     /**
-     * Network prefix length
+     * Prefix length.
      */
     private int prefixLength;
 
@@ -50,10 +50,19 @@ public class LinkAddress implements Parcelable {
         this.prefixLength = prefixLength;
     }
 
+    /**
+     * Constructs a new {@code LinkAddress} from an {@code InetAddress} and a prefix length.
+     * @param address The IP address.
+     * @param prefixLength The prefix length.
+     */
     public LinkAddress(InetAddress address, int prefixLength) {
         init(address, prefixLength);
     }
 
+    /**
+     * Constructs a new {@code LinkAddress} from an {@code InterfaceAddress}.
+     * @param interfaceAddress The interface address.
+     */
     public LinkAddress(InterfaceAddress interfaceAddress) {
         init(interfaceAddress.getAddress(),
              interfaceAddress.getNetworkPrefixLength());
@@ -86,13 +95,13 @@ public class LinkAddress implements Parcelable {
 
     @Override
     public String toString() {
-        return (address == null ? "" : (address.getHostAddress() + "/" + prefixLength));
+        return address.getHostAddress() + "/" + prefixLength;
     }
 
     /**
      * Compares this {@code LinkAddress} instance against the specified address
      * in {@code obj}. Two addresses are equal if their InetAddress and prefixLength
-     * are equal
+     * are equal.
      *
      * @param obj the object to be tested for equality.
      * @return {@code true} if both objects are equal, {@code false} otherwise.
@@ -107,30 +116,30 @@ public class LinkAddress implements Parcelable {
             this.prefixLength == linkAddress.prefixLength;
     }
 
-    @Override
-    /*
-     * generate hashcode based on significant fields
+    /**
+     * Returns a hashcode for this address.
      */
+    @Override
     public int hashCode() {
-        return ((null == address) ? 0 : address.hashCode()) + prefixLength;
+        return address.hashCode() + 11 * prefixLength;
     }
 
     /**
-     * Returns the InetAddress for this address.
+     * Returns the InetAddress of this address.
      */
     public InetAddress getAddress() {
         return address;
     }
 
     /**
-     * Get network prefix length
+     * Returns the prefix length of this address.
      */
     public int getNetworkPrefixLength() {
         return prefixLength;
     }
 
     /**
-     * Implement the Parcelable interface
+     * Implement the Parcelable interface.
      * @hide
      */
     public int describeContents() {
@@ -142,13 +151,8 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
-        if (address != null) {
-            dest.writeByte((byte)1);
-            dest.writeByteArray(address.getAddress());
-            dest.writeInt(prefixLength);
-        } else {
-            dest.writeByte((byte)0);
-        }
+        dest.writeByteArray(address.getAddress());
+        dest.writeInt(prefixLength);
     }
 
     /**
@@ -159,13 +163,14 @@ public class LinkAddress implements Parcelable {
         new Creator<LinkAddress>() {
             public LinkAddress createFromParcel(Parcel in) {
                 InetAddress address = null;
-                int prefixLength = 0;
-                if (in.readByte() == 1) {
-                    try {
-                        address = InetAddress.getByAddress(in.createByteArray());
-                        prefixLength = in.readInt();
-                    } catch (UnknownHostException e) { }
+                try {
+                    address = InetAddress.getByAddress(in.createByteArray());
+                } catch (UnknownHostException e) {
+                    // Nothing we can do here. When we call the constructor, we'll throw an
+                    // IllegalArgumentException, because a LinkAddress can't have a null
+                    // InetAddress.
                 }
+                int prefixLength = in.readInt();
                 return new LinkAddress(address, prefixLength);
             }
 
