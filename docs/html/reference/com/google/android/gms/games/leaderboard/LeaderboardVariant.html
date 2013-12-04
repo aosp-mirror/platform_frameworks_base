@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -655,7 +657,38 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+
+
+
+
+
+
+
 <div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+  <a href="#constants">Constants</a>
+
+
+
+
+
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -681,6 +714,11 @@ onkeyup="return search_changed(event, false, '/')" />
 
   
   
+      implements
+
+        <a href="/reference/com/google/android/gms/common/data/Freezable.html">Freezable</a>&lt;T&gt;
+
+
   
 
 
@@ -1012,6 +1050,76 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.Freezable" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.data.Freezable-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/common/data/Freezable.html">com.google.android.gms.common.data.Freezable</a>
+
+<div id="inherited-methods-com.google.android.gms.common.data.Freezable">
+  <div id="inherited-methods-com.google.android.gms.common.data.Freezable-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.common.data.Freezable-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            T</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->

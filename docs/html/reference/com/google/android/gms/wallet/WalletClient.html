@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -793,9 +795,10 @@ Summary:
  new account and do not reuse the Google transaction ID associated with the old account - this is
  a new transaction.
  <p>
- We recommend that you <a class="external-link" href="http://getinstantbuy.withgoogle.com/">apply
- for API access</a> before starting development. During development, use the sandbox environment by
- specifying <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></code> in the constructor.
+ We recommend that you apply for API access at
+ <a href="http://getinstantbuy.withgoogle.com/">http://getinstantbuy.withgoogle.com/</a>
+ before starting development. During development, use the sandbox environment by specifying
+ <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></code> in the constructor.
 </p>
 
 
@@ -1810,6 +1813,17 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
+        <tr>
+          <th>googleTransactionId</td>
+          <td>Required field. Must be identical to the value returned in an
+                            earlier <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code> in the same transaction.</td>
+        </tr>
+        <tr>
+          <th>merchantTransactionId</td>
+          <td>Optional merchant identifier for the transaction. The value
+                              will be echoed back in <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code>, but is not
+                              otherwise used by the Wallet API. To omit, pass <code>null</code></td>
+        </tr>
         <tr>
           <th>requestCode</td>
           <td>will be passed back in onActivityResult where you can retrieve the result

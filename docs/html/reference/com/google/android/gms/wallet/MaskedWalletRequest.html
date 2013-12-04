@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -692,9 +694,6 @@ Summary:
 
 
 
-  &#124; <a href="#pubctors">Ctors</a>
-  
-
 
 
   &#124; <a href="#pubmethods">Methods</a>
@@ -721,7 +720,7 @@ Summary:
 <div id="jd-header">
     public
      
-     
+    final
     
     class
 <h1 itemprop="name">MaskedWalletRequest</h1>
@@ -917,8 +916,12 @@ android.os.Parcelable
 
 
 
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
 
 
 
@@ -930,25 +933,28 @@ android.os.Parcelable
             
             
             
-            </nobr>
+            boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html#MaskedWalletRequest()">MaskedWalletRequest</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html#allowDebitCard()">allowDebitCard</a></span>()</nobr>
         
   </td></tr>
 
 
 
-</table>
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
 
 
 
 
 
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html#allowPrepaidCard()">allowPrepaidCard</a></span>()</nobr>
 
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
-
+  </td></tr>
 
 
 	 
@@ -975,6 +981,22 @@ android.os.Parcelable
             
             
             
+            <a href="/reference/com/google/android/gms/wallet/CountrySpecification.html">CountrySpecification[]</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html#getAllowedShippingCountrySpecifications()">getAllowedShippingCountrySpecifications</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             <a href="/reference/com/google/android/gms/wallet/Cart.html">Cart</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -984,7 +1006,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1000,7 +1022,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1016,7 +1038,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1032,7 +1054,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1048,7 +1070,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1064,7 +1086,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1080,7 +1102,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1096,7 +1118,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1112,7 +1134,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1128,7 +1150,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1144,7 +1166,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1160,7 +1182,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1513,42 +1535,6 @@ From interface
 <!-- Public ctors -->
 
 
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<A NAME="MaskedWalletRequest()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">MaskedWalletRequest</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-
-
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -1562,7 +1548,7 @@ From interface
 
 
 
-<A NAME="describeContents()"></A>
+<A NAME="allowDebitCard()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1572,9 +1558,9 @@ From interface
          
          
          
-        int
+        boolean
       </span>
-      <span class="sympad">describeContents</span>
+      <span class="sympad">allowDebitCard</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1586,6 +1572,108 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>whether a debit card may be used as the backing card for this transaction
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="allowPrepaidCard()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">allowPrepaidCard</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>whether a prepaid card may be used as the backing card for this transaction
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="describeContents()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">describeContents</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getAllowedShippingCountrySpecifications()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/wallet/CountrySpecification.html">CountrySpecification[]</a>
+      </span>
+      <span class="sympad">getAllowedShippingCountrySpecifications</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the allowed set of shipping country specifications
+</li></ul>
+  </div>
 
     </div>
 </div>
