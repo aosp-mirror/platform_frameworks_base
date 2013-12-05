@@ -237,7 +237,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     public Drawable findDrawableByLayerId(int id) {
         final ChildDrawable[] layers = mLayerState.mChildren;
         final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i--) {
+        for (int i = 0; i < N; i++) {
             if (layers[i].mId == id) {
                 return layers[i].mDrawable;
             }
