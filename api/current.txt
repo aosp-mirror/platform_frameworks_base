@@ -10369,6 +10369,7 @@ package android.graphics.drawable {
     method public int getId(int);
     method public int getNumberOfLayers();
     method public int getOpacity();
+    method public int getPaddingMode();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public void setAlpha(int);
@@ -10377,7 +10378,10 @@ package android.graphics.drawable {
     method public void setId(int, int);
     method public void setLayerInset(int, int, int, int, int);
     method public void setOpacity(int);
+    method public void setPaddingMode(int);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
+    field public static final int PADDING_MODE_NEST = 0; // 0x0
+    field public static final int PADDING_MODE_STACK = 1; // 0x1
   }
 
   public class LevelListDrawable extends android.graphics.drawable.DrawableContainer {
