@@ -206,7 +206,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libicuuc \
 	libicui18n \
 	libmedia \
-	libwpa_client \
 	libjpeg \
 	libusbhost \
 	libharfbuzz_ng \
