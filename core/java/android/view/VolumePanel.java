@@ -311,7 +311,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         lp.type = LayoutParams.TYPE_VOLUME_OVERLAY;
         lp.width = LayoutParams.WRAP_CONTENT;
         lp.height = LayoutParams.WRAP_CONTENT;
-        lp.privateFlags |= LayoutParams.PRIVATE_FLAG_FORCE_SHOW_NAV_BAR;
         window.setAttributes(lp);
         window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
