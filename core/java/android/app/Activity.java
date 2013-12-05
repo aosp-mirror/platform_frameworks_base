@@ -17,6 +17,9 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
 import com.android.internal.app.ActionBarImpl;
@@ -1990,6 +1993,41 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Retrieve the {@link TransitionManager} responsible for default transitions in this window.
+     * Requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * <p>This method will return non-null after content has been initialized (e.g. by using
+     * {@link #setContentView}) if {@link Window#FEATURE_CONTENT_TRANSITIONS} has been granted.</p>
+     *
+     * @return This window's content TransitionManager or null if none is set.
+     */
+    public TransitionManager getContentTransitionManager() {
+        return getWindow().getTransitionManager();
+    }
+
+    /**
+     * Set the {@link TransitionManager} to use for default transitions in this window.
+     * Requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * @param tm The TransitionManager to use for scene changes.
+     */
+    public void setContentTransitionManager(TransitionManager tm) {
+        getWindow().setTransitionManager(tm);
+    }
+
+    /**
+     * Retrieve the {@link Scene} representing this window's current content.
+     * Requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * <p>This method will return null if the current content is not represented by a Scene.</p>
+     *
+     * @return Current Scene being shown or null
+     */
+    public Scene getContentScene() {
+        return getWindow().getContentScene();
+    }
+
+    /**
      * Sets whether this activity is finished when touched outside its window's
      * bounds.
      */
@@ -3408,7 +3446,29 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity 
      */
     public void startActivityForResult(Intent intent, int requestCode) {
-        startActivityForResult(intent, requestCode, null);
+        final TransitionManager tm = getWindow().getTransitionManager();
+        final Scene currScene = getWindow().getContentScene();
+        final String[] targetSceneNames = currScene != null && tm != null ?
+                tm.getTargetSceneNames(currScene) : null;
+
+        if (targetSceneNames == null || targetSceneNames.length == 0) {
+            startActivityForResult(intent, requestCode, null);
+        } else {
+            // TODO Capture the scene transition args and send along
+            final ActivityOptions opts = ActivityOptions.makeSceneTransitionAnimation(
+                    targetSceneNames, null,
+                    new ActivityOptions.OnSceneTransitionStartedListener() {
+                        @Override public void onSceneTransitionStarted(String destSceneName) {
+                            final Transition t = tm.getNamedTransition(currScene, destSceneName);
+                            // TODO Fill this in to notify the outgoing activity that it should
+                            // treat this as a sync point for the transition - the target
+                            // transition has started.
+                            Log.d(TAG, "Scene transition to scene " + destSceneName +
+                                    " transition " + t);
+                        }
+                    }, mHandler);
+            startActivityForResult(intent, requestCode, opts.toBundle());
+        }
     }
 
     /**
@@ -5229,6 +5289,16 @@ public class Activity extends ContextThemeWrapper
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config) {
+        attach(context, aThread, instr, token, ident, application, intent, info, title, parent, id,
+                lastNonConfigurationInstances, config, null);
+    }
+
+    final void attach(Context context, ActivityThread aThread,
+            Instrumentation instr, IBinder token, int ident,
+            Application application, Intent intent, ActivityInfo info,
+            CharSequence title, Activity parent, String id,
+            NonConfigurationInstances lastNonConfigurationInstances,
+            Configuration config, Bundle options) {
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
@@ -5265,6 +5335,7 @@ public class Activity extends ContextThemeWrapper
             mWindow.setContainer(mParent.getWindow());
         }
         mWindowManager = mWindow.getWindowManager();
+        mWindow.setTransitionOptions(options);
         mCurrentConfig = config;
     }
 
