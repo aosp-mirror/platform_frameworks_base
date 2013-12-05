@@ -547,16 +547,20 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
     jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
                                                              gVMRuntime_newNonMovableArray,
                                                              gByte_class, size);
-    if (arrayObj) {
-        jbyte* addr = (jbyte*) env->CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj);
-        if (addr) {
-            SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
-            bitmap->setPixelRef(pr)->unref();
-            // since we're already allocated, we lockPixels right away
-            // HeapAllocator behaves this way too
-            bitmap->lockPixels();
-        }
+    if (env->ExceptionCheck() != 0) {
+        return NULL;
     }
+    SkASSERT(arrayObj);
+    jbyte* addr = (jbyte*) env->CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj);
+    if (env->ExceptionCheck() != 0) {
+        return NULL;
+    }
+    SkASSERT(addr);
+    SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
+    bitmap->setPixelRef(pr)->unref();
+    // since we're already allocated, we lockPixels right away
+    // HeapAllocator behaves this way too
+    bitmap->lockPixels();
 
     return arrayObj;
 }
