@@ -4241,6 +4241,14 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
+        <!-- Indicates how layer padding should affect the bounds of subsequent layers.
+            The default value is nest. -->
+        <attr name="paddingMode">
+            <!-- Nest each layer inside the padding of the previous layer. -->
+            <enum name="nest" value="0" />
+            <!-- Stack each layer directly atop the previous layer. -->
+            <enum name="stack" value="1" />
+        </attr>
     </declare-styleable>
 
     <!-- Describes an item (or child) of a LayerDrawable. -->
@@ -4256,7 +4264,7 @@
         <!-- Drawable used to render the layer. -->
         <attr name="drawable" />
         <!-- Identifier of the layer. This can be used to retrieve the layer
-             from a drawbable container. -->
+             from a drawable container. -->
         <attr name="id" />
     </declare-styleable>
 
