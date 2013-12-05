@@ -36,6 +36,7 @@ import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 
@@ -53,10 +54,13 @@ public class KeyButtonView extends ImageView {
     int mTouchSlop;
     Drawable mGlowBG;
     int mGlowWidth, mGlowHeight;
-    float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
+    float mGlowAlpha = 0f, mGlowScale = 1f;
+    @ViewDebug.ExportedProperty(category = "drawing")
+    float mDrawingAlpha = 1f;
+    @ViewDebug.ExportedProperty(category = "drawing")
     float mQuiescentAlpha = DEFAULT_QUIESCENT_ALPHA;
     boolean mSupportsLongpress = true;
-    RectF mRect = new RectF(0f,0f,0f,0f);
+    RectF mRect = new RectF();
     AnimatorSet mPressedAnim;
     Animator mAnimateToQuiescent = new ObjectAnimator();
 
@@ -90,8 +94,8 @@ public class KeyButtonView extends ImageView {
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
+        setDrawingAlpha(mQuiescentAlpha);
         if (mGlowBG != null) {
-            setDrawingAlpha(mQuiescentAlpha);
             mGlowWidth = mGlowBG.getIntrinsicWidth();
             mGlowHeight = mGlowBG.getIntrinsicHeight();
         }
@@ -126,16 +130,14 @@ public class KeyButtonView extends ImageView {
     public void setQuiescentAlpha(float alpha, boolean animate) {
         mAnimateToQuiescent.cancel();
         alpha = Math.min(Math.max(alpha, 0), 1);
-        if (alpha == mQuiescentAlpha) return;
+        if (alpha == mQuiescentAlpha && alpha == mDrawingAlpha) return;
         mQuiescentAlpha = alpha;
         if (DEBUG) Log.d(TAG, "New quiescent alpha = " + mQuiescentAlpha);
-        if (mGlowBG != null) {
-            if (animate) {
-                mAnimateToQuiescent = animateToQuiescent();
-                mAnimateToQuiescent.start();
-            } else {
-                setDrawingAlpha(mQuiescentAlpha);
-            }
+        if (mGlowBG != null && animate) {
+            mAnimateToQuiescent = animateToQuiescent();
+            mAnimateToQuiescent.start();
+        } else {
+            setDrawingAlpha(mQuiescentAlpha);
         }
     }
 
@@ -143,13 +145,15 @@ public class KeyButtonView extends ImageView {
         return ObjectAnimator.ofFloat(this, "drawingAlpha", mQuiescentAlpha);
     }
 
+    public float getQuiescentAlpha() {
+        return mQuiescentAlpha;
+    }
+
     public float getDrawingAlpha() {
-        if (mGlowBG == null) return 0;
         return mDrawingAlpha;
     }
 
     public void setDrawingAlpha(float x) {
-        if (mGlowBG == null) return;
         // Calling setAlpha(int), which is an ImageView-specific
         // method that's different from setAlpha(float). This sets
         // the alpha on this ImageView's drawable directly

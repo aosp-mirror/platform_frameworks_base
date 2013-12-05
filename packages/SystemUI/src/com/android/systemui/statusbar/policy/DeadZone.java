@@ -22,7 +22,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -75,7 +75,7 @@ public class DeadZone extends View {
         mVertical = (index == VERTICAL);
 
         if (DEBUG)
-            Log.v(TAG, this + " size=[" + mSizeMin + "-" + mSizeMax + "] hold=" + mHold
+            Slog.v(TAG, this + " size=[" + mSizeMin + "-" + mSizeMax + "] hold=" + mHold
                     + (mVertical ? " vertical" : " horizontal"));
 
         setFlashOnTouchCapture(context.getResources().getBoolean(R.bool.config_dead_zone_flash));
@@ -106,7 +106,7 @@ public class DeadZone extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (DEBUG) {
-            Log.v(TAG, this + " onTouch: " + MotionEvent.actionToString(event.getAction()));
+            Slog.v(TAG, this + " onTouch: " + MotionEvent.actionToString(event.getAction()));
         }
 
         final int action = event.getAction();
@@ -114,12 +114,12 @@ public class DeadZone extends View {
             poke(event);
         } else if (action == MotionEvent.ACTION_DOWN) {
             if (DEBUG) {
-                Log.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
+                Slog.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
             }
             int size = (int) getSize(event.getEventTime());
             if ((mVertical && event.getX() < size) || event.getY() < size) {
                 if (CHATTY) {
-                    Log.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY() + ")");
+                    Slog.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY() + ")");
                 }
                 if (mShouldFlash) {
                     post(mDebugFlash);
@@ -134,7 +134,7 @@ public class DeadZone extends View {
     public void poke(MotionEvent event) {
         mLastPokeTime = event.getEventTime();
         if (DEBUG)
-            Log.v(TAG, "poked! size=" + getSize(mLastPokeTime));
+            Slog.v(TAG, "poked! size=" + getSize(mLastPokeTime));
         if (mShouldFlash) postInvalidate();
     }
 

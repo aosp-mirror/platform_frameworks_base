@@ -123,7 +123,7 @@ public class Gravity
     public static final int RELATIVE_HORIZONTAL_GRAVITY_MASK = START | END;
 
     /**
-     * Apply a gravity constant to an object. This suppose that the layout direction is LTR.
+     * Apply a gravity constant to an object. This supposes that the layout direction is LTR.
      * 
      * @param gravity The desired placement of the object, as defined by the
      *                constants in this class.

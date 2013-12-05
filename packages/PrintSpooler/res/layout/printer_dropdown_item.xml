@@ -15,13 +15,13 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="16dip"
-        android:paddingEnd="16dip"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall"
-        android:orientation="horizontal"
-        android:gravity="start|center_vertical">
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:paddingStart="16dip"
+      android:paddingEnd="16dip"
+      android:minHeight="?android:attr/listPreferredItemHeightSmall"
+      android:orientation="horizontal"
+      android:gravity="start|center_vertical">
 
     <ImageView
         android:id="@+id/icon"
@@ -31,7 +31,7 @@
         android:layout_marginEnd="8dip"
         android:duplicateParentState="true"
         android:contentDescription="@null"
-        android:visibility="gone">
+        android:visibility="invisible">
     </ImageView>
 
     <LinearLayout

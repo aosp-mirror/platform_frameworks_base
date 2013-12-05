@@ -205,7 +205,9 @@ public class KeyguardManager {
         try {
             mWM.exitKeyguardSecurely(new IOnKeyguardExitResult.Stub() {
                 public void onKeyguardExitResult(boolean success) throws RemoteException {
-                    callback.onKeyguardExitResult(success);
+                    if (callback != null) {
+                        callback.onKeyguardExitResult(success);
+                    }
                 }
             });
         } catch (RemoteException e) {

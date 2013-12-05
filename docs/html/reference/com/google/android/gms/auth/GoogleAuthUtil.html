@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -861,13 +873,20 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_CLIENT_PACKAGE_NAME">KEY_CLIENT_PACKAGE_NAME</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></td>
         <td class="jd-descrcol" width="100%">Bundle key for specifying which user's app activity (moment) types can
  be written to Google.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_VISIBLE_ACTIVITIES">KEY_REQUEST_VISIBLE_ACTIVITIES</a></td>
         <td class="jd-descrcol" width="100%">See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_REQUEST_ACTIONS">KEY_REQUEST_ACTIONS</a></code>
@@ -875,7 +894,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_SUPPRESS_PROGRESS_SCREEN">KEY_SUPPRESS_PROGRESS_SCREEN</a></td>
         <td class="jd-descrcol" width="100%">Adding KEY_SUPPRESS_PROGRESS will suppress the progress screen shown
@@ -1293,6 +1312,43 @@ From class
         <span>
             
                 "com.google"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="KEY_CLIENT_PACKAGE_NAME"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        KEY_CLIENT_PACKAGE_NAME
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "clientPackageName"
             
         </span>
         </div>

@@ -259,14 +259,26 @@ public class BitmapFactory {
          * (e.g. the bitmap is drawn, getPixels() is called), they will be
          * automatically re-decoded.
          *
-         * For the re-decode to happen, the bitmap must have access to the
+         * <p>For the re-decode to happen, the bitmap must have access to the
          * encoded data, either by sharing a reference to the input
          * or by making a copy of it. This distinction is controlled by
          * inInputShareable. If this is true, then the bitmap may keep a shallow
          * reference to the input. If this is false, then the bitmap will
          * explicitly make a copy of the input data, and keep that. Even if
          * sharing is allowed, the implementation may still decide to make a
-         * deep copy of the input data.
+         * deep copy of the input data.</p>
+         *
+         * <p>While inPurgeable can help avoid big Dalvik heap allocations (from
+         * API level 11 onward), it sacrifices performance predictability since any
+         * image that the view system tries to draw may incur a decode delay which
+         * can lead to dropped frames. Therefore, most apps should avoid using
+         * inPurgeable to allow for a fast and fluid UI. To minimize Dalvik heap
+         * allocations use the {@link #inBitmap} flag instead.</p>
+         *
+         * <p class="note"><strong>Note:</strong> This flag is ignored when used
+         * with {@link #decodeResource(Resources, int,
+         * android.graphics.BitmapFactory.Options)} or {@link #decodeFile(String,
+         * android.graphics.BitmapFactory.Options)}.</p>
          */
         public boolean inPurgeable;
 
@@ -457,7 +469,7 @@ public class BitmapFactory {
      *
      * @param res The resources object containing the image data
      * @param id The resource id of the image data
-     * @return The decoded bitmap, or null if the image could not be decode.
+     * @return The decoded bitmap, or null if the image could not be decoded.
      */
     public static Bitmap decodeResource(Resources res, int id) {
         return decodeResource(res, id, null);
@@ -505,7 +517,7 @@ public class BitmapFactory {
      * @param offset offset into imageData for where the decoder should begin
      *               parsing.
      * @param length the number of bytes, beginning at offset, to parse
-     * @return The decoded bitmap, or null if the image could not be decode.
+     * @return The decoded bitmap, or null if the image could not be decoded.
      */
     public static Bitmap decodeByteArray(byte[] data, int offset, int length) {
         return decodeByteArray(data, offset, length, null);

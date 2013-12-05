@@ -177,6 +177,7 @@ class KeyguardMessageArea extends TextView {
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setLayerType(LAYER_TYPE_HARDWARE, null); // work around nested unclipped SaveLayer bug
 
         mLockPatternUtils = new LockPatternUtils(context);
 

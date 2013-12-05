@@ -112,7 +112,7 @@ cloud messaging.</p>
   <div class="cell-icon">
     <img src="{@docRoot}images/google/wallet.png" width="40" />
   </div>
-    <h4><a class="external-link" href="https://developers.google.com/commerce/wallet/instant-buy/"
+    <h4><a href="{@docRoot}google/play-services/wallet.html"
     >Google Wallet Instant Buy</a></h4>
     <p>Provide fast and easy checkout in your app when selling physical goods and services.
     Increase conversions by streamlining your purchase flow and reducing the amount of
@@ -136,11 +136,11 @@ interaction patterns, and much more.
 
 <div class="landing-cell">
   <div class="cell-icon">
-    <img src="{@docRoot}images/google/admob-money.png" width="40" />
+    <img src="{@docRoot}images/google/google-mobile-ads.png" width="40" />
   </div>
-    <h4><a class="external-link" href="https://developers.google.com/mobile-ads-sdk/"
-    >Google AdMob Ads</a></h4>
-    <p>Display ads from AdMob offer you an alternative revenue opportunity that leverages
+    <h4><a href="{@docRoot}google/play-services/ads.html"
+    >Google Mobile Ads</a></h4>
+    <p>Display ads from Google Mobile Ads offer you an alternative revenue opportunity that leverages
     multiple ad networks with targeted ads and several display formats.
     </p>
 </div>

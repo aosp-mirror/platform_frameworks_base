@@ -40,6 +40,14 @@ public class KeyguardServiceDelegate {
     private KeyguardState mKeyguardState = new KeyguardState();
 
     /* package */ static final class KeyguardState {
+        KeyguardState() {
+            // Assume keyguard is showing and secure until we know for sure. This is here in
+            // the event something checks before the service is actually started.
+            // KeyguardService itself should default to this state until the real state is known.
+            showing = true;
+            showingAndNotHidden = true;
+            secure = true;
+        }
         boolean showing;
         boolean showingAndNotHidden;
         boolean inputRestricted;
@@ -52,6 +60,7 @@ public class KeyguardServiceDelegate {
         public int offReason;
         public int currentUser;
         public boolean screenIsOn;
+        public boolean bootCompleted;
     };
 
     public interface ShowListener {
@@ -116,6 +125,9 @@ public class KeyguardServiceDelegate {
                 mKeyguardService.onSystemReady();
                 // This is used to hide the scrim once keyguard displays.
                 mKeyguardService.onScreenTurnedOn(new KeyguardShowDelegate(null));
+            }
+            if (mKeyguardState.bootCompleted) {
+                mKeyguardService.onBootCompleted();
             }
         }
 
@@ -303,6 +315,13 @@ public class KeyguardServiceDelegate {
                 mScrim.setVisibility(View.GONE);
             }
         });
+    }
+
+    public void onBootCompleted() {
+        if (mKeyguardService != null) {
+            mKeyguardService.onBootCompleted();
+        }
+        mKeyguardState.bootCompleted = true;
     }
 
 }

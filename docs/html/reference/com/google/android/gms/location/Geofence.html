@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -757,19 +769,27 @@ onkeyup="return search_changed(event, false, '/')" />
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_DWELL">GEOFENCE_TRANSITION_DWELL</a></td>
+        <td class="jd-descrcol" width="100%">The transition type indicating that the user enters and dwells in
+ geofences for a given period of time.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">GEOFENCE_TRANSITION_ENTER</a></td>
         <td class="jd-descrcol" width="100%">The transition type indicating that the user enters the geofence(s).</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_EXIT">GEOFENCE_TRANSITION_EXIT</a></td>
         <td class="jd-descrcol" width="100%">The transition type indicating that the user exits the geofence(s).</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.html#NEVER_EXPIRE">NEVER_EXPIRE</a></td>
         <td class="jd-descrcol" width="100%">Expiration value that indicates the geofence should never expire.</td>
@@ -849,6 +869,52 @@ onkeyup="return search_changed(event, false, '/')" />
 <!-- ========= ENUM CONSTANTS DETAIL ======== -->
 <h2>Constants</h2>
 
+
+
+
+<A NAME="GEOFENCE_TRANSITION_DWELL"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        GEOFENCE_TRANSITION_DWELL
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The transition type indicating that the user enters and dwells in
+ geofences for a given period of time. This alert always follows the
+ <code><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">GEOFENCE_TRANSITION_ENTER</a></code> alert. But an app can always specify
+ this transition type without specifying
+ <code><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">GEOFENCE_TRANSITION_ENTER</a></code>.
+ <p>
+ You must set the duration of loitering before this alert is sent using
+ <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setLoiteringDelay(int)">setLoiteringDelay(int)</a></code>.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                4
+                (0x00000004)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
 
 
 

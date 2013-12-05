@@ -122,7 +122,7 @@ not know the content of your shaders at runtime, you should build your code such
 get created once and then cached for later use.</p>
 
 <pre>
-public Triangle() {
+public class Triangle() {
     ...
 
     int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);

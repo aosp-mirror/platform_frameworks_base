@@ -6686,6 +6686,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             scrap.dispatchStartTemporaryDetach();
 
+            // The the accessibility state of the view may change while temporary
+            // detached and we do not allow detached views to fire accessibility
+            // events. So we are announcing that the subtree changed giving a chance
+            // to clients holding on to a view in this subtree to refresh it.
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+
             // Don't scrap views that have transient state.
             final boolean scrapHasTransientState = scrap.hasTransientState();
             if (scrapHasTransientState) {

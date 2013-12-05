@@ -65,7 +65,6 @@ public class LoudnessEnhancer extends AudioEffect {
     private final Object mParamListenerLock = new Object();
 
     /**
-     * @hide
      * Class constructor.
      * @param audioSession system-wide unique audio session identifier. The LoudnessEnhancer
      * will be attached to the MediaPlayer or AudioTrack in the same audio session.

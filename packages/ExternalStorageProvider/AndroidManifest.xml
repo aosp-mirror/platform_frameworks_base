@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
 
     <application android:label="@string/app_label">
         <provider
@@ -15,6 +16,14 @@
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
         </provider>
+
+        <receiver android:name=".MountReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
+                <action android:name="android.intent.action.MEDIA_UNMOUNTED" />
+                <data android:scheme="file" />
+            </intent-filter>
+        </receiver>
 
         <!-- TODO: find a better place for tests to live -->
         <provider

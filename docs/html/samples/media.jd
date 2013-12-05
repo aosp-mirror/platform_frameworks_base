@@ -1,0 +1,11 @@
+page.title=Media
+@jd:body
+
+
+<div id="samples" class="media">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

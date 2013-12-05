@@ -530,6 +530,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final long WALLPAPER_TIMEOUT = 150;
     // Time we wait after a timeout before trying to wait again.
     static final long WALLPAPER_TIMEOUT_RECOVERY = 10000;
+    boolean mAnimateWallpaperWithTarget;
 
     AppWindowToken mFocusedApp = null;
 
@@ -577,10 +578,13 @@ public class WindowManagerService extends IWindowManager.Stub
         private boolean mUpdateRotation = false;
         boolean mWallpaperActionPending = false;
 
-        private static final int DISPLAY_CONTENT_UNKNOWN = 0;
-        private static final int DISPLAY_CONTENT_MIRROR = 1;
-        private static final int DISPLAY_CONTENT_UNIQUE = 2;
-        private int mDisplayHasContent = DISPLAY_CONTENT_UNKNOWN;
+        // Set to true when the display contains content to show the user.
+        // When false, the display manager may choose to mirror or blank the display.
+        boolean mDisplayHasContent = false;
+
+        // Only set while traversing the default display based on its content.
+        // Affects the behavior of mirroring on secondary displays.
+        boolean mObscureApplicationContentOnSecondaryDisplays = false;
     }
     final LayoutFields mInnerFields = new LayoutFields();
 
@@ -3393,16 +3397,17 @@ public class WindowManagerService extends IWindowManager.Stub
         if (stack == null) {
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
+        EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
         Task task = new Task(atoken, stack, userId);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, true);
-        stack.getDisplayContent().moveStack(stack, true);
         return task;
     }
 
     @Override
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
-            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId) {
+            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
+            int configChanges) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3434,6 +3439,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.appFullscreen = fullscreen;
             atoken.showWhenLocked = showWhenLocked;
             atoken.requestedOrientation = requestedOrientation;
+            atoken.configChanges = configChanges;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + atoken
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
 
@@ -4302,10 +4308,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
             if (okToDisplay() && mAppTransition.isTransitionSet()) {
-                // Already in requested state, don't do anything more.
-                if (wtoken.hiddenRequested != visible) {
-                    return;
-                }
                 wtoken.hiddenRequested = !visible;
 
                 if (!wtoken.startingDisplayed) {
@@ -4732,11 +4734,9 @@ public class WindowManagerService extends IWindowManager.Stub
         return index;
     }
 
-    void moveStackWindowsLocked(TaskStack stack) {
-        DisplayContent displayContent = stack.getDisplayContent();
-
+    void moveStackWindowsLocked(DisplayContent displayContent) {
         // First remove all of the windows from the list.
-        final ArrayList<Task> tasks = stack.getTasks();
+        final ArrayList<Task> tasks = displayContent.getTasks();
         final int numTasks = tasks.size();
         for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
             AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
@@ -4793,7 +4793,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.moveHomeStackBox(isHomeStackTask);
                 }
                 stack.moveTaskToTop(task);
-                displayContent.moveStack(stack, true);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4812,7 +4811,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 final TaskStack stack = task.mStack;
                 stack.moveTaskToBottom(task);
-                moveStackWindowsLocked(stack);
+                moveStackWindowsLocked(stack.getDisplayContent());
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4847,7 +4846,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         weight);
                 if (stack != null) {
                     mStackIdToStack.put(stackId, stack);
-                    displayContent.moveStack(stack, true);
                     performLayoutAndPlaceSurfacesLocked();
                     return;
                 }
@@ -4879,6 +4877,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             final TaskStack stack = task.mStack;
+            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
             stack.removeTask(task);
             stack.getDisplayContent().layoutNeeded = true;
         }
@@ -5717,7 +5716,7 @@ public class WindowManagerService extends IWindowManager.Stub
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
 
-        if (true || DEBUG_SCREENSHOT) {
+        if (DEBUG_SCREENSHOT) {
             // TEST IF IT's ALL BLACK
             int[] buffer = new int[bm.getWidth() * bm.getHeight()];
             bm.getPixels(buffer, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
@@ -7630,22 +7629,27 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            // Set some sort of reasonable bounds on the size of the display that we
-            // will try to emulate.
-            final int MIN_WIDTH = 200;
-            final int MIN_HEIGHT = 200;
-            final int MAX_SCALE = 2;
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                width = Math.min(Math.max(width, MIN_WIDTH),
-                        displayContent.mInitialDisplayWidth * MAX_SCALE);
-                height = Math.min(Math.max(height, MIN_HEIGHT),
-                        displayContent.mInitialDisplayHeight * MAX_SCALE);
-                setForcedDisplaySizeLocked(displayContent, width, height);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                // Set some sort of reasonable bounds on the size of the display that we
+                // will try to emulate.
+                final int MIN_WIDTH = 200;
+                final int MIN_HEIGHT = 200;
+                final int MAX_SCALE = 2;
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    width = Math.min(Math.max(width, MIN_WIDTH),
+                            displayContent.mInitialDisplayWidth * MAX_SCALE);
+                    height = Math.min(Math.max(height, MIN_HEIGHT),
+                            displayContent.mInitialDisplayHeight * MAX_SCALE);
+                    setForcedDisplaySizeLocked(displayContent, width, height);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7716,14 +7720,19 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
-                        displayContent.mInitialDisplayHeight);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_SIZE_FORCED, "");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
+                            displayContent.mInitialDisplayHeight);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_SIZE_FORCED, "");
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7764,13 +7773,18 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setForcedDisplayDensityLocked(displayContent, density);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setForcedDisplayDensityLocked(displayContent, density);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7795,13 +7809,19 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setForcedDisplayDensityLocked(displayContent, displayContent.mInitialDisplayDensity);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_DENSITY_FORCED, "");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setForcedDisplayDensityLocked(displayContent,
+                            displayContent.mInitialDisplayDensity);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_DENSITY_FORCED, "");
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7849,11 +7869,16 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        synchronized(mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setOverscanLocked(displayContent, left, top, right, bottom);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setOverscanLocked(displayContent, left, top, right, bottom);
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -8238,7 +8263,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || (win.mAttrs.type == TYPE_KEYGUARD && win.isConfigChanged())
+                    || win.isConfigChanged() && (win.mAttrs.type == TYPE_KEYGUARD ||
+                            (win.mAppToken != null && (win.mAppToken.configChanges &
+                            (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION))
+                                    != 0))
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
@@ -8470,6 +8498,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            mAnimateWallpaperWithTarget = false;
             if (closingAppHasWallpaper && openingAppHasWallpaper) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Wallpaper animation!");
                 switch (transit) {
@@ -8485,7 +8514,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         break;
                 }
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit: " + transit);
-            } else if ((oldWallpaper != null) && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
+            } else if ((oldWallpaper != null) && !mOpeningApps.isEmpty()
+                    && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
                 transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
@@ -8497,6 +8527,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 transit = AppTransition.TRANSIT_WALLPAPER_OPEN;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit into wallpaper: " + transit);
+            } else {
+                mAnimateWallpaperWithTarget = true;
             }
 
             // If all closing windows are obscured, then there is
@@ -8552,8 +8584,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.mAppAnimator.clearThumbnail();
                 wtoken.inPendingTransaction = false;
                 wtoken.mAppAnimator.animation = null;
-                setTokenVisibilityLocked(wtoken, animLp, false,
-                        transit, false);
+                setTokenVisibilityLocked(wtoken, animLp, false, transit, false);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToHide = false;
                 // Force the allDrawn flag, because we want to start
@@ -8749,6 +8780,14 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowManager.LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean canBeSeen = w.isDisplayedLw();
+        final boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
+
+        if (opaqueDrawn && w.isFullscreen(innerDw, innerDh)) {
+            // This window completely covers everything behind it,
+            // so we want to leave all of them as undimmed (for
+            // performance reasons).
+            mInnerFields.mObscured = true;
+        }
 
         if (w.mHasSurface) {
             if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
@@ -8777,21 +8816,23 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (canBeSeen) {
-                if (type == TYPE_DREAM || type == TYPE_KEYGUARD) {
-                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_MIRROR;
-                } else if (mInnerFields.mDisplayHasContent
-                        == LayoutFields.DISPLAY_CONTENT_UNKNOWN) {
-                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNIQUE;
+                // This function assumes that the contents of the default display are
+                // processed first before secondary displays.
+                if (w.mDisplayContent.isDefaultDisplay) {
+                    // While a dream or keyguard is showing, obscure ordinary application
+                    // content on secondary displays (by forcibly enabling mirroring unless
+                    // there is other content we want to show) but still allow opaque
+                    // keyguard dialogs to be shown.
+                    if (type == TYPE_DREAM || type == TYPE_KEYGUARD) {
+                        mInnerFields.mObscureApplicationContentOnSecondaryDisplays = true;
+                    }
+                    mInnerFields.mDisplayHasContent = true;
+                } else if (!mInnerFields.mObscureApplicationContentOnSecondaryDisplays
+                        || (mInnerFields.mObscured && type == TYPE_KEYGUARD_DIALOG)) {
+                    // Allow full screen keyguard presentation dialogs to be seen.
+                    mInnerFields.mDisplayHasContent = true;
                 }
             }
-        }
-
-        boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
-        if (opaqueDrawn && w.isFullscreen(innerDw, innerDh)) {
-            // This window completely covers everything behind it,
-            // so we want to leave all of them as undimmed (for
-            // performance reasons).
-            mInnerFields.mObscured = true;
         }
     }
 
@@ -8870,7 +8911,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mScreenBrightness = -1;
         mInnerFields.mButtonBrightness = -1;
         mInnerFields.mUserActivityTimeout = -1;
-        mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
+        mInnerFields.mObscureApplicationContentOnSecondaryDisplays = false;
 
         mTransactionSequence++;
 
@@ -8905,10 +8946,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int innerDh = displayInfo.appHeight;
                 final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
 
-                // Reset for each display unless we are forcing mirroring.
-                if (mInnerFields.mDisplayHasContent != LayoutFields.DISPLAY_CONTENT_MIRROR) {
-                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
-                }
+                // Reset for each display.
+                mInnerFields.mDisplayHasContent = false;
 
                 int repeats = 0;
                 do {
@@ -9117,20 +9156,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateResizingWindows(w);
                 }
 
-                final boolean hasUniqueContent;
-                switch (mInnerFields.mDisplayHasContent) {
-                    case LayoutFields.DISPLAY_CONTENT_MIRROR:
-                        hasUniqueContent = isDefaultDisplay;
-                        break;
-                    case LayoutFields.DISPLAY_CONTENT_UNIQUE:
-                        hasUniqueContent = true;
-                        break;
-                    case LayoutFields.DISPLAY_CONTENT_UNKNOWN:
-                    default:
-                        hasUniqueContent = false;
-                        break;
-                }
-                mDisplayManagerService.setDisplayHasContent(displayId, hasUniqueContent,
+                mDisplayManagerService.setDisplayHasContent(displayId,
+                        mInnerFields.mDisplayHasContent,
                         true /* inTraversal, must call performTraversalInTrans... below */);
 
                 getDisplayContentLocked(displayId).stopDimmingIfNeeded();

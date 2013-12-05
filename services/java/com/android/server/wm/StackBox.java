@@ -243,10 +243,6 @@ public class StackBox {
     /** Remove this box and propagate its sibling's content up to their parent.
      * @return The first stackId of the resulting StackBox. */
     int remove() {
-        if (mStack != null) {
-            if (DEBUG_STACK) Slog.i(TAG, "StackBox.remove: removing stackId=" + mStack.mStackId);
-            mDisplayContent.mStackHistory.remove(mStack);
-        }
         mDisplayContent.layoutNeeded = true;
 
         if (mParent == null) {

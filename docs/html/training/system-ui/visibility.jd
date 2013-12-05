@@ -1,0 +1,76 @@
+page.title=Responding to UI Visibility Changes
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#listener">Register a Listener</a></li>
+</ol>
+
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}design/index.html">
+        Android Design Guide
+        </a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}samples/ImmersiveMode/index.html"
+class="button">Get the sample</a>
+ <p class="filename">ImmersiveMode sample</p>
+</div>
+
+</div>
+</div>
+
+<p>This lesson describes how to register a listener so that your app can get notified
+of system UI visibility changes. This is useful if you want to
+synchronize other parts of your UI with the hiding/showing of system bars.</p>
+
+<h2 id="listener">Register a Listener</h2>
+
+<p>To get notified of system UI visibility changes, register an
+{@link android.view.View.OnSystemUiVisibilityChangeListener} to your view.
+This is typically the view you are using to control the navigation visibility.</p>
+
+<p>For example, you could add this code to your activity's
+{@link android.app.Activity#onCreate onCreate()} method:</p>
+
+<pre>View decorView = getWindow().getDecorView();
+decorView.setOnSystemUiVisibilityChangeListener
+        (new View.OnSystemUiVisibilityChangeListener() {
+    &#64;Override
+    public void onSystemUiVisibilityChange(int visibility) {
+        // Note that system bars will only be "visible" if none of the
+        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+            // TODO: The system bars are visible. Make any desired
+            // adjustments to your UI, such as showing the action bar or
+            // other navigational controls.
+        } else {
+            // TODO: The system bars are NOT visible. Make any desired
+            // adjustments to your UI, such as hiding the action bar or
+            // other navigational controls.
+        }
+    }
+});</pre>
+
+<p>It's generally good practice to keep your UI in sync with changes in system bar
+visibility. For example, you could use this listener to hide and show the action bar in
+concert with the status bar hiding and showing.</p>

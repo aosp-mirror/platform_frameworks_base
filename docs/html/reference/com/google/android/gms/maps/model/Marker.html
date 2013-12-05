@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -868,6 +880,24 @@ Summary:
             
             
             
+            float</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#getAlpha()">getAlpha</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Gets the alpha of the marker.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -879,7 +909,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -897,7 +927,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -915,7 +945,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -933,7 +963,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -951,7 +981,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -967,7 +997,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -985,7 +1015,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1003,7 +1033,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1021,7 +1051,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1039,7 +1069,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1055,7 +1085,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1068,6 +1098,24 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#remove()">remove</a></span>()</nobr>
         
         <div class="jd-descrdiv">Removes this marker from the map.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setAlpha(float)">setAlpha</a></span>(float alpha)</nobr>
+        
+        <div class="jd-descrdiv">Sets the alpha (opacity) of the marker.</div>
   
   </td></tr>
 
@@ -1559,6 +1607,40 @@ From class
 </div>
 
 
+<A NAME="getAlpha()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        float
+      </span>
+      <span class="sympad">getAlpha</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the alpha of the marker.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the alpha of the marker in the range [0, 1].
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getId()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1945,6 +2027,37 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Removes this marker from the map. After a marker has been removed, the behavior of all its
  methods is undefined.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setAlpha(float)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setAlpha</span>
+      <span class="normal">(float alpha)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the alpha (opacity) of the marker. This is a value from 0 to 1, where 0 means the marker
+ is completely transparent and 1 means the marker is completely opaque.
 </p></div>
 
     </div>

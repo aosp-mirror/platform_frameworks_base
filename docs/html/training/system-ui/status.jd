@@ -1,0 +1,226 @@
+page.title=Hiding the Status Bar
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#40">Hide the Status Bar on Android 4.0 and Lower</a></li>
+  <li><a href="#41">Hide the Status Bar on Android 4.1 and Higher</a></li>
+  <li><a href="#44">Hide the Status Bar on Android 4.4 and Higher</a></li>
+
+  <li><a href="#behind">Make Content Appear Behind the Status Bar</a></li>
+  <li><a href="#action-bar">Synchronize the Status Bar with Action Bar Transition</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}design/index.html">
+        Android Design Guide
+        </a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}samples/ImmersiveMode/index.html"
+class="button">Get the sample</a>
+ <p class="filename">ImmersiveMode sample</p>
+</div>
+
+</div>
+</div>
+
+<p>
+    This lesson describes how to hide the status bar on different versions of
+    Android. Hiding the status bar (and optionally, the navigation bar) lets the
+    content use more of the display space, thereby providing a more immersive user experience.
+
+</p>
+
+<p>
+ Figure 1 shows an app with a visible status bar:
+</p>
+
+<img src="{@docRoot}images/training/status_bar_show.png"
+  alt="system bars">
+<p class="img-caption"><strong>Figure 1.</strong> Visible status bar.</p>
+
+<p>
+ Figure 2 shows an app with a hidden status bar. Note that the action bar is hidden too.
+ You should never show the action bar without the status bar.
+</p>
+
+<img src="{@docRoot}images/training/status_bar_hide.png"
+  alt="system bars">
+<p class="img-caption"><strong>Figure 2.</strong> Hidden status bar.</p>
+
+<h2 id="40">Hide the Status Bar on Android 4.0 and Lower</h2>
+
+<p>You can hide the status bar on Android 4.0 (API level 14) and lower by setting
+{@link android.view.WindowManager} flags. You can do this programmatically or by
+setting an activity theme in your app's manifest file. Setting an activity theme in your app's
+manifest file is the preferred approach if the status bar should always remain
+hidden in your app (though strictly speaking, you could programmatically override the
+theme if you wanted to). For example:</p>
+
+<pre>
+&lt;application
+    ...
+    android:theme=&quot;@android:style/Theme.Holo.NoActionBar.Fullscreen&quot; &gt;
+    ...
+&lt;/application&gt;
+</pre>
+
+<p>The advantages of using an activity theme are as follows:</p>
+
+<ul>
+<li>It's easier to maintain and less error-prone than setting a flag programmatically.</li>
+<li>It results in smoother UI transitions, because the system has the information it needs
+to render your UI before instantiating your app's main activity.</li>
+</ul>
+
+<p>
+Alternatively, you can programmatically set {@link android.view.WindowManager} flags.
+This approach makes it easier to hide and show the status bar as the user interacts with
+your app:</p>
+
+<pre>public class MainActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // If the Android version is lower than Jellybean, use this call to hide
+        // the status bar.
+        if (Build.VERSION.SDK_INT < 16) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+        setContentView(R.layout.activity_main);
+    }
+    ...
+}
+</pre>
+
+<p>When you set {@link android.view.WindowManager} flags (whether through an activity theme or
+programmatically), the flags remain in effect unless your app clears them.</p>
+
+<p>You can use
+{@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_SCREEN}
+to set  your activity layout to use the same screen area that's available when you've enabled
+{@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN}. This prevents your
+content from resizing when the status bar hides and shows.</p>
+
+
+<h2 id="41">Hide the Status Bar on Android 4.1 and Higher</h2>
+
+<p>You can hide the status bar on Android 4.1 (API level 16) and higher by
+using {@link android.view.View#setSystemUiVisibility setSystemUiVisibility()}.
+{@link android.view.View#setSystemUiVisibility setSystemUiVisibility()} sets UI flags at
+the individual view level; these settings are aggregated to the window level. Using
+{@link android.view.View#setSystemUiVisibility setSystemUiVisibility()} to set UI flags
+gives you more granular control over the system bars than using
+{@link android.view.WindowManager} flags. This snippet hides the status bar:</p>
+
+<pre>View decorView = getWindow().getDecorView();
+// Hide the status bar.
+int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+decorView.setSystemUiVisibility(uiOptions);
+// Remember that you should never show the action bar if the
+// status bar is hidden, so hide that too if necessary.
+ActionBar actionBar = getActionBar();
+actionBar.hide();
+</pre>
+
+<p>Note the following:</p>
+
+<ul>
+<li>Once UI flags have been cleared (for example, by navigating away from the
+activity), your app needs to reset them if you want to hide the bars again.
+See <a href="visibility.html">Responding to UI Visibility Changes</a> for a
+discussion of how to listen for UI visibility changes so that your app can
+respond accordingly.</li>
+
+<li>Where you set the UI flags makes a difference. If you hide the system bars in your activity's
+ {@link android.app.Activity#onCreate onCreate()} method and the user presses Home, the system bars will
+ reappear. When the user reopens the activity, {@link android.app.Activity#onCreate onCreate()}
+won't get called, so the system bars will remain visible. If you want system UI changes to
+persist as the user navigates in and out of your activity, set UI flags in
+{@link android.app.Activity#onResume onResume()}
+or {@link android.view.Window.Callback#onWindowFocusChanged onWindowFocusChanged()}.</li>
+
+  <li>The method {@link android.view.View#setSystemUiVisibility setSystemUiVisibility()}
+  only has an effect if the view you call it from is visible.</li>
+
+  <li>Navigating away from the view causes flags
+  set with {@link android.view.View#setSystemUiVisibility setSystemUiVisibility()}
+  to be cleared.</li>
+</ul>
+ </p>
+
+ <h2 id="behind">Make Content Appear Behind the Status Bar</h2>
+<p>On Android 4.1 and higher, you can set your application's content to appear behind
+the status bar, so that the content doesn't resize as the status bar hides and shows.
+To do this, use
+{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
+You may also need to use
+{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} to help your app maintain a
+stable layout.</p>
+
+<p>When you use this approach, it becomes your responsibility to ensure that critical parts
+of your app's UI (for example, the built-in controls in a Maps application) don't end up
+getting covered by system bars. This could make your app unusable. In most cases you can
+handle this by adding the {@code android:fitsSystemWindows} attribute to your XML layout file, set to
+{@code true}. This adjusts the padding of the parent {@link android.view.ViewGroup}
+to leave space for the system windows. This is sufficient for most applications.</p>
+
+<p>In some cases, however, you may need to modify the default padding to get the desired
+layout for your app. To directly manipulate how your
+content lays out relative to the system bars (which occupy a space known as the window's
+"content insets"), override {@link android.view.View#fitSystemWindows fitSystemWindows(Rect insets)}.
+The {@link android.view.View#fitSystemWindows fitSystemWindows()} method is called by the
+view hierarchy when the content insets for a window have changed, to allow the window to
+adjust its content accordingly. By overriding this method you can handle the
+insets (and hence your app's layout) however you want. </p>
+
+ <h2 id="action-bar">Synchronize the Status Bar with Action Bar Transition</h2>
+
+  <p>On Android 4.1 and higher, to avoid resizing your layout when the action bar hides and
+  shows, you can enable overlay mode for the <a href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>.
+  When in overlay mode, your activity layout uses all the
+  space available as if the action bar is not there and the system draws the action bar in
+  front of your layout. This obscures some of the layout at the top, but now when the
+  action bar hides or appears, the system does not need to resize your layout and the
+  transition is seamless.</p>
+
+  <p>To enable overlay mode for the action bar, you need to create a custom theme that
+  extends an existing theme with an action bar and set the
+  {@code android:windowActionBarOverlay} attribute
+  to {@code true}. For more discussion of this topic, see
+  <a href="{@docRoot}training/basics/actionbar/overlaying.html#EnableOverlay">
+  Overlaying the Action Bar</a> in the <a href="{@docRoot}training/basics/actionbar/index.html">
+  Adding the Action Bar</a> class.</p>
+
+
+<p>Then use
+{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN},
+as described above,
+to set  your activity layout to use the same screen area that's available when you've enabled
+{@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}.
+
+When you want to hide the system UI, use
+{@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}.
+This also hides the action bar (because {@code windowActionBarOverlay=”true”)} and does
+so with a coordinated animation when both hiding and showing the two.</p>

@@ -19,6 +19,7 @@ package android.transition;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -81,6 +82,8 @@ public class TransitionManager {
      * an {@link AutoTransition} instance.
      *
      * @param transition The default transition to be used for scene changes.
+     *
+     * @hide pending later changes
      */
     public void setDefaultTransition(Transition transition) {
         sDefaultTransition = transition;
@@ -92,6 +95,8 @@ public class TransitionManager {
      *
      * @return The current default transition.
      * @see #setDefaultTransition(Transition)
+     *
+     * @hide pending later changes
      */
     public static Transition getDefaultTransition() {
         return sDefaultTransition;
@@ -104,7 +109,7 @@ public class TransitionManager {
      * transition to run.
      * @param transition The transition that will play when the given scene is
      * entered. A value of null will result in the default behavior of
-     * using the {@link #getDefaultTransition() default transition} instead.
+     * using the default transition instead.
      */
     public void setTransition(Scene scene, Transition transition) {
         mSceneTransitions.put(scene, transition);
@@ -120,7 +125,7 @@ public class TransitionManager {
      * be run
      * @param transition The transition that will play when the given scene is
      * entered. A value of null will result in the default behavior of
-     * using the {@link #getDefaultTransition() default transition} instead.
+     * using the default transition instead.
      */
     public void setTransition(Scene fromScene, Scene toScene, Transition transition) {
         ArrayMap<Scene, Transition> sceneTransitionMap = mScenePairTransitions.get(toScene);
@@ -138,8 +143,8 @@ public class TransitionManager {
      *
      * @param scene The scene being entered
      * @return The Transition to be used for the given scene change. If no
-     * Transition was specified for this scene change, the {@link #getDefaultTransition()
-     * default transition} will be used instead.
+     * Transition was specified for this scene change, the default transition
+     * will be used instead.
      */
     private Transition getTransition(Scene scene) {
         Transition transition = null;
@@ -205,47 +210,90 @@ public class TransitionManager {
 
     private static void sceneChangeRunTransition(final ViewGroup sceneRoot,
             final Transition transition) {
-        if (transition != null) {
-            final ViewTreeObserver observer = sceneRoot.getViewTreeObserver();
-            final ViewTreeObserver.OnPreDrawListener listener =
-                    new ViewTreeObserver.OnPreDrawListener() {
-                public boolean onPreDraw() {
-                    sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
-                    sPendingTransitions.remove(sceneRoot);
-                    // Add to running list, handle end to remove it
-                    final ArrayMap<ViewGroup, ArrayList<Transition>> runningTransitions =
-                            getRunningTransitions();
-                    ArrayList<Transition> currentTransitions = runningTransitions.get(sceneRoot);
-                    ArrayList<Transition> previousRunningTransitions = null;
-                    if (currentTransitions == null) {
-                        currentTransitions = new ArrayList<Transition>();
-                        runningTransitions.put(sceneRoot, currentTransitions);
-                    } else if (currentTransitions.size() > 0) {
-                        previousRunningTransitions = new ArrayList<Transition>(currentTransitions);
-                    }
-                    currentTransitions.add(transition);
-                    transition.addListener(new Transition.TransitionListenerAdapter() {
-                        @Override
-                        public void onTransitionEnd(Transition transition) {
-                            ArrayList<Transition> currentTransitions =
-                                    runningTransitions.get(sceneRoot);
-                            currentTransitions.remove(transition);
-                        }
-                    });
-                    transition.captureValues(sceneRoot, false);
-                    if (previousRunningTransitions != null) {
-                        for (Transition runningTransition : previousRunningTransitions) {
-                            runningTransition.resume();
-                        }
-                    }
-                    transition.playTransition(sceneRoot);
-
-                    return true;
-                }
-            };
-            observer.addOnPreDrawListener(listener);
+        if (transition != null && sceneRoot != null) {
+            MultiListener listener = new MultiListener(transition, sceneRoot);
+            sceneRoot.addOnAttachStateChangeListener(listener);
+            sceneRoot.getViewTreeObserver().addOnPreDrawListener(listener);
         }
     }
+
+    /**
+     * This private utility class is used to listen for both OnPreDraw and
+     * OnAttachStateChange events. OnPreDraw events are the main ones we care
+     * about since that's what triggers the transition to take place.
+     * OnAttachStateChange events are also important in case the view is removed
+     * from the hierarchy before the OnPreDraw event takes place; it's used to
+     * clean up things since the OnPreDraw listener didn't get called in time.
+     */
+    private static class MultiListener implements ViewTreeObserver.OnPreDrawListener,
+            View.OnAttachStateChangeListener {
+
+        Transition mTransition;
+        ViewGroup mSceneRoot;
+
+        MultiListener(Transition transition, ViewGroup sceneRoot) {
+            mTransition = transition;
+            mSceneRoot = sceneRoot;
+        }
+
+        private void removeListeners() {
+            mSceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
+            mSceneRoot.removeOnAttachStateChangeListener(this);
+        }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            removeListeners();
+
+            sPendingTransitions.remove(mSceneRoot);
+            ArrayList<Transition> runningTransitions = getRunningTransitions().get(mSceneRoot);
+            if (runningTransitions != null && runningTransitions.size() > 0) {
+                for (Transition runningTransition : runningTransitions) {
+                    runningTransition.resume();
+                }
+            }
+            mTransition.clearValues(true);
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            removeListeners();
+            sPendingTransitions.remove(mSceneRoot);
+            // Add to running list, handle end to remove it
+            final ArrayMap<ViewGroup, ArrayList<Transition>> runningTransitions =
+                    getRunningTransitions();
+            ArrayList<Transition> currentTransitions = runningTransitions.get(mSceneRoot);
+            ArrayList<Transition> previousRunningTransitions = null;
+            if (currentTransitions == null) {
+                currentTransitions = new ArrayList<Transition>();
+                runningTransitions.put(mSceneRoot, currentTransitions);
+            } else if (currentTransitions.size() > 0) {
+                previousRunningTransitions = new ArrayList<Transition>(currentTransitions);
+            }
+            currentTransitions.add(mTransition);
+            mTransition.addListener(new Transition.TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    ArrayList<Transition> currentTransitions =
+                            runningTransitions.get(mSceneRoot);
+                    currentTransitions.remove(transition);
+                }
+            });
+            mTransition.captureValues(mSceneRoot, false);
+            if (previousRunningTransitions != null) {
+                for (Transition runningTransition : previousRunningTransitions) {
+                    runningTransition.resume();
+                }
+            }
+            mTransition.playTransition(mSceneRoot);
+
+            return true;
+        }
+    };
 
     private static void sceneChangeSetup(ViewGroup sceneRoot, Transition transition) {
 

@@ -1,11 +1,45 @@
 page.title=Samples
+page.tags="samples","examples","code"
+
 @jd:body
 
 
-<div id="samples">
-<p>Some kind of sample sorting will appear here.</p>
+<p>Welcome to code samples for Android developers. Here you can browse sample code
+  and learn how to build different components for your applications. Use the categories on the left
+  to browse the available samples.</p>
+
+<p>Each sample is a fully functioning Android app. You can browse the resources, source files and
+  see the overall project structure. You can copy and paste the code you need, and if you want to
+  share a link to a specific line you can double-click it to the get the url.</p>
+
+<p>If you want to download a complete project, just click on any source file in the project and
+  click the link in the upper right of the source page.</p>
+
+<p>To import a downloaded project:<p>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Android Studio</a></p>
+
+  <div class="toggle-content-toggleme">
+
+  <ol>
+    <li>Unpack the downloaded project package.</li>
+    <li>In <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>, chose
+    <strong>File > Import Project</strong> and select the root folder of the unpacked project.
+      <p>Android Studio may ask you to choose the type of project you are importing.
+        If this is the case, make sure to choose <strong>Import project from
+        external model</strong> and select the <strong>Gradle</strong> option.
+      </p>
+    </li>
+  </ol>
+
+  </div>
 </div>
 
+<p class="note">
+  <strong>Note:</strong> At this time, the downloadable projects are designed for use with Gradle
+    and Android Studio. Project downloads for Eclipse will be available soon!
+</p>
 
-<script>
-</script>

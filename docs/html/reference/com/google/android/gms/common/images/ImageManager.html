@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -879,8 +891,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(com.google.android.gms.common.images.ImageManager.OnImageLoadedListener, android.net.Uri, int)">loadImage</a></span>(<a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a> listener, Uri uri, int defaultResId)</nobr>
         
-        <div class="jd-descrdiv">Load an image to display from a URI, using the given resource ID as the default if no
- image if found for the given URI.</div>
+        <div class="jd-descrdiv">Load an image to display from a URI, using the given resource ID as the default if no image
+ is found for the given URI.</div>
   
   </td></tr>
 
@@ -916,8 +928,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.html#loadImage(android.widget.ImageView, android.net.Uri, int)">loadImage</a></span>(ImageView imageView, Uri uri, int defaultResId)</nobr>
         
-        <div class="jd-descrdiv">Loads an image to display from a URI, using the given resource ID as the default if no
- image if found for the given URI.</div>
+        <div class="jd-descrdiv">Loads an image to display from a URI, using the given resource ID as the default if no image
+ is found for the given URI.</div>
   
   </td></tr>
 
@@ -1346,9 +1358,12 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Load an image to display from a URI, using the given resource ID as the default if no
- image if found for the given URI. Note that this does not support arbitrary URIs - the URI
- must be something that was retrieved from another call to Google Play services.
+  <div class="jd-tagdata jd-tagdescr"><p>Load an image to display from a URI, using the given resource ID as the default if no image
+ is found for the given URI. Note that this does not support arbitrary URIs - the URI must be
+ something that was retrieved from another call to Google Play services.
+ <p>
+ Note that you should hold a reference to the listener provided until the callback is
+ complete. For this reason, the use of anonymous implementations is discouraged.
  <p>
  The result is delivered to the given listener on the main thread.
  <p>
@@ -1403,6 +1418,9 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Load an image to display from a URI. Note that this does not support arbitrary URIs - the URI
  must be something that was retrieved from another call to Google Play services.
  <p>
+ Note that you should hold a reference to the listener provided until the callback is
+ complete. For this reason, the use of anonymous implementations is discouraged.
+ <p>
  The result is delivered to the given listener on the main thread.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1446,9 +1464,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Loads an image to display from a URI, using the given resource ID as the default if no
- image if found for the given URI. Note that this does not support arbitrary URIs - the URI
- must be something that was retrieved from another call to Google Play services.
+  <div class="jd-tagdata jd-tagdescr"><p>Loads an image to display from a URI, using the given resource ID as the default if no image
+ is found for the given URI. Note that this does not support arbitrary URIs - the URI must be
+ something that was retrieved from another call to Google Play services.
  <p>
  The image view will be set to the given default resource if the image needs to be loaded
  asynchronously.

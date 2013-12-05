@@ -60,6 +60,8 @@
             android:id="@+id/keyguard_security_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             androidprv:layout_childType="challenge"
             androidprv:layout_centerWithinArea="0.55">
             <com.android.keyguard.KeyguardSecurityViewFlipper

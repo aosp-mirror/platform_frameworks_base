@@ -140,6 +140,7 @@ public class ProxyProperties implements Parcelable {
     }
 
     public boolean isValid() {
+        if (!TextUtils.isEmpty(mPacFileUrl)) return true;
         try {
             Proxy.validate(mHost == null ? "" : mHost, mPort == 0 ? "" : Integer.toString(mPort),
                     mExclusionList == null ? "" : mExclusionList);

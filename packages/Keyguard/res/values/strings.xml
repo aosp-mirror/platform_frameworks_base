@@ -24,12 +24,12 @@
 
     <!-- Instructions telling the user to enter their SIM PUK to unlock the keyguard.
          Displayed in one line in a large font.  -->
-    <string name="keyguard_password_enter_puk_code">Type PUK and new PIN code</string>
+    <string name="keyguard_password_enter_puk_code">Type SIM PUK and new PIN code</string>
 
     <!-- Prompt to enter SIM PUK in Edit Text Box in unlock screen -->
-    <string name="keyguard_password_enter_puk_prompt">PUK code</string>
+    <string name="keyguard_password_enter_puk_prompt">SIM PUK code</string>
     <!-- Prompt to enter New SIM PIN in Edit Text Box in unlock screen -->
-    <string name="keyguard_password_enter_pin_prompt">New PIN code</string>
+    <string name="keyguard_password_enter_pin_prompt">New SIM PIN code</string>
 
     <!-- Displayed as hint in passwordEntry EditText on PasswordUnlockScreen [CHAR LIMIT=30]-->
     <string name="keyguard_password_entry_touch_hint"><font size="17">Touch to type password</font></string>
@@ -249,8 +249,6 @@
     <string name="kg_enter_confirm_pin_hint">Confirm desired PIN code</string>
     <!-- Message shown in dialog while the device is unlocking the SIM card -->
     <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
-    <!-- Message shown when the user enters the wrong PIN code -->
-    <string name="kg_password_wrong_pin_code">Incorrect PIN code.</string>
     <!-- Message shown when the user enters an invalid SIM pin password in PUK screen -->
     <string name="kg_invalid_sim_pin_hint">Type a PIN that is 4 to 8 numbers.</string>
     <!-- Message shown when the user enters an invalid PUK code in the PUK screen -->
@@ -332,6 +330,34 @@
     <string name="kg_text_message_separator" product="default">" \u2014 "</string>
     <!-- The delete-widget drop target button text -->
     <string name="kg_reordering_delete_drop_target_text">Remove</string>
+
+    <!-- Instructions telling the user that they entered the wrong SIM PIN for the last time.
+         Displayed in a dialog box.  -->
+    <string name="kg_password_wrong_pin_code_pukked">Incorrect SIM PIN code you must now contact your carrier to unlock your device.</string>
+    <!-- Instructions telling the user that they entered the wrong SIM PIN while trying
+         to unlock the keyguard.  Displayed in a dialog box.  -->
+    <plurals name="kg_password_wrong_pin_code">
+        <item quantity="one">Incorrect SIM PIN code, you have <xliff:g id="number">%d</xliff:g> remaining attempt before you must contact your carrier to unlock your device.</item>
+        <item quantity="other">Incorrect SIM PIN code, you have <xliff:g id="number">%d</xliff:g> remaining attempts.</item>
+    </plurals>
+
+    <!-- Instructions telling the user that they have exhausted SIM PUK retries and the SIM is now unusable.
+         Displayed in a dialog box.  -->
+    <string name="kg_password_wrong_puk_code_dead">SIM is unusable. Contact your carrier.</string>
+    <!-- Instructions telling the user that they entered the wrong puk while trying
+         to unlock the keyguard.  Displayed in a dialog box.  -->
+    <plurals name="kg_password_wrong_puk_code">
+        <item quantity="one">Incorrect SIM PUK code, you have <xliff:g id="number">%d</xliff:g> remaining attempt before SIM becomes permanently unusable.</item>
+        <item quantity="other">Incorrect SIM PUK code, you have <xliff:g id="number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
+    </plurals>
+    <!-- Instructions telling the user that the operation to unlock the keyguard
+         with SIM PIN failed. Displayed in one line in a large font.  -->
+    <string name="kg_password_pin_failed">SIM PIN operation failed!</string>
+    <!-- Instructions telling the user that the operation to unlock the keyguard
+         with PUK failed. Displayed in one line in a large font.  -->
+    <string name="kg_password_puk_failed">SIM PUK operation failed!</string>
+    <!-- Notification telling the user that the PIN1 they entered is valid -->
+    <string name="kg_pin_accepted">Code Accepted!</string>
 
     <!-- Transport control strings -->
     <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->

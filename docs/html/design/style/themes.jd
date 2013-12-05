@@ -14,22 +14,16 @@ page.title=Themes
       Settings in Holo Dark.
     </div>
 
-    <img src="{@docRoot}design/media/themes_holo_inverse.png">
-    <div class="figure-caption">
-      Talk in Holo Light with dark action bar.
-    </div>
-
   </div>
   <div class="layout-content-col span-7">
 
-<p>Themes are Android's mechanism for applying a consistent style to an app or activity. The style
-specifies the visual properties of the elements that make up your user interface, such as color,
-height, padding and font size. To promote greater cohesion between all apps on the platform, Android
-provides three system themes that you can choose from when building apps for Ice Cream Sandwich:</p>
+<p>Themes are Android's mechanism for applying a consistent style to an app or activity.
+The style specifies the visual properties of the elements that make up your user interface,
+such as color, height, padding and font size. To promote greater cohesion between all apps
+on the platform, Android provides two system themes that you can choose from when building apps:</p>
 <ul>
 <li>Holo Light</li>
 <li>Holo Dark</li>
-<li>Holo Light with dark action bars</li>
 </ul>
 <p>Applying these themes will go a long way in helping you to build apps that fit right into the
 general visual language of Android.</p>

@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -54,9 +55,9 @@ public final class BroadcastQueue {
     static final boolean DEBUG_BROADCAST_LIGHT = ActivityManagerService.DEBUG_BROADCAST_LIGHT;
     static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
 
-    static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 25;
+    static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
     static final int MAX_BROADCAST_SUMMARY_HISTORY
-            = ActivityManager.isLowRamDeviceStatic() ? 25 : 100;
+            = ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
 
     final ActivityManagerService mService;
 
@@ -220,7 +221,8 @@ public final class BroadcastQueue {
         r.curApp = app;
         app.curReceiver = r;
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
-        mService.updateLruProcessLocked(app, true, false);
+        mService.updateLruProcessLocked(app, false, null);
+        mService.updateOomAdjLocked();
 
         // Tell the application to launch this receiver.
         r.intent.setComponent(r.curComponent);
@@ -812,6 +814,26 @@ public final class BroadcastQueue {
                 Slog.w(TAG, "Skipping deliver ordered [" + mQueueName + "] " + r
                         + " to " + r.curApp + ": process crashing");
                 skip = true;
+            }
+            if (!skip) {
+                boolean isAvailable = false;
+                try {
+                    isAvailable = AppGlobals.getPackageManager().isPackageAvailable(
+                            info.activityInfo.packageName,
+                            UserHandle.getUserId(info.activityInfo.applicationInfo.uid));
+                } catch (Exception e) {
+                    // all such failures mean we skip this receiver
+                    Slog.w(TAG, "Exception getting recipient info for "
+                            + info.activityInfo.packageName, e);
+                }
+                if (!isAvailable) {
+                    if (DEBUG_BROADCAST) {
+                        Slog.v(TAG, "Skipping delivery to " + info.activityInfo.packageName
+                                + " / " + info.activityInfo.applicationInfo.uid
+                                + " : package no longer available");
+                    }
+                    skip = true;
+                }
             }
 
             if (skip) {

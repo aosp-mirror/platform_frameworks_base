@@ -17,6 +17,7 @@ package com.android.layoutlib.bridge.android.view;
 
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
 import android.view.View;
 import android.view.WindowManager;
@@ -32,7 +33,8 @@ public class WindowManagerImpl implements WindowManager {
         DisplayInfo info = new DisplayInfo();
         info.logicalHeight = mMetrics.heightPixels;
         info.logicalWidth = mMetrics.widthPixels;
-        mDisplay = new Display(null, Display.DEFAULT_DISPLAY, info, null);
+        mDisplay = new Display(null, Display.DEFAULT_DISPLAY, info,
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
 
     @Override

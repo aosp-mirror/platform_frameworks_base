@@ -597,10 +597,10 @@ public class Vpn extends BaseNetworkStateTracker {
         int appId = UserHandle.getAppId(Binder.getCallingUid());
         final long token = Binder.clearCallingIdentity();
         try {
-            // System dialogs are also allowed to control VPN.
+            // System VPN dialogs are also allowed to control VPN.
             PackageManager pm = mContext.getPackageManager();
             ApplicationInfo app = pm.getApplicationInfo(VpnConfig.DIALOGS_PACKAGE, 0);
-            if (appId == app.uid) {
+            if (((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) && (appId == app.uid)) {
                 return;
             }
         } catch (Exception e) {

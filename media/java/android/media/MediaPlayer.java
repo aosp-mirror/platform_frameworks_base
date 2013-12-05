@@ -2861,8 +2861,6 @@ public class MediaPlayer implements SubtitleController.Listener
             }
 
             if (DEBUG) Log.v(TAG, "scheduleNotification " + type + " in " + delayUs);
-            mStopped = type == NOTIFY_STOP;
-            mSeeking = type == NOTIFY_SEEK;
             mEventHandler.removeMessages(NOTIFY);
             Message msg = mEventHandler.obtainMessage(NOTIFY, type, 0);
             mEventHandler.sendMessageDelayed(msg, (int) (delayUs / 1000));
@@ -2889,9 +2887,12 @@ public class MediaPlayer implements SubtitleController.Listener
             synchronized(this) {
                 if (DEBUG) Log.d(TAG, "onPaused: " + paused);
                 if (mStopped) { // handle as seek if we were stopped
+                    mStopped = false;
+                    mSeeking = true;
                     scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
                 } else {
                     mPausing = paused;  // special handling if player disappeared
+                    mSeeking = false;
                     scheduleNotification(REFRESH_AND_NOTIFY_TIME, 0 /* delay */);
                 }
             }
@@ -2902,6 +2903,8 @@ public class MediaPlayer implements SubtitleController.Listener
             synchronized(this) {
                 if (DEBUG) Log.d(TAG, "onStopped");
                 mPaused = true;
+                mStopped = true;
+                mSeeking = false;
                 scheduleNotification(NOTIFY_STOP, 0 /* delay */);
             }
         }
@@ -2910,6 +2913,8 @@ public class MediaPlayer implements SubtitleController.Listener
         @Override
         public void onSeekComplete(MediaPlayer mp) {
             synchronized(this) {
+                mStopped = false;
+                mSeeking = true;
                 scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
             }
         }
@@ -2918,6 +2923,8 @@ public class MediaPlayer implements SubtitleController.Listener
         public void onNewPlayer() {
             if (mRefresh) {
                 synchronized(this) {
+                    mStopped = false;
+                    mSeeking = true;
                     scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
                 }
             }
@@ -3143,6 +3150,8 @@ public class MediaPlayer implements SubtitleController.Listener
                         if (mTimeAdjustment > 1000000) {
                             // schedule seeked event if time jumped significantly
                             // TODO: do this properly by introducing an exception
+                            mStopped = false;
+                            mSeeking = true;
                             scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
                         }
                     } else {

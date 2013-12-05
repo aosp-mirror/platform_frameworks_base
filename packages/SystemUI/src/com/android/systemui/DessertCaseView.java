@@ -17,6 +17,7 @@
 package com.android.systemui;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -166,15 +167,19 @@ public class DessertCaseView extends FrameLayout {
         if (mCellSize < 512) { // assuming 512x512 images
             opts.inSampleSize = 2;
         }
+        opts.inMutable = true;
+        Bitmap loaded = null;
         for (int[] list : new int[][] { PASTRIES, RARE_PASTRIES, XRARE_PASTRIES, XXRARE_PASTRIES }) {
             for (int resid : list) {
-                final BitmapDrawable d = new BitmapDrawable(res,
-                        convertToAlphaMask(BitmapFactory.decodeResource(res, resid, opts)));
+                opts.inBitmap = loaded;
+                loaded = BitmapFactory.decodeResource(res, resid, opts);
+                final BitmapDrawable d = new BitmapDrawable(res, convertToAlphaMask(loaded));
                 d.setColorFilter(new ColorMatrixColorFilter(ALPHA_MASK));
                 d.setBounds(0, 0, mCellSize, mCellSize);
                 mDrawables.append(resid, d);
             }
         }
+        loaded = null;
         if (DEBUG) setWillNotDraw(false);
     }
 
@@ -304,8 +309,6 @@ public class DessertCaseView extends FrameLayout {
                 v.getOverlay().add(d);
             }
 
-            v.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
             lp.width = lp.height = mCellSize;
             addView(v, lp);
             place(v, pt, false);
@@ -314,13 +317,28 @@ public class DessertCaseView extends FrameLayout {
                 v.setScaleX(0.5f * s);
                 v.setScaleY(0.5f * s);
                 v.setAlpha(0f);
-                v.animate().scaleX(s).scaleY(s).alpha(1f).setDuration(animationLen);
+                v.animate().withLayer().scaleX(s).scaleY(s).alpha(1f).setDuration(animationLen);
             }
         }
     }
 
     public void place(View v, boolean animate) {
         place(v, new Point(irand(0, mColumns), irand(0, mRows)), animate);
+    }
+
+    // we don't have .withLayer() on general Animators
+    private final Animator.AnimatorListener makeHardwareLayerListener(final View v) {
+        return new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                v.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                v.buildLayer();
+            }
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                v.setLayerType(View.LAYER_TYPE_NONE, null);
+            }
+        };
     }
 
     private final HashSet<View> tmpSet = new HashSet<View>();
@@ -370,7 +388,8 @@ public class DessertCaseView extends FrameLayout {
             if (squatter != v) {
                 squatter.setTag(TAG_POS, null);
                 if (animate) {
-                    squatter.animate().scaleX(0.5f).scaleY(0.5f).alpha(0)
+                    squatter.animate().withLayer()
+                            .scaleX(0.5f).scaleY(0.5f).alpha(0)
                             .setDuration(DURATION)
                             .setInterpolator(new AccelerateInterpolator())
                             .setListener(new Animator.AnimatorListener() {
@@ -397,6 +416,7 @@ public class DessertCaseView extends FrameLayout {
 
         if (animate) {
             v.bringToFront();
+
             AnimatorSet set1 = new AnimatorSet();
             set1.playTogether(
                     ObjectAnimator.ofFloat(v, View.SCALE_X, (float) scale),
@@ -404,7 +424,6 @@ public class DessertCaseView extends FrameLayout {
             );
             set1.setInterpolator(new AnticipateOvershootInterpolator());
             set1.setDuration(DURATION);
-            set1.start();
 
             AnimatorSet set2 = new AnimatorSet();
             set2.playTogether(
@@ -414,6 +433,10 @@ public class DessertCaseView extends FrameLayout {
             );
             set2.setInterpolator(new DecelerateInterpolator());
             set2.setDuration(DURATION);
+
+            set1.addListener(makeHardwareLayerListener(v));
+
+            set1.start();
             set2.start();
         } else {
             v.setX(i * mCellSize + (scale-1) * mCellSize /2);
@@ -473,7 +496,6 @@ public class DessertCaseView extends FrameLayout {
     }
 
     public static class RescalingContainer extends FrameLayout {
-        private static final int SYSTEM_UI_MODE_800 = 0x00000800;
         private DessertCaseView mView;
         private float mDarkness;
 
@@ -486,7 +508,7 @@ public class DessertCaseView extends FrameLayout {
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | SYSTEM_UI_MODE_800
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             );
         }
 

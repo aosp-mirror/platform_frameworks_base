@@ -23,6 +23,8 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
 import android.view.ViewConfiguration;
+
+import com.android.internal.R;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -1920,6 +1922,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private PopupWindow mActionModePopup;
         private Runnable mShowActionModePopup;
 
+        // View added at runtime to draw under the status bar area
+        private View mStatusGuard;
+        // View added at runtime to draw under the navigation bar area
+        private View mNavigationGuard;
+
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
@@ -2479,10 +2486,89 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         protected boolean fitSystemWindows(Rect insets) {
             mFrameOffsets.set(insets);
+            updateStatusGuard(insets);
+            updateNavigationGuard(insets);
             if (getForeground() != null) {
                 drawableChanged();
             }
             return super.fitSystemWindows(insets);
+        }
+
+        private void updateStatusGuard(Rect insets) {
+            boolean showStatusGuard = false;
+            // Show the status guard when the non-overlay contextual action bar is showing
+            if (mActionModeView != null) {
+                if (mActionModeView.getLayoutParams() instanceof MarginLayoutParams) {
+                    MarginLayoutParams mlp = (MarginLayoutParams) mActionModeView.getLayoutParams();
+                    boolean mlpChanged = false;
+                    final boolean nonOverlayShown =
+                            (getLocalFeatures() & (1 << FEATURE_ACTION_MODE_OVERLAY)) == 0
+                            && mActionModeView.isShown();
+                    if (nonOverlayShown) {
+                        // set top margin to top insets, show status guard
+                        if (mlp.topMargin != insets.top) {
+                            mlpChanged = true;
+                            mlp.topMargin = insets.top;
+                            if (mStatusGuard == null) {
+                                mStatusGuard = new View(mContext);
+                                mStatusGuard.setBackgroundColor(mContext.getResources()
+                                        .getColor(R.color.input_method_navigation_guard));
+                                addView(mStatusGuard, new LayoutParams(
+                                        LayoutParams.MATCH_PARENT, mlp.topMargin,
+                                        Gravity.START | Gravity.TOP));
+                            } else {
+                                LayoutParams lp = (LayoutParams) mStatusGuard.getLayoutParams();
+                                if (lp.height != mlp.topMargin) {
+                                    lp.height = mlp.topMargin;
+                                    mStatusGuard.setLayoutParams(lp);
+                                }
+                            }
+                        }
+                        insets.top = 0;  // consume top insets
+                        showStatusGuard = true;
+                    } else {
+                        // reset top margin
+                        if (mlp.topMargin != 0) {
+                            mlpChanged = true;
+                            mlp.topMargin = 0;
+                        }
+                    }
+                    if (mlpChanged) {
+                        mActionModeView.setLayoutParams(mlp);
+                    }
+                }
+            }
+            if (mStatusGuard != null) {
+                mStatusGuard.setVisibility(showStatusGuard ? View.VISIBLE : View.GONE);
+            }
+        }
+
+        private void updateNavigationGuard(Rect insets) {
+            // IMEs lay out below the nav bar, but the content view must not (for back compat)
+            if (getAttributes().type == WindowManager.LayoutParams.TYPE_INPUT_METHOD) {
+                // prevent the content view from including the nav bar height
+                if (mContentParent != null) {
+                    if (mContentParent.getLayoutParams() instanceof MarginLayoutParams) {
+                        MarginLayoutParams mlp =
+                                (MarginLayoutParams) mContentParent.getLayoutParams();
+                        mlp.bottomMargin = insets.bottom;
+                        mContentParent.setLayoutParams(mlp);
+                    }
+                }
+                // position the navigation guard view, creating it if necessary
+                if (mNavigationGuard == null) {
+                    mNavigationGuard = new View(mContext);
+                    mNavigationGuard.setBackgroundColor(mContext.getResources()
+                            .getColor(R.color.input_method_navigation_guard));
+                    addView(mNavigationGuard, new LayoutParams(
+                            LayoutParams.MATCH_PARENT, insets.bottom,
+                            Gravity.START | Gravity.BOTTOM));
+                } else {
+                    LayoutParams lp = (LayoutParams) mNavigationGuard.getLayoutParams();
+                    lp.height = insets.bottom;
+                    mNavigationGuard.setLayoutParams(lp);
+                }
+            }
         }
 
         private void drawableChanged() {
@@ -2661,6 +2747,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                requestFitSystemWindows();
                 return mWrapped.onPrepareActionMode(mode, menu);
             }
 
@@ -2687,6 +2774,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 }
                 mActionMode = null;
+                requestFitSystemWindows();
             }
         }
     }

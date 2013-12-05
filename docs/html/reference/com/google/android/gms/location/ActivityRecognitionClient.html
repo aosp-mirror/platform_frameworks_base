@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -2039,6 +2051,11 @@ From interface
  Activities may arrive several seconds after the requested
  detectionIntervalMillis if the activity detection service requires more
  samples to make a more accurate prediction.
+ <p>
+ To conserve battery, activity reporting may stop when the device is
+ 'STILL' for an extended period of time. It will resume once the device
+ moves again. This only happens on devices that support the
+ Sensor.TYPE_SIGNIFICANT_MOTION hardware.
  <p>
  A common use case is that an application wants to monitor activities in
  the background and perform an action when a specific activity is

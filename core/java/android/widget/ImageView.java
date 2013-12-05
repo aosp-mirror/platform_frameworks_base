@@ -710,6 +710,7 @@ public class ImageView extends View {
             }
             d.setLevel(mLevel);
             d.setLayoutDirection(getLayoutDirection());
+            d.setVisible(getVisibility() == VISIBLE, true);
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
             applyColorMod();

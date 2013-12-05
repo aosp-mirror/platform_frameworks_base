@@ -55,6 +55,7 @@ import com.android.server.content.ContentService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.input.InputManagerService;
+import com.android.server.media.MediaRouterService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.os.SchedulingPolicyService;
@@ -356,6 +357,7 @@ class ServerThread {
         DreamManagerService dreamy = null;
         AssetAtlasService atlas = null;
         PrintManagerService printManager = null;
+        MediaRouterService mediaRouter = null;
 
         // Bring up services needed for UI.
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -804,6 +806,16 @@ class ServerThread {
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
             }
+
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Media Router Service");
+                    mediaRouter = new MediaRouterService(context);
+                    ServiceManager.addService(Context.MEDIA_ROUTER_SERVICE, mediaRouter);
+                } catch (Throwable e) {
+                    reportWtf("starting MediaRouterService", e);
+                }
+            }
         }
 
         // Before things start rolling, be sure we have decided whether
@@ -916,6 +928,7 @@ class ServerThread {
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final PrintManagerService printManagerF = printManager;
+        final MediaRouterService mediaRouterF = mediaRouter;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1063,6 +1076,12 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("Notifying PrintManagerService running", e);
                 }
+
+                try {
+                    if (mediaRouterF != null) mediaRouterF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying MediaRouterService running", e);
+                }
             }
         });
 
@@ -1104,6 +1123,19 @@ public class SystemServer {
     private static native void nativeInit();
 
     public static void main(String[] args) {
+
+        /*
+         * In case the runtime switched since last boot (such as when
+         * the old runtime was removed in an OTA), set the system
+         * property so that it is in sync. We can't do this in
+         * libnativehelper's JniInvocation::Init code where we already
+         * had to fallback to a different runtime because it is
+         * running as root and we need to be the system user to set
+         * the property. http://b/11463182
+         */
+        SystemProperties.set("persist.sys.dalvik.vm.lib",
+                             VMRuntime.getRuntime().vmLibrary());
+
         if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
             // If a device's clock is before 1970 (before 0), a lot of
             // APIs crash dealing with negative numbers, notably

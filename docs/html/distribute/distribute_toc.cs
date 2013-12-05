@@ -81,6 +81,7 @@
     <ul>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/tablets.html">Tablet Stories</a></li>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/games.html">Game Stories</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/localization.html">Localization Stories</a></li>
     </ul>
   </li> 
 
@@ -90,6 +91,7 @@
       <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/about.html">About</a></li>
       <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/start.html">Get Started</a></li>
       <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/guidelines.html">Guidelines</a></li>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/faq.html">FAQ</a></li>
       <li><a href="<?cs var:toroot ?>distribute/googleplay/edu/contact.html">Sign Up</a></li>
     </ul>  
   </li>

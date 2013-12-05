@@ -17,13 +17,17 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.text.method.SingleLineTransformationMethod;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TextView;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
+
+import java.util.Locale;
 
 public class CarrierText extends TextView {
     private static CharSequence mSeparator;
@@ -77,6 +81,8 @@ public class CarrierText extends TextView {
     public CarrierText(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLockPatternUtils = new LockPatternUtils(mContext);
+        boolean useAllCaps = mContext.getResources().getBoolean(R.bool.kg_use_all_caps);
+        setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
     }
 
     protected void updateCarrierText(State simState, CharSequence plmn, CharSequence spn) {
@@ -257,5 +263,26 @@ public class CarrierText extends TextView {
         }
 
         return mContext.getText(carrierHelpTextId);
+    }
+
+    private class CarrierTextTransformationMethod extends SingleLineTransformationMethod {
+        private final Locale mLocale;
+        private final boolean mAllCaps;
+
+        public CarrierTextTransformationMethod(Context context, boolean allCaps) {
+            mLocale = context.getResources().getConfiguration().locale;
+            mAllCaps = allCaps;
+        }
+
+        @Override
+        public CharSequence getTransformation(CharSequence source, View view) {
+            source = super.getTransformation(source, view);
+
+            if (mAllCaps && source != null) {
+                source = source.toString().toUpperCase(mLocale);
+            }
+
+            return source;
+        }
     }
 }

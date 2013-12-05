@@ -33,7 +33,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
@@ -124,8 +123,6 @@ import java.util.List;
 public abstract class PreferenceActivity extends ListActivity implements
         PreferenceManager.OnPreferenceTreeClickListener,
         PreferenceFragment.OnPreferenceStartFragmentCallback {
-
-    private static final String TAG = "PreferenceActivity";
 
     // Constants for state save/restore
     private static final String HEADERS_TAG = ":android:headers";
@@ -524,7 +521,9 @@ public abstract class PreferenceActivity extends ListActivity implements
         int initialTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_TITLE, 0);
         int initialShortTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_SHORT_TITLE, 0);
 
-        if (savedInstanceState != null) {
+        // Restore from headers only if they are supported which
+        // is in multi-pane mode.
+        if (savedInstanceState != null && !mSinglePane) {
             // We are restarting from a previous saved state; used that to
             // initialize, instead of starting fresh.
             ArrayList<Header> headers = savedInstanceState.getParcelableArrayList(HEADERS_TAG);

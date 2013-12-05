@@ -721,13 +721,18 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             if (subMenu == null) return false;
 
             mOpenSubMenuId = ((SubMenuBuilder) subMenu).getItem().getItemId();
-            return false;
+            final MenuPresenter.Callback cb = getCallback();
+            return cb != null ? cb.onOpenSubMenu(subMenu) : false;
         }
 
         @Override
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
             if (menu instanceof SubMenuBuilder) {
                 ((SubMenuBuilder) menu).getRootMenu().close(false);
+            }
+            final MenuPresenter.Callback cb = getCallback();
+            if (cb != null) {
+                cb.onCloseMenu(menu, allMenusAreClosing);
             }
         }
     }

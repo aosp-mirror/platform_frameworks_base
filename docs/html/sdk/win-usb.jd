@@ -191,26 +191,18 @@ This is the Android Software Development Kit License Agreement
 </div>
 </div>
 
-<p>The Google USB Driver is for <strong>Windows only</strong> and provides the
-necessary drivers for the following devices:</p>
-  <ul>
-    <li>ADP1 / T-Mobile G1*</li>
-    <li>ADP2 / Google Ion / T-Mobile myTouch 3G*</li>
-    <li>Verizon Droid*</li>
-    <li>Nexus One</li>
-    <li>Nexus S</li>
-    <li>Nexus 4</li>
-    <li>Nexus 7</li>
-    <li>Nexus 10</li>
-  </ul>
-  <p>* <em>Or similar hardware on other carriers</em></p>
-
-  <p>All other devices require Windows drivers provided by the respective hardware manufacturer,
-  as listed in the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB Drivers</a> document.</p>
-
-  <p>The Galaxy Nexus driver is distributed by <a
+<p>The Google USB Driver is <strong>required for Windows only</strong> in order to perform
+<a href="{@docRoot}tools/help/adb.html">adb</a> debugging with any of
+the <strong>Google Nexus devices</strong>. The one exception is the
+Galaxy Nexus: the driver for Galaxy Nexus is distributed by <a
 href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
 (listed as model SCH-I515).</p>
+
+<p>Windows drivers for all other devices are provided by the respective hardware
+manufacturer, as listed in the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB Drivers</a>
+document.</p>
+
+
 
 <p class="note"><strong>Note:</strong>
 If you're developing on Mac OS X or Linux, then you <strong>do not</strong> need to install a USB

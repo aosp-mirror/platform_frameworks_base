@@ -17,11 +17,16 @@
 package com.android.keyguard;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.PhoneConstants;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.Editable;
@@ -30,6 +35,7 @@ import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -38,9 +44,14 @@ import android.widget.TextView.OnEditorActionListener;
  */
 public class KeyguardSimPinView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
+    private static final String LOG_TAG = "KeyguardSimPinView";
+    private static final boolean DEBUG = KeyguardViewMediator.DEBUG;
+    public static final String TAG = "KeyguardSimPinView";
 
     private ProgressDialog mSimUnlockProgressDialog = null;
-    private volatile boolean mSimCheckInProgress;
+    private CheckSimPin mCheckSimPinThread;
+
+    private AlertDialog mRemainingAttemptsDialog;
 
     public KeyguardSimPinView(Context context) {
         this(context, null);
@@ -53,6 +64,23 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
     public void resetState() {
         mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
         mPasswordEntry.setEnabled(true);
+    }
+
+    private String getPinPasswordErrorMessage(int attemptsRemaining) {
+        String displayMessage;
+
+        if (attemptsRemaining == 0) {
+            displayMessage = getContext().getString(R.string.kg_password_wrong_pin_code_pukked);
+        } else if (attemptsRemaining > 0) {
+            displayMessage = getContext().getResources()
+                    .getQuantityString(R.plurals.kg_password_wrong_pin_code, attemptsRemaining,
+                            attemptsRemaining);
+        } else {
+            displayMessage = getContext().getString(R.string.kg_password_pin_failed);
+        }
+        if (DEBUG) Log.d(LOG_TAG, "getPinPasswordErrorMessage:"
+                + " attemptsRemaining=" + attemptsRemaining + " displayMessage=" + displayMessage);
+        return displayMessage;
     }
 
     @Override
@@ -109,6 +137,8 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
                 | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 
         mPasswordEntry.requestFocus();
+
+        mSecurityMessageDisplay.setTimeout(0); // don't show ownerinfo/charging status by default
     }
 
     @Override
@@ -135,22 +165,25 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
             mPin = pin;
         }
 
-        abstract void onSimCheckResponse(boolean success);
+        abstract void onSimCheckResponse(final int result, final int attemptsRemaining);
 
         @Override
         public void run() {
             try {
-                final boolean result = ITelephony.Stub.asInterface(ServiceManager
-                        .checkService("phone")).supplyPin(mPin);
+                Log.v(TAG, "call supplyPinReportResult()");
+                final int[] result = ITelephony.Stub.asInterface(ServiceManager
+                        .checkService("phone")).supplyPinReportResult(mPin);
+                Log.v(TAG, "supplyPinReportResult returned: " + result[0] + " " + result[1]);
                 post(new Runnable() {
                     public void run() {
-                        onSimCheckResponse(result);
+                        onSimCheckResponse(result[0], result[1]);
                     }
                 });
             } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException for supplyPinReportResult:", e);
                 post(new Runnable() {
                     public void run() {
-                        onSimCheckResponse(false);
+                        onSimCheckResponse(PhoneConstants.PIN_GENERAL_FAILURE, -1);
                     }
                 });
             }
@@ -164,12 +197,26 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
                     mContext.getString(R.string.kg_sim_unlock_progress_dialog_message));
             mSimUnlockProgressDialog.setIndeterminate(true);
             mSimUnlockProgressDialog.setCancelable(false);
-            if (!(mContext instanceof Activity)) {
-                mSimUnlockProgressDialog.getWindow().setType(
-                        WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            }
+            mSimUnlockProgressDialog.getWindow().setType(
+                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         }
         return mSimUnlockProgressDialog;
+    }
+
+    private Dialog getSimRemainingAttemptsDialog(int remaining) {
+        String msg = getPinPasswordErrorMessage(remaining);
+        if (mRemainingAttemptsDialog == null) {
+            Builder builder = new AlertDialog.Builder(mContext);
+            builder.setMessage(msg);
+            builder.setCancelable(false);
+            builder.setNeutralButton(R.string.ok, null);
+            mRemainingAttemptsDialog = builder.create();
+            mRemainingAttemptsDialog.getWindow().setType(
+                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        } else {
+            mRemainingAttemptsDialog.setMessage(msg);
+        }
+        return mRemainingAttemptsDialog;
     }
 
     @Override
@@ -186,31 +233,45 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
 
         getSimUnlockProgressDialog().show();
 
-        if (!mSimCheckInProgress) {
-            mSimCheckInProgress = true; // there should be only one
-            new CheckSimPin(mPasswordEntry.getText().toString()) {
-                void onSimCheckResponse(final boolean success) {
+        if (mCheckSimPinThread == null) {
+            mCheckSimPinThread = new CheckSimPin(mPasswordEntry.getText().toString()) {
+                void onSimCheckResponse(final int result, final int attemptsRemaining) {
                     post(new Runnable() {
                         public void run() {
                             if (mSimUnlockProgressDialog != null) {
                                 mSimUnlockProgressDialog.hide();
                             }
-                            if (success) {
-                                // before closing the keyguard, report back that the sim is unlocked
-                                // so it knows right away.
+                            if (result == PhoneConstants.PIN_RESULT_SUCCESS) {
                                 KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked();
                                 mCallback.dismiss(true);
                             } else {
-                                mSecurityMessageDisplay.setMessage
-                                    (R.string.kg_password_wrong_pin_code, true);
+                                if (result == PhoneConstants.PIN_PASSWORD_INCORRECT) {
+                                    if (attemptsRemaining <= 2) {
+                                        // this is getting critical - show dialog
+                                        getSimRemainingAttemptsDialog(attemptsRemaining).show();
+                                    } else {
+                                        // show message
+                                        mSecurityMessageDisplay.setMessage(
+                                                getPinPasswordErrorMessage(attemptsRemaining), true);
+                                    }
+                                } else {
+                                    // "PIN operation failed!" - no idea what this was and no way to
+                                    // find out. :/
+                                    mSecurityMessageDisplay.setMessage(getContext().getString(
+                                            R.string.kg_password_pin_failed), true);
+                                }
+                                if (DEBUG) Log.d(LOG_TAG, "verifyPasswordAndUnlock "
+                                        + " CheckSimPin.onSimCheckResponse: " + result
+                                        + " attemptsRemaining=" + attemptsRemaining);
                                 mPasswordEntry.setText("");
                             }
                             mCallback.userActivity(0);
-                            mSimCheckInProgress = false;
+                            mCheckSimPinThread = null;
                         }
                     });
                 }
-            }.start();
+            };
+            mCheckSimPinThread.start();
         }
     }
 }

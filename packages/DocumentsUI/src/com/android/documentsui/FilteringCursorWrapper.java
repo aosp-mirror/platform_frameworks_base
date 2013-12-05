@@ -17,6 +17,8 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.model.DocumentInfo.getCursorLong;
+import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.AbstractCursor;
 import android.database.Cursor;
@@ -50,10 +52,8 @@ public class FilteringCursorWrapper extends AbstractCursor {
 
         cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
-            final String mimeType = cursor.getString(
-                    cursor.getColumnIndex(Document.COLUMN_MIME_TYPE));
-            final long lastModified = cursor.getLong(
-                    cursor.getColumnIndex(Document.COLUMN_LAST_MODIFIED));
+            final String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+            final long lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
             if (rejectMimes != null && MimePredicate.mimeMatches(rejectMimes, mimeType)) {
                 continue;
             }

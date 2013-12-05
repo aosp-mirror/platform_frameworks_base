@@ -221,6 +221,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int REMOVE_CHATTY = 1<<16;
 
     /**
+     * Timeout (in milliseconds) after which the watchdog should declare that
+     * our handler thread is wedged.  The usual default for such things is one
+     * minute but we sometimes do very lengthy I/O operations on this thread,
+     * such as installing multi-gigabyte applications, so ours needs to be longer.
+     */
+    private static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
+
+    /**
      * Whether verification is enabled by default.
      */
     private static final boolean DEFAULT_VERIFY_ENABLE = true;
@@ -1115,7 +1123,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             mHandlerThread.start();
             mHandler = new PackageHandler(mHandlerThread.getLooper());
-            Watchdog.getInstance().addThread(mHandler, mHandlerThread.getName());
+            Watchdog.getInstance().addThread(mHandler, mHandlerThread.getName(),
+                    WATCHDOG_TIMEOUT);
 
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");
@@ -1269,7 +1278,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 frameworkDir.getPath(), OBSERVER_EVENTS, true, false);
             mFrameworkInstallObserver.startWatching();
             scanDirLI(frameworkDir, PackageParser.PARSE_IS_SYSTEM
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    | PackageParser.PARSE_IS_SYSTEM_DIR
+                    | PackageParser.PARSE_IS_PRIVILEGED,
                     scanMode | SCAN_NO_DEX, 0);
 
             // Collected privileged system packages.
@@ -1760,6 +1770,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageParser.generatePackageInfo(p, gp.gids, flags,
                 ps.firstInstallTime, ps.lastUpdateTime, gp.grantedPermissions,
                 state, userId);
+    }
+
+    public boolean isPackageAvailable(String packageName, int userId) {
+        if (!sUserManager.exists(userId)) return false;
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "is package available");
+        synchronized (mPackages) {
+            PackageParser.Package p = mPackages.get(packageName);
+            if (p != null) {
+                final PackageSetting ps = (PackageSetting) p.mExtras;
+                if (ps != null) {
+                    final PackageUserState state = ps.readUserState(userId);
+                    if (state != null) {
+                        return PackageParser.isAvailable(state);
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -3585,7 +3613,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 + ps.name + " changing from " + updatedPkg.codePathString
                                 + " to " + scanFile);
                         updatedPkg.codePath = scanFile;
-                        updatedPkg.codePathString = scanFile.toString();                        
+                        updatedPkg.codePathString = scanFile.toString();
+                        // This is the point at which we know that the system-disk APK
+                        // for this package has moved during a reboot (e.g. due to an OTA),
+                        // so we need to reevaluate it for privilege policy.
+                        if (locationIsPrivileged(scanFile)) {
+                            updatedPkg.pkgFlags |= ApplicationInfo.FLAG_PRIVILEGED;
+                        }
                     }
                     updatedPkg.pkg = pkg;
                     mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
@@ -4944,6 +4978,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         permissionMap.put(p.info.name, bp);
                     }
                     if (bp.perm == null) {
+                        if (bp.sourcePackage != null
+                                && !bp.sourcePackage.equals(p.info.packageName)) {
+                            // If this is a permission that was formerly defined by a non-system
+                            // app, but is now defined by a system app (following an upgrade),
+                            // discard the previous declaration and consider the system's to be
+                            // canonical.
+                            if (isSystemApp(p.owner)) {
+                                Slog.i(TAG, "New decl " + p.owner + " of permission  "
+                                        + p.info.name + " is system");
+                                bp.sourcePackage = null;
+                            }
+                        }
                         if (bp.sourcePackage == null
                                 || bp.sourcePackage.equals(p.info.packageName)) {
                             BasePermission tree = findPermissionTreeLP(p.info.name);
@@ -5566,9 +5612,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // version of the one on the data partition, but which
                         // granted a new system permission that it didn't have
                         // before.  In this case we do want to allow the app to
-                        // now get the new permission if the new system-partition
-                        // apk is privileged to get it.
-                        if (sysPs.pkg != null && isPrivilegedApp(pkg)) {
+                        // now get the new permission if the ancestral apk is
+                        // privileged to get it.
+                        if (sysPs.pkg != null && sysPs.isPrivileged()) {
                             for (int j=0;
                                     j<sysPs.pkg.requestedPermissions.size(); j++) {
                                 if (perm.equals(
@@ -9370,7 +9416,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    boolean locationIsPrivileged(File path) {
+    static boolean locationIsPrivileged(File path) {
         try {
             final String privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app")
                     .getCanonicalPath();
@@ -9950,6 +9996,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // writer
         int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, true, "add preferred activity");
+        if (filter.countActions() == 0) {
+            Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
+            return;
+        }
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
@@ -9980,11 +10030,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (filter.countDataAuthorities() != 0
                 || filter.countDataPaths() != 0
-                || filter.countDataSchemes() != 0
+                || filter.countDataSchemes() > 1
                 || filter.countDataTypes() != 0) {
             throw new IllegalArgumentException(
                     "replacePreferredActivity expects filter to have no data authorities, " +
-                    "paths, schemes or types.");
+                    "paths, or types; and at most one scheme.");
         }
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
@@ -10001,31 +10051,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final int callingUserId = UserHandle.getCallingUserId();
-            ArrayList<PreferredActivity> removed = null;
             PreferredIntentResolver pir = mSettings.mPreferredActivities.get(callingUserId);
             if (pir != null) {
-                Iterator<PreferredActivity> it = pir.filterIterator();
-                String action = filter.getAction(0);
-                String category = filter.getCategory(0);
-                while (it.hasNext()) {
-                    PreferredActivity pa = it.next();
-                    if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
-                        if (removed == null) {
-                            removed = new ArrayList<PreferredActivity>();
-                        }
-                        removed.add(pa);
-                        if (DEBUG_PREFERRED) {
-                            Slog.i(TAG, "Removing preferred activity "
-                                    + pa.mPref.mComponent + ":");
-                            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                        }
-                    }
+                Intent intent = new Intent(filter.getAction(0)).addCategory(filter.getCategory(0));
+                if (filter.countDataSchemes() == 1) {
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.scheme(filter.getDataScheme(0));
+                    intent.setData(builder.build());
                 }
-                if (removed != null) {
-                    for (int i=0; i<removed.size(); i++) {
-                        PreferredActivity pa = removed.get(i);
-                        pir.removeFilter(pa);
+                List<PreferredActivity> matches = pir.queryIntent(
+                        intent, null, true, callingUserId);
+                if (DEBUG_PREFERRED) {
+                    Slog.i(TAG, matches.size() + " preferred matches for " + intent);
+                }
+                for (int i = 0; i < matches.size(); i++) {
+                    PreferredActivity pa = matches.get(i);
+                    if (DEBUG_PREFERRED) {
+                        Slog.i(TAG, "Removing preferred activity "
+                                + pa.mPref.mComponent + ":");
+                        filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                     }
+                    pir.removeFilter(pa);
                 }
             }
             addPreferredActivityInternal(filter, match, set, activity, true, callingUserId);

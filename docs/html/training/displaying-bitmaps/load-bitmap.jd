@@ -97,7 +97,8 @@ android.graphics.BitmapFactory.Options} object. For example, an image with resol
 is decoded with an {@link android.graphics.BitmapFactory.Options#inSampleSize} of 4 produces a
 bitmap of approximately 512x384. Loading this into memory uses 0.75MB rather than 12MB for the full
 image (assuming a bitmap configuration of {@link android.graphics.Bitmap.Config ARGB_8888}). Here’s
-a method to calculate a the sample size value based on a target width and height:</p>
+a method to calculate a sample size value that is a power of two based on a target width and
+height:</p>
 
 <pre>
 public static int calculateInSampleSize(
@@ -107,26 +108,26 @@ public static int calculateInSampleSize(
     final int width = options.outWidth;
     int inSampleSize = 1;
 
-    if (height > reqHeight || width > reqWidth) {
+    if (height &gt; reqHeight || width &gt; reqWidth) {
 
-        // Calculate ratios of height and width to requested height and width
-        final int heightRatio = Math.round((float) height / (float) reqHeight);
-        final int widthRatio = Math.round((float) width / (float) reqWidth);
+        final int halfHeight = height / 2;
+        final int halfWidth = width / 2;
 
-        // Choose the smallest ratio as inSampleSize value, this will guarantee
-        // a final image with both dimensions larger than or equal to the
-        // requested height and width.
-        inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+        // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+        // height and width larger than the requested height and width.
+        while ((halfHeight / inSampleSize) &gt; reqHeight
+                && (halfWidth / inSampleSize) &gt; reqWidth) {
+            inSampleSize *= 2;
+        }
     }
 
     return inSampleSize;
 }
 </pre>
 
-<p class="note"><strong>Note:</strong> Using powers of 2 for {@link
-android.graphics.BitmapFactory.Options#inSampleSize} values is faster and more efficient for the
-decoder. However, if you plan to cache the resized versions in memory or on disk, it’s usually still
-worth decoding to the most appropriate image dimensions to save space.</p>
+<p class="note"><strong>Note:</strong> A power of two value is calculated because the decoder uses
+a final value by rounding down to the nearest power of two, as per the {@link
+android.graphics.BitmapFactory.Options#inSampleSize} documentation.</p>
 
 <p>To use this method, first decode with {@link
 android.graphics.BitmapFactory.Options#inJustDecodeBounds} set to {@code true}, pass the options

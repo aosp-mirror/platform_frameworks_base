@@ -231,10 +231,11 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         final FileDescriptor fd = openInternal(file, mode);
         if (fd == null) return null;
 
-        final FileDescriptor[] comm = createCommSocketPair(true);
+        final FileDescriptor[] comm = createCommSocketPair();
         final ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd, comm[0]);
 
         // Kick off thread to watch for status updates
+        IoUtils.setBlocking(comm[1], true);
         final ListenerBridge bridge = new ListenerBridge(comm[1], handler.getLooper(), listener);
         bridge.start();
 
@@ -378,7 +379,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     public static ParcelFileDescriptor[] createReliablePipe() throws IOException {
         try {
-            final FileDescriptor[] comm = createCommSocketPair(false);
+            final FileDescriptor[] comm = createCommSocketPair();
             final FileDescriptor[] fds = Libcore.os.pipe();
             return new ParcelFileDescriptor[] {
                     new ParcelFileDescriptor(fds[0], comm[0]),
@@ -416,7 +417,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     public static ParcelFileDescriptor[] createReliableSocketPair() throws IOException {
         try {
-            final FileDescriptor[] comm = createCommSocketPair(false);
+            final FileDescriptor[] comm = createCommSocketPair();
             final FileDescriptor fd0 = new FileDescriptor();
             final FileDescriptor fd1 = new FileDescriptor();
             Libcore.os.socketpair(AF_UNIX, SOCK_STREAM, 0, fd0, fd1);
@@ -428,13 +429,13 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    private static FileDescriptor[] createCommSocketPair(boolean blocking) throws IOException {
+    private static FileDescriptor[] createCommSocketPair() throws IOException {
         try {
             final FileDescriptor comm1 = new FileDescriptor();
             final FileDescriptor comm2 = new FileDescriptor();
             Libcore.os.socketpair(AF_UNIX, SOCK_STREAM, 0, comm1, comm2);
-            IoUtils.setBlocking(comm1, blocking);
-            IoUtils.setBlocking(comm2, blocking);
+            IoUtils.setBlocking(comm1, false);
+            IoUtils.setBlocking(comm2, false);
             return new FileDescriptor[] { comm1, comm2 };
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
@@ -670,32 +671,33 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
 
         try {
+            if (status == Status.SILENCE) return;
+
+            // Since we're about to close, read off any remote status. It's
+            // okay to remember missing here.
+            mStatus = readCommStatus(mCommFd, getOrCreateStatusBuffer());
+
+            // Skip writing status when other end has already gone away.
+            if (mStatus != null) return;
+
             try {
-                if (status != Status.SILENCE) {
-                    final byte[] buf = getOrCreateStatusBuffer();
-                    int writePtr = 0;
+                final byte[] buf = getOrCreateStatusBuffer();
+                int writePtr = 0;
 
-                    Memory.pokeInt(buf, writePtr, status, ByteOrder.BIG_ENDIAN);
-                    writePtr += 4;
+                Memory.pokeInt(buf, writePtr, status, ByteOrder.BIG_ENDIAN);
+                writePtr += 4;
 
-                    if (msg != null) {
-                        final byte[] rawMsg = msg.getBytes();
-                        final int len = Math.min(rawMsg.length, buf.length - writePtr);
-                        System.arraycopy(rawMsg, 0, buf, writePtr, len);
-                        writePtr += len;
-                    }
-
-                    Libcore.os.write(mCommFd, buf, 0, writePtr);
+                if (msg != null) {
+                    final byte[] rawMsg = msg.getBytes();
+                    final int len = Math.min(rawMsg.length, buf.length - writePtr);
+                    System.arraycopy(rawMsg, 0, buf, writePtr, len);
+                    writePtr += len;
                 }
+
+                Libcore.os.write(mCommFd, buf, 0, writePtr);
             } catch (ErrnoException e) {
                 // Reporting status is best-effort
                 Log.w(TAG, "Failed to report status: " + e);
-            }
-
-            if (status != Status.SILENCE) {
-                // Since we're about to close, read off any remote status. It's
-                // okay to remember missing here.
-                mStatus = readCommStatus(mCommFd, getOrCreateStatusBuffer());
             }
 
         } finally {

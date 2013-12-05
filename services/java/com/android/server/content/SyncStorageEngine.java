@@ -1295,18 +1295,38 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * Return a list of the currently active syncs. Note that the returned items are the
-     * real, live active sync objects, so be careful what you do with it.
+     * Return a list of the currently active syncs. Note that the returned
+     * items are the real, live active sync objects, so be careful what you do
+     * with it.
      */
-    public List<SyncInfo> getCurrentSyncs(int userId) {
+    private List<SyncInfo> getCurrentSyncs(int userId) {
         synchronized (mAuthorities) {
-            ArrayList<SyncInfo> syncs = mCurrentSyncs.get(userId);
-            if (syncs == null) {
-                syncs = new ArrayList<SyncInfo>();
-                mCurrentSyncs.put(userId, syncs);
-            }
-            return syncs;
+            return getCurrentSyncsLocked(userId);
         }
+    }
+
+    /**
+     * @return a copy of the current syncs data structure. Will not return
+     * null.
+     */
+    public List<SyncInfo> getCurrentSyncsCopy(int userId) {
+        synchronized (mAuthorities) {
+            final List<SyncInfo> syncs = getCurrentSyncsLocked(userId);
+            final List<SyncInfo> syncsCopy = new ArrayList<SyncInfo>();
+            for (SyncInfo sync : syncs) {
+                syncsCopy.add(new SyncInfo(sync));
+            }
+            return syncsCopy;
+        }
+    }
+
+    private List<SyncInfo> getCurrentSyncsLocked(int userId) {
+        ArrayList<SyncInfo> syncs = mCurrentSyncs.get(userId);
+        if (syncs == null) {
+            syncs = new ArrayList<SyncInfo>();
+            mCurrentSyncs.put(userId, syncs);
+        }
+        return syncs;
     }
 
     /**

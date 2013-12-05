@@ -55,8 +55,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-import android.net.ProxyProperties;
 import android.content.pm.UserInfo;
+import android.net.ProxyProperties;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -523,6 +523,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         || pm.getReceiverInfo(aa.info.getComponent(), 0, userHandle) == null) {
                     removed = true;
                     policy.mAdminList.remove(i);
+                    policy.mAdminMap.remove(aa.info.getComponent());
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen

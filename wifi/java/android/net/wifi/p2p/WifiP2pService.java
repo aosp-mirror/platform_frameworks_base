@@ -85,6 +85,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+
 
 /**
  * WifiP2pService includes a state machine to perform Wi-Fi p2p operations. Applications
@@ -200,6 +202,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
      * (notably dhcp)
      */
     private boolean mDiscoveryBlocked;
+
+    // Supplicant doesn't like setting the same country code multiple times (it may drop
+    // current connected network), so we save the country code here to avoid redundency
+    private String mLastSetCountryCode;
 
     /*
      * remember if we were in a scan when it had to be stopped
@@ -1070,7 +1076,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case SET_COUNTRY_CODE:
                     String countryCode = (String) message.obj;
-                    mWifiNative.setCountryCode(countryCode);
+                    countryCode = countryCode.toUpperCase(Locale.ROOT);
+                    if (mLastSetCountryCode == null ||
+                            countryCode.equals(mLastSetCountryCode) == false) {
+                        if (mWifiNative.setCountryCode(countryCode)) {
+                            mLastSetCountryCode = countryCode;
+                        }
+                    }
                     break;
                 default:
                    return NOT_HANDLED;
@@ -1082,6 +1094,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public void exit() {
             sendP2pStateChangedBroadcast(false);
             mNetworkInfo.setIsAvailable(false);
+
+            mLastSetCountryCode = null;
         }
     }
 

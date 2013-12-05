@@ -97,6 +97,13 @@
          the SIM card. -->
     <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
     <string name="needPuk2">Type PUK2 to unblock SIM card.</string>
+    <!-- Displayed when user attempts to change SIM PIN1 without enabling PIN1. -->
+    <string name="enablePin">Unsuccessful, enable SIM/RUIM Lock.</string>
+    <!-- Displayed when a SIM PIN/PUK is entered incorrectly. -->
+    <plurals name="pinpuk_attempts">
+        <item quantity="one">You have <xliff:g id="number">%d</xliff:g> remaining attempt before SIM is locked.</item>
+        <item quantity="other">You have <xliff:g id="number">%d</xliff:g> remaining attempts before SIM is locked.</item>
+    </plurals>
     <!-- Title for the dialog used to display the user's IMEI number [CHAR LIMIT=10] -->
     <string name="imei">IMEI</string>
 
@@ -1043,6 +1050,12 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindWallpaper">Allows the holder to bind to the top-level
         interface of a wallpaper. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindRemoteDisplay">bind to a remote display</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindRemoteDisplay">Allows the holder to bind to the top-level
+        interface of a remote display. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindRemoteViews">bind to a widget service</string>
@@ -3894,6 +3907,9 @@
     <!-- Description of the shwoing of a popup window with activities to choose from. [CHAR LIMIT=NONE] -->
     <string name="activitychooserview_choose_application">Choose an app</string>
 
+    <!-- Error message if the share target app cannto be launched. [CHAR LIMIT=NONE] -->
+    <string name="activitychooserview_choose_application_error">Couldn\'t launch <xliff:g id="application_name" example="Acme">%s</xliff:g></string>
+
     <!-- ShareActionProvider - accessibility support -->
     <!-- Description of the choose target button in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] -->
     <string name="shareactionprovider_share_with">Share with</string>
@@ -4080,11 +4096,23 @@
     <!-- Description of a wireless display route. [CHAR LIMIT=50] -->
     <string name="wireless_display_route_description">Wireless display</string>
 
-    <!-- "Done" button for MediaRouter chooser dialog when grouping routes. [CHAR LIMIT=NONE] -->
-    <string name="media_route_chooser_grouping_done">Done</string>
-
     <!-- Content description of a MediaRouteButton for accessibility support -->
     <string name="media_route_button_content_description">Media output</string>
+
+    <!-- Title of the media route chooser dialog. [CHAR LIMIT=40] -->
+    <string name="media_route_chooser_title">Connect to device</string>
+
+    <!-- Title of the media route chooser dialog for selecting remote display routes. [CHAR LIMIT=40] -->
+    <string name="media_route_chooser_title_for_remote_display">Cast screen to device</string>
+
+    <!-- Placeholder text to show when no devices have been found. [CHAR LIMIT=50] -->
+    <string name="media_route_chooser_searching">Searching for devices\u2026</string>
+
+    <!-- Button to access extended settings.  [CHAR LIMIT=30] -->
+    <string name="media_route_chooser_extended_settings">Settings</string>
+
+    <!-- Button to disconnect from a media route.  [CHAR LIMIT=30] -->
+    <string name="media_route_controller_disconnect">Disconnect</string>
 
     <!-- Status message for remote routes attempting to scan/determine availability -->
     <string name="media_route_status_scanning">Scanning...</string>
@@ -4118,10 +4146,14 @@
     <!-- Title text to append when the display is secure.  [CHAR LIMIT=30] -->
     <string name="display_manager_overlay_display_secure_suffix">, secure</string>
 
+    <!-- Title of the notification to indicate the process of connecting to a wifi display.  [CHAR LIMIT=50] -->
+    <string name="wifi_display_notification_connecting_title">Casting screen</string>
+    <!-- Message of the notification to indicate the process of connecting to a wifi display.  [CHAR LIMIT=80] -->
+    <string name="wifi_display_notification_connecting_message">Connecting to <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Title of the notification to indicate an active wifi display connection.  [CHAR LIMIT=50] -->
-    <string name="wifi_display_notification_title">Wireless display is connected</string>
+    <string name="wifi_display_notification_connected_title">Casting screen</string>
     <!-- Message of the notification to indicate an active wifi display connection.  [CHAR LIMIT=80] -->
-    <string name="wifi_display_notification_message">This screen is showing on another device</string>
+    <string name="wifi_display_notification_connected_message">Connected to <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Label of a button to disconnect an active wifi display connection.  [CHAR LIMIT=25] -->
     <string name="wifi_display_notification_disconnect">Disconnect</string>
 

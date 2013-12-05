@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -746,15 +758,6 @@ Summary:
               
             
               
-              
-            
-              
-              
-            
-              
-              
-            
-              
                 <a href="/reference/com/google/android/gms/games/Game.html">Game</a>,
               
               
@@ -763,8 +766,19 @@ Summary:
               
             
               
+              
+            
+              
+              
+            
+              
+                <a href="/reference/com/google/android/gms/games/GameEntity.html">GameEntity</a>,
+              
+              
+            
+              
               and
-                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">10 others.</a>
+                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">9 others.</a>
               
             
           
@@ -834,42 +848,38 @@ Summary:
               <td class="jd-descrcol" width="100%">The person's primary cover image.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a></td>
-              <td class="jd-descrcol" width="100%">&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Image.html">Person.Image</a></td>
               <td class="jd-descrcol" width="100%">The representation of the person's profile photo.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Name.html">Person.Name</a></td>
               <td class="jd-descrcol" width="100%">An object representation of the individual components of a person's name.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Organizations.html">Person.Organizations</a></td>
               <td class="jd-descrcol" width="100%">&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.PlacesLived.html">Person.PlacesLived</a></td>
               <td class="jd-descrcol" width="100%">&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html">Person.Urls</a></td>
               <td class="jd-descrcol" width="100%">&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Player.html">Player</a></td>
               <td class="jd-descrcol" width="100%">Data interface for retrieving player information.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerEntity.html">PlayerEntity</a></td>
               <td class="jd-descrcol" width="100%">Data object representing a set of Player data.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></td>
               <td class="jd-descrcol" width="100%">Data interface for room functionality.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomEntity.html">RoomEntity</a></td>
               <td class="jd-descrcol" width="100%">Data object representing the data for a room.&nbsp;</td>
           </tr>

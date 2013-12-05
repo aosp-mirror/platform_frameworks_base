@@ -89,10 +89,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override // CommandQueue
-    public void setNavigationIconHints(int hints) {
-    }
-
-    @Override // CommandQueue
     public void setWindowState(int window, int state) {
     }
 

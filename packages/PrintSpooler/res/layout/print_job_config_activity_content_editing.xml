@@ -18,8 +18,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:scrollbars="vertical"
-    android:background="@color/editable_background">
+    android:scrollbars="vertical">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -42,6 +41,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dip"
             android:orientation="horizontal"
             android:baselineAligned="false">
 
@@ -203,27 +203,79 @@
 
         </LinearLayout>
 
+        <!-- Advanced settings button -->
+
+        <LinearLayout
+           android:id="@+id/advanced_settings_container"
+           android:layout_width="fill_parent"
+           android:layout_height="wrap_content"
+           android:orientation="vertical"
+           android:visibility="gone">
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="1dip"
+                android:layout_marginStart="24dip"
+                android:layout_marginEnd="24dip"
+                android:layout_gravity="fill_horizontal"
+                android:background="@color/separator"
+                android:contentDescription="@null">
+            </ImageView>
+
+            <Button
+                android:id="@+id/advanced_settings_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dip"
+                android:layout_marginEnd="24dip"
+                android:layout_gravity="fill_horizontal"
+                android:text="@string/advanced_settings_button"
+                android:gravity="start|center_vertical"
+                android:textSize="16sp"
+                android:textColor="@color/item_text_color">
+            </Button>
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="1dip"
+                android:layout_gravity="fill_horizontal"
+                android:layout_marginStart="24dip"
+                android:layout_marginEnd="24dip"
+                android:background="@color/separator"
+                android:contentDescription="@null">
+            </ImageView>
+
+        </LinearLayout>
+
         <!-- Print button -->
 
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="1dip"
-            android:layout_marginTop="24dip"
-            android:layout_gravity="fill_horizontal"
-            android:background="@color/separator"
-            android:contentDescription="@null">
-        </ImageView>
-
-        <Button
-            android:id="@+id/print_button"
-            style="?android:attr/buttonBarButtonStyle"
+        <FrameLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="fill_horizontal"
-            android:text="@string/print_button"
-            android:textSize="16sp"
-            android:textColor="@color/item_text_color">
-        </Button>
+            android:layout_marginTop="24dip"
+            android:background="@color/action_button_background">
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="1dip"
+                android:layout_gravity="fill_horizontal"
+                android:background="@color/separator"
+                android:contentDescription="@null">
+            </ImageView>
+
+            <Button
+                android:id="@+id/print_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_horizontal"
+                android:text="@string/print_button"
+                android:textSize="16sp"
+                android:textColor="@color/item_text_color">
+            </Button>
+
+        </FrameLayout>
 
     </LinearLayout>
 

@@ -1,8 +1,8 @@
 page.title=Installing the Eclipse Plugin
-adt.zip.version=22.2.1
-adt.zip.download=ADT-22.2.1.zip
-adt.zip.bytes=14476845
-adt.zip.checksum=97176754a1e86adf2e5e05f44dc7229e
+adt.zip.version=22.3.0
+adt.zip.download=ADT-22.3.0.zip
+adt.zip.bytes=14493723
+adt.zip.checksum=0189080b23dfa0f866adafaaafcc34ab
 
 @jd:body
 
@@ -74,12 +74,14 @@ To get these packages for your SDK, continue to
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-<h2>Join the translation pilot</h2>
-<p>Google Play is offering <a
-href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">
-translation services</a> as part of a pilot program. If you are interested,
-sign up for the pilot program on the APK page in your Developer Console.</p>
-</div></div>
+<h2>App Translations in Google Play</h2>
+<p>Google Play <a href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">App 
+Translation Service</a> is available in the Developer Console to help you
+localize your app for a global user base. You can browse qualified vendors, get
+estimates, upload strings for translation, and then import the translations directly
+into your app.</p>
+</div>
+</div>
 
 <p>ADT Translation Manager Plugin is an Android SDK Tools plugin that helps
 you work with strings that you are localizing. It's designed to work
@@ -97,7 +99,8 @@ the correct locations under <code>res/values</code>, so that
 localization works instantly.</p>
 
 <p>For more information about translation services in Google Play, see <a
-href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">Purchase professional translations through the Developer Console</a>.</p>
+href="{@docRoot}distribute/googleplay/publish/localizing.html#gp-trans">Purchase
+professional translations through the Developer Console</a>.</p>
 
 <p>To install the ADT Translation Manager Plugin follow these steps:</p>
 

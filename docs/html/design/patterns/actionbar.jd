@@ -93,9 +93,9 @@ rotation on different screen sizes.</p>
 content across multiple bars located below the main action bar or at the bottom of the screen.</p>
 
 <img src="{@docRoot}design/media/action_bar_pattern_rotation.png">
-<div class="figure-caption">
+<!-- <div class="figure-caption">
   Split action bar showing action buttons at the bottom of the screen in vertical orientation.
-</div>
+</div> -->
 
 <h2 id="considerations-split-action-bars">Layout Considerations for Split Action Bars</h2>
 
@@ -182,7 +182,7 @@ files for further customization.
 <p>
 
 <a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Action Bar Icons (@actionbar page)']);"
-   href="{@docRoot}downloads/design/Android_Design_Icons_20130926.zip">Download the Action Bar Icon Pack</a>
+   href="{@docRoot}downloads/design/Android_Design_Icons_20131106.zip">Download the Action Bar Icon Pack</a>
 
 </p>
 

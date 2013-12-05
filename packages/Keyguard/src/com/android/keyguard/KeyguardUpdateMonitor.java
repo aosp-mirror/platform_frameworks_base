@@ -635,15 +635,14 @@ public class KeyguardUpdateMonitor {
      * PhoneWindowManager in this case.
      */
     protected void dispatchBootCompleted() {
-        if (!mBootCompleted) {
-            mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
-        }
+        mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
     }
 
     /**
      * Handle {@link #MSG_BOOT_COMPLETED}
      */
     protected void handleBootCompleted() {
+        if (mBootCompleted) return;
         mBootCompleted = true;
         mAudioManager = new AudioManager(mContext);
         mAudioManager.registerRemoteControlDisplay(mRemoteControlDisplay);
@@ -816,7 +815,7 @@ public class KeyguardUpdateMonitor {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onKeyguardVisibilityChanged(isShowing);
+                cb.onKeyguardVisibilityChangedRaw(isShowing);
             }
         }
     }

@@ -24,8 +24,8 @@ import android.view.ViewGroup;
 /**
  * Common base class of common implementation for an {@link Adapter} that can be
  * used in both {@link ListView} (by implementing the specialized
- * {@link ListAdapter} interface} and {@link Spinner} (by implementing the
- * specialized {@link SpinnerAdapter} interface.
+ * {@link ListAdapter} interface) and {@link Spinner} (by implementing the
+ * specialized {@link SpinnerAdapter} interface).
  */
 public abstract class BaseAdapter implements ListAdapter, SpinnerAdapter {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();

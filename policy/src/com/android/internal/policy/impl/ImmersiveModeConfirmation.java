@@ -201,13 +201,20 @@ public class ImmersiveModeConfirmation {
         private ValueAnimator mColorAnim;
         private ViewGroup mClingLayout;
 
+        private Runnable mUpdateLayoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mClingLayout != null && mClingLayout.getParent() != null) {
+                    mClingLayout.setLayoutParams(getBubbleLayoutParams());
+                }
+            }
+        };
+
         private BroadcastReceiver mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
-                    if (mClingLayout != null && mClingLayout.getParent() != null) {
-                        mClingLayout.setLayoutParams(getBubbleLayoutParams());
-                    }
+                    post(mUpdateLayoutRunnable);
                 }
             }
         };

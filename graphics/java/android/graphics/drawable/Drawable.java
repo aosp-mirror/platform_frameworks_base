@@ -693,8 +693,8 @@ public abstract class Drawable {
      */
     protected boolean onLevelChange(int level) { return false; }
     /**
-     * Override this in your subclass to change appearance if you recognize the
-     * specified state.
+     * Override this in your subclass to change appearance if you vary based on
+     * the bounds.
      */
     protected void onBoundsChange(Rect bounds) {}
 

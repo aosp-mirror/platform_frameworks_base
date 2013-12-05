@@ -62,4 +62,11 @@ public interface ICreateInfo {
      */
     public abstract String[] getDeleteReturns();
 
+    /**
+     * Returns the list of classes to refactor, must be an even list: the
+     * binary FQCN of class to replace followed by the new FQCN. All references
+     * to the old class should be updated to the new class.
+     * The list can be empty but must not be null.
+     */
+    public abstract String[] getJavaPkgClasses();
 }

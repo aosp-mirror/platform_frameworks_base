@@ -48,6 +48,15 @@ import android.os.WorkSource;
  * etc) it is easier and much more efficient to use
  * {@link android.os.Handler}.</b>
  *
+ * <p class="caution"><strong>Note:</strong> Beginning with API 19
+ * ({@link android.os.Build.VERSION_CODES#KITKAT}) alarm delivery is inexact:
+ * the OS will shift alarms in order to minimize wakeups and battery use.  There are
+ * new APIs to support applications which need strict delivery guarantees; see
+ * {@link #setWindow(int, long, long, PendingIntent)} and
+ * {@link #setExact(int, long, PendingIntent)}.  Applications whose {@code targetSdkVersion}
+ * is earlier than API 19 will continue to see the previous behavior in which all
+ * alarms are delivered exactly when requested.
+ *
  * <p>You do not
  * instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService
@@ -109,21 +118,19 @@ public class AlarmManager
     }
 
     /**
-     * TBW: discussion of fuzzy nature of alarms in KLP+.
-     *
      * <p>Schedule an alarm.  <b>Note: for timing operations (ticks, timeouts,
-     * etc) it is easier and much more efficient to use
-     * {@link android.os.Handler}.</b>  If there is already an alarm scheduled
-     * for the same IntentSender, it will first be canceled.
+     * etc) it is easier and much more efficient to use {@link android.os.Handler}.</b>
+     * If there is already an alarm scheduled for the same IntentSender, that previous
+     * alarm will first be canceled.
      *
-     * <p>If the time occurs in the past, the alarm will be triggered
+     * <p>If the stated trigger time is in the past, the alarm will be triggered
      * immediately.  If there is already an alarm for this Intent
      * scheduled (with the equality of two intents being defined by
      * {@link Intent#filterEquals}), then it will be removed and replaced by
      * this one.
      *
      * <p>
-     * The alarm is an intent broadcast that goes to a broadcast receiver that
+     * The alarm is an Intent broadcast that goes to a broadcast receiver that
      * you registered with {@link android.content.Context#registerReceiver}
      * or through the &lt;receiver&gt; tag in an AndroidManifest.xml file.
      *
@@ -133,9 +140,34 @@ public class AlarmManager
      * how many past alarm events have been accumulated into this intent
      * broadcast.  Recurring alarms that have gone undelivered because the
      * phone was asleep may have a count greater than one when delivered.  
-     *  
-     * @param type One of ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC or
-     *             RTC_WAKEUP.
+     *
+     * <div class="note">
+     * <p>
+     * <b>Note:</b> Beginning in API 19, the trigger time passed to this method
+     * is treated as inexact: the alarm will not be delivered before this time, but
+     * may be deferred and delivered some time later.  The OS will use
+     * this policy in order to "batch" alarms together across the entire system,
+     * minimizing the number of times the device needs to "wake up" and minimizing
+     * battery use.  In general, alarms scheduled in the near future will not
+     * be deferred as long as alarms scheduled far in the future.
+     *
+     * <p>
+     * With the new batching policy, delivery ordering guarantees are not as
+     * strong as they were previously.  If the application sets multiple alarms,
+     * it is possible that these alarms' <em>actual</em> delivery ordering may not match
+     * the order of their <em>requested</em> delivery times.  If your application has
+     * strong ordering requirements there are other APIs that you can use to get
+     * the necessary behavior; see {@link #setWindow(int, long, long, PendingIntent)}
+     * and {@link #setExact(int, long, PendingIntent)}.
+     *
+     * <p>
+     * Applications whose {@code targetSdkVersion} is before API 19 will
+     * continue to get the previous alarm behavior: all of their scheduled alarms
+     * will be treated as exact.
+     * </div>
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      * off, using the appropriate clock (depending on the alarm type).
      * @param operation Action to perform when the alarm goes off;
@@ -165,10 +197,10 @@ public class AlarmManager
      * {@link android.os.Handler}.</b>  If there is already an alarm scheduled
      * for the same IntentSender, it will first be canceled.
      *
-     * <p>Like {@link #set}, except you can also
-     * supply a rate at which the alarm will repeat.  This alarm continues
-     * repeating until explicitly removed with {@link #cancel}.  If the time
-     * occurs in the past, the alarm will be triggered immediately, with an
+     * <p>Like {@link #set}, except you can also supply a period at which
+     * the alarm will automatically repeat.  This alarm continues
+     * repeating until explicitly removed with {@link #cancel}.  If the stated
+     * trigger time is in the past, the alarm will be triggered immediately, with an
      * alarm count depending on how far in the past the trigger time is relative
      * to the repeat interval.
      *
@@ -185,8 +217,15 @@ public class AlarmManager
      * between alarms, then the approach to take is to use one-time alarms, 
      * scheduling the next one yourself when handling each alarm delivery.
      *
-     * @param type One of ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP}, RTC or
-     *             RTC_WAKEUP.
+     * <p class="note">
+     * <b>Note:</b> as of API 19, all repeating alarms are inexact.  If your
+     * application needs precise delivery times then it must use one-time
+     * exact alarms, rescheduling each time as described above. Legacy applications
+     * whose {@code targetSdkVersion} is earlier than API 19 will continue to have all
+     * of their alarms, including repeating alarms, treated as exact.
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
      * @param triggerAtMillis time in milliseconds that the alarm should first
      * go off, using the appropriate clock (depending on the alarm type).
      * @param intervalMillis interval in milliseconds between subsequent repeats
@@ -214,18 +253,33 @@ public class AlarmManager
     }
 
     /**
-     * Schedule an alarm to be delivered within a given window of time.
+     * Schedule an alarm to be delivered within a given window of time.  This method
+     * is similar to {@link #set(int, long, PendingIntent)}, but allows the
+     * application to precisely control the degree to which its delivery might be
+     * adjusted by the OS. This method allows an application to take advantage of the
+     * battery optimizations that arise from delivery batching even when it has
+     * modest timeliness requirements for its alarms.
      *
-     * TBW: clean up these docs
+     * <p>
+     * This method can also be used to achieve strict ordering guarantees among
+     * multiple alarms by ensuring that the windows requested for each alarm do
+     * not intersect.
      *
-     * @param type One of ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC or
-     *        RTC_WAKEUP.
+     * <p>
+     * When precise delivery is not required, applications should use the standard
+     * {@link #set(int, long, PendingIntent)} method.  This will give the OS the most
+     * flexibility to minimize wakeups and battery use.  For alarms that must be delivered
+     * at precisely-specified times with no acceptable variation, applications can use
+     * {@link #setExact(int, long, PendingIntent)}.
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
      * @param windowStartMillis The earliest time, in milliseconds, that the alarm should
      *        be delivered, expressed in the appropriate clock's units (depending on the alarm
      *        type).
      * @param windowLengthMillis The length of the requested delivery window,
      *        in milliseconds.  The alarm will be delivered no later than this many
-     *        milliseconds after the windowStartMillis time.  Note that this parameter
+     *        milliseconds after {@code windowStartMillis}.  Note that this parameter
      *        is a <i>duration,</i> not the timestamp of the end of the window.
      * @param operation Action to perform when the alarm goes off;
      *        typically comes from {@link PendingIntent#getBroadcast
@@ -249,8 +303,38 @@ public class AlarmManager
     }
 
     /**
-     * TBW: new 'exact' alarm that must be delivered as nearly as possible
-     * to the precise time specified.
+     * Schedule an alarm to be delivered precisely at the stated time.
+     *
+     * <p>
+     * This method is like {@link #set(int, long, PendingIntent)}, but does not permit
+     * the OS to adjust the delivery time.  The alarm will be delivered as nearly as
+     * possible to the requested trigger time.
+     *
+     * <p>
+     * <b>Note:</b> only alarms for which there is a strong demand for exact-time
+     * delivery (such as an alarm clock ringing at the requested time) should be
+     * scheduled as exact.  Applications are strongly discouraged from using exact
+     * alarms unnecessarily as they reduce the OS's ability to minimize battery use.
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param triggerAtMillis time in milliseconds that the alarm should go
+     *        off, using the appropriate clock (depending on the alarm type).
+     * @param operation Action to perform when the alarm goes off;
+     *        typically comes from {@link PendingIntent#getBroadcast
+     *        IntentSender.getBroadcast()}.
+     *
+     * @see #set
+     * @see #setRepeating
+     * @see #setWindow
+     * @see #cancel
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     * @see #ELAPSED_REALTIME
+     * @see #ELAPSED_REALTIME_WAKEUP
+     * @see #RTC
+     * @see #RTC_WAKEUP
      */
     public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null);
@@ -283,73 +367,81 @@ public class AlarmManager
     }
 
     /**
-     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
-     * repeating alarms are inexact.
+     * Available inexact recurrence interval recognized by
+     * {@link #setInexactRepeating(int, long, long, PendingIntent)}
+     * when running on Android prior to API 19.
      */
-    @Deprecated
     public static final long INTERVAL_FIFTEEN_MINUTES = 15 * 60 * 1000;
 
     /**
-     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
-     * repeating alarms are inexact.
+     * Available inexact recurrence interval recognized by
+     * {@link #setInexactRepeating(int, long, long, PendingIntent)}
+     * when running on Android prior to API 19.
      */
-    @Deprecated
     public static final long INTERVAL_HALF_HOUR = 2*INTERVAL_FIFTEEN_MINUTES;
 
     /**
-     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
-     * repeating alarms are inexact.
+     * Available inexact recurrence interval recognized by
+     * {@link #setInexactRepeating(int, long, long, PendingIntent)}
+     * when running on Android prior to API 19.
      */
-    @Deprecated
     public static final long INTERVAL_HOUR = 2*INTERVAL_HALF_HOUR;
 
     /**
-     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
-     * repeating alarms are inexact.
+     * Available inexact recurrence interval recognized by
+     * {@link #setInexactRepeating(int, long, long, PendingIntent)}
+     * when running on Android prior to API 19.
      */
-    @Deprecated
     public static final long INTERVAL_HALF_DAY = 12*INTERVAL_HOUR;
 
     /**
-     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
-     * repeating alarms are inexact.
+     * Available inexact recurrence interval recognized by
+     * {@link #setInexactRepeating(int, long, long, PendingIntent)}
+     * when running on Android prior to API 19.
      */
-    @Deprecated
     public static final long INTERVAL_DAY = 2*INTERVAL_HALF_DAY;
 
     /**
      * Schedule a repeating alarm that has inexact trigger time requirements;
      * for example, an alarm that repeats every hour, but not necessarily at
      * the top of every hour.  These alarms are more power-efficient than
-     * the strict recurrences supplied by {@link #setRepeating}, since the
-     * system can adjust alarms' phase to cause them to fire simultaneously,
+     * the strict recurrences traditionally supplied by {@link #setRepeating}, since the
+     * system can adjust alarms' delivery times to cause them to fire simultaneously,
      * avoiding waking the device from sleep more than necessary.
-     * 
+     *
      * <p>Your alarm's first trigger will not be before the requested time,
      * but it might not occur for almost a full interval after that time.  In
      * addition, while the overall period of the repeating alarm will be as
      * requested, the time between any two successive firings of the alarm
      * may vary.  If your application demands very low jitter, use
-     * {@link #setRepeating} instead.
+     * one-shot alarms with an appropriate window instead; see {@link
+     * #setWindow(int, long, long, PendingIntent)} and
+     * {@link #setExact(int, long, PendingIntent)}.
      *
-     * @param type One of ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP}, RTC or
-     *             RTC_WAKEUP.
+     * <p class="note">
+     * As of API 19, all repeating alarms are inexact.  Because this method has
+     * been available since API 3, your application can safely call it and be
+     * assured that it will get similar behavior on both current and older versions
+     * of Android.
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
      * @param triggerAtMillis time in milliseconds that the alarm should first
      * go off, using the appropriate clock (depending on the alarm type).  This
      * is inexact: the alarm will not fire before this time, but there may be a
      * delay of almost an entire alarm interval before the first invocation of
      * the alarm.
      * @param intervalMillis interval in milliseconds between subsequent repeats
-     * of the alarm.  If this is one of INTERVAL_FIFTEEN_MINUTES,
+     * of the alarm.  Prior to API 19, if this is one of INTERVAL_FIFTEEN_MINUTES,
      * INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_HALF_DAY, or INTERVAL_DAY
      * then the alarm will be phase-aligned with other alarms to reduce the
      * number of wakeups.  Otherwise, the alarm will be set as though the
-     * application had called {@link #setRepeating}.
+     * application had called {@link #setRepeating}.  As of API 19, all repeating
+     * alarms will be inexact and subject to batching with other alarms regardless
+     * of their stated repeat interval.
      * @param operation Action to perform when the alarm goes off;
      * typically comes from {@link PendingIntent#getBroadcast
      * IntentSender.getBroadcast()}.
-     *
-     * @deprecated As of API 19, all repeating alarms are inexact.
      *
      * @see android.os.Handler
      * @see #set
@@ -367,7 +459,6 @@ public class AlarmManager
      * @see #INTERVAL_HALF_DAY
      * @see #INTERVAL_DAY
      */
-    @Deprecated
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation, null);

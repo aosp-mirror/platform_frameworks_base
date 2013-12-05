@@ -1,4 +1,5 @@
 page.title=Downloads
+page tags="Icons", "stencils", "color swatches"
 @jd:body
 
 <div class="layout-content-row">
@@ -15,7 +16,7 @@ page.title=Downloads
 
 <p>
   <a class="download-button" onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'All Design Assets']);"
-    href="{@docRoot}downloads/design/Android_Design_Downloads_20130814.zip">Download All</a>
+    href="{@docRoot}downloads/design/Android_Design_Downloads_20131106.zip">Download All</a>
 </p>
 
   </div>
@@ -26,8 +27,8 @@ page.title=Downloads
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
 
-<p>Drag and drop your way to beautifully designed Ice Cream Sandwich apps. The stencils feature the
-rich typography, colors, interactive controls, and icons found throughout Android 4.0, along with
+<p>Drag and drop your way to beautifully designed Android apps. The stencils feature the
+rich typography, colors, interactive controls, and icons found throughout Android, along with
 phone and tablet outlines to frame your creations. Source files for icons and controls are also
 available.</p>
 
@@ -40,14 +41,14 @@ available.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Fireworks Stencil']);"
+  <!--<a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Fireworks Stencil']);"
     href="{@docRoot}downloads/design/Android_Design_Fireworks_Stencil_20120814.png">Adobe&reg; Fireworks&reg; PNG Stencil</a>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Illustrator Stencil']);"
     href="{@docRoot}downloads/design/Android_Design_Illustrator_Vectors_20120814.ai">Adobe&reg; Illustrator&reg; Stencil</a>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'OmniGraffle Stencil']);"
-    href="{@docRoot}downloads/design/Android_Design_OmniGraffle_Stencil_20120814.graffle">Omni&reg; OmniGraffle&reg; Stencil</a>
+    href="{@docRoot}downloads/design/Android_Design_OmniGraffle_Stencil_20120814.graffle">Omni&reg; OmniGraffle&reg; Stencil</a>-->
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Photoshop Sources']);"
-    href="{@docRoot}downloads/design/Android_Design_Holo_Widgets_20120814.zip">Adobe&reg; Photoshop&reg; Sources</a>
+    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Photoshop&reg; Stencils and Sources</a>
 </p>
 
   </div>
@@ -74,7 +75,7 @@ modify to match your theme, plus source files.</p>
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Action Bar Icons']);"
-    href="{@docRoot}downloads/design/Android_Design_Icons_20130926.zip">Action Bar Icon Pack</a>
+    href="{@docRoot}downloads/design/Android_Design_Icons_20131106.zip">Action Bar Icon Pack</a>
 </p>
 
   </div>
@@ -102,9 +103,9 @@ requirements of UI and high-resolution screens.</p>
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
-    href="{@docRoot}downloads/design/roboto-1.100141.zip">Roboto</a>
+    href="{@docRoot}downloads/design/roboto-1.2.zip">Roboto</a>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specemin Book']);"
-    href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a>
+    href="{@docRoot}downloads/design/Roboto_Specimen_Book_20131031.pdf">Specimen Book</a>
 </p>
 
   </div>
@@ -114,7 +115,7 @@ requirements of UI and high-resolution screens.</p>
   <div class="layout-content-col span-5">
 
 <h4>Color</h4>
-<p>Blue is the standard accent color in Android's color palette. Each color has a corresponding darker
+<p>In Android's color palette, each color has a corresponding darker
 shade that can be used as a complement when needed.</p>
 <p><a href="{@docRoot}design/style/color.html">More on Color</a></p>
 

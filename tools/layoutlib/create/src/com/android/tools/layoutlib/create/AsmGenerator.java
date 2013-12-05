@@ -65,6 +65,9 @@ public class AsmGenerator {
     /** A map { FQCN => set { method names } } of methods to rewrite as delegates.
      *  The special name {@link DelegateClassAdapter#ALL_NATIVES} can be used as in internal set. */
     private final HashMap<String, Set<String>> mDelegateMethods;
+    /** FQCN Names of classes to refactor. All reference to old-FQCN will be updated to new-FQCN.
+     * map old-FQCN => new-FQCN */
+    private final HashMap<String, String> mRefactorClasses;
 
     /**
      * Creates a new generator that can generate the output JAR with the stubbed classes.
@@ -117,6 +120,17 @@ public class AsmGenerator {
             String newFqcn = binaryToInternalClassName(renameClasses[i + 1]);
             mRenameClasses.put(oldFqcn, newFqcn);
             mClassesNotRenamed.add(oldFqcn);
+        }
+
+        // Create a map of classes to be refactored.
+        mRefactorClasses = new HashMap<String, String>();
+        String[] refactorClasses = createInfo.getJavaPkgClasses();
+        n = refactorClasses.length;
+        for (int i = 0; i < n; i += 2) {
+            assert i + 1 < n;
+            String oldFqcn = binaryToInternalClassName(refactorClasses[i]);
+            String newFqcn = binaryToInternalClassName(refactorClasses[i + 1]);
+            mRefactorClasses.put(oldFqcn, newFqcn);;
         }
 
         // create the map of renamed class -> return type of method to delete.
@@ -308,14 +322,14 @@ public class AsmGenerator {
         // original class reader.
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 
-        ClassVisitor rv = cw;
+        ClassVisitor cv = new RefactorClassAdapter(cw, mRefactorClasses);
         if (newName != className) {
-            rv = new RenameClassAdapter(cw, className, newName);
+            cv = new RenameClassAdapter(cv, className, newName);
         }
 
-        ClassVisitor cv = new TransformClassAdapter(mLog, mStubMethods,
+        cv = new TransformClassAdapter(mLog, mStubMethods,
                 mDeleteReturns.get(className),
-                newName, rv,
+                newName, cv,
                 stubNativesOnly, stubNativesOnly || hasNativeMethods);
 
         Set<String> delegateMethods = mDelegateMethods.get(className);

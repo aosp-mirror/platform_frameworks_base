@@ -1957,6 +1957,27 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Process phone number for CDMA, converting plus code using the home network number format.
+     * This is used for outgoing SMS messages.
+     *
+     * @param dialStr the original dial string
+     * @return the converted dial string
+     * @hide for internal use
+     */
+    public static String cdmaCheckAndProcessPlusCodeForSms(String dialStr) {
+        if (!TextUtils.isEmpty(dialStr)) {
+            if (isReallyDialable(dialStr.charAt(0)) && isNonSeparator(dialStr)) {
+                String defaultIso = SystemProperties.get(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+                if (!TextUtils.isEmpty(defaultIso)) {
+                    int format = getFormatTypeFromCountryCode(defaultIso);
+                    return cdmaCheckAndProcessPlusCodeByNumberFormat(dialStr, format, format);
+                }
+            }
+        }
+        return dialStr;
+    }
+
+    /**
      * This function should be called from checkAndProcessPlusCode only
      * And it is used for test purpose also.
      *

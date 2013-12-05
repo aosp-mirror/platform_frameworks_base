@@ -55,6 +55,7 @@
   <java-symbol type="id" name="clearDefaultHint" />
   <java-symbol type="id" name="contentPanel" />
   <java-symbol type="id" name="current_scene" />
+  <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
   <java-symbol type="id" name="datePicker" />
   <java-symbol type="id" name="day" />
@@ -105,7 +106,6 @@
   <java-symbol type="id" name="month" />
   <java-symbol type="id" name="month_name" />
   <java-symbol type="id" name="name" />
-  <java-symbol type="id" name="navigationGuard" />
   <java-symbol type="id" name="next" />
   <java-symbol type="id" name="next_button" />
   <java-symbol type="id" name="new_app_action" />
@@ -283,6 +283,7 @@
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
   <java-symbol type="bool" name="config_camera_sound_forced" />
   <java-symbol type="bool" name="config_dontPreferApn" />
+  <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />
   <java-symbol type="bool" name="config_speed_up_audio_on_mt_calls" />
   <java-symbol type="bool" name="config_useFixedVolume" />
   <java-symbol type="bool" name="config_forceDefaultOrientation" />
@@ -392,6 +393,7 @@
   <java-symbol type="string" name="accessibility_enabled" />
   <java-symbol type="string" name="activity_chooser_view_see_all" />
   <java-symbol type="string" name="activitychooserview_choose_application" />
+  <java-symbol type="string" name="activitychooserview_choose_application_error" />
   <java-symbol type="string" name="alternate_eri_file" />
   <java-symbol type="string" name="alwaysUse" />
   <java-symbol type="string" name="autofill_address_line_1_label_re" />
@@ -612,6 +614,7 @@
   <java-symbol type="string" name="more_item_label" />
   <java-symbol type="string" name="needPuk" />
   <java-symbol type="string" name="needPuk2" />
+  <java-symbol type="string" name="enablePin" />
   <java-symbol type="string" name="new_app_action" />
   <java-symbol type="string" name="new_app_description" />
   <java-symbol type="string" name="noApplications" />
@@ -965,6 +968,7 @@
   <java-symbol type="plurals" name="num_minutes_ago" />
   <java-symbol type="plurals" name="num_seconds_ago" />
   <java-symbol type="plurals" name="restr_pin_countdown" />
+  <java-symbol type="plurals" name="pinpuk_attempts" />
 
   <java-symbol type="array" name="carrier_properties" />
   <java-symbol type="array" name="config_data_usage_network_types" />
@@ -1093,7 +1097,11 @@
   <java-symbol type="drawable" name="notification_template_icon_bg" />
   <java-symbol type="drawable" name="notification_template_icon_low_bg" />
   <java-symbol type="drawable" name="ic_media_route_on_holo_dark" />
+  <java-symbol type="drawable" name="ic_media_route_off_holo_dark" />
+  <java-symbol type="drawable" name="ic_media_route_connecting_holo_dark" />
   <java-symbol type="drawable" name="ic_media_route_disabled_holo_dark" />
+  <java-symbol type="drawable" name="ic_notification_cast_connecting" />
+  <java-symbol type="drawable" name="ic_notification_cast_on" />
   <java-symbol type="drawable" name="cling_button" />
   <java-symbol type="drawable" name="cling_arrow_up" />
   <java-symbol type="drawable" name="cling_bg" />
@@ -1250,17 +1258,17 @@
 
   <java-symbol type="attr" name="mediaRouteButtonStyle" />
   <java-symbol type="attr" name="externalRouteEnabledDrawable" />
-  <java-symbol type="id" name="extended_settings" />
-  <java-symbol type="id" name="check" />
-  <java-symbol type="id" name="volume_slider" />
-  <java-symbol type="id" name="volume_icon" />
-  <java-symbol type="drawable" name="ic_media_route_on_holo_dark" />
-  <java-symbol type="layout" name="media_route_chooser_layout" />
-  <java-symbol type="layout" name="media_route_list_item_top_header" />
-  <java-symbol type="layout" name="media_route_list_item_section_header" />
+  <java-symbol type="layout" name="media_route_chooser_dialog" />
+  <java-symbol type="layout" name="media_route_controller_dialog" />
   <java-symbol type="layout" name="media_route_list_item" />
-  <java-symbol type="layout" name="media_route_list_item_checkable" />
-  <java-symbol type="layout" name="media_route_list_item_collapse_group" />
+  <java-symbol type="id" name="media_route_list" />
+  <java-symbol type="id" name="media_route_volume_layout" />
+  <java-symbol type="id" name="media_route_volume_slider" />
+  <java-symbol type="id" name="media_route_control_frame" />
+  <java-symbol type="id" name="media_route_disconnect_button" />
+  <java-symbol type="id" name="media_route_extended_settings_button" />
+  <java-symbol type="string" name="media_route_chooser_title" />
+  <java-symbol type="string" name="media_route_chooser_title_for_remote_display" />
   <java-symbol type="string" name="bluetooth_a2dp_audio_route_name" />
 
   <java-symbol type="dimen" name="config_minScalingSpan" />
@@ -1432,6 +1440,7 @@
   <java-symbol type="array" name="config_locationProviderPackageNames" />
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
   <java-symbol type="array" name="config_notificationFallbackVibePattern" />
+  <java-symbol type="array" name="config_onlySingleDcAllowed" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
@@ -1447,7 +1456,6 @@
   <java-symbol type="color" name="config_defaultNotificationColor" />
   <java-symbol type="color" name="input_method_navigation_guard" />
   <java-symbol type="drawable" name="ic_notification_ime_default" />
-  <java-symbol type="drawable" name="ic_notify_wifidisplay" />
   <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="stat_notify_car_mode" />
   <java-symbol type="drawable" name="stat_notify_disabled" />
@@ -1590,8 +1598,10 @@
   <java-symbol type="string" name="vpn_lockdown_error" />
   <java-symbol type="string" name="vpn_lockdown_config" />
   <java-symbol type="string" name="wallpaper_binding_label" />
-  <java-symbol type="string" name="wifi_display_notification_title" />
-  <java-symbol type="string" name="wifi_display_notification_message" />
+  <java-symbol type="string" name="wifi_display_notification_connecting_title" />
+  <java-symbol type="string" name="wifi_display_notification_connecting_message" />
+  <java-symbol type="string" name="wifi_display_notification_connected_title" />
+  <java-symbol type="string" name="wifi_display_notification_connected_message" />
   <java-symbol type="string" name="wifi_display_notification_disconnect" />
   <java-symbol type="style" name="Theme.Dialog.AppError" />
   <java-symbol type="style" name="Theme.Toast" />

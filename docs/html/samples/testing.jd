@@ -1,0 +1,11 @@
+page.title=Testing
+@jd:body
+
+
+<div id="samples" class="testing">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

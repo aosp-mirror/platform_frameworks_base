@@ -1,0 +1,11 @@
+page.title=Background
+@jd:body
+
+
+<div id="samples" class="background">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

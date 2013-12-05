@@ -31,7 +31,8 @@
     <com.android.keyguard.SlidingChallengeLayout
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipChildren="false">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -64,6 +65,8 @@
             android:id="@+id/keyguard_security_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             androidprv:layout_maxHeight="@dimen/keyguard_security_height"
             androidprv:layout_childType="challenge"
             android:padding="0dp"

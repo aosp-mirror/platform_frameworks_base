@@ -50,13 +50,54 @@ components will not be available for download.</p>
 
 
 
-<h2 id="4.3">Android 4.3</h2>
+<h2 id="4.4">Android 4.4</h2>
 
 
 <div class="toggle-content opened">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release. The system version is 4.4.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>Android SDK Platform-tools r19 or higher is required.</dd>
+      <dd>Android SDK Tools 22.3 or higher is recommended.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<h3 id="gsi-4.4">Google APIs System Image</h3>
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release. This release includes
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 4.0.30,
+    allowing you to test your application in an emulator using the latest Google Play services.</p>
+
+  </div>
+</div>
+
+
+
+<h2 id="4.3">Android 4.3</h2>
+
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
   </p>
 
@@ -91,11 +132,11 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
   </div>
 </div>
 
-<h3 id="">Google APIs System Image</h3>
+<h3 id="gsi-4.3">Google APIs System Image</h3>
 
-<div class="toggle-content opened">
+<div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png"
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 3</a> <em>(September 2013)</em>
   </p>
 

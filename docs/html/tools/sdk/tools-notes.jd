@@ -30,6 +30,38 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 22.3</a> <em>(October 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 18 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that this version of SDK Tools is
+          designed for use with ADT 22.3.0 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 22.3.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Added support for Android 4.4 (API level 19).</li>
+        <li>Fixed a number of minor bugs in the SDK and build system.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.2.1</a> <em>(September 2013)</em>
   </p>
 

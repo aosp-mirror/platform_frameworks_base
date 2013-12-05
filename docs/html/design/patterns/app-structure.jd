@@ -1,4 +1,4 @@
-page.title=Application Structure
+page.title=App Structure
 page.tags="navigation","layout","tablet"
 @jd:body
 
@@ -61,30 +61,9 @@ layouts that are visually engaging and appropriate for the data type and screen 
 
     <img src="{@docRoot}design/media/app_structure_market.png">
     <div class="figure-caption">
-      The Play Store app's start screen primarily allows navigation into the stores for Apps, Music, Books,
-      Movies, and Games. It is also enriched with tailored recommendations and promotions that
-      surface content of interest to the user. Search is readily available from the action bar.
-    </div>
-
-  </div>
-</div>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
-
-<h4>Create an identity for your app</h4>
-<p>Creating an identity for your app goes beyond the action bar. Your app communicates its identity
-through its data, the way that data is arranged, and how people interact with it. Especially for
-media-rich applications, try to create unique layouts that showcase your data and go beyond the
-monotony of simple list views.</p>
-
-  </div>
-  <div class="layout-content-col span-8">
-
-    <img src="{@docRoot}design/media/app_structure_music_lndscp.png">
-    <div class="figure-caption">
-      The 3D carousel celebrates cover art and establishes a unique identity for the Music app.
-      Defaulting to the Recent view keeps the focus on music the user has been listening to lately.
+      Play Music allows navigation among artists, albums, and playlists through rich content display.
+      It is also enriched with tailored recommendations and promotions that surface content of interest
+      to the user. Search is readily available from the action bar. 
     </div>
 
   </div>
@@ -112,9 +91,8 @@ important actions.</p>
 
     <img src="{@docRoot}design/media/app_structure_gmail.png">
     <div class="figure-caption">
-      Email is about productivity, so an efficient, easy-to-skim list with higher data density works
-      well. Navigation supports switching between accounts and recent labels. Icons for creating a
-      new message or searching are prominent in the split action bar at the bottom.
+      A calendar is about productivity, so an efficient, easy-to-skim view with higher data density works
+      well. Navigation supports switching views of day, week, month, and agenda views. 
     </div>
 
   </div>
@@ -185,7 +163,7 @@ important actions.</p>
   <div class="layout-content-col span-7">
     <img src="{@docRoot}design/media/app_structure_drawer.png">
     <div class="figure-caption">
-      Navigation drawer from the Shopper app.
+      Navigation drawer from the Keep app.
     </div>
   </div>
 </div>
@@ -230,7 +208,7 @@ in view at the same time.</p>
 
     <img src="{@docRoot}design/media/app_structure_fixedtabs.png">
     <div class="figure-caption">
-      YouTube uses fixed tabs to switch between different, relatively unrelated functional areas.
+      People uses fixed tabs to switch between different, relatively unrelated functional areas.
     </div>
 
 
@@ -290,21 +268,6 @@ design guide.</p>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
-
-<h4>Lights-out mode</h4>
-<p>Immersive content like media and games is best experienced full screen without distractions. But that doesn't mean you can't also offer actions on the content like sharing, commenting, or searching. If the user hasn't interacted with any of the controls after a short period of time, automatically fade away the action bar and all system UI affordances so the user can lean back and enjoy the content. We call this lights-out mode. Later, if the user wants to take some action, they can touch anywhere on the screen to exit lights-out mode and bring back the controls.</p>
-
-  </div>
-  <div class="layout-content-col span-9">
-
-    <img src="{@docRoot}design/media/app_structure_book_detail_page_flip.png">
-    <div class="figure-caption">
-      Google Books' detail view replicates the immersive experience of reading an actual book through lights-out mode and a page-flip animation.
-    </div>
-  </div>
-</div>
 
 <h4>Make navigation between detail views efficient</h4>
 <p>If your users are likely to want to look at multiple items in sequence, allow them to navigate

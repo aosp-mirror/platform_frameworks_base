@@ -63,6 +63,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/providers/contacts-provider.html">
               <span class="en">Contacts Provider</span>
             </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/providers/document-provider.html">
+              <span class="en">Storage Access Framework</span>
+            </a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/components/intents-filters.html">
@@ -405,6 +408,7 @@
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/connectivity/nfc/nfc.html">NFC Basics</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/connectivity/nfc/advanced-nfc.html">Advanced NFC</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/connectivity/nfc/hce.html">Host-based Card Emulation</a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/connectivity/wifip2p.html">
@@ -486,14 +490,14 @@
     <span class="en">Web Apps</span>
     </a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/webapps/overview.html">
-            <span class="en">Overview</span>
-          </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/targeting.html">
-            <span class="en">Targeting Screens from Web Apps</span>
+            <span class="en">Supporting Different Screens in Web Apps</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/webview.html">
             <span class="en">Building Web Apps in WebView</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/webapps/migrating.html">
+            <span class="en">Migrating to WebView in Android 4.4</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/debugging.html">
             <span class="en">Debugging Web Apps</span>

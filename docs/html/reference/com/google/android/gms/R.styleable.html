@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -779,6 +791,20 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adSize">AdsAttrs_adSize</a></td>
+        <td class="jd-descrcol" width="100%"><p>The size of the ad.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adUnitId">AdsAttrs_adUnitId</a></td>
+        <td class="jd-descrcol" width="100%"><p>The ad unit ID.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_contentProviderUri">Corpus_contentProviderUri</a></td>
         <td class="jd-descrcol" width="100%"><p>The URI of the content provider that the index should crawl to get the data for this
     corpus.</td>
@@ -983,43 +1009,64 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature_type">SectionFeature_type</a></td>
+        <td class="jd-descrcol" width="100%"><p>The type of this section.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_format">Section_format</a></td>
         <td class="jd-descrcol" width="100%"><p>The format of the section.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_id">Section_id</a></td>
         <td class="jd-descrcol" width="100%"><p>The ID of the section.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">Section_indexPrefixes</a></td>
         <td class="jd-descrcol" width="100%"><p>Indicates if this section should support prefix matching.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_noIndex">Section_noIndex</a></td>
         <td class="jd-descrcol" width="100%"><p>Indicates if this section should not be indexed.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_subsectionSeparator">Section_subsectionSeparator</a></td>
         <td class="jd-descrcol" width="100%"><p>Subsection separator.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_weight">Section_weight</a></td>
         <td class="jd-descrcol" width="100%"><p>The weight of the section.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Set_name">Set_name</a></td>
+        <td class="jd-descrcol" width="100%"><p>The name of this parameter.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Set_value">Set_value</a></td>
+        <td class="jd-descrcol" width="100%"><p>The value of this parameter.</td>
     </tr>
     
     
@@ -1043,13 +1090,24 @@ Summary:
           static
           final
           int[]</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs">AdsAttrs</a></td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a AdsAttrs.</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AppDataSearch">AppDataSearch</a></td>
           <td class="jd-descrcol" width="100%">Applications that index data using AppDataSearch must provide their corpus configuration
     in an XML file, typically called <code>appdatasearch.xml</code>.</td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1060,7 +1118,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1072,7 +1130,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1084,7 +1142,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1095,7 +1153,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1106,7 +1164,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1114,6 +1172,28 @@ Summary:
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section">Section</a></td>
           <td class="jd-descrcol" width="100%">The <code>Section</code> element represents a section within a corpus.</td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature">SectionFeature</a></td>
+          <td class="jd-descrcol" width="100%">The <code>SectionFeature</code> element represents a feature of a section.</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Set">Set</a></td>
+          <td class="jd-descrcol" width="100%">The <code>Set</code> element represents a parameter specified for a <code>SectionFeature</code>.</td>
       </tr>
       
     
@@ -1393,6 +1473,103 @@ From class
 <!-- ========= ENUM CONSTANTS DETAIL ======== -->
 <h2>Constants</h2>
 
+
+
+
+<A NAME="AdsAttrs_adSize"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        AdsAttrs_adSize
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>The size of the ad. It must be one of BANNER, FULL_BANNER, LEADERBOARD,
+    MEDIUM_RECTANGLE, SMART_BANNER, WIDE_SKYSCRAPER, or
+    &lt;width&gt;x&lt;height&gt;.
+
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                0
+                (0x00000000)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="AdsAttrs_adUnitId"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        AdsAttrs_adUnitId
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>The ad unit ID. 
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                1
+                (0x00000001)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
 
 
 
@@ -2693,6 +2870,56 @@ containing a value of this type.</p></div>
 
 
 
+<A NAME="SectionFeature_type"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        SectionFeature_type
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>The type of this section. Required. 
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>match_global_nicknames</code></td><td>1</td><td>  Enable global nickname matching on this section </td></tr>
+<tr><td><code>demote_common_words</code></td><td>2</td><td>  Demote common words by a factor in this section </td></tr>
+</table>
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                0
+                (0x00000000)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 <A NAME="Section_format"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2981,6 +3208,100 @@ containing a value of this type.
 
 
 
+<A NAME="Set_name"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        Set_name
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>The name of this parameter. Required. 
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                0
+                (0x00000000)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="Set_value"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        Set_value
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>The value of this parameter. Optional. 
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                1
+                (0x00000001)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 
 <!-- Fields -->
 
@@ -2988,6 +3309,48 @@ containing a value of this type.
 <!-- ========= FIELD DETAIL ======== -->
 <h2>Fields</h2>
 
+
+
+
+<A NAME="AdsAttrs"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int[]
+      </span>
+        AdsAttrs
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a AdsAttrs.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adSize">com.google.android.gms:adSize</a></code></code></td><td>
+    The size of the ad.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adUnitId">com.google.android.gms:adUnitId</a></code></code></td><td> The ad unit ID.</td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adSize">AdsAttrs_adSize</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adUnitId">AdsAttrs_adUnitId</a></code></li>
+      </ul>
+  </div>
+
+    
+    </div>
+</div>
 
 
 
@@ -3013,7 +3376,7 @@ containing a value of this type.
       
   <div class="jd-tagdata jd-tagdescr"><p>Applications that index data using AppDataSearch must provide their corpus configuration
     in an XML file, typically called <code>appdatasearch.xml</code>. This file is referenced in your
-    manifest with a meta-data tag with the name <code>android.gms.appdatasearch</code> in the
+    manifest with a meta-data tag with the name <code>com.google.android.gms.appdatasearch</code> in the
     <code>Application</code> section of the <code>AndroidManifest.xml</code>.
 
     This is the root element of the XML file. It should contain a <code>Corpus</code> element for each
@@ -3299,6 +3662,88 @@ containing a value of this type.
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_format">Section_format</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_id">Section_id</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">Section_indexPrefixes</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_noIndex">Section_noIndex</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_subsectionSeparator">Section_subsectionSeparator</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_weight">Section_weight</a></code></li>
+      </ul>
+  </div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="SectionFeature"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int[]
+      </span>
+        SectionFeature
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The <code>SectionFeature</code> element represents a feature of a section. These features are
+    used to modify some semantic property of a section. 
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature_type">com.google.android.gms:type</a></code></code></td><td> The type of this section.</td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature_type">SectionFeature_type</a></code></li>
+      </ul>
+  </div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="Set"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int[]
+      </span>
+        Set
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The <code>Set</code> element represents a parameter specified for a <code>SectionFeature</code>. 
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Set_name">com.google.android.gms:name</a></code></code></td><td> The name of this parameter.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Set_value">com.google.android.gms:value</a></code></code></td><td> The value of this parameter.</td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Set_name">Set_name</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Set_value">Set_value</a></code></li>
       </ul>
   </div>
 

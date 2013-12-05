@@ -36,27 +36,28 @@ public final class Scene {
     private ViewGroup mSceneRoot;
     private ViewGroup mLayout; // alternative to layoutId
     Runnable mEnterAction, mExitAction;
-    private static ThreadLocal<SparseArray<Scene>> sScenes = new ThreadLocal<SparseArray<Scene>>();
 
     /**
      * Returns a Scene described by the resource file associated with the given
-     * <code>layoutId</code> parameter. If such a Scene has already been created,
-     * that same Scene will be returned. This caching of layoutId-based scenes enables
-     * sharing of common scenes between those created in code and those referenced
-     * by {@link TransitionManager} XML resource files.
+     * <code>layoutId</code> parameter. If such a Scene has already been created for
+     * the given <code>sceneRoot</code>, that same Scene will be returned.
+     * This caching of layoutId-based scenes enables sharing of common scenes
+     * between those created in code and those referenced by {@link TransitionManager}
+     * XML resource files.
      *
      * @param sceneRoot The root of the hierarchy in which scene changes
      * and transitions will take place.
      * @param layoutId The id of a standard layout resource file.
      * @param context The context used in the process of inflating
      * the layout resource.
-     * @return
+     * @return The scene for the given root and layout id
      */
     public static Scene getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context) {
-        SparseArray<Scene> scenes = sScenes.get();
+        SparseArray<Scene> scenes = (SparseArray<Scene>) sceneRoot.getTag(
+                com.android.internal.R.id.scene_layoutid_cache);
         if (scenes == null) {
             scenes = new SparseArray<Scene>();
-            sScenes.set(scenes);
+            sceneRoot.setTagInternal(com.android.internal.R.id.scene_layoutid_cache, scenes);
         }
         Scene scene = scenes.get(layoutId);
         if (scene != null) {

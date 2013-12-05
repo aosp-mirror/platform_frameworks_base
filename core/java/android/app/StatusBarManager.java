@@ -58,10 +58,7 @@ public class StatusBarManager {
             | DISABLE_SYSTEM_INFO | DISABLE_RECENT | DISABLE_HOME | DISABLE_BACK | DISABLE_CLOCK
             | DISABLE_SEARCH;
 
-    public static final int NAVIGATION_HINT_BACK_NOP      = 1 << 0;
-    public static final int NAVIGATION_HINT_HOME_NOP      = 1 << 1;
-    public static final int NAVIGATION_HINT_RECENT_NOP    = 1 << 2;
-    public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 3;
+    public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
 
     public static final int WINDOW_STATUS_BAR = 1;
     public static final int WINDOW_NAVIGATION_BAR = 2;

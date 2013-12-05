@@ -47,6 +47,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -76,6 +77,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
@@ -83,7 +85,6 @@ import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Display the documents inside a single directory.
@@ -126,9 +127,7 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_QUERY = "query";
     private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
-    private static AtomicInteger sLoaderId = new AtomicInteger(4000);
-
-    private final int mLoaderId = sLoaderId.incrementAndGet();
+    private final int mLoaderId = 42;
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
@@ -528,7 +527,7 @@ public class DirectoryFragment extends Fragment {
             if (iconThumb != null) {
                 final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
                 if (oldTask != null) {
-                    oldTask.reallyCancel();
+                    oldTask.preempt();
                     iconThumb.setTag(null);
                 }
             }
@@ -794,7 +793,7 @@ public class DirectoryFragment extends Fragment {
 
             final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
             if (oldTask != null) {
-                oldTask.reallyCancel();
+                oldTask.preempt();
                 iconThumb.setTag(null);
             }
 
@@ -818,7 +817,7 @@ public class DirectoryFragment extends Fragment {
                     final ThumbnailAsyncTask task = new ThumbnailAsyncTask(
                             uri, iconMime, iconThumb, mThumbSize);
                     iconThumb.setTag(task);
-                    task.executeOnExecutor(ProviderExecutor.forAuthority(docAuthority));
+                    ProviderExecutor.forAuthority(docAuthority).execute(task);
                 }
             }
 
@@ -988,7 +987,8 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap> {
+    private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap>
+            implements Preemptable {
         private final Uri mUri;
         private final ImageView mIconMime;
         private final ImageView mIconThumb;
@@ -1004,7 +1004,8 @@ public class DirectoryFragment extends Fragment {
             mSignal = new CancellationSignal();
         }
 
-        public void reallyCancel() {
+        @Override
+        public void preempt() {
             cancel(false);
             mSignal.cancel();
         }
@@ -1028,7 +1029,9 @@ public class DirectoryFragment extends Fragment {
                     thumbs.put(mUri, result);
                 }
             } catch (Exception e) {
-                Log.w(TAG, "Failed to load thumbnail for " + mUri + ": " + e);
+                if (!(e instanceof OperationCanceledException)) {
+                    Log.w(TAG, "Failed to load thumbnail for " + mUri + ": " + e);
+                }
             } finally {
                 ContentProviderClient.releaseQuietly(client);
             }
