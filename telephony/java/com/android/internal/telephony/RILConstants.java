@@ -55,6 +55,8 @@ public interface RILConstants {
     int ILLEGAL_SIM_OR_ME = 15;               /* network selection failure due
                                                  to wrong SIM/ME and no
                                                  retries needed */
+    int MISSING_RESOURCE = 16;                /* no logical channel available */
+    int NO_SUCH_ELEMENT = 17;                 /* application not found on SIM */
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
     int NETWORK_MODE_WCDMA_PREF     = 0; /* GSM/WCDMA (WCDMA preferred) */
@@ -266,6 +268,10 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_SET_INITIAL_ATTACH_APN = 111;
     int RIL_REQUEST_IMS_REGISTRATION_STATE = 112;
     int RIL_REQUEST_IMS_SEND_SMS = 113;
+    int RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC = 114;
+    int RIL_REQUEST_SIM_OPEN_CHANNEL = 115;
+    int RIL_REQUEST_SIM_CLOSE_CHANNEL = 116;
+    int RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL = 117;
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
     int RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED = 1001;
