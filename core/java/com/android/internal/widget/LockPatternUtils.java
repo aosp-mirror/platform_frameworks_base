@@ -1200,7 +1200,7 @@ public class LockPatternUtils {
 
     private void setLong(String secureSettingKey, long value, int userHandle) {
         try {
-            getLockSettings().setLong(secureSettingKey, value, getCurrentOrCallingUserId());
+            getLockSettings().setLong(secureSettingKey, value, userHandle);
         } catch (RemoteException re) {
             // What can we do?
             Log.e(TAG, "Couldn't write long " + secureSettingKey + re);
