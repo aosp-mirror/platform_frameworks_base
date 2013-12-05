@@ -152,10 +152,8 @@ public void setCamera(Camera camera) {
             e.printStackTrace();
         }
       
-        /*
-          Important: Call startPreview() to start updating the preview surface. Preview must 
-          be started before you can take a picture.
-          */
+        // Important: Call startPreview() to start updating the preview
+        // surface. Preview must be started before you can take a picture.
         mCamera.startPreview();
     }
 }
@@ -177,10 +175,8 @@ public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
     requestLayout();
     mCamera.setParameters(parameters);
 
-    /*
-      Important: Call startPreview() to start updating the preview surface. Preview must be
-      started before you can take a picture.
-    */
+    // Important: Call startPreview() to start updating the preview surface.
+    // Preview must be started before you can take a picture.
     mCamera.startPreview();
 }
 </pre>
@@ -251,29 +247,23 @@ Preview} class.</p>
 public void surfaceDestroyed(SurfaceHolder holder) {
     // Surface will be destroyed when we return, so stop the preview.
     if (mCamera != null) {
-        /*
-          Call stopPreview() to stop updating the preview surface.
-        */
+        // Call stopPreview() to stop updating the preview surface.
         mCamera.stopPreview();
     }
 }
 
 /**
-  * When this function returns, mCamera will be null.
-  */
+ * When this function returns, mCamera will be null.
+ */
 private void stopPreviewAndFreeCamera() {
 
     if (mCamera != null) {
-        /*
-          Call stopPreview() to stop updating the preview surface.
-        */
+        // Call stopPreview() to stop updating the preview surface.
         mCamera.stopPreview();
     
-        /*
-          Important: Call release() to release the camera for use by other applications. 
-          Applications should release the camera immediately in onPause() (and re-open() it in
-          onResume()).
-        */
+        // Important: Call release() to release the camera for use by other
+        // applications. Applications should release the camera immediately
+        // during onPause() and re-open() it during onResume()).
         mCamera.release();
     
         mCamera = null;
