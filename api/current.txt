@@ -3239,6 +3239,7 @@ package android.app {
     method public android.app.AlertDialog.Builder setSingleChoiceItems(android.widget.ListAdapter, int, android.content.DialogInterface.OnClickListener);
     method public android.app.AlertDialog.Builder setTitle(int);
     method public android.app.AlertDialog.Builder setTitle(java.lang.CharSequence);
+    method public android.app.AlertDialog.Builder setView(int);
     method public android.app.AlertDialog.Builder setView(android.view.View);
     method public android.app.AlertDialog show();
   }

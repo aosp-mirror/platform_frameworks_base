@@ -456,13 +456,20 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
-     * Finds a view that was identified by the id attribute from the XML that
-     * was processed in {@link #onStart}.
+     * Finds a child view with the given identifier.
+     * <p>
+     * Prior to API 20, this function could only be used after the first call
+     * to {@link #show()}. In later versions, this function may be used at any
+     * time; however, the first call to this function "locks in" certain dialog
+     * characteristics.
      *
      * @param id the identifier of the view to find
-     * @return The view if found or null otherwise.
+     * @return The view with the given id or null.
      */
     public View findViewById(int id) {
+        if (!mCreated) {
+            dispatchOnCreate(null);
+        }
         return mWindow.findViewById(id);
     }
 
@@ -479,7 +486,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     /**
      * Set the screen content to an explicit view.  This view is placed
      * directly into the screen's view hierarchy.  It can itself be a complex
-     * view hierarhcy.
+     * view hierarchy.
      * 
      * @param view The desired content to display.
      */
