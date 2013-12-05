@@ -21,6 +21,7 @@ package com.android.commands.am;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
+import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
@@ -35,6 +36,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -107,7 +109,7 @@ public class Am extends BaseCommand {
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
-                "       am stack create <TASK_ID>\n" +
+                "       am stack create <TASK_ID> <DISPLAY_ID>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack list\n" +
@@ -1558,10 +1560,16 @@ public class Am extends BaseCommand {
     private void runStackCreate() throws Exception {
         String taskIdStr = nextArgRequired();
         int taskId = Integer.valueOf(taskIdStr);
+        String displayIdStr = nextArgRequired();
+        int displayId = Integer.valueOf(displayIdStr);
 
         try {
-            int stackId = mAm.createStack(taskId);
-            System.out.println("createStack returned new stackId=" + stackId + "\n\n");
+            IBinder homeActivityToken = mAm.getHomeActivityToken();
+            IActivityContainer container = mAm.createActivityContainer(homeActivityToken, null);
+            final int stackId = container.getStackId();
+            System.out.println("createStack returned new stackId=" + stackId + "\n");
+            container.attachToDisplay(displayId);
+            mAm.moveTaskToStack(taskId, stackId, true);
         } catch (RemoteException e) {
         }
     }
