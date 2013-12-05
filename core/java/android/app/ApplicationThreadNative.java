@@ -113,7 +113,8 @@ public abstract class ApplicationThreadNative extends Binder
             IBinder b = data.readStrongBinder();
             int procState = data.readInt();
             boolean isForward = data.readInt() != 0;
-            scheduleResumeActivity(b, procState, isForward);
+            Bundle resumeArgs = data.readBundle();
+            scheduleResumeActivity(b, procState, isForward, resumeArgs);
             return true;
         }
         
@@ -145,8 +146,10 @@ public abstract class ApplicationThreadNative extends Binder
             ParcelFileDescriptor profileFd = data.readInt() != 0
                     ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             boolean autoStopProfiler = data.readInt() != 0;
+            Bundle resumeArgs = data.readBundle();
             scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo, procState, state,
-                    ri, pi, notResumed, isForward, profileName, profileFd, autoStopProfiler);
+                    ri, pi, notResumed, isForward, profileName, profileFd, autoStopProfiler,
+                    resumeArgs);
             return true;
         }
         
@@ -696,13 +699,15 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public final void scheduleResumeActivity(IBinder token, int procState, boolean isForward)
+    public final void scheduleResumeActivity(IBinder token, int procState, boolean isForward,
+            Bundle resumeArgs)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
         data.writeInt(procState);
         data.writeInt(isForward ? 1 : 0);
+        data.writeBundle(resumeArgs);
         mRemote.transact(SCHEDULE_RESUME_ACTIVITY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -722,9 +727,10 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
             int procState, Bundle state, List<ResultInfo> pendingResults,
-    		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-    		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
-    		throws RemoteException {
+            List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
+            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
+            Bundle resumeArgs)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         intent.writeToParcel(data, 0);
@@ -747,6 +753,7 @@ class ApplicationThreadProxy implements IApplicationThread {
             data.writeInt(0);
         }
         data.writeInt(autoStopProfiler ? 1 : 0);
+        data.writeBundle(resumeArgs);
         mRemote.transact(SCHEDULE_LAUNCH_ACTIVITY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();

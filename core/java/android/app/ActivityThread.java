@@ -56,6 +56,7 @@ import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -68,12 +69,15 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.transition.Scene;
+import android.transition.TransitionManager;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SuperNotCalledException;
@@ -284,6 +288,7 @@ public final class ActivityThread {
         boolean isForward;
         int pendingConfigChanges;
         boolean onlyLocalRequest;
+        Bundle activityOptions;
 
         View mPendingRemoveWindow;
         WindowManager mPendingRemoveWindowManager;
@@ -576,9 +581,10 @@ public final class ActivityThread {
         }
 
         public final void scheduleResumeActivity(IBinder token, int processState,
-                boolean isForward) {
+                boolean isForward, Bundle resumeArgs) {
             updateProcessState(processState, false);
-            sendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0);
+            sendMessage(H.RESUME_ACTIVITY, new Pair<IBinder, Bundle>(token, resumeArgs),
+                    isForward ? 1 : 0);
         }
 
         public final void scheduleSendResult(IBinder token, List<ResultInfo> results) {
@@ -594,7 +600,8 @@ public final class ActivityThread {
                 ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
                 int procState, Bundle state, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-                String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+                String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
+                Bundle resumeArgs) {
 
             updateProcessState(procState, false);
 
@@ -616,6 +623,7 @@ public final class ActivityThread {
             r.profileFile = profileName;
             r.profileFd = profileFd;
             r.autoStopProfiler = autoStopProfiler;
+            r.activityOptions = resumeArgs;
 
             updatePendingConfiguration(curConfig);
 
@@ -1189,7 +1197,7 @@ public final class ActivityThread {
             switch (msg.what) {
                 case LAUNCH_ACTIVITY: {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-                    ActivityClientRecord r = (ActivityClientRecord)msg.obj;
+                    final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
 
                     r.packageInfo = getPackageInfoNoCheck(
                             r.activityInfo.applicationInfo, r.compatInfo);
@@ -1235,7 +1243,8 @@ public final class ActivityThread {
                     break;
                 case RESUME_ACTIVITY:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
-                    handleResumeActivity((IBinder)msg.obj, true,
+                    final Pair<IBinder, Bundle> resumeArgs = (Pair<IBinder, Bundle>) msg.obj;
+                    handleResumeActivity(resumeArgs.first, resumeArgs.second, true,
                             msg.arg1 != 0, true);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
@@ -2032,7 +2041,7 @@ public final class ActivityThread {
                     + ", comp=" + name
                     + ", token=" + token);
         }
-        return performLaunchActivity(r, null);
+        return performLaunchActivity(r, null, null);
     }
 
     public final Activity getActivity(IBinder token) {
@@ -2085,7 +2094,8 @@ public final class ActivityThread {
         sendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
-    private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
+    private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent,
+            Bundle options) {
         // System.out.println("##### [" + System.currentTimeMillis() + "] ActivityThread.performLaunchActivity(" + r + ")");
 
         ActivityInfo aInfo = r.activityInfo;
@@ -2143,7 +2153,7 @@ public final class ActivityThread {
                         + r.activityInfo.name + " with config " + config);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
-                        r.embeddedID, r.lastNonConfigurationInstances, config);
+                        r.embeddedID, r.lastNonConfigurationInstances, config, options);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;
@@ -2242,12 +2252,13 @@ public final class ActivityThread {
 
         if (localLOGV) Slog.v(
             TAG, "Handling launch of " + r);
-        Activity a = performLaunchActivity(r, customIntent);
+
+        Activity a = performLaunchActivity(r, customIntent, r.activityOptions);
 
         if (a != null) {
             r.createdConfig = new Configuration(mConfiguration);
             Bundle oldState = r.state;
-            handleResumeActivity(r.token, false, r.isForward,
+            handleResumeActivity(r.token, r.activityOptions, false, r.isForward,
                     !r.activity.mFinished && !r.startsNotResumed);
 
             if (!r.activity.mFinished && r.startsNotResumed) {
@@ -2808,12 +2819,13 @@ public final class ActivityThread {
         r.mPendingRemoveWindowManager = null;
     }
 
-    final void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,
-            boolean reallyResume) {
+    final void handleResumeActivity(IBinder token, Bundle resumeArgs,
+            boolean clearHide, boolean isForward, boolean reallyResume) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
 
+        // TODO Push resumeArgs into the activity for consideration
         ActivityClientRecord r = performResumeActivity(token, clearHide);
 
         if (r != null) {
@@ -3734,6 +3746,7 @@ public final class ActivityThread {
             }
         }
         r.startsNotResumed = tmp.startsNotResumed;
+        r.activityOptions = null;
 
         handleLaunchActivity(r, currentIntent);
     }

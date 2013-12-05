@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.InflateException;
@@ -291,18 +292,39 @@ public class TransitionInflater {
         int toId = a.getResourceId(
                 com.android.internal.R.styleable.TransitionManager_toScene, -1);
         if (toId >= 0) toScene = Scene.getSceneForLayout(sceneRoot, toId, mContext);
+        String fromName = a.getString(
+                com.android.internal.R.styleable.TransitionManager_fromSceneName);
+        String toName = a.getString(
+                com.android.internal.R.styleable.TransitionManager_toSceneName);
         if (transitionId >= 0) {
             Transition transition = inflateTransition(transitionId);
             if (transition != null) {
                 if (fromScene != null) {
-                    if (toScene == null){
-                        throw new RuntimeException("No matching toScene for given fromScene " +
-                                "for transition ID " + transitionId);
-                    } else {
+                    boolean hasDest = false;
+                    if (toScene != null) {
                         transitionManager.setTransition(fromScene, toScene, transition);
+                        hasDest = true;
+                    }
+
+                    if (!TextUtils.isEmpty(toName)) {
+                        transitionManager.setTransition(fromScene, toName, transition);
+                        hasDest = true;
+                    }
+
+                    if (!hasDest) {
+                        throw new RuntimeException("No matching toScene or toSceneName for given " +
+                                "fromScene for transition ID " + transitionId);
                     }
                 } else if (toId >= 0) {
                     transitionManager.setTransition(toScene, transition);
+                }
+                if (fromName != null) {
+                    if (toScene != null) {
+                        transitionManager.setTransition(fromName, toScene, transition);
+                    } else {
+                        throw new RuntimeException("No matching toScene for given fromSceneName " +
+                                "for transition ID " + transitionId);
+                    }
                 }
             }
         }

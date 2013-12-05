@@ -2830,6 +2830,8 @@ package android.app {
     method public java.lang.String getCallingPackage();
     method public int getChangingConfigurations();
     method public android.content.ComponentName getComponentName();
+    method public android.transition.Scene getContentScene();
+    method public android.transition.TransitionManager getContentTransitionManager();
     method public android.view.View getCurrentFocus();
     method public android.app.FragmentManager getFragmentManager();
     method public android.content.Intent getIntent();
@@ -2935,6 +2937,7 @@ package android.app {
     method public void reportFullyDrawn();
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
+    method public void setContentTransitionManager(android.transition.TransitionManager);
     method public void setContentView(int);
     method public void setContentView(android.view.View);
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
@@ -26364,10 +26367,15 @@ package android.transition {
     ctor public TransitionManager();
     method public static void beginDelayedTransition(android.view.ViewGroup);
     method public static void beginDelayedTransition(android.view.ViewGroup, android.transition.Transition);
+    method public android.transition.Transition getNamedTransition(java.lang.String, android.transition.Scene);
+    method public android.transition.Transition getNamedTransition(android.transition.Scene, java.lang.String);
+    method public java.lang.String[] getTargetSceneNames(android.transition.Scene);
     method public static void go(android.transition.Scene);
     method public static void go(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Scene, android.transition.Transition);
+    method public void setTransition(android.transition.Scene, java.lang.String, android.transition.Transition);
+    method public void setTransition(java.lang.String, android.transition.Scene, android.transition.Transition);
     method public void transitionTo(android.transition.Scene);
   }
 
@@ -29290,6 +29298,7 @@ package android.view {
     method public final android.view.WindowManager.LayoutParams getAttributes();
     method public final android.view.Window.Callback getCallback();
     method public final android.view.Window getContainer();
+    method public android.transition.Scene getContentScene();
     method public final android.content.Context getContext();
     method public abstract android.view.View getCurrentFocus();
     method public abstract android.view.View getDecorView();
@@ -29297,6 +29306,7 @@ package android.view {
     method protected final int getForcedWindowFlags();
     method public abstract android.view.LayoutInflater getLayoutInflater();
     method protected final int getLocalFeatures();
+    method public android.transition.TransitionManager getTransitionManager();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
     method public final android.content.res.TypedArray getWindowStyle();
@@ -29346,6 +29356,8 @@ package android.view {
     method public void setSoftInputMode(int);
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract deprecated void setTitleColor(int);
+    method public void setTransitionManager(android.transition.TransitionManager);
+    method public void setTransitionOptions(android.os.Bundle);
     method public void setType(int);
     method public void setUiOptions(int);
     method public void setUiOptions(int, int);
