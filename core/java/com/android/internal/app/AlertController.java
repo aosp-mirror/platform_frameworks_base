@@ -70,6 +70,8 @@ public class AlertController {
     
     private View mView;
 
+    private int mViewLayoutResId;
+
     private int mViewSpacingLeft;
     
     private int mViewSpacingTop;
@@ -232,11 +234,6 @@ public class AlertController {
     public void installContent() {
         /* We use a custom title so never request a window title */
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
-        
-        if (mView == null || !canTextInput(mView)) {
-            mWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
-                    WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        }
         mWindow.setContentView(mAlertDialogLayout);
         setupView();
     }
@@ -263,10 +260,20 @@ public class AlertController {
     }
 
     /**
+     * Set the view resource to display in the dialog.
+     */
+    public void setView(int layoutResId) {
+        mView = null;
+        mViewLayoutResId = layoutResId;
+        mViewSpacingSpecified = false;
+    }
+
+    /**
      * Set the view to display in the dialog.
      */
     public void setView(View view) {
         mView = view;
+        mViewLayoutResId = 0;
         mViewSpacingSpecified = false;
     }
     
@@ -276,6 +283,7 @@ public class AlertController {
     public void setView(View view, int viewSpacingLeft, int viewSpacingTop, int viewSpacingRight,
             int viewSpacingBottom) {
         mView = view;
+        mViewLayoutResId = 0;
         mViewSpacingSpecified = true;
         mViewSpacingLeft = viewSpacingLeft;
         mViewSpacingTop = viewSpacingTop;
@@ -406,20 +414,36 @@ public class AlertController {
             mWindow.setCloseOnTouchOutsideIfNotSet(true);
         }
 
-        FrameLayout customPanel = null;
+        final FrameLayout customPanel = (FrameLayout) mWindow.findViewById(R.id.customPanel);
+        final View customView;
         if (mView != null) {
-            customPanel = (FrameLayout) mWindow.findViewById(R.id.customPanel);
-            FrameLayout custom = (FrameLayout) mWindow.findViewById(R.id.custom);
-            custom.addView(mView, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+            customView = mView;
+        } else if (mViewLayoutResId != 0) {
+            final LayoutInflater inflater = LayoutInflater.from(mContext);
+            customView = inflater.inflate(mViewLayoutResId, customPanel, false);
+        } else {
+            customView = null;
+        }
+
+        if (customView == null || !canTextInput(customView)) {
+            mWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                    WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        }
+
+        if (customView != null) {
+            final FrameLayout custom = (FrameLayout) mWindow.findViewById(R.id.custom);
+            custom.addView(customView, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+
             if (mViewSpacingSpecified) {
-                custom.setPadding(mViewSpacingLeft, mViewSpacingTop, mViewSpacingRight,
-                        mViewSpacingBottom);
+                custom.setPadding(
+                        mViewSpacingLeft, mViewSpacingTop, mViewSpacingRight, mViewSpacingBottom);
             }
+
             if (mListView != null) {
                 ((LinearLayout.LayoutParams) customPanel.getLayoutParams()).weight = 0;
             }
         } else {
-            mWindow.findViewById(R.id.customPanel).setVisibility(View.GONE);
+            customPanel.setVisibility(View.GONE);
         }
         
         /* Only display the divider if we have a title and a 
@@ -427,7 +451,7 @@ public class AlertController {
          */
         if (hasTitle) {
             View divider = null;
-            if (mMessage != null || mView != null || mListView != null) {
+            if (mMessage != null || customView != null || mListView != null) {
                 divider = mWindow.findViewById(R.id.titleDivider);
             } else {
                 divider = mWindow.findViewById(R.id.titleDividerTop);
@@ -774,6 +798,7 @@ public class AlertController {
         public CharSequence[] mItems;
         public ListAdapter mAdapter;
         public DialogInterface.OnClickListener mOnClickListener;
+        public int mViewLayoutResId;
         public View mView;
         public int mViewSpacingLeft;
         public int mViewSpacingTop;
@@ -859,8 +884,10 @@ public class AlertController {
                 } else {
                     dialog.setView(mView);
                 }
+            } else if (mViewLayoutResId != 0) {
+                dialog.setView(mViewLayoutResId);
             }
-            
+
             /*
             dialog.setCancelable(mCancelable);
             dialog.setOnCancelListener(mOnCancelListener);
