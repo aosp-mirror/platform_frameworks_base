@@ -16,10 +16,11 @@
 
 package com.android.server.power;
 
-import com.android.server.LightsService;
-import com.android.server.TwilightService;
-import com.android.server.TwilightService.TwilightState;
+import com.android.server.lights.LightsManager;
+import com.android.server.twilight.TwilightListener;
+import com.android.server.twilight.TwilightManager;
 import com.android.server.display.DisplayManagerService;
+import com.android.server.twilight.TwilightState;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -179,10 +180,10 @@ final class DisplayPowerController {
     private Handler mCallbackHandler;
 
     // The lights service.
-    private final LightsService mLights;
+    private final LightsManager mLights;
 
     // The twilight service.
-    private final TwilightService mTwilight;
+    private final TwilightManager mTwilight;
 
     // The display manager.
     private final DisplayManagerService mDisplayManager;
@@ -351,7 +352,7 @@ final class DisplayPowerController {
      * Creates the display power controller.
      */
     public DisplayPowerController(Looper looper, Context context, Notifier notifier,
-            LightsService lights, TwilightService twilight, SensorManager sensorManager,
+            LightsManager lights, TwilightManager twilight, SensorManager sensorManager,
             DisplayManagerService displayManager,
             SuspendBlocker displaySuspendBlocker, DisplayBlanker displayBlanker,
             Callbacks callbacks, Handler callbackHandler) {
@@ -528,7 +529,7 @@ final class DisplayPowerController {
     private void initialize() {
         mPowerState = new DisplayPowerState(
                 new ElectronBeam(mDisplayManager), mDisplayBlanker,
-                mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT));
+                mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
                 mPowerState, DisplayPowerState.ELECTRON_BEAM_LEVEL, 0.0f, 1.0f);
@@ -1368,8 +1369,7 @@ final class DisplayPowerController {
         }
     };
 
-    private final TwilightService.TwilightListener mTwilightListener =
-            new TwilightService.TwilightListener() {
+    private final TwilightListener mTwilightListener = new TwilightListener() {
         @Override
         public void onTwilightStateChanged() {
             mTwilightChanged = true;

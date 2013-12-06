@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -64,54 +65,51 @@ import static android.app.AlarmManager.ELAPSED_REALTIME;
 
 import com.android.internal.util.LocalLog;
 
-class AlarmManagerService extends IAlarmManager.Stub {
+class AlarmManagerService extends SystemService {
     // The threshold for how long an alarm can be late before we print a
     // warning message.  The time duration is in milliseconds.
     private static final long LATE_ALARM_THRESHOLD = 10 * 1000;
 
     private static final int RTC_WAKEUP_MASK = 1 << RTC_WAKEUP;
     private static final int RTC_MASK = 1 << RTC;
-    private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << ELAPSED_REALTIME_WAKEUP; 
+    private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << ELAPSED_REALTIME_WAKEUP;
     private static final int ELAPSED_REALTIME_MASK = 1 << ELAPSED_REALTIME;
-    private static final int TIME_CHANGED_MASK = 1 << 16;
-    private static final int IS_WAKEUP_MASK = RTC_WAKEUP_MASK|ELAPSED_REALTIME_WAKEUP_MASK;
+    static final int TIME_CHANGED_MASK = 1 << 16;
+    static final int IS_WAKEUP_MASK = RTC_WAKEUP_MASK|ELAPSED_REALTIME_WAKEUP_MASK;
 
     // Mask for testing whether a given alarm type is wakeup vs non-wakeup
-    private static final int TYPE_NONWAKEUP_MASK = 0x1; // low bit => non-wakeup
+    static final int TYPE_NONWAKEUP_MASK = 0x1; // low bit => non-wakeup
 
-    private static final String TAG = "AlarmManager";
-    private static final String ClockReceiver_TAG = "ClockReceiver";
-    private static final boolean localLOGV = false;
-    private static final boolean DEBUG_BATCH = localLOGV || false;
-    private static final boolean DEBUG_VALIDATE = localLOGV || false;
-    private static final int ALARM_EVENT = 1;
-    private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
+    static final String TAG = "AlarmManager";
+    static final String ClockReceiver_TAG = "ClockReceiver";
+    static final boolean localLOGV = false;
+    static final boolean DEBUG_BATCH = localLOGV || false;
+    static final boolean DEBUG_VALIDATE = localLOGV || false;
+    static final int ALARM_EVENT = 1;
+    static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
     
-    private static final Intent mBackgroundIntent
+    static final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
-    private static final IncreasingTimeOrder sIncreasingTimeOrder = new IncreasingTimeOrder();
+    static final IncreasingTimeOrder sIncreasingTimeOrder = new IncreasingTimeOrder();
     
-    private static final boolean WAKEUP_STATS = false;
+    static final boolean WAKEUP_STATS = false;
 
-    private final Context mContext;
+    final LocalLog mLog = new LocalLog(TAG);
 
-    private final LocalLog mLog = new LocalLog(TAG);
+    final Object mLock = new Object();
 
-    private Object mLock = new Object();
-
-    private int mDescriptor;
+    int mDescriptor;
     private long mNextWakeup;
     private long mNextNonWakeup;
-    private int mBroadcastRefCount = 0;
-    private PowerManager.WakeLock mWakeLock;
-    private ArrayList<InFlight> mInFlight = new ArrayList<InFlight>();
-    private final AlarmThread mWaitThread = new AlarmThread();
-    private final AlarmHandler mHandler = new AlarmHandler();
-    private ClockReceiver mClockReceiver;
+    int mBroadcastRefCount = 0;
+    PowerManager.WakeLock mWakeLock;
+    ArrayList<InFlight> mInFlight = new ArrayList<InFlight>();
+    final AlarmHandler mHandler = new AlarmHandler();
+    ClockReceiver mClockReceiver;
     private UninstallReceiver mUninstallReceiver;
-    private final ResultReceiver mResultReceiver = new ResultReceiver();
-    private final PendingIntent mTimeTickSender;
-    private final PendingIntent mDateChangeSender;
+    final ResultReceiver mResultReceiver = new ResultReceiver();
+    PendingIntent mTimeTickSender;
+    PendingIntent mDateChangeSender;
 
     class WakeupEvent {
         public long when;
@@ -125,8 +123,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
 
-    private final LinkedList<WakeupEvent> mRecentWakeups = new LinkedList<WakeupEvent>();
-    private final long RECENT_WAKEUP_PERIOD = 1000L * 60 * 60 * 24; // one day
+    final LinkedList<WakeupEvent> mRecentWakeups = new LinkedList<WakeupEvent>();
+    final long RECENT_WAKEUP_PERIOD = 1000L * 60 * 60 * 24; // one day
 
     static final class Batch {
         long start;     // These endpoints are always in ELAPSED
@@ -317,9 +315,9 @@ class AlarmManagerService extends IAlarmManager.Stub {
     }
     
     // minimum recurrence period or alarm futurity for us to be able to fuzz it
-    private static final long MIN_FUZZABLE_INTERVAL = 10000;
-    private static final BatchTimeOrder sBatchOrder = new BatchTimeOrder();
-    private final ArrayList<Batch> mAlarmBatches = new ArrayList<Batch>();
+    static final long MIN_FUZZABLE_INTERVAL = 10000;
+    static final BatchTimeOrder sBatchOrder = new BatchTimeOrder();
+    final ArrayList<Batch> mAlarmBatches = new ArrayList<Batch>();
 
     static long convertToElapsed(long when, int type) {
         final boolean isRtc = (type == RTC || type == RTC_WAKEUP);
@@ -403,7 +401,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
 
-    private static final class InFlight extends Intent {
+    static final class InFlight extends Intent {
         final PendingIntent mPendingIntent;
         final WorkSource mWorkSource;
         final Pair<String, ComponentName> mTarget;
@@ -427,7 +425,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
 
-    private static final class FilterStats {
+    static final class FilterStats {
         final BroadcastStats mBroadcastStats;
         final Pair<String, ComponentName> mTarget;
 
@@ -443,7 +441,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
     
-    private static final class BroadcastStats {
+    static final class BroadcastStats {
         final String mPackageName;
 
         long aggregateTime;
@@ -459,47 +457,48 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
     
-    private final HashMap<String, BroadcastStats> mBroadcastStats
+    final HashMap<String, BroadcastStats> mBroadcastStats
             = new HashMap<String, BroadcastStats>();
     
-    public AlarmManagerService(Context context) {
-        mContext = context;
+    @Override
+    public void onStart() {
         mDescriptor = init();
         mNextWakeup = mNextNonWakeup = 0;
 
         // We have to set current TimeZone info to kernel
         // because kernel doesn't keep this after reboot
-        String tz = SystemProperties.get(TIMEZONE_PROPERTY);
-        if (tz != null) {
-            setTimeZone(tz);
-        }
+        setTimeZoneImpl(SystemProperties.get(TIMEZONE_PROPERTY));
 
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         
-        mTimeTickSender = PendingIntent.getBroadcastAsUser(context, 0,
+        mTimeTickSender = PendingIntent.getBroadcastAsUser(getContext(), 0,
                 new Intent(Intent.ACTION_TIME_TICK).addFlags(
                         Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND), 0,
                         UserHandle.ALL);
         Intent intent = new Intent(Intent.ACTION_DATE_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        mDateChangeSender = PendingIntent.getBroadcastAsUser(context, 0, intent,
+        mDateChangeSender = PendingIntent.getBroadcastAsUser(getContext(), 0, intent,
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT, UserHandle.ALL);
         
         // now that we have initied the driver schedule the alarm
-        mClockReceiver= new ClockReceiver();
+        mClockReceiver = new ClockReceiver();
         mClockReceiver.scheduleTimeTickEvent();
         mClockReceiver.scheduleDateChangedEvent();
         mUninstallReceiver = new UninstallReceiver();
         
         if (mDescriptor != -1) {
-            mWaitThread.start();
+            AlarmThread waitThread = new AlarmThread();
+            waitThread.start();
         } else {
             Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
         }
+
+        publishBinderService(Context.ALARM_SERVICE, mService);
     }
-    
+
+    @Override
     protected void finalize() throws Throwable {
         try {
             close(mDescriptor);
@@ -508,19 +507,51 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
 
-    @Override
-    public void set(int type, long triggerAtTime, long windowLength, long interval,
-            PendingIntent operation, WorkSource workSource) {
-        if (workSource != null) {
-            mContext.enforceCallingPermission(
-                    android.Manifest.permission.UPDATE_DEVICE_STATS,
-                    "AlarmManager.set");
+    void setTimeZoneImpl(String tz) {
+        if (TextUtils.isEmpty(tz)) {
+            return;
         }
 
-        set(type, triggerAtTime, windowLength, interval, operation, false, workSource);
+        TimeZone zone = TimeZone.getTimeZone(tz);
+        // Prevent reentrant calls from stepping on each other when writing
+        // the time zone property
+        boolean timeZoneWasChanged = false;
+        synchronized (this) {
+            String current = SystemProperties.get(TIMEZONE_PROPERTY);
+            if (current == null || !current.equals(zone.getID())) {
+                if (localLOGV) {
+                    Slog.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
+                }
+                timeZoneWasChanged = true;
+                SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
+            }
+
+            // Update the kernel timezone information
+            // Kernel tracks time offsets as 'minutes west of GMT'
+            int gmtOffset = zone.getOffset(System.currentTimeMillis());
+            setKernelTimezone(mDescriptor, -(gmtOffset / 60000));
+        }
+
+        TimeZone.setDefault(null);
+
+        if (timeZoneWasChanged) {
+            Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.putExtra("time-zone", zone.getID());
+            getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+        }
     }
 
-    public void set(int type, long triggerAtTime, long windowLength, long interval,
+    void removeImpl(PendingIntent operation) {
+        if (operation == null) {
+            return;
+        }
+        synchronized (mLock) {
+            removeLocked(operation);
+        }
+    }
+
+    void setImpl(int type, long triggerAtTime, long windowLength, long interval,
             PendingIntent operation, boolean isStandalone, WorkSource workSource) {
         if (operation == null) {
             Slog.w(TAG, "set/setRepeating ignored because there is no intent");
@@ -606,231 +637,64 @@ class AlarmManagerService extends IAlarmManager.Stub {
         rescheduleKernelAlarmsLocked();
     }
 
-    private void logBatchesLocked() {
-        ByteArrayOutputStream bs = new ByteArrayOutputStream(2048);
-        PrintWriter pw = new PrintWriter(bs);
-        final long nowRTC = System.currentTimeMillis();
-        final long nowELAPSED = SystemClock.elapsedRealtime();
-        final int NZ = mAlarmBatches.size();
-        for (int iz = 0; iz < NZ; iz++) {
-            Batch bz = mAlarmBatches.get(iz);
-            pw.append("Batch "); pw.print(iz); pw.append(": "); pw.println(bz);
-            dumpAlarmList(pw, bz.alarms, "  ", nowELAPSED, nowRTC);
-            pw.flush();
-            Slog.v(TAG, bs.toString());
-            bs.reset();
-        }
-    }
-
-    private boolean validateConsistencyLocked() {
-        if (DEBUG_VALIDATE) {
-            long lastTime = Long.MIN_VALUE;
-            final int N = mAlarmBatches.size();
-            for (int i = 0; i < N; i++) {
-                Batch b = mAlarmBatches.get(i);
-                if (b.start >= lastTime) {
-                    // duplicate start times are okay because of standalone batches
-                    lastTime = b.start;
-                } else {
-                    Slog.e(TAG, "CONSISTENCY FAILURE: Batch " + i + " is out of order");
-                    logBatchesLocked();
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private Batch findFirstWakeupBatchLocked() {
-        final int N = mAlarmBatches.size();
-        for (int i = 0; i < N; i++) {
-            Batch b = mAlarmBatches.get(i);
-            if (b.hasWakeups()) {
-                return b;
-            }
-        }
-        return null;
-    }
-
-    private void rescheduleKernelAlarmsLocked() {
-        // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
-        // prior to that which contains no wakeups, we schedule that as well.
-        if (mAlarmBatches.size() > 0) {
-            final Batch firstWakeup = findFirstWakeupBatchLocked();
-            final Batch firstBatch = mAlarmBatches.get(0);
-            if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
-                mNextWakeup = firstWakeup.start;
-                setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
-            }
-            if (firstBatch != firstWakeup && mNextNonWakeup != firstBatch.start) {
-                mNextNonWakeup = firstBatch.start;
-                setLocked(ELAPSED_REALTIME, firstBatch.start);
-            }
-        }
-    }
-
-    public void setTime(long millis) {
-        mContext.enforceCallingOrSelfPermission(
-                "android.permission.SET_TIME",
-                "setTime");
-
-        SystemClock.setCurrentTimeMillis(millis);
-    }
-
-    public void setTimeZone(String tz) {
-        mContext.enforceCallingOrSelfPermission(
-                "android.permission.SET_TIME_ZONE",
-                "setTimeZone");
-
-        long oldId = Binder.clearCallingIdentity();
-        try {
-            if (TextUtils.isEmpty(tz)) return;
-            TimeZone zone = TimeZone.getTimeZone(tz);
-            // Prevent reentrant calls from stepping on each other when writing
-            // the time zone property
-            boolean timeZoneWasChanged = false;
-            synchronized (this) {
-                String current = SystemProperties.get(TIMEZONE_PROPERTY);
-                if (current == null || !current.equals(zone.getID())) {
-                    if (localLOGV) {
-                        Slog.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
-                    }
-                    timeZoneWasChanged = true;
-                    SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
-                }
-
-                // Update the kernel timezone information
-                // Kernel tracks time offsets as 'minutes west of GMT'
-                int gmtOffset = zone.getOffset(System.currentTimeMillis());
-                setKernelTimezone(mDescriptor, -(gmtOffset / 60000));
+    private final IBinder mService = new IAlarmManager.Stub() {
+        @Override
+        public void set(int type, long triggerAtTime, long windowLength, long interval,
+                PendingIntent operation, WorkSource workSource) {
+            if (workSource != null) {
+                getContext().enforceCallingPermission(
+                        android.Manifest.permission.UPDATE_DEVICE_STATS,
+                        "AlarmManager.set");
             }
 
-            TimeZone.setDefault(null);
+            setImpl(type, triggerAtTime, windowLength, interval, operation,
+                    false, workSource);
+        }
 
-            if (timeZoneWasChanged) {
-                Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                intent.putExtra("time-zone", zone.getID());
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(oldId);
+        @Override
+        public void setTime(long millis) {
+            getContext().enforceCallingOrSelfPermission(
+                    "android.permission.SET_TIME",
+                    "setTime");
+
+            SystemClock.setCurrentTimeMillis(millis);
         }
-    }
-    
-    public void remove(PendingIntent operation) {
-        if (operation == null) {
-            return;
-        }
-        synchronized (mLock) {
-            removeLocked(operation);
-        }
-    }
-    
-    public void removeLocked(PendingIntent operation) {
-        boolean didRemove = false;
-        for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
-            Batch b = mAlarmBatches.get(i);
-            didRemove |= b.remove(operation);
-            if (b.size() == 0) {
-                mAlarmBatches.remove(i);
+
+        @Override
+        public void setTimeZone(String tz) {
+            getContext().enforceCallingOrSelfPermission(
+                    "android.permission.SET_TIME_ZONE",
+                    "setTimeZone");
+
+            final long oldId = Binder.clearCallingIdentity();
+            try {
+                setTimeZoneImpl(tz);
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
             }
         }
 
-        if (didRemove) {
-            if (DEBUG_BATCH) {
-                Slog.v(TAG, "remove(operation) changed bounds; rebatching");
-            }
-            rebatchAllAlarmsLocked(true);
-            rescheduleKernelAlarmsLocked();
-        }
-    }
+        @Override
+        public void remove(PendingIntent operation) {
+            removeImpl(operation);
 
-    public void removeLocked(String packageName) {
-        boolean didRemove = false;
-        for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
-            Batch b = mAlarmBatches.get(i);
-            didRemove |= b.remove(packageName);
-            if (b.size() == 0) {
-                mAlarmBatches.remove(i);
-            }
         }
 
-        if (didRemove) {
-            if (DEBUG_BATCH) {
-                Slog.v(TAG, "remove(package) changed bounds; rebatching");
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump AlarmManager from from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid());
+                return;
             }
-            rebatchAllAlarmsLocked(true);
-            rescheduleKernelAlarmsLocked();
-        }
-    }
 
-    public void removeUserLocked(int userHandle) {
-        boolean didRemove = false;
-        for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
-            Batch b = mAlarmBatches.get(i);
-            didRemove |= b.remove(userHandle);
-            if (b.size() == 0) {
-                mAlarmBatches.remove(i);
-            }
+            dumpImpl(pw);
         }
+    };
 
-        if (didRemove) {
-            if (DEBUG_BATCH) {
-                Slog.v(TAG, "remove(user) changed bounds; rebatching");
-            }
-            rebatchAllAlarmsLocked(true);
-            rescheduleKernelAlarmsLocked();
-        }
-    }
-
-    public boolean lookForPackageLocked(String packageName) {
-        for (int i = 0; i < mAlarmBatches.size(); i++) {
-            Batch b = mAlarmBatches.get(i);
-            if (b.hasPackage(packageName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void setLocked(int type, long when)
-    {
-        if (mDescriptor != -1)
-        {
-            // The kernel never triggers alarms with negative wakeup times
-            // so we ensure they are positive.
-            long alarmSeconds, alarmNanoseconds;
-            if (when < 0) {
-                alarmSeconds = 0;
-                alarmNanoseconds = 0;
-            } else {
-                alarmSeconds = when / 1000;
-                alarmNanoseconds = (when % 1000) * 1000 * 1000;
-            }
-            
-            set(mDescriptor, type, alarmSeconds, alarmNanoseconds);
-        }
-        else
-        {
-            Message msg = Message.obtain();
-            msg.what = ALARM_EVENT;
-            
-            mHandler.removeMessages(ALARM_EVENT);
-            mHandler.sendMessageAtTime(msg, when);
-        }
-    }
-    
-    @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump AlarmManager from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
-        
+    void dumpImpl(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("Current Alarm Manager state:");
             final long nowRTC = System.currentTimeMillis();
@@ -980,6 +844,159 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
 
+    private void logBatchesLocked() {
+        ByteArrayOutputStream bs = new ByteArrayOutputStream(2048);
+        PrintWriter pw = new PrintWriter(bs);
+        final long nowRTC = System.currentTimeMillis();
+        final long nowELAPSED = SystemClock.elapsedRealtime();
+        final int NZ = mAlarmBatches.size();
+        for (int iz = 0; iz < NZ; iz++) {
+            Batch bz = mAlarmBatches.get(iz);
+            pw.append("Batch "); pw.print(iz); pw.append(": "); pw.println(bz);
+            dumpAlarmList(pw, bz.alarms, "  ", nowELAPSED, nowRTC);
+            pw.flush();
+            Slog.v(TAG, bs.toString());
+            bs.reset();
+        }
+    }
+
+    private boolean validateConsistencyLocked() {
+        if (DEBUG_VALIDATE) {
+            long lastTime = Long.MIN_VALUE;
+            final int N = mAlarmBatches.size();
+            for (int i = 0; i < N; i++) {
+                Batch b = mAlarmBatches.get(i);
+                if (b.start >= lastTime) {
+                    // duplicate start times are okay because of standalone batches
+                    lastTime = b.start;
+                } else {
+                    Slog.e(TAG, "CONSISTENCY FAILURE: Batch " + i + " is out of order");
+                    logBatchesLocked();
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private Batch findFirstWakeupBatchLocked() {
+        final int N = mAlarmBatches.size();
+        for (int i = 0; i < N; i++) {
+            Batch b = mAlarmBatches.get(i);
+            if (b.hasWakeups()) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    void rescheduleKernelAlarmsLocked() {
+        // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
+        // prior to that which contains no wakeups, we schedule that as well.
+        if (mAlarmBatches.size() > 0) {
+            final Batch firstWakeup = findFirstWakeupBatchLocked();
+            final Batch firstBatch = mAlarmBatches.get(0);
+            if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
+                mNextWakeup = firstWakeup.start;
+                setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
+            }
+            if (firstBatch != firstWakeup && mNextNonWakeup != firstBatch.start) {
+                mNextNonWakeup = firstBatch.start;
+                setLocked(ELAPSED_REALTIME, firstBatch.start);
+            }
+        }
+    }
+
+    private void removeLocked(PendingIntent operation) {
+        boolean didRemove = false;
+        for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
+            Batch b = mAlarmBatches.get(i);
+            didRemove |= b.remove(operation);
+            if (b.size() == 0) {
+                mAlarmBatches.remove(i);
+            }
+        }
+
+        if (didRemove) {
+            if (DEBUG_BATCH) {
+                Slog.v(TAG, "remove(operation) changed bounds; rebatching");
+            }
+            rebatchAllAlarmsLocked(true);
+            rescheduleKernelAlarmsLocked();
+        }
+    }
+
+    void removeLocked(String packageName) {
+        boolean didRemove = false;
+        for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
+            Batch b = mAlarmBatches.get(i);
+            didRemove |= b.remove(packageName);
+            if (b.size() == 0) {
+                mAlarmBatches.remove(i);
+            }
+        }
+
+        if (didRemove) {
+            if (DEBUG_BATCH) {
+                Slog.v(TAG, "remove(package) changed bounds; rebatching");
+            }
+            rebatchAllAlarmsLocked(true);
+            rescheduleKernelAlarmsLocked();
+        }
+    }
+
+    void removeUserLocked(int userHandle) {
+        boolean didRemove = false;
+        for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
+            Batch b = mAlarmBatches.get(i);
+            didRemove |= b.remove(userHandle);
+            if (b.size() == 0) {
+                mAlarmBatches.remove(i);
+            }
+        }
+
+        if (didRemove) {
+            if (DEBUG_BATCH) {
+                Slog.v(TAG, "remove(user) changed bounds; rebatching");
+            }
+            rebatchAllAlarmsLocked(true);
+            rescheduleKernelAlarmsLocked();
+        }
+    }
+
+    boolean lookForPackageLocked(String packageName) {
+        for (int i = 0; i < mAlarmBatches.size(); i++) {
+            Batch b = mAlarmBatches.get(i);
+            if (b.hasPackage(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void setLocked(int type, long when) {
+        if (mDescriptor != -1) {
+            // The kernel never triggers alarms with negative wakeup times
+            // so we ensure they are positive.
+            long alarmSeconds, alarmNanoseconds;
+            if (when < 0) {
+                alarmSeconds = 0;
+                alarmNanoseconds = 0;
+            } else {
+                alarmSeconds = when / 1000;
+                alarmNanoseconds = (when % 1000) * 1000 * 1000;
+            }
+            
+            set(mDescriptor, type, alarmSeconds, alarmNanoseconds);
+        } else {
+            Message msg = Message.obtain();
+            msg.what = ALARM_EVENT;
+            
+            mHandler.removeMessages(ALARM_EVENT);
+            mHandler.sendMessageAtTime(msg, when);
+        }
+    }
+
     private static final void dumpAlarmList(PrintWriter pw, ArrayList<Alarm> list,
             String prefix, String label, long now) {
         for (int i=list.size()-1; i>=0; i--) {
@@ -1020,7 +1037,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private native int waitForAlarm(int fd);
     private native int setKernelTimezone(int fd, int minuteswest);
 
-    private void triggerAlarmsLocked(ArrayList<Alarm> triggerList, long nowELAPSED, long nowRTC) {
+    void triggerAlarmsLocked(ArrayList<Alarm> triggerList, long nowELAPSED, long nowRTC) {
         // batches are temporally sorted, so we need only pull from the
         // start of the list until we either empty it or hit a batch
         // that is not yet deliverable
@@ -1166,13 +1183,13 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     if (DEBUG_BATCH) {
                         Slog.v(TAG, "Time changed notification from kernel; rebatching");
                     }
-                    remove(mTimeTickSender);
+                    removeImpl(mTimeTickSender);
                     rebatchAllAlarms();
                     mClockReceiver.scheduleTimeTickEvent();
                     Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                             | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+                    getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
                 }
                 
                 synchronized (mLock) {
@@ -1206,7 +1223,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         Alarm alarm = triggerList.get(i);
                         try {
                             if (localLOGV) Slog.v(TAG, "sending alarm " + alarm);
-                            alarm.operation.send(mContext, 0,
+                            alarm.operation.send(getContext(), 0,
                                     mBackgroundIntent.putExtra(
                                             Intent.EXTRA_ALARM_COUNT, alarm.count),
                                     mResultReceiver, mHandler);
@@ -1248,7 +1265,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                             if (alarm.repeatInterval > 0) {
                                 // This IntentSender is no longer valid, but this
                                 // is a repeating alarm, so toss the hoser.
-                                remove(alarm.operation);
+                                removeImpl(alarm.operation);
                             }
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Failure sending alarm.", e);
@@ -1310,7 +1327,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         if (alarm.repeatInterval > 0) {
                             // This IntentSender is no longer valid, but this
                             // is a repeating alarm, so toss the hoser.
-                            remove(alarm.operation);
+                            removeImpl(alarm.operation);
                         }
                     }
                 }
@@ -1323,7 +1340,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_TIME_TICK);
             filter.addAction(Intent.ACTION_DATE_CHANGED);
-            mContext.registerReceiver(this, filter);
+            getContext().registerReceiver(this, filter);
         }
         
         @Override
@@ -1354,7 +1371,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             final long tickEventDelay = nextTime - currentTime;
 
             final WorkSource workSource = null; // Let system take blame for time tick events.
-            set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
+            setImpl(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
                     0, mTimeTickSender, true, workSource);
         }
 
@@ -1368,7 +1385,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             calendar.add(Calendar.DAY_OF_MONTH, 1);
 
             final WorkSource workSource = null; // Let system take blame for date change events.
-            set(RTC, calendar.getTimeInMillis(), 0, 0, mDateChangeSender, true, workSource);
+            setImpl(RTC, calendar.getTimeInMillis(), 0, 0, mDateChangeSender, true, workSource);
         }
     }
     
@@ -1379,12 +1396,12 @@ class AlarmManagerService extends IAlarmManager.Stub {
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
             filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
             filter.addDataScheme("package");
-            mContext.registerReceiver(this, filter);
+            getContext().registerReceiver(this, filter);
              // Register for events related to sdcard installation.
             IntentFilter sdFilter = new IntentFilter();
             sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             sdFilter.addAction(Intent.ACTION_USER_STOPPED);
-            mContext.registerReceiver(this, sdFilter);
+            getContext().registerReceiver(this, sdFilter);
         }
         
         @Override

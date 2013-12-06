@@ -19,6 +19,8 @@ package com.android.server;
 import android.os.BatteryStats;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
 
 import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
@@ -134,13 +136,10 @@ public final class BatteryService extends Binder {
 
     private boolean mSentLowBatteryBroadcast = false;
 
-    private BatteryListener mBatteryPropertiesListener;
-    private IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
-
-    public BatteryService(Context context, LightsService lights) {
+    public BatteryService(Context context, LightsManager lightsManager) {
         mContext = context;
         mHandler = new Handler(true /*async*/);
-        mLed = new Led(context, lights);
+        mLed = new Led(context, lightsManager);
         mBatteryStats = BatteryStatsService.getService();
 
         mCriticalBatteryLevel = mContext.getResources().getInteger(
@@ -158,13 +157,11 @@ public final class BatteryService extends Binder {
                     "DEVPATH=/devices/virtual/switch/invalid_charger");
         }
 
-        mBatteryPropertiesListener = new BatteryListener();
-
         IBinder b = ServiceManager.getService("batterypropreg");
-        mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(b);
-
+        final IBatteryPropertiesRegistrar batteryPropertiesRegistrar =
+                IBatteryPropertiesRegistrar.Stub.asInterface(b);
         try {
-            mBatteryPropertiesRegistrar.registerListener(mBatteryPropertiesListener);
+            batteryPropertiesRegistrar.registerListener(new BatteryListener());
         } catch (RemoteException e) {
             // Should never happen.
         }
@@ -688,7 +685,7 @@ public final class BatteryService extends Binder {
     };
 
     private final class Led {
-        private final LightsService.Light mBatteryLight;
+        private final Light mBatteryLight;
 
         private final int mBatteryLowARGB;
         private final int mBatteryMediumARGB;
@@ -696,8 +693,8 @@ public final class BatteryService extends Binder {
         private final int mBatteryLedOn;
         private final int mBatteryLedOff;
 
-        public Led(Context context, LightsService lights) {
-            mBatteryLight = lights.getLight(LightsService.LIGHT_ID_BATTERY);
+        public Led(Context context, LightsManager lights) {
+            mBatteryLight = lights.getLight(LightsManager.LIGHT_ID_BATTERY);
 
             mBatteryLowARGB = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryLowARGB);
@@ -723,7 +720,7 @@ public final class BatteryService extends Binder {
                     mBatteryLight.setColor(mBatteryLowARGB);
                 } else {
                     // Flash red when battery is low and not charging
-                    mBatteryLight.setFlashing(mBatteryLowARGB, LightsService.LIGHT_FLASH_TIMED,
+                    mBatteryLight.setFlashing(mBatteryLowARGB, Light.LIGHT_FLASH_TIMED,
                             mBatteryLedOn, mBatteryLedOff);
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
@@ -743,8 +740,14 @@ public final class BatteryService extends Binder {
     }
 
     private final class BatteryListener extends IBatteryPropertiesListener.Stub {
+        @Override
         public void batteryPropertiesChanged(BatteryProperties props) {
-            BatteryService.this.update(props);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                BatteryService.this.update(props);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
        }
     }
 }

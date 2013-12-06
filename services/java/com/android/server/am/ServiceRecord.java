@@ -18,7 +18,8 @@ package com.android.server.am;
 
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.NotificationManagerService;
+import com.android.server.LocalServices;
+import com.android.server.notification.NotificationManagerInternal;
 
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -427,8 +428,8 @@ final class ServiceRecord extends Binder {
             final Notification localForegroundNoti = foregroundNoti;
             ams.mHandler.post(new Runnable() {
                 public void run() {
-                    NotificationManagerService nm =
-                            (NotificationManagerService) NotificationManager.getService();
+                    NotificationManagerInternal nm = LocalServices.getService(
+                            NotificationManagerInternal.class);
                     if (nm == null) {
                         return;
                     }
@@ -479,7 +480,7 @@ final class ServiceRecord extends Binder {
                             throw new RuntimeException("icon must be non-zero");
                         }
                         int[] outId = new int[1];
-                        nm.enqueueNotificationInternal(localPackageName, localPackageName,
+                        nm.enqueueNotification(localPackageName, localPackageName,
                                 appUid, appPid, null, localForegroundId, localForegroundNoti,
                                 outId, userId);
                     } catch (RuntimeException e) {

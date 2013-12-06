@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.statusbar;
 
 import android.app.StatusBarManager;
+import android.os.Binder;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.Binder;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
+import com.android.server.LocalServices;
+import com.android.server.notification.NotificationDelegate;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -51,31 +53,31 @@ import java.util.Map;
 public class StatusBarManagerService extends IStatusBarService.Stub
     implements WindowManagerService.OnHardKeyboardStatusChangeListener
 {
-    static final String TAG = "StatusBarManagerService";
-    static final boolean SPEW = false;
+    private static final String TAG = "StatusBarManagerService";
+    private static final boolean SPEW = false;
 
-    final Context mContext;
-    final WindowManagerService mWindowManager;
-    Handler mHandler = new Handler();
-    NotificationCallbacks mNotificationCallbacks;
-    volatile IStatusBar mBar;
-    StatusBarIconList mIcons = new StatusBarIconList();
-    HashMap<IBinder,StatusBarNotification> mNotifications
+    private final Context mContext;
+    private final WindowManagerService mWindowManager;
+    private Handler mHandler = new Handler();
+    private NotificationDelegate mNotificationDelegate;
+    private volatile IStatusBar mBar;
+    private StatusBarIconList mIcons = new StatusBarIconList();
+    private HashMap<IBinder,StatusBarNotification> mNotifications
             = new HashMap<IBinder,StatusBarNotification>();
 
     // for disabling the status bar
-    final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
-    IBinder mSysUiVisToken = new Binder();
-    int mDisabled = 0;
+    private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
+    private IBinder mSysUiVisToken = new Binder();
+    private int mDisabled = 0;
 
-    Object mLock = new Object();
+    private Object mLock = new Object();
     // encompasses lights-out mode and other flags defined on View
-    int mSystemUiVisibility = 0;
-    boolean mMenuVisible = false;
-    int mImeWindowVis = 0;
-    int mImeBackDisposition;
-    IBinder mImeToken = null;
-    int mCurrentUserId;
+    private int mSystemUiVisibility = 0;
+    private boolean mMenuVisible = false;
+    private int mImeWindowVis = 0;
+    private int mImeBackDisposition;
+    private IBinder mImeToken = null;
+    private int mCurrentUserId;
 
     private class DisableRecord implements IBinder.DeathRecipient {
         int userId;
@@ -90,16 +92,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    public interface NotificationCallbacks {
-        void onSetDisabled(int status);
-        void onClearAll();
-        void onNotificationClick(String pkg, String tag, int id);
-        void onNotificationClear(String pkg, String tag, int id);
-        void onPanelRevealed();
-        void onNotificationError(String pkg, String tag, int id,
-                int uid, int initialPid, String message);
-    }
-
     /**
      * Construct the service, add the status bar view to the window manager
      */
@@ -110,15 +102,74 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
         final Resources res = context.getResources();
         mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.config_statusBarIcons));
+
+        LocalServices.addService(StatusBarManagerInternal.class, mInternalService);
     }
 
-    public void setNotificationCallbacks(NotificationCallbacks listener) {
-        mNotificationCallbacks = listener;
-    }
+    /**
+     * Private API used by NotificationManagerService.
+     */
+    private final StatusBarManagerInternal mInternalService = new StatusBarManagerInternal() {
+        @Override
+        public void setNotificationDelegate(NotificationDelegate delegate) {
+            synchronized (mNotifications) {
+                mNotificationDelegate = delegate;
+            }
+        }
+
+        @Override
+        public IBinder addNotification(StatusBarNotification notification) {
+            synchronized (mNotifications) {
+                IBinder key = new Binder();
+                mNotifications.put(key, notification);
+                if (mBar != null) {
+                    try {
+                        mBar.addNotification(key, notification);
+                    } catch (RemoteException ex) {
+                    }
+                }
+                return key;
+            }
+        }
+
+        @Override
+        public void updateNotification(IBinder key, StatusBarNotification notification) {
+            synchronized (mNotifications) {
+                if (!mNotifications.containsKey(key)) {
+                    throw new IllegalArgumentException("updateNotification key not found: " + key);
+                }
+                mNotifications.put(key, notification);
+                if (mBar != null) {
+                    try {
+                        mBar.updateNotification(key, notification);
+                    } catch (RemoteException ex) {
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void removeNotification(IBinder key) {
+            synchronized (mNotifications) {
+                final StatusBarNotification n = mNotifications.remove(key);
+                if (n == null) {
+                    Slog.e(TAG, "removeNotification key not found: " + key);
+                    return;
+                }
+                if (mBar != null) {
+                    try {
+                        mBar.removeNotification(key);
+                    } catch (RemoteException ex) {
+                    }
+                }
+            }
+        }
+    };
 
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
+    @Override
     public void expandNotificationsPanel() {
         enforceExpandStatusBar();
 
@@ -130,6 +181,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void collapsePanels() {
         enforceExpandStatusBar();
 
@@ -141,6 +193,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void expandSettingsPanel() {
         enforceExpandStatusBar();
 
@@ -152,6 +205,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void disable(int what, IBinder token, String pkg) {
         disableInternal(mCurrentUserId, what, token, pkg);
     }
@@ -177,7 +231,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             mDisabled = net;
             mHandler.post(new Runnable() {
                     public void run() {
-                        mNotificationCallbacks.onSetDisabled(net);
+                        mNotificationDelegate.onSetDisabled(net);
                     }
                 });
             if (mBar != null) {
@@ -189,6 +243,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void setIcon(String slot, String iconPackage, int iconId, int iconLevel,
             String contentDescription) {
         enforceStatusBar();
@@ -214,6 +269,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void setIconVisibility(String slot, boolean visible) {
         enforceStatusBar();
 
@@ -241,6 +297,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void removeIcon(String slot) {
         enforceStatusBar();
 
@@ -265,6 +322,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
      * response to a window with FLAG_NEEDS_MENU_KEY set.
      */
+    @Override
     public void topAppWindowChanged(final boolean menuVisible) {
         enforceStatusBar();
 
@@ -285,6 +343,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void setImeWindowStatus(final IBinder token, final int vis, final int backDisposition) {
         enforceStatusBar();
 
@@ -312,6 +371,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void setSystemUiVisibility(int vis, int mask) {
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
@@ -344,6 +404,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
     public void setHardKeyboardEnabled(final boolean enabled) {
         mHandler.post(new Runnable() {
             public void run() {
@@ -426,6 +487,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // Callbacks from the status bar service.
     // ================================================================================
+    @Override
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
             List<IBinder> notificationKeys, List<StatusBarNotification> notifications,
             int switches[], List<IBinder> binders) {
@@ -458,86 +520,64 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      * The status bar service should call this each time the user brings the panel from
      * invisible to visible in order to clear the notification light.
      */
+    @Override
     public void onPanelRevealed() {
         enforceStatusBarService();
-
-        // tell the notification manager to turn off the lights.
-        mNotificationCallbacks.onPanelRevealed();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            // tell the notification manager to turn off the lights.
+            mNotificationDelegate.onPanelRevealed();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
+    @Override
     public void onNotificationClick(String pkg, String tag, int id) {
         enforceStatusBarService();
-
-        mNotificationCallbacks.onNotificationClick(pkg, tag, id);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationClick(pkg, tag, id);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
+    @Override
     public void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message) {
         enforceStatusBarService();
-
-        // WARNING: this will call back into us to do the remove.  Don't hold any locks.
-        mNotificationCallbacks.onNotificationError(pkg, tag, id, uid, initialPid, message);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            // WARNING: this will call back into us to do the remove.  Don't hold any locks.
+            mNotificationDelegate.onNotificationError(pkg, tag, id, uid, initialPid, message);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
+    @Override
     public void onNotificationClear(String pkg, String tag, int id) {
         enforceStatusBarService();
-
-        mNotificationCallbacks.onNotificationClear(pkg, tag, id);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationClear(pkg, tag, id);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
+    @Override
     public void onClearAllNotifications() {
         enforceStatusBarService();
-
-        mNotificationCallbacks.onClearAll();
-    }
-
-    // ================================================================================
-    // Callbacks for NotificationManagerService.
-    // ================================================================================
-    public IBinder addNotification(StatusBarNotification notification) {
-        synchronized (mNotifications) {
-            IBinder key = new Binder();
-            mNotifications.put(key, notification);
-            if (mBar != null) {
-                try {
-                    mBar.addNotification(key, notification);
-                } catch (RemoteException ex) {
-                }
-            }
-            return key;
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onClearAll();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
-        synchronized (mNotifications) {
-            if (!mNotifications.containsKey(key)) {
-                throw new IllegalArgumentException("updateNotification key not found: " + key);
-            }
-            mNotifications.put(key, notification);
-            if (mBar != null) {
-                try {
-                    mBar.updateNotification(key, notification);
-                } catch (RemoteException ex) {
-                }
-            }
-        }
-    }
-
-    public void removeNotification(IBinder key) {
-        synchronized (mNotifications) {
-            final StatusBarNotification n = mNotifications.remove(key);
-            if (n == null) {
-                Slog.e(TAG, "removeNotification key not found: " + key);
-                return;
-            }
-            if (mBar != null) {
-                try {
-                    mBar.removeNotification(key);
-                } catch (RemoteException ex) {
-                }
-            }
-        }
-    }
 
     // ================================================================================
     // Can be called from any thread
