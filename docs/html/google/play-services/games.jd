@@ -62,8 +62,8 @@ header.hide=1
     <h3 style="clear:left">Getting Started</h3>
     <h4>1. Get the Google Play services SDK</h4>
     <p>Google Play game services is part of the Google Play services platform.</p>
-    <p>To use game services, <a href="{@docRoot}google/play-services/setup.html">set up</a>
-      the Google Play services SDK. Then, see the <a class="external-link"
+    <p>To use game services, <a href="{@docRoot}google/play-services/setup.html">set up
+      the Google Play services SDK</a>. Then, see the <a class="external-link"
       href="https://developers.google.com/games/services/android/quickstart">
       Getting Started guide</a> to set up your app.
     </p>
