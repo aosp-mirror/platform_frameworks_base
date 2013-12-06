@@ -741,18 +741,29 @@ public class RelativeLayout extends ViewGroup {
     private int getChildMeasureSpec(int childStart, int childEnd,
             int childSize, int startMargin, int endMargin, int startPadding,
             int endPadding, int mySize) {
-        if (mySize < 0 && !mAllowBrokenMeasureSpecs) {
-            if (childSize >= 0) {
-                return MeasureSpec.makeMeasureSpec(childSize, MeasureSpec.EXACTLY);
-            }
-            // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
-            // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
-            // Carry it forward.
-            return MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        }
-
         int childSpecMode = 0;
         int childSpecSize = 0;
+
+        // Negative values in a mySize/myWidth/myWidth value in RelativeLayout
+        // measurement is code for, "we got an unspecified mode in the
+        // RelativeLayout's measure spec."
+        if (mySize < 0 && !mAllowBrokenMeasureSpecs) {
+            if (childSize >= 0) {
+                // The child specified an exact size.
+                childSpecSize = childSize;
+                childSpecMode = MeasureSpec.EXACTLY;
+            } else if (childStart >= 0 && childEnd >= 0) {
+                // Constraints fixed both edges, so child has an exact size.
+                childSpecSize = Math.max(0, childEnd - childStart);
+                childSpecMode = MeasureSpec.EXACTLY;
+            } else {
+                // Allow the child to be whatever size it wants.
+                childSpecSize = 0;
+                childSpecMode = MeasureSpec.UNSPECIFIED;
+            }
+
+            return MeasureSpec.makeMeasureSpec(childSpecSize, childSpecMode);
+        }
 
         // Figure out start and end bounds.
         int tempStart = childStart;
