@@ -134,7 +134,7 @@ static JNINativeMethod method_table[] = {
 
 int register_android_server_LightsService(JNIEnv *env)
 {
-    return jniRegisterNativeMethods(env, "com/android/server/LightsService",
+    return jniRegisterNativeMethods(env, "com/android/server/lights/LightsService",
             method_table, NELEM(method_table));
 }
 
