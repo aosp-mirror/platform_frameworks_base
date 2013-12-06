@@ -28,7 +28,6 @@ import android.database.ContentObserver;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiStateMachine;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;

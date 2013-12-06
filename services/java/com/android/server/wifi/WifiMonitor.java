@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package com.android.server.wifi;
 
 import android.net.NetworkInfo;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiSsid;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pProvDiscEvent;
-import android.net.wifi.p2p.WifiP2pService.P2pStatus;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.os.Message;
 import android.util.Log;
+
+import com.android.server.wifi.p2p.WifiP2pService.P2pStatus;
 
 import com.android.internal.util.Protocol;
 import com.android.internal.util.StateMachine;

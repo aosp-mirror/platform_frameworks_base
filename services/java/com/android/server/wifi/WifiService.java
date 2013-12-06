@@ -38,8 +38,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiStateMachine;
-import android.net.wifi.WifiWatchdogStateMachine;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Messenger;

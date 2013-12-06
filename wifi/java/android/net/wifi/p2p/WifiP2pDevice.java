@@ -274,7 +274,7 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     /** Updates details obtained from supplicant @hide */
-    void updateSupplicantDetails(WifiP2pDevice device) {
+    public void updateSupplicantDetails(WifiP2pDevice device) {
         if (device == null) {
             throw new IllegalArgumentException("device is null");
         }
