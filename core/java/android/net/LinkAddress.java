@@ -24,8 +24,32 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.UnknownHostException;
 
+import static libcore.io.OsConstants.IFA_F_DADFAILED;
+import static libcore.io.OsConstants.IFA_F_DEPRECATED;
+import static libcore.io.OsConstants.IFA_F_TENTATIVE;
+import static libcore.io.OsConstants.RT_SCOPE_HOST;
+import static libcore.io.OsConstants.RT_SCOPE_LINK;
+import static libcore.io.OsConstants.RT_SCOPE_SITE;
+import static libcore.io.OsConstants.RT_SCOPE_UNIVERSE;
+
 /**
  * Identifies an IP address on a network link.
+ *
+ * A {@code LinkAddress} consists of:
+ * <ul>
+ * <li>An IP address and prefix length (e.g., {@code 2001:db8::1/64} or {@code 192.0.2.1/24}).
+ * The address must be unicast, as multicast addresses cannot be assigned to interfaces.
+ * <li>Address flags: A bitmask of {@code IFA_F_*} values representing properties of the address.
+ * <li>Address scope: An integer defining the scope in which the address is unique (e.g.,
+ * {@code RT_SCOPE_LINK} or {@code RT_SCOPE_SITE}).
+ * <ul>
+ *<p>
+ * When constructing a {@code LinkAddress}, the IP address and prefix are required. The flags and
+ * scope are optional. If they are not specified, the flags are set to zero, and the scope will be
+ * determined based on the IP address (e.g., link-local addresses will be created with a scope of
+ * {@code RT_SCOPE_LINK}, global addresses with {@code RT_SCOPE_UNIVERSE}, etc.) If they are
+ * specified, they are not checked for validity.
+ *
  * @hide
  */
 public class LinkAddress implements Parcelable {
@@ -39,8 +63,46 @@ public class LinkAddress implements Parcelable {
      */
     private int prefixLength;
 
-    private void init(InetAddress address, int prefixLength) {
-        if (address == null || prefixLength < 0 ||
+    /**
+     * Address flags. A bitmask of IFA_F_* values.
+     */
+    private int flags;
+
+    /**
+     * Address scope. One of the RT_SCOPE_* constants.
+     */
+    private int scope;
+
+    /**
+     * Utility function to determines the scope of a unicast address. Per RFC 4291 section 2.5 and
+     * RFC 6724 section 3.2.
+     * @hide
+     */
+    static int scopeForUnicastAddress(InetAddress addr) {
+        if (addr.isAnyLocalAddress()) {
+            return RT_SCOPE_HOST;
+        }
+
+        if (addr.isLoopbackAddress() || addr.isLinkLocalAddress()) {
+            return RT_SCOPE_LINK;
+        }
+
+        // isSiteLocalAddress() returns true for private IPv4 addresses, but RFC 6724 section 3.2
+        // says that they are assigned global scope.
+        if (!(addr instanceof Inet4Address) && addr.isSiteLocalAddress()) {
+            return RT_SCOPE_SITE;
+        }
+
+        return RT_SCOPE_UNIVERSE;
+    }
+
+    /**
+     * Utility function for the constructors.
+     */
+    private void init(InetAddress address, int prefixLength, int flags, int scope) {
+        if (address == null ||
+                address.isMulticastAddress() ||
+                prefixLength < 0 ||
                 ((address instanceof Inet4Address) && prefixLength > 32) ||
                 (prefixLength > 128)) {
             throw new IllegalArgumentException("Bad LinkAddress params " + address +
@@ -48,32 +110,59 @@ public class LinkAddress implements Parcelable {
         }
         this.address = address;
         this.prefixLength = prefixLength;
+        this.flags = flags;
+        this.scope = scope;
+    }
+
+    /**
+     * Constructs a new {@code LinkAddress} from an {@code InetAddress} and prefix length, with
+     * the specified flags and scope. Flags and scope are not checked for validity.
+     * @param address The IP address.
+     * @param prefixLength The prefix length.
+     */
+    public LinkAddress(InetAddress address, int prefixLength, int flags, int scope) {
+        init(address, prefixLength, flags, scope);
     }
 
     /**
      * Constructs a new {@code LinkAddress} from an {@code InetAddress} and a prefix length.
+     * The flags are set to zero and the scope is determined from the address.
      * @param address The IP address.
      * @param prefixLength The prefix length.
      */
     public LinkAddress(InetAddress address, int prefixLength) {
-        init(address, prefixLength);
+        this(address, prefixLength, 0, 0);
+        this.scope = scopeForUnicastAddress(address);
     }
 
     /**
      * Constructs a new {@code LinkAddress} from an {@code InterfaceAddress}.
+     * The flags are set to zero and the scope is determined from the address.
      * @param interfaceAddress The interface address.
      */
     public LinkAddress(InterfaceAddress interfaceAddress) {
-        init(interfaceAddress.getAddress(),
+        this(interfaceAddress.getAddress(),
              interfaceAddress.getNetworkPrefixLength());
     }
 
     /**
      * Constructs a new {@code LinkAddress} from a string such as "192.0.2.5/24" or
-     * "2001:db8::1/64".
+     * "2001:db8::1/64". The flags are set to zero and the scope is determined from the address.
      * @param string The string to parse.
      */
     public LinkAddress(String address) {
+        this(address, 0, 0);
+        this.scope = scopeForUnicastAddress(this.address);
+    }
+
+    /**
+     * Constructs a new {@code LinkAddress} from a string such as "192.0.2.5/24" or
+     * "2001:db8::1/64", with the specified flags and scope.
+     * @param string The string to parse.
+     * @param flags The address flags.
+     * @param scope The address scope.
+     */
+    public LinkAddress(String address, int flags, int scope) {
         InetAddress inetAddress = null;
         int prefixLength = -1;
         try {
@@ -90,18 +179,22 @@ public class LinkAddress implements Parcelable {
             throw new IllegalArgumentException("Bad LinkAddress params " + address);
         }
 
-        init(inetAddress, prefixLength);
+        init(inetAddress, prefixLength, flags, scope);
     }
 
+    /**
+     * Returns a string representation of this address, such as "192.0.2.1/24" or "2001:db8::1/64".
+     * The string representation does not contain the flags and scope, just the address and prefix
+     * length.
+     */
     @Override
     public String toString() {
         return address.getHostAddress() + "/" + prefixLength;
     }
 
     /**
-     * Compares this {@code LinkAddress} instance against the specified address
-     * in {@code obj}. Two addresses are equal if their InetAddress and prefixLength
-     * are equal.
+     * Compares this {@code LinkAddress} instance against {@code obj}. Two addresses are equal if
+     * their address, prefix length, flags and scope are equal.
      *
      * @param obj the object to be tested for equality.
      * @return {@code true} if both objects are equal, {@code false} otherwise.
@@ -113,7 +206,9 @@ public class LinkAddress implements Parcelable {
         }
         LinkAddress linkAddress = (LinkAddress) obj;
         return this.address.equals(linkAddress.address) &&
-            this.prefixLength == linkAddress.prefixLength;
+            this.prefixLength == linkAddress.prefixLength &&
+            this.flags == linkAddress.flags &&
+            this.scope == linkAddress.scope;
     }
 
     /**
@@ -121,7 +216,20 @@ public class LinkAddress implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return address.hashCode() + 11 * prefixLength;
+        return address.hashCode() + 11 * prefixLength + 19 * flags + 43 * scope;
+    }
+
+    /**
+     * Determines whether this {@code LinkAddress} and the provided {@code LinkAddress} represent
+     * the same address. Two LinkAddresses represent the same address if they have the same IP
+     * address and prefix length, even if their properties are different.
+     *
+     * @param other the {@code LinkAddress} to compare to.
+     * @return {@code true} if both objects have the same address and prefix length, {@code false}
+     * otherwise.
+     */
+    public boolean isSameAddressAs(LinkAddress other) {
+        return address.equals(other.address) && prefixLength == other.prefixLength;
     }
 
     /**
@@ -139,6 +247,28 @@ public class LinkAddress implements Parcelable {
     }
 
     /**
+     * Returns the flags of this address.
+     */
+    public int getFlags() {
+        return flags;
+    }
+
+    /**
+     * Returns the scope of this address.
+     */
+    public int getScope() {
+        return scope;
+    }
+
+    /**
+     * Returns true if this {@code LinkAddress} is global scope and preferred.
+     */
+    public boolean isGlobalPreferred() {
+        return (scope == RT_SCOPE_UNIVERSE &&
+                (flags & (IFA_F_DADFAILED | IFA_F_DEPRECATED | IFA_F_TENTATIVE)) == 0L);
+    }
+
+    /**
      * Implement the Parcelable interface.
      * @hide
      */
@@ -153,6 +283,8 @@ public class LinkAddress implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByteArray(address.getAddress());
         dest.writeInt(prefixLength);
+        dest.writeInt(this.flags);
+        dest.writeInt(scope);
     }
 
     /**
@@ -171,7 +303,9 @@ public class LinkAddress implements Parcelable {
                     // InetAddress.
                 }
                 int prefixLength = in.readInt();
-                return new LinkAddress(address, prefixLength);
+                int flags = in.readInt();
+                int scope = in.readInt();
+                return new LinkAddress(address, prefixLength, flags, scope);
             }
 
             public LinkAddress[] newArray(int size) {

@@ -37,12 +37,12 @@ public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
     }
 
     @Override
-    public void addressUpdated(LinkAddress address, String iface, int flags, int scope) {
+    public void addressUpdated(String iface, LinkAddress address) {
         // default no-op
     }
 
     @Override
-    public void addressRemoved(LinkAddress address, String iface, int flags, int scope) {
+    public void addressRemoved(String iface, LinkAddress address) {
         // default no-op
     }
 
