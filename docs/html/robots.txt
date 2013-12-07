@@ -14,4 +14,5 @@ Disallow: /sdk/1.6_r1/
 Disallow: /shareables/
 Disallow: /guide/tutorials/
 Disallow: /guide/samples/
+Disallow: /community/
 Sitemap: http://developer.android.com/sitemap.txt
