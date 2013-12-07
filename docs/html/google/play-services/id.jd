@@ -41,8 +41,8 @@ href="{@docRoot}reference/com/google/android/gms/ads/identifier/package-summary.
     <h3 style="clear:left">Getting Started</h3>
     <h4>1. Get the Google Play services SDK</h4>
     <p>The advertising ID APIs are part of the Google Play services platform.</p>
-    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up
-      the Google Play services SDK</a>. </p>
+    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a>
+    the Google Play services SDK. </p>
 
     <h4>2. Read the docs and example code</h4>
     <p>Once you've installed the Google Play services package, review the <a href="#get_started">overview</a>

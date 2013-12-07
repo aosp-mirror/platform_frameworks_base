@@ -61,8 +61,8 @@ information about integrating Google+ into your app.</p>
     <h3 style="clear:left">Getting Started</h3>
     <h4>1. Get the Google Play services SDK</h4>
     <p>The Google+ Android APIs are part of the Google Play services platform.</p>
-    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up
-      the Google Play services SDK</a>.
+    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a>
+      the Google Play services SDK.
     </p>
             
     <h4>2. Run the sample</h4>
