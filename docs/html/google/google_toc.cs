@@ -41,11 +41,6 @@
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot?>google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
