@@ -18,6 +18,7 @@ package android.provider;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -40,6 +41,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -7978,7 +7980,7 @@ public final class ContactsContract {
             // Trigger with obtained rectangle
             Intent intent = composeQuickContactsIntent(context, target, lookupUri, mode,
                     excludeMimes);
-            context.startActivity(intent);
+            startActivityWithErrorToast(context, intent);
         }
 
         /**
@@ -8011,7 +8013,16 @@ public final class ContactsContract {
                 String[] excludeMimes) {
             Intent intent = composeQuickContactsIntent(context, target, lookupUri, mode,
                     excludeMimes);
-            context.startActivity(intent);
+            startActivityWithErrorToast(context, intent);
+        }
+
+        private static void startActivityWithErrorToast(Context context, Intent intent) {
+            try {
+              context.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(context, com.android.internal.R.string.quick_contacts_not_available,
+                                Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
