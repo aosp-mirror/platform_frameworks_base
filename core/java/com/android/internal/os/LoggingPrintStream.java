@@ -293,7 +293,7 @@ abstract class LoggingPrintStream extends PrintStream {
 
     @Override
     public synchronized void println(String s) {
-        if (builder.length() == 0) {
+        if (builder.length() == 0 && s != null) {
             // Optimization for a simple println.
             int length = s.length();
 
