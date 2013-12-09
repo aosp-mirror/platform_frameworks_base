@@ -405,11 +405,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a new or updated interface address.
      */
-    private void notifyAddressUpdated(LinkAddress address, String iface, int flags, int scope) {
+    private void notifyAddressUpdated(String iface, LinkAddress address) {
         final int length = mObservers.beginBroadcast();
         for (int i = 0; i < length; i++) {
             try {
-                mObservers.getBroadcastItem(i).addressUpdated(address, iface, flags, scope);
+                mObservers.getBroadcastItem(i).addressUpdated(iface, address);
             } catch (RemoteException e) {
             } catch (RuntimeException e) {
             }
@@ -420,11 +420,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a deleted interface address.
      */
-    private void notifyAddressRemoved(LinkAddress address, String iface, int flags, int scope) {
+    private void notifyAddressRemoved(String iface, LinkAddress address) {
         final int length = mObservers.beginBroadcast();
         for (int i = 0; i < length; i++) {
             try {
-                mObservers.getBroadcastItem(i).addressRemoved(address, iface, flags, scope);
+                mObservers.getBroadcastItem(i).addressRemoved(iface, address);
             } catch (RemoteException e) {
             } catch (RuntimeException e) {
             }
@@ -535,23 +535,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         throw new IllegalStateException(errorMessage);
                     }
 
-                    int flags;
-                    int scope;
+                    String iface = cooked[4];
                     LinkAddress address;
                     try {
-                        flags = Integer.parseInt(cooked[5]);
-                        scope = Integer.parseInt(cooked[6]);
-                        address = new LinkAddress(cooked[3]);
+                        int flags = Integer.parseInt(cooked[5]);
+                        int scope = Integer.parseInt(cooked[6]);
+                        address = new LinkAddress(cooked[3], flags, scope);
                     } catch(NumberFormatException e) {     // Non-numeric lifetime or scope.
                         throw new IllegalStateException(errorMessage, e);
-                    } catch(IllegalArgumentException e) {  // Malformed IP address.
+                    } catch(IllegalArgumentException e) {  // Malformed/invalid IP address.
                         throw new IllegalStateException(errorMessage, e);
                     }
 
                     if (cooked[2].equals("updated")) {
-                        notifyAddressUpdated(address, cooked[4], flags, scope);
+                        notifyAddressUpdated(iface, address);
                     } else {
-                        notifyAddressRemoved(address, cooked[4], flags, scope);
+                        notifyAddressRemoved(iface, address);
                     }
                     return true;
                     // break;
