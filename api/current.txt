@@ -28434,6 +28434,7 @@ package android.view {
     method public void invalidate(int, int, int, int);
     method public void invalidate();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
+    method public boolean isAccessibilityFocused();
     method public boolean isActivated();
     method public boolean isAttachedToWindow();
     method public boolean isClickable();
@@ -28449,6 +28450,7 @@ package android.view {
     method public boolean isHorizontalFadingEdgeEnabled();
     method public boolean isHorizontalScrollBarEnabled();
     method public boolean isHovered();
+    method public boolean isImportantForAccessibility();
     method public boolean isInEditMode();
     method public boolean isInLayout();
     method public boolean isInTouchMode();
