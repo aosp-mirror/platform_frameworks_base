@@ -2034,6 +2034,7 @@ java.security.cert.CertSelector
 java.security.cert.Certificate
 java.security.cert.CertificateFactory
 java.security.cert.CertificateFactorySpi
+java.security.cert.CertStoreParameters
 java.security.cert.PKIXCertPathChecker
 java.security.cert.PKIXCertPathValidatorResult
 java.security.cert.PKIXParameters
