@@ -24,6 +24,8 @@ import junit.framework.TestCase;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import libcore.io.OsConstants;
+
 public class LinkPropertiesTest extends TestCase {
     private static InetAddress ADDRV4 = NetworkUtils.numericToInetAddress("75.208.6.1");
     private static InetAddress ADDRV6 = NetworkUtils.numericToInetAddress(
@@ -341,6 +343,10 @@ public class LinkPropertiesTest extends TestCase {
         assertFalse(rmnet0.removeStackedLink(clat4));
     }
 
+    private LinkAddress getFirstLinkAddress(LinkProperties lp) {
+        return lp.getLinkAddresses().iterator().next();
+    }
+
     @SmallTest
     public void testAddressMethods() {
         LinkProperties lp = new LinkProperties();
@@ -366,26 +372,56 @@ public class LinkPropertiesTest extends TestCase {
         // Addresses on the base link.
         // Check the return values of hasIPvXAddress and ensure the add/remove methods return true
         // iff something changes.
+        assertEquals(0, lp.getLinkAddresses().size());
         assertTrue(lp.addLinkAddress(LINKADDRV6));
+        assertEquals(1, lp.getLinkAddresses().size());
         assertFalse(lp.hasIPv4Address());
         assertTrue(lp.hasIPv6Address());
 
         assertTrue(lp.removeLinkAddress(LINKADDRV6));
+        assertEquals(0, lp.getLinkAddresses().size());
         assertTrue(lp.addLinkAddress(LINKADDRV4));
+        assertEquals(1, lp.getLinkAddresses().size());
         assertTrue(lp.hasIPv4Address());
         assertFalse(lp.hasIPv6Address());
 
         assertTrue(lp.addLinkAddress(LINKADDRV6));
+        assertEquals(2, lp.getLinkAddresses().size());
         assertTrue(lp.hasIPv4Address());
         assertTrue(lp.hasIPv6Address());
 
         // Adding an address twice has no effect.
         // Removing an address that's not present has no effect.
         assertFalse(lp.addLinkAddress(LINKADDRV4));
+        assertEquals(2, lp.getLinkAddresses().size());
         assertTrue(lp.hasIPv4Address());
         assertTrue(lp.removeLinkAddress(LINKADDRV4));
+        assertEquals(1, lp.getLinkAddresses().size());
         assertFalse(lp.hasIPv4Address());
         assertFalse(lp.removeLinkAddress(LINKADDRV4));
+        assertEquals(1, lp.getLinkAddresses().size());
+
+        // Adding an address that's already present but with different properties causes the
+        // existing address to be updated and returns true.
+        // Start with only LINKADDRV6.
+        assertEquals(1, lp.getLinkAddresses().size());
+        assertEquals(LINKADDRV6, getFirstLinkAddress(lp));
+
+        // Create a LinkAddress object for the same address, but with different flags.
+        LinkAddress deprecated = new LinkAddress(ADDRV6, 128,
+                OsConstants.IFA_F_DEPRECATED, OsConstants.RT_SCOPE_UNIVERSE);
+        assertTrue(deprecated.isSameAddressAs(LINKADDRV6));
+        assertFalse(deprecated.equals(LINKADDRV6));
+
+        // Check that adding it updates the existing address instead of adding a new one.
+        assertTrue(lp.addLinkAddress(deprecated));
+        assertEquals(1, lp.getLinkAddresses().size());
+        assertEquals(deprecated, getFirstLinkAddress(lp));
+        assertFalse(LINKADDRV6.equals(getFirstLinkAddress(lp)));
+
+        // Removing LINKADDRV6 removes deprecated, because removing addresses ignores properties.
+        assertTrue(lp.removeLinkAddress(LINKADDRV6));
+        assertEquals(0, lp.getLinkAddresses().size());
     }
 
     @SmallTest
