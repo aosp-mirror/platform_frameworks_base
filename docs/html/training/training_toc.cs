@@ -1001,6 +1001,27 @@ include the action bar on devices running Android 2.1 or higher."
         </ul>
       </li>
 
+     <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/app-indexing/index.html"
+             description=
+             "How to enable deep linking and indexing of your application
+content so that users can open this content directly from their mobile search
+results."
+            >Making Your App Content Searchable</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/app-indexing/deep-linking.html">
+            Enabling Deep Links for App Content
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/app-indexing/enabling-app-indexing.html">
+            Specifying  App Content for Indexing
+          </a>
+          </li>
+        </ul>
+      </li>
+
     </ul>
   </li>
   <!-- End best UX and UI -->
