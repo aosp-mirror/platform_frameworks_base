@@ -2071,16 +2071,15 @@ public final class ActiveServices {
             // Unless the process is persistent, this process record is going away,
             // so make sure the service is cleaned out of it.
             if (!app.persistent) {
-                app.services.remove(sr);
+                app.services.removeAt(i);
             }
 
             // Sanity check: if the service listed for the app is not one
-            // we actually are maintaining, drop it.
+            // we actually are maintaining, just let it drop.
             if (smap.mServicesByName.get(sr.name) != sr) {
                 ServiceRecord cur = smap.mServicesByName.get(sr.name);
                 Slog.wtf(TAG, "Service " + sr + " in process " + app
                         + " not same as in map: " + cur);
-                app.services.removeAt(i);
                 continue;
             }
 
