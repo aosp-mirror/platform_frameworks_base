@@ -51,9 +51,8 @@ namespace uirenderer {
 #define PROGRAM_KEY_GRADIENT 0x8
 #define PROGRAM_KEY_BITMAP_FIRST 0x10
 #define PROGRAM_KEY_COLOR_MATRIX 0x20
-#define PROGRAM_KEY_COLOR_LIGHTING 0x40
-#define PROGRAM_KEY_COLOR_BLEND 0x80
-#define PROGRAM_KEY_BITMAP_NPOT 0x100
+#define PROGRAM_KEY_COLOR_BLEND 0x40
+#define PROGRAM_KEY_BITMAP_NPOT 0x80
 #define PROGRAM_KEY_SWAP_SRC_DST 0x2000
 
 #define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
@@ -104,7 +103,6 @@ struct ProgramDescription {
     enum ColorModifier {
         kColorNone = 0,
         kColorMatrix,
-        kColorLighting,
         kColorBlend
     };
 
@@ -247,9 +245,6 @@ struct ProgramDescription {
         switch (colorOp) {
             case kColorMatrix:
                 key |= PROGRAM_KEY_COLOR_MATRIX;
-                break;
-            case kColorLighting:
-                key |= PROGRAM_KEY_COLOR_LIGHTING;
                 break;
             case kColorBlend:
                 key |= PROGRAM_KEY_COLOR_BLEND;

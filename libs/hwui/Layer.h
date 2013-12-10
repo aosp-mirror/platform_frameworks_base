@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_LAYER_H
 #define ANDROID_HWUI_LAYER_H
 
+#include <cutils/compiler.h>
 #include <sys/types.h>
 
 #include <GLES2/gl2.h>
@@ -26,9 +27,9 @@
 #include <SkPaint.h>
 #include <SkXfermode.h>
 
+#include "Matrix.h"
 #include "Rect.h"
 #include "RenderBuffer.h"
-#include "SkiaColorFilter.h"
 #include "Texture.h"
 #include "Vertex.h"
 
@@ -217,11 +218,11 @@ public:
         this->textureLayer = textureLayer;
     }
 
-    inline SkiaColorFilter* getColorFilter() const {
+    inline SkColorFilter* getColorFilter() const {
         return colorFilter;
     }
 
-    ANDROID_API void setColorFilter(SkiaColorFilter* filter);
+    ANDROID_API void setColorFilter(SkColorFilter* filter);
 
     void bindStencilRenderBuffer() const;
 
@@ -339,7 +340,7 @@ private:
     /**
      * Color filter used to draw this layer. Optional.
      */
-    SkiaColorFilter* colorFilter;
+    SkColorFilter* colorFilter;
 
     /**
      * Opacity of the layer.

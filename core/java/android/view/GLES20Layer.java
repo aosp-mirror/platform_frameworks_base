@@ -48,7 +48,7 @@ abstract class GLES20Layer extends HardwareLayer {
         if (paint != null) {
             GLES20Canvas.nSetLayerPaint(mLayer, paint.mNativePaint);
             GLES20Canvas.nSetLayerColorFilter(mLayer, paint.getColorFilter() != null ?
-                    paint.getColorFilter().nativeColorFilter : 0);
+                    paint.getColorFilter().native_instance : 0);
         }
     }
 

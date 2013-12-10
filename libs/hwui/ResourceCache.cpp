@@ -76,11 +76,6 @@ void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
     incrementRefcount((void*) shaderResource, kShader);
 }
 
-void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
-    SkSafeRef(filterResource->getSkColorFilter());
-    incrementRefcount((void*) filterResource, kColorFilter);
-}
-
 void ResourceCache::incrementRefcount(const Res_png_9patch* patchResource) {
     incrementRefcount((void*) patchResource, kNinePatch);
 }
@@ -114,11 +109,6 @@ void ResourceCache::incrementRefcountLocked(SkiaShader* shaderResource) {
     incrementRefcountLocked((void*) shaderResource, kShader);
 }
 
-void ResourceCache::incrementRefcountLocked(SkiaColorFilter* filterResource) {
-    SkSafeRef(filterResource->getSkColorFilter());
-    incrementRefcountLocked((void*) filterResource, kColorFilter);
-}
-
 void ResourceCache::incrementRefcountLocked(const Res_png_9patch* patchResource) {
     incrementRefcountLocked((void*) patchResource, kNinePatch);
 }
@@ -145,11 +135,6 @@ void ResourceCache::decrementRefcount(const SkPath* pathResource) {
 void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
     SkSafeUnref(shaderResource->getSkShader());
     decrementRefcount((void*) shaderResource);
-}
-
-void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
-    SkSafeUnref(filterResource->getSkColorFilter());
-    decrementRefcount((void*) filterResource);
 }
 
 void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
@@ -186,11 +171,6 @@ void ResourceCache::decrementRefcountLocked(const SkPath* pathResource) {
 void ResourceCache::decrementRefcountLocked(SkiaShader* shaderResource) {
     SkSafeUnref(shaderResource->getSkShader());
     decrementRefcountLocked((void*) shaderResource);
-}
-
-void ResourceCache::decrementRefcountLocked(SkiaColorFilter* filterResource) {
-    SkSafeUnref(filterResource->getSkColorFilter());
-    decrementRefcountLocked((void*) filterResource);
 }
 
 void ResourceCache::decrementRefcountLocked(const Res_png_9patch* patchResource) {
@@ -251,25 +231,6 @@ void ResourceCache::destructor(SkiaShader* resource) {
 }
 
 void ResourceCache::destructorLocked(SkiaShader* resource) {
-    ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
-        // If we're not tracking this resource, just delete it
-        delete resource;
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReferenceLocked(resource, ref);
-    }
-}
-
-void ResourceCache::destructor(SkiaColorFilter* resource) {
-    Mutex::Autolock _l(mLock);
-    destructorLocked(resource);
-}
-
-void ResourceCache::destructorLocked(SkiaColorFilter* resource) {
     ssize_t index = mCache->indexOfKey(resource);
     ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
     if (ref == NULL) {
@@ -370,11 +331,6 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
             case kShader: {
                 SkiaShader* shader = (SkiaShader*) resource;
                 delete shader;
-            }
-            break;
-            case kColorFilter: {
-                SkiaColorFilter* filter = (SkiaColorFilter*) resource;
-                delete filter;
             }
             break;
             case kNinePatch: {

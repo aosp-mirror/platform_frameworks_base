@@ -47,7 +47,6 @@
 #include <LayerRenderer.h>
 #include <OpenGLRenderer.h>
 #include <SkiaShader.h>
-#include <SkiaColorFilter.h>
 #include <Stencil.h>
 #include <Rect.h>
 
@@ -81,7 +80,6 @@ using namespace uirenderer;
 
 #define MODIFIER_SHADOW 1
 #define MODIFIER_SHADER 2
-#define MODIFIER_COLOR_FILTER 4
 
 // ----------------------------------------------------------------------------
 
@@ -638,7 +636,6 @@ static void android_view_GLES20Canvas_resetModifiers(JNIEnv* env, jobject clazz,
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     if (modifiers & MODIFIER_SHADOW) renderer->resetShadow();
     if (modifiers & MODIFIER_SHADER) renderer->resetShader();
-    if (modifiers & MODIFIER_COLOR_FILTER) renderer->resetColorFilter();
 }
 
 static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject clazz,
@@ -648,12 +645,6 @@ static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject clazz,
     renderer->setupShader(shader);
 }
 
-static void android_view_GLES20Canvas_setupColorFilter(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong colorFilterPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    SkiaColorFilter* colorFilter = reinterpret_cast<SkiaColorFilter*>(colorFilterPtr);
-    renderer->setupColorFilter(colorFilter);
-}
 
 static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jfloat radius, jfloat dx, jfloat dy, jint color) {
@@ -987,7 +978,7 @@ static void android_view_GLES20Canvas_setLayerColorFilter(JNIEnv* env, jobject c
         jlong layerPtr, jlong colorFilterPtr) {
     Layer* layer = reinterpret_cast<Layer*>(layerPtr);
     if (layer) {
-        SkiaColorFilter* colorFilter = reinterpret_cast<SkiaColorFilter*>(colorFilterPtr);
+        SkColorFilter* colorFilter = reinterpret_cast<SkColorFilter*>(colorFilterPtr);
         layer->setColorFilter(colorFilter);
     }
 }
@@ -1222,7 +1213,6 @@ static JNINativeMethod gMethods[] = {
 
     { "nResetModifiers",    "(JI)V",           (void*) android_view_GLES20Canvas_resetModifiers },
     { "nSetupShader",       "(JJ)V",           (void*) android_view_GLES20Canvas_setupShader },
-    { "nSetupColorFilter",  "(JJ)V",           (void*) android_view_GLES20Canvas_setupColorFilter },
     { "nSetupShadow",       "(JFFFI)V",        (void*) android_view_GLES20Canvas_setupShadow },
 
     { "nSetupPaintFilter",  "(JII)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },

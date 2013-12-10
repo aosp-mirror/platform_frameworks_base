@@ -61,7 +61,6 @@ class DisplayListRenderer;
 class OpenGLRenderer;
 class Rect;
 class Layer;
-class SkiaColorFilter;
 class SkiaShader;
 
 class ClipRectOp;
@@ -582,7 +581,6 @@ private:
 
     Vector<const SkBitmap*> mBitmapResources;
     Vector<const SkBitmap*> mOwnedBitmapResources;
-    Vector<SkiaColorFilter*> mFilterResources;
     Vector<const Res_png_9patch*> mPatchResources;
 
     Vector<const SkPaint*> mPaints;

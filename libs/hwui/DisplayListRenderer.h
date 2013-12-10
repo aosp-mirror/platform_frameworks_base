@@ -102,9 +102,6 @@ public:
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
 
-    virtual void resetColorFilter();
-    virtual void setupColorFilter(SkiaColorFilter* filter);
-
     virtual void resetShadow();
     virtual void setupShadow(float radius, float dx, float dy, int color);
 
@@ -180,10 +177,6 @@ public:
 
     const Vector<const SkBitmap*>& getOwnedBitmapResources() const {
         return mOwnedBitmapResources;
-    }
-
-    const Vector<SkiaColorFilter*>& getFilterResources() const {
-        return mFilterResources;
     }
 
     const Vector<const Res_png_9patch*>& getPatchResources() const {
@@ -349,12 +342,6 @@ private:
         return shaderCopy;
     }
 
-    inline SkiaColorFilter* refColorFilter(SkiaColorFilter* colorFilter) {
-        mFilterResources.add(colorFilter);
-        mCaches.resourceCache.incrementRefcount(colorFilter);
-        return colorFilter;
-    }
-
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
         mPatchResources.add(patch);
         mCaches.resourceCache.incrementRefcount(patch);
@@ -364,7 +351,6 @@ private:
     // TODO: move these to DisplayListData
     Vector<const SkBitmap*> mBitmapResources;
     Vector<const SkBitmap*> mOwnedBitmapResources;
-    Vector<SkiaColorFilter*> mFilterResources;
     Vector<const Res_png_9patch*> mPatchResources;
 
     Vector<const SkPaint*> mPaints;

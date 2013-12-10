@@ -620,38 +620,6 @@ private:
     SkiaShader* mShader;
 };
 
-class ResetColorFilterOp : public StateOp {
-public:
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.resetColorFilter();
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOGS("ResetColorFilter");
-    }
-
-    virtual const char* name() { return "ResetColorFilter"; }
-};
-
-class SetupColorFilterOp : public StateOp {
-public:
-    SetupColorFilterOp(SkiaColorFilter* colorFilter)
-            : mColorFilter(colorFilter) {}
-
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.setupColorFilter(mColorFilter);
-    }
-
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("SetupColorFilter, filter %p", mColorFilter);
-    }
-
-    virtual const char* name() { return "SetupColorFilter"; }
-
-private:
-    SkiaColorFilter* mColorFilter;
-};
-
 class ResetShadowOp : public StateOp {
 public:
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {

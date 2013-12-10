@@ -51,7 +51,7 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight):
 }
 
 Layer::~Layer() {
-    if (colorFilter) caches.resourceCache.decrementRefcount(colorFilter);
+    SkSafeUnref(colorFilter);
     removeFbo();
     deleteTexture();
 
@@ -135,14 +135,8 @@ void Layer::setPaint(SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
 }
 
-void Layer::setColorFilter(SkiaColorFilter* filter) {
-    if (colorFilter) {
-        caches.resourceCache.decrementRefcount(colorFilter);
-    }
-    colorFilter = filter;
-    if (colorFilter) {
-        caches.resourceCache.incrementRefcount(colorFilter);
-    }
+void Layer::setColorFilter(SkColorFilter* filter) {
+    SkRefCnt_SafeAssign(colorFilter, filter);
 }
 
 void Layer::bindTexture() const {
