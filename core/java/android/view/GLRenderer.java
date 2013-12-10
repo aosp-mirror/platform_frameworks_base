@@ -635,11 +635,11 @@ public class GLRenderer extends HardwareRenderer {
     GLRenderer(boolean translucent) {
         mTranslucent = translucent;
 
-        loadSystemProperties(null);
+        loadSystemProperties();
     }
 
     @Override
-    boolean loadSystemProperties(Surface surface) {
+    boolean loadSystemProperties() {
         boolean value;
         boolean changed = false;
 
@@ -1102,11 +1102,6 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
-    HardwareCanvas getCanvas() {
-        return mCanvas;
-    }
-
-    @Override
     void setName(String name) {
         mName = name;
     }
@@ -1129,6 +1124,66 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
+    void drawDisplayList(DisplayList displayList, View.AttachInfo attachInfo,
+            HardwareDrawCallbacks callbacks, Rect dirty) {
+        if (canDraw()) {
+            if (!hasDirtyRegions()) {
+                dirty = null;
+            }
+
+            // We are already on the correct thread
+            final int surfaceState = checkRenderContextUnsafe();
+            if (surfaceState != SURFACE_STATE_ERROR) {
+                HardwareCanvas canvas = mCanvas;
+
+                if (mProfileEnabled) {
+                    mProfileLock.lock();
+                }
+
+                dirty = beginFrame(canvas, dirty, surfaceState);
+
+                int saveCount = 0;
+                int status = DisplayList.STATUS_DONE;
+
+                long start = getSystemTime();
+                try {
+                    status = prepareFrame(dirty);
+
+                    saveCount = canvas.save();
+                    callbacks.onHardwarePreDraw(canvas);
+
+                    status |= drawDisplayList(attachInfo, canvas, displayList, status);
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "An error has occurred while drawing:", e);
+                } finally {
+                    callbacks.onHardwarePostDraw(canvas);
+                    canvas.restoreToCount(saveCount);
+
+                    mDrawDelta = getSystemTime() - start;
+
+                    if (mDrawDelta > 0) {
+                        mFrameCount++;
+
+                        debugOverdraw(attachInfo, dirty, canvas, displayList);
+                        debugDirtyRegions(dirty, canvas);
+                        drawProfileData(attachInfo);
+                    }
+                }
+
+                onPostDraw();
+
+                swapBuffers(status);
+
+                if (mProfileEnabled) {
+                    mProfileLock.unlock();
+                }
+
+                attachInfo.mIgnoreDirtyState = false;
+            }
+        }
+    }
+
+    @Override
     void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
             Rect dirty) {
         if (canDraw()) {
@@ -1144,7 +1199,6 @@ public class GLRenderer extends HardwareRenderer {
             final int surfaceState = checkRenderContextUnsafe();
             if (surfaceState != SURFACE_STATE_ERROR) {
                 HardwareCanvas canvas = mCanvas;
-                attachInfo.mHardwareCanvas = canvas;
 
                 if (mProfileEnabled) {
                     mProfileLock.lock();

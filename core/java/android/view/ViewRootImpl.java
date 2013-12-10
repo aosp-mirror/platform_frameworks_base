@@ -266,10 +266,10 @@ public final class ViewRootImpl implements ViewParent,
     int mScrollY;
     int mCurScrollY;
     Scroller mScroller;
-    HardwareLayer mResizeBuffer;
-    long mResizeBufferStartTime;
-    int mResizeBufferDuration;
-    static final Interpolator mResizeInterpolator = new AccelerateDecelerateInterpolator();
+//    HardwareLayer mResizeBuffer;
+//    long mResizeBufferStartTime;
+//    int mResizeBufferDuration;
+//    static final Interpolator mResizeInterpolator = new AccelerateDecelerateInterpolator();
     private ArrayList<LayoutTransition> mPendingTransitions;
 
     final ViewConfiguration mViewConfiguration;
@@ -933,17 +933,17 @@ public final class ViewRootImpl implements ViewParent,
         return mAppVisible ? mView.getVisibility() : View.GONE;
     }
 
-    void disposeResizeBuffer() {
-        if (mResizeBuffer != null && mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.safelyRun(new Runnable() {
-                @Override
-                public void run() {
-                    mResizeBuffer.destroy();
-                    mResizeBuffer = null;
-                }
-            });
-        }
-    }
+//    void disposeResizeBuffer() {
+//        if (mResizeBuffer != null && mAttachInfo.mHardwareRenderer != null) {
+//            mAttachInfo.mHardwareRenderer.safelyRun(new Runnable() {
+//                @Override
+//                public void run() {
+//                    mResizeBuffer.destroy();
+//                    mResizeBuffer = null;
+//                }
+//            });
+//        }
+//    }
 
     /**
      * Add LayoutTransition to the list of transitions to be started in the next traversal.
@@ -1454,75 +1454,76 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean visibleInsetsChanged = !mPendingVisibleInsets.equals(
                         mAttachInfo.mVisibleInsets);
                 if (contentInsetsChanged) {
-                    if (mWidth > 0 && mHeight > 0 && lp != null &&
-                            ((lp.systemUiVisibility|lp.subtreeSystemUiVisibility)
-                                    & View.SYSTEM_UI_LAYOUT_FLAGS) == 0 &&
-                            mSurface != null && mSurface.isValid() &&
-                            !mAttachInfo.mTurnOffWindowResizeAnim &&
-                            mAttachInfo.mHardwareRenderer != null &&
-                            mAttachInfo.mHardwareRenderer.isEnabled() &&
-                            mAttachInfo.mHardwareRenderer.validate() &&
-                            lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
-
-                        disposeResizeBuffer();
-
-                        boolean completed = false;
-                        HardwareCanvas hwRendererCanvas = mAttachInfo.mHardwareRenderer.getCanvas();
-                        HardwareCanvas layerCanvas = null;
-                        try {
-                            if (mResizeBuffer == null) {
-                                mResizeBuffer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
-                                        mWidth, mHeight, false);
-                            } else if (mResizeBuffer.getWidth() != mWidth ||
-                                    mResizeBuffer.getHeight() != mHeight) {
-                                mResizeBuffer.resize(mWidth, mHeight);
-                            }
-                            // TODO: should handle create/resize failure
-                            layerCanvas = mResizeBuffer.start(hwRendererCanvas);
-                            final int restoreCount = layerCanvas.save();
-
-                            int yoff;
-                            final boolean scrolling = mScroller != null
-                                    && mScroller.computeScrollOffset();
-                            if (scrolling) {
-                                yoff = mScroller.getCurrY();
-                                mScroller.abortAnimation();
-                            } else {
-                                yoff = mScrollY;
-                            }
-
-                            layerCanvas.translate(0, -yoff);
-                            if (mTranslator != null) {
-                                mTranslator.translateCanvas(layerCanvas);
-                            }
-
-                            DisplayList displayList = mView.mDisplayList;
-                            if (displayList != null && displayList.isValid()) {
-                                layerCanvas.drawDisplayList(displayList, null,
-                                        DisplayList.FLAG_CLIP_CHILDREN);
-                            } else {
-                                mView.draw(layerCanvas);
-                            }
-
-                            drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
-
-                            mResizeBufferStartTime = SystemClock.uptimeMillis();
-                            mResizeBufferDuration = mView.getResources().getInteger(
-                                    com.android.internal.R.integer.config_mediumAnimTime);
-                            completed = true;
-
-                            layerCanvas.restoreToCount(restoreCount);
-                        } catch (OutOfMemoryError e) {
-                            Log.w(TAG, "Not enough memory for content change anim buffer", e);
-                        } finally {
-                            if (mResizeBuffer != null) {
-                                mResizeBuffer.end(hwRendererCanvas);
-                                if (!completed) {
-                                    disposeResizeBuffer();
-                                }
-                            }
-                        }
-                    }
+//                    TODO: Do something with this...
+//                    if (mWidth > 0 && mHeight > 0 && lp != null &&
+//                            ((lp.systemUiVisibility|lp.subtreeSystemUiVisibility)
+//                                    & View.SYSTEM_UI_LAYOUT_FLAGS) == 0 &&
+//                            mSurface != null && mSurface.isValid() &&
+//                            !mAttachInfo.mTurnOffWindowResizeAnim &&
+//                            mAttachInfo.mHardwareRenderer != null &&
+//                            mAttachInfo.mHardwareRenderer.isEnabled() &&
+//                            mAttachInfo.mHardwareRenderer.validate() &&
+//                            lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
+//
+//                        disposeResizeBuffer();
+//
+//                        boolean completed = false;
+//                        HardwareCanvas hwRendererCanvas = mAttachInfo.mHardwareRenderer.getCanvas();
+//                        HardwareCanvas layerCanvas = null;
+//                        try {
+//                            if (mResizeBuffer == null) {
+//                                mResizeBuffer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
+//                                        mWidth, mHeight, false);
+//                            } else if (mResizeBuffer.getWidth() != mWidth ||
+//                                    mResizeBuffer.getHeight() != mHeight) {
+//                                mResizeBuffer.resize(mWidth, mHeight);
+//                            }
+//                            // TODO: should handle create/resize failure
+//                            layerCanvas = mResizeBuffer.start(hwRendererCanvas);
+//                            final int restoreCount = layerCanvas.save();
+//
+//                            int yoff;
+//                            final boolean scrolling = mScroller != null
+//                                    && mScroller.computeScrollOffset();
+//                            if (scrolling) {
+//                                yoff = mScroller.getCurrY();
+//                                mScroller.abortAnimation();
+//                            } else {
+//                                yoff = mScrollY;
+//                            }
+//
+//                            layerCanvas.translate(0, -yoff);
+//                            if (mTranslator != null) {
+//                                mTranslator.translateCanvas(layerCanvas);
+//                            }
+//
+//                            DisplayList displayList = mView.mDisplayList;
+//                            if (displayList != null && displayList.isValid()) {
+//                                layerCanvas.drawDisplayList(displayList, null,
+//                                        DisplayList.FLAG_CLIP_CHILDREN);
+//                            } else {
+//                                mView.draw(layerCanvas);
+//                            }
+//
+//                            drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
+//
+//                            mResizeBufferStartTime = SystemClock.uptimeMillis();
+//                            mResizeBufferDuration = mView.getResources().getInteger(
+//                                    com.android.internal.R.integer.config_mediumAnimTime);
+//                            completed = true;
+//
+//                            layerCanvas.restoreToCount(restoreCount);
+//                        } catch (OutOfMemoryError e) {
+//                            Log.w(TAG, "Not enough memory for content change anim buffer", e);
+//                        } finally {
+//                            if (mResizeBuffer != null) {
+//                                mResizeBuffer.end(hwRendererCanvas);
+//                                if (!completed) {
+//                                    disposeResizeBuffer();
+//                                }
+//                            }
+//                        }
+//                    }
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
                             + mAttachInfo.mContentInsets);
@@ -1582,7 +1583,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (mScroller != null) {
                         mScroller.abortAnimation();
                     }
-                    disposeResizeBuffer();
+//                    disposeResizeBuffer();
                     // Our surface is gone
                     if (mAttachInfo.mHardwareRenderer != null &&
                             mAttachInfo.mHardwareRenderer.isEnabled()) {
@@ -2181,23 +2182,28 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void onHardwarePostDraw(HardwareCanvas canvas) {
-        if (mResizeBuffer != null) {
-            mResizePaint.setAlpha(mResizeAlpha);
-            canvas.drawHardwareLayer(mResizeBuffer, 0.0f, mHardwareYOffset, mResizePaint);
+//        if (mResizeBuffer != null) {
+//            mResizePaint.setAlpha(mResizeAlpha);
+//            canvas.drawHardwareLayer(mResizeBuffer, 0.0f, mHardwareYOffset, mResizePaint);
+//        }
+        // TODO: this
+        if (!HardwareRenderer.sUseRenderThread) {
+            drawAccessibilityFocusedDrawableIfNeeded(canvas);
         }
-        drawAccessibilityFocusedDrawableIfNeeded(canvas);
     }
 
     /**
      * @hide
      */
     void outputDisplayList(View view) {
-        if (mAttachInfo != null && mAttachInfo.mHardwareCanvas != null) {
-            DisplayList displayList = view.getDisplayList();
-            if (displayList != null) {
-                mAttachInfo.mHardwareCanvas.outputDisplayList(displayList);
-            }
-        }
+        // TODO - route through HardwareCanvas so it can be
+        //        proxied to the correct thread
+//        if (mAttachInfo != null && mAttachInfo.mHardwareCanvas != null) {
+//            DisplayList displayList = view.getDisplayList();
+//            if (displayList != null) {
+//                mAttachInfo.mHardwareCanvas.outputDisplayList(displayList);
+//            }
+//        }
     }
 
     /**
@@ -2342,17 +2348,17 @@ public final class ViewRootImpl implements ViewParent,
         final boolean scalingRequired = attachInfo.mScalingRequired;
 
         int resizeAlpha = 0;
-        if (mResizeBuffer != null) {
-            long deltaTime = SystemClock.uptimeMillis() - mResizeBufferStartTime;
-            if (deltaTime < mResizeBufferDuration) {
-                float amt = deltaTime/(float) mResizeBufferDuration;
-                amt = mResizeInterpolator.getInterpolation(amt);
-                animating = true;
-                resizeAlpha = 255 - (int)(amt*255);
-            } else {
-                disposeResizeBuffer();
-            }
-        }
+//        if (mResizeBuffer != null) {
+//            long deltaTime = SystemClock.uptimeMillis() - mResizeBufferStartTime;
+//            if (deltaTime < mResizeBufferDuration) {
+//                float amt = deltaTime/(float) mResizeBufferDuration;
+//                amt = mResizeInterpolator.getInterpolation(amt);
+//                animating = true;
+//                resizeAlpha = 255 - (int)(amt*255);
+//            } else {
+//                disposeResizeBuffer();
+//            }
+//        }
 
         final Rect dirty = mDirty;
         if (mSurfaceHolder != null) {
@@ -2362,7 +2368,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (mScroller != null) {
                     mScroller.abortAnimation();
                 }
-                disposeResizeBuffer();
+//                disposeResizeBuffer();
             }
             return;
         }
@@ -2725,7 +2731,7 @@ public final class ViewRootImpl implements ViewParent,
         if (scrollY != mScrollY) {
             if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Pan scroll changed: old="
                     + mScrollY + " , new=" + scrollY);
-            if (!immediate && mResizeBuffer == null) {
+            if (!immediate /*&& mResizeBuffer == null*/) {
                 if (mScroller == null) {
                     mScroller = new Scroller(mView.getContext());
                 }
@@ -5404,7 +5410,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Hardware rendering
                 if (mAttachInfo.mHardwareRenderer != null) {
-                    if (mAttachInfo.mHardwareRenderer.loadSystemProperties(mSurface)) {
+                    if (mAttachInfo.mHardwareRenderer.loadSystemProperties()) {
                         invalidate();
                     }
                 }

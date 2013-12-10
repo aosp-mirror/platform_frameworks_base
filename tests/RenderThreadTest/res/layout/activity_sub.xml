@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <View
+        android:id="@+id/bg_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/starry_night_bg" />
+
+    <LinearLayout
+        android:id="@+id/my_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <View
+            android:id="@+id/from_left"
+            android:layout_width="match_parent"
+            android:layout_height="48dip"
+            android:background="#7000FF00" />
+
+        <View
+            android:id="@+id/from_right"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_margin="80dip"
+            android:layout_weight="1"
+            android:background="#90FF0000" />
+
+        <View
+            android:id="@+id/from_left"
+            android:layout_width="match_parent"
+            android:layout_height="48dip"
+            android:background="#7000FF00" />
+    </LinearLayout>
+
+</FrameLayout>
