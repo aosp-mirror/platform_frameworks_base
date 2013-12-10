@@ -4865,59 +4865,67 @@ public final class ViewRootImpl implements ViewParent,
         };
     }
 
+    private KeyEvent getSyntheticFallbackKey(KeyEvent event) {
+        // In some locales (like Japan) controllers use B for confirm and A for back, rather
+        // than vice versa, so we need to special case this here since the input system itself
+        // is not locale-aware.
+        int keyCode;
+        switch(event.getKeyCode()) {
+            case KeyEvent.KEYCODE_BUTTON_A:
+            case KeyEvent.KEYCODE_BUTTON_C:
+            case KeyEvent.KEYCODE_BUTTON_X:
+            case KeyEvent.KEYCODE_BUTTON_Z:
+                keyCode = mFlipControllerFallbackKeys ?
+                    KeyEvent.KEYCODE_BACK : KeyEvent.KEYCODE_DPAD_CENTER;
+                break;
+            case KeyEvent.KEYCODE_BUTTON_B:
+            case KeyEvent.KEYCODE_BUTTON_Y:
+                keyCode = mFlipControllerFallbackKeys ?
+                    KeyEvent.KEYCODE_DPAD_CENTER : KeyEvent.KEYCODE_BACK;
+                break;
+            case KeyEvent.KEYCODE_BUTTON_THUMBL:
+            case KeyEvent.KEYCODE_BUTTON_THUMBR:
+            case KeyEvent.KEYCODE_BUTTON_START:
+            case KeyEvent.KEYCODE_BUTTON_1:
+            case KeyEvent.KEYCODE_BUTTON_2:
+            case KeyEvent.KEYCODE_BUTTON_3:
+            case KeyEvent.KEYCODE_BUTTON_4:
+            case KeyEvent.KEYCODE_BUTTON_5:
+            case KeyEvent.KEYCODE_BUTTON_6:
+            case KeyEvent.KEYCODE_BUTTON_7:
+            case KeyEvent.KEYCODE_BUTTON_8:
+            case KeyEvent.KEYCODE_BUTTON_9:
+            case KeyEvent.KEYCODE_BUTTON_10:
+            case KeyEvent.KEYCODE_BUTTON_11:
+            case KeyEvent.KEYCODE_BUTTON_12:
+            case KeyEvent.KEYCODE_BUTTON_13:
+            case KeyEvent.KEYCODE_BUTTON_14:
+            case KeyEvent.KEYCODE_BUTTON_15:
+            case KeyEvent.KEYCODE_BUTTON_16:
+                keyCode = KeyEvent.KEYCODE_DPAD_CENTER;
+                break;
+            case KeyEvent.KEYCODE_BUTTON_SELECT:
+            case KeyEvent.KEYCODE_BUTTON_MODE:
+                keyCode = KeyEvent.KEYCODE_MENU;
+            default:
+                return null;
+        }
+        return KeyEvent.obtain(event.getDownTime(), event.getEventTime(),
+                        event.getAction(), keyCode, event.getRepeatCount(), event.getMetaState(),
+                        event.getDeviceId(), event.getScanCode(),
+                        event.getFlags() | KeyEvent.FLAG_FALLBACK, event.getSource(), null);
+    }
+
+
     final class SyntheticKeyHandler {
 
         public boolean process(KeyEvent event) {
-            // In some locales (like Japan) controllers use B for confirm and A for back, rather
-            // than vice versa, so we need to special case this here since the input system itself
-            // is not locale-aware.
-            int keyCode;
-            switch(event.getKeyCode()) {
-                case KeyEvent.KEYCODE_BUTTON_A:
-                case KeyEvent.KEYCODE_BUTTON_C:
-                case KeyEvent.KEYCODE_BUTTON_X:
-                case KeyEvent.KEYCODE_BUTTON_Z:
-                    keyCode = mFlipControllerFallbackKeys ?
-                        KeyEvent.KEYCODE_BACK : KeyEvent.KEYCODE_DPAD_CENTER;
-                    break;
-                case KeyEvent.KEYCODE_BUTTON_B:
-                case KeyEvent.KEYCODE_BUTTON_Y:
-                    keyCode = mFlipControllerFallbackKeys ?
-                        KeyEvent.KEYCODE_DPAD_CENTER : KeyEvent.KEYCODE_BACK;
-                    break;
-                case KeyEvent.KEYCODE_BUTTON_THUMBL:
-                case KeyEvent.KEYCODE_BUTTON_THUMBR:
-                case KeyEvent.KEYCODE_BUTTON_START:
-                case KeyEvent.KEYCODE_BUTTON_1:
-                case KeyEvent.KEYCODE_BUTTON_2:
-                case KeyEvent.KEYCODE_BUTTON_3:
-                case KeyEvent.KEYCODE_BUTTON_4:
-                case KeyEvent.KEYCODE_BUTTON_5:
-                case KeyEvent.KEYCODE_BUTTON_6:
-                case KeyEvent.KEYCODE_BUTTON_7:
-                case KeyEvent.KEYCODE_BUTTON_8:
-                case KeyEvent.KEYCODE_BUTTON_9:
-                case KeyEvent.KEYCODE_BUTTON_10:
-                case KeyEvent.KEYCODE_BUTTON_11:
-                case KeyEvent.KEYCODE_BUTTON_12:
-                case KeyEvent.KEYCODE_BUTTON_13:
-                case KeyEvent.KEYCODE_BUTTON_14:
-                case KeyEvent.KEYCODE_BUTTON_15:
-                case KeyEvent.KEYCODE_BUTTON_16:
-                    keyCode = KeyEvent.KEYCODE_DPAD_CENTER;
-                    break;
-                case KeyEvent.KEYCODE_BUTTON_SELECT:
-                case KeyEvent.KEYCODE_BUTTON_MODE:
-                    keyCode = KeyEvent.KEYCODE_MENU;
-                default:
-                    return false;
+            KeyEvent syntheticKey = getSyntheticFallbackKey(event);
+            if (syntheticKey != null) {
+                enqueueInputEvent(syntheticKey);
+                return true;
             }
-
-            enqueueInputEvent(new KeyEvent(event.getDownTime(), event.getEventTime(),
-                        event.getAction(), keyCode, event.getRepeatCount(), event.getMetaState(),
-                        event.getDeviceId(), event.getScanCode(),
-                        event.getFlags() | KeyEvent.FLAG_FALLBACK, event.getSource()));
-            return true;
+            return false;
         }
 
     }
@@ -5857,23 +5865,32 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dispatchUnhandledKey(KeyEvent event) {
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-            final KeyCharacterMap kcm = event.getKeyCharacterMap();
-            final int keyCode = event.getKeyCode();
-            final int metaState = event.getMetaState();
+            // Some fallback keys are decided by the ViewRoot as they might have special
+            // properties (e.g. are locale aware). These take precedence over fallbacks defined by
+            // the kcm.
+            KeyEvent fallbackEvent = getSyntheticFallbackKey(event);
 
-            // Check for fallback actions specified by the key character map.
-            KeyCharacterMap.FallbackAction fallbackAction =
-                    kcm.getFallbackAction(keyCode, metaState);
-            if (fallbackAction != null) {
-                final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
-                KeyEvent fallbackEvent = KeyEvent.obtain(
-                        event.getDownTime(), event.getEventTime(),
-                        event.getAction(), fallbackAction.keyCode,
-                        event.getRepeatCount(), fallbackAction.metaState,
-                        event.getDeviceId(), event.getScanCode(),
-                        flags, event.getSource(), null);
-                fallbackAction.recycle();
+            if (fallbackEvent == null) {
+                final KeyCharacterMap kcm = event.getKeyCharacterMap();
+                final int keyCode = event.getKeyCode();
+                final int metaState = event.getMetaState();
 
+                // Check for fallback actions specified by the key character map.
+                KeyCharacterMap.FallbackAction fallbackAction =
+                        kcm.getFallbackAction(keyCode, metaState);
+                if (fallbackAction != null) {
+                    final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
+                    fallbackEvent = KeyEvent.obtain(
+                            event.getDownTime(), event.getEventTime(),
+                            event.getAction(), fallbackAction.keyCode,
+                            event.getRepeatCount(), fallbackAction.metaState,
+                            event.getDeviceId(), event.getScanCode(),
+                            flags, event.getSource(), null);
+                    fallbackAction.recycle();
+
+                }
+            }
+            if (fallbackEvent != null) {
                 dispatchInputEvent(fallbackEvent);
             }
         }
