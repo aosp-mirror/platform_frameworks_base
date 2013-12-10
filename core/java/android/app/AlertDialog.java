@@ -146,19 +146,25 @@ public class AlertDialog extends Dialog implements DialogInterface {
     }
 
     /**
-     * Gets one of the buttons used in the dialog.
+     * Gets one of the buttons used in the dialog. Returns null if the specified
+     * button does not exist in the dialog.
      * <p>
-     * If a button does not exist in the dialog, null will be returned.
-     * 
+     * Prior to API 20, this function could only be called after the dialog was
+     * shown. In later versions, this function may be called at any time;
+     * however, calling this function locks in various attributes including
+     * buttons and icons.
+     *
      * @param whichButton The identifier of the button that should be returned.
      *            For example, this can be
      *            {@link DialogInterface#BUTTON_POSITIVE}.
      * @return The button from the dialog, or null if a button does not exist.
      */
     public Button getButton(int whichButton) {
+        // Superclass handles re-entrance and multiple calls.
+        dispatchOnCreate(null);
         return mAlert.getButton(whichButton);
     }
-    
+
     /**
      * Gets the list view used in the dialog.
      *  
