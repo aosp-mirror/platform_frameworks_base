@@ -19,22 +19,67 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * {@hide}
+ * Battery properties that may be queried using
+ * {@link BatteryManager#getProperty
+ * BatteryManager.getProperty()}
  */
 public class BatteryProperty implements Parcelable {
     /*
      * Battery property identifiers.  These must match the values in
      * frameworks/native/include/batteryservice/BatteryService.h
      */
-    public static final int BATTERY_PROP_CHARGE_COUNTER = 1;
-    public static final int BATTERY_PROP_CURRENT_NOW = 2;
-    public static final int BATTERY_PROP_CURRENT_AVG = 3;
-    public static final int BATTERY_PROP_CAPACITY = 4;
+    /** Battery capacity in microampere-hours, as an integer. */
+    public static final int CHARGE_COUNTER = 1;
 
-    public int valueInt;
+    /**
+     * Instantaneous battery current in microamperes, as an integer.  Positive
+     * values indicate net current entering the battery from a charge source,
+     * negative values indicate net current discharging from the battery.
+     */
+    public static final int CURRENT_NOW = 2;
 
+    /**
+     * Average battery current in microamperes, as an integer.  Positive
+     * values indicate net current entering the battery from a charge source,
+     * negative values indicate net current discharging from the battery.
+     * The time period over which the average is computed may depend on the
+     * fuel gauge hardware and its configuration.
+     */
+    public static final int CURRENT_AVERAGE = 3;
+
+    /**
+     * Remaining battery capacity as an integer percentage of total capacity
+     * (with no fractional part).
+     */
+    public static final int CAPACITY = 4;
+
+    private int mValueInt;
+
+    /**
+     * @hide
+     */
+    public BatteryProperty(int value) {
+        mValueInt = value;
+    }
+
+    /**
+     * @hide
+     */
     public BatteryProperty() {
-        valueInt = Integer.MIN_VALUE;
+        mValueInt = Integer.MIN_VALUE;
+    }
+
+    /**
+     * Return the value of a property of integer type previously queried
+     * via {@link BatteryManager#getProperty
+     * BatteryManager.getProperty()}.  If the platform does
+     * not provide the property queried, this value will be
+     * Integer.MIN_VALUE.
+     *
+     * @return The queried property value, or Integer.MIN_VALUE if not supported.
+     */
+    public int getInt() {
+        return mValueInt;
     }
 
     /*
@@ -47,11 +92,11 @@ public class BatteryProperty implements Parcelable {
     }
 
     public void readFromParcel(Parcel p) {
-        valueInt = p.readInt();
+        mValueInt = p.readInt();
     }
 
     public void writeToParcel(Parcel p, int flags) {
-        p.writeInt(valueInt);
+        p.writeInt(mValueInt);
     }
 
     public static final Parcelable.Creator<BatteryProperty> CREATOR
