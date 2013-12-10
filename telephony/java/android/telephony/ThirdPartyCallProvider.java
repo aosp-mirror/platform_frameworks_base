@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.android.internal.telephony.IThirdPartyCallProvider;
+import com.android.internal.telephony.IThirdPartyCallSendDtmfCallback;
 
 /**
  * Interface sent to {@link android.telephony.ThirdPartyCallListener#onCallProviderAttached
@@ -55,7 +56,7 @@ public class ThirdPartyCallProvider {
     /**
      * Sends the given DTMF code. The code can be '0'-'9', 'A'-'D', '#', or '*'.
      */
-    public void sendDtmf(char c) {
+    public void sendDtmf(char c, ThirdPartyCallSendDtmfCallback callback) {
         // default implementation empty
     }
 
@@ -76,8 +77,8 @@ public class ThirdPartyCallProvider {
         }
 
         @Override
-        public void sendDtmf(char c) {
-            Message.obtain(mHandler, MSG_SEND_DTMF, (int) c, 0).sendToTarget();
+        public void sendDtmf(char c, IThirdPartyCallSendDtmfCallback callback) {
+            Message.obtain(mHandler, MSG_SEND_DTMF, (int) c, 0, callback).sendToTarget();
         }
     };
 
@@ -95,7 +96,9 @@ public class ThirdPartyCallProvider {
                     incomingCallAccept();
                     break;
                 case MSG_SEND_DTMF:
-                    sendDtmf((char) msg.arg1);
+                    ThirdPartyCallSendDtmfCallback callback = new ThirdPartyCallSendDtmfCallback(
+                            (IThirdPartyCallSendDtmfCallback) msg.obj);
+                    sendDtmf((char) msg.arg1, callback);
                     break;
             }
         }
