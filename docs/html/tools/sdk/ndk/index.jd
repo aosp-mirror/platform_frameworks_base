@@ -1,58 +1,34 @@
 ndk=true
 page.template=sdk
 
-ndk.mac64.legacy_download=android-ndk-r9b-darwin-x86_64-legacy-toolchains.tar.bz2
-ndk.mac64.legacy_bytes=122378495
-ndk.mac64.legacy_checksum=19c696a5b690b040409c68b21e9fcf46
 
-ndk.mac64_download=android-ndk-r9b-darwin-x86_64.tar.bz2
-ndk.mac64_bytes=354748937
-ndk.mac64_checksum=710d80b6ff807f03e585f9aacee3bf09
+ndk.mac64_download=android-ndk-r9c-darwin-x86_64.tar.bz2
+ndk.mac64_bytes=358350393
+ndk.mac64_checksum=154bc0248671b8609037218d3faa47f5
 
+ndk.mac32_download=android-ndk-r9c-darwin-x86.tar.bz2
+ndk.mac32_bytes=352900444
+ndk.mac32_checksum=0ba391eb12d4eed6bd7dbff5d8804e0f
 
-ndk.mac32.legacy_download=android-ndk-r9b-darwin-x86-legacy-toolchains.tar.bz2
-ndk.mac32.legacy_bytes=119394536
-ndk.mac32.legacy_checksum=be0a07bcea3695f7d93cbd1b880d3f75
+ndk.linux64_download=android-ndk-r9c-linux-x86_64.tar.bz2
+ndk.linux64_bytes=371254928
+ndk.linux64_checksum=e9c3fd9881c811753bb57f701b3e05b1
 
-ndk.mac32_download=android-ndk-r9b-darwin-x86.tar.bz2
-ndk.mac32_bytes=349307548
-ndk.mac32_checksum=b5fa7aa3b9fca5a5b0c46bdd970d284b
+ndk.linux32_download=android-ndk-r9c-linux-x86.tar.bz2
+ndk.linux32_bytes=365412557
+ndk.linux32_checksum=93d2aa9a40501b568037642cdb174643
 
+ndk.win64_download=android-ndk-r9c-windows-x86_64.zip
+ndk.win64_bytes=483804820
+ndk.win64_checksum=9e84d0d59ce7d4a24370b619fb8799e4
 
-ndk.linux64.legacy_download=android-ndk-r9b-linux-x86_64-legacy-toolchains.tar.bz2
-ndk.linux64.legacy_bytes=127742633
-ndk.linux64.legacy_checksum=f41017d5888a8dc210d1703dcdf1def7
+ndk.win32_download=android-ndk-r9c-windows-x86.zip
+ndk.win32_bytes=460676475
+ndk.win32_checksum=863b5ab371b63c3e9bf0d39e47903763
 
-ndk.linux64_download=android-ndk-r9b-linux-x86_64.tar.bz2
-ndk.linux64_bytes=366988131
-ndk.linux64_checksum=56c0999a2683d6711591843217f943e0
-
-
-ndk.linux32.legacy_download=android-ndk-r9b-linux-x86-legacy-toolchains.tar.bz2
-ndk.linux32.legacy_bytes=125676842
-ndk.linux32.legacy_checksum=bfc7a1e6baf856b4348d57abffc761d2
-
-ndk.linux32_download=android-ndk-r9b-linux-x86.tar.bz2
-ndk.linux32_bytes=361394055
-ndk.linux32_checksum=d7f783deaeea6b60cb515d9427c01c2e
-
-
-ndk.win64.legacy_download=android-ndk-r9b-windows-x86_64-legacy-toolchains.zip
-ndk.win64.legacy_bytes=166961852
-ndk.win64.legacy_checksum=6eee9459986e8b7f1032d62831dd775b
-
-ndk.win64_download=android-ndk-r9b-windows-x86_64.zip
-ndk.win64_bytes=479012553
-ndk.win64_checksum=1ba6be7ebf4e9272d77031dd70f81e94
-
-
-ndk.win32.legacy_download=android-ndk-r9b-windows-x86-legacy-toolchains.zip
-ndk.win32.legacy_bytes=152568224
-ndk.win32.legacy_checksum=00c8373b53ad9475f1bab1de4219b877
-
-ndk.win32_download=android-ndk-r9b-windows-x86.zip
-ndk.win32_bytes=455928388
-ndk.win32_checksum=cfb9402ea08a1554186e85ed28cb4593
+ndk.debug_info_download=android-ndk-r9c-cxx-stl-libs-with-debugging-info.zip
+ndk.debug_info_bytes=100364569
+ndk.debug_info_checksum=37911716e1fd2fe3abb8a410750d73e6
 
 
 page.title=Android NDK
@@ -288,16 +264,87 @@ $('#Downloads').after($('#download-table'));
   contains legacy NDK toolchains for that platform, which is only required if you are not using
   the current, recommended toolchain for your NDK builds.</p>
 
-
-
 <h2 id="Revisions">Revisions</h2>
 
 <p>The following sections provide information about releases of the NDK.</p>
 
 <div class="toggle-content opened">
+ <p>
+   <a href="#" onclick="return toggleContent(this)"> <img
+     src="/assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+   >Android NDK, Revision 9c</a> <em>(December 2013)</em>
+ </p>
+ <div class="toggle-content-toggleme">
+<p>This is a bug-fix-only release.</p>
+   <dl>
+     <dt>Important bug fixes:</dt>
+     <dd>
+     <ul>
+       <li>Fixed a problem with GCC 4.8 ARM, in which the stack pointer is restored too early. This problem prevented the frame pointer from reliably accessing a variable in the stack frame. For more information, see <a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58854">http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58854</a>.</li>
+<li>- Fixed a problem with GCC 4.8 libstdc++, in which a bug in std::nth_element was causing generation of code that produced a random segfault. For more information, see <a href="https://code.google.com/p/android/issues/detail?id=62910">https://code.google.com/p/android/issues/detail?id=62910</a>.</li>
+           <li>Fixed GCC 4.8 ICE in cc1/cc1plus with <code>-fuse-ld=mcld</code>, so that the following error no longer occurs:
+<pre>cc1: internal compiler error: in common_handle_option, at opts.c:1774</pre></li>
+           <li>Fixed <code>-mhard-float</code> support for <code>__builtin</code> math functions. For ongoing information on fixes for -mhard-float with STL, please follow <a href="http://b.android.com/61784">http://b.android.com/61784</a>.</li>
+     </ul>
+     </dd>
+
+     <dt>Other bug fixes:</dt>
+     <dd>
+     <ul>
+       <li>Header fixes:
+         <ul>
+           <li>Changed prototype of <code>poll</code> to <code>poll(struct pollfd *, nfds_t, int);</code> in <code>poll.h</code>.</li>
+           <li>Added <code>utimensat</code> to <code>libc.so</code> in API levels 12 and 19. It is now present in levels 12-19.</li>
+<li>Introduced <code>futimens</code> into <code>libc.so</code>, as of API level 19.</li>
+<li>Added missing <code>clock_settime()</code> and <code>clock_nanosleep()</code> to <code>time.h</code> for API 8 and higher.</li>
+<li>Added <code>CLOCK_MONOTONIC_RAW, CLOCK_REALTIME_COARSE, CLOCK_MONOTONIC_COARSE, CLOCK_BOOTTIME, CLOCK_REALTIME_ALARM,</code> and <code>CLOCK_BOOTTIME_ALARM</code> in <code>time.h.</code></li>
+<li>Removed obsolete <code>CLOCK_REALTIME_HR</code> and <code>CLOCK_MONOTONIC_HR.</code></li>
+         </ul>
+       </li>
+       <li>Refactored samples Teapot, MoreTeapots, and <code>source/android/ndk_helper</code> as follows:
+         <ul>
+<li>They now use a hard-float abi for armeabi-v7a.</li>
+<li>Android-19 now has immersive mode.</li>
+<li>Fixed a problem with <code>Check_ReleaseStringUTFChars</code> in <code>/system/lib/libdvm.so</code> that was causing crashes on x86 devices.</li>
+         </ul>
+        </li>
+<li>Fixed ndk-build fails that happen in cygwin when the NDK package is referenced via symlink.</li>
+<li>Fixed ndk-build.cmd fails that happen in windows <code>cmd.exe</code> when <code>LOCAL_SRC_FILES</code> contains absolute paths. See <a href="https://android-review.googlesource.com/#/c/69992">https://android-review.googlesource.com/#/c/69992.</a></li>
+<li>Fixed ndk-stack to proceed even when it can't parse a frame due to inability to find a routine, filename, or line number. In any of those cases, it prints "??".</li>
+<li>Fixed ndk-stack windows-x64_64 so that it no longer erroneously matches a frame line with a line in the <code>stack:</code>
+  section that doesn't contain <code>pc</code>, <code>eip</code>, or <code>ip</code>. For example:
+<pre>I/DEBUG   ( 1151):     #00  5f09db68  401f01c4  /system/lib/libc.so</pre></li>
+<li>Fixed gabi++ so that it:
+     <ul>
+         <li>Does not use malloc() to allocate C++ thread-local
+  objects.</li>
+         <li>Avoids deadlocks in gabi++ in cases where libc.debug.malloc is non-zero in
+  userdebug/eng Android platform builds.</li>
+     </ul>
+     </ul>
+     </dd>
+
+     <dt>Other changes:</dt>
+     <dd>
+     <ul>
+       <li>Added <code>LOCAL_EXPORT_LDFLAGS</code>.</li>
+<li>Introduced the <code>NDK_PROJECT_PATH=null</code> setting for use in an integrated build system where options are explicitly passed to <code>ndk-build</code>. With this setting, <code>ndk-build</code> makes no attempt to look for <code>NDK_PROJECT_PATH.</code> This setting also prevents variables from deriving default settings from NDK_PROJECT_PATH. As a result, the following variables must now be explicitly specified (with their default values if such exist): <code>NDK_OUT, NDK_LIBS_OUT, APP_BUILD_SCRIPT, NDK_DEBUG</code> (optional, default to 0), and other <code>APP_*</code>'s contained in <code>Application.mk</code>.</li>
+<li><code>APP_ABI</code> can now be enumerated in a comma-delimited list. For example:
+<pre>APP_ABI := "armeabi,armeabi-v7a"</pre></li>
+<li>Provided the ability (option <code>-g</code>) to rebuild all of STL with debugging info in an optional, separate package called <code>android-ndk-r9c-cxx-stl-libs-with-debugging-info.zip</code>. This option helps ndk-stack to provide better a stack dump across STL. This change should not affect the code/size of the final, stripped file.</li>
+<li>Enhanced <code>hello-jni</code> samples to report <code>APP_ABI</code> at compilation.</li>
+<li>Used the <code>ar</code> tool in Deterministic mode (option <code>-D</code>) to build static libraries.  For more information, see <a href="http://b.android.com/60705">http://b.android.com/60705</a>.</li>
+     </ul>
+     </dd>
+
+   </dl>
+ </div>
+</div>
+
+<div class="toggle-content closed">
   <p>
     <a href="#" onclick="return toggleContent(this)"> <img
-      src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+      src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
     >Android NDK, Revision 9b</a> <em>(October 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
