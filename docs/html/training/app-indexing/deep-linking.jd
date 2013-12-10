@@ -1,0 +1,134 @@
+page.title=Enabling Deep Links for App Content
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#adding-filters">Add Intent Filters for Your Deep Links</a></li>
+  <li><a href="#handling-intents">Read Data from Incoming Intents</a></li>
+  <li><a href="#testing-filters">Test Your Deep Links</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+<li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a></li>
+<li><a href="{@docRoot}training/basics/intents/filters.html">Allow Other Apps to Start Your Activity</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>To enable Google to crawl your app content and allow users to enter your app
+  from search results, you must add intent filters for the relevant
+  activities in your app manifest. These intent filters allow
+  <em>deep linking</em> to the content in any of your activities. For example, the user might click on a deep link to view a page within a shopping app that describes a product offering that the user is searching for.</p>
+
+<h2 id="adding-filters">Add Intent Filters for Your Deep Links</h2>
+<p>To create a deep link to your app content, add an intent filter that
+  contains these elements and attribute values in your manifest:</p>
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+<dd>Specify the {@link android.content.Intent#ACTION_VIEW} intent action so
+  that the intent filter can be reached from Google Search.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+<dd>Add one or more <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> tags, where each tag represents a URI format that resolves to the activity. At minimum, the <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> tag must include the <a href="{@docRoot}guide/topics/manifest/data-element.html#scheme">{@code android:scheme}</a> attribute.
+<p>You can add additional attributes to further refine the type of URI that the activity accepts. For example, you might have multiple activities that accept similar URIs, but which differ simply based on the path name. In this case, use the <a href="{@docRoot}guide/topics/manifest/data-element.html#path">{@code android:path}</a> attribute or its variants ({@code pathPattern} or {@code pathPrefix}) to differentiate which activity the system should open for different URI paths.</p></dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+<dd>Include the {@link android.content.Intent#CATEGORY_BROWSABLE BROWSABLE}
+category. The {@link android.content.Intent#CATEGORY_BROWSABLE BROWSABLE}
+category is required in order for the intent filter to be accessible from a web
+browser. Without it, clicking a link in a browser cannot resolve to your app.
+The {@link android.content.Intent#CATEGORY_DEFAULT DEFAULT} category is
+optional, but recommended. Without this category, the activity can be started
+only with an explicit intent, using your app component name.
+</dd>
+</dl>
+
+<p>The following XML snippet shows how you might specify an intent filter
+in your manifest for deep linking. The URIs {@code “example://gizmos”} and
+{@code “http://www.example.com/gizmos”} both resolve to this activity.</p>
+
+<pre>
+&lt;activity
+    android:name="com.example.android.GizmosActivity"
+    android:label="@string/title_gizmos" &gt;
+    &lt;intent-filter android:label="@string/filter_title_viewgizmos"&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;!-- Accepts URIs that begin with "example://gizmos” --&gt;
+        &lt;data android:scheme="example"
+              android:host="gizmos" /&gt;
+        &lt;!-- Accepts URIs that begin with "http://www.example.com/gizmos” --&gt;
+        &lt;data android:scheme="http"
+              android:host="www.example.com"
+              android:pathPrefix="gizmos" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>Once you've added intent filters with URIs for activity content to your app
+manifest, Android is able to route any {@link android.content.Intent}
+that has matching URIs to your app at runtime.</p>
+
+<p>To learn more about defining intent filters, see <a href="{@docRoot}training/basics/intents/filters.html">Allow Other Apps to Start Your Activity</a>.</p>
+
+<h2 id="handling-intents">Read Data from Incoming Intents</h2>
+<p>Once the system starts your activity through an intent filter, you can
+  use data provided by the {@link android.content.Intent} to determine what you need to render. Call the {@link android.content.Intent#getData()} and
+{@link android.content.Intent#getAction()} methods to retrieve the data and
+action associated with the incoming {@link android.content.Intent}. You can
+call these methods at any time during the lifecycle of the activity, but you
+should generally do so during early callbacks such as {@link
+android.app.Activity#onCreate(android.os.Bundle) onCreate()} or
+{@link android.app.Activity#onStart()}.</p>
+<p>Here’s a snippet that shows how to retrieve data from an
+{@link android.content.Intent}:</p>
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    Intent intent = getIntent();
+    String action = intent.getAction();
+    Uri data = intent.getData();
+}
+</pre>
+<p>Follow these best practices to improve the user's experience:</p>
+<ul>
+<li>The deep link should take users directly to the content,
+without any prompts, interstitial pages, or logins. Make sure that users can
+see the app content even if they never previously opened the application.
+It is okay to prompt users on subsequent interactions or when they open the app
+from the Launcher. This is the same principle as the <a href="https://support.google.com/webmasters/answer/74536?hl=en" class="external-link" target="_blank">first click free</a> experience for web sites.</li>
+<li>Follow the design guidance described in
+  <a href="{@docRoot}design/patterns/navigation.html">Navigation with Back and Up</a>
+  so that your app matches users' expectations for backward navigation after
+  they enter your app through a deep link.
+</li>
+</ul>
+
+<h2 id="testing-filters">Test Your Deep Links</h2>
+<p>You can use the <a href="{@docRoot}tools/help/adb.html">Android Debug
+Bridge</a> with the activity manager (am) tool to test that the intent filter
+URIs you specified for deep linking resolve to the correct app activity. You
+can run the adb command against a device or an emulator.</p>
+<p>The general syntax for testing an intent filter URI with adb is:</p>
+<pre>
+$ adb shell am start
+        -W -a android.intent.action.VIEW
+        -d &lt;URI&gt; &lt;PACKAGE&gt;
+</pre>
+<p>For example, the command below tries to view a target app activity that
+is associated with the specified URI.</p>
+<pre>
+$ adb shell am start
+        -W -a android.intent.action.VIEW
+        -d "example://gizmos" com.example.android
+</pre>
