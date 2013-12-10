@@ -2196,14 +2196,10 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     void outputDisplayList(View view) {
-        // TODO - route through HardwareCanvas so it can be
-        //        proxied to the correct thread
-//        if (mAttachInfo != null && mAttachInfo.mHardwareCanvas != null) {
-//            DisplayList displayList = view.getDisplayList();
-//            if (displayList != null) {
-//                mAttachInfo.mHardwareCanvas.outputDisplayList(displayList);
-//            }
-//        }
+        DisplayList displayList = view.getDisplayList();
+        if (displayList != null) {
+            displayList.output();
+        }
     }
 
     /**

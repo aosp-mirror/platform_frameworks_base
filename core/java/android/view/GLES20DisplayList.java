@@ -440,6 +440,13 @@ class GLES20DisplayList extends DisplayList {
         }
     }
 
+    @Override
+    public void output() {
+        if (hasNativeDisplayList()) {
+            nOutput(mFinalizer.mNativeDisplayList);
+        }
+    }
+
     private static native void nReset(int displayList);
     private static native void nOffsetTopAndBottom(int displayList, float offset);
     private static native void nOffsetLeftAndRight(int displayList, float offset);
@@ -487,6 +494,7 @@ class GLES20DisplayList extends DisplayList {
     private static native float nGetRotationY(int displayList);
     private static native float nGetPivotX(int displayList);
     private static native float nGetPivotY(int displayList);
+    private static native void nOutput(int displayList);
 
     ///////////////////////////////////////////////////////////////////////////
     // Finalization
