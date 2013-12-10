@@ -1,0 +1,171 @@
+page.title=Build Tools
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See Also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/building/index.html">Building and Running</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Build Tools is a component of the Android SDK required for building Android
+  application code. The latest version of these tools is included in the
+  <a href="{@docRoot}sdk/index.html">SDK starter package</a> and installed in the
+  <code>&lt;sdk&gt;/build-tools/</code> directory.</p>
+
+<p>You should always keep your Build Tools component updated by downloading the latest version
+  using the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>. By default,
+  the Android SDK uses the most recent downloaded version of the Build Tools. If your projects
+  depend on older versions of the Build Tools, the SDK Manager allows you to download and maintain
+  separate versions of the tools for use with those projects.</p>
+
+<p>To use a specific version of the Build Tools in your application project:</p>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Eclipse</a></p>
+
+  <div class="toggle-content-toggleme">
+  <ol>
+    <li>In the root folder of your application project, find the {@code project.properties}
+      file.</li>
+    <li>Open the file and specify the Build Tools version by adding a {@code buildtools} property
+      on a separate line:
+<pre>
+sdk.buildtools=17.0.0
+</pre>
+    </li>
+  </ol>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Android Studio</a></p>
+
+  <div class="toggle-content-toggleme">
+  <ol>
+    <li>In the root folder of your application project, find the {@code build.gradle}
+      file.</li>
+    <li>Open the file and specify the Build Tools version by adding a {@code buildToolsVersion}
+      property to the {@code android} section:
+<pre>
+android {
+    ...
+    buildToolsVersion "17.0.0"
+    ...
+}
+</pre>
+    </li>
+  </ol>
+  </div>
+</div>
+
+
+<h2 id="notes">Revisions</h2>
+
+<p>The sections below provide notes about releases of the Build Tools. To determine which
+revisions of the Build Tools are available in your SDK, refer to the <em>Installed Packages</em>
+listing in the Android SDK Manager.</p>
+
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 19.0.1</a> <em>(December 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <dl>
+      <dt>Fixed miscellaneous build issues:</dt>
+      <dd>
+        <ul>
+          <li>Fixed support for compiling RenderScript in NDK mode with Gradle.</li>
+          <li>Fixed {@code BufferOverflowException} problem in the dx build.
+            (<a href="http://b.android.com/61710">Issue 61710</a>)
+          </li>
+        </ul>
+      </dd>
+    </dl>
+    <p></p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 19</a> <em>(October 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <p>Added support for Android 4.4 (API level 19) build targets.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 18.1.1</a> <em>(September 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <p>Fixed several minor build issues.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 18.1.0</a> <em>(September 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <p>Fixed issue with RenderScript support mode.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 18.0.1</a> <em>(July 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <p>Added support for Android 4.3 (API level 18) build targets.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 17</a> <em>(May 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release.</p>
+
+    <dl>
+      <dt>General Notes:</dt>
+      <dd>
+        <ul>
+          <li>Included support for Android 4.2 (API level 17) build targets.</li>
+          <li>Decoupled the build-specific components of the Android SDK from the platform-tools
+          component, so that the build tools can be updated independently of the integrated
+          development environment (IDE) components.</li>
+        </ul>
+      </dd>
+    </dl>
+
+  </div>
+</div>
