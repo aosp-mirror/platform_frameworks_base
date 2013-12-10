@@ -125,7 +125,6 @@ public:
     Vector<const SkPath*> paths;
     SortedVector<const SkPath*> sourcePaths;
     Vector<const SkRegion*> regions;
-    Vector<const SkMatrix*> matrices;
     Vector<Layer*> layers;
     uint32_t functorCount;
     bool hasDrawOps;

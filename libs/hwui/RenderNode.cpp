@@ -212,9 +212,9 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
         renderer.translate(properties().getLeft(), properties().getTop());
     }
     if (properties().getStaticMatrix()) {
-        renderer.concatMatrix(properties().getStaticMatrix());
+        renderer.concatMatrix(*properties().getStaticMatrix());
     } else if (properties().getAnimationMatrix()) {
-        renderer.concatMatrix(properties().getAnimationMatrix());
+        renderer.concatMatrix(*properties().getAnimationMatrix());
     }
     if (properties().hasTransformMatrix()) {
         if (properties().isTransformTranslateOnly()) {

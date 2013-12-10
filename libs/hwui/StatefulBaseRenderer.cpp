@@ -121,20 +121,16 @@ void StatefulBaseRenderer::skew(float sx, float sy) {
     mSnapshot->transform->skew(sx, sy);
 }
 
-void StatefulBaseRenderer::setMatrix(const SkMatrix* matrix) {
-    if (matrix) {
-        mSnapshot->transform->load(*matrix);
-    } else {
-        mSnapshot->transform->loadIdentity();
-    }
+void StatefulBaseRenderer::setMatrix(const SkMatrix& matrix) {
+    mSnapshot->transform->load(matrix);
 }
 
 void StatefulBaseRenderer::setMatrix(const Matrix4& matrix) {
     mSnapshot->transform->load(matrix);
 }
 
-void StatefulBaseRenderer::concatMatrix(const SkMatrix* matrix) {
-    mat4 transform(*matrix);
+void StatefulBaseRenderer::concatMatrix(const SkMatrix& matrix) {
+    mat4 transform(matrix);
     mSnapshot->transform->multiply(transform);
 }
 

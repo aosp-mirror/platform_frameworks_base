@@ -75,9 +75,9 @@ public:
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
-    virtual void setMatrix(const SkMatrix* matrix);
+    virtual void setMatrix(const SkMatrix& matrix);
     void setMatrix(const Matrix4& matrix); // internal only convenience method
-    virtual void concatMatrix(const SkMatrix* matrix);
+    virtual void concatMatrix(const SkMatrix& matrix);
     void concatMatrix(const Matrix4& matrix); // internal only convenience method
 
     // Clip

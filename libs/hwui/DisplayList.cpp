@@ -80,10 +80,6 @@ void DisplayListData::cleanupResources() {
         delete paths.itemAt(i);
     }
 
-    for (size_t i = 0; i < matrices.size(); i++) {
-        delete matrices.itemAt(i);
-    }
-
     bitmapResources.clear();
     ownedBitmapResources.clear();
     patchResources.clear();
@@ -91,7 +87,6 @@ void DisplayListData::cleanupResources() {
     paints.clear();
     regions.clear();
     paths.clear();
-    matrices.clear();
     layers.clear();
 }
 

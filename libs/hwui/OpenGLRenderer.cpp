@@ -2042,10 +2042,10 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, float left, float to
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix& matrix,
         const SkPaint* paint) {
     Rect r(0.0f, 0.0f, bitmap->width(), bitmap->height());
-    const mat4 transform(*matrix);
+    const mat4 transform(matrix);
     transform.mapRect(r);
 
     if (quickRejectSetupScissor(r.left, r.top, r.right, r.bottom)) {
