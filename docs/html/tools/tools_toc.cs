@@ -225,14 +225,14 @@ class="en">MonkeyRunner</span></a></li>
 ?>tools/revisions/index.html"><span class="en">Revisions</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/sdk/tools-notes.html">
-        <span class="en">Tools</span>
+        <span class="en">SDK Tools</span>
       </a></li>
       <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
         <span class="en">ADT Plugin</span>
       </a></li>
-      <!--
-      <li><a href="<?cs var:toroot ?>tools/sdk/addons.html"><span class="en">Add-ons</span></a></li>
-      -->
+      <li><a href="<?cs var:toroot ?>tools/revisions/build-tools.html">
+        <span class="en">Build Tools</span>
+      </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html"><span
 class="en">Platforms</span></a></li>
     </ul>
