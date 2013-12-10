@@ -84,7 +84,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 67 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 69 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -234,7 +234,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     final StopwatchTimer[] mPhoneDataConnectionsTimer =
             new StopwatchTimer[NUM_DATA_CONNECTION_TYPES];
 
-    final LongSamplingCounter[] mNetworkActivityCounters =
+    final LongSamplingCounter[] mNetworkByteActivityCounters =
+            new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+    final LongSamplingCounter[] mNetworkPacketActivityCounters =
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
 
     boolean mWifiOn;
@@ -1469,6 +1471,162 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBtHeadset = headset;
     }
 
+    // Part of initial delta int that specifies the time delta.
+    static final int DELTA_TIME_MASK = 0x3ffff;
+    static final int DELTA_TIME_ABS = 0x3fffd;    // Following is an entire abs update.
+    static final int DELTA_TIME_INT = 0x3fffe;    // The delta is a following int
+    static final int DELTA_TIME_LONG = 0x3ffff;   // The delta is a following long
+    // Part of initial delta int holding the command code.
+    static final int DELTA_CMD_MASK = 0x3;
+    static final int DELTA_CMD_SHIFT = 18;
+    // Flag in delta int: a new battery level int follows.
+    static final int DELTA_BATTERY_LEVEL_FLAG = 1<<20;
+    // Flag in delta int: a new full state and battery status int follows.
+    static final int DELTA_STATE_FLAG = 1<<21;
+    static final int DELTA_STATE_MASK = 0xffc00000;
+
+    public void writeHistoryDelta(Parcel dest, HistoryItem cur, HistoryItem last) {
+        if (last == null || !last.isDeltaData() || !cur.isDeltaData()) {
+            dest.writeInt(DELTA_TIME_ABS);
+            cur.writeToParcel(dest, 0);
+            return;
+        }
+
+        final long deltaTime = cur.time - last.time;
+        final int lastBatteryLevelInt = buildBatteryLevelInt(last);
+        final int lastStateInt = buildStateInt(last);
+
+        int deltaTimeToken;
+        if (deltaTime < 0 || deltaTime > Integer.MAX_VALUE) {
+            deltaTimeToken = DELTA_TIME_LONG;
+        } else if (deltaTime >= DELTA_TIME_ABS) {
+            deltaTimeToken = DELTA_TIME_INT;
+        } else {
+            deltaTimeToken = (int)deltaTime;
+        }
+        int firstToken = deltaTimeToken
+                | (cur.cmd<<DELTA_CMD_SHIFT)
+                | (cur.states&DELTA_STATE_MASK);
+        final int batteryLevelInt = buildBatteryLevelInt(cur);
+        final boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
+        if (batteryLevelIntChanged) {
+            firstToken |= DELTA_BATTERY_LEVEL_FLAG;
+        }
+        final int stateInt = buildStateInt(cur);
+        final boolean stateIntChanged = stateInt != lastStateInt;
+        if (stateIntChanged) {
+            firstToken |= DELTA_STATE_FLAG;
+        }
+        dest.writeInt(firstToken);
+        if (DEBUG) Slog.i(TAG, "WRITE DELTA: firstToken=0x" + Integer.toHexString(firstToken)
+                + " deltaTime=" + deltaTime);
+
+        if (deltaTimeToken >= DELTA_TIME_INT) {
+            if (deltaTimeToken == DELTA_TIME_INT) {
+                if (DEBUG) Slog.i(TAG, "WRITE DELTA: int deltaTime=" + (int)deltaTime);
+                dest.writeInt((int)deltaTime);
+            } else {
+                if (DEBUG) Slog.i(TAG, "WRITE DELTA: long deltaTime=" + deltaTime);
+                dest.writeLong(deltaTime);
+            }
+        }
+        if (batteryLevelIntChanged) {
+            dest.writeInt(batteryLevelInt);
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryToken=0x"
+                    + Integer.toHexString(batteryLevelInt)
+                    + " batteryLevel=" + cur.batteryLevel
+                    + " batteryTemp=" + cur.batteryTemperature
+                    + " batteryVolt=" + (int)cur.batteryVoltage);
+        }
+        if (stateIntChanged) {
+            dest.writeInt(stateInt);
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: stateToken=0x"
+                    + Integer.toHexString(stateInt)
+                    + " batteryStatus=" + cur.batteryStatus
+                    + " batteryHealth=" + cur.batteryHealth
+                    + " batteryPlugType=" + cur.batteryPlugType
+                    + " states=0x" + Integer.toHexString(cur.states));
+        }
+        if (cur.cmd == HistoryItem.CMD_EVENT) {
+            dest.writeInt(cur.eventCode);
+            dest.writeInt(cur.eventUid);
+            dest.writeString(cur.eventName);
+        }
+    }
+
+    private int buildBatteryLevelInt(HistoryItem h) {
+        return ((((int)h.batteryLevel)<<25)&0xfe000000)
+                | ((((int)h.batteryTemperature)<<14)&0x01ffc000)
+                | (((int)h.batteryVoltage)&0x00003fff);
+    }
+
+    private int buildStateInt(HistoryItem h) {
+        return ((((int)h.batteryStatus)<<28)&0xf0000000)
+                | ((((int)h.batteryHealth)<<24)&0x0f000000)
+                | ((((int)h.batteryPlugType)<<22)&0x00c00000)
+                | (h.states&(~DELTA_STATE_MASK));
+    }
+
+    public void readHistoryDelta(Parcel src, HistoryItem cur) {
+        int firstToken = src.readInt();
+        int deltaTimeToken = firstToken&DELTA_TIME_MASK;
+        cur.cmd = (byte)((firstToken>>DELTA_CMD_SHIFT)&DELTA_CMD_MASK);
+        if (DEBUG) Slog.i(TAG, "READ DELTA: firstToken=0x" + Integer.toHexString(firstToken)
+                + " deltaTimeToken=" + deltaTimeToken);
+
+        if (deltaTimeToken < DELTA_TIME_ABS) {
+            cur.time += deltaTimeToken;
+        } else if (deltaTimeToken == DELTA_TIME_ABS) {
+            cur.time = src.readLong();
+            cur.readFromParcel(src);
+            return;
+        } else if (deltaTimeToken == DELTA_TIME_INT) {
+            int delta = src.readInt();
+            cur.time += delta;
+            if (DEBUG) Slog.i(TAG, "READ DELTA: time delta=" + delta + " new time=" + cur.time);
+        } else {
+            long delta = src.readLong();
+            if (DEBUG) Slog.i(TAG, "READ DELTA: time delta=" + delta + " new time=" + cur.time);
+            cur.time += delta;
+        }
+
+        if ((firstToken&DELTA_BATTERY_LEVEL_FLAG) != 0) {
+            int batteryLevelInt = src.readInt();
+            cur.batteryLevel = (byte)((batteryLevelInt>>25)&0x7f);
+            cur.batteryTemperature = (short)((batteryLevelInt<<7)>>21);
+            cur.batteryVoltage = (char)(batteryLevelInt&0x3fff);
+            if (DEBUG) Slog.i(TAG, "READ DELTA: batteryToken=0x"
+                    + Integer.toHexString(batteryLevelInt)
+                    + " batteryLevel=" + cur.batteryLevel
+                    + " batteryTemp=" + cur.batteryTemperature
+                    + " batteryVolt=" + (int)cur.batteryVoltage);
+        }
+
+        if ((firstToken&DELTA_STATE_FLAG) != 0) {
+            int stateInt = src.readInt();
+            cur.states = (firstToken&DELTA_STATE_MASK) | (stateInt&(~DELTA_STATE_MASK));
+            cur.batteryStatus = (byte)((stateInt>>28)&0xf);
+            cur.batteryHealth = (byte)((stateInt>>24)&0xf);
+            cur.batteryPlugType = (byte)((stateInt>>22)&0x3);
+            if (DEBUG) Slog.i(TAG, "READ DELTA: stateToken=0x"
+                    + Integer.toHexString(stateInt)
+                    + " batteryStatus=" + cur.batteryStatus
+                    + " batteryHealth=" + cur.batteryHealth
+                    + " batteryPlugType=" + cur.batteryPlugType
+                    + " states=0x" + Integer.toHexString(cur.states));
+        } else {
+            cur.states = (firstToken&DELTA_STATE_MASK) | (cur.states&(~DELTA_STATE_MASK));
+        }
+
+        if (cur.cmd == HistoryItem.CMD_EVENT) {
+            cur.eventCode = src.readInt();
+            cur.eventUid = src.readInt();
+            cur.eventName = src.readString();
+        } else {
+            cur.eventCode = HistoryItem.EVENT_NONE;
+        }
+    }
+
     int mChangedBufferStates = 0;
 
     void addHistoryBufferLocked(long curTime) {
@@ -1486,7 +1644,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mHistoryBuffer.setDataPosition(mHistoryBufferLastPos);
             mHistoryBufferLastPos = -1;
             if (mHistoryLastLastWritten.cmd == HistoryItem.CMD_UPDATE
-                    && timeDiff < 500 && mHistoryLastLastWritten.same(mHistoryCur)) {
+                    && timeDiff < 500 && mHistoryLastLastWritten.sameNonEvent(mHistoryCur)) {
                 // If this results in us returning to the state written
                 // prior to the last one, then we can just delete the last
                 // written one and drop the new one.  Nothing more to do.
@@ -1524,6 +1682,15 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     void addHistoryBufferLocked(long curTime, byte cmd) {
+        addHistoryBufferLocked(curTime, cmd, HistoryItem.EVENT_NONE, 0, null);
+    }
+
+    void addHistoryBufferEventLocked(long curTime, int eventCode, int eventUid, String eventName) {
+        addHistoryBufferLocked(curTime, HistoryItem.CMD_EVENT, eventCode, eventUid, eventName);
+    }
+
+    private void addHistoryBufferLocked(long curTime, byte cmd,
+            int eventCode, int eventUid, String eventName) {
         int origPos = 0;
         if (mIteratingHistory) {
             origPos = mHistoryBuffer.dataPosition();
@@ -1531,8 +1698,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mHistoryBufferLastPos = mHistoryBuffer.dataPosition();
         mHistoryLastLastWritten.setTo(mHistoryLastWritten);
-        mHistoryLastWritten.setTo(mHistoryBaseTime + curTime, cmd, mHistoryCur);
-        mHistoryLastWritten.writeDelta(mHistoryBuffer, mHistoryLastLastWritten);
+        mHistoryLastWritten.setTo(mHistoryBaseTime + curTime, cmd,
+                eventCode, eventUid, eventName, mHistoryCur);
+        writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
         mLastHistoryTime = curTime;
         if (DEBUG_HISTORY) Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
                 + " now " + mHistoryBuffer.dataPosition()
@@ -1566,7 +1734,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             // longer need the entry.
             if (mHistoryLastEnd != null && mHistoryLastEnd.cmd == HistoryItem.CMD_UPDATE
                     && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+500)
-                    && mHistoryLastEnd.same(mHistoryCur)) {
+                    && mHistoryLastEnd.sameNonEvent(mHistoryCur)) {
                 mHistoryLastEnd.next = null;
                 mHistoryEnd.next = mHistoryCache;
                 mHistoryCache = mHistoryEnd;
@@ -1574,7 +1742,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryLastEnd = null;
             } else {
                 mChangedStates |= mHistoryEnd.states^mHistoryCur.states;
-                mHistoryEnd.setTo(mHistoryEnd.time, HistoryItem.CMD_UPDATE, mHistoryCur);
+                mHistoryEnd.setTo(mHistoryEnd.time, HistoryItem.CMD_UPDATE,
+                        HistoryItem.EVENT_NONE, 0, null, mHistoryCur);
             }
             return;
         }
@@ -1610,7 +1779,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         } else {
             rec = new HistoryItem();
         }
-        rec.setTo(mHistoryBaseTime + curTime, cmd, mHistoryCur);
+        rec.setTo(mHistoryBaseTime + curTime, cmd,
+                HistoryItem.EVENT_NONE, 0, null, mHistoryCur);
 
         addHistoryRecordLocked(rec);
     }
@@ -2571,9 +2741,18 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
-    public long getNetworkActivityCount(int type, int which) {
-        if (type >= 0 && type < mNetworkActivityCounters.length) {
-            return mNetworkActivityCounters[type].getCountLocked(which);
+    public long getNetworkActivityBytes(int type, int which) {
+        if (type >= 0 && type < mNetworkByteActivityCounters.length) {
+            return mNetworkByteActivityCounters[type].getCountLocked(which);
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public long getNetworkActivityPackets(int type, int which) {
+        if (type >= 0 && type < mNetworkPacketActivityCounters.length) {
+            return mNetworkPacketActivityCounters[type].getCountLocked(which);
         } else {
             return 0;
         }
@@ -2622,7 +2801,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         Counter[] mUserActivityCounters;
 
-        LongSamplingCounter[] mNetworkActivityCounters;
+        LongSamplingCounter[] mNetworkByteActivityCounters;
+        LongSamplingCounter[] mNetworkPacketActivityCounters;
 
         /**
          * The statistics we have collected for this uid's wake locks.
@@ -3007,12 +3187,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        void noteNetworkActivityLocked(int type, long delta) {
-            if (mNetworkActivityCounters == null) {
+        void noteNetworkActivityLocked(int type, long deltaBytes, long deltaPackets) {
+            if (mNetworkByteActivityCounters == null) {
                 initNetworkActivityLocked();
             }
             if (type >= 0 && type < NUM_NETWORK_ACTIVITY_TYPES) {
-                mNetworkActivityCounters[type].addCountLocked(delta);
+                mNetworkByteActivityCounters[type].addCountLocked(deltaBytes);
+                mNetworkPacketActivityCounters[type].addCountLocked(deltaPackets);
             } else {
                 Slog.w(TAG, "Unknown network activity type " + type + " was specified.",
                         new Throwable());
@@ -3021,23 +3202,35 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public boolean hasNetworkActivity() {
-            return mNetworkActivityCounters != null;
+            return mNetworkByteActivityCounters != null;
         }
 
         @Override
-        public long getNetworkActivityCount(int type, int which) {
-            if (mNetworkActivityCounters != null && type >= 0
-                    && type < mNetworkActivityCounters.length) {
-                return mNetworkActivityCounters[type].getCountLocked(which);
+        public long getNetworkActivityBytes(int type, int which) {
+            if (mNetworkByteActivityCounters != null && type >= 0
+                    && type < mNetworkByteActivityCounters.length) {
+                return mNetworkByteActivityCounters[type].getCountLocked(which);
+            } else {
+                return 0;
+            }
+        }
+
+        @Override
+        public long getNetworkActivityPackets(int type, int which) {
+            if (mNetworkPacketActivityCounters != null && type >= 0
+                    && type < mNetworkPacketActivityCounters.length) {
+                return mNetworkPacketActivityCounters[type].getCountLocked(which);
             } else {
                 return 0;
             }
         }
 
         void initNetworkActivityLocked() {
-            mNetworkActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+            mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+            mNetworkPacketActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
             for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                mNetworkActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
+                mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
+                mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
             }
         }
 
@@ -3098,9 +3291,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            if (mNetworkActivityCounters != null) {
+            if (mNetworkByteActivityCounters != null) {
                 for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                    mNetworkActivityCounters[i].reset(false);
+                    mNetworkByteActivityCounters[i].reset(false);
+                    mNetworkPacketActivityCounters[i].reset(false);
                 }
             }
 
@@ -3199,9 +3393,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mUserActivityCounters[i].detach();
                     }
                 }
-                if (mNetworkActivityCounters != null) {
+                if (mNetworkByteActivityCounters != null) {
                     for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                        mNetworkActivityCounters[i].detach();
+                        mNetworkByteActivityCounters[i].detach();
+                        mNetworkPacketActivityCounters[i].detach();
                     }
                 }
             }
@@ -3302,10 +3497,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else {
                 out.writeInt(0);
             }
-            if (mNetworkActivityCounters != null) {
+            if (mNetworkByteActivityCounters != null) {
                 out.writeInt(1);
                 for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                    mNetworkActivityCounters[i].writeToParcel(out);
+                    mNetworkByteActivityCounters[i].writeToParcel(out);
+                    mNetworkPacketActivityCounters[i].writeToParcel(out);
                 }
             } else {
                 out.writeInt(0);
@@ -3423,12 +3619,16 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mUserActivityCounters = null;
             }
             if (in.readInt() != 0) {
-                mNetworkActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+                mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+                mNetworkPacketActivityCounters
+                        = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
                 for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                    mNetworkActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
+                    mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
+                    mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
                 }
             } else {
-                mNetworkActivityCounters = null;
+                mNetworkByteActivityCounters = null;
+                mNetworkPacketActivityCounters = null;
             }
         }
 
@@ -4505,7 +4705,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneDataConnectionsTimer[i] = new StopwatchTimer(null, -300-i, null, mUnpluggables);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
+            mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
+            mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
         }
         mWifiOnTimer = new StopwatchTimer(null, -3, null, mUnpluggables);
         mGlobalWifiRunningTimer = new StopwatchTimer(null, -4, null, mUnpluggables);
@@ -4563,7 +4764,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public boolean getNextOldHistoryLocked(HistoryItem out) {
         boolean end = mHistoryBuffer.dataPosition() >= mHistoryBuffer.dataSize();
         if (!end) {
-            mHistoryReadTmp.readDelta(mHistoryBuffer);
+            readHistoryDelta(mHistoryBuffer, mHistoryReadTmp);
             mReadOverflow |= mHistoryReadTmp.cmd == HistoryItem.CMD_OVERFLOW;
         }
         HistoryItem cur = mHistoryIterator;
@@ -4583,9 +4784,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 PrintWriter pw = new FastPrintWriter(new LogWriter(android.util.Log.WARN, TAG));
                 pw.println("Histories differ!");
                 pw.println("Old history:");
-                (new HistoryPrinter()).printNextItem(pw, out, now);
+                (new HistoryPrinter()).printNextItem(pw, out, now, false);
                 pw.println("New history:");
-                (new HistoryPrinter()).printNextItem(pw, mHistoryReadTmp, now);
+                (new HistoryPrinter()).printNextItem(pw, mHistoryReadTmp, now, false);
                 pw.flush();
             }
         }
@@ -4619,7 +4820,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             return false;
         }
 
-        out.readDelta(mHistoryBuffer);
+        readHistoryDelta(mHistoryBuffer, out);
         return true;
     }
 
@@ -4684,7 +4885,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneDataConnectionsTimer[i].reset(this, false);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkActivityCounters[i].reset(false);
+            mNetworkByteActivityCounters[i].reset(false);
+            mNetworkPacketActivityCounters[i].reset(false);
         }
         mWifiOnTimer.reset(this, false);
         mGlobalWifiRunningTimer.reset(this, false);
@@ -4947,18 +5149,28 @@ public final class BatteryStatsImpl extends BatteryStats {
             final Uid u = getUidStatsLocked(entry.uid);
 
             if (mMobileIfaces.contains(entry.iface)) {
-                u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_BYTES, entry.rxBytes);
-                u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_BYTES, entry.txBytes);
+                u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
+                        entry.rxPackets);
+                u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
+                        entry.txPackets);
 
-                mNetworkActivityCounters[NETWORK_MOBILE_RX_BYTES].addCountLocked(entry.rxBytes);
-                mNetworkActivityCounters[NETWORK_MOBILE_TX_BYTES].addCountLocked(entry.txBytes);
+                mNetworkByteActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(entry.rxBytes);
+                mNetworkByteActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(entry.txBytes);
+                mNetworkPacketActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
+                        entry.rxPackets);
+                mNetworkPacketActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
+                        entry.txPackets);
 
             } else if (mWifiIfaces.contains(entry.iface)) {
-                u.noteNetworkActivityLocked(NETWORK_WIFI_RX_BYTES, entry.rxBytes);
-                u.noteNetworkActivityLocked(NETWORK_WIFI_TX_BYTES, entry.txBytes);
+                u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes, entry.rxPackets);
+                u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes, entry.txPackets);
 
-                mNetworkActivityCounters[NETWORK_WIFI_RX_BYTES].addCountLocked(entry.rxBytes);
-                mNetworkActivityCounters[NETWORK_WIFI_TX_BYTES].addCountLocked(entry.txBytes);
+                mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(entry.rxBytes);
+                mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(entry.txBytes);
+                mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
+                        entry.rxPackets);
+                mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
+                        entry.txPackets);
             }
         }
     }
@@ -5533,7 +5745,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneDataConnectionsTimer[i].readSummaryFromParcelLocked(in);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkActivityCounters[i].readSummaryFromParcelLocked(in);
+            mNetworkByteActivityCounters[i].readSummaryFromParcelLocked(in);
+            mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
         }
         mWifiOn = false;
         mWifiOnTimer.readSummaryFromParcelLocked(in);
@@ -5614,11 +5827,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             if (in.readInt() != 0) {
-                if (u.mNetworkActivityCounters == null) {
+                if (u.mNetworkByteActivityCounters == null) {
                     u.initNetworkActivityLocked();
                 }
                 for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                    u.mNetworkActivityCounters[i].readSummaryFromParcelLocked(in);
+                    u.mNetworkByteActivityCounters[i].readSummaryFromParcelLocked(in);
+                    u.mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
                 }
             }
 
@@ -5753,7 +5967,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneDataConnectionsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkActivityCounters[i].writeSummaryFromParcelLocked(out);
+            mNetworkByteActivityCounters[i].writeSummaryFromParcelLocked(out);
+            mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);
         }
         mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mGlobalWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
@@ -5844,12 +6059,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            if (u.mNetworkActivityCounters == null) {
+            if (u.mNetworkByteActivityCounters == null) {
                 out.writeInt(0);
             } else {
                 out.writeInt(1);
                 for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-                    u.mNetworkActivityCounters[i].writeSummaryFromParcelLocked(out);
+                    u.mNetworkByteActivityCounters[i].writeSummaryFromParcelLocked(out);
+                    u.mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);
                 }
             }
 
@@ -5984,7 +6200,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                     null, mUnpluggables, in);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
+            mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
+            mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
         }
         mWifiOn = false;
         mWifiOnTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
@@ -6094,7 +6311,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneDataConnectionsTimer[i].writeToParcel(out, batteryRealtime);
         }
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
-            mNetworkActivityCounters[i].writeToParcel(out);
+            mNetworkByteActivityCounters[i].writeToParcel(out);
+            mNetworkPacketActivityCounters[i].writeToParcel(out);
         }
         mWifiOnTimer.writeToParcel(out, batteryRealtime);
         mGlobalWifiRunningTimer.writeToParcel(out, batteryRealtime);
