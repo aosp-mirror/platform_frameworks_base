@@ -1769,6 +1769,21 @@ final class ActivityStack {
 
         r.putInHistory();
         r.frontOfTask = newTask;
+        if (!r.frontOfTask) {
+            // It is possible that the current frontOfTask activity is finishing. Check for that.
+            ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = 0; activityNdx < activities.size(); ++activityNdx) {
+                final ActivityRecord activity = activities.get(activityNdx);
+                if (activity.finishing) {
+                    continue;
+                }
+                if (activity == r) {
+                    // All activities before r are finishing.
+                    r.frontOfTask = true;
+                }
+                break;
+            }
+        }
         if (!isHomeStack() || numActivities() > 0) {
             // We want to show the starting preview window if we are
             // switching to a new task, or the next activity's process is
