@@ -55,6 +55,7 @@ LOCAL_SRC_FILES:= \
 	android_view_GLRenderer.cpp \
 	android_view_GLES20DisplayList.cpp \
 	android_view_GLES20Canvas.cpp \
+	android_view_ThreadedRenderer.cpp \
 	android_view_MotionEvent.cpp \
 	android_view_PointerIcon.cpp \
 	android_view_VelocityTracker.cpp \

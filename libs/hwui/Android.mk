@@ -45,6 +45,11 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		TextureCache.cpp \
 		TextDropShadowCache.cpp
 
+	# RenderThread stuff
+	LOCAL_SRC_FILES += \
+		renderthread/RenderTask.cpp \
+		renderthread/RenderThread.cpp
+
 	intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,)
 
 	LOCAL_C_INCLUDES += \
