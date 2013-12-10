@@ -277,7 +277,6 @@ public:
     virtual Rect* getClipRect();
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags);
-    virtual void outputDisplayList(DisplayList* displayList);
     virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     status_t drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,

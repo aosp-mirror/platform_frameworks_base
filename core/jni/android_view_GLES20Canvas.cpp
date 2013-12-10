@@ -783,11 +783,6 @@ static jint android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
     return status;
 }
 
-static void android_view_GLES20Canvas_outputDisplayList(JNIEnv* env,
-        jobject clazz, OpenGLRenderer* renderer, DisplayList* displayList) {
-    renderer->outputDisplayList(displayList);
-}
-
 // ----------------------------------------------------------------------------
 // Layers
 // ----------------------------------------------------------------------------
@@ -1103,7 +1098,6 @@ static JNINativeMethod gMethods[] = {
             (void*) android_view_GLES20Canvas_getClipBounds },
 
     { "nGetDisplayList",         "(II)I",      (void*) android_view_GLES20Canvas_getDisplayList },
-    { "nOutputDisplayList",      "(II)V",      (void*) android_view_GLES20Canvas_outputDisplayList },
     { "nDrawDisplayList",        "(IILandroid/graphics/Rect;I)I",
             (void*) android_view_GLES20Canvas_drawDisplayList },
 

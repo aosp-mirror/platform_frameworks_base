@@ -2088,12 +2088,6 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
     return DrawGlInfo::kStatusDone;
 }
 
-void OpenGLRenderer::outputDisplayList(DisplayList* displayList) {
-    if (displayList) {
-        displayList->output(1);
-    }
-}
-
 void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;

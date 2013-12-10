@@ -694,4 +694,12 @@ public abstract class DisplayList {
      * @see View#offsetTopAndBottom(int)
      */
     public abstract void offsetTopAndBottom(float offset);
+
+    /**
+     * Outputs the display list to the log. This method exists for use by
+     * tools to output display lists for selected nodes to the log.
+     *
+     * @hide
+     */
+    public abstract void output();
 }

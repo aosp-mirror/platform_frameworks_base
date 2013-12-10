@@ -60,6 +60,11 @@ static void android_view_GLES20DisplayList_setDisplayListName(JNIEnv* env,
     }
 }
 
+static void android_view_GLES20DisplayList_output(JNIEnv* env,
+        jobject clazz, DisplayList* displayList) {
+    displayList->output();
+}
+
 static void android_view_GLES20DisplayList_destroyDisplayList(JNIEnv* env,
         jobject clazz, DisplayList* displayList) {
     DisplayList::destroyDisplayListDeferred(displayList);
@@ -303,6 +308,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetDisplayListSize",   "(I)I",   (void*) android_view_GLES20DisplayList_getDisplayListSize },
     { "nSetDisplayListName",   "(ILjava/lang/String;)V",
             (void*) android_view_GLES20DisplayList_setDisplayListName },
+    { "nOutput",               "(I)V",  (void*) android_view_GLES20DisplayList_output },
 
     { "nReset",                "(I)V",   (void*) android_view_GLES20DisplayList_reset },
     { "nSetCaching",           "(IZ)V",  (void*) android_view_GLES20DisplayList_setCaching },

@@ -116,7 +116,7 @@ public:
     void defer(DeferStateStruct& deferStruct, const int level);
     void replay(ReplayStateStruct& replayStruct, const int level);
 
-    void output(uint32_t level = 0);
+    ANDROID_API void output(uint32_t level = 1);
 
     ANDROID_API void reset();
 
