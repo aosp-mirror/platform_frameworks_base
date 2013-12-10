@@ -105,6 +105,9 @@ public class Dialog implements DialogInterface, Window.Callback,
     private boolean mShowing = false;
     private boolean mCanceled = false;
 
+    /** Whether the execution path is currently in onCreate(). */
+    private boolean mInOnCreate = false;
+
     private final Handler mHandler = new Handler();
 
     private static final int DISMISS = 0x43;
@@ -356,8 +359,10 @@ public class Dialog implements DialogInterface, Window.Callback,
     // internal method to make sure mcreated is set properly without requiring
     // users to call through to super in onCreate
     void dispatchOnCreate(Bundle savedInstanceState) {
-        if (!mCreated) {
+        if (!mCreated && !mInOnCreate) {
+            mInOnCreate = true;
             onCreate(savedInstanceState);
+            mInOnCreate = false;
             mCreated = true;
         }
     }
