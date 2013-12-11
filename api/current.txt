@@ -3392,6 +3392,7 @@ package android.app {
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void cancel();
     method public void closeOptionsMenu();
+    method public void create();
     method public void dismiss();
     method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);
     method public boolean dispatchKeyEvent(android.view.KeyEvent);

@@ -105,9 +105,6 @@ public class Dialog implements DialogInterface, Window.Callback,
     private boolean mShowing = false;
     private boolean mCanceled = false;
 
-    /** Whether the execution path is currently in onCreate(). */
-    private boolean mInOnCreate = false;
-
     private final Handler mHandler = new Handler();
 
     private static final int DISMISS = 0x43;
@@ -242,6 +239,18 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
+     * Forces immediate creation of the dialog.
+     * <p>
+     * Note that you should not override this method to perform dialog creation.
+     * Rather, override {@link #onCreate(Bundle)}.
+     */
+    public void create() {
+        if (!mCreated) {
+            dispatchOnCreate(null);
+        }
+    }
+
+    /**
      * Start the dialog and display it on screen.  The window is placed in the
      * application layer and opaque.  Note that you should not override this
      * method to do initialization when the dialog is shown, instead implement
@@ -359,10 +368,8 @@ public class Dialog implements DialogInterface, Window.Callback,
     // internal method to make sure mcreated is set properly without requiring
     // users to call through to super in onCreate
     void dispatchOnCreate(Bundle savedInstanceState) {
-        if (!mCreated && !mInOnCreate) {
-            mInOnCreate = true;
+        if (!mCreated) {
             onCreate(savedInstanceState);
-            mInOnCreate = false;
             mCreated = true;
         }
     }
@@ -461,20 +468,14 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
-     * Finds a child view with the given identifier.
-     * <p>
-     * Prior to API 20, this function could only be used after the first call
-     * to {@link #show()}. In later versions, this function may be used at any
-     * time; however, the first call to this function "locks in" certain dialog
-     * characteristics.
+     * Finds a child view with the given identifier. Returns null if the
+     * specified child view does not exist or the dialog has not yet been fully
+     * created (for example, via {@link #show()} or {@link #create()}).
      *
      * @param id the identifier of the view to find
      * @return The view with the given id or null.
      */
     public View findViewById(int id) {
-        if (!mCreated) {
-            dispatchOnCreate(null);
-        }
         return mWindow.findViewById(id);
     }
 
