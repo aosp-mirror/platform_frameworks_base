@@ -68,9 +68,16 @@
             </a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>guide/components/intents-filters.html">
-          <span class="en">Intents and Intent Filters</span>
-        </a></li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/components/intents-filters.html">
+            <span class="en">Intents and Intent Filters</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/components/intents-common.html">
+            <span class="en">Common Intents</span>
+          </a></li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/components/processes-and-threads.html">
           <span class="en">Processes and Threads</span>
         </a>
