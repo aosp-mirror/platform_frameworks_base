@@ -293,6 +293,9 @@ public class CaptioningManager {
          */
         public final int edgeColor;
 
+        /** The preferred window color for video captions. */
+        public final int windowColor;
+
         /**
          * @hide
          */
@@ -301,11 +304,12 @@ public class CaptioningManager {
         private Typeface mParsedTypeface;
 
         private CaptionStyle(int foregroundColor, int backgroundColor, int edgeType, int edgeColor,
-                String rawTypeface) {
+                int windowColor, String rawTypeface) {
             this.foregroundColor = foregroundColor;
             this.backgroundColor = backgroundColor;
             this.edgeType = edgeType;
             this.edgeColor = edgeColor;
+            this.windowColor = windowColor;
 
             mRawTypeface = rawTypeface;
         }
@@ -334,25 +338,27 @@ public class CaptioningManager {
                     cr, Secure.ACCESSIBILITY_CAPTIONING_EDGE_TYPE, defStyle.edgeType);
             final int edgeColor = Secure.getInt(
                     cr, Secure.ACCESSIBILITY_CAPTIONING_EDGE_COLOR, defStyle.edgeColor);
+            final int windowColor = Secure.getInt(
+                    cr, Secure.ACCESSIBILITY_CAPTIONING_WINDOW_COLOR, defStyle.windowColor);
 
             String rawTypeface = Secure.getString(cr, Secure.ACCESSIBILITY_CAPTIONING_TYPEFACE);
             if (rawTypeface == null) {
                 rawTypeface = defStyle.mRawTypeface;
             }
 
-            return new CaptionStyle(
-                    foregroundColor, backgroundColor, edgeType, edgeColor, rawTypeface);
+            return new CaptionStyle(foregroundColor, backgroundColor, edgeType, edgeColor,
+                    windowColor, rawTypeface);
         }
 
         static {
-            WHITE_ON_BLACK = new CaptionStyle(
-                    Color.WHITE, Color.BLACK, EDGE_TYPE_NONE, Color.BLACK, null);
-            BLACK_ON_WHITE = new CaptionStyle(
-                    Color.BLACK, Color.WHITE, EDGE_TYPE_NONE, Color.BLACK, null);
-            YELLOW_ON_BLACK = new CaptionStyle(
-                    Color.YELLOW, Color.BLACK, EDGE_TYPE_NONE, Color.BLACK, null);
-            YELLOW_ON_BLUE = new CaptionStyle(
-                    Color.YELLOW, Color.BLUE, EDGE_TYPE_NONE, Color.BLACK, null);
+            WHITE_ON_BLACK = new CaptionStyle(Color.WHITE, Color.BLACK, EDGE_TYPE_NONE,
+                    Color.BLACK, Color.TRANSPARENT, null);
+            BLACK_ON_WHITE = new CaptionStyle(Color.BLACK, Color.WHITE, EDGE_TYPE_NONE,
+                    Color.BLACK, Color.TRANSPARENT, null);
+            YELLOW_ON_BLACK = new CaptionStyle(Color.YELLOW, Color.BLACK, EDGE_TYPE_NONE,
+                    Color.BLACK, Color.TRANSPARENT, null);
+            YELLOW_ON_BLUE = new CaptionStyle(Color.YELLOW, Color.BLUE, EDGE_TYPE_NONE,
+                    Color.BLACK, Color.TRANSPARENT, null);
 
             PRESETS = new CaptionStyle[] {
                     WHITE_ON_BLACK, BLACK_ON_WHITE, YELLOW_ON_BLACK, YELLOW_ON_BLUE
