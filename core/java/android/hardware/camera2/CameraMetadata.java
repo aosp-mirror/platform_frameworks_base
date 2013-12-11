@@ -224,9 +224,7 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * android.led.transmit control is used
-     * </p>
+     * <p>android.led.transmit control is used</p>
      * @see CameraCharacteristics#LED_AVAILABLE_LEDS
      * @hide
      */
@@ -251,28 +249,22 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * Use the android.colorCorrection.transform matrix
-     * and android.colorCorrection.gains to do color conversion
-     * </p>
+     * <p>Use the android.colorCorrection.transform matrix
+     * and android.colorCorrection.gains to do color conversion</p>
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0;
 
     /**
-     * <p>
-     * Must not slow down frame rate relative to raw
-     * bayer output
-     * </p>
+     * <p>Must not slow down frame rate relative to raw
+     * bayer output</p>
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_FAST = 1;
 
     /**
-     * <p>
-     * Frame rate may be reduced by high
-     * quality
-     * </p>
+     * <p>Frame rate may be reduced by high
+     * quality</p>
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2;
@@ -306,52 +298,42 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * Autoexposure is disabled; sensor.exposureTime,
-     * sensor.sensitivity and sensor.frameDuration are used
-     * </p>
+     * <p>Autoexposure is disabled; sensor.exposureTime,
+     * sensor.sensitivity and sensor.frameDuration are used</p>
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_OFF = 0;
 
     /**
-     * <p>
-     * Autoexposure is active, no flash
-     * control
-     * </p>
+     * <p>Autoexposure is active, no flash
+     * control</p>
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON = 1;
 
     /**
-     * <p>
-     * if flash exists Autoexposure is active, auto
+     * <p>if flash exists Autoexposure is active, auto
      * flash control; flash may be fired when precapture
      * trigger is activated, and for captures for which
-     * captureIntent = STILL_CAPTURE
-     * </p>
+     * captureIntent = STILL_CAPTURE</p>
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2;
 
     /**
-     * <p>
-     * if flash exists Autoexposure is active, auto
+     * <p>if flash exists Autoexposure is active, auto
      * flash control for precapture trigger and always flash
-     * when captureIntent = STILL_CAPTURE
-     * </p>
+     * when captureIntent = STILL_CAPTURE</p>
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3;
 
     /**
-     * <p>
-     * optional Automatic red eye reduction with flash.
+     * <p>optional Automatic red eye reduction with flash.
      * If deemed necessary, red eye reduction sequence should
      * fire when precapture trigger is activated, and final
      * flash should fire when captureIntent =
-     * STILL_CAPTURE
-     * </p>
+     * STILL_CAPTURE</p>
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE = 4;
@@ -361,20 +343,16 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * The trigger is idle.
-     * </p>
+     * <p>The trigger is idle.</p>
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      */
     public static final int CONTROL_AE_PRECAPTURE_TRIGGER_IDLE = 0;
 
     /**
-     * <p>
-     * The precapture metering sequence
+     * <p>The precapture metering sequence
      * must be started. The exact effect of the precapture
      * trigger depends on the current AE mode and
-     * state.
-     * </p>
+     * state.</p>
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      */
     public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1;
@@ -384,55 +362,44 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * The 3A routines do not control the lens;
+     * <p>The 3A routines do not control the lens;
      * android.lens.focusDistance is controlled by the
-     * application
-     * </p>
+     * application</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_OFF = 0;
 
     /**
-     * <p>
-     * if lens is not fixed focus.
-     * </p><p>
-     * Use android.lens.minimumFocusDistance to determine if lens
+     * <p>If lens is not fixed focus.</p>
+     * <p>Use android.lens.minimumFocusDistance to determine if lens
      * is fixed focus In this mode, the lens does not move unless
      * the autofocus trigger action is called. When that trigger
      * is activated, AF must transition to ACTIVE_SCAN, then to
      * the outcome of the scan (FOCUSED or
-     * NOT_FOCUSED).
-     * </p><p>
-     * Triggering cancel AF resets the lens position to default,
-     * and sets the AF state to INACTIVE.
-     * </p>
+     * NOT_FOCUSED).</p>
+     * <p>Triggering cancel AF resets the lens position to default,
+     * and sets the AF state to INACTIVE.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_AUTO = 1;
 
     /**
-     * <p>
-     * In this mode, the lens does not move unless the
-     * autofocus trigger action is called.
-     * </p><p>
-     * When that trigger is activated, AF must transition to
+     * <p>In this mode, the lens does not move unless the
+     * autofocus trigger action is called.</p>
+     * <p>When that trigger is activated, AF must transition to
      * ACTIVE_SCAN, then to the outcome of the scan (FOCUSED or
      * NOT_FOCUSED).  Triggering cancel AF resets the lens
      * position to default, and sets the AF state to
-     * INACTIVE.
-     * </p>
+     * INACTIVE.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_MACRO = 2;
 
     /**
-     * <p>
-     * In this mode, the AF algorithm modifies the lens
+     * <p>In this mode, the AF algorithm modifies the lens
      * position continually to attempt to provide a
-     * constantly-in-focus image stream.
-     * </p><p>
-     * The focusing behavior should be suitable for good quality
+     * constantly-in-focus image stream.</p>
+     * <p>The focusing behavior should be suitable for good quality
      * video recording; typically this means slower focus
      * movement and no overshoots. When the AF trigger is not
      * involved, the AF algorithm should start in INACTIVE state,
@@ -440,25 +407,21 @@ public abstract class CameraMetadata {
      * states as appropriate. When the AF trigger is activated,
      * the algorithm should immediately transition into
      * AF_FOCUSED or AF_NOT_FOCUSED as appropriate, and lock the
-     * lens position until a cancel AF trigger is received.
-     * </p><p>
-     * Once cancel is received, the algorithm should transition
+     * lens position until a cancel AF trigger is received.</p>
+     * <p>Once cancel is received, the algorithm should transition
      * back to INACTIVE and resume passive scan. Note that this
      * behavior is not identical to CONTINUOUS_PICTURE, since an
      * ongoing PASSIVE_SCAN must immediately be
-     * canceled.
-     * </p>
+     * canceled.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_CONTINUOUS_VIDEO = 3;
 
     /**
-     * <p>
-     * In this mode, the AF algorithm modifies the lens
+     * <p>In this mode, the AF algorithm modifies the lens
      * position continually to attempt to provide a
-     * constantly-in-focus image stream.
-     * </p><p>
-     * The focusing behavior should be suitable for still image
+     * constantly-in-focus image stream.</p>
+     * <p>The focusing behavior should be suitable for still image
      * capture; typically this means focusing as fast as
      * possible. When the AF trigger is not involved, the AF
      * algorithm should start in INACTIVE state, and then
@@ -467,22 +430,18 @@ public abstract class CameraMetadata {
      * trigger is activated, the algorithm should finish its
      * PASSIVE_SCAN if active, and then transition into
      * AF_FOCUSED or AF_NOT_FOCUSED as appropriate, and lock the
-     * lens position until a cancel AF trigger is received.
-     * </p><p>
-     * When the AF cancel trigger is activated, the algorithm
+     * lens position until a cancel AF trigger is received.</p>
+     * <p>When the AF cancel trigger is activated, the algorithm
      * should transition back to INACTIVE and then act as if it
-     * has just been started.
-     * </p>
+     * has just been started.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_CONTINUOUS_PICTURE = 4;
 
     /**
-     * <p>
-     * Extended depth of field (digital focus). AF
+     * <p>Extended depth of field (digital focus). AF
      * trigger is ignored, AF state should always be
-     * INACTIVE.
-     * </p>
+     * INACTIVE.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_EDOF = 5;
@@ -492,26 +451,20 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * The trigger is idle.
-     * </p>
+     * <p>The trigger is idle.</p>
      * @see CaptureRequest#CONTROL_AF_TRIGGER
      */
     public static final int CONTROL_AF_TRIGGER_IDLE = 0;
 
     /**
-     * <p>
-     * Autofocus must trigger now.
-     * </p>
+     * <p>Autofocus must trigger now.</p>
      * @see CaptureRequest#CONTROL_AF_TRIGGER
      */
     public static final int CONTROL_AF_TRIGGER_START = 1;
 
     /**
-     * <p>
-     * Autofocus must return to initial
-     * state, and cancel any active trigger.
-     * </p>
+     * <p>Autofocus must return to initial
+     * state, and cancel any active trigger.</p>
      * @see CaptureRequest#CONTROL_AF_TRIGGER
      */
     public static final int CONTROL_AF_TRIGGER_CANCEL = 2;
@@ -570,59 +523,47 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * This request doesn't fall into the other
+     * <p>This request doesn't fall into the other
      * categories. Default to preview-like
-     * behavior.
-     * </p>
+     * behavior.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_CUSTOM = 0;
 
     /**
-     * <p>
-     * This request is for a preview-like usecase. The
+     * <p>This request is for a preview-like usecase. The
      * precapture trigger may be used to start off a metering
-     * w/flash sequence
-     * </p>
+     * w/flash sequence</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_PREVIEW = 1;
 
     /**
-     * <p>
-     * This request is for a still capture-type
-     * usecase.
-     * </p>
+     * <p>This request is for a still capture-type
+     * usecase.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_STILL_CAPTURE = 2;
 
     /**
-     * <p>
-     * This request is for a video recording
-     * usecase.
-     * </p>
+     * <p>This request is for a video recording
+     * usecase.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_RECORD = 3;
 
     /**
-     * <p>
-     * This request is for a video snapshot (still
-     * image while recording video) usecase
-     * </p>
+     * <p>This request is for a video snapshot (still
+     * image while recording video) usecase</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
 
     /**
-     * <p>
-     * This request is for a ZSL usecase; the
+     * <p>This request is for a ZSL usecase; the
      * application will stream full-resolution images and
      * reprocess one or several later for a final
-     * capture
-     * </p>
+     * capture</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG = 5;
@@ -681,36 +622,30 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * Full application control of pipeline. All 3A
+     * <p>Full application control of pipeline. All 3A
      * routines are disabled, no other settings in
-     * android.control.* have any effect
-     * </p>
+     * android.control.* have any effect</p>
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_OFF = 0;
 
     /**
-     * <p>
-     * Use settings for each individual 3A routine.
+     * <p>Use settings for each individual 3A routine.
      * Manual control of capture parameters is disabled. All
      * controls in android.control.* besides sceneMode take
-     * effect
-     * </p>
+     * effect</p>
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_AUTO = 1;
 
     /**
-     * <p>
-     * Use specific scene mode. Enabling this disables
+     * <p>Use specific scene mode. Enabling this disables
      * control.aeMode, control.awbMode and control.afMode
      * controls; the HAL must ignore those settings while
      * USE_SCENE_MODE is active (except for FACE_PRIORITY
      * scene mode). Other control entries are still active.
      * This setting can only be used if availableSceneModes !=
-     * UNSUPPORTED
-     * </p>
+     * UNSUPPORTED</p>
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_USE_SCENE_MODE = 2;
@@ -725,18 +660,15 @@ public abstract class CameraMetadata {
     public static final int CONTROL_SCENE_MODE_UNSUPPORTED = 0;
 
     /**
-     * <p>
-     * if face detection support exists Use face
+     * <p>if face detection support exists Use face
      * detection data to drive 3A routines. If face detection
      * statistics are disabled, should still operate correctly
      * (but not return face detection statistics to the
-     * framework).
-     * </p><p>
-     * Unlike the other scene modes, aeMode, awbMode, and afMode
+     * framework).</p>
+     * <p>Unlike the other scene modes, aeMode, awbMode, and afMode
      * remain active when FACE_PRIORITY is set. This is due to
      * compatibility concerns with the old camera
-     * API
-     * </p>
+     * API</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1;
@@ -821,27 +753,21 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * No edge enhancement is applied
-     * </p>
+     * <p>No edge enhancement is applied</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_OFF = 0;
 
     /**
-     * <p>
-     * Must not slow down frame rate relative to raw
-     * bayer output
-     * </p>
+     * <p>Must not slow down frame rate relative to raw
+     * bayer output</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_FAST = 1;
 
     /**
-     * <p>
-     * Frame rate may be reduced by high
-     * quality
-     * </p>
+     * <p>Frame rate may be reduced by high
+     * quality</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_HIGH_QUALITY = 2;
@@ -851,30 +777,24 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * Do not fire the flash for this
-     * capture
-     * </p>
+     * <p>Do not fire the flash for this
+     * capture</p>
      * @see CaptureRequest#FLASH_MODE
      */
     public static final int FLASH_MODE_OFF = 0;
 
     /**
-     * <p>
-     * if android.flash.available is true Fire flash
+     * <p>if android.flash.available is true Fire flash
      * for this capture based on firingPower,
-     * firingTime.
-     * </p>
+     * firingTime.</p>
      * @see CaptureRequest#FLASH_MODE
      */
     public static final int FLASH_MODE_SINGLE = 1;
 
     /**
-     * <p>
-     * if android.flash.available is true Flash
+     * <p>if android.flash.available is true Flash
      * continuously on, power set by
-     * firingPower
-     * </p>
+     * firingPower</p>
      * @see CaptureRequest#FLASH_MODE
      */
     public static final int FLASH_MODE_TORCH = 2;
@@ -898,27 +818,21 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * No noise reduction is applied
-     * </p>
+     * <p>No noise reduction is applied</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_OFF = 0;
 
     /**
-     * <p>
-     * Must not slow down frame rate relative to raw
-     * bayer output
-     * </p>
+     * <p>Must not slow down frame rate relative to raw
+     * bayer output</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_FAST = 1;
 
     /**
-     * <p>
-     * May slow down frame rate to provide highest
-     * quality
-     * </p>
+     * <p>May slow down frame rate to provide highest
+     * quality</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
@@ -933,19 +847,15 @@ public abstract class CameraMetadata {
     public static final int STATISTICS_FACE_DETECT_MODE_OFF = 0;
 
     /**
-     * <p>
-     * Optional Return rectangle and confidence
-     * only
-     * </p>
+     * <p>Optional Return rectangle and confidence
+     * only</p>
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1;
 
     /**
-     * <p>
-     * Optional Return all face
-     * metadata
-     * </p>
+     * <p>Optional Return all face
+     * metadata</p>
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2;
@@ -969,28 +879,22 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * Use the tone mapping curve specified in
-     * android.tonemap.curve
-     * </p>
+     * <p>Use the tone mapping curve specified in
+     * android.tonemap.curve</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_CONTRAST_CURVE = 0;
 
     /**
-     * <p>
-     * Must not slow down frame rate relative to raw
-     * bayer output
-     * </p>
+     * <p>Must not slow down frame rate relative to raw
+     * bayer output</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_FAST = 1;
 
     /**
-     * <p>
-     * Frame rate may be reduced by high
-     * quality
-     * </p>
+     * <p>Frame rate may be reduced by high
+     * quality</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_HIGH_QUALITY = 2;
@@ -1000,60 +904,48 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * AE is off.  When a camera device is opened, it starts in
-     * this state.
-     * </p>
+     * <p>AE is off.  When a camera device is opened, it starts in
+     * this state.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_INACTIVE = 0;
 
     /**
-     * <p>
-     * AE doesn't yet have a good set of control values
-     * for the current scene
-     * </p>
+     * <p>AE doesn't yet have a good set of control values
+     * for the current scene</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_SEARCHING = 1;
 
     /**
-     * <p>
-     * AE has a good set of control values for the
-     * current scene
-     * </p>
+     * <p>AE has a good set of control values for the
+     * current scene</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_CONVERGED = 2;
 
     /**
-     * <p>
-     * AE has been locked (aeMode =
-     * LOCKED)
-     * </p>
+     * <p>AE has been locked (aeMode =
+     * LOCKED)</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_LOCKED = 3;
 
     /**
-     * <p>
-     * AE has a good set of control values, but flash
+     * <p>AE has a good set of control values, but flash
      * needs to be fired for good quality still
-     * capture
-     * </p>
+     * capture</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_FLASH_REQUIRED = 4;
 
     /**
-     * <p>
-     * AE has been asked to do a precapture sequence
+     * <p>AE has been asked to do a precapture sequence
      * (through the
      * trigger_action(CAMERA2_TRIGGER_PRECAPTURE_METERING)
      * call), and is currently executing it. Once PRECAPTURE
      * completes, AE will transition to CONVERGED or
-     * FLASH_REQUIRED as appropriate
-     * </p>
+     * FLASH_REQUIRED as appropriate</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_PRECAPTURE = 5;
@@ -1063,71 +955,57 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * AF off or has not yet tried to scan/been asked
+     * <p>AF off or has not yet tried to scan/been asked
      * to scan.  When a camera device is opened, it starts in
-     * this state.
-     * </p>
+     * this state.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_INACTIVE = 0;
 
     /**
-     * <p>
-     * if CONTINUOUS_* modes are supported. AF is
+     * <p>if CONTINUOUS_* modes are supported. AF is
      * currently doing an AF scan initiated by a continuous
-     * autofocus mode
-     * </p>
+     * autofocus mode</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_SCAN = 1;
 
     /**
-     * <p>
-     * if CONTINUOUS_* modes are supported. AF currently
+     * <p>if CONTINUOUS_* modes are supported. AF currently
      * believes it is in focus, but may restart scanning at
-     * any time.
-     * </p>
+     * any time.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_FOCUSED = 2;
 
     /**
-     * <p>
-     * if AUTO or MACRO modes are supported. AF is doing
+     * <p>if AUTO or MACRO modes are supported. AF is doing
      * an AF scan because it was triggered by AF
-     * trigger
-     * </p>
+     * trigger</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_ACTIVE_SCAN = 3;
 
     /**
-     * <p>
-     * if any AF mode besides OFF is supported. AF
+     * <p>if any AF mode besides OFF is supported. AF
      * believes it is focused correctly and is
-     * locked
-     * </p>
+     * locked</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_FOCUSED_LOCKED = 4;
 
     /**
-     * <p>
-     * if any AF mode besides OFF is supported. AF has
+     * <p>if any AF mode besides OFF is supported. AF has
      * failed to focus successfully and is
-     * locked
-     * </p>
+     * locked</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_NOT_FOCUSED_LOCKED = 5;
 
     /**
-     * <p>
-     * if CONTINUOUS_* modes are supported. AF finished a
+     * <p>if CONTINUOUS_* modes are supported. AF finished a
      * passive scan without finding focus, and may restart
-     * scanning at any time.
-     * </p>
+     * scanning at any time.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_UNFOCUSED = 6;
@@ -1137,37 +1015,29 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * AWB is not in auto mode.  When a camera device is opened, it
-     * starts in this state.
-     * </p>
+     * <p>AWB is not in auto mode.  When a camera device is opened, it
+     * starts in this state.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_INACTIVE = 0;
 
     /**
-     * <p>
-     * AWB doesn't yet have a good set of control
-     * values for the current scene
-     * </p>
+     * <p>AWB doesn't yet have a good set of control
+     * values for the current scene</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_SEARCHING = 1;
 
     /**
-     * <p>
-     * AWB has a good set of control values for the
-     * current scene
-     * </p>
+     * <p>AWB has a good set of control values for the
+     * current scene</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_CONVERGED = 2;
 
     /**
-     * <p>
-     * AE has been locked (aeMode =
-     * LOCKED)
-     * </p>
+     * <p>AE has been locked (aeMode =
+     * LOCKED)</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_LOCKED = 3;
@@ -1177,36 +1047,28 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>
-     * No flash on camera
-     * </p>
+     * <p>No flash on camera</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_UNAVAILABLE = 0;
 
     /**
-     * <p>
-     * if android.flash.available is true Flash is
-     * charging and cannot be fired
-     * </p>
+     * <p>if android.flash.available is true Flash is
+     * charging and cannot be fired</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_CHARGING = 1;
 
     /**
-     * <p>
-     * if android.flash.available is true Flash is
-     * ready to fire
-     * </p>
+     * <p>if android.flash.available is true Flash is
+     * ready to fire</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_READY = 2;
 
     /**
-     * <p>
-     * if android.flash.available is true Flash fired
-     * for this capture
-     * </p>
+     * <p>if android.flash.available is true Flash fired
+     * for this capture</p>
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_FIRED = 3;
