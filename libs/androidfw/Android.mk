@@ -54,6 +54,7 @@ LOCAL_C_INCLUDES := \
 	external/zlib
 
 LOCAL_STATIC_LIBRARIES := liblog
+LOCAL_WHOLE_STATIC_LIBRARIES := libziparchive-host
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -72,9 +73,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libz
 
+LOCAL_STATIC_LIBRARIES := libziparchive
+
 LOCAL_C_INCLUDES := \
     external/icu4c/common \
-	external/zlib
+    external/zlib \
+    system/core/include
 
 LOCAL_MODULE:= libandroidfw
 
