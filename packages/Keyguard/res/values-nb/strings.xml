@@ -117,7 +117,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Skriv inn den korrekte PUK-koden på nytt. Gjentatte forsøk kommer til å deaktivere SIM-kortet."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kodene stemmer ikke overens"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøk på tegning av mønster"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Logg deg på med Google-kontoen din for å låse opp."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Logg på med Google-kontoen din for å låse opp."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Brukernavn (e-postadresse)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Passord"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Logg på"</string>
