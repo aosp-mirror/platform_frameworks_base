@@ -843,7 +843,7 @@ void _CompressedAsset::close(void)
  * The first time this is called, we expand the compressed data into a
  * buffer.
  */
-const void* _CompressedAsset::getBuffer(bool wordAligned)
+const void* _CompressedAsset::getBuffer(bool)
 {
     unsigned char* buf = NULL;
 
@@ -860,7 +860,7 @@ const void* _CompressedAsset::getBuffer(bool wordAligned)
     }
 
     if (mMap != NULL) {
-        if (!ZipFileRO::inflateBuffer(buf, mMap->getDataPtr(),
+        if (!ZipUtils::inflateToBuffer(mMap->getDataPtr(), buf,
                 mUncompressedLen, mCompressedLen))
             goto bail;
     } else {

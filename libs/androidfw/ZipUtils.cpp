@@ -33,114 +33,12 @@
 
 using namespace android;
 
-/*
- * Utility function that expands zip/gzip "deflate" compressed data
- * into a buffer.
- *
- * "fd" is an open file positioned at the start of the "deflate" data
- * "buf" must hold at least "uncompressedLen" bytes.
- */
-/*static*/ bool ZipUtils::inflateToBuffer(int fd, void* buf,
-    long uncompressedLen, long compressedLen)
-{
-    bool result = false;
-	const unsigned long kReadBufSize = 32768;
-	unsigned char* readBuf = NULL;
-    z_stream zstream;
-    int zerr;
-    unsigned long compRemaining;
-
-    assert(uncompressedLen >= 0);
-    assert(compressedLen >= 0);
-
-	readBuf = new unsigned char[kReadBufSize];
-	if (readBuf == NULL)
-        goto bail;
-    compRemaining = compressedLen;
-
-    /*
-     * Initialize the zlib stream.
-     */
-	memset(&zstream, 0, sizeof(zstream));
-    zstream.zalloc = Z_NULL;
-    zstream.zfree = Z_NULL;
-    zstream.opaque = Z_NULL;
-    zstream.next_in = NULL;
-    zstream.avail_in = 0;
-    zstream.next_out = (Bytef*) buf;
-    zstream.avail_out = uncompressedLen;
-    zstream.data_type = Z_UNKNOWN;
-
-	/*
-	 * Use the undocumented "negative window bits" feature to tell zlib
-	 * that there's no zlib header waiting for it.
-	 */
-    zerr = inflateInit2(&zstream, -MAX_WBITS);
-    if (zerr != Z_OK) {
-        if (zerr == Z_VERSION_ERROR) {
-            ALOGE("Installed zlib is not compatible with linked version (%s)\n",
-                ZLIB_VERSION);
-        } else {
-            ALOGE("Call to inflateInit2 failed (zerr=%d)\n", zerr);
-        }
-        goto bail;
-    }
-
-    /*
-     * Loop while we have data.
-     */
-    do {
-        unsigned long getSize;
-
-        /* read as much as we can */
-        if (zstream.avail_in == 0) {
-            getSize = (compRemaining > kReadBufSize) ?
-                        kReadBufSize : compRemaining;
-            ALOGV("+++ reading %ld bytes (%ld left)\n",
-                getSize, compRemaining);
-
-            int cc = TEMP_FAILURE_RETRY(read(fd, readBuf, getSize));
-            if (cc < 0) {
-                ALOGW("inflate read failed: %s", strerror(errno));
-            } else if (cc != (int) getSize) {
-                ALOGW("inflate read failed (%d vs %ld)", cc, getSize);
-                goto z_bail;
-            }
-
-            compRemaining -= getSize;
-
-            zstream.next_in = readBuf;
-            zstream.avail_in = getSize;
-        }
-
-        /* uncompress the data */
-        zerr = inflate(&zstream, Z_NO_FLUSH);
-        if (zerr != Z_OK && zerr != Z_STREAM_END) {
-            ALOGD("zlib inflate call failed (zerr=%d)\n", zerr);
-            goto z_bail;
-        }
-
-		/* output buffer holds all, so no need to write the output */
-    } while (zerr == Z_OK);
-
-    assert(zerr == Z_STREAM_END);       /* other errors should've been caught */
-
-    if ((long) zstream.total_out != uncompressedLen) {
-        ALOGW("Size mismatch on inflated file (%ld vs %ld)\n",
-            zstream.total_out, uncompressedLen);
-        goto z_bail;
-    }
-
-    // success!
-    result = true;
-
-z_bail:
-    inflateEnd(&zstream);        /* free up any allocated structures */
-
-bail:
-	delete[] readBuf;
-    return result;
+static inline unsigned long get4LE(const unsigned char* buf) {
+    return buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
 }
+
+
+static const unsigned long kReadBufSize = 32768;
 
 /*
  * Utility function that expands zip/gzip "deflate" compressed data
@@ -153,12 +51,11 @@ bail:
  * "fp" is an open file positioned at the start of the "deflate" data
  * "buf" must hold at least "uncompressedLen" bytes.
  */
-/*static*/ bool ZipUtils::inflateToBuffer(FILE* fp, void* buf,
+/*static*/ template<typename T> bool inflateToBuffer(T& reader, void* buf,
     long uncompressedLen, long compressedLen)
 {
     bool result = false;
-	const unsigned long kReadBufSize = 32768;
-	unsigned char* readBuf = NULL;
+
     z_stream zstream;
     int zerr;
     unsigned long compRemaining;
@@ -166,15 +63,12 @@ bail:
     assert(uncompressedLen >= 0);
     assert(compressedLen >= 0);
 
-	readBuf = new unsigned char[kReadBufSize];
-	if (readBuf == NULL)
-        goto bail;
     compRemaining = compressedLen;
 
     /*
      * Initialize the zlib stream.
      */
-	memset(&zstream, 0, sizeof(zstream));
+    memset(&zstream, 0, sizeof(zstream));
     zstream.zalloc = Z_NULL;
     zstream.zfree = Z_NULL;
     zstream.opaque = Z_NULL;
@@ -184,10 +78,10 @@ bail:
     zstream.avail_out = uncompressedLen;
     zstream.data_type = Z_UNKNOWN;
 
-	/*
-	 * Use the undocumented "negative window bits" feature to tell zlib
-	 * that there's no zlib header waiting for it.
-	 */
+    /*
+     * Use the undocumented "negative window bits" feature to tell zlib
+     * that there's no zlib header waiting for it.
+     */
     zerr = inflateInit2(&zstream, -MAX_WBITS);
     if (zerr != Z_OK) {
         if (zerr == Z_VERSION_ERROR) {
@@ -212,17 +106,18 @@ bail:
             ALOGV("+++ reading %ld bytes (%ld left)\n",
                 getSize, compRemaining);
 
-            int cc = fread(readBuf, 1, getSize, fp);
-            if (cc != (int) getSize) {
-                ALOGD("inflate read failed (%d vs %ld)\n",
-                    cc, getSize);
+            unsigned char* nextBuffer = NULL;
+            const unsigned long nextSize = reader.read(&nextBuffer, getSize);
+
+            if (nextSize < getSize || nextBuffer == NULL) {
+                ALOGD("inflate read failed (%ld vs %ld)\n", nextSize, getSize);
                 goto z_bail;
             }
 
-            compRemaining -= getSize;
+            compRemaining -= nextSize;
 
-            zstream.next_in = readBuf;
-            zstream.avail_in = getSize;
+            zstream.next_in = nextBuffer;
+            zstream.avail_in = nextSize;
         }
 
         /* uncompress the data */
@@ -250,9 +145,99 @@ z_bail:
     inflateEnd(&zstream);        /* free up any allocated structures */
 
 bail:
-	delete[] readBuf;
     return result;
 }
+
+class FileReader {
+public:
+   FileReader(FILE* fp) :
+       mFp(fp), mReadBuf(new unsigned char[kReadBufSize])
+   {
+   }
+
+   ~FileReader() {
+       delete[] mReadBuf;
+   }
+
+   long read(unsigned char** nextBuffer, long readSize) const {
+       *nextBuffer = mReadBuf;
+       return fread(mReadBuf, 1, readSize, mFp);
+   }
+
+   FILE* mFp;
+   unsigned char* mReadBuf;
+};
+
+class FdReader {
+public:
+   FdReader(int fd) :
+       mFd(fd), mReadBuf(new unsigned char[kReadBufSize])
+   {
+   }
+
+   ~FdReader() {
+       delete[] mReadBuf;
+   }
+
+   long read(unsigned char** nextBuffer, long readSize) const {
+       *nextBuffer = mReadBuf;
+       return TEMP_FAILURE_RETRY(::read(mFd, mReadBuf, readSize));
+   }
+
+   int mFd;
+   unsigned char* mReadBuf;
+};
+
+class BufferReader {
+public:
+    BufferReader(void* input, size_t inputSize) :
+        mInput(reinterpret_cast<unsigned char*>(input)),
+        mInputSize(inputSize),
+        mBufferReturned(false)
+    {
+    }
+
+    long read(unsigned char** nextBuffer, long readSize) {
+        if (!mBufferReturned) {
+            mBufferReturned = true;
+            *nextBuffer = mInput;
+            return mInputSize;
+        }
+
+        *nextBuffer = NULL;
+        return 0;
+    }
+
+    unsigned char* mInput;
+    const size_t mInputSize;
+    bool mBufferReturned;
+};
+
+/*static*/ bool ZipUtils::inflateToBuffer(FILE* fp, void* buf,
+    long uncompressedLen, long compressedLen)
+{
+    FileReader reader(fp);
+    return ::inflateToBuffer<FileReader>(reader, buf,
+        uncompressedLen, compressedLen);
+}
+
+/*static*/ bool ZipUtils::inflateToBuffer(int fd, void* buf,
+    long uncompressedLen, long compressedLen)
+{
+    FdReader reader(fd);
+    return ::inflateToBuffer<FdReader>(reader, buf,
+        uncompressedLen, compressedLen);
+}
+
+/*static*/ bool ZipUtils::inflateToBuffer(void* in, void* buf,
+    long uncompressedLen, long compressedLen)
+{
+    BufferReader reader(in, compressedLen);
+    return ::inflateToBuffer<BufferReader>(reader, buf,
+        uncompressedLen, compressedLen);
+}
+
+
 
 /*
  * Look at the contents of a gzip archive.  We want to know where the
@@ -338,8 +323,8 @@ bail:
     fseek(fp, curPosn, SEEK_SET);
 
     *pCompressionMethod = method;
-    *pCRC32 = ZipFileRO::get4LE(&buf[0]);
-    *pUncompressedLen = ZipFileRO::get4LE(&buf[4]);
+    *pCRC32 = get4LE(&buf[0]);
+    *pUncompressedLen = get4LE(&buf[4]);
 
     return true;
 }

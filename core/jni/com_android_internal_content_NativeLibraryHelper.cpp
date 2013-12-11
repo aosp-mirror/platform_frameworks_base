@@ -21,7 +21,9 @@
 
 #include <utils/Log.h>
 #include <androidfw/ZipFileRO.h>
+#include <androidfw/ZipUtils.h>
 #include <ScopedUtfChars.h>
+#include <UniquePtr.h>
 
 #include <zlib.h>
 
@@ -143,7 +145,7 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
 }
 
 static install_status_t
-sumFiles(JNIEnv* env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
+sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char*)
 {
     size_t* total = (size_t*) arg;
     size_t uncompLen;
@@ -178,7 +180,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_FAILED_INVALID_APK;
     } else {
         struct tm t;
-        ZipFileRO::zipTimeToTimespec(when, &t);
+        ZipUtils::zipTimeToTimespec(when, &t);
         modTime = mktime(&t);
     }
 
@@ -273,26 +275,25 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
     ScopedUtfChars cpuAbi(env, javaCpuAbi);
     ScopedUtfChars cpuAbi2(env, javaCpuAbi2);
 
-    ZipFileRO zipFile;
-
-    if (zipFile.open(filePath.c_str()) != NO_ERROR) {
+    UniquePtr<ZipFileRO> zipFile(ZipFileRO::open(filePath.c_str()));
+    if (zipFile.get() == NULL) {
         ALOGI("Couldn't open APK %s\n", filePath.c_str());
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    const int N = zipFile.getNumEntries();
-
     char fileName[PATH_MAX];
     bool hasPrimaryAbi = false;
 
-    for (int i = 0; i < N; i++) {
-        const ZipEntryRO entry = zipFile.findEntryByIndex(i);
-        if (entry == NULL) {
-            continue;
-        }
+    void* cookie = NULL;
+    if (!zipFile->startIteration(&cookie)) {
+        ALOGI("Couldn't iterate over APK%s\n", filePath.c_str());
+        return INSTALL_FAILED_INVALID_APK;
+    }
 
+    ZipEntryRO entry = NULL;
+    while ((entry = zipFile->nextEntry(cookie)) != NULL) {
         // Make sure this entry has a filename.
-        if (zipFile.getEntryFileName(entry, fileName, sizeof(fileName))) {
+        if (zipFile->getEntryFileName(entry, fileName, sizeof(fileName))) {
             continue;
         }
 
@@ -346,14 +347,17 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
                     && isFilenameSafe(lastSlash + 1))
                 || !strncmp(lastSlash + 1, GDBSERVER, GDBSERVER_LEN)) {
 
-            install_status_t ret = callFunc(env, callArg, &zipFile, entry, lastSlash + 1);
+            install_status_t ret = callFunc(env, callArg, zipFile.get(), entry, lastSlash + 1);
 
             if (ret != INSTALL_SUCCEEDED) {
                 ALOGV("Failure for entry %s", lastSlash + 1);
+                zipFile->endIteration(cookie);
                 return ret;
             }
         }
     }
+
+    zipFile->endIteration(cookie);
 
     return INSTALL_SUCCEEDED;
 }
