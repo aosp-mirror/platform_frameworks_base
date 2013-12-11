@@ -216,7 +216,7 @@ public class StorageVolume implements Parcelable {
             return -1;
         }
         try {
-            return Integer.parseInt(mUuid.replace("-", ""), 16);
+            return (int)Long.parseLong(mUuid.replace("-", ""), 16);
         } catch (NumberFormatException e) {
             return -1;
         }
