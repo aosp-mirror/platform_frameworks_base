@@ -148,8 +148,8 @@ the recipient's address using the {@code send} or {@code sendto} URI scheme. For
 {@link android.content.Intent#CATEGORY_DEFAULT} category in the intent filter. The methods {@link
 android.app.Activity#startActivity startActivity()} and {@link
 android.app.Activity#startActivityForResult startActivityForResult()} treat all intents as if they
-contained the {@link android.content.Intent#CATEGORY_DEFAULT} category. If you do not declare it, no
-implicit intents will resolve to your activity.</p>
+declared the {@link android.content.Intent#CATEGORY_DEFAULT} category. If you do not declare it
+in your intent filter, no implicit intents will resolve to your activity.</p>
 
 <p>For more information about sending and receiving {@link android.content.Intent#ACTION_SEND}
 intents that perform social sharing behaviors, see the lesson about <a

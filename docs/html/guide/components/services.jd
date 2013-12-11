@@ -212,41 +212,35 @@ element. For example:</p>
 &lt;/manifest&gt;
 </pre>
 
+<p>See the <a
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
+reference for more information about declaring your service in the manifest.</p>
+
 <p>There are other attributes you can include in the <a
 href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element to
 define properties such as permissions required to start the service and the process in
 which the service should run. The <a
 href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a>
 attribute is the only required attribute&mdash;it specifies the class name of the service. Once
-you publish your application, you should not change this name, because if you do, you might break
-some functionality where explicit intents are used to reference your service (read the blog post, <a
+you publish your application, you should not change this name, because if you do, you risk breaking
+code due to dependence on explicit intents to start or bind the service (read the blog post, <a
 href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
 That Cannot Change</a>).
 
-<p>See the <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
-reference for more information about declaring your service in the manifest.</p>
+<p>To ensure your app is secure, <strong>always use an explicit intent when starting or binding
+your {@link android.app.Service}</strong> and do not declare intent filters for the service. If
+it's critical that you allow for some amount of ambiguity as to which service starts, you can
+supply intent filters for your services and exclude the component name from the {@link
+android.content.Intent}, but you then must set the package for the intent with {@link
+android.content.Intent#setPackage setPackage()}, which provides sufficient disambiguation for the
+target service.</p>
 
-<p>Just like an activity, a service can define intent filters that allow other components to
-invoke the service using implicit intents. By declaring intent filters, components
-from any application installed on the user's device can potentially start your service if your
-service declares an intent filter that matches the intent another application passes to {@link
-android.content.Context#startService startService()}.</p>
-
-<p>If you plan on using your service only locally (other applications do not use it), then you
-don't need to (and should not) supply any intent filters. Without any intent filters, you must
-start the service using an intent that explicitly names the service class. More information
-about <a href="#StartingAService">starting a service</a> is discussed below.</p>
-
-<p>Additionally, you can ensure that your service is private to your application only if
-you include the <a
+<p>Additionally, you can ensure that your service is available to only your app by
+including the <a
 href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a>
-attribute and set it to {@code "false"}. This is effective even if your service supplies intent
-filters.</p>
+attribute and setting it to {@code "false"}. This effectively stops other apps from starting your
+service, even when using an explicit intent.</p>
 
-<p>For more information about creating intent filters for your service, see the <a
-href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
-document.</p>
 
 
 
@@ -333,7 +327,7 @@ client. (Though, you also need to provide a small constructor for the service.)<
 <pre>
 public class HelloIntentService extends IntentService {
 
-  /** 
+  /**
    * A constructor is required, and must call the super {@link android.app.IntentService#IntentService}
    * constructor with a name for the worker thread.
    */
@@ -443,8 +437,8 @@ public class HelloService extends Service {
     HandlerThread thread = new HandlerThread("ServiceStartArguments",
             Process.THREAD_PRIORITY_BACKGROUND);
     thread.start();
-    
-    // Get the HandlerThread's Looper and use it for our Handler 
+
+    // Get the HandlerThread's Looper and use it for our Handler
     mServiceLooper = thread.getLooper();
     mServiceHandler = new ServiceHandler(mServiceLooper);
   }
@@ -458,7 +452,7 @@ public class HelloService extends Service {
       Message msg = mServiceHandler.obtainMessage();
       msg.arg1 = startId;
       mServiceHandler.sendMessage(msg);
-      
+
       // If we get killed, after returning from here, restart
       return START_STICKY;
   }
@@ -468,10 +462,10 @@ public class HelloService extends Service {
       // We don't provide binding, so return null
       return null;
   }
-  
+
   &#64;Override
   public void onDestroy() {
-    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show(); 
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
   }
 }
 </pre>
@@ -652,7 +646,7 @@ developer guides for more information.</p>
 <h2 id="Foreground">Running a Service in the Foreground</h2>
 
 <p>A foreground service is a service that's considered to be something the
-user is actively aware of and thus not a candidate for the system to kill when low on memory. A 
+user is actively aware of and thus not a candidate for the system to kill when low on memory. A
 foreground service must provide a notification for the status bar, which is placed under the
 "Ongoing" heading, which means that the notification cannot be dismissed unless the service is
 either stopped or removed from the foreground.</p>
