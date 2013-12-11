@@ -1,0 +1,875 @@
+page.title=Storage Access Framework
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+    <li>
+        <a href="#overview">Overview</a>
+    </li>
+    <li>
+        <a href="#flow">Control Flow</a>
+    </li>
+    <li>
+        <a href="#client">Writing a Client App</a>
+        <ol>
+        <li><a href="#search">Search for documents</a></li>
+        <li><a href="#process">Process results</a></li>
+        <li><a href="#metadata">Examine document metadata</a></li>
+        <li><a href="#open">Open a document</a></li>
+        <li><a href="#create">Create a new document</a></li>
+        <li><a href="#delete">Delete a document</a></li>
+        <li><a href="#edit">Edit a document</a></li>
+        <li><a href="#permissions">Persist permissions</a></li>
+        </ol>
+    </li>
+    <li><a href="#custom">Writing a Custom Document Provider</a>
+        <ol>
+        <li><a href="#manifest">Manifest</a></li>
+        <li><a href="#contract">Contracts</a></li>
+        <li><a href="#subclass">Subclass DocumentsProvider</a></li>
+        <li><a href="#security">Security</a></li>
+        </ol>
+    </li>
+
+</ol>
+<h2>Key classes</h2>
+<ol>
+    <li>{@link android.provider.DocumentsProvider}</li>
+    <li>{@link android.provider.DocumentsContract}</li>
+    <li>{@link android.provider.DocumentsContract.Document}</li>
+    <li>{@link android.provider.DocumentsContract.Root}</li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Content Provider Basics
+        </a>
+    </li>
+</ol>
+</div>
+</div>
+<p>Android 4.4 (API level 19) introduces the Storage Access Framework. The
+Storage Access Framework encapsulates capabilities in the Android platform that
+allow apps to request files from file storage services. The Storage Access
+Framework includes the following:</p>
+
+<ul>
+<li><strong>Document provider</strong>&mdash;A content provider that allows a
+storage service (such as Google Drive) to reveal the files it manages. This is
+implemented as a subclass of the {@link android.provider.DocumentsProvider} class.
+The document provider schema is based on a traditional file hierarchy,
+though how your document provider physically stores data is up to you.
+The Android platform includes several built-in document providers, such as
+Downloads, Images, and Videos.</li>
+
+<li><strong>Client app</strong>&mdash;A custom app that invokes the
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} and/or
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} intent and receives the
+files returned by document providers.</li>
+
+<li><strong>Picker</strong>&mdash;A system UI that lets users access documents from all
+document providers that satisfy the client app's search criteria.</li>
+</ul>
+
+<p>Some of the features offered by the Storage Access Framework are as follows:</p>
+<ul>
+<li>Lets users browse content from all document providers, not just a single app.</li>
+<li>Makes it possible for your app to have long term, persistent access to
+ documents owned by a document provider. Through this access users can add, edit,
+ save, and delete files on the provider.</li>
+<li>Supports multiple user accounts and transient roots such as USB storage
+providers, which only appear if the drive is plugged in. </li>
+</ul>
+
+<h2 id ="overview">Overview</h2>
+
+<p>The Storage Access Framework centers around a content provider that is a
+subclass of the {@link android.provider.DocumentsProvider} class. Within a <em>document provider</em>, data is
+structured as a traditional file hierarchy:</p>
+<p><img src="{@docRoot}images/providers/storage_datamodel.png" alt="data model" /></p>
+<p class="img-caption"><strong>Figure 1.</strong> Document provider data model. A Root points to a single Document,
+which then starts the fan-out of the entire tree.</p>
+
+<p>Note the following:</p>
+<ul>
+
+<li>Each document provider reports one or more
+&quot;roots&quot; which are starting points into exploring a tree of documents.
+Each root has a unique {@link android.provider.DocumentsContract.Root#COLUMN_ROOT_ID},
+and it points to a document (a directory)
+representing the contents under that root.
+Roots are dynamic by design to support use cases like multiple accounts,
+transient USB storage devices, or user login/log out.</li>
+
+<li>Under each root is a single document. That document points to 1 to <em>N</em> documents,
+each of which in turn can point to 1 to <em>N</em> documents. </li>
+
+<li>Each storage backend surfaces
+individual files and directories by referencing them with a unique
+{@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID}.
+Document IDs must be unique and not change once issued, since they are used for persistent
+URI grants across device reboots.</li>
+
+
+<li>Documents can be either an openable file (with a specific MIME type), or a
+directory containing additional documents (with the
+{@link android.provider.DocumentsContract.Document#MIME_TYPE_DIR} MIME type).</li>
+
+<li>Each document can have different capabilities, as described by
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS}.
+For example, {@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_WRITE},
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE}, and
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_THUMBNAIL}.
+The same {@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} can be
+included in multiple directories.</li>
+</ul>
+
+<h2 id="flow">Control Flow</h2>
+<p>As stated above, the  document provider data model is based on a traditional
+file hierarchy. However, you can physically store your data however you like, as
+long as it can be accessed through the {@link android.provider.DocumentsProvider} API. For example, you
+could use tag-based cloud storage for your data.</p>
+
+<p>Figure 2 shows an example of how a photo app might use the Storage Access Framework
+to access  stored data:</p>
+<p><img src="{@docRoot}images/providers/storage_dataflow.png" alt="app" /></p>
+
+<p class="img-caption"><strong>Figure 2.</strong> Storage Access Framework Flow</p>
+
+<p>Note the following:</p>
+<ul>
+
+<li>In the Storage Access Framework, providers and clients don't interact
+directly. A client requests permission to interact
+with files (that is, to read, edit, create, or delete files).</li>
+
+<li>The interaction starts when an application (in this example, a photo app)  fires the intent
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} or {@link android.content.Intent#ACTION_CREATE_DOCUMENT}. The intent may include filters
+to further refine the criteria&mdash;for example, &quot;give me all openable files
+that have the 'image' MIME type.&quot;</li>
+
+<li>Once the intent fires, the system picker goes to each registered provider
+and shows the user the matching content roots.</li>
+
+<li>The picker gives users a standard interface for accessing documents, even
+though the underlying document providers may be very different. For example, figure 2
+shows a Google Drive provider, a USB provider, and a cloud provider.</li>
+</ul>
+
+<p>Figure 3 shows a picker in which a user searching for images has selected a
+Google Drive account:</p>
+
+<p><img src="{@docRoot}images/providers/storage_picker.png" width="340"
+alt="picker" style="border:2px solid #ddd"/></p>
+
+<p class="img-caption"><strong>Figure 3.</strong> Picker</p>
+
+<p>When the user selects Google Drive the images are displayed, as shown in
+figure 4. From that point on, the user can interact with them in whatever ways
+are supported by the provider and client app.
+
+<p><img src="{@docRoot}images/providers/storage_photos.png" width="340"
+alt="picker" style="border:2px solid #ddd"/></p>
+
+<p class="img-caption"><strong>Figure 4.</strong> Images</p>
+
+<h2 id="client">Writing a Client App</h2>
+
+<p>On Android 4.3 and lower, if you want your app to retrieve a file from another
+app, it must invoke an intent such as {@link android.content.Intent#ACTION_PICK}
+or {@link android.content.Intent#ACTION_GET_CONTENT}. The user must then select
+a single app from which to pick a file and the selected app must provide a user
+interface for the user to browse and pick from the available files. </p>
+
+<p>On Android 4.4 and higher, you have the additional option of using the
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} intent,
+which displays a picker UI controlled by the system that allows the user to
+browse all files that other apps have made available. From this single UI, the
+user can pick a file from any of the supported apps.</p>
+
+<p>{@link android.content.Intent#ACTION_OPEN_DOCUMENT} is
+not intended to be a replacement for {@link android.content.Intent#ACTION_GET_CONTENT}.
+The one you should use depends on the needs of your app:</p>
+
+<ul>
+<li>Use {@link android.content.Intent#ACTION_GET_CONTENT} if you want your app
+to simply read/import data. With this approach, the app imports a copy of the data,
+such as an image file.</li>
+
+<li>Use {@link android.content.Intent#ACTION_OPEN_DOCUMENT} if you want your
+app to have long term, persistent access to documents owned by a document
+provider. An example would be a photo-editing app that lets users edit
+images stored in a document provider. </li>
+
+</ul>
+
+
+<p>This section describes how to write client apps based on the
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} and
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} intents.</p>
+
+
+<h3 id="search">Search for documents</h3>
+
+<p>
+The following snippet uses {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+to search for document providers that
+contain image files:</p>
+
+<pre>private static final int READ_REQUEST_CODE = 42;
+...
+/**
+ * Fires an intent to spin up the &quot;file chooser&quot; UI and select an image.
+ */
+public void performFileSearch() {
+
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+    // browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones)
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only images, using the image MIME data type.
+    // If one wanted to search for ogg vorbis files, the type would be &quot;audio/ogg&quot;.
+    // To search for all documents available via installed storage providers,
+    // it would be &quot;*/*&quot;.
+    intent.setType(&quot;image/*&quot;);
+
+    startActivityForResult(intent, READ_REQUEST_CODE);
+}</pre>
+
+<p>Note the following:</p>
+<ul>
+<li>When the app fires the {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+intent, it launches a picker that displays all matching document providers.</li>
+
+<li>Adding the category {@link android.content.Intent#CATEGORY_OPENABLE} to the
+intent filters the results to display only documents that can be opened, such as image files.</li>
+
+<li>The statement {@code intent.setType(&quot;image/*&quot;)} further filters to
+display only documents that have the image MIME data type.</li>
+</ul>
+
+<h3 id="results">Process Results</h3>
+
+<p>Once the user selects a document in the picker,
+{@link android.app.Activity#onActivityResult onActivityResult()} gets called.
+The URI that points to the selected document is contained in the {@code resultData}
+parameter. Extract the URI using {@link android.content.Intent#getData getData()}.
+Once you have it, you can use it to retrieve the document the user wants. For
+example:</p>
+
+<pre>&#64;Override
+public void onActivityResult(int requestCode, int resultCode,
+        Intent resultData) {
+
+    // The ACTION_OPEN_DOCUMENT intent was sent with the request code
+    // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
+    // response to some other intent, and the code below shouldn't run at all.
+
+    if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        // The document selected by the user won't be returned in the intent.
+        // Instead, a URI to that document will be contained in the return intent
+        // provided to this method as a parameter.
+        // Pull that URI using resultData.getData().
+        Uri uri = null;
+        if (resultData != null) {
+            uri = resultData.getData();
+            Log.i(TAG, "Uri: " + uri.toString());
+            showImage(uri);
+        }
+    }
+}
+</pre>
+
+<h3 id="metadata">Examine document metadata</h3>
+
+<p>Once you have the URI for a document, you gain access to its metadata. This
+snippet grabs the metadata for a document specified by the URI, and logs it:</p>
+
+<pre>public void dumpImageMetaData(Uri uri) {
+
+    // The query, since it only applies to a single document, will only return
+    // one row. There's no need to filter, sort, or select fields, since we want
+    // all fields for one document.
+    Cursor cursor = getActivity().getContentResolver()
+            .query(uri, null, null, null, null, null);
+
+    try {
+    // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+    // &quot;if there's anything to look at, look at it&quot; conditionals.
+        if (cursor != null &amp;&amp; cursor.moveToFirst()) {
+
+            // Note it's called &quot;Display Name&quot;.  This is
+            // provider-specific, and might not necessarily be the file name.
+            String displayName = cursor.getString(
+                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            Log.i(TAG, &quot;Display Name: &quot; + displayName);
+
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+            // If the size is unknown, the value stored is null.  But since an
+            // int can't be null in Java, the behavior is implementation-specific,
+            // which is just a fancy term for &quot;unpredictable&quot;.  So as
+            // a rule, check if it's null before assigning to an int.  This will
+            // happen often:  The storage API allows for remote files, whose
+            // size might not be locally known.
+            String size = null;
+            if (!cursor.isNull(sizeIndex)) {
+                // Technically the column stores an int, but cursor.getString()
+                // will do the conversion automatically.
+                size = cursor.getString(sizeIndex);
+            } else {
+                size = &quot;Unknown&quot;;
+            }
+            Log.i(TAG, &quot;Size: &quot; + size);
+        }
+    } finally {
+        cursor.close();
+    }
+}
+</pre>
+
+<h3 id="open-client">Open a document</h3>
+
+<p>Once you have the URI for a document, you can open it or do whatever else
+you want to do with it.</p>
+
+<h4>Bitmap</h4>
+
+<p>Here is an example of how you might open a {@link android.graphics.Bitmap}:</p>
+
+<pre>private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+    ParcelFileDescriptor parcelFileDescriptor =
+            getContentResolver().openFileDescriptor(uri, "r");
+    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+    Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+    parcelFileDescriptor.close();
+    return image;
+}
+</pre>
+
+<p>Note that you should not do this operation on the UI thread. Do it in the
+background, using {@link android.os.AsyncTask}. Once you open the bitmap, you
+can display it in an {@link android.widget.ImageView}.
+</p>
+
+<h4>Get an InputStream</h4>
+
+<p>Here is an example of how you can get an {@link java.io.InputStream} from the URI. In this
+snippet, the lines of the file are being read into a string:</p>
+
+<pre>private String readTextFromUri(Uri uri) throws IOException {
+    InputStream inputStream = getContentResolver().openInputStream(uri);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+            inputStream));
+    StringBuilder stringBuilder = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+        stringBuilder.append(line);
+    }
+    fileInputStream.close();
+    parcelFileDescriptor.close();
+    return stringBuilder.toString();
+}
+</pre>
+
+<h3 id="create">Create a new document</h3>
+
+<p>Your app can create a new document in a document provider using the
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT}
+intent. To create a file you give your intent a MIME type and a file name, and
+launch it with a unique request code. The rest is taken care of for you:</p>
+
+
+<pre>
+// Here are some examples of how you might call this method.
+// The first parameter is the MIME type, and the second parameter is the name
+// of the file you are creating:
+//
+// createFile("text/plain", "foobar.txt");
+// createFile("image/png", "mypicture.png");
+
+// Unique request code.
+private static final int WRITE_REQUEST_CODE = 43;
+...
+private void createFile(String mimeType, String fileName) {
+    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as
+    // a file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Create a file with the requested MIME type.
+    intent.setType(mimeType);
+    intent.putExtra(Intent.EXTRA_TITLE, fileName);
+    startActivityForResult(intent, WRITE_REQUEST_CODE);
+}
+</pre>
+
+<p>Once you create a new document you can get its URI in
+{@link android.app.Activity#onActivityResult onActivityResult()}, so that you
+can continue to write to it.</p>
+
+<h3 id="delete">Delete a document</h3>
+
+<p>If you have the URI for a document and the document's
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS Document.COLUMN_FLAGS}
+contains
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE SUPPORTS_DELETE},
+you can delete the document. For example:</p>
+
+<pre>
+DocumentsContract.deleteDocument(getContentResolver(), uri);
+</pre>
+
+<h3 id="edit">Edit a document</h3>
+
+<p>You can use the Storage Access Framework to edit a text document in place.
+This snippet fires
+the {@link android.content.Intent#ACTION_OPEN_DOCUMENT} intent and uses the
+category {@link android.content.Intent#CATEGORY_OPENABLE} to to display only
+documents that can be opened. It further filters to show only text files:</p>
+
+<pre>
+private static final int EDIT_REQUEST_CODE = 44;
+/**
+ * Open a file for writing and append some text to it.
+ */
+ private void editDocument() {
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's
+    // file browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only text files.
+    intent.setType(&quot;text/plain&quot;);
+
+    startActivityForResult(intent, EDIT_REQUEST_CODE);
+}
+</pre>
+
+<p>Next, from {@link android.app.Activity#onActivityResult onActivityResult()}
+(see <a href="#results">Process results</a>) you can call code to perform the edit.
+The following snippet gets a {@link java.io.FileOutputStream}
+from the {@link android.content.ContentResolver}. By default it uses “write” mode.
+It's best practice to ask for the least amount of access you need, so don’t ask
+for read/write if all you need is write:</p>
+
+<pre>private void alterDocument(Uri uri) {
+    try {
+        ParcelFileDescriptor pfd = getActivity().getContentResolver().
+                openFileDescriptor(uri, "w");
+        FileOutputStream fileOutputStream =
+                new FileOutputStream(pfd.getFileDescriptor());
+        fileOutputStream.write(("Overwritten by MyCloud at " +
+                System.currentTimeMillis() + "\n").getBytes());
+        // Let the document provider know you're done by closing the stream.
+        fileOutputStream.close();
+        pfd.close();
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}</pre>
+
+<h3 id="permissions">Persist permissions</h3>
+
+<p>When your app opens a file for reading or writing, the system gives your
+app a URI permission grant for that file. It lasts until the user's device restarts.
+But suppose your app is an image-editing app, and you want users to be able to
+access the last 5 images they edited, directly from your app. If the user's device has
+restarted, you'd have to send the user back to the system picker to find the
+files, which is obviously not ideal.</p>
+
+<p>To prevent this from happening, you can persist the permissions the system
+gives your app. Effectively, your app "takes" the persistable URI permission grant
+that the system is offering. This gives the user continued access to the files
+through your app, even if the device has been restarted:</p>
+
+
+<pre>final int takeFlags = intent.getFlags()
+            &amp; (Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+// Check for the freshest data.
+getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
+
+<p>There is one final step. You may have saved the most
+recent URIs your app accessed, but they may no longer be valid&mdash;another app
+may have deleted or modified a document. Thus, you should always call
+{@code getContentResolver().takePersistableUriPermission()} to check for the
+freshest data.</p>
+
+<h2 id="custom">Writing a Custom Document Provider</h2>
+
+<p>
+If you're developing an app that provides storage services for files (such as
+a cloud save service), you can make your files available through the Storage
+Access Framework by writing a custom document provider.  This section describes
+how to do this.</p>
+
+
+<h3 id="manifest">Manifest</h3>
+
+<p>To implement a custom document provider, add the following to your application's
+manifest:</p>
+<ul>
+
+<li>A target of API level 19 or higher.</li>
+
+<li>A <code>&lt;provider&gt;</code> element that declares your custom storage
+provider. </li>
+
+<li>The name of your provider, which is its class name, including package name.
+For example: <code>com.example.android.storageprovider.MyCloudProvider</code>.</li>
+
+<li>The name of your authority, which is your package name (in this example,
+<code>com.example.android.storageprovider</code>) plus the type of content provider
+(<code>documents</code>). For example, {@code com.example.android.storageprovider.documents}.</li>
+
+<li>The attribute <code>android:exported</code> set to <code>&quot;true&quot;</code>.
+You must export your provider so that other apps can see it.</li>
+
+<li>The attribute <code>android:grantUriPermissions</code> set to
+<code>&quot;true&quot;</code>. This allows the system to grant other apps access
+to content in your provider. For a discussion of how to persist a grant for
+a particular document, see <a href="#permissions">Persist permissions</a>.</li>
+
+<li>The {@code MANAGE_DOCUMENTS} permission. By default a provider is available
+to everyone. Adding this permission restricts your provider to the system,
+which is important for security. </li>
+
+<li>An intent filter that includes the
+{@code android.content.action.DOCUMENTS_PROVIDER} action, so that your provider
+appears in the picker when the system searches for providers.</li>
+
+</ul>
+<p>Here are excerpts from a sample manifest that includes a provider:</p>
+
+<pre>&lt;manifest... &gt;
+    ...
+    &lt;uses-sdk
+        android:minSdkVersion=&quot;19&quot;
+        android:targetSdkVersion=&quot;19&quot; /&gt;
+        ....
+        &lt;provider
+            android:name=&quot;com.example.android.storageprovider.MyCloudProvider&quot;
+            android:authorities=&quot;com.example.android.storageprovider.documents&quot;
+            android:grantUriPermissions=&quot;true&quot;
+            android:exported=&quot;true&quot;
+            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.content.action.DOCUMENTS_PROVIDER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/provider&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</pre>
+
+<h4>Supporting devices running Android 4.3 and lower</h4>
+
+<p>The
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} intent is only available
+on devices running Android 4.4 and higher.
+If you want your application to support {@link android.content.Intent#ACTION_GET_CONTENT}
+to accommodate devices that are running Android 4.3 and lower, you should
+disable the {@link android.content.Intent#ACTION_GET_CONTENT} intent filter in
+your manifest if a device is running Android 4.4 or higher. A
+document provider and {@link android.content.Intent#ACTION_GET_CONTENT} should be considered
+ mutually exclusive. If you support both of them simultaneously, your app will
+appear twice in the system picker UI, offering two different ways of accessing
+your stored data. This would be confusing for users.</p>
+
+<p>Here is the recommended way of disabling the
+{@link android.content.Intent#ACTION_GET_CONTENT} intent filter for devices
+running Android version 4.4 or higher:</p>
+
+<ol>
+<li>In your {@code bool.xml} resources file under {@code res/values/}, add
+this line: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;true&lt;/bool&gt;</pre></li>
+
+<li>In your {@code bool.xml} resources file under {@code res/values-v19/}, add
+this line: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>Add an
+<a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">activity
+alias</a> to disable the {@link android.content.Intent#ACTION_GET_CONTENT} intent
+filter for versions 4.4 (API level 19) and higher. For example:
+
+<pre>
+&lt;!-- This activity alias is added so that GET_CONTENT intent-filter
+     can be disabled for builds on API level 19 and higher. --&gt;
+&lt;activity-alias android:name=&quot;com.android.example.app.MyPicker&quot;
+        android:targetActivity=&quot;com.android.example.app.MyActivity&quot;
+        ...
+        android:enabled=&quot;@bool/atMostJellyBeanMR2&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.GET_CONTENT&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.OPENABLE&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+        &lt;data android:mimeType=&quot;video/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity-alias&gt;
+</pre>
+</li>
+</ol>
+<h3 id="contract">Contracts</h3>
+
+<p>Usually when you write a custom content provider, one of the tasks is
+implementing contract classes, as described in the
+<a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContractClass">
+Content Providers</a> developers guide. A contract class is a {@code public final} class
+that contains constant definitions for the URIs, column names, MIME types, and
+other metadata that pertain to the provider. The Storage Access Framework
+provides these contract classes for you, so you don't need to write your
+own:</p>
+
+<ul>
+   <li>{@link android.provider.DocumentsContract.Document}</li>
+   <li>{@link android.provider.DocumentsContract.Root}</li>
+</ul>
+
+<p>For example, here are the columns you might return in a cursor when
+your document provider is queried for documents or the root:</p>
+
+<pre>private static final String[] DEFAULT_ROOT_PROJECTION =
+        new String[]{Root.COLUMN_ROOT_ID, Root.COLUMN_MIME_TYPES,
+        Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
+        Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
+        Root.COLUMN_AVAILABLE_BYTES,};
+private static final String[] DEFAULT_DOCUMENT_PROJECTION = new
+        String[]{Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
+        Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
+        Document.COLUMN_FLAGS, Document.COLUMN_SIZE,};
+</pre>
+
+<h3 id="subclass">Subclass DocumentsProvider</h3>
+
+<p>The next step in writing a custom document provider is to subclass the
+abstract class {@link android.provider.DocumentsProvider}. At minimum, you need
+to implement the following methods:</p>
+
+<ul>
+<li>{@link android.provider.DocumentsProvider#queryRoots queryRoots()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}</li>
+
+<li>{@link android.provider.DocumentsProvider#openDocument openDocument()}</li>
+</ul>
+
+<p>These are the only methods you are strictly required to implement, but there
+are many more you might want to. See {@link android.provider.DocumentsProvider}
+for details.</p>
+
+<h4 id="queryRoots">Implement queryRoots</h4>
+
+<p>Your implementation of {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} must return a {@link android.database.Cursor} pointing to all the
+root directories of your document providers, using columns defined in
+{@link android.provider.DocumentsContract.Root}.</p>
+
+<p>In the following snippet, the {@code projection} parameter represents the
+specific fields the caller wants to get back. The snippet creates a new cursor
+and adds one row to it&mdash;one root, a top level directory, like
+Downloads or Images.  Most providers only have one root. You might have more than one,
+for example, in the case of multiple user accounts. In that case, just add a
+second row to the cursor.</p>
+
+<pre>
+&#64;Override
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+
+    // Create a cursor with either the requested fields, or the default
+    // projection if "projection" is null.
+    final MatrixCursor result =
+            new MatrixCursor(resolveRootProjection(projection));
+
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+    }
+
+    // It's possible to have multiple roots (e.g. for multiple accounts in the
+    // same app) -- just add multiple cursor rows.
+    // Construct one row for a root called &quot;MyCloud&quot;.
+    final MatrixCursor.RowBuilder row = result.newRow();
+    row.add(Root.COLUMN_ROOT_ID, ROOT);
+    row.add(Root.COLUMN_SUMMARY, getContext().getString(R.string.root_summary));
+
+    // FLAG_SUPPORTS_CREATE means at least one directory under the root supports
+    // creating documents. FLAG_SUPPORTS_RECENTS means your application's most
+    // recently used documents will show up in the &quot;Recents&quot; category.
+    // FLAG_SUPPORTS_SEARCH allows users to search all documents the application
+    // shares.
+    row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE |
+            Root.FLAG_SUPPORTS_RECENTS |
+            Root.FLAG_SUPPORTS_SEARCH);
+
+    // COLUMN_TITLE is the root title (e.g. Gallery, Drive).
+    row.add(Root.COLUMN_TITLE, getContext().getString(R.string.title));
+
+    // This document id cannot change once it's shared.
+    row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(mBaseDir));
+
+    // The child MIME types are used to filter the roots and only present to the
+    //  user roots that contain the desired type somewhere in their file hierarchy.
+    row.add(Root.COLUMN_MIME_TYPES, getChildMimeTypes(mBaseDir));
+    row.add(Root.COLUMN_AVAILABLE_BYTES, mBaseDir.getFreeSpace());
+    row.add(Root.COLUMN_ICON, R.drawable.ic_launcher);
+
+    return result;
+}</pre>
+
+<h4 id="queryChildDocuments">Implement queryChildDocuments</h4>
+
+<p>Your implementation of
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}
+must return a {@link android.database.Cursor} that points to all the files in
+the specified directory, using columns defined in
+{@link android.provider.DocumentsContract.Document}.</p>
+
+<p>This method gets called when you choose an application root in the picker UI.
+It gets the child documents of a directory under the root.  It can be called at any level in
+the file hierarchy, not just the root. This snippet
+makes a new cursor with the requested columns, then adds information about
+every immediate child in the parent directory to the cursor.
+A child can be an image, another directory&mdash;any file:</p>
+
+<pre>&#64;Override
+public Cursor queryChildDocuments(String parentDocumentId, String[] projection,
+                              String sortOrder) throws FileNotFoundException {
+
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    final File parent = getFileForDocId(parentDocumentId);
+    for (File file : parent.listFiles()) {
+        // Adds the file's display name, MIME type, size, and so on.
+        includeFile(result, null, file);
+    }
+    return result;
+}
+</pre>
+
+<h4 id="queryDocument">Implement queryDocument</h4>
+
+<p>Your implementation of
+{@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+must return a {@link android.database.Cursor} that points to the specified file,
+using columns defined in {@link android.provider.DocumentsContract.Document}.
+</p>
+
+<p>The {@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+method returns the same information that was passed in
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()},
+but for a specific file:</p>
+
+
+<pre>&#64;Override
+public Cursor queryDocument(String documentId, String[] projection) throws
+        FileNotFoundException {
+
+    // Create a cursor with the requested projection, or the default projection.
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    includeFile(result, documentId, null);
+    return result;
+}
+</pre>
+
+<h4 id="openDocument">Implement openDocument</h4>
+
+<p>You must implement {@link android.provider.DocumentsProvider#openDocument
+openDocument()} to return a {@link android.os.ParcelFileDescriptor} representing
+the specified file. Other apps can use the returned {@link android.os.ParcelFileDescriptor}
+to stream data. The system calls this method once the user selects a file
+and the client app requests access to it by calling
+{@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()}.
+For example:</p>
+
+<pre>&#64;Override
+public ParcelFileDescriptor openDocument(final String documentId,
+                                         final String mode,
+                                         CancellationSignal signal) throws
+        FileNotFoundException {
+    Log.v(TAG, &quot;openDocument, mode: &quot; + mode);
+    // It's OK to do network operations in this method to download the document,
+    // as long as you periodically check the CancellationSignal. If you have an
+    // extremely large file to transfer from the network, a better solution may
+    // be pipes or sockets (see ParcelFileDescriptor for helper methods).
+
+    final File file = getFileForDocId(documentId);
+
+    final boolean isWrite = (mode.indexOf('w') != -1);
+    if(isWrite) {
+        // Attach a close listener if the document is opened in write mode.
+        try {
+            Handler handler = new Handler(getContext().getMainLooper());
+            return ParcelFileDescriptor.open(file, accessMode, handler,
+                        new ParcelFileDescriptor.OnCloseListener() {
+                &#64;Override
+                public void onClose(IOException e) {
+
+                    // Update the file with the cloud server. The client is done
+                    // writing.
+                    Log.i(TAG, &quot;A file with id &quot; +
+                    documentId + &quot; has been closed!
+                    Time to &quot; +
+                    &quot;update the server.&quot;);
+                }
+
+            });
+        } catch (IOException e) {
+            throw new FileNotFoundException(&quot;Failed to open document with id &quot;
+            + documentId + &quot; and mode &quot; + mode);
+        }
+    } else {
+        return ParcelFileDescriptor.open(file, accessMode);
+    }
+}
+</pre>
+
+<h3 id="security">Security</h3>
+
+<p>Suppose your document provider is a password-protected cloud storage service
+and you want to make sure that users are logged in before you start sharing their files.
+What should your app do if the user is not logged in?  The solution is to return
+zero roots in your implementation of {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()}. That is, an empty root cursor:</p>
+
+<pre>
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+...
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+}
+</pre>
+
+<p>The other step is to call {@code getContentResolver().notifyChange()}.
+Remember the {@link android.provider.DocumentsContract}?  We’re using it to make
+this URI. The following snippet tells the system to query the roots of your
+document provider whenever the user's login status changes. If the user is not
+logged in, a call to {@link android.provider.DocumentsProvider#queryRoots queryRoots()} returns an
+empty cursor, as shown above. This ensures that a provider's documents are only
+available if the user is logged into the provider.</p>
+
+<pre>private void onLoginButtonClick() {
+    loginOrLogout();
+    getContentResolver().notifyChange(DocumentsContract
+            .buildRootsUri(AUTHORITY), null);
+}
+</pre>

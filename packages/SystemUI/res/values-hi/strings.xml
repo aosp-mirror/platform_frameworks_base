@@ -23,11 +23,11 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"साफ़ करें"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूची से निकालें"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स जानकारी"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"कोई हाल ही के एप्स नहीं"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के एप्स खारिज करें"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"कोई हाल ही के ऐप्स  नहीं"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"1 हाल ही का एप्स"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d हाल ही के एप्स"</item>
+    <item quantity="one" msgid="5854176083865845541">"1 हाल ही का ऐप्स"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d हाल ही के ऐप्स"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कोई सूचना नहीं"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ऑनगोइंग"</string>
@@ -47,11 +47,11 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट पद्धति सेट करें"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"भौतिक कीबोर्ड"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"एप्स <xliff:g id="APPLICATION">%1$s</xliff:g> को USB उपकरण तक पहुंचने दें?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"एप्स <xliff:g id="APPLICATION">%1$s</xliff:g> को USB सहायक उपकरण तक पहुंचने दें?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB उपकरण तक पहुंचने दें?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB सहायक उपकरण तक पहुंचने दें?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"जब यह USB उपकरण कनेक्ट किया जाए, तब <xliff:g id="ACTIVITY">%1$s</xliff:g> को खोलें?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"जब यह USB एसेसरी कनेक्ट की जाए, तब <xliff:g id="ACTIVITY">%1$s</xliff:g> को खोलें?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक उपकरण के साथ कोई भी इंस्टॉल एप्स काम नहीं करता. इस सहायक उपकरण के बारे में यहां अधिक जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक उपकरण के साथ कोई भी इंस्टॉल ऐप्स  काम नहीं करता. इस सहायक उपकरण के बारे में यहां अधिक जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB सहायक साधन"</string>
     <string name="label_view" msgid="6304565553218192990">"देखें"</string>
     <string name="always_use_device" msgid="1450287437017315906">"इस USB उपकरण के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
@@ -71,7 +71,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेयर के रूप में माउंट करें (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"कैमरे के रूप में माउंट करें (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac के लिए Android File Transfer एप्लि. इंस्टॉल करें"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac के लिए Android File Transfer ऐप्स इंस्टॉल करें"</string>
     <string name="accessibility_back" msgid="567011538994429120">"वापस जाएं"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"होम"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेनू"</string>
@@ -153,6 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"बैटरी <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"हवाई जहाज़ मोड <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"स्थान <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> के लिए अलार्म सेट किया गया."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G डेटा अक्षम"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G डेटा अक्षम"</string>
@@ -195,8 +196,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"कनेक्ट नहीं है"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"कोई नेटवर्क नहीं"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi बंद"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi प्रदर्शन"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"वायरलेस डिस्प्ले"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"स्क्रीन कास्ट करें"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"नेटवर्क को\nमॉनीटर किया जा सकता है"</string>

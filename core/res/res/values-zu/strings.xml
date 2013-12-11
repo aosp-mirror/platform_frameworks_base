@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Thayipha i-PUK enezinombolo ezingu-8 noma ngaphezu."</string>
     <string name="needPuk" msgid="919668385956251611">"Ikhadi lakho le-SIM livalwe nge-PUK. Thayipha ikhodi ye-PUK ukulivula."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Thayipha i-PUK2 ukuze uvule ikhadi le-SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"Akuphumelelanga, nika amandla ukhiye we-SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Unemizamo engu-<xliff:g id="NUMBER">%d</xliff:g> ngaphambi kokuba i-SIM ikhiywe."</item>
+    <item quantity="other" msgid="7530597808358774740">"Unemizamo engu-<xliff:g id="NUMBER">%d</xliff:g> ngaphambi kokuba i-SIM ikhiywe."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"I-ID Yocingo Olungenayo"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Ivumela umnini ukuthi abophele kwissekelo esingaphezulu sesevisi ye-Vpm. Ayidingakeli izinhlelo zokusebenza ezejwayelekile."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"hlanganisa kwiphephadonga"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwephephadonga. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"bophezela kusibonisi sesilawuli kude"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ivumela umbambi ukuhlanganisa isixhumi esibonakalayo esisezingeni eliphezulu sesibonisi sesilawuli kude. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bophezela kube isevisi yesinqunjana"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lensizakalo yesinqunjwana. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"xhumana nomphathi wedivaysi"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Beka kwenye indawo"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Faka"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Khetha uhlelo lokusebenza"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Ayikwazanga ukuqalisa i-<xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Yabelana no"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Yabelana no <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Ihaambis isibambo. Thinta &amp; ubambe."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Isistimu"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Umsindo we-Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Ukubonisa okungenazintambo"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Qedile"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Okukhiphayo kwemidiya"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Xhuma kudivayisi"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Lingisa isikrini kudivayisi"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Isesha amadivayisi…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Izilungiselelo"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Nqamula"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Iyaskena..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Iyaxhuma..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Kuyatholakala"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Isendlalelo #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", kuphephile"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Ukubukeka okungenantambo kuxhunyiwe"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Lesi sikrini siyabonakala kwenye idivayisi"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Isikrini sokulingisa"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Ixhuma ku-<xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Isikrini sokulingisa"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Kuxhunywe ku-<xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Nqamula"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Ucingo lwezimo eziphuthumayo"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Ukhohlwe iphethini?"</string>

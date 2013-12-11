@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Nhập mã PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Nhập PUK và mã PIN mới"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Mã PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Mã PIN mới"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Nhập mã PIN mới và mã PUK của SIM"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Mã PUK của SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Mã PIN mới của SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Chạm để nhập mật khẩu"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Nhập mật khẩu để mở khóa"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Nhập mã PIN để mở khóa"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Nhập mã PIN mong muốn"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Xác nhận mã PIN mong muốn"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Đang mở khóa thẻ SIM…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Mã PIN không chính xác."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Nhập mã PIN có từ 4 đến 8 số."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Mã PUK phải có từ 8 số trở lên."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Hãy nhập lại mã PUK chính xác. Nhiều lần lặp lại sẽ vô hiệu hóa vĩnh viễn thẻ SIM."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Xóa"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Mã PIN của SIM không chính xác, bây giờ bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của bạn."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Mã PIN của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử trước khi bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của bạn."</item>
+    <item quantity="other" msgid="2215723361575359486">"Mã PIN của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM không thể sử dụng được. Liên hệ với nhà cung cấp dịch vụ của bạn."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Mã PUK của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được."</item>
+    <item quantity="other" msgid="5477305226026342036">"Mã PUK của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Thao tác mã PIN của SIM không thành công!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Thao tác mã PUK của SIM không thành công!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Mã được chấp nhận!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Nút bản nhạc trước"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Nút bản nhạc tiếp theo"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Nút tạm dừng"</string>

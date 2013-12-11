@@ -77,10 +77,11 @@ public class KeyguardTouchDelegate {
     }
 
     public static KeyguardTouchDelegate getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new KeyguardTouchDelegate(context);
+        KeyguardTouchDelegate instance = sInstance;
+        if (instance == null) {
+            instance = sInstance = new KeyguardTouchDelegate(context);
         }
-        return sInstance;
+        return instance;
     }
 
     public boolean isSecure() {
@@ -165,7 +166,21 @@ public class KeyguardTouchDelegate {
                 Slog.e(TAG, "RemoteException launching camera!", e);
             }
         } else {
-            Slog.w(TAG, "dispatch(event): NO SERVICE!");
+            Slog.w(TAG, "launchCamera(): NO SERVICE!");
+        }
+    }
+
+    public void dismiss() {
+        final IKeyguardService service = mService;
+        if (service != null) {
+            try {
+                service.dismiss();
+            } catch (RemoteException e) {
+                // What to do?
+                Slog.e(TAG, "RemoteException dismissing keyguard!", e);
+            }
+        } else {
+            Slog.w(TAG, "dismiss(): NO SERVICE!");
         }
     }
 

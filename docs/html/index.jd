@@ -16,114 +16,81 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
             <ul>
 
                 <li class="item carousel-home">
-                    <div class="content-left col-9">
-                        <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
+                    <div class="content-left col-7">
+                        <a href="/about/versions/kitkat.html"><img src="/images/home/kk-hero.jpg" style="width:242px;padding-top:72px;"></a>
                     </div>
                     <div class="content-right col-6">
-                    <h1>A Sweeter Jelly Bean!</h1>
-                    <p>Android 4.3 is now available with a variety of performance improvements
-                    and new features. </p>
-                    <p>For developers, the new platform adds support for <span style="white-space:nowrap;">OpenGL ES 3.0</span>,
-                    connectivity with Bluetooth Smart devices and sensors, support for restricted profiles, a modular DRM framework,
-                    new profiling tools, and more.</p>
-                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
+                    <h1>Android 4.4 KitKat!</h1>
+                    <p>A new version of Android is here, with great new features, APIs, and tools for developers.</p>
+                    <p>Android 4.4 is built to run on more devices than ever before, and gives you more ways to showcase your content and create beautiful, useful, and innovative apps.</p>
+                    <p>Learn about what's new in the Platform Highlights and see the API Overview for details.</p>
+                    <p><a href="/about/versions/kitkat.html" class="button">Check out the highlights</a></p>
                     </div>
                 </li>
-
 
                 <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:65px;">
-                      <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
-                      <div style="box-shadow: 3px 10px 18px 1px #999;width:600px;height:336px">
-                        <div id="ytapiplayer">
-                          <a href="http://www.youtube.com/watch?v=CbpoZeQCNe4"><img width=600 src="{@docRoot}images/video-Colopl.png"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
-                        </div>
-                        <script type="text/javascript">
-                            var params = { allowScriptAccess: "always" };
-                            var atts = { id: "ytapiplayer" };
-                            swfobject.embedSWF("//www.youtube.com/v/CbpoZeQCNe4?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
-                              "ytapiplayer", "600", "336", "8", null, null, params, atts);
-
-                            // Callback used to pause/resume carousel based on video state
-                            function onytplayerStateChange(newState) {
-                               var isPaused = $("#pauseButton").hasClass("paused");
-                               if ((newState == 1) || (newState == 3)) {
-                               // if playing or buffering, pause the carousel
-                                 if (!isPaused) {
-                                    $("#pauseButton").click();
-                                 }
-                               } else {
-                               // otherwise, make sure carousel is running
-                                 if (isPaused) {
-                                    $("#pauseButton").click();
-                                 }
-                               }
-                            }
-
-                            // Callback received when YouTube player loads to setup callback (above)
-                            function onYouTubePlayerReady(playerId) {
-                              var ytplayer = document.getElementById("ytapiplayer");
-                              ytplayer.addEventListener("onStateChange", "onytplayerStateChange");
-                            }
-
-                        </script>
+                      <a href="https://www.youtube.com/watch?v=sONcojECWXs&list=PLWz5rJ2EKKc-2quE-o0enpILZF3nBZg_K&index=1">
+                                          <img src="/images/title-devbytes-kk.jpg" style="margin-top:22px;width:600px;">
+                        </a>
                       </div>
-                    </div>
+
                     <div class="content-right col-4">
-                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />Colopl</h1>
-                    <p>The creators of Kuma The Bear, Japan-based Colopl, talk about how Google Play and Android allowed them to grow their business to become one of the most profitable games publishers in APAC to date. </p>
+                    <h1 style="white-space:nowrap;line-height:1.2em;">DevBytes: <br />Android 4.4</h1>
+                    <p>Join the DevBytes team for a look at what's new in Android 4.4 KitKat&nbsp;&mdash; new ways to make your apps beautiful, printing, storage access framework, and more.</p>
+                    <p><a href="https://www.youtube.com/watch?v=sONcojECWXs&list=PLWz5rJ2EKKc-2quE-o0enpILZF3nBZg_K&index=1" class="button">Watch the video </a></p>
                     </div>
                 </li>
 
 
                 <li class="item carousel-home">
+                    <div class="content-left col-10"><a href="/design/patterns/new.html">
+                        <img src="/design/media/design_elements_landing.png" style="margin-top:30px">
+                        </a>
+                    </div>
+                    <div class="content-right col-5">
+                    <h1>Design for Android KitKat</h1>
+                    <p>Android KitKat brings a refreshed UI with updated styles, patterns, and gestures to use in your apps. </p>
+                    <p>We've updated the Android Design guidelines and added new pages on branding, fullscreen, and more. </p>
+                    <p><a href="/design/patterns/new.html" class="button">See what's new</a></p>
+                    </div>
+                </li>
+
+                <!--<li class="item carousel-home">
+                    <div class="content-left col-11" style="padding-top:65px;">
+                      <a href="http://www.youtube.com/watch?v=6QHkv-bSlds&list=PLWz5rJ2EKKc8j2B95zGMb8muZvrIy-wcF&index=1">
+                                          <img src="/images/title-adia-kk.png" style="margin-top:22px;width:600px;">
+                        </a>
+                      </div>
+
+                    <div class="content-right col-4">
+                    <h1 style="white-space:nowrap;line-height:1.2em;">ADIA: <br />Android 4.4</h1>
+                    </p>Join the Android Design in Action team for a walkthrough of new developer features, UX changes, and updates to design guidelines in Android 4.4.</p>
+                    <p><a href="http://www.youtube.com/watch?v=6QHkv-bSlds&list=PLWz5rJ2EKKc8j2B95zGMb8muZvrIy-wcF&index=1" class="button">Watch the video </a></p>
+                    </div>
+                </li> -->
+               <!-- <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:10px;">
-                        <a href="{@docRoot}channels/io2013.html">
-                          <img src="{@docRoot}images/home/io-videos-2013.png" style="margin:60px 0 0;
+                        <a href="/channels/io2013.html">
+                          <img src="/images/home/io-videos-2013.png" style="margin:60px 0 0;
                           box-shadow: 3px 10px 18px 1px #999;">
                         </a>
                     </div>
                     <div class="content-right col-4">
-                    <h1>Watch the Android talks from Google I/O</h1>
+                    <h1>Hands-on with New KitKat Features</h1>
                     <p>If you weren't able to attend Google I/O in person or couldn't make it
                     to all the talks, you can catch up on the action
                     with all the recordings, brought to you by
                     <a href="http://developers.google.com/live">Google Developers Live</a>.</p>
-                    <p><a href="{@docRoot}channels/io2013.html" class="button"
+                    <p><a href="/channels/io2013.html" class="button"
                     >See the Android talks</a></p>
                     </div>
-                </li>
-
-
-                <li class="item carousel-home">
-                    <div class="content-left col-10">
-                        <img src="{@docRoot}images/home/design.png" style="margin-top:30px">
-                    </div>
-                    <div class="content-right col-5">
-                    <h1>Make your Android apps<br>look great</h1>
-                    <p>New templates in the design guide make it easier than ever to design apps
-that are beautiful and easy to use.</p>
-                    <p><a href="{@docRoot}design/index.html" class="button">Learn More</a></p>
-                    </div>
-                </li>
-
-
-                <li class="item carousel-home">
-                        <div class="content-left col-10">
-                            <img src="{@docRoot}images/home/google-play.png"
-                                  style="margin-top:50px">
-                        </div>
-                        <div class="content-right col-5">
-                        <h1>Publish your apps<br>in Google Play</h1>
-                        <p>The most visited store in the world for Android apps. Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
-
-                        <p><a href="{@docRoot}distribute/index.html" class="button">Learn More</a></p>
-                        </div>
-                </li>
-            </ul>
+                </li> -->
+           </ul>
         </div>
     </div>
-    <!-- /End slideshow -->
+
+<!-- /End slideshow -->
 
     <a href="" id="pauseButton" style="display:none">pause</a>
 

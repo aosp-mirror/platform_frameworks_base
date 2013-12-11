@@ -1,0 +1,150 @@
+page.title=Full Screen
+page.tags="full screen","immersive", "leanback"
+@jd:body
+
+<p>
+  Some content is best experienced full screen, like videos, games, image
+  galleries, books, and slides in a presentation. You can engage users more
+  deeply with content in full screen by minimizing visual distraction from app
+  controls and protecting users from escaping the app accidentally.
+</p>
+
+    <img src="{@docRoot}design/media/fullscreen_landing.png" style="margin:1em auto 2em auto;">
+
+<p>
+  In version 4.4, Android offers two approaches for making your app go full
+  screen: Lean Back and Immersive. In both approaches, all persistent system
+  bars are hidden. The difference between them is how the user brings the bars
+  back into view.
+</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>Lean Back</h4>
+    <p>Touch the screen anywhere to bring back system bars. </p>
+    <img src="{@docRoot}design/media/fullscreen_leanback.png" style="width:311px;">
+  </div>
+  <div class="layout-content-col span-6">
+    <h4>Immersive</h4>
+    <p>Swipe from the any edge of the screen with a hidden bar to bring back system bars. </p>
+    <img src="{@docRoot}design/media/fullscreen_immersive_swipe_bottom.png" style="width:160px;float:right">
+    <img src="{@docRoot}design/media/fullscreen_immersive_swipe_top.png" style="width:160px">
+  </div>
+</div>
+
+<h2 id="leanback">
+  Lean Back
+</h2>
+
+<p>
+  The Lean Back approach is for full-screen experiences in which users won't be
+  interacting heavily with the screen while consuming content, like while
+  watching a video.
+</p>
+
+<p>
+  In this type of experience, users are leaning back and watching the screen.
+  Then, when they need to bring back the bars, they simply touch anywhere. This
+  gesture is easy and intuitive.
+</p>
+
+    <img src="{@docRoot}design/media/fullscreen_leanback.png" style="width:311px;">
+
+<h2 id="immersive">
+  Immersive
+</h2>
+
+<p>
+  The Immersive approach is mainly intended for apps in which the user will be
+  heavily interacting with the full screen as part of the primary experience.
+  Examples are games, viewing images in a gallery, or reading paginated
+  content, like a book or slides in a presentation.
+</p>
+
+<p>
+  In this type of experience, when users need to bring back the system bars,
+  they swipe from any edge where a system bar is hidden. By requiring this more
+  deliberate gesture, the user's deep engagement with your app won't be
+  interrupted by accidental touches and swipes.
+</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/fullscreen_immersive_swipe_bottom.png" style="width:160px;float:right">
+    <img src="{@docRoot}design/media/fullscreen_immersive_swipe_top.png" style="width:160px">
+  </div>
+</div>
+
+<p>
+  The user learns about the gesture to bring back the system bars through a
+  message that appears the first time the app goes full screen.
+</p>
+
+<p>
+  If your app has its own controls that aren't needed when a user is immersed
+  in content, make them disappear and reappear in sync with the system bars.
+  This rule also applies to any app-specific gestures you might have for hiding
+  and showing app controls. For example, if touching anywhere on the screen
+  toggles the appearance of an action bar or a palette, then it must also
+  toggle the appearance of system bars.
+</p>
+
+<p>
+  You might be tempted to use this approach just to maximize screen real
+  estate. But be mindful of how often users jump in and out of apps to check
+  notifications, do impromptu searches, and more. This approach will cause
+  users to lose easy access to system navigation, so a little extra space
+  should not be the only benefit they're getting in return.
+</p>
+
+<h2 id="variation_using_edges">
+  Variation: Swiping from edges with bars also affects the app
+</h2>
+
+<p>
+  In the Immersive approach, any time a user swipes from an edge with a system
+  bar, the Android framework takes care of revealing the system bars. Your app
+  won't even be aware that this gesture occurred.
+</p>
+
+<p>
+  But in some apps, the user might occasionally need to swipe from the edge as
+  <strong>part of the primary app experience</strong>. Examples are games and
+  drawing applications.
+</p>
+
+<p>
+  For apps with this requirement, you can use a variation on the Immersive
+  approach: when a user swipes from an edge with a system bar, system bars are
+  shown and the gesture is passed to the app so the app can respond to the
+  gesture.
+</p>
+
+<p>
+  For example, in a drawing app that uses this approach, if a user wants to
+  draw a line that begins at the very edge of the screen, swiping from the edge
+  would reveal the system bars and also start drawing a line that begins at the
+  very edge.
+</p>
+
+<p>
+  In this approach, to minimize disruption while a user is deeply engaged in
+  the app, the system bars are semi-transparent. The bars automatically
+  disappear after a few seconds of no interaction or as soon as the user
+  touches or gestures anywhere outside the system bars.
+</p>
+
+<h2 id="lightsout">What About Lights Out Mode?</h2>
+
+<p>
+  Before Android 4.4, the design guideline was to use Lights Out mode, a mode
+  in which the Action Bar and Status Bar fades away and becomes unavailable
+  after a few seconds of inactivity. The Navigation Bar is still available and
+  responds to touches but appears dimmed.
+</p>
+
+<p>
+  Replace previous implementations of Lights Out mode with the Lean Back or
+  Immersive approaches. Continue to use Lights Out mode for implementations of
+  your app targeted for earlier releases.
+</p>

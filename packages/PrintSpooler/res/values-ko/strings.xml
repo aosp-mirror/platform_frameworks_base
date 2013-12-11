@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"인쇄 스풀러"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"프린터 설정"</string>
     <string name="print_button" msgid="645164566271246268">"인쇄"</string>
     <string name="save_button" msgid="1921310454071758999">"저장"</string>
     <string name="label_destination" msgid="9132510997381599275">"대상"</string>
@@ -40,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"검색창 표시됨"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"검색창 숨겨짐"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"프린터 추가"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"프린터 선택"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"프린터 삭제"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"프린터 <xliff:g id="COUNT">%1$s</xliff:g>대 검색됨"</item>
     <item quantity="other" msgid="6533817036607128241">"프린터 <xliff:g id="COUNT">%1$s</xliff:g>대 검색됨"</item>

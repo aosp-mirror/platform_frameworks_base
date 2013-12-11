@@ -117,11 +117,29 @@ feature image or screenshots for your Google Play app listing.</p>
     border-top: 1px solid transparent;
     background: transparent url({@docRoot}assets/images/styles/disclosure_down.png)
                 no-repeat scroll 0 8px;
+    -webkit-transition: border 0.2s;
+       -moz-transition: border 0.2s;
+            transition: border 0.2s;
   }
 
   #archive-expando.expanded {
     background-image: url({@docRoot}assets/images/styles/disclosure_up.png);
     border-top: 1px solid #ccc;
+  }
+
+  .device-list.archive {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+
+    -webkit-transition: max-height 0.2s, opacity 0.2s;
+       -moz-transition: max-height 0.2s, opacity 0.2s;
+            transition: max-height 0.2s, opacity 0.2s;
+  }
+
+  .device-list.archive.expanded {
+    opacity: 1;
+    max-height: 300px;
   }
 
   #output {
@@ -152,17 +170,17 @@ feature image or screenshots for your Google Play app listing.</p>
   // Device manifest.
   var DEVICES = [
     {
-      id: 'nexus_4',
-      title: 'Nexus 4',
-      url: 'http://www.google.com/nexus/4/',
-      physicalSize: 4.7,
-      physicalHeight: 5.23,
-      density: 'XHDPI',
+      id: 'nexus_5',
+      title: 'Nexus 5',
+      url: 'http://www.google.com/nexus/5/',
+      physicalSize: 5,
+      physicalHeight: 5.43,
+      density: 'XXHDPI',
       landRes: ['shadow', 'back', 'fore'],
-      landOffset: [349,214],
+      landOffset: [436,306],
       portRes: ['shadow', 'back', 'fore'],
-      portOffset: [213,350],
-      portSize: [768,1280]
+      portOffset: [304,436],
+      portSize: [1080,1920],
     },
     {
       id: 'nexus_7',
@@ -218,6 +236,20 @@ feature image or screenshots for your Google Play app listing.</p>
       portRes: ['shadow', 'back', 'fore'],
       portOffset: [264,311],
       portSize: [800,1280],
+      archived: true
+    },
+    {
+      id: 'nexus_4',
+      title: 'Nexus 4',
+      url: 'http://www.google.com/nexus/4/',
+      physicalSize: 4.7,
+      physicalHeight: 5.27,
+      density: 'XHDPI',
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [349,214],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [213,350],
+      portSize: [768,1280],
       archived: true
     },
     {
@@ -321,7 +353,6 @@ feature image or screenshots for your Google Play app listing.</p>
     $('#output').html(MSG_NO_INPUT_IMAGE);
 
     $('#frame-customizations').hide();
-    $('.device-list.archive').hide();
 
     $('#output-shadow, #output-glare').click(function() {
       createFrame();
@@ -360,10 +391,10 @@ feature image or screenshots for your Google Play app listing.</p>
     $('#archive-expando').click(function() {
       if ($(this).hasClass('expanded')) {
         $(this).removeClass('expanded');
-        $('.device-list.archive').hide();
+        $('.device-list.archive').removeClass('expanded');
       } else {
         $(this).addClass('expanded');
-        $('.device-list.archive').show();
+        $('.device-list.archive').addClass('expanded');
       }
       return false;
     });

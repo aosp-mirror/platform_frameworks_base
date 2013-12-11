@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Introdueix el codi PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Introdueix el codi PUK i el codi PIN nou"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Codi PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Codi PIN nou"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Escriu el PUK de la SIM i el codi PIN nou."</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Codi PUK de la SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Codi PIN de la SIM nou"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Toca per introduir contrasenya"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Introdueix la contrasenya per desbloquejar"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Introdueix la contrasenya per desbloquejar"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Introdueix el codi PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirma el codi PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"S\'està desbloquejant la targeta SIM..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Codi PIN incorrecte."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Escriu un PIN que tingui de 4 a 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"El codi PUK ha de tenir 8 números o més."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Torna a introduir el codi PUK correcte. Els intents repetits faran que es desactivi la SIM de manera permanent."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Elimina"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"El codi PIN de la SIM no és correcte. Has de contactar amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"El codi PIN de la SIM no és correcte. Et queda <xliff:g id="NUMBER">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</item>
+    <item quantity="other" msgid="2215723361575359486">"El codi PIN de la SIM no és correcte. Et queden <xliff:g id="NUMBER">%d</xliff:g> intents."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"La SIM no es pot utilitzar. Contacta amb l\'operador de telefonia mòbil."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"El codi PUK de la SIM no és correcte. Et queda <xliff:g id="NUMBER">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir."</item>
+    <item quantity="other" msgid="5477305226026342036">"El codi PUK de la SIM no és correcte. Et queden <xliff:g id="NUMBER">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Hi ha hagut un problema en l\'operació del PIN de la SIM."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Hi ha hagut un problema en l\'operació del PUK de la SIM."</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"S\'ha acceptat el codi."</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Botó de pista anterior"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Botó de pista següent"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Botó de pausa"</string>

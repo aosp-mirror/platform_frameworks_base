@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
+
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+<title>GoogleMap.OnMapLoadedCallback | Android Developers</title>
+
+<!-- STYLESHEETS -->
+<link rel="stylesheet"
+href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic,bold" title="roboto">
+<link href="/assets/css/default.css" rel="stylesheet" type="text/css">
+
+
+
+<!-- JAVASCRIPT -->
+<script src="//www.google.com/jsapi" type="text/javascript"></script>
+<script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
+<script type="text/javascript">
+  var toRoot = "/";
+  var devsite = false;
+</script>
+<script src="/assets/js/docs.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-5831155-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+<body class="gc-documentation google
+  develop" itemscope itemtype="http://schema.org/Article">
+  <div id="doc-api-level" class="" style="display:none"></div>
+  <a name="top"></a>
+
+<a name="top"></a>
+
+    <!-- Header -->
+    <div id="header">
+        <div class="wrap" id="header-wrap">
+          <div class="col-3 logo">
+          <a href="/index.html">
+            <img src="/assets/images/dac_logo.png" width="123" height="25" alt="Android Developers" />
+          </a>
+          <div class="btn-quicknav" id="btn-quicknav">
+          	<a href="#" class="arrow-inactive">Quicknav</a>
+			      <a href="#" class="arrow-active">Quicknav</a>
+          </div>
+          </div>
+            <ul class="nav-x col-9">
+                <li class="design">
+                  <a href="/design/index.html"
+                  zh-tw-lang="設計"
+                  zh-cn-lang="设计"
+                  ru-lang="Проектирование"
+                  ko-lang="디자인"
+                  ja-lang="設計"
+                  es-lang="Diseñar"               
+                  >Design</a></li>
+                <li class="develop"><a href="/develop/index.html"
+                  zh-tw-lang="開發"
+                  zh-cn-lang="开发"
+                  ru-lang="Разработка"
+                  ko-lang="개발"
+                  ja-lang="開発"
+                  es-lang="Desarrollar"               
+                  >Develop</a></li>
+                <li class="distribute last"><a href="/distribute/index.html"
+                  zh-tw-lang="發佈"
+                  zh-cn-lang="分发"
+                  ru-lang="Распространение"
+                  ko-lang="배포"
+                  ja-lang="配布"
+                  es-lang="Distribuir"               
+                  >Distribute</a></li>
+            </ul>
+            
+            <!-- New Search -->
+            <div class="menu-container">
+            <div class="moremenu">
+    <div id="more-btn"></div>
+  </div>
+  <div class="morehover" id="moremenu">
+    <div class="top"></div>
+    <div class="mid">
+      <div class="header">Links</div>
+      <ul>
+        <li><a href="https://play.google.com/apps/publish/">Google Play Developer Console</a></li>
+        <li><a href="http://android-developers.blogspot.com/">Android Developers Blog</a></li>
+        <li><a href="/about/index.html">About Android</a></li>
+      </ul>
+      <div class="header">Android Sites</div>
+      <ul>
+        <li><a href="http://www.android.com">Android.com</a></li>
+        <li class="active"><a>Android Developers</a></li>
+        <li><a href="http://source.android.com">Android Open Source Project</a></li>
+      </ul>
+      
+      
+      
+        <div class="header">Language</div>
+          <div id="language" class="locales">
+            <select name="language" onChange="changeLangPref(this.value, true)">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="ru">Русский</option>
+                <option value="zh-cn">中文 (中国)</option>
+                <option value="zh-tw">中文 (台灣)</option>
+            </select>
+          </div>
+        <script type="text/javascript">
+          <!--
+          loadLangPref();
+            //-->
+        </script>
+      
+      
+
+
+      <br class="clearfix" />
+    </div>
+    <div class="bottom"></div>
+  </div>
+  <div class="search" id="search-container">
+    <div class="search-inner">
+      <div id="search-btn"></div>
+      <div class="left"></div>
+      <form onsubmit="return submit_search()">
+        <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
+onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
+onkeydown="return search_changed(event, true, '/')" 
+onkeyup="return search_changed(event, false, '/')" />
+      </form>
+      <div class="right"></div>
+        <a class="close hide">close</a>
+        <div class="left"></div>
+        <div class="right"></div>
+    </div>
+  </div>
+
+  <div class="search_filtered_wrapper reference">
+    <div class="suggest-card reference no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
+  <div class="search_filtered_wrapper docs">
+    <div class="suggest-card dummy no-display">&nbsp;</div>
+    <div class="suggest-card develop no-display">
+      <ul class="search_filtered">
+      </ul>
+      <div class="child-card guides no-display">
+      </div>
+      <div class="child-card training no-display">
+      </div>
+    </div>
+    <div class="suggest-card design no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+    <div class="suggest-card distribute no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
+  </div>
+  <!-- /New Search>
+          
+          
+          <!-- Expanded quicknav -->
+           <div id="quicknav" class="col-9">
+                <ul>
+                    <li class="design">
+                      <ul>
+                        <li><a href="/design/index.html">Get Started</a></li>
+                        <li><a href="/design/style/index.html">Style</a></li>
+                        <li><a href="/design/patterns/index.html">Patterns</a></li>
+                        <li><a href="/design/building-blocks/index.html">Building Blocks</a></li>
+                        <li><a href="/design/downloads/index.html">Downloads</a></li>
+                        <li><a href="/design/videos/index.html">Videos</a></li>
+                      </ul>
+                    </li>
+                    <li class="develop">
+                      <ul>
+                        <li><a href="/training/index.html"
+                          zh-tw-lang="訓練課程"
+                          zh-cn-lang="培训"
+                          ru-lang="Курсы"
+                          ko-lang="교육"
+                          ja-lang="トレーニング"
+                          es-lang="Capacitación"               
+                          >Training</a></li>
+                        <li><a href="/guide/components/index.html"
+                          zh-tw-lang="API 指南"
+                          zh-cn-lang="API 指南"
+                          ru-lang="Руководства по API"
+                          ko-lang="API 가이드"
+                          ja-lang="API ガイド"
+                          es-lang="Guías de la API"               
+                          >API Guides</a></li>
+                        <li><a href="/reference/packages.html"
+                          zh-tw-lang="參考資源"
+                          zh-cn-lang="参考"
+                          ru-lang="Справочник"
+                          ko-lang="참조문서"
+                          ja-lang="リファレンス"
+                          es-lang="Referencia"               
+                          >Reference</a></li>
+                        <li><a href="/tools/index.html"
+                          zh-tw-lang="相關工具"
+                          zh-cn-lang="工具"
+                          ru-lang="Инструменты"
+                          ko-lang="도구"
+                          ja-lang="ツール"
+                          es-lang="Herramientas"               
+                          >Tools</a>
+                          <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
+                        </li>
+                        <li><a href="/google/index.html">Google Services</a>
+                        </li>
+                        
+                      </ul>
+                    </li>
+                    <li class="distribute last">
+                      <ul>
+                        <li><a href="/distribute/index.html">Google Play</a></li>
+                        <li><a href="/distribute/googleplay/publish/index.html">Publishing</a></li>
+                        <li><a href="/distribute/googleplay/promote/index.html">Promoting</a></li>
+                        <li><a href="/distribute/googleplay/quality/index.html">App Quality</a></li>
+                        <li><a href="/distribute/googleplay/spotlight/index.html">Spotlight</a></li>
+                        <li><a href="/distribute/open.html">Open Distribution</a></li>
+                      </ul>
+                    </li>
+                </ul>
+          </div>
+          <!-- /Expanded quicknav -->
+        </div>
+    </div>
+    <!-- /Header -->
+    
+    
+  <div id="searchResults" class="wrap" style="display:none;">
+          <h2 id="searchTitle">Results</h2>
+          <div id="leftSearchControl" class="search-control">Loading...</div>
+  </div>
+    
+    
+  
+    <!-- Secondary x-nav -->
+    <div id="nav-x">
+        <div class="wrap">
+            <ul class="nav-x col-9 develop" style="width:100%">
+                <li class="training"><a href="/training/index.html"
+                  zh-tw-lang="訓練課程"
+                  zh-cn-lang="培训"
+                  ru-lang="Курсы"
+                  ko-lang="교육"
+                  ja-lang="トレーニング"
+                  es-lang="Capacitación"               
+                  >Training</a></li>
+                <li class="guide"><a href="/guide/components/index.html"
+                  zh-tw-lang="API 指南"
+                  zh-cn-lang="API 指南"
+                  ru-lang="Руководства по API"
+                  ko-lang="API 가이드"
+                  ja-lang="API ガイド"
+                  es-lang="Guías de la API"               
+                  >API Guides</a></li>
+                <li class="reference"><a href="/reference/packages.html"
+                  zh-tw-lang="參考資源"
+                  zh-cn-lang="参考"
+                  ru-lang="Справочник"
+                  ko-lang="참조문서"
+                  ja-lang="リファレンス"
+                  es-lang="Referencia"               
+                  >Reference</a></li>
+                <li class="tools"><a href="/tools/index.html"
+                  zh-tw-lang="相關工具"
+                  zh-cn-lang="工具"
+                  ru-lang="Инструменты"
+                  ko-lang="도구"
+                  ja-lang="ツール"
+                  es-lang="Herramientas"
+                  >Tools</a></li>
+                <li class="google"><a href="/google/index.html"
+                  >Google Services</a>
+                </li>
+                
+            </ul>
+        </div>
+        
+    </div>
+    <!-- /Sendondary x-nav -->
+  
+
+
+
+
+  
+
+
+  
+  <div class="wrap clearfix" id="body-content">
+    <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
+      <div id="devdoc-nav" class="scroll-pane">
+<a class="totop" href="#top" data-g-event="left-nav-top">to top</a>
+
+
+
+<ul id="nav">
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/index.html">
+          <span class="en">Overview</span>
+      </a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/games.html">
+          <span class="en">Games</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/location.html">
+          <span class="en">Location</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/plus.html">
+          <span class="en">Google+</span>
+                </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/auth.html">
+          <span class="en">Authorization</span>
+      </a></div>
+  </li>
+
+
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/index.html">
+      <span class="en">Google Play Services</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/setup.html">
+          <span class="en">Setup</span></a>
+      </li>
+      <li id="gms-tree-list" class="nav-section">
+        <div class="nav-section-header">
+          <a href="/reference/gms-packages.html">
+            <span class="en">Reference</span>
+          </a>
+        <div>
+      </li>
+    </ul>
+  </li>
+
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+      <span class="en">Google Play In-app Billing</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play/billing/billing_overview.html">
+              <span class="en">Overview</span></a>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+              <span class="en">Version 3 API</span></a></div>
+              <ul>
+              <li><a href="/google/play/billing/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="/google/play/billing/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/v2/api.html">
+              <span class="en">Version 2 API</span></a></div>
+              <ul>
+              <li><a href="/google/play/billing/v2/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="/google/play/billing/v2/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a></li>
+              <li><a href="/google/play/billing/v2/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a>
+      </li>
+      <li><a href="/google/play/billing/billing_best_practices.html">
+              <span class="en">Security and Design</span></a>
+      </li>
+      <li><a href="/google/play/billing/billing_testing.html">
+              <span class="en">Testing In-app Billing</span></a>
+      </li>
+      <li><a href="/google/play/billing/billing_admin.html">
+              <span class="en">Administering In-app Billing</span></a>
+      </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
+      <li><a href="/google/play/billing/versions.html">
+              <span class="en">Version Notes</span></a>
+      </li>
+    </ul>
+  </li>
+
+
+
+  <li class="nav-section">
+      <div class="nav-section-header"><a href="/google/gcm/index.html">
+        <span class="en">Google Cloud Messaging</span></a>
+      </div>
+      <ul>
+        <li><a href="/google/gcm/gs.html">
+            <span class="en">Getting Started</span></a>
+        </li>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
+        </li>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
+        </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
+        <li><a href="/google/gcm/c2dm.html">
+            <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
+        </li>
+      </ul>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/dist.html">
+      <span class="en">Google Play Distribution</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play/filters.html">
+          <span class="en">Filters on Google Play</span></a>
+      </li>
+
+      <li><a href="/google/play/publishing/multiple-apks.html">
+          <span class="en">Multiple APK Support</span></a>
+      </li>
+      <li><a href="/google/play/expansion-files.html">
+          <span class="en">APK Expansion Files</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="/google/play/licensing/index.html">
+          <span class="en">Application Licensing</span></a>
+        </div>
+        <ul>
+          <li><a href="/google/play/licensing/overview.html">
+              <span class="en">Licensing Overview</span></a>
+          </li>
+          <li><a href="/google/play/licensing/setting-up.html">
+              <span class="en">Setting Up for Licensing</span></a>
+          </li>
+          <li><a href="/google/play/licensing/adding-licensing.html">
+              <span class="en">Adding Licensing to Your App</span></a>
+          </li>
+          <li><a href="/google/play/licensing/licensing-reference.html">
+              <span class="en">Licensing Reference</span></a>
+          </li>
+        </ul>
+      </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/backup/index.html">
+      Android Backup Service</a>
+    </div>
+    <ul>
+      <li><a href="/google/backup/signup.html">
+          Register</a>
+      </li>
+    </ul>
+  </li>
+
+  </ul>
+
+</li>
+
+
+
+</ul>
+
+<script type="text/javascript">
+<!--
+    buildToggleLists();
+    changeNavLang(getLangPref());
+//-->
+</script>
+
+
+        
+
+      </div>
+      <script type="text/javascript">
+       showGoogleRefTree();
+    
+      </script>
+    </div> <!-- end side-nav -->
+    <script>
+      $(document).ready(function() {
+        scrollIntoView("devdoc-nav");
+        });
+    </script>
+
+
+     
+
+
+
+<div class="col-12"  id="doc-col">
+
+<div id="api-info-block">
+
+
+
+
+<div class="sum-details-links">
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+    static 
+     
+    
+    interface
+<h1 itemprop="name">GoogleMap.OnMapLoadedCallback</h1>
+
+
+
+  
+  
+  
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.maps.GoogleMap.OnMapLoadedCallback</td>
+    </tr>
+    
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">Callback interface for when the map has finished rendering. This occurs after all tiles
+ required to render the map have been fetched, and all labeling is complete. This event will
+ not fire if the map never loads due to connectivity issues, or if the map is continuously
+ changing and never completes loading due to the user constantly interacting with the map.
+</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapLoadedCallback.html#onMapLoaded()">onMapLoaded</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Called when the map has finished rendering.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="onMapLoaded()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">onMapLoaded</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the map has finished rendering. This will only be called once. You must
+ request another callback if you want to be notified again.
+</p></div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer" class="wrap" >
+        
+
+  <div id="copyright">
+    
+  Except as noted, this content is licensed under <a
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
+  For details and restrictions, see the <a href="/license.html">
+  Content License</a>.
+  </div>
+  <div id="build_info">
+    
+<script src="/timestamp.js" type="text/javascript"></script>
+<script>document.write(BUILD_TIMESTAMP)</script>
+
+  </div>
+
+
+  <div id="footerlinks">
+    
+  <p>
+    <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
+    <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
+    <a href="/support.html">Support</a>
+  </p>
+  </div>
+
+</div> <!-- end footer -->
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+
+
+
+
+
+</body>
+</html>

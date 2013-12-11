@@ -526,7 +526,7 @@ public class ActionBarView extends AbsActionBarView {
         if (mLogoNavItem != null) {
             mLogoNavItem.setTitle(title);
         }
-        mUpGoerFive.setContentDescription(buildHomeContentDescription());
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public CharSequence getSubtitle() {
@@ -544,7 +544,7 @@ public class ActionBarView extends AbsActionBarView {
                     (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle));
             mTitleLayout.setVisibility(visible ? VISIBLE : GONE);
         }
-        mUpGoerFive.setContentDescription(buildHomeContentDescription());
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public void setHomeButtonEnabled(boolean enable) {
@@ -566,7 +566,11 @@ public class ActionBarView extends AbsActionBarView {
         mUpGoerFive.setEnabled(enable);
         mUpGoerFive.setFocusable(enable);
         // Make sure the home button has an accurate content description for accessibility.
-        if (!enable) {
+        updateHomeAccessibility(enable);
+    }
+
+    private void updateHomeAccessibility(boolean homeEnabled) {
+        if (!homeEnabled) {
             mUpGoerFive.setContentDescription(null);
             mUpGoerFive.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         } else {
@@ -677,19 +681,7 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         // Make sure the home button has an accurate content description for accessibility.
-        if (!mHomeLayout.isEnabled()) {
-            mHomeLayout.setContentDescription(null);
-            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        } else {
-            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-            if ((options & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-                mHomeLayout.setContentDescription(mContext.getResources().getText(
-                        R.string.action_bar_up_description));
-            } else {
-                mHomeLayout.setContentDescription(mContext.getResources().getText(
-                        R.string.action_bar_home_description));
-            }
-        }
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public void setIcon(Drawable icon) {
@@ -1340,11 +1332,13 @@ public class ActionBarView extends AbsActionBarView {
 
     public void setHomeActionContentDescription(CharSequence description) {
         mHomeDescription = description;
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public void setHomeActionContentDescription(int resId) {
         mHomeDescriptionRes = resId;
         mHomeDescription = resId != 0 ? getResources().getText(resId) : null;
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     static class SavedState extends BaseSavedState {

@@ -815,7 +815,7 @@ public class KeyguardUpdateMonitor {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onKeyguardVisibilityChanged(isShowing);
+                cb.onKeyguardVisibilityChangedRaw(isShowing);
             }
         }
     }

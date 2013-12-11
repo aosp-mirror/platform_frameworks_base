@@ -137,4 +137,15 @@ final class RemotePrintDocumentAdapter {
             Log.e(LOG_TAG, "Error calling finish()", re);
         }
     }
+
+    public void cancel() {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "cancel()");
+        }
+        try {
+            mRemoteInterface.cancel();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error calling cancel()", re);
+        }
+    }
 }

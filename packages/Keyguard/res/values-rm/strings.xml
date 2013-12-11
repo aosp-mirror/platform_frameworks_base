@@ -22,11 +22,11 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- no translation found for keyguard_password_enter_pin_code (3037685796058495017) -->
     <skip />
-    <!-- no translation found for keyguard_password_enter_puk_code (4800725266925845333) -->
+    <!-- no translation found for keyguard_password_enter_puk_code (3035856550289724338) -->
     <skip />
-    <!-- no translation found for keyguard_password_enter_puk_prompt (1341112146710087048) -->
+    <!-- no translation found for keyguard_password_enter_puk_prompt (1801941051094974609) -->
     <skip />
-    <!-- no translation found for keyguard_password_enter_pin_prompt (8027680321614196258) -->
+    <!-- no translation found for keyguard_password_enter_pin_prompt (3201151840570492538) -->
     <skip />
     <!-- no translation found for keyguard_password_entry_touch_hint (7858547464982981384) -->
     <skip />
@@ -200,8 +200,6 @@
     <skip />
     <!-- no translation found for kg_sim_unlock_progress_dialog_message (8950398016976865762) -->
     <skip />
-    <!-- no translation found for kg_password_wrong_pin_code (1139324887413846912) -->
-    <skip />
     <!-- no translation found for kg_invalid_sim_pin_hint (8795159358110620001) -->
     <skip />
     <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
@@ -247,6 +245,20 @@
     <!-- no translation found for kg_text_message_separator (4160700433287233771) -->
     <skip />
     <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
+    <skip />
+    <!-- no translation found for kg_password_wrong_pin_code_pukked (30531039455764924) -->
+    <skip />
+    <!-- no translation found for kg_password_wrong_pin_code:one (8134313997799638254) -->
+    <!-- no translation found for kg_password_wrong_pin_code:other (2215723361575359486) -->
+    <!-- no translation found for kg_password_wrong_puk_code_dead (7077536808291316208) -->
+    <skip />
+    <!-- no translation found for kg_password_wrong_puk_code:one (3256893607561060649) -->
+    <!-- no translation found for kg_password_wrong_puk_code:other (5477305226026342036) -->
+    <!-- no translation found for kg_password_pin_failed (6268288093558031564) -->
+    <skip />
+    <!-- no translation found for kg_password_puk_failed (2838824369502455984) -->
+    <skip />
+    <!-- no translation found for kg_pin_accepted (1448241673570020097) -->
     <skip />
     <!-- no translation found for keyguard_transport_prev_description (8229108430245669854) -->
     <skip />

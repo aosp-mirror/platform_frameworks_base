@@ -227,6 +227,12 @@ Versions dashboards page</a>.</p>
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
 
+    <tr><td><a href="{@docRoot}about/versions/android-4.4.html">Android 4.4</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/19/changes.html" title="Diff Report">19</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#KITKAT}</td>
+    <td><a href="{@docRoot}about/versions/kitkat.html">Platform
+Highlights</a></td></tr>
+
     <tr><td><a href="{@docRoot}about/versions/android-4.3.html">Android 4.3</a></td>
     <td><a href="{@docRoot}sdk/api_diff/18/changes.html" title="Diff Report">18</a></td>
     <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}</td>

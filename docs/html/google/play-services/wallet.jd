@@ -1,0 +1,86 @@
+page.title=Google Wallet Instant Buy for Android
+page.tags="Wallet","payments","Instant Buy"
+header.hide=1
+
+@jd:body
+
+<div class="landing-banner">
+<div class="col-8">
+  <h1 itemprop="name" style="margin-bottom:0;">Google Wallet Instant Buy</h1>
+  <p itemprop="description">Add fast, secure checkout for users buying physical goods and
+  services from your app.  Transactions are monitored for fraud 24/7. Keep your existing
+  payments infrastructure and integrate Google Wallet quickly, easily and free of charge.</p>
+
+    <p><a class="external-link" href="http://getinstantbuy.withgoogle.com/">Apply for
+      production access</a> before launching Instant Buy in your app. We recommend applying
+      before starting development. Note that Instant Buy is currently only available to
+      US-based merchants. </p>
+
+  <p>Check out the <a 
+  href="{@docRoot}reference/com/google/android/gms/wallet/package-summary.html">Instant
+  Buy API reference</a> and visit
+  <a href="https://developers.google.com/wallet/instant-buy/">developers.google.com/wallet/instant-buy/</a>
+  for complete information about integrating Google Wallet Instant Buy into your app.</p>
+</div>
+
+<div class="col-4"> 
+  <img src="{@docRoot}images/google/gps-wallet-instant.png" alt="" style="padding-bottom:14px;width:210px">
+</div>
+</div>
+
+<div class="landing-docs">
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Key Developer Features</h3>
+
+      <h4>Add the "Buy with Google" button</h4>
+      <p>Easily embed a “Buy with Google” button in your flow to let customers purchase instantly
+      from your app. Customers can grant you access to their payment information with just
+      a few clicks.
+      <br />
+      <a href="https://developers.google.com/commerce/wallet/instant-buy/android/tutorial#add_google_wallet_buttons_to_your_ui"
+      class="external-link">Add a "Buy with Google" button</a>.</p>
+
+      <h4>Streamline Purchases with Google+ Sign-On</h4>
+      <p>For users ready to purchase, you can simplify the login and account creation steps
+      by adding Google+ sign in. Users can sign in with a single click and share their
+      profile information during the purchase. 
+      <br />
+      <a href="https://developers.google.com/commerce/wallet/instant-buy/wallet-sso#android"
+      class="external-link">Add Google+ Sign-In for Wallet</a>.</p>
+       
+      <h4>Minimize User Data Entry</h4>
+      <p>Google Wallet provides auto-completion of addresses, minimizing user data entry. You can also
+      retrieve billing and shipping addresses directly from the user’s Wallet to-do form pre-fills.<br />
+      <a class="external-link"
+      href="https://developers.google.com/commerce/wallet/instant-buy/android/reference/com/google/android/gms/wallet/MaskedWallet#getBillingAddress()">Get
+      billing addresses</a>.</p>
+  </div>
+
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Getting Started</h3>
+    <h4>1. Get the Google Play services SDK</h4>
+    <p>The Google Wallet Android APIs are part of the Google Play services platform.</p>
+    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a>
+      the Google Play services SDK. Then see the <a class="external-link"
+      href="https://developers.google.com/commerce/wallet/instant-buy/android/tutorial">tutorial</a>
+      to learn how to set up your app.
+    </p>
+    <h4>2. Run the sample</h4>
+    <p>Once you've installed the Google Play services package, try the Google Wallet
+    sample located in <code>&lt;android-sdk&gt;/extras/google-play-services/samples/wallet</code>.
+    The sample shows you how to use the major components of the Instant Buy API.</p>
+    <p>The <a
+    class="external-link" href="https://developers.google.com/commerce/wallet/instant-buy/android/quickstart">Quick
+    Start guide</a> provides directions on how to get the Wallet sample up and running</p>
+    <h4>3. Read the documentation</h4>
+    <p>For quick access while developing your Android apps, the <a 
+    href="{@docRoot}reference/com/google/android/gms/wallet/package-summary.html">Google Wallet
+    API reference</a> is available here on developer.android.com.</p>
+
+    <p>Detailed documentation for the Instant Buy API is available at <a class="external-link"
+    href="https://developers.google.com/wallet/instant-buy/">developers.google.com/wallet/instant-buy/</a></p>
+
+
+  </div>
+</div>

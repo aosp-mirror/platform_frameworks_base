@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"请键入至少 8 位数字的 PUK 码。"</string>
     <string name="needPuk" msgid="919668385956251611">"已对 SIM 卡进行 PUK 码锁定。键入 PUK 码将其解锁。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"输入 PUK2 码以解锁 SIM 卡。"</string>
+    <string name="enablePin" msgid="209412020907207950">"失败，请启用 SIM/RUIM 卡锁定设置。"</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM 卡将被锁定。"</item>
+    <item quantity="other" msgid="7530597808358774740">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM 卡将被锁定。"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"来电显示"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许用户绑定到 VPN 服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许用户绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"绑定至远程显示屏"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允许应用绑定至远程显示屏的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到小部件服务"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允许应用绑定到小部件服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"与设备管理器交互"</string>
@@ -483,8 +490,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制 WLAN 显示设备的基础功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"检测关键词"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用捕获音频以便检测语音指令的关键词。捕获操作会在后台进行，但不会妨碍其他音频捕获工具（例如摄像机）。"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"启动指令检测"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用捕获音频以便检测语音启动指令。捕获操作会在后台进行，但不会妨碍其他音频捕获工具（例如摄像机）。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"捕获视频输出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允许该应用捕获和重定向视频输出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"捕获安全视频输出"</string>
@@ -545,7 +552,7 @@
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"访问检入属性"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允许应用对登记服务上传的属性拥有读取/写入权限。普通应用不应使用此权限。"</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"选择小部件"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人资料的访问权限。普通应用不应使用此权限。"</string>
+    <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人数据的访问权限。普通应用不应使用此权限。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手机状态"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"允许应用控制设备的电话功能。拥有此权限的应用可在不通知您的情况下执行切换网络、开关手机无线装置等此类操作。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"读取手机状态和身份"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"选择应用"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"无法启动“<xliff:g id="APPLICATION_NAME">%s</xliff:g>”"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"分享方式"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"使用<xliff:g id="APPLICATION_NAME">%s</xliff:g>分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑动手柄。触摸并按住。"</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"系统"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"蓝牙音频"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"无线显示"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完成"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"媒体输出线路"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"连接到设备"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"将屏幕投射到设备上"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜索设备…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"设置"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"断开连接"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"正在扫描..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在连接..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可连接"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"叠加视图 #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"，安全"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"已连接到无线显示设备"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"此屏幕的内容正显示在另一台设备上"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"正在投射屏幕"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"正在连接到“<xliff:g id="NAME">%1$s</xliff:g>”"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"正在投射屏幕"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"已连接到“<xliff:g id="NAME">%1$s</xliff:g>”"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"断开连接"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"紧急呼救"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘记了图案"</string>

@@ -62,7 +62,8 @@ import java.io.FileNotFoundException;
  *            android:authorities="com.example.mycloudprovider"
  *            android:exported="true"
  *            android:grantUriPermissions="true"
- *            android:permission="android.permission.MANAGE_DOCUMENTS"&gt;
+ *            android:permission="android.permission.MANAGE_DOCUMENTS"
+ *            android:enabled="@bool/isAtLeastKitKat"&gt;
  *            &lt;intent-filter&gt;
  *                &lt;action android:name="android.content.action.DOCUMENTS_PROVIDER" /&gt;
  *            &lt;/intent-filter&gt;
@@ -76,9 +77,8 @@ import java.io.FileNotFoundException;
  * only the system can obtain. Applications cannot use a documents provider
  * directly; they must go through {@link Intent#ACTION_OPEN_DOCUMENT} or
  * {@link Intent#ACTION_CREATE_DOCUMENT} which requires a user to actively
- * navigate and select documents. When a user selects documents through that
- * UI, the system issues narrow URI permission grants to the requesting
- * application.
+ * navigate and select documents. When a user selects documents through that UI,
+ * the system issues narrow URI permission grants to the requesting application.
  * </p>
  * <h3>Documents</h3>
  * <p>
@@ -91,8 +91,8 @@ import java.io.FileNotFoundException;
  * <p>
  * Each document can have different capabilities, as described by
  * {@link Document#COLUMN_FLAGS}. For example, if a document can be represented
- * as a thumbnail, a provider can set {@link Document#FLAG_SUPPORTS_THUMBNAIL}
- * and implement
+ * as a thumbnail, your provider can set
+ * {@link Document#FLAG_SUPPORTS_THUMBNAIL} and implement
  * {@link #openDocumentThumbnail(String, Point, CancellationSignal)} to return
  * that thumbnail.
  * </p>
@@ -102,7 +102,7 @@ import java.io.FileNotFoundException;
  * single document can be included in multiple directories when responding to
  * {@link #queryChildDocuments(String, String[], String)}. For example, a
  * provider might surface a single photo in multiple locations: once in a
- * directory of locations, and again in a directory of dates.
+ * directory of geographic locations, and again in a directory of dates.
  * </p>
  * <h3>Roots</h3>
  * <p>
@@ -162,7 +162,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
     /**
      * Create a new document and return its newly generated
-     * {@link Document#COLUMN_DOCUMENT_ID}. A provider must allocate a new
+     * {@link Document#COLUMN_DOCUMENT_ID}. You must allocate a new
      * {@link Document#COLUMN_DOCUMENT_ID} to represent the document, which must
      * not change once returned.
      *
@@ -194,16 +194,17 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return all roots currently provided. A provider must define at least one
-     * root to display to users, and it should avoid making network requests to
-     * keep this request fast.
+     * Return all roots currently provided. To display to users, you must define
+     * at least one root. You should avoid making network requests to keep this
+     * request fast.
      * <p>
      * Each root is defined by the metadata columns described in {@link Root},
      * including {@link Root#COLUMN_DOCUMENT_ID} which points to a directory
      * representing a tree of documents to display under that root.
      * <p>
      * If this set of roots changes, you must call {@link ContentResolver#notifyChange(Uri,
-     * android.database.ContentObserver)} to notify the system.
+     * android.database.ContentObserver, boolean)} with
+     * {@link DocumentsContract#buildRootsUri(String)} to notify the system.
      *
      * @param projection list of {@link Root} columns to put into the cursor. If
      *            {@code null} all supported columns should be included.
@@ -216,6 +217,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * {@link Root#FLAG_SUPPORTS_RECENTS}. The returned documents should be
      * sorted by {@link Document#COLUMN_LAST_MODIFIED} in descending order, and
      * limited to only return the 64 most recently modified documents.
+     * <p>
+     * Recent documents do not support change notifications.
      *
      * @param projection list of {@link Document} columns to put into the
      *            cursor. If {@code null} all supported columns should be
@@ -229,8 +232,8 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return metadata for the single requested document. A provider should
-     * avoid making network requests to keep this request fast.
+     * Return metadata for the single requested document. You should avoid
+     * making network requests to keep this request fast.
      *
      * @param documentId the document to return.
      * @param projection list of {@link Document} columns to put into the
@@ -248,10 +251,18 @@ public abstract class DocumentsProvider extends ContentProvider {
      * If your provider is cloud-based, and you have some data cached or pinned
      * locally, you may return the local data immediately, setting
      * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
-     * your provider is still fetching additional data. Then, when the network
-     * data is available, you can call {@link ContentResolver#notifyChange(Uri,
-     * android.database.ContentObserver)} to trigger a requery and return the
-     * complete contents.
+     * you are still fetching additional data. Then, when the network data is
+     * available, you can send a change notification to trigger a requery and
+     * return the complete contents. To return a Cursor with extras, you need to
+     * extend and override {@link Cursor#getExtras()}.
+     * <p>
+     * To support change notifications, you must
+     * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
+     * Uri, such as
+     * {@link DocumentsContract#buildChildDocumentsUri(String, String)}. Then
+     * you can call {@link ContentResolver#notifyChange(Uri,
+     * android.database.ContentObserver, boolean)} with that Uri to send change
+     * notifications.
      *
      * @param parentDocumentId the directory to return children for.
      * @param projection list of {@link Document} columns to put into the
@@ -289,6 +300,20 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>
      * Only documents may be returned; directories are not supported in search
      * results.
+     * <p>
+     * If your provider is cloud-based, and you have some data cached or pinned
+     * locally, you may return the local data immediately, setting
+     * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
+     * you are still fetching additional data. Then, when the network data is
+     * available, you can send a change notification to trigger a requery and
+     * return the complete contents.
+     * <p>
+     * To support change notifications, you must
+     * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
+     * Uri, such as {@link DocumentsContract#buildSearchDocumentsUri(String,
+     * String, String)}. Then you can call {@link ContentResolver#notifyChange(Uri,
+     * android.database.ContentObserver, boolean)} with that Uri to send change
+     * notifications.
      *
      * @param rootId the root to search under.
      * @param query string to match documents against.
@@ -327,22 +352,19 @@ public abstract class DocumentsProvider extends ContentProvider {
     /**
      * Open and return the requested document.
      * <p>
-     * A provider should return a reliable {@link ParcelFileDescriptor} to
+     * Your provider should return a reliable {@link ParcelFileDescriptor} to
      * detect when the remote caller has finished reading or writing the
-     * document. A provider may return a pipe or socket pair if the mode is
-     * exclusively {@link ParcelFileDescriptor#MODE_READ_ONLY} or
-     * {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, but complex modes like
-     * {@link ParcelFileDescriptor#MODE_READ_WRITE} require a normal file on
-     * disk.
+     * document. You may return a pipe or socket pair if the mode is exclusively
+     * "r" or "w", but complex modes like "rw" imply a normal file on disk that
+     * supports seeking.
      * <p>
-     * If a provider blocks while downloading content, it should periodically
-     * check {@link CancellationSignal#isCanceled()} to abort abandoned open
-     * requests.
+     * If you block while downloading content, you should periodically check
+     * {@link CancellationSignal#isCanceled()} to abort abandoned open requests.
      *
      * @param documentId the document to return.
      * @param mode the mode to open with, such as 'r', 'w', or 'rw'.
      * @param signal used by the caller to signal if the request should be
-     *            cancelled.
+     *            cancelled. May be null.
      * @see ParcelFileDescriptor#open(java.io.File, int, android.os.Handler,
      *      OnCloseListener)
      * @see ParcelFileDescriptor#createReliablePipe()
@@ -359,15 +381,14 @@ public abstract class DocumentsProvider extends ContentProvider {
      * attempting to serve from a local cache if possible. A provider should
      * never return images more than double the hinted size.
      * <p>
-     * If a provider performs expensive operations to download or generate a
-     * thumbnail, it should periodically check
-     * {@link CancellationSignal#isCanceled()} to abort abandoned thumbnail
-     * requests.
+     * If you perform expensive operations to download or generate a thumbnail,
+     * you should periodically check {@link CancellationSignal#isCanceled()} to
+     * abort abandoned thumbnail requests.
      *
      * @param documentId the document to return.
      * @param sizeHint hint of the optimal thumbnail dimensions.
      * @param signal used by the caller to signal if the request should be
-     *            cancelled.
+     *            cancelled. May be null.
      * @see Document#FLAG_SUPPORTS_THUMBNAIL
      */
     @SuppressWarnings("unused")
@@ -495,10 +516,7 @@ public abstract class DocumentsProvider extends ContentProvider {
         final boolean callerHasManage =
                 context.checkCallingOrSelfPermission(android.Manifest.permission.MANAGE_DOCUMENTS)
                 == PackageManager.PERMISSION_GRANTED;
-        if (!callerHasManage) {
-            getContext().enforceCallingOrSelfUriPermission(
-                    documentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION, method);
-        }
+        enforceWritePermissionInner(documentUri);
 
         final Bundle out = new Bundle();
         try {

@@ -85,6 +85,7 @@ final class ServiceRecord extends Binder {
     ProcessRecord app;      // where this service is running or null.
     ProcessRecord isolatedProc; // keep track of isolated process, if requested
     ProcessStats.ServiceState tracker; // tracking service execution, may be null
+    ProcessStats.ServiceState restartTracker; // tracking service restart
     boolean delayed;        // are we waiting to start this service in the background?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
@@ -338,6 +339,19 @@ final class ServiceRecord extends Binder {
             tracker.clearCurrentOwner(this, true);
             tracker = null;
         }
+    }
+
+    public void makeRestarting(int memFactor, long now) {
+        if (restartTracker == null) {
+            if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
+                restartTracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
+                        serviceInfo.applicationInfo.uid, serviceInfo.processName, serviceInfo.name);
+            }
+            if (restartTracker == null) {
+                return;
+            }
+        }
+        restartTracker.setRestarting(true, memFactor, now);
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,

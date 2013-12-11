@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Andika PUK ambayo ina urefu wa nambari 8 au zaidi."</string>
     <string name="needPuk" msgid="919668385956251611">"Kadi yako ya SIM imefungwa na PUK. Anika msimbo wa PUK ili kuifungua."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Chapisha PUK2 ili kufungua SIM kadi."</string>
+    <string name="enablePin" msgid="209412020907207950">"Imeshindwa, washa ufungaji wa SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kufungwa."</item>
+    <item quantity="other" msgid="7530597808358774740">"Umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kufungwa."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Kitambulisho cha Mpigaji wa Simu Inayoingia"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Inaruhusu kishikiliaji kushurutisha kusano ya kiwango cha juu cha huduma ya Vpn. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"funga kwa mandhari"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Inaruhusu kishikiliaji kushurutisha kwa kusano ya kiwango cha juu cha mandhari. Haipaswi kamwe kuhitajika kwa programu za kawaida."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"fungisha kwenye mwonekano wa mbali"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Huruhusu mtumiaji kujifungia kiolesura cha kiwango cha juu cha mwonekano wa mbali. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"funga kwenye huduma ya widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Inaruhusu mmiliki kushurutisha kusano ya kiwango cha juu ya huduma ya wijeti. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"jiunge na msimamizi wa kifaa"</string>
@@ -551,7 +558,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"kusoma hali na kitambulisho cha simu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Inaruhusu programu kufikia vipengele vya simu vya kifaa. Idhini hii inaruhusu programu kutambua nambari ya simu na kifaa, kama simu ni amilifu, na nambari ya mbali iliyounganishwa kwa simu."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zuia kompyuta ndogo dhidi ya kulala"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zuia simu dhidi ya kulala"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"kuzuia simu isilale"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Inaruhusu programu kuzuia kompyuta kibao  kwenda kulala."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Inaruhusu programu kuzuia simu isiende kulala."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"sambaza infrared"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Songa"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Chagua programu"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Haikuweza kuzindua <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Shiriki na"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Shiriki na <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Utambo unaosonga. Gusa &amp; shika"</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Mfumo"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Sauti ya Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Uonyeshaji usiotumia waya"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Nimemaliza"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Towe la midia"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Unganisha kwenye kifaa"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Tuma skrini kwa kifaa"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Inatafuta vifaa..."</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Mipangilio"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Ondoa"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Inatambaza..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Inaunganisha..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Inapatikana"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Uwekeleaji #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", salama"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Onyesho pasiwaya limeunganishwa"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Skrini hii inaonyesha kwenye kifaa kingine"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Utumaji wa skrini"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Inaunganishwa kwenye <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Utumaji wa skrini"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Imeungwanishwa kwenye <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Tenganisha"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Simu ya dharura"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Umesahau Ruwaza"</string>
@@ -1649,5 +1663,5 @@
     <item quantity="other" msgid="4730868920742952817">"Jaribu tena baada ya sekunde <xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Jaribu tena baadaye"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Telezesha kidole kwa kasi chini kuanzia juu ili uondoke kwenye skrini kamili."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Telezesha kidole kwa kasi chini kuanzia juu ili uondoke kwenye skrini zima."</string>
 </resources>

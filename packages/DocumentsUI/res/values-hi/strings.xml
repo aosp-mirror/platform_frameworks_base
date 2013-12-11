@@ -43,7 +43,7 @@
     <string name="root_type_service" msgid="2178854894416775409">"संग्रहण सेवाएं"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"शॉर्टकट"</string>
     <string name="root_type_device" msgid="7121342474653483538">"उपकरण"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"अधिक एप्स"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"अधिक ऐप्स"</string>
     <string name="pref_advanced_devices" msgid="903257239609301276">"उन्नत उपकरणों को दिखाएं"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"फ़ाइल का आकार दिखाएं"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"उपकरण का आकार दिखाएं"</string>

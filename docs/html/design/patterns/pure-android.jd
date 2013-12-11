@@ -32,7 +32,7 @@ conventions of a different platform.</p>
 
     <img src="{@docRoot}design/media/migrating_ui_elements.png">
     <div class="figure-caption">
-      Sampling of UI elements from Android, iOS and Windows Phone 7.
+      Sampling of UI elements from Android, iOS, and Windows Phone.
     </div>
 
   </div>
@@ -56,7 +56,7 @@ counterparts.</p>
 
     <img src="{@docRoot}design/media/migrating_icons.png">
     <div class="figure-caption">
-      Sampling of icons from Android, iOS and Windows Phone 7.
+      Sampling of icons from Android, iOS, and Windows Phone.
     </div>
 
   </div>

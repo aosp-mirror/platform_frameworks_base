@@ -57,6 +57,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
@@ -419,7 +420,8 @@ public class WifiStateMachine extends StateMachine {
 
     /* change the batch scan settings.
      * arg1 = responsible UID
-     * obj = the new settings
+     * arg2 = csph (channel scans per hour)
+     * obj = bundle with the new settings and the optional worksource
      */
     public static final int CMD_SET_BATCHED_SCAN          = BASE + 135;
     public static final int CMD_START_NEXT_BATCHED_SCAN   = BASE + 136;
@@ -637,6 +639,15 @@ public class WifiStateMachine extends StateMachine {
 
     private BatchedScanSettings mBatchedScanSettings = null;
 
+    /**
+     * Track the worksource/cost of the current settings and track what's been noted
+     * to the battery stats, so we can mark the end of the previous when changing.
+     */
+    private WorkSource mBatchedScanWorkSource = null;
+    private int mBatchedScanCsph = 0;
+    private WorkSource mNotedBatchedScanWorkSource = null;
+    private int mNotedBatchedScanCsph = 0;
+
 
     public WifiStateMachine(Context context, String wlanInterface) {
         super("WifiStateMachine");
@@ -850,8 +861,14 @@ public class WifiStateMachine extends StateMachine {
     /**
      * start or stop batched scanning using the given settings
      */
-    public void setBatchedScanSettings(BatchedScanSettings settings, int callingUid) {
-        sendMessage(CMD_SET_BATCHED_SCAN, callingUid, 0, settings);
+    private static final String BATCHED_SETTING = "batched_settings";
+    private static final String BATCHED_WORKSOURCE = "batched_worksource";
+    public void setBatchedScanSettings(BatchedScanSettings settings, int callingUid, int csph,
+            WorkSource workSource) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BATCHED_SETTING, settings);
+        bundle.putParcelable(BATCHED_WORKSOURCE, workSource);
+        sendMessage(CMD_SET_BATCHED_SCAN, callingUid, csph, bundle);
     }
 
     public List<BatchedScanResult> syncGetBatchedScanResultsList() {
@@ -870,6 +887,8 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private void startBatchedScan() {
+        if (mBatchedScanSettings == null) return;
+
         if (mDhcpActive) {
             if (DBG) log("not starting Batched Scans due to DHCP");
             return;
@@ -881,10 +900,10 @@ public class WifiStateMachine extends StateMachine {
         mAlarmManager.cancel(mBatchedScanIntervalIntent);
 
         String scansExpected = mWifiNative.setBatchedScanSettings(mBatchedScanSettings);
-
         try {
             mExpectedBatchedScans = Integer.parseInt(scansExpected);
             setNextBatchedAlarm(mExpectedBatchedScans);
+            if (mExpectedBatchedScans > 0) noteBatchedScanStart();
         } catch (NumberFormatException e) {
             stopBatchedScan();
             loge("Exception parsing WifiNative.setBatchedScanSettings response " + e);
@@ -927,25 +946,31 @@ public class WifiStateMachine extends StateMachine {
     }
 
     // return true if new/different
-    private boolean recordBatchedScanSettings(BatchedScanSettings settings) {
-        if (DBG) log("set batched scan to " + settings);
+    private boolean recordBatchedScanSettings(int responsibleUid, int csph, Bundle bundle) {
+        BatchedScanSettings settings = bundle.getParcelable(BATCHED_SETTING);
+        WorkSource responsibleWorkSource = bundle.getParcelable(BATCHED_WORKSOURCE);
+
+        if (DBG) {
+            log("set batched scan to " + settings + " for uid=" + responsibleUid +
+                    ", worksource=" + responsibleWorkSource);
+        }
         if (settings != null) {
-            // TODO - noteBatchedScanStart(message.arg1);
             if (settings.equals(mBatchedScanSettings)) return false;
         } else {
             if (mBatchedScanSettings == null) return false;
-            // TODO - noteBatchedScanStop(message.arg1);
         }
         mBatchedScanSettings = settings;
+        if (responsibleWorkSource == null) responsibleWorkSource = new WorkSource(responsibleUid);
+        mBatchedScanWorkSource = responsibleWorkSource;
+        mBatchedScanCsph = csph;
         return true;
     }
 
     private void stopBatchedScan() {
         mAlarmManager.cancel(mBatchedScanIntervalIntent);
-        if (mBatchedScanSettings != null) {
-            retrieveBatchedScanData();
-            mWifiNative.setBatchedScanSettings(null);
-        }
+        retrieveBatchedScanData();
+        mWifiNative.setBatchedScanSettings(null);
+        noteBatchedScanStop();
     }
 
     private void setNextBatchedAlarm(int scansExpected) {
@@ -1169,6 +1194,44 @@ public class WifiStateMachine extends StateMachine {
                 log(e.toString());
             } finally {
                 mScanWorkSource = null;
+            }
+        }
+    }
+
+    private void noteBatchedScanStart() {
+        // note the end of a previous scan set
+        if (mNotedBatchedScanWorkSource != null &&
+                (mNotedBatchedScanWorkSource.equals(mBatchedScanWorkSource) == false ||
+                 mNotedBatchedScanCsph != mBatchedScanCsph)) {
+            try {
+                mBatteryStats.noteWifiBatchedScanStoppedFromSource(mNotedBatchedScanWorkSource);
+            } catch (RemoteException e) {
+                log(e.toString());
+            } finally {
+                mNotedBatchedScanWorkSource = null;
+                mNotedBatchedScanCsph = 0;
+            }
+        }
+        // note the start of the new
+        try {
+            mBatteryStats.noteWifiBatchedScanStartedFromSource(mBatchedScanWorkSource,
+                    mBatchedScanCsph);
+            mNotedBatchedScanWorkSource = mBatchedScanWorkSource;
+            mNotedBatchedScanCsph = mBatchedScanCsph;
+        } catch (RemoteException e) {
+            log(e.toString());
+        }
+    }
+
+    private void noteBatchedScanStop() {
+        if (mNotedBatchedScanWorkSource != null) {
+            try {
+                mBatteryStats.noteWifiBatchedScanStoppedFromSource(mNotedBatchedScanWorkSource);
+            } catch (RemoteException e) {
+                log(e.toString());
+            } finally {
+                mNotedBatchedScanWorkSource = null;
+                mNotedBatchedScanCsph = 0;
             }
         }
     }
@@ -1901,6 +1964,9 @@ public class WifiStateMachine extends StateMachine {
            return;
         }
 
+        // note that all these splits and substrings keep references to the original
+        // huge string buffer while the amount we really want is generally pretty small
+        // so make copies instead (one example b/11087956 wasted 400k of heap here).
         synchronized(mScanResultCache) {
             mScanResults = new ArrayList<ScanResult>();
             String[] lines = scanResults.split("\n");
@@ -2340,9 +2406,7 @@ public class WifiStateMachine extends StateMachine {
 
         mDhcpActive = false;
 
-        if (mBatchedScanSettings != null) {
-            startBatchedScan();
-        }
+        startBatchedScan();
     }
 
     private void handleSuccessfulIpConfiguration(DhcpResults dhcpResults) {
@@ -2484,7 +2548,7 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                 case CMD_SET_BATCHED_SCAN:
-                    recordBatchedScanSettings((BatchedScanSettings)message.obj);
+                    recordBatchedScanSettings(message.arg1, message.arg2, (Bundle)message.obj);
                     break;
                 case CMD_POLL_BATCHED_SCAN:
                     handleBatchedScanPollRequest();
@@ -3006,9 +3070,7 @@ public class WifiStateMachine extends StateMachine {
 
             mDhcpActive = false;
 
-            if (mBatchedScanSettings != null) {
-                startBatchedScan();
-            }
+            startBatchedScan();
 
             if (mOperationalMode != CONNECT_MODE) {
                 mWifiNative.disconnect();
@@ -3067,8 +3129,10 @@ public class WifiStateMachine extends StateMachine {
                     startScanNative(WifiNative.SCAN_WITH_CONNECTION_SETUP);
                     break;
                 case CMD_SET_BATCHED_SCAN:
-                    recordBatchedScanSettings((BatchedScanSettings)message.obj);
-                    startBatchedScan();
+                    if (recordBatchedScanSettings(message.arg1, message.arg2,
+                            (Bundle)message.obj)) {
+                        startBatchedScan();
+                    }
                     break;
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
@@ -3212,9 +3276,7 @@ public class WifiStateMachine extends StateMachine {
             updateBatteryWorkSource(null);
             mScanResults = new ArrayList<ScanResult>();
 
-            if (mBatchedScanSettings != null) {
-                stopBatchedScan();
-            }
+            stopBatchedScan();
 
             final Intent intent = new Intent(WifiManager.WIFI_SCAN_AVAILABLE);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);

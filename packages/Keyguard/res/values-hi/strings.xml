@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"पिन कोड लिखें"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK और नया पिन कोड लिखें"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK कोड"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"नया पिन कोड"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"सिम PUK और नया PIN कोड लिखें"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"सिम PUK कोड"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"नया सिम PIN कोड"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"पासवर्ड लिखने के लिए स्पर्श करें"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करने के लिए पासवर्ड लिखें"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करने के लिए पिन लिखें"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड डालें"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM कार्ड अनलॉक कर रहा है…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"गलत PIN कोड."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ऐसा PIN लिखें, जो 4 से 8 अंकों का हो."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड 8 या अधिक संख्या वाला होना चाहिए."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड पुन: डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"गलत सिम PIN कोड अपने उपकरण को अनलॉक करने के लिए अब आपको अपने वाहक से संपर्क करना होगा."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"गलत सिम PIN कोड, अपने उपकरण को अनलॉक करने के लिए अपने वाहक से संपर्क करने से पहले आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष है."</item>
+    <item quantity="other" msgid="2215723361575359486">"गलत सिम PIN कोड, आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष हैं."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"सिम अनुपयोगी है. अपने वाहक से संपर्क करें."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष है."</item>
+    <item quantity="other" msgid="5477305226026342036">"गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष हैं."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"सिम PIN की कार्यवाही विफल रही!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"सिम PUK की कार्यवाही विफल रही!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"कोड स्वीकार किया गया!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"पिछला ट्रैक बटन"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"अगला ट्रैक बटन"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"पॉज़ करें बटन"</string>

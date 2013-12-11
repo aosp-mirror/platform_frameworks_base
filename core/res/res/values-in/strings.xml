@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Ketik PUK yang terdiri dari 8 angka atau lebih."</string>
     <string name="needPuk" msgid="919668385956251611">"Kartu SIM Anda dikunci PUK. Ketikkan kode PUK untuk membukanya."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Ketikkan PUK2 untuk membuka kartu SIM"</string>
+    <string name="enablePin" msgid="209412020907207950">"Gagal, aktifkan Kunci SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Sisa <xliff:g id="NUMBER">%d</xliff:g> percobaan sebelum SIM terkunci."</item>
+    <item quantity="other" msgid="7530597808358774740">"Sisa <xliff:g id="NUMBER">%d</xliff:g> percobaan sebelum SIM terkunci."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Nomor Penelepon Masuk"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan Vpn. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"mengikat ke wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu wallpaper. Tidak pernah diperlukan oleh apl normal."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"mengikat ke layar jarak jauh"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Mengizinkan pemegang mengikat ke antarmuka tingkat atas dari layar jarak jauh. Tidak pernah diperlukan untuk aplikasi normal."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"mengikat ke layanan widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan widget. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"berinteraksi dengan admin perangkat"</string>
@@ -1142,15 +1149,15 @@
     <string name="smv_application" msgid="3307209192155442829">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukannya sendiri."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar kebijakan StrictMode yang diberlakukan secara otomatis."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android sedang meningkatkan versi..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"Mengoptimalkan apl <xliff:g id="NUMBER_0">%1$d</xliff:g> dari <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Memulai apl."</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"Mengoptimalkan aplikasi <xliff:g id="NUMBER_0">%1$d</xliff:g> dari <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Memulai aplikasi."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Menyelesaikan boot."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Sentuh untuk beralih ke apl"</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Beralih apl?"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Apl lain sudah berjalan dan harus dihentikan agar Anda dapat memulai yang baru."</string>
     <string name="old_app_action" msgid="493129172238566282">"Kembali ke<xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Jangan memulai apl baru."</string>
+    <string name="old_app_description" msgid="2082094275580358049">"Jangan memulai aplikasi baru."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Mulai <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Hentikan apl lama tanpa menyimpan."</string>
     <string name="sendText" msgid="5209874571959469142">"Pilih tindakan untuk teks"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Pilih apl"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Tidak dapat meluncurkan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Berbagi dengan"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Berbagi dengan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Gagang geser. Sentuh &amp; tahan."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Layar nirkabel"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Selesai"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Keluaran media"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Sambungkan ke perangkat"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Transmisi layar ke perangkat"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Menelusuri perangkat…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Setelan"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Putuskan sambungan"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Memindai..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Menyambung..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Tersedia"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", aman"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Layar nirkabel tersambung"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Layar ini ditampilkan di perangkat lain"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Transmisi layar"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Menyambung ke <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Transmisi layar"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Tersambung ke <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Putuskan sambungan"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Panggilan darurat"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Lupa Pola?"</string>

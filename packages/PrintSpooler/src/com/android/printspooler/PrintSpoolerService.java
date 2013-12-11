@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -440,6 +441,7 @@ public final class PrintSpoolerService extends Service {
 
     private void removeObsoletePrintJobs() {
         synchronized (mLock) {
+            boolean persistState = false;
             final int printJobCount = mPrintJobs.size();
             for (int i = printJobCount - 1; i >= 0; i--) {
                 PrintJobInfo printJob = mPrintJobs.get(i);
@@ -449,9 +451,12 @@ public final class PrintSpoolerService extends Service {
                         Slog.i(LOG_TAG, "[REMOVE] " + printJob.getId().flattenToString());
                     }
                     removePrintJobFileLocked(printJob.getId());
+                    persistState = true;
                 }
             }
-            mPersistanceManager.writeStateLocked();
+            if (persistState) {
+                mPersistanceManager.writeStateLocked();
+            }
         }
     }
 
@@ -543,7 +548,7 @@ public final class PrintSpoolerService extends Service {
         final int printJobCount = mPrintJobs.size();
         for (int i = 0; i < printJobCount; i++) {
             PrintJobInfo printJob = mPrintJobs.get(i);
-            if (isActiveState(printJob.getState())
+            if (isActiveState(printJob.getState()) && printJob.getPrinterId() != null
                     && printJob.getPrinterId().getServiceName().equals(service)) {
                 return true;
             }
@@ -619,6 +624,16 @@ public final class PrintSpoolerService extends Service {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
                 printJob.setCopies(copies);
+            }
+        }
+    }
+
+    public void setPrintJobAdvancedOptionsNoPersistence(PrintJobId printJobId,
+            Bundle advancedOptions) {
+        synchronized (mLock) {
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
+            if (printJob != null) {
+                printJob.setAdvancedOptions(advancedOptions);
             }
         }
     }
@@ -704,6 +719,14 @@ public final class PrintSpoolerService extends Service {
         private static final String ATTR_STATE_REASON = "stateReason";
         private static final String ATTR_CANCELLING = "cancelling";
 
+        private static final String TAG_ADVANCED_OPTIONS = "advancedOptions";
+        private static final String TAG_ADVANCED_OPTION = "advancedOption";
+        private static final String ATTR_KEY = "key";
+        private static final String ATTR_TYPE = "type";
+        private static final String ATTR_VALUE = "value";
+        private static final String TYPE_STRING = "string";
+        private static final String TYPE_INT = "int";
+
         private static final String TAG_MEDIA_SIZE = "mediaSize";
         private static final String TAG_RESOLUTION = "resolution";
         private static final String TAG_MARGINS = "margins";
@@ -779,6 +802,10 @@ public final class PrintSpoolerService extends Service {
                 final int printJobCount = printJobs.size();
                 for (int j = 0; j < printJobCount; j++) {
                     PrintJobInfo printJob = printJobs.get(j);
+
+                    if (!shouldPersistPrintJob(printJob)) {
+                        continue;
+                    }
 
                     serializer.startTag(null, TAG_JOB);
 
@@ -897,6 +924,30 @@ public final class PrintSpoolerService extends Service {
                         serializer.attribute(null, ATTR_DATA_SIZE, String.valueOf(
                                 documentInfo.getDataSize()));
                         serializer.endTag(null, TAG_DOCUMENT_INFO);
+                    }
+
+                    Bundle advancedOptions = printJob.getAdvancedOptions();
+                    if (advancedOptions != null) {
+                        serializer.startTag(null, TAG_ADVANCED_OPTIONS);
+                        for (String key : advancedOptions.keySet()) {
+                            Object value = advancedOptions.get(key);
+                            if (value instanceof String) {
+                                String stringValue = (String) value;
+                                serializer.startTag(null, TAG_ADVANCED_OPTION);
+                                serializer.attribute(null, ATTR_KEY, key);
+                                serializer.attribute(null, ATTR_TYPE, TYPE_STRING);
+                                serializer.attribute(null, ATTR_VALUE, stringValue);
+                                serializer.endTag(null, TAG_ADVANCED_OPTION);
+                            } else if (value instanceof Integer) {
+                                String intValue = Integer.toString((Integer) value);
+                                serializer.startTag(null, TAG_ADVANCED_OPTION);
+                                serializer.attribute(null, ATTR_KEY, key);
+                                serializer.attribute(null, ATTR_TYPE, TYPE_INT);
+                                serializer.attribute(null, ATTR_VALUE, intValue);
+                                serializer.endTag(null, TAG_ADVANCED_OPTION);
+                            }
+                        }
+                        serializer.endTag(null, TAG_ADVANCED_OPTIONS);
                     }
 
                     serializer.endTag(null, TAG_JOB);
@@ -1027,6 +1078,7 @@ public final class PrintSpoolerService extends Service {
                 skipEmptyTextTags(parser);
                 expect(parser, XmlPullParser.END_TAG, TAG_PAGE_RANGE);
                 parser.next();
+                skipEmptyTextTags(parser);
             }
             if (pageRanges != null) {
                 PageRange[] pageRangesArray = new PageRange[pageRanges.size()];
@@ -1057,8 +1109,8 @@ public final class PrintSpoolerService extends Service {
                     final int labelResId = (labelResIdString != null)
                             ? Integer.parseInt(labelResIdString) : 0;
                     label = parser.getAttributeValue(null, ATTR_LABEL);
-                    MediaSize mediaSize = new MediaSize(id, label, packageName, labelResId,
-                                widthMils, heightMils);
+                    MediaSize mediaSize = new MediaSize(id, label, packageName,
+                                widthMils, heightMils, labelResId);
                     builder.setMediaSize(mediaSize);
                     parser.next();
                     skipEmptyTextTags(parser);
@@ -1124,6 +1176,32 @@ public final class PrintSpoolerService extends Service {
                 parser.next();
                 skipEmptyTextTags(parser);
                 expect(parser, XmlPullParser.END_TAG, TAG_DOCUMENT_INFO);
+                parser.next();
+            }
+
+            skipEmptyTextTags(parser);
+            if (accept(parser, XmlPullParser.START_TAG, TAG_ADVANCED_OPTIONS)) {
+                parser.next();
+                skipEmptyTextTags(parser);
+                Bundle advancedOptions = new Bundle();
+                while (accept(parser, XmlPullParser.START_TAG, TAG_ADVANCED_OPTION)) {
+                    String key = parser.getAttributeValue(null, ATTR_KEY);
+                    String value = parser.getAttributeValue(null, ATTR_VALUE);
+                    String type = parser.getAttributeValue(null, ATTR_TYPE);
+                    if (TYPE_STRING.equals(type)) {
+                        advancedOptions.putString(key, value);
+                    } else if (TYPE_INT.equals(type)) {
+                        advancedOptions.putInt(key, Integer.valueOf(value));
+                    }
+                    parser.next();
+                    skipEmptyTextTags(parser);
+                    expect(parser, XmlPullParser.END_TAG, TAG_ADVANCED_OPTION);
+                    parser.next();
+                    skipEmptyTextTags(parser);
+                }
+                printJob.setAdvancedOptions(advancedOptions);
+                skipEmptyTextTags(parser);
+                expect(parser, XmlPullParser.END_TAG, TAG_ADVANCED_OPTIONS);
                 parser.next();
             }
 

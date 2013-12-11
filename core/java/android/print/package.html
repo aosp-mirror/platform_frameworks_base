@@ -1,0 +1,46 @@
+<HTML>
+<BODY>
+<h3>Overview</h3>
+<p>
+Provides classes for implementing print support in applications and also contains all
+base classes and abstractions involved in printing. These base classes are also used
+by other more specialized printing related packages.
+</p>
+<p>
+The entry point for interacting with the print system is the {@link android.print.PrintManager}
+which is a system service that can be obtained from the current context. The print manager
+provides APIs for printing, querying the state of print jobs, etc.
+<p/>
+<h3>Print contract</h3>
+<p>
+An application that wants to implement printing must extend
+{@link android.print.PrintDocumentAdapter} which defines the contract between the system
+and the application.The key idea behind this adapter is that the printed content may change
+based on the selected print options, such as media size, orientation, which
+requires the content to be re-laid out. The constraints according to which the content has
+to be laid out are encapsulated in the {@link android.print.PrintAttributes} class. Once
+layout is completed the application calls back to the system passing a
+{@link android.print.PrintDocumentInfo} instance which describes the generated content. After
+the content has been laid out the application may be asked to render some pages of that content
+for preview or printing. The range of pages that have to be rendered is abstracted by the
+{@link android.print.PageRange} class.
+</p>
+<h3>Print jobs</h3>
+<p>
+A print job is represented by the {@link android.print.PrintJob} class which has behavior
+methods as well as methods for querying its state. Each print job has a unique id represented
+by the {@link android.print.PrintJobId} class and exposes APIs for obtaining a {@link
+android.print.PrintJobInfo} which is a snapshot of its state. The print job state may
+change over time.
+</p>
+<h3>Printers</h3>
+<p>
+An available printer represented by the {@link android.print.PrinterInfo} class has a
+unique id which is abstracted by the {@link android.print.PrinterId} class. The {@link
+android.print.PrinterInfo} contains printer properties such as id, name, description, status,
+and printer capabilities encapsulated in the {@link android.print.PrinterCapabilitiesInfo}
+class. Printer capabilities describe how a printer can print content, for example what are
+the supported media sizes, color modes, resolutions, etc.
+<p>
+</BODY>
+</HTML>

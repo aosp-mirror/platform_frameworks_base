@@ -153,6 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batería <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo avión <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Ubicación <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"La alarma sonará a la(s) <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos 2G-3G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datos 4G inhabilitados"</string>
@@ -195,8 +196,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"No conectado"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No hay red."</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desactivado"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Pantalla Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Pantalla inalámbrica"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Pantalla de Cast"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"La red se\npuede supervisar"</string>

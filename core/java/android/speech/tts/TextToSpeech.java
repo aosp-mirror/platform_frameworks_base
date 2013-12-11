@@ -993,8 +993,16 @@ public class TextToSpeech {
         return runAction(new Action<Set<String>>() {
             @Override
             public Set<String> run(ITextToSpeechService service) throws RemoteException {
-                String[] features = service.getFeaturesForLanguage(
+                String[] features = null;
+                try {
+                    features = service.getFeaturesForLanguage(
                         locale.getISO3Language(), locale.getISO3Country(), locale.getVariant());
+                } catch(MissingResourceException e) {
+                    Log.w(TAG, "Couldn't retrieve 3 letter ISO 639-2/T language and/or ISO 3166 " +
+                            "country code for locale: " + locale, e);
+                    return null;
+                }
+
                 if (features != null) {
                     final Set<String> featureSet = new HashSet<String>();
                     Collections.addAll(featureSet, features);

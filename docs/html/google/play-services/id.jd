@@ -1,0 +1,198 @@
+page.title=Advertising ID
+page.tags="Ads","Advertising ID", "ID"
+header.hide=1
+
+@jd:body
+
+<div class="landing-banner">
+        
+<div class="col-8">
+
+  <h1 itemprop="name" style="margin-bottom:0;">Advertising ID</h1>
+  <p itemprop="description">The advertising ID is a user-specific, unique,
+  resettable ID for advertising, provided by Google Play services. It gives
+  users better controls and provides developers with a simple, standard system
+  to continue to monetize your apps. It is an anonymous identifier for advertising
+  purposes and enables users to reset their identifier or opt out of interest-based
+  ads within Google Play apps. </p>
+
+<p>The advertising ID is accessible through a straightforward API that you can implement in your apps. For details, 
+take a look at the
+<a href="#get_started">overview</a> and the <a
+href="{@docRoot}reference/com/google/android/gms/ads/identifier/package-summary.html">advertising ID API reference</a>.
+
+</div>
+</div>
+
+<div class="landing-docs">
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Key Developer Features</h3>
+
+      <h4>Standard, simple ID</h4>
+      <p>The advertising ID is a part of a standard, simple system for serving ads and performing analytics.</p>
+
+      <h4>Giving users control</h4>
+      <p>Users  can reset their advertising ID or opt out of interest-based ads at any time, right from the Google Settings app.
+      Their preferences apply across all ad companies that use the advertising ID.</p>
+       
+  </div>
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Getting Started</h3>
+    <h4>1. Get the Google Play services SDK</h4>
+    <p>The advertising ID APIs are part of the Google Play services platform.</p>
+    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a>
+    the Google Play services SDK. </p>
+
+    <h4>2. Read the docs and example code</h4>
+    <p>Once you've installed the Google Play services package, review the <a href="#get_started">overview</a>
+    below, as well as the <a href="#example">example</a>.</p>
+    <p>
+    For detailed documentation, take a look at the <a href=
+    "{@docRoot}reference/com/google/android/gms/ads/identifier/package-summary.html">
+    advertising ID API reference documentation</a>.
+    </p>
+  </div>
+</div>
+
+
+<h2 id="get_started">Using the Advertising ID</h2>
+
+<p>
+  The <strong>advertising ID</strong> is a unique but
+  user-resettable string identifier that lets ad networks and other apps anonymously
+  identify a user. The user's advertising ID is made available to apps through APIs
+  provided in Google Play services.
+</p>
+<p>
+  Users can reset their advertising ID at any time, right from the Ads section of the
+  Google Settings app on their devices. From the same app, users can also
+  opt-out of targeted advertising based on the advertising ID by setting the appropriate
+  <strong style="white-space:nowrap">ad tracking preference</strong>. When the
+  user opts-out of targeted ads, this ad tracking preference is made available
+  to apps through a Google Play services API.
+</p>
+<p>
+  Apps making use of the advertising ID <strong>must check for and respect</strong> the
+  user's ad tracking preference. Also please note that any use of the advertising ID
+  must abide by the terms of the <a class="external-link"
+  href="http://play.google.com/about/developer-content-policy.html#ADID">Google Play
+  Developer Content Policies</a>. 
+</p>
+
+<h3 id="format">Format of the Advertising ID</h3>
+
+<p>
+  Google Play services APIs expose the user's advertising ID as a string format of UUID,
+  with values similar to this:
+</p>
+<p style="margin-left:1.5em;"><code>“38400000-8cf0-11bd-b23e-10b96e40000d”</code></p>
+
+<h3 id="requirements">Requirements</h3>
+
+<ul>
+  <li>The advertising ID APIs are supported in Google Play services 4.0+</li>
+  <li>Support for the advertising ID on specific devices is based on their installed versions 
+  of Google Play services</li>
+</ul>
+
+<h3 id="obtaining">Obtaining the user's advertising ID and ad tracking preference</h3>
+
+<p>
+  If you want to use the advertising ID in your app, you must first install the Google
+  Play services SDK. As noted in the requirements above, you should install the
+  SDK for Google Play services 4.0 or higher if you will develop using the advertising ID
+  APIs. For information about how to get started, see <a href=
+  "{@docRoot}google/play-services/setup.html">Set Up Google Play services</a>.
+</p>
+<p>
+  The advertising ID APIs are available in the <a href=
+  "{@docRoot}reference/com/google/android/gms/ads/identifier/package-summary.html">
+  <code>com.google.android.gms.ads.identifier</code></a> package in the Google
+  Play Services library. To obtain the user's advertising ID and tracking preference,
+  call the method
+  <a href=
+  "{@docRoot}reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.html#getAdvertisingIdInfo(android.content.Context)">
+  <code>getAdvertisingIdInfo()</code></a>, which returns an <a href=
+  "{@docRoot}reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info.html">
+  <code>AdvertisingIdClient.Info</code></a> encapsulating the user's current Advertising ID
+  and tracking preference.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> The <code>getAdvertisingIdInfo()</code> method is a
+  blocking call, so you must not call it on the main (UI) thread. If called on
+  the main thread, the method throws <code>IllegalStateException</code>.
+</p>
+
+<p>
+  Once you've retrieved the <code>AdvertisingIdClient.Info</code> object, you
+  can use it's <a href=
+  "{@docRoot}reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info.html#getId()">
+  <code>getId()</code></a> and <a href=
+  "{@docRoot}reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info.html#isLimitAdTrackingEnabled()">
+  <code>isLimitAdTrackingEnabled()</code></a> methods to access the advertising ID and
+  ad tracking preference.
+</p>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>public String getId()</code></td>
+<td style="white-space:nowrap;">Retrieves the advertising ID.</td>
+</tr>
+<tr>
+<td style="white-space:nowrap;"><code>public boolean isLimitAdTrackingEnabled()</code></td>
+<td>Retrieves whether the user has limit ad tracking enabled or not.</td>
+</tr>
+</table>
+
+<p>
+  The advertising ID APIs do not include a "reset" method. Only users can initiate a
+  reset of their own advertising IDs, through the Google Settings application.
+</p>
+<p>
+  For more information about the advertising ID APIs, see the <a href=
+  "{@docRoot}reference/com/google/android/gms/ads/identifier/package-summary.html">
+  reference documentation</a>.
+</p>
+
+<h3 id="example">Example implementation</h3>
+
+<p>
+  Here's a basic illustration of how you can retrieve the user's advertising ID and ad
+  tracking preference in your app:
+</p>
+
+<pre>
+import com.google.android.gms.ads.identifier.AdvertisingIdClient;
+import com.google.android.gms.ads.identifier.AdvertisingIdClient.Info;
+import com.google.android.gms.common.GooglePlayServicesAvailabilityException;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import java.io.IOException;
+...
+
+// Do not call this function from the main thread. Otherwise, 
+// an IllegalStateException will be thrown.
+public void getIdThread() {
+
+  Info adInfo = null;
+  try {
+    adInfo = AdvertisingIdClient.getAdvertisingIdInfo(mContext);
+
+  } catch (IOException e) {
+    // Unrecoverable error connecting to Google Play services (e.g.,
+    // the old version of the service doesn't support getting AdvertisingId).
+ 
+  } catch (GooglePlayServicesAvailabilityException e) {
+    // Encountered a recoverable error connecting to Google Play services. 
+
+  } catch (GooglePlayServicesNotAvailableException e) {
+    // Google Play services is not available entirely.
+  }
+  final String id = adInfo.getId();
+  final boolean isLAT = adInfo.isLimitAdTrackingEnabled();
+}</pre>

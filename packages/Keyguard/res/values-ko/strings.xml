@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN 코드 입력"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK 및 새 PIN 코드 입력"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 코드"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"새 PIN 코드"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"SIM PUK 및 새 PIN 코드 입력"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK 코드"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"새 SIM PIN 코드"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"비밀번호를 입력하려면 터치"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"잠금 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"잠금을 해제하려면 PIN 입력"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"원하는 PIN 코드 입력"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"원하는 PIN 코드 확인"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM 카드 잠금해제 중..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN 코드가 잘못되었습니다."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4~8자리 숫자로 된 PIN을 입력하세요."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 코드는 8자리 이상의 숫자여야 합니다."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"올바른 PUK 코드를 다시 입력하세요. 입력을 반복해서 시도하면 SIM을 영구적으로 사용할 수 없게 됩니다."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN 코드가 잘못되었습니다. 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM PIN 코드가 잘못되었습니다. <xliff:g id="NUMBER">%d</xliff:g>회 이상 실패할 경우 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM PIN 코드가 잘못되었습니다. <xliff:g id="NUMBER">%d</xliff:g>번의 기회가 남았습니다."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM을 사용할 수 없습니다. 이동통신사에 문의하세요."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"SIM PUK 코드가 잘못되었습니다. <xliff:g id="NUMBER">%d</xliff:g>회 이상 실패할 경우 SIM을 완전히 사용할 수 없습니다."</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM PUK 코드가 잘못되었습니다. <xliff:g id="NUMBER">%d</xliff:g>회 이상 실패할 경우 SIM을 완전히 사용할 수 없습니다."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN 작업이 실패했습니다."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK 작업이 실패했습니다."</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"코드 승인 완료"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"이전 트랙 버튼"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"다음 트랙 버튼"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"일시중지 버튼"</string>

@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Druck-Spooler"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"Druckereinstellungen"</string>
     <string name="print_button" msgid="645164566271246268">"Drucken"</string>
     <string name="save_button" msgid="1921310454071758999">"Speichern"</string>
     <string name="label_destination" msgid="9132510997381599275">"Ziel"</string>
@@ -40,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Suchfeld angezeigt"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Suchfeld ausgeblendet"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Drucker hinzufügen"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Drucker auswählen"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Drucker wieder vergessen"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"<xliff:g id="COUNT">%1$s</xliff:g> Drucker gefunden"</item>
     <item quantity="other" msgid="6533817036607128241">"<xliff:g id="COUNT">%1$s</xliff:g> Drucker gefunden"</item>

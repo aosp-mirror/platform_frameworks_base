@@ -27,7 +27,7 @@
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"סגור אפליקציות אחרונות"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"אפליקציה אחרונה אחת"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d האפליקציות האחרונות"</item>
+    <item quantity="other" msgid="1040784359794890744">"‏%d האפליקציות האחרונות"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין התראות"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתמשך"</string>
@@ -35,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"חבר מטען"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"הסוללה נחלשת."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"נותרו <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"טעינה באמצעות USB אינה נתמכת.\nהשתמש אך ורק במטען שסופק."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"‏טעינה באמצעות USB אינה נתמכת.\nהשתמש אך ורק במטען שסופק."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"צריכת סוללה"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"הגדרות"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -44,20 +44,20 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"השתק"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"אוטומטי"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"התראות"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth קשור"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"‏Bluetooth קשור"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"הגדר שיטות קלט"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"מקלדת פיזית"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"לאפשר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> גישה להתקן ה-USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"לאפשר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> גישה לאביזר ה-USB?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר מכשיר USB זה מחובר?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר אביזר USB זה מחובר?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"אין אפליקציות מותקנות הפועלות עם אביזר ה-USB. למידע נוסף על אביזר זה בקר בכתובת <xliff:g id="URL">%1$s</xliff:g>"</string>
-    <string name="title_usb_accessory" msgid="4966265263465181372">"אביזר USB"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"‏לאפשר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> גישה להתקן ה-USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"‏לאפשר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> גישה לאביזר ה-USB?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"‏האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר מכשיר USB זה מחובר?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"‏האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר אביזר USB זה מחובר?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"‏אין אפליקציות מותקנות הפועלות עם אביזר ה-USB. למידע נוסף על אביזר זה בקר בכתובת <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"‏אביזר USB"</string>
     <string name="label_view" msgid="6304565553218192990">"הצג"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"השתמש כברירת מחדל עבור מכשיר USB זה"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"השתמש כברירת מחדל עבור אביזר USB זה"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"האם לאפשר ניקוי באגים ב-USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"טביעת האצבע של מפתח ה-RSA של המחשב היא:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"‏השתמש כברירת מחדל עבור מכשיר USB זה"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"‏השתמש כברירת מחדל עבור אביזר USB זה"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"‏האם לאפשר ניקוי באגים ב-USB?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"‏טביעת האצבע של מפתח ה-RSA של המחשב היא:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"אפשר תמיד ממחשב זה"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"מתח כדי למלא את המסך"</string>
@@ -68,10 +68,10 @@
     <string name="screenshot_saved_text" msgid="1152839647677558815">"גע כדי להציג את צילום המסך שלך"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"לא ניתן לבצע צילום מסך."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"לא ניתן לשמור את צילום המסך. ייתכן שנעשה שימוש באמצעי אחסון."</string>
-    <string name="usb_preference_title" msgid="6551050377388882787">"אפשרויות העברת קבצים ב-USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"טען כנגן מדיה (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7517127540301625751">"טען כמצלמה (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"התקן את אפליקציית העברת הקבצים של Android עבור Mac"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"‏אפשרויות העברת קבצים ב-USB"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"‏טען כנגן מדיה (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"‏טען כמצלמה (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"‏התקן את אפליקציית העברת הקבצים של Android עבור Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"הקודם"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"בית"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"תפריט"</string>
@@ -81,8 +81,8 @@
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"לחצן מרחק מתצוגה של תאימות."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"שנה מרחק מתצוגה של מסך קטן לגדול יותר."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth מחובר."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth מנותק."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"‏Bluetooth מחובר."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"‏Bluetooth מנותק."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"אין סוללה."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"פס אחד של סוללה."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"שני פסים של סוללה."</string>
@@ -98,17 +98,17 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"שני פסים של נתונים."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"שלושה פסים של נתונים."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"אות הנתונים מלא."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi כבוי."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi מנותק."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"פס אחד של Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"שני פסים של Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"שלושה פסים של Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"אות ה-Wi-Fi מלא."</string>
-    <string name="accessibility_no_wimax" msgid="4329180129727630368">"ללא WiMAX."</string>
-    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"פס אחד של WiMAX."</string>
-    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"שני פסים של WiMAX."</string>
-    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"שלושה פסים של WiMAX."</string>
-    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"אות ה-WiMAX מלא."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"‏Wi-Fi כבוי."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"‏Wi-Fi מנותק."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"‏פס אחד של Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"‏שני פסים של Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"‏שלושה פסים של Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"‏אות ה-Wi-Fi מלא."</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏ללא WiMAX."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"‏פס אחד של WiMAX."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"‏שני פסים של WiMAX."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"‏שלושה פסים של WiMAX."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"‏אות ה-WiMAX מלא."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"אין אות."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"לא מחובר."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"אפס פסים."</string>
@@ -130,16 +130,16 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"נדידה"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"קצה"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"אין כרטיס SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"שיתוף אינטרנט בין ניידים של Bluetooth"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"‏אין כרטיס SIM."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"‏שיתוף אינטרנט בין ניידים של Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"מצב טיסה"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> אחוזים של סוללה."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"הגדרות מערכת"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"התראות"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"נקה התראה"</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS מופעל."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"השגת GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter מופעל"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏GPS מופעל."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏השגת GPS."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"‏TeleTypewriter מופעל"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"צלצול ורטט."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"צלצול שקט."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> נדחה."</string>
@@ -152,18 +152,19 @@
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"נייד <xliff:g id="SIGNAL">%1$s</xliff:g>.‏ <xliff:g id="TYPE">%2$s</xliff:g>.‏ <xliff:g id="NETWORK">%3$s</xliff:g>.‏"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"סוללה <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"מצב טיסה <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth ‏<xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"‏Bluetooth ‏<xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"המיקום <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"ההתראה נקבעה ל-<xliff:g id="TIME">%s</xliff:g>."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"נתוני 2G-3G מושבתים"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"נתוני 4G מושבתים"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"‏נתוני 2G-3G מושבתים"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"‏נתוני 4G מושבתים"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"נתונים לנייד מושבתים"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"הנתונים מושבתים"</string>
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"הגעת לגבול המוגדר של שימוש בנתונים.\n\nאם תפעיל מחדש נתונים, ייתכן שתחויב על ידי הספק שלך."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"הפעל מחדש את הנתונים"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"אין חיבור לאינטרנט"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi מחובר"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"מחפש GPS"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"מיקום מוגדר על ידי GPS"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi מחובר"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"‏מחפש GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"‏מיקום מוגדר על ידי GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"בקשות מיקום פעילות"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"נקה את כל ההתראות."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"פרטי אפליקציה"</string>
@@ -177,8 +178,8 @@
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"טוען (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"מלאה"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth ‏(<xliff:g id="NUMBER">%d</xliff:g> מכשירים)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth מופסק"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"‏Bluetooth ‏(<xliff:g id="NUMBER">%d</xliff:g> מכשירים)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"‏Bluetooth מופסק"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"בהירות"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"סיבוב אוטומטי"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"סיבוב נעול"</string>
@@ -194,9 +195,8 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"לא מחובר"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"אין רשת"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi כבוי"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"תצוגת Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"תצוגת Wi-Fi"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi כבוי"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"העבר מסך"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"בהירות"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"אוטומטי"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"ייתכן שהרשת\nמנוטרת"</string>

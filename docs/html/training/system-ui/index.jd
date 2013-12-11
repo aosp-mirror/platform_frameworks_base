@@ -1,0 +1,90 @@
+page.title=Managing the System UI
+page.tags=""
+
+trainingnavtop=true
+startpage=true
+
+
+@jd:body
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+
+<ul>
+  <li>Android 1.6 (API Level 4) or higher</li>
+</ul>
+
+
+
+</div>
+</div>
+
+<a class="notice-designers wide" href="{@docRoot}design/get-started/ui-overview.html#system-bars">
+<div>
+    <h3>Design Guide</h3>
+    <p>System Bars</p>
+</div>
+</a>
+
+<div class="figure" style="width:278px">
+  <img src="{@docRoot}images/training/system-ui.png"
+  alt="system bars" />
+  <p class="img-caption"><strong>Figure 1.</strong> System bars, including the [1] status
+bar, and [2] navigation bar.</p>
+</div>
+
+<p>The <a href="https://developer.android.com/design/get-started/ui-overview.html#system-bars">
+system bars</a> are screen areas dedicated to the display of notifications, communication
+of device status, and device navigation. Typically the system bars (which consist of the status
+and navigation bars, as shown in figure 1) are displayed
+concurrently with your app. Apps that display immersive content, such as movies or images,
+can temporarily dim the system bar icons for a less distracting experience,
+or temporarily hide the bars for a fully immersive experience.</p>
+
+<p>If you're familiar with the <a href="{@docRoot}design/index.html">Android Design
+Guide</a>, you know the importance of designing your apps to conform to standard Android UI
+guidelines and usage patterns. You should carefully consider your users'
+needs and expectations before modifying the system bars, since they give users a
+standard way of navigating a device and viewing its status.</p>
+
+<p>This class describes how to dim or hide system bars across different versions of Android
+to create an immersive user experience, while still preserving easy access to the system
+bars.
+</p>
+<h2>Lessons</h2>
+
+<dl>
+ <dt>
+        <strong><a href="dim.html">Dimming the System Bars</a></strong>
+    </dt>
+    <dd>
+        Learn how to dim the status and navigation bars.
+    </dd>
+    <dt>
+        <strong><a href="status.html">Hiding the Status Bar</a></strong>
+    </dt>
+    <dd>
+        Learn how to hide the status bar on different versions of Android.
+    </dd>
+    <dt>
+        <strong><a href="navigation.html">Hiding the Navigation Bar</a></strong>
+    </dt>
+    <dd>
+        Learn how to hide the navigation bar, in addition to the status bar.
+    </dd>
+
+    <dt>
+        <strong><a href="visibility.html">Responding to UI Visibility Changes</a></strong>
+    </dt>
+    <dd>
+        Learn how to register a listener to get notified of system UI visibility changes
+        so that you can adjust your app's UI accordingly.
+    </dd>
+
+</dl>

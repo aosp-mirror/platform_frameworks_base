@@ -60,6 +60,8 @@ public final class PrintServiceInfo implements Parcelable {
 
     private final String mAddPrintersActivityName;
 
+    private final String mAdvancedPrintOptionsActivityName;
+
     /**
      * Creates a new instance.
      *
@@ -70,6 +72,7 @@ public final class PrintServiceInfo implements Parcelable {
         mResolveInfo = parcel.readParcelable(null);
         mSettingsActivityName = parcel.readString();
         mAddPrintersActivityName = parcel.readString();
+        mAdvancedPrintOptionsActivityName = parcel.readString();
     }
 
     /**
@@ -78,14 +81,16 @@ public final class PrintServiceInfo implements Parcelable {
      * @param resolveInfo The service resolve info.
      * @param settingsActivityName Optional settings activity name.
      * @param addPrintersActivityName Optional add printers activity name.
+     * @param advancedPrintOptionsActivityName Optional advanced print options activity.
      */
     public PrintServiceInfo(ResolveInfo resolveInfo, String settingsActivityName,
-            String addPrintersActivityName) {
+            String addPrintersActivityName, String advancedPrintOptionsActivityName) {
         mId = new ComponentName(resolveInfo.serviceInfo.packageName,
                 resolveInfo.serviceInfo.name).flattenToString();
         mResolveInfo = resolveInfo;
         mSettingsActivityName = settingsActivityName;
         mAddPrintersActivityName = addPrintersActivityName;
+        mAdvancedPrintOptionsActivityName = advancedPrintOptionsActivityName;
     }
 
     /**
@@ -99,6 +104,7 @@ public final class PrintServiceInfo implements Parcelable {
     public static PrintServiceInfo create(ResolveInfo resolveInfo, Context context) {
         String settingsActivityName = null;
         String addPrintersActivityName = null;
+        String advancedPrintOptionsActivityName = null;
 
         XmlResourceParser parser = null;
         PackageManager packageManager = context.getPackageManager();
@@ -128,6 +134,9 @@ public final class PrintServiceInfo implements Parcelable {
                     addPrintersActivityName = attributes.getString(
                             com.android.internal.R.styleable.PrintService_addPrintersActivity);
 
+                    advancedPrintOptionsActivityName = attributes.getString(com.android.internal
+                            .R.styleable.PrintService_advancedPrintOptionsActivity);
+
                     attributes.recycle();
                 }
             } catch (IOException ioe) {
@@ -144,7 +153,8 @@ public final class PrintServiceInfo implements Parcelable {
             }
         }
 
-        return new PrintServiceInfo(resolveInfo, settingsActivityName, addPrintersActivityName);
+        return new PrintServiceInfo(resolveInfo, settingsActivityName,
+                addPrintersActivityName, advancedPrintOptionsActivityName);
     }
 
     /**
@@ -195,6 +205,19 @@ public final class PrintServiceInfo implements Parcelable {
     }
 
     /**
+     * The advanced print options activity name.
+     * <p>
+     * <strong>Statically set from
+     * {@link PrintService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     *
+     * @return The advanced print options activity name.
+     */
+    public String getAdvancedOptionsActivityName() {
+        return mAdvancedPrintOptionsActivityName;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public int describeContents() {
@@ -206,6 +229,7 @@ public final class PrintServiceInfo implements Parcelable {
         parcel.writeParcelable(mResolveInfo, 0);
         parcel.writeString(mSettingsActivityName);
         parcel.writeString(mAddPrintersActivityName);
+        parcel.writeString(mAdvancedPrintOptionsActivityName);
     }
 
     @Override
@@ -243,6 +267,8 @@ public final class PrintServiceInfo implements Parcelable {
         builder.append(", resolveInfo=").append(mResolveInfo);
         builder.append(", settingsActivityName=").append(mSettingsActivityName);
         builder.append(", addPrintersActivityName=").append(mAddPrintersActivityName);
+        builder.append(", advancedPrintOptionsActivityName=")
+                .append(mAdvancedPrintOptionsActivityName);
         builder.append("}");
         return builder.toString();
     }

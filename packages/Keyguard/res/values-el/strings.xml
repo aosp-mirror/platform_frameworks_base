@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Πληκτρολογήστε τον κωδικό αριθμό PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Πληκτρολογήστε τον κωδικό PUK και τον νέο κωδικό PIN"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Κωδικός PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Νέος κωδικός PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Πληκτρολογήστε τον κωδικό PUK της κάρτας SIM και τον νέο κωδικό PIN"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Κωδικός PUK κάρτας SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Νέος κώδικας αριθμού PIN της κάρτας SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Αγγίξτε για εισαγ. κωδ. πρόσβ."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Πληκτρολογήστε τον κωδικό πρόσβασης για ξεκλείδωμα"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Πληκτρολογήστε τον αριθμό PIN για ξεκλείδωμα"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Εισαγάγετε τον απαιτούμενο κωδικό PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Επιβεβαιώστε τον απαιτούμενο κωδικό PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ξεκλείδωμα κάρτας SIM..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Εσφαλμένος κωδικός PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Πληκτρολογήστε έναν αριθμό PIN που να αποτελείται από 4 έως 8 αριθμούς."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Ο κωδικός PUK θα πρέπει να περιέχει τουλάχιστον 8 αριθμούς."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Εισαγάγετε ξανά τον κωδικό PUK. Οι επαναλαμβανόμενες προσπάθειες θα απενεργοποιήσουν οριστικά την κάρτα SIM."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Κατάργηση"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Εσφαλμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Εσφαλμένος κωδικός PIN κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</item>
+    <item quantity="other" msgid="2215723361575359486">"Εσφαλμένος κωδικός PIN κάρτας SIM. Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί. Επικοινωνήστε με τον πάροχο κινητής τηλεφωνίας σας."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Εσφαλμένος κωδικός PUK κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια προτού δεν είναι πλέον δυνατή η χρήση της κάρτας SIM."</item>
+    <item quantity="other" msgid="5477305226026342036">"Εσφαλμένος κωδικός PUK κάρτας SIM. Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες προτού δεν είναι πλέον δυνατή η χρήση της κάρτας SIM."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Αποτυχία λειτουργίας κωδικού PIN κάρτας SIM!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Αποτυχία λειτουργίας κωδικού PUK κάρτας SIM!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Αποδεκτός κωδικός!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Κουμπί προηγούμενου κομματιού"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Κουμπί επόμενου κομματιού"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Κουμπί παύσης"</string>

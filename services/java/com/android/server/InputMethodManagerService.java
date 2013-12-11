@@ -309,6 +309,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mShortcutInputMethodsAndSubtypes =
                 new HashMap<InputMethodInfo, ArrayList<InputMethodSubtype>>();
 
+    // Was the keyguard locked when this client became current?
+    private boolean mCurClientInKeyguard;
+
     /**
      * Set to true if our ServiceConnection is currently actively bound to
      * a service (whether or not we have gotten its IBinder back yet).
@@ -385,7 +388,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private Locale mLastSystemLocale;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
-    private boolean mInputBoundToKeyguard;
 
     class SettingsObserver extends ContentObserver {
         String mLastEnabled = "";
@@ -874,13 +876,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final boolean hardKeyShown = haveHardKeyboard
                 && conf.hardKeyboardHidden
                         != Configuration.HARDKEYBOARDHIDDEN_YES;
-        final boolean isScreenLocked =
-                mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
-        final boolean isScreenSecurelyLocked =
-                isScreenLocked && mKeyguardManager.isKeyguardSecure();
-        final boolean inputShown = mInputShown && (!isScreenLocked || mInputBoundToKeyguard);
-        mImeWindowVis = (!isScreenSecurelyLocked && (inputShown || hardKeyShown)) ?
-                (InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE) : 0;
+
+        final boolean isScreenLocked = isKeyguardLocked();
+        final boolean inputActive = !isScreenLocked && (mInputShown || hardKeyShown);
+        // We assume the softkeyboard is shown when the input is active as long as the
+        // hard keyboard is not shown.
+        final boolean inputVisible = inputActive && !hardKeyShown;
+        mImeWindowVis = (inputActive ? InputMethodService.IME_ACTIVE : 0)
+                | (inputVisible ? InputMethodService.IME_VISIBLE : 0);
         updateImeWindowStatusLocked();
     }
 
@@ -1131,19 +1134,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return mNoBinding;
         }
 
-        if (mCurClient == null) {
-            mInputBoundToKeyguard = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
-            if (DEBUG) {
-                Slog.v(TAG, "New bind. keyguard = " +  mInputBoundToKeyguard);
-            }
-        }
-
         if (mCurClient != cs) {
+            // Was the keyguard locked when switching over to the new client?
+            mCurClientInKeyguard = isKeyguardLocked();
             // If the client is changing, we need to switch over to the new
             // one.
             unbindCurrentClientLocked();
             if (DEBUG) Slog.v(TAG, "switching to client: client = "
-                    + cs.client.asBinder());
+                    + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
 
             // If the screen is on, inform the new client it is active
             if (mScreenOn) {
@@ -1495,6 +1493,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private boolean isKeyguardLocked() {
+        return mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
+    }
+
     // Caution! This method is called in this class. Handle multi-user carefully
     @SuppressWarnings("deprecation")
     @Override
@@ -1506,8 +1508,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.w(TAG, "Ignoring setImeWindowStatus of uid " + uid + " token: " + token);
                 return;
             }
-
             synchronized (mMethodMap) {
+                // apply policy for binder calls
+                if (vis != 0 && isKeyguardLocked() && !mCurClientInKeyguard) {
+                    vis = 0;
+                }
                 mImeWindowVis = vis;
                 mBackDisposition = backDisposition;
                 if (mStatusBar != null) {

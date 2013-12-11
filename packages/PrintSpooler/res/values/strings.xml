@@ -19,6 +19,9 @@
     <!-- Title of the PrintSpooler application. [CHAR LIMIT=50] -->
     <string name="app_label">Print Spooler</string>
 
+    <!-- Label of the print dialog's button for advanced printer settings. [CHAR LIMIT=25] -->
+    <string name="advanced_settings_button">Printer settings</string>
+
     <!-- Label of the print dialog's print button. [CHAR LIMIT=16] -->
     <string name="print_button">Print</string>
 
@@ -89,6 +92,12 @@
 
     <!-- Title of the action bar button to got to add a printer. [CHAR LIMIT=25] -->
     <string name="print_add_printer">Add printer</string>
+
+    <!-- Title of the menu item to select a printer. [CHAR LIMIT=25] -->
+    <string name="print_select_printer">Select printer</string>
+
+    <!-- Title of the menu item to forget a printer. [CHAR LIMIT=25] -->
+    <string name="print_forget_printer">Forget printer</string>
 
     <!-- Utterance to announce a change in the number of matches during a search. This is spoken to a blind user. [CHAR LIMIT=none] -->
     <plurals name="print_search_result_count_utterance">

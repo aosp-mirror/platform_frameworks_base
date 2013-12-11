@@ -32,17 +32,15 @@
         android:id="@+id/carrier_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/kg_status_line_font_size"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textAllCaps="@bool/kg_use_all_caps" />
+        android:textColor="?android:attr/textColorSecondary" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-10dip"
+        android:layout_marginTop="@dimen/eca_overlap"
         style="?android:attr/buttonBarStyle"
         android:orientation="horizontal"
         android:gravity="center"
@@ -66,12 +64,10 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:drawableLeft="@drawable/lockscreen_forgot_password_button"
             style="?android:attr/buttonBarButtonStyle"
             android:textSize="@dimen/kg_status_line_font_size"
             android:textColor="?android:attr/textColorSecondary"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:drawablePadding="8dip"
             android:visibility="gone"
             android:textAllCaps="@bool/kg_use_all_caps" />
     </LinearLayout>

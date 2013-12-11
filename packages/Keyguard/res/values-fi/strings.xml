@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Anna PIN-koodi"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Anna PUK-koodi ja uusi PIN-koodi"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-koodi"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Uusi PIN-koodi"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Anna SIM-kortin PUK-koodi ja uusi PIN-koodi"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM-kortin PUK-koodi"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Uusi SIM-kortin PIN-koodi"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Kosketa ja anna salasana"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Poista lukitus antamalla salasana"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Poista lukitus antamalla PIN-koodi"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Anna haluamasi PIN-koodi"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Vahvista haluamasi PIN-koodi"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kortin lukitusta poistetaan…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Virheellinen PIN-koodi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Anna 4–8-numeroinen PIN-koodi."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-koodissa tulee olla vähintään 8 numeroa."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Anna uudelleen oikea PUK-koodi. Jos teet liian monta yritystä, SIM-kortti poistetaan käytöstä pysyvästi."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Poista"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Virheellinen SIM-kortin PIN-koodi. Sinun on nyt otettava yhteys operaattoriin laitteen lukituksen avaamiseksi."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Virheellinen SIM-kortin PIN-koodi. Sinulla on <xliff:g id="NUMBER">%d</xliff:g> yritys jäljellä, ennen kuin sinun on otettava yhteys operaattoriin laitteen lukituksen avaamiseksi."</item>
+    <item quantity="other" msgid="2215723361575359486">"Virheellinen SIM-kortin PIN-koodi. Sinulla on <xliff:g id="NUMBER">%d</xliff:g> yritystä jäljellä."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-kortti on käyttökelvoton. Ota yhteys operaattoriin."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Virheellinen SIM-kortin PUK-koodi. Sinulla on <xliff:g id="NUMBER">%d</xliff:g> yritys jäljellä, ennen kuin SIM-kortista tulee pysyvästi käyttökelvoton."</item>
+    <item quantity="other" msgid="5477305226026342036">"Virheellinen SIM-kortin PUK-koodi. Sinulla on <xliff:g id="NUMBER">%d</xliff:g> yritystä jäljellä, ennen kuin SIM-kortista tulee pysyvästi käyttökelvoton."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM-kortin PIN-toiminto epäonnistui!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM-kortin PUK-toiminto epäonnistui!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Koodi hyväksytty!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Edellinen kappale -painike"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Seuraava kappale -painike"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Tauko-painike"</string>

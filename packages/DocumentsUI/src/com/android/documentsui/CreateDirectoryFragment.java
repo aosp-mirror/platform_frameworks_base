@@ -95,6 +95,11 @@ public class CreateDirectoryFragment extends DialogFragment {
         }
 
         @Override
+        protected void onPreExecute() {
+            mActivity.setPending(true);
+        }
+
+        @Override
         protected DocumentInfo doInBackground(Void... params) {
             final ContentResolver resolver = mActivity.getContentResolver();
             ContentProviderClient client = null;
@@ -120,6 +125,8 @@ public class CreateDirectoryFragment extends DialogFragment {
             } else {
                 Toast.makeText(mActivity, R.string.create_error, Toast.LENGTH_SHORT).show();
             }
+
+            mActivity.setPending(false);
         }
     }
 }

@@ -1,0 +1,57 @@
+page.title=Printing Content
+page.tags="print","navigation","gesturedetector","scroller"
+
+trainingnavtop=true
+startpage=true
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+  <h2>Dependencies and prerequisites</h2>
+
+  <ul>
+    <li>Android 4.4 (API Level 19) or higher</li>
+  </ul>
+
+  </div>
+</div>
+
+<p>
+  Android users frequently view content solely on their devices, but there are times when
+  showing someone a screen is not an adequate way to share information. Being able to print
+  information from your Android application gives users a way to see a larger version of the
+  content from your app or share it with another person who is not using your application.
+  Printing also allows them to create a snapshot of information that does not depend on having a
+  device, sufficient battery power, or a wireless network connection.
+</p>
+
+<p>
+  In Android 4.4 (API level 19) and higher, the framework provides services for printing images and
+  documents directly from Android applications. This training describes how to enable printing in
+  your application, including printing images, HTML pages and creating custom documents for
+  printing.
+</p>
+
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt>
+      <strong><a href="photos.html">Printing a Photo</a></strong>
+  </dt>
+  <dd>This lesson shows you how to print an image.</dd>
+
+  <dt>
+    <strong><a href="html-docs.html">Printing an HTML Document</a></strong>
+  </dt>
+  <dd>This lesson shows you how to print an HTML document.</dd>
+
+  <dt>
+    <strong><a href="custom-docs.html">Printing a Custom Document</a></strong>
+  </dt>
+  <dd>This lesson shows you how you connect to the Android print manager, create a print adapter
+    and build content for printing.</dd>
+</dl>
+
+

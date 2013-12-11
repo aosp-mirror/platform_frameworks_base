@@ -308,8 +308,9 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeRecycle(int nativeBitmap) {
+    /*package*/ static boolean nativeRecycle(int nativeBitmap) {
         sManager.removeJavaReferenceFor(nativeBitmap);
+        return true;
     }
 
     @LayoutlibDelegate

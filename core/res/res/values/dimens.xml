@@ -53,7 +53,7 @@
     <!-- Minimum size of the fastscroll overlay -->
     <dimen name="fastscroll_overlay_size">104dp</dimen>
     <!-- Text size of the fastscroll overlay -->
-    <dimen name="fastscroll_overlay_text_size">24sp</dimen>
+    <dimen name="fastscroll_overlay_text_size">52sp</dimen>
     <!-- Padding of the fastscroll overlay -->
     <dimen name="fastscroll_overlay_padding">16dp</dimen>
     <!-- Width of the fastscroll thumb -->

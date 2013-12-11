@@ -12,7 +12,7 @@ page.tags="textview","font"
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
-    href="{@docRoot}downloads/design/roboto-1.100141.zip">Download Roboto</a>
+    href="{@docRoot}downloads/design/roboto-1.2.zip">Download Roboto</a>
 </p>
 
 <p>The Android design language relies on traditional typographic tools such as scale, space, rhythm,
@@ -30,7 +30,7 @@ variant in regular and bold weights, along with an italic style for each weight.
     <img src="{@docRoot}design/media/typography_variants@2x.png" width="220">
 
 <p><a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specimen Booke (@typography page)']);"
-      href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a></p>
+      href="{@docRoot}downloads/design/Roboto_Specimen_Book_20131031.pdf">Specimen Book</a></p>
 
   </div>
 </div>

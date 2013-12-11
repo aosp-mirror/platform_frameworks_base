@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Taipkan PUK yang mempunyai 8 nombor atau lebih panjang."</string>
     <string name="needPuk" msgid="919668385956251611">"Kad SIM anda dikunci PUK. Taipkan kod PUK untuk membuka kuncinya."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Taipkan PUK2 untuk menyahsekat kad SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"Tidak berjaya, dayakan Kunci SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM dikunci."</item>
+    <item quantity="other" msgid="7530597808358774740">"Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM dikunci."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID Pemanggil Masuk"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan Vpn. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"terikat pada kertas dinding"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi kertas dinding. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"terikat kepada paparan jauh"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi paparan jauh. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"terikat kepada perkhidmatan widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan widget. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"berinteraksi dengan pentadbir peranti"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Masuk"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Pilih apl"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Tidak dapat melancarkan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Kongsi dengan"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Kongsi dengan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Pemegang gelongsor. Sentuh &amp; tahan."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Paparan wayarles"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Selesai"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Output media"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Sambung ke peranti"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Hantar skrin ke peranti"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Mencari peranti..."</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Tetapan"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Putuskan sambungan"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Mengimbas…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Menyambung..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Tersedia"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Tindih #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", selamat"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Paparan wayarles disambungkan"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Skrin ini ditunjukkan pada peranti lain"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Menghantar skrin"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Menyambung ke <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Menghantar skrin"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Disambungkan ke <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Putus sambungan"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Panggilan kecemasan"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Lupa Corak"</string>

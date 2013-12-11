@@ -19,6 +19,7 @@
       <li><a href="<?cs var:toroot ?>design/style/typography.html">Typography</a></li>
       <li><a href="<?cs var:toroot ?>design/style/color.html">Color</a></li>
       <li><a href="<?cs var:toroot ?>design/style/iconography.html">Iconography</a></li>
+      <li><a href="<?cs var:toroot ?>design/style/branding.html">Your Branding</a></li>
       <li><a href="<?cs var:toroot ?>design/style/writing.html">Writing Style</a></li>
     </ul>
   </li>
@@ -34,6 +35,7 @@
       <li><a href="<?cs var:toroot ?>design/patterns/navigation-drawer.html">Navigation Drawer</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/swipe-views.html">Swipe Views</a></li>
+      <li><a href="<?cs var:toroot ?>design/patterns/fullscreen.html">Full Screen</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/selection.html">Selection</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/confirming-acknowledging.html">Confirming &amp; Acknowledging</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/notifications.html">Notifications</a></li>

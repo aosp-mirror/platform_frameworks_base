@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Print Spooler"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"Printera iestatījumi"</string>
     <string name="print_button" msgid="645164566271246268">"Drukāt"</string>
     <string name="save_button" msgid="1921310454071758999">"Saglabāt"</string>
     <string name="label_destination" msgid="9132510997381599275">"Galamērķis"</string>
@@ -40,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Meklēšanas lodziņš ir redzams."</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Meklēšanas lodziņš ir paslēpts."</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Pievienot printeri"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Atlasīt printeri"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Neatcerēties printeri"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"Atrasts <xliff:g id="COUNT">%1$s</xliff:g> printeris"</item>
     <item quantity="other" msgid="6533817036607128241">"Atrasti <xliff:g id="COUNT">%1$s</xliff:g> printeri"</item>
@@ -60,7 +63,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Nav savienojuma ar printeri"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"nezināms"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> — nav pieejams"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Nevar ģenerēt drukas darbu"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Nevarēja ģenerēt drukas darbu"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Melnbalts"</item>
     <item msgid="2762241247228983754">"Krāsa"</item>

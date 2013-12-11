@@ -321,7 +321,7 @@ public final class PrintJob {
      */
     public String getAdvancedStringOption(String key) {
         PrintService.throwIfNotCalledOnMainThread();
-        return null;
+        return getInfo().getAdvancedStringOption(key);
     }
 
     /**
@@ -333,7 +333,7 @@ public final class PrintJob {
      */
     public boolean hasAdvancedOption(String key) {
         PrintService.throwIfNotCalledOnMainThread();
-        return false;
+        return getInfo().hasAdvancedOption(key);
     }
 
     /**
@@ -344,7 +344,7 @@ public final class PrintJob {
      */
     public int getAdvancedIntOption(String key) {
         PrintService.throwIfNotCalledOnMainThread();
-        return 0;
+        return getInfo().getAdvancedIntOption(key);
     }
 
     @Override

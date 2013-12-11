@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Sisestage PIN-kood"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Sisestage PUK-kood ja uus PIN-kood"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kood"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Uus PIN-kood"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Sisestage SIM-i PUK- ja uus PIN-kood"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM-i PUK-kood"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Uus SIM-i PIN-kood"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Puudutage parooli sisestamiseks"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Avamiseks sisestage parool"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Avamiseks sisestage PIN-kood"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Sisestage soovitud PIN-kood"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Kinnitage soovitud PIN-kood"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kaardi avamine ..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Vale PIN-kood."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Sisestage 4–8-numbriline PIN-kood."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-koodi pikkus peab olema vähemalt 8 numbrit."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Sisestage uuesti õige PUK-kood. Korduvkatsete korral keelatakse SIM jäädavalt."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga.\n\n Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eemalda"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Vale SIM-i PIN-kood, seadme avamiseks peate nüüd ühendust võtma oma operaatoriga."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Vale SIM-i PIN-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katse, enne kui peate seadme avamiseks operaatoriga ühendust võtma."</item>
+    <item quantity="other" msgid="2215723361575359486">"Vale SIM-i PIN-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katset."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM ei ole kasutatav. Võtke ühendust operaatoriga."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Vale SIM-i PUK-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katse, enne kui SIM püsivalt lukustatakse."</item>
+    <item quantity="other" msgid="5477305226026342036">"Vale SIM-i PUK-kood, teil on jäänud veel <xliff:g id="NUMBER">%d</xliff:g> katset, enne kui SIM püsivalt lukustatakse."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM-i PIN-koodi toiming ebaõnnestus."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM-i PUK-koodi toiming ebaõnnestus."</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kood on õige."</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Nupp Eelmine lugu"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Nupp Järgmine lugu"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Nupp Peata"</string>

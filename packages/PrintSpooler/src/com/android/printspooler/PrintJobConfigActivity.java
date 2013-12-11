@@ -19,6 +19,7 @@ package com.android.printspooler;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.LoaderManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,8 @@ import android.content.Loader;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -40,6 +43,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.print.ILayoutResultCallback;
 import android.print.IPrintDocumentAdapter;
+import android.print.IPrintDocumentAdapterObserver;
 import android.print.IWriteResultCallback;
 import android.print.PageRange;
 import android.print.PrintAttributes;
@@ -54,6 +58,8 @@ import android.print.PrintManager;
 import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
+import android.printservice.PrintService;
+import android.printservice.PrintServiceInfo;
 import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -129,6 +135,7 @@ public class PrintJobConfigActivity extends Activity {
 
     private static final int ACTIVITY_REQUEST_CREATE_FILE = 1;
     private static final int ACTIVITY_REQUEST_SELECT_PRINTER = 2;
+    private static final int ACTIVITY_POPULATE_ADVANCED_PRINT_OPTIONS = 3;
 
     private static final int CONTROLLER_STATE_FINISHED = 1;
     private static final int CONTROLLER_STATE_FAILED = 2;
@@ -201,6 +208,14 @@ public class PrintJobConfigActivity extends Activity {
             throw new IllegalArgumentException("PrintDocumentAdapter cannot be null");
         }
 
+        try {
+            IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter)
+                    .setObserver(new PrintDocumentAdapterObserver(this));
+        } catch (RemoteException re) {
+            finish();
+            return;
+        }
+
         PrintAttributes attributes = printJob.getAttributes();
         if (attributes != null) {
             mCurrPrintAttributes.copyFrom(attributes);
@@ -245,31 +260,32 @@ public class PrintJobConfigActivity extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
-        // We can safely do the work in here since at this point
-        // the system is bound to our (spooler) process which
-        // guarantees that this process will not be killed.
-        if (mController.hasStarted()) {
-            mController.finish();
-        }
-        if (mEditor.isPrintConfirmed() && mController.isFinished()) {
-            mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
-                    PrintJobInfo.STATE_QUEUED, null);
-        } else {
-            mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
-                    PrintJobInfo.STATE_CANCELED, null);
-        }
-        mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
-        if (mGeneratingPrintJobDialog != null) {
-            mGeneratingPrintJobDialog.dismiss();
-            mGeneratingPrintJobDialog = null;
-        }
-        mSpoolerProvider.destroy();
-        super.onDestroy();
+    public void onPause() {
+       if (isFinishing()) {
+           if (mController != null && mController.hasStarted()) {
+               mController.finish();
+           }
+           if (mEditor != null && mEditor.isPrintConfirmed()
+                   && mController != null && mController.isFinished()) {
+                   mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
+                           PrintJobInfo.STATE_QUEUED, null);
+           } else {
+               mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
+                       PrintJobInfo.STATE_CANCELED, null);
+           }
+           if (mGeneratingPrintJobDialog != null) {
+               mGeneratingPrintJobDialog.dismiss();
+               mGeneratingPrintJobDialog = null;
+           }
+           mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
+           mSpoolerProvider.destroy();
+       }
+        super.onPause();
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (!mEditor.isPrintConfirmed() && mEditor.shouldCloseOnTouch(event)) {
+        if (mController != null && mEditor != null &&
+                !mEditor.isPrintConfirmed() && mEditor.shouldCloseOnTouch(event)) {
             if (!mController.isWorking()) {
                 PrintJobConfigActivity.this.finish();
             }
@@ -287,17 +303,19 @@ public class PrintJobConfigActivity extends Activity {
     }
 
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mEditor.isShwoingGeneratingPrintJobUi()) {
+        if (mController != null && mEditor != null) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (mEditor.isShwoingGeneratingPrintJobUi()) {
+                    return true;
+                }
+                if (event.isTracking() && !event.isCanceled()) {
+                    if (!mController.isWorking()) {
+                        PrintJobConfigActivity.this.finish();
+                    }
+                }
+                mEditor.cancel();
                 return true;
             }
-            if (event.isTracking() && !event.isCanceled()) {
-                if (!mController.isWorking()) {
-                    PrintJobConfigActivity.this.finish();
-                }
-            }
-            mEditor.cancel();
-            return true;
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -339,6 +357,9 @@ public class PrintJobConfigActivity extends Activity {
         }
 
         public void cancel() {
+            if (isWorking()) {
+                mRemotePrintAdapter.cancel();
+            }
             mControllerState = CONTROLLER_STATE_CANCELLED;
         }
 
@@ -594,21 +615,17 @@ public class PrintJobConfigActivity extends Activity {
             } else {
                 // We did not get the pages we requested, then the application
                 // misbehaves, so we fail quickly.
-                // TODO: We need some UI for announcing an error.
                 mControllerState = CONTROLLER_STATE_FAILED;
                 Log.e(LOG_TAG, "Received invalid pages from the app");
-                mEditor.cancel();
-                PrintJobConfigActivity.this.finish();
+                mEditor.showUi(Editor.UI_ERROR, null);
             }
         }
 
         private void requestCreatePdfFileOrFinish() {
             if (mEditor.isPrintingToPdf()) {
-                PrintJobInfo printJob = mSpoolerProvider.getSpooler()
-                        .getPrintJobInfo(mPrintJobId, PrintManager.APP_ID_ANY);
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.setType("application/pdf");
-                intent.putExtra(Intent.EXTRA_TITLE, printJob.getLabel());
+                intent.putExtra(Intent.EXTRA_TITLE, mDocument.info.getName());
                 intent.putExtra(DocumentsContract.EXTRA_PACKAGE_NAME, mCallingPackageName);
                 startActivityForResult(intent, ACTIVITY_REQUEST_CREATE_FILE);
             } else {
@@ -778,6 +795,19 @@ public class PrintJobConfigActivity extends Activity {
                 }
                 mEditor.ensureCurrentPrinterSelected();
             } break;
+
+            case ACTIVITY_POPULATE_ADVANCED_PRINT_OPTIONS: {
+                if (resultCode == RESULT_OK) {
+                    PrintJobInfo printJobInfo = (PrintJobInfo) data.getParcelableExtra(
+                            PrintService.EXTRA_PRINT_JOB_INFO);
+                    if (printJobInfo != null) {
+                        mEditor.updateFromAdvancedOptions(printJobInfo);
+                        break;
+                    }
+                }
+                mEditor.cancel();
+                PrintJobConfigActivity.this.finish();
+            } break;
         }
     }
 
@@ -856,6 +886,10 @@ public class PrintJobConfigActivity extends Activity {
 
         private View mContentContainer;
 
+        private View mAdvancedPrintOptionsContainer;
+
+        private Button mAdvancedOptionsButton;
+
         private Button mPrintButton;
 
         private PrinterId mNextPrinterId;
@@ -903,6 +937,7 @@ public class PrintJobConfigActivity extends Activity {
                             mPrintJobId, mCurrentPrinter);
 
                     if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE) {
+                        mCapabilitiesTimeout.post();
                         updateUi();
                         return;
                     }
@@ -919,6 +954,10 @@ public class PrintJobConfigActivity extends Activity {
                         refreshCurrentPrinter();
                     }
                 } else if (spinner == mMediaSizeSpinner) {
+                    if (mIgnoreNextMediaSizeChange) {
+                        mIgnoreNextMediaSizeChange = false;
+                        return;
+                    }
                     if (mOldMediaSizeSelectionIndex
                             == mMediaSizeSpinner.getSelectedItemPosition()) {
                         mOldMediaSizeSelectionIndex = AdapterView.INVALID_POSITION;
@@ -934,6 +973,10 @@ public class PrintJobConfigActivity extends Activity {
                         mController.update();
                     }
                 } else if (spinner == mColorModeSpinner) {
+                    if (mIgnoreNextColorChange) {
+                        mIgnoreNextColorChange = false;
+                        return;
+                    }
                     if (mOldColorModeSelectionIndex
                             == mColorModeSpinner.getSelectedItemPosition()) {
                         mOldColorModeSelectionIndex = AdapterView.INVALID_POSITION;
@@ -1180,6 +1223,16 @@ public class PrintJobConfigActivity extends Activity {
                 // greater than the to page. When computing the requested pages
                 // we just swap them if necessary.
 
+                // Keep the print job up to date with the selected pages if we
+                // know how many pages are there in the document.
+                PageRange[] requestedPages = getRequestedPages();
+                if (requestedPages != null && requestedPages.length > 0
+                        && requestedPages[requestedPages.length - 1].getEnd()
+                                < mDocument.info.getPageCount()) {
+                    mSpoolerProvider.getSpooler().setPrintJobPagesNoPersistence(
+                            mPrintJobId, requestedPages);
+                }
+
                 mPageRangeEditText.setError(null);
                 mPrintButton.setEnabled(true);
                 updateUi();
@@ -1202,6 +1255,8 @@ public class PrintJobConfigActivity extends Activity {
         private boolean mIgnoreNextRangeOptionChange;
         private boolean mIgnoreNextCopiesChange;
         private boolean mIgnoreNextRangeChange;
+        private boolean mIgnoreNextMediaSizeChange;
+        private boolean mIgnoreNextColorChange;
 
         private int mCurrentUi = UI_NONE;
 
@@ -1411,6 +1466,92 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
+        public void updateFromAdvancedOptions(PrintJobInfo printJobInfo) {
+            boolean updateContent = false;
+
+            // Copies.
+            mCopiesEditText.setText(String.valueOf(printJobInfo.getCopies()));
+
+            // Media size and orientation
+            PrintAttributes attributes = printJobInfo.getAttributes();
+            if (!mCurrPrintAttributes.getMediaSize().equals(attributes.getMediaSize())) {
+                final int mediaSizeCount = mMediaSizeSpinnerAdapter.getCount();
+                for (int i = 0; i < mediaSizeCount; i++) {
+                    MediaSize mediaSize = mMediaSizeSpinnerAdapter.getItem(i).value;
+                    if (mediaSize.asPortrait().equals(attributes.getMediaSize().asPortrait())) {
+                        updateContent = true;
+                        mCurrPrintAttributes.setMediaSize(attributes.getMediaSize());
+                        mMediaSizeSpinner.setSelection(i);
+                        mIgnoreNextMediaSizeChange = true;
+                        if (attributes.getMediaSize().isPortrait()) {
+                            mOrientationSpinner.setSelection(0);
+                            mIgnoreNextOrientationChange = true;
+                        } else {
+                            mOrientationSpinner.setSelection(1);
+                            mIgnoreNextOrientationChange = true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // Color mode.
+            final int colorMode = attributes.getColorMode();
+            if (mCurrPrintAttributes.getColorMode() != colorMode) {
+                if (colorMode == PrintAttributes.COLOR_MODE_MONOCHROME) {
+                    updateContent = true;
+                    mColorModeSpinner.setSelection(0);
+                    mIgnoreNextColorChange = true;
+                    mCurrPrintAttributes.setColorMode(attributes.getColorMode());
+                } else if (colorMode == PrintAttributes.COLOR_MODE_COLOR) {
+                    updateContent = true;
+                    mColorModeSpinner.setSelection(1);
+                    mIgnoreNextColorChange = true;
+                    mCurrPrintAttributes.setColorMode(attributes.getColorMode());
+                }
+            }
+
+            // Range.
+            PageRange[] pageRanges = printJobInfo.getPages();
+            if (pageRanges != null && pageRanges.length > 0) {
+                pageRanges = PageRangeUtils.normalize(pageRanges);
+                final int pageRangeCount = pageRanges.length;
+                if (pageRangeCount == 1 && pageRanges[0] == PageRange.ALL_PAGES) {
+                    mRangeOptionsSpinner.setSelection(0);
+                } else {
+                    final int pageCount = mDocument.info.getPageCount();
+                    if (pageRanges[0].getStart() >= 0
+                            && pageRanges[pageRanges.length - 1].getEnd() < pageCount) {
+                        mRangeOptionsSpinner.setSelection(1);
+                        StringBuilder builder = new StringBuilder();
+                        for (int i = 0; i < pageRangeCount; i++) {
+                            if (builder.length() > 0) {
+                                builder.append(',');
+                            }
+                            PageRange pageRange = pageRanges[i];
+                            final int shownStartPage = pageRange.getStart() + 1;
+                            final int shownEndPage = pageRange.getEnd() + 1;
+                            builder.append(shownStartPage);
+                            if (shownStartPage != shownEndPage) {
+                                builder.append('-');
+                                builder.append(shownEndPage);
+                            }
+                        }
+                        mPageRangeEditText.setText(builder.toString());
+                    }
+                }
+            }
+
+            // Update the advanced options.
+            mSpoolerProvider.getSpooler().setPrintJobAdvancedOptionsNoPersistence(
+                    mPrintJobId, printJobInfo.getAdvancedOptions());
+
+            // Update the content if needed.
+            if (updateContent) {
+                mController.update();
+            }
+        }
+
         public void ensurePrinterSelected(PrinterId printerId) {
             // If the printer is not present maybe the loader is not
             // updated yet. In this case make a note and as soon as
@@ -1596,6 +1737,44 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
+        private void registerAdvancedPrintOptionsButtonClickListener() {
+            Button advancedOptionsButton = (Button) findViewById(R.id.advanced_settings_button);
+            advancedOptionsButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ComponentName serviceName = mCurrentPrinter.getId().getServiceName();
+                    String activityName = getAdvancedOptionsActivityName(serviceName);
+                    if (TextUtils.isEmpty(activityName)) {
+                        return;
+                    }
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setComponent(new ComponentName(serviceName.getPackageName(),
+                            activityName));
+
+                    List<ResolveInfo> resolvedActivities = getPackageManager()
+                            .queryIntentActivities(intent, 0);
+                    if (resolvedActivities.isEmpty()) {
+                        return;
+                    }
+                    // The activity is a component name, therefore it is one or none.
+                    if (resolvedActivities.get(0).activityInfo.exported) {
+                        PrintJobInfo printJobInfo = mSpoolerProvider.getSpooler().getPrintJobInfo(
+                                mPrintJobId, PrintManager.APP_ID_ANY);
+                        intent.putExtra(PrintService.EXTRA_PRINT_JOB_INFO, printJobInfo);
+                        // TODO: Make this an API for the next release.
+                        intent.putExtra("android.intent.extra.print.EXTRA_PRINTER_INFO",
+                                mCurrentPrinter);
+                        try {
+                            startActivityForResult(intent,
+                                    ACTIVITY_POPULATE_ADVANCED_PRINT_OPTIONS);
+                        } catch (ActivityNotFoundException anfe) {
+                            Log.e(LOG_TAG, "Error starting activity for intent: " + intent, anfe);
+                        }
+                    }
+                }
+            });
+        }
+
         private void registerPrintButtonClickListener() {
             Button printButton = (Button) findViewById(R.id.print_button);
             printButton.setOnClickListener(new OnClickListener() {
@@ -1643,6 +1822,9 @@ public class PrintJobConfigActivity extends Activity {
                             mEditor.initialize();
                             mEditor.bindUi();
                             mEditor.reselectCurrentPrinter();
+                            if (!mController.hasPerformedLayout()) {
+                                mController.update();
+                            }
                         }
                     });
                 }
@@ -1844,6 +2026,11 @@ public class PrintJobConfigActivity extends Activity {
             mPageRangeEditText.setOnFocusChangeListener(mFocusListener);
             mPageRangeEditText.addTextChangedListener(mRangeTextWatcher);
 
+            // Advanced options button.
+            mAdvancedPrintOptionsContainer = findViewById(R.id.advanced_settings_container);
+            mAdvancedOptionsButton = (Button) findViewById(R.id.advanced_settings_button);
+            registerAdvancedPrintOptionsButtonClickListener();
+
             // Print button
             mPrintButton = (Button) findViewById(R.id.print_button);
             registerPrintButtonClickListener();
@@ -1862,6 +2049,7 @@ public class PrintJobConfigActivity extends Activity {
                 mRangeOptionsSpinner.setEnabled(false);
                 mPageRangeEditText.setEnabled(false);
                 mPrintButton.setEnabled(false);
+                mAdvancedOptionsButton.setEnabled(false);
                 return false;
             }
 
@@ -1887,6 +2075,7 @@ public class PrintJobConfigActivity extends Activity {
                 mRangeOptionsSpinner.setEnabled(false);
                 mPageRangeEditText.setEnabled(false);
                 mPrintButton.setEnabled(false);
+                mAdvancedOptionsButton.setEnabled(false);
                 return false;
             } else {
                 boolean someAttributeSelectionChanged = false;
@@ -2064,7 +2253,17 @@ public class PrintJobConfigActivity extends Activity {
                     mPageRangeTitle.setVisibility(View.INVISIBLE);
                 }
 
-                // Print/Print preview
+                // Advanced print options
+                ComponentName serviceName = mCurrentPrinter.getId().getServiceName();
+                if (!TextUtils.isEmpty(getAdvancedOptionsActivityName(serviceName))) {
+                    mAdvancedPrintOptionsContainer.setVisibility(View.VISIBLE);
+                    mAdvancedOptionsButton.setEnabled(true);
+                } else {
+                    mAdvancedPrintOptionsContainer.setVisibility(View.GONE);
+                    mAdvancedOptionsButton.setEnabled(false);
+                }
+
+                // Print
                 if (mDestinationSpinner.getSelectedItemId()
                         != DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF) {
                     String newText = getString(R.string.print_button);
@@ -2102,6 +2301,21 @@ public class PrintJobConfigActivity extends Activity {
 
                 return someAttributeSelectionChanged;
             }
+        }
+
+        private String getAdvancedOptionsActivityName(ComponentName serviceName) {
+            PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+            List<PrintServiceInfo> printServices = printManager.getEnabledPrintServices();
+            final int printServiceCount = printServices.size();
+            for (int i = 0; i < printServiceCount; i ++) {
+                PrintServiceInfo printServiceInfo = printServices.get(i);
+                ServiceInfo serviceInfo = printServiceInfo.getResolveInfo().serviceInfo;
+                if (serviceInfo.name.equals(serviceName.getClassName())
+                        && serviceInfo.packageName.equals(serviceName.getPackageName())) {
+                    return printServiceInfo.getAdvancedOptionsActivityName();
+                }
+            }
+            return null;
         }
 
         private void setMediaSizeSpinnerSelectionNoCallback(int position) {
@@ -2303,8 +2517,6 @@ public class PrintJobConfigActivity extends Activity {
                             R.layout.printer_dropdown_item, parent, false);
                 }
 
-                convertView.getLayoutParams().width = mDestinationSpinner.getWidth();
-
                 CharSequence title = null;
                 CharSequence subtitle = null;
                 Drawable icon = null;
@@ -2353,7 +2565,7 @@ public class PrintJobConfigActivity extends Activity {
                     iconView.setImageDrawable(icon);
                     iconView.setVisibility(View.VISIBLE);
                 } else {
-                    iconView.setVisibility(View.GONE);
+                    iconView.setVisibility(View.INVISIBLE);
                 }
 
                 return convertView;
@@ -2701,6 +2913,34 @@ public class PrintJobConfigActivity extends Activity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             /* do noting - we are in the same process */
+        }
+    }
+
+    private static final class PrintDocumentAdapterObserver
+            extends IPrintDocumentAdapterObserver.Stub {
+        private final WeakReference<PrintJobConfigActivity> mWeakActvity;
+
+        public PrintDocumentAdapterObserver(PrintJobConfigActivity activity) {
+            mWeakActvity = new WeakReference<PrintJobConfigActivity>(activity);
+        }
+
+        @Override
+        public void onDestroy() {
+            final PrintJobConfigActivity activity = mWeakActvity.get();
+            if (activity != null) {
+                activity.mController.mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (activity.mController != null) {
+                            activity.mController.cancel();
+                        }
+                        if (activity.mEditor != null) {
+                            activity.mEditor.cancel();
+                        }
+                        activity.finish();
+                    }
+                });
+            }
         }
     }
 }

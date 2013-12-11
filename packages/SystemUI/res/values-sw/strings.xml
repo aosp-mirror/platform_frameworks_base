@@ -151,6 +151,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Betri <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Hali ya Ndege <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Mahali <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Kengele imewekwa <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Data ya 2G-3G imelemazwa"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Data ya 4G imelemazwa"</string>
@@ -193,8 +194,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Haijaunganishwa"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Hakuna Mtandao"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Imezimwa"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Onyesho la Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Uonyeshaji Pasiwaya"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Utumaji wa Skrini"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ung\'avu"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"KIOTOMATIKI"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Huenda mtandao\nunafuatiliwa"</string>

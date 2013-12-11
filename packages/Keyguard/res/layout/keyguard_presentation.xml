@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2013, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- This is a view that shows general status information in Keyguard. -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
+    android:id="@+id/presentation"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.android.keyguard.KeyguardStatusView
+        android:id="@+id/clock"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/keyguard_accessibility_status">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top"
+            android:orientation="vertical"
+            android:focusable="true">
+            <TextClock
+                android:id="@+id/clock_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:textColor="@color/clock_white"
+                android:singleLine="true"
+                style="@style/widget_big_thin"
+                android:format12Hour="@string/keyguard_widget_12_hours_format"
+                android:format24Hour="@string/keyguard_widget_24_hours_format"
+                android:baselineAligned="true"
+                android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
+
+            <include layout="@layout/keyguard_status_area" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dip"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/kg_security_lock_normal" />
+        </LinearLayout>
+    </com.android.keyguard.KeyguardStatusView>
+
+</FrameLayout>

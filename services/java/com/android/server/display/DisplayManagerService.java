@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -172,6 +173,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     // The Wifi display adapter, or null if not registered.
     private WifiDisplayAdapter mWifiDisplayAdapter;
+
+    // The number of active wifi display scan requests.
+    private int mWifiDisplayScanRequestCount;
 
     // The virtual display adapter, or null if not registered.
     private VirtualDisplayAdapter mVirtualDisplayAdapter;
@@ -458,23 +462,78 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
     }
 
-    private void onCallbackDied(int pid) {
+    private void onCallbackDied(CallbackRecord record) {
         synchronized (mSyncRoot) {
-            mCallbacks.remove(pid);
+            mCallbacks.remove(record.mPid);
+            stopWifiDisplayScanLocked(record);
         }
     }
 
     @Override // Binder call
-    public void scanWifiDisplays() {
+    public void startWifiDisplayScan() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to start wifi display scans");
+
+        final int callingPid = Binder.getCallingPid();
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
-                if (mWifiDisplayAdapter != null) {
-                    mWifiDisplayAdapter.requestScanLocked();
+                CallbackRecord record = mCallbacks.get(callingPid);
+                if (record == null) {
+                    throw new IllegalStateException("The calling process has not "
+                            + "registered an IDisplayManagerCallback.");
                 }
+                startWifiDisplayScanLocked(record);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private void startWifiDisplayScanLocked(CallbackRecord record) {
+        if (!record.mWifiDisplayScanRequested) {
+            record.mWifiDisplayScanRequested = true;
+            if (mWifiDisplayScanRequestCount++ == 0) {
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestStartScanLocked();
+                }
+            }
+        }
+    }
+
+    @Override // Binder call
+    public void stopWifiDisplayScan() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to stop wifi display scans");
+
+        final int callingPid = Binder.getCallingPid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                CallbackRecord record = mCallbacks.get(callingPid);
+                if (record == null) {
+                    throw new IllegalStateException("The calling process has not "
+                            + "registered an IDisplayManagerCallback.");
+                }
+                stopWifiDisplayScanLocked(record);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private void stopWifiDisplayScanLocked(CallbackRecord record) {
+        if (record.mWifiDisplayScanRequested) {
+            record.mWifiDisplayScanRequested = false;
+            if (--mWifiDisplayScanRequestCount == 0) {
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestStopScanLocked();
+                }
+            } else if (mWifiDisplayScanRequestCount < 0) {
+                Log.wtf(TAG, "mWifiDisplayScanRequestCount became negative: "
+                        + mWifiDisplayScanRequestCount);
+                mWifiDisplayScanRequestCount = 0;
+            }
         }
     }
 
@@ -483,13 +542,14 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
         }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to connect to a wifi display");
 
-        final boolean trusted = canCallerConfigureWifiDisplay();
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
                 if (mWifiDisplayAdapter != null) {
-                    mWifiDisplayAdapter.requestConnectLocked(address, trusted);
+                    mWifiDisplayAdapter.requestConnectLocked(address);
                 }
             }
         } finally {
@@ -499,12 +559,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override
     public void pauseWifiDisplay() {
-        if (mContext.checkCallingPermission(
-                android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY"
-                    + "permission to pause a wifi display session.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to pause a wifi display session");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -520,12 +576,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override
     public void resumeWifiDisplay() {
-        if (mContext.checkCallingPermission(
-                android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY"
-                    + "permission to resume a wifi display session.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to resume a wifi display session");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -541,6 +593,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void disconnectWifiDisplay() {
+        // This request does not require special permissions.
+        // Any app can request disconnection from the currently active wifi display.
+        // This exception should no longer be needed once wifi display control moves
+        // to the media router service.
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -558,10 +615,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
         }
-        if (!canCallerConfigureWifiDisplay()) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission to "
-                    + "rename a wifi display.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to rename to a wifi display");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -580,10 +635,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
         }
-        if (!canCallerConfigureWifiDisplay()) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission to "
-                    + "forget a wifi display.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to forget to a wifi display");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -599,6 +652,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public WifiDisplayStatus getWifiDisplayStatus() {
+        // This request does not require special permissions.
+        // Any app can get information about available wifi displays.
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -610,11 +666,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    private boolean canCallerConfigureWifiDisplay() {
-        return mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override // Binder call
@@ -1112,6 +1163,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             pw.println("  mDefaultViewport=" + mDefaultViewport);
             pw.println("  mExternalTouchViewport=" + mExternalTouchViewport);
             pw.println("  mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
+            pw.println("  mWifiDisplayScanRequestCount=" + mWifiDisplayScanRequestCount);
 
             IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
             ipw.increaseIndent();
@@ -1138,6 +1190,15 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 LogicalDisplay display = mLogicalDisplays.valueAt(i);
                 pw.println("  Display " + displayId + ":");
                 display.dumpLocked(ipw);
+            }
+
+            final int callbackCount = mCallbacks.size();
+            pw.println();
+            pw.println("Callbacks: size=" + callbackCount);
+            for (int i = 0; i < callbackCount; i++) {
+                CallbackRecord callback = mCallbacks.valueAt(i);
+                pw.println("  " + i + ": mPid=" + callback.mPid
+                        + ", mWifiDisplayScanRequested=" + callback.mWifiDisplayScanRequested);
             }
         }
     }
@@ -1239,8 +1300,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     private final class CallbackRecord implements DeathRecipient {
-        private final int mPid;
+        public final int mPid;
         private final IDisplayManagerCallback mCallback;
+
+        public boolean mWifiDisplayScanRequested;
 
         public CallbackRecord(int pid, IDisplayManagerCallback callback) {
             mPid = pid;
@@ -1252,7 +1315,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             if (DEBUG) {
                 Slog.d(TAG, "Display listener for pid " + mPid + " died.");
             }
-            onCallbackDied(mPid);
+            onCallbackDied(this);
         }
 
         public void notifyDisplayEventAsync(int displayId, int event) {

@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"ພິມລະຫັດ PUK ທີ່ມີ 8 ໂຕເລກ ຫຼືຫຼາຍກວ່ານັ້ນ."</string>
     <string name="needPuk" msgid="919668385956251611">"ຊິມກາດຂອງທ່ານຖືກລັອກດ້ວຍລະຫັດ PUK. ໃຫ້ພິມລະຫັດ PUK ເພື່ອປົດລັອກມັນ."</string>
     <string name="needPuk2" msgid="4526033371987193070">"ພິມ PUK2 ເພື່ອປົດລັອກ SIM card."</string>
+    <string name="enablePin" msgid="209412020907207950">"ບໍ່ສຳເລັດ, ເປີດນໍາໃຊ້ການລັອກຂອງ SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະຖືກລັອກ."</item>
+    <item quantity="other" msgid="7530597808358774740">"ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະຖືກລັອກ."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ໝາຍເລກຜູ່ໂທເຂົ້າ"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງເຊື່ອມໂຍງກັບສ່ວນຕິດຕໍ່ລະດັບເທິງສຸດ ຂອງບໍລິການ VPN. ແອັບຯທົ່ວໄປບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ເຊື່ອມໂຍງກັບພາບພື້ນຫຼັງ"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ອະນຸຍາດໃຫ້ຜູ່ໃຊ້ເຊື່ອມໂຍງກັບສ່ວນຕິດຕໍ່ລະດັບສູງສຸດ ຂອງພາບພື້ນຫຼັງໃດນຶ່ງ. ແອັບຯທຳມະດາບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ຜູກກັນເພື່ອສະແດງຜົນທາງໄກ."</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"ອະນຸຍາດໃຫ້ຜູ່ຖືຜູກກັບສ່ວນຕິດຕໍ່ລະດັບສູງສຸດ ຂອງການສະແດງຜົນທາງໄກ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ເຊື່ອມໂຍງໄປຫາບໍລິການວິດເຈັດ"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ອະນຸຍາດໃຫ້ຜູ່ຖືຜູກກັບອິນເຕີເຟດລະດັບສູງສຸດ ຂອງບໍລິການວິເຈັດ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ຕິດຕໍ່ກັບຜູ່ເບິ່ງແຍງອຸປະກອນ"</string>
@@ -1114,7 +1121,7 @@
     <string name="loading" msgid="7933681260296021180">"ກຳລັງໂຫລດ..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ເປີດ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ປິດ"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"ເຮັດວຽກໃຫ້ສຳເລັດໂດຍໃຊ້"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"ດຳເນີນການໂດຍໃຊ້"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ເລືອກແອັບຯ Home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ໃຊ້ໂດຍຄ່າເລີ່ມຕົນສຳລັບການເຮັດວຽກນີ້."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ລຶບລ້າງຄ່າເລີ່ມຕົ້ນ ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ."</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ເລືອກແອັບຯ"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"ບໍ່​ສາ​ມາດ​ເປີດ <xliff:g id="APPLICATION_NAME">%s</xliff:g> ໄດ້"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"ແບ່ງປັນກັບ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"ແບ່ງປັນໃຫ້ <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"ເລື່ອນບ່ອນຖື ແລ້ວແຕະຄ້າງໄວ້."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ລະບົບ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ສຽງ Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ການສະແດງຜົນໄຮ້ສາຍ"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"ແລ້ວໆ"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"ມີເດຍເອົ້າພຸດ"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"ເຊື່ອມຕໍ່ຫາອຸປະກອນ"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ສົ່ງພາບໜ້າຈໍໄປຫາອຸປະກອນ"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ກຳລັງຊອກຫາອຸປະກອນ..."</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ການຕັ້ງຄ່າ"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ຕັດການເຊື່ອມຕໍ່"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"ກຳລັງສະແກນ..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"ກຳລັງເຊື່ອມຕໍ່..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"ສາມາດໃຊ້ໄດ້"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ການວາງຊ້ອນ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ປອດໄພ"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"ເຊື່ອມຕໍ່ການສະແດງຜົນໄຮ້ສາຍແລ້ວ"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"ຈໍນີ້ກຳລັງສະແດງຢູ່ໃນອຸປະກອນອື່ນ"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"ກຳລັງສົ່ງພາບໜ້າຈໍ"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"ກຳລັງເຊື່ອມຕໍ່ຫາ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"ການສົ່ງພາບໜ້າຈໍ"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"ເຊື່ອມຕໍ່ກັບ <xliff:g id="NAME">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"ຢຸດການເຊື່ອມຕໍ່"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"ການໂທສຸກເສີນ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ລືມຮູບແບບປົດລັອກ?"</string>

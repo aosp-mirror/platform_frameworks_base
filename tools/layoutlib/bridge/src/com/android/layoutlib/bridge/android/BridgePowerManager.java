@@ -81,6 +81,11 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
+    public void updateWakeLockUids(IBinder arg0, int[] arg1) throws RemoteException {
+        // pass for now.
+    }
+
+    @Override
     public void setAttentionLight(boolean arg0, int arg1) throws RemoteException {
         // pass for now.
     }

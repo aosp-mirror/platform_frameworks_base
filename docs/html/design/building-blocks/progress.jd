@@ -54,14 +54,8 @@ page.tags="progressbar","download","network"
         <p>In this example, an activity circle (in Holo Light) is used in the Gmail application when a message is being loaded because it's not possible to determine how long it will take to download the email.</p>
         <p>When displaying an activity circle, do not include text to communicate what the app is doing. The moving circle alone provides sufficient feedback about the delay, and does so in an understated way that minimizes the impact.</p>
         <p>
-        <div class="layout-content-col span-3" style="margin-left:0">
-          <div class="do-dont-label bad">Don't</div>
-          <img src="{@docRoot}design/media/progress_activity_dont.png">
-        </div>
-      
-        <div class="layout-content-col span-3">
-          <div class="do-dont-label good">Do</div>
-          <img src="{@docRoot}design/media/progress_activity_do.png">
+        <div style="margin-left:0;margin-top:1em;">
+          <img src="{@docRoot}design/media/progress_activity_do_dont.png">
         </div>
         </p>
       </li>

@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Մուտքագրեք PIN կոդը"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Մուտքագրեք PUK-ը և նոր PIN կոդը"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK կոդ"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Նոր PIN ծածկագիր"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Մուտքագրեք SIM PUK-ը և նոր PIN կոդը"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK կոդը"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Նոր SIM PIN կոդը"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Հպեք` գաղտնաբառը մուտքագրելու համար"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Մուտքագրեք գաղտնաբառը ապակողպման համար"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Մուտքագրեք PIN-ը ապակողպման համար"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Մուտքագրեք ցանկալի PIN ծածկագիրը"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Հաստատեք ցանկալի PIN ծածկագիրը"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ապակողպում է SIM քարտը ..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Սխալ PIN ծածկագիր:"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK կոդը պետք է լինի 8 կամ ավելի թիվ:"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Վերամուտքագրեք ճիշտ PUK ծածկագիրը: Կրկնվող փորձերը ընդմիշտ կկասեցնեն SIM քարտը:"</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Դուք <xliff:g id="NUMBER_0">%d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման նմուշը: <xliff:g id="NUMBER_1">%d</xliff:g> անգամից ավել անհաջող փորձերից հետո ձեզ կառաջարկվի ապակողպել ձեր հեռախոսը` օգտագործելով էլփոստի հաշիվ:\n\n Փորձեք կրկին <xliff:g id="NUMBER_2">%d</xliff:g> վայրկյանից:"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Հեռացնել"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Սխալ SIM PIN կոդի պատճառով պետք է դիմեք ձեր օպերատորին՝ սարքն արգելաբացելու համար:"</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ, որից հետո պետք է դիմեք ձեր օպերատորին՝ սարքն արգելաբացելու համար:"</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ:"</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-ը հնարավոր չէ օգտագործել: Դիմեք ձեր օպերատորին:"</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ՝ մինչև SIM-ի ընդմիշտ արգելափակումը:"</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ՝ մինչև SIM-ի ընդմիշտ արգելափակումը:"</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN գործողությունը ձախողվեց:"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK գործողությունը ձախողվեց:"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Կոդն ընդունվեց:"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Նախորդ հետագծի կոճակ"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Հաջորդ հետագծի կոճակ"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Դադարի կոճակ"</string>

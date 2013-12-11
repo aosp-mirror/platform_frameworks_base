@@ -57,6 +57,10 @@
     <skip />
     <string name="needPuk" msgid="919668385956251611">"Vossa carta SIM è bloccada cun in PUK. Endatai il PUK per debloccar ella."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Endatai il PUK2 per debloccar la carta SIM."</string>
+    <!-- no translation found for enablePin (209412020907207950) -->
+    <skip />
+    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
+    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
     <!-- no translation found for imei (2625429890869005782) -->
     <skip />
     <!-- no translation found for meid (4841221237681254195) -->
@@ -593,6 +597,10 @@
     <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sa fixar vid in fund davos"</string>
     <!-- no translation found for permdesc_bindWallpaper (7108428692595491668) -->
+    <skip />
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
     <skip />
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
     <skip />
@@ -2267,6 +2275,8 @@
     <skip />
     <!-- no translation found for activitychooserview_choose_application (2125168057199941199) -->
     <skip />
+    <!-- no translation found for activitychooserview_choose_application_error (8624618365481126668) -->
+    <skip />
     <!-- no translation found for shareactionprovider_share_with (806688056141131819) -->
     <skip />
     <!-- no translation found for shareactionprovider_share_with_application (5627411384638389738) -->
@@ -2405,9 +2415,17 @@
     <skip />
     <!-- no translation found for wireless_display_route_description (9070346425023979651) -->
     <skip />
-    <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
-    <skip />
     <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_title (1751618554539087622) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_title_for_remote_display (3395541745872017583) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_searching (4776236202610828706) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_extended_settings (87015534236701604) -->
+    <skip />
+    <!-- no translation found for media_route_controller_disconnect (8966120286374158649) -->
     <skip />
     <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
     <skip />
@@ -2429,9 +2447,13 @@
     <skip />
     <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
     <skip />
-    <!-- no translation found for wifi_display_notification_title (2223050649240326557) -->
+    <!-- no translation found for wifi_display_notification_connecting_title (2838646471050359706) -->
     <skip />
-    <!-- no translation found for wifi_display_notification_message (4498802012464170685) -->
+    <!-- no translation found for wifi_display_notification_connecting_message (5837350993752841389) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_title (8567308065912676285) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_message (2587209325701109715) -->
     <skip />
     <!-- no translation found for wifi_display_notification_disconnect (6183754463561153372) -->
     <skip />

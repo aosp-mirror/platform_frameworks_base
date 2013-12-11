@@ -2,46 +2,24 @@ page.title=Writing Style
 page.tags="dialog","toast","notification"
 @jd:body
 
-<p>When choosing words for your app:</p>
-<ol>
-<li>
-<p><strong>Keep it brief.</strong> Be concise, simple and precise. Start with a 30 character limit (including
-   spaces), and don't use more unless absolutely necessary.</p>
-</li>
-<li>
-<p><strong>Keep it simple.</strong> Pretend you're speaking to someone who's smart and competent, but doesn't
-   know technical jargon and may not speak English very well. Use short words, active verbs, and
-   common nouns.</p>
-</li>
-<li>
-<p><strong>Be friendly.</strong> Use contractions. Talk directly to the reader using second person ("you"). If
-   your text doesn't read the way you'd say it in casual conversation, it's probably not the way
-   you should write it. Don't be abrupt or annoying and make the user feel safe, happy and
-   energized.</p>
-</li>
-<li>
-<p><strong>Put the most important thing first.</strong> The first two words (around 11 characters, including
-   spaces) should include at least a taste of the most important information in the string. If they
-   don't, start over.</p>
-</li>
-<li>
-<p><strong>Describe only what's necessary, and no more.</strong> Don't try to explain subtle differences. They
-   will be lost on most users.</p>
-</li>
-<li>
-<p><strong>Avoid repetition.</strong> If a significant term gets repeated within a screen or block of text, find
-   a way to use it just once.</p>
-</li>
-</ol>
+<h2 id="voa">Android's Voice</h2>
 
-<h2 id="examples">Examples</h2>
+<p>When writing text that appears in your app, keep it concise, simple, and friendly.</p>
 
-<ol><li class="value-1"><strong>Keep it brief.</strong> From the setup wizard:</ol>
+<h4 id="concise">Concise</h4>
+
+<ul>
+  <li>Describe only what the user needs to know.</li>
+  <li>Eliminate redundancy, such as titles that restate the body of an information box.</li>
+  <li>Keep text as short as possible.</li>
+</ul>
+
+<p><em>Avoid wordy, stilted text</em></p>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-6 layout-with-list-item-margins">
 
-    <div class="do-dont-label bad">Too formal</div>
+    <div class="do-dont-label bad">Don't</div>
 
     <table class="ui-table good"><tbody><tr><td>
     Consult the documentation that came with your phone for further instructions.
@@ -50,7 +28,7 @@ page.tags="dialog","toast","notification"
   </div>
   <div class="layout-content-col span-6">
 
-    <div class="do-dont-label good">Better</div>
+    <div class="do-dont-label good">Do</div>
 
     <table class="ui-table good"><tbody><tr><td>
     Read the instructions that came with your phone.
@@ -59,174 +37,7 @@ page.tags="dialog","toast","notification"
   </div>
 </div>
 
-<div class="vspace size-1">&nbsp;</div>
-
-<ol><li class="value-2"><strong>Keep it simple.</strong> From the Location settings screen:</ol>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
-
-    <div class="do-dont-label bad">Confusing</div>
-
-    <table class="ui-table bad">
-    <thead>
-      <tr>
-        <th>
-        Use GPS satellites
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-        When locating, accurate to street level.
-        </td>
-      </tr>
-    </tbody>
-    </table>
-
-  </div>
-  <div class="layout-content-col span-6">
-
-    <div class="do-dont-label good">Better</div>
-
-    <table class="ui-table good">
-    <thead>
-      <tr>
-        <th>
-        GPS
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-        Let apps use satellites to pinpoint your location.
-        </td>
-      </tr>
-    </tbody>
-    </table>
-
-  </div>
-</div>
-
-<div class="vspace size-1">&nbsp;</div>
-
-<ol><li class="value-3"><strong>Be friendly.</strong> Dialog that appears when an application
-crashes:</ol>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
-
-    <div class="do-dont-label bad">Confusing and annoying&mdash;"Sorry" just rubs salt in the
-    wound.</div>
-
-    <table class="ui-table bad">
-    <thead>
-      <tr>
-        <th colspan="3">
-        Sorry!
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td colspan="3">
-        Activity MyAppActivity (in application MyApp)
-        is not responding.
-        </td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td width="33%">Force close</td>
-        <td width="33%">Wait</td>
-        <td width="33%">Report</td>
-      </tr>
-    </tbody>
-    </table>
-
-  </div>
-  <div class="layout-content-col span-6">
-
-    <div class="do-dont-label good">Shorter, more direct, no faux-apologetic title:<br><br></div>
-
-    <table class="ui-table good">
-    <thead>
-      <tr>
-        <th colspan="3">
-        MyApp isn't responding.
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td colspan="3">
-        Do you want to close it?
-        </td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td width="33%">Wait</td>
-        <td width="33%">Report</td>
-        <td width="33%">Close</td>
-      </tr>
-    </tbody>
-    </table>
-
-  </div>
-</div>
-
-<div class="vspace size-1">&nbsp;</div>
-
-<ol><li class="value-4"><strong>Put the most important thing first.</strong></ol>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
-
-    <div class="do-dont-label bad">Top news last</div>
-
-    <table class="ui-table bad"><tbody><tr><td>
-    77 other people +1'd this, including Larry Page.
-    </td></tr></tbody></table>
-
-  </div>
-  <div class="layout-content-col span-6">
-
-    <div class="do-dont-label good">Top news first</div>
-
-    <table class="ui-table good"><tbody><tr><td>
-    Larry Page and 77 others +1'd this.
-    </td></tr></tbody></table>
-
-  </div>
-</div>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
-
-    <div class="do-dont-label bad">Task last</div>
-
-    <table class="ui-table bad"><tbody><tr><td>
-    Touch Next to complete setup using a Wi-Fi connection.
-    </td></tr></tbody></table>
-
-  </div>
-  <div class="layout-content-col span-6">
-
-    <div class="do-dont-label good">Task first</div>
-
-    <table class="ui-table good"><tbody><tr><td>
-    To finish setup using Wi-Fi, touch Next.
-    </td></tr></tbody></table>
-
-  </div>
-</div>
-
-<div class="vspace size-1">&nbsp;</div>
-
-<ol><li class="value-5"><strong>Describe only what's necessary, and no more.</strong></ol>
+<p><em>Don't provide unnecessary information</em></p>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-6 layout-with-list-item-margins">
@@ -277,3 +88,235 @@ crashes:</ol>
 
   </div>
 </div>
+
+<h4 id="simple">Simple</h4>
+
+<ul>
+  <li>Use short words, active verbs, and common nouns.</li>
+  <li>Put the most important thing first. “Front-load” the first 11 characters
+      with the most salient information in the string.</li>
+  <li>Don’t try to explain subtle differences. They are lost on most users.</li>
+</ul>
+
+<p><em>Focus on the user's concern, not technical details</em></p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+    <div class="do-dont-label bad">Don't</div>
+
+    <table class="ui-table good"><tbody><tr><td>
+    Manually control GPS to prevent other apps from using it
+    </td></tr></tbody></table>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <div class="do-dont-label good">Do</div>
+
+    <table class="ui-table good"><tbody><tr><td>
+    To save power, switch Location mode to Battery saving
+    </td></tr></tbody></table>
+
+  </div>
+</div>
+
+<p><em>Put top news first</em></p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+    <div class="do-dont-label bad">Don't</div>
+
+    <table class="ui-table good"><tbody><tr><td>
+    77 other people +1’d this, including Larry Page
+    </td></tr></tbody></table>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <div class="do-dont-label good">Do</div>
+
+    <table class="ui-table good"><tbody><tr><td>
+    Larry Page and 76 others +1’d this
+    </td></tr></tbody></table>
+
+  </div>
+</div>
+
+<p><em>Put the user's goal first</em></p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+    <div class="do-dont-label bad">Don't</div>
+
+    <table class="ui-table good"><tbody><tr><td>
+    Touch Next to complete setup using a Wi-Fi connection
+    </td></tr></tbody></table>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <div class="do-dont-label good">Do</div>
+
+    <table class="ui-table good"><tbody><tr><td>
+    To finish setup using Wi-Fi, touch Next
+    </td></tr></tbody></table>
+
+  </div>
+</div>
+
+
+<h4 id="friendly">Friendly</h4>
+
+<ul>
+  <li>Use contractions.</li>
+  <li>Talk directly to the reader. Use “you”  to refer to the reader.</li>
+  <li>Keep your tone casual and conversational, but avoid slang.</li>
+</li>
+</ul>
+
+<p><em>Avoid being confusing or annoying</em></p>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
+    <div class="do-dont-label bad">Don't</div>
+    <table class="ui-table bad">
+    <thead>
+      <tr>
+        <th>
+        Sorry!
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+        Activity MyAppActivity (in application<br />
+        MyApp) is not responding
+        </td>
+      </tr>
+    </tbody>
+    </table>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <div class="do-dont-label good">Do</div>
+    <table class="ui-table good">
+    <thead>
+      <tr>
+        <th>
+        MyApp isn’t responding 
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+        Do you want to close it?
+        </td>
+      </tr>
+    </tbody>
+    </table>
+  </div>
+</div>
+
+
+<h4>Words to avoid</h4>
+
+<div style="padding:5px 2.1em;">
+<table>
+  <tr>
+    <td class="do-dont-label bad" style="width:40%">Don't use</td>
+    <td class="do-dont-label good" style="width:40%">Use</td>
+  </tr>
+  <tr>
+    <td>one, two, three, four, ...</td>
+    <td>1, 2, 3, 4, ...</td>
+  </tr>
+  <tr>
+    <td>application</td>
+    <td>app</td>
+  </tr>
+  <tr>
+    <td>cannot, could not, do not, did not 
+will not, you will</td>
+    <td><em>Contractions:</em> can’t, couldn’t, don’t, didn’t won’t, you’ll, and so on</td>
+  </tr>
+    <tr>
+    <td>okay, ok</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>please, sorry, thank you</td>
+    <td><em>Attempts at politeness can annoy the user, especially in messages that say
+        something has gone wrong.<br />
+        Exception: In Japanese, “please” is mandatory and imperative verbs should
+        be localized accordingly (turn on -> please turn on).
+        </em></td>
+  </tr>
+    <tr>
+    <td>there is, there are, it is<br />
+        <em>and other “disappeared” subjects (grammatical expletives)</em></td>
+    <td><em>Use a noun as the subject</em></td>
+  </tr>
+  <tr>
+    <td>abort, kill, terminate</td>
+    <td>stop, cancel, end, exit</td>
+  </tr>
+    <tr>
+    <td>fail, failed, <em>negative language</em></td>
+    <td><em>In general, use positive phrasing<br />
+        (for example, “do” rather than “don’t,” except in cases such as “Don’t show
+        again,” “Can’t connect,” and so on.)</em></td>
+  </tr>
+  <tr>
+    <td>me, I, my, mine</td>
+    <td>you, your, yours</td>
+  </tr>
+    <tr>
+    <td>Are you sure? Warning!</td>
+    <td><em>Tell user the consequence instead, for example, “You’ll lose all photos 
+        and media”</em></td>
+  </tr>
+</table>
+
+</div>
+
+<h2 id="formatting_text">Formatting text</h2>
+
+<h4 id="capitalization">Capitalization</h4>
+
+<ul>
+  <li>Use sentence-style capitalization for all UI strings: “Words to live by.”</li>
+  <li>Capitalize all important words in: 
+    <ul>
+      <li>App names (Calendar, Google Drive)</li>
+      <li>Named features (Android Beam, Face Unlock)</li>
+      <li>Proper nouns (Statue of Liberty, San Francisco Giants)</li>
+    </ul>
+  </li>
+  <li>Be conservative. Don't capitalize words that aren't part of a formal feature name: 
+    <ul>
+      <li>Sim card lock, Home screen, not Sim Card Lock, Home Screen.</li>
+    </ul>
+  </li>
+</ul>
+
+
+<h4 id="punctuation">Punctuation</h4>
+<ul>
+  <li><strong>Period.</strong> Don't use a period after a single sentence or
+  phrase used in isolation, such as in a toast, label, or notification. Wherever two or
+  more sentences run together, use a period for each sentence. </li>
+  <li><strong>Ellipsis.</strong> Use the ellipsis character (…) (Option-; on MacOS and &amp;hellip;
+    in HTML) to indicate 
+    <ul>
+      <li>Incompleteness, such as an action in progress (“Downloading...”) or truncated text.</li>
+      <li>That a menu item (such as Print… or Share…) leads to further UI involving significant
+        choices. Exception: Commands whose wording already implies further (but limited) UI, such
+        as <strong>Find in page</strong> or <strong>Pick a date</strong>, do not require an
+        ellipsis. </li>
+    </ul>
+  </li>
+</ul>

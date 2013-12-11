@@ -812,6 +812,7 @@ public final class RemoteController
         final OnClientUpdateListener l;
         synchronized(mInfoLock) {
             l = mOnClientUpdateListener;
+            mMetadataEditor = null;
         }
         if (l != null) {
             l.onClientChange(clearing);

@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"輸入 8 位數以上的 PUK。"</string>
     <string name="needPuk" msgid="919668385956251611">"SIM 卡的 PUK 已鎖定。請輸入 PUK 碼解除鎖定。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"請輸入 PUK2 以解鎖 SIM 卡。"</string>
+    <string name="enablePin" msgid="209412020907207950">"操作失敗，請啟用 SIM/RUIM 鎖定。"</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖住。"</item>
+    <item quantity="other" msgid="7530597808358774740">"您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖住。"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"來電顯示"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允許應用程式聯繫至 VPN 服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"連結至桌布"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允許應用程式繫結至桌布的頂層介面 (一般應用程式不需使用)。"</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"繫結至遠端螢幕"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允許應用程式繫結至遠端螢幕的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"繫結至小工具服務"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允許應用程式繫結至小工具服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"與裝置管理員互動"</string>
@@ -483,8 +490,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"擷取音訊輸出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允許應用程式擷取及重新導向音訊輸出。"</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"熱門字詞偵測"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允許應用程式擷取音訊用於熱門字詞偵測。擷取作業可在背景執行，但並未禁止使用其他音訊擷取工具 (例如攝錄影機)。"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"啟動字詞偵測"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允許應用程式擷取音訊用於啟動字詞偵測。擷取作業可在背景執行，但並未禁止使用其他音訊擷取工具 (例如攝錄影機)。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"擷取視訊輸出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允許應用程式擷取及重新導向視訊輸出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"擷取安全視訊輸出"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift 鍵"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 鍵"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"選擇應用程式"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"無法啟動 <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"分享對象："</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"與「<xliff:g id="APPLICATION_NAME">%s</xliff:g>」分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑動控制。持續輕觸。"</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"系統"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"藍牙音訊"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"無線螢幕分享"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完成"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"媒體輸出"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"連線至裝置"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"將螢幕投放到裝置上"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置..."</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"中斷連線"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"掃描中..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"連線中…"</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可以使用"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"第 <xliff:g id="ID">%1$d</xliff:g> 個重疊效果"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"(安全)"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"已連接無線顯示器"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"其他裝置正在顯示這個畫面"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"正在投放螢幕"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"正在連線至「<xliff:g id="NAME">%1$s</xliff:g>」"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"正在投放螢幕"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"已連線至「<xliff:g id="NAME">%1$s</xliff:g>」"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"中斷連線"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"緊急電話"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖形"</string>
@@ -1649,5 +1663,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> 秒後再試一次"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下滑動即可結束全螢幕。"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下滑動即可退出全螢幕模式。"</string>
 </resources>

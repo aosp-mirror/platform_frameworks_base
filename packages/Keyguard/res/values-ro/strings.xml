@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Introduceţi codul PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Introduceţi codul PUK şi noul cod PIN"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Codul PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Noul cod PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Introduceți codul PUK pentru cardul SIM și codul PIN nou"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Codul PUK pentru cardul SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Codul PIN nou pentru cardul SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Atingeţi şi introduceţi parola"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Introduceţi parola pentru a debloca"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Introduceţi codul PIN pentru a debloca"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Introduceţi codul PIN dorit"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirmaţi codul PIN dorit"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Se deblochează cardul SIM..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Cod PIN incorect."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Introduceţi un cod PIN format din 4 până la 8 cifre."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Codul PUK trebuie să aibă minimum 8 cifre."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Reintroduceţi codul PUK corect. Încercările repetate vor dezactiva definitiv cardul SIM."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminaţi"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codul PIN pentru cardul SIM este incorect. Contactați operatorul pentru a vă debloca dispozitivul."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Codul PIN pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercare, după care va trebui să contactați operatorul pentru a vă debloca dispozitivul."</item>
+    <item quantity="other" msgid="2215723361575359486">"Codul PIN pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercări."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Cardul SIM nu poate fi utilizat. Contactați operatorul."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Codul PUK pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercare până când cardul SIM va deveni inutilizabil definitiv."</item>
+    <item quantity="other" msgid="5477305226026342036">"Codul PUK pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER">%d</xliff:g> încercări până când cardul SIM va deveni inutilizabil definitiv."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Deblocarea cu ajutorul codului PIN pentru cardul SIM nu a reușit!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Deblocarea cu ajutorul codului PUK pentru cardul SIM nu a reușit!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Cod acceptat!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Butonul Melodia anterioară"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Butonul Melodia următoare"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Butonul Întrerupeți"</string>

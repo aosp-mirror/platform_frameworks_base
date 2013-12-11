@@ -1153,7 +1153,7 @@
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
          targetSdkVersion}</a> is 4 or higher.-->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_sdcardRead"
         android:description="@string/permdesc_sdcardRead"
         android:protectionLevel="normal" />
@@ -1991,6 +1991,14 @@
         android:label="@string/permlab_bindWallpaper"
         android:description="@string/permdesc_bindWallpaper"
         android:protectionLevel="signature|system" />
+
+    <!-- Must be required by a {@link com.android.media.remotedisplay.RemoteDisplayProvider},
+         to ensure that only the system can bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_REMOTE_DISPLAY"
+        android:label="@string/permlab_bindRemoteDisplay"
+        android:description="@string/permdesc_bindRemoteDisplay"
+        android:protectionLevel="signature" />
 
     <!-- Must be required by device administration receiver, to ensure that only the
          system can interact with it. -->

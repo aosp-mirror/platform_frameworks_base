@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Увядзіце PUK з 8 лічбаў ці больш."</string>
     <string name="needPuk" msgid="919668385956251611">"Ваша SIM-карта заблакавана PUK-кодам. Увядзіце PUK, каб разблакаваць карту."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Увядзіце PUK2 для разблакавання SIM-карты."</string>
+    <!-- no translation found for enablePin (209412020907207950) -->
+    <skip />
+    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
+    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Ідэнтыфікатар АВН"</string>
@@ -392,6 +396,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Дазваляе ўладальніку звязвацца з інтэрфейсам службы VPN вышэйшага ўзроўню. Не патрэбна для звычайных прыкладанняў."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"прывязаць да шпалер"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Дазваляе ўладальніку ўсталёўваць прывязку да інтэрфейсу шпалер верхняга ўзроўню. Не патрабуецца для звычайных прыкладанняў."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"прывязаць да службы віджэту"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню службы віджэта. Не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"узаемадзейнічаць з адміністратарам прылады"</string>
@@ -1461,6 +1469,8 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Выберыце прыкладанне"</string>
+    <!-- no translation found for activitychooserview_choose_application_error (8624618365481126668) -->
+    <skip />
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Апублікаваць з дапамогай"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Адправiць з дапамогай прыкладання <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Ручка для перасоўвання. Націсніце і ўтрымлівайце."</string>
@@ -1530,8 +1540,15 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Сістэма"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-аўдыё"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Бесправадны дысплей"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Гатова"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Мультымедыйны выхад"</string>
+    <!-- no translation found for media_route_chooser_title (1751618554539087622) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_searching (4776236202610828706) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_extended_settings (87015534236701604) -->
+    <skip />
+    <!-- no translation found for media_route_controller_disconnect (8966120286374158649) -->
+    <skip />
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Сканiраванне..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Падключэнне..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Даступна"</string>
@@ -1544,8 +1561,14 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> кр. на цалю"</string>
     <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
     <skip />
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Падключаны бесправадны дысплей"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Гэты экран паказваецца на іншай прыладзе"</string>
+    <!-- no translation found for wifi_display_notification_connecting_title (9102788196896266990) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connecting_message (5837350993752841389) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_title (4118323329495921271) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_message (2587209325701109715) -->
+    <skip />
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Адключыць"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Экстранны выклік"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забылі ключ"</string>

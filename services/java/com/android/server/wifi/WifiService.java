@@ -370,15 +370,17 @@ public final class WifiService extends IWifiManager.Stub {
     }
 
     private class BatchedScanRequest extends DeathRecipient {
-        BatchedScanSettings settings;
-        int uid;
-        int pid;
+        final BatchedScanSettings settings;
+        final int uid;
+        final int pid;
+        final WorkSource workSource;
 
-        BatchedScanRequest(BatchedScanSettings settings, IBinder binder) {
+        BatchedScanRequest(BatchedScanSettings settings, IBinder binder, WorkSource ws) {
             super(0, null, binder, null);
             this.settings = settings;
             this.uid = getCallingUid();
             this.pid = getCallingPid();
+            workSource = ws;
         }
         public void binderDied() {
             stopBatchedScan(settings, uid, pid);
@@ -407,12 +409,19 @@ public final class WifiService extends IWifiManager.Stub {
     /**
      * see {@link android.net.wifi.WifiManager#requestBatchedScan()}
      */
-    public boolean requestBatchedScan(BatchedScanSettings requested, IBinder binder) {
+    public boolean requestBatchedScan(BatchedScanSettings requested, IBinder binder,
+            WorkSource workSource) {
         enforceChangePermission();
+        if (workSource != null) {
+            enforceWorkSourcePermission();
+            // WifiManager currently doesn't use names, so need to clear names out of the
+            // supplied WorkSource to allow future WorkSource combining.
+            workSource.clearNames();
+        }
         if (mBatchedScanSupported == false) return false;
         requested = new BatchedScanSettings(requested);
         if (requested.isInvalid()) return false;
-        BatchedScanRequest r = new BatchedScanRequest(requested, binder);
+        BatchedScanRequest r = new BatchedScanRequest(requested, binder, workSource);
         synchronized(mBatchedScanners) {
             mBatchedScanners.add(r);
             resolveBatchedScannersLocked();
@@ -469,18 +478,48 @@ public final class WifiService extends IWifiManager.Stub {
 
     private void resolveBatchedScannersLocked() {
         BatchedScanSettings setting = new BatchedScanSettings();
+        WorkSource responsibleWorkSource = null;
         int responsibleUid = 0;
+        double responsibleCsph = 0; // Channel Scans Per Hour
 
         if (mBatchedScanners.size() == 0) {
-            mWifiStateMachine.setBatchedScanSettings(null, 0);
+            mWifiStateMachine.setBatchedScanSettings(null, 0, 0, null);
             return;
         }
         for (BatchedScanRequest r : mBatchedScanners) {
             BatchedScanSettings s = r.settings;
+
+            // evaluate responsibility
+            int currentChannelCount;
+            int currentScanInterval;
+            double currentCsph;
+
+            if (s.channelSet == null || s.channelSet.isEmpty()) {
+                // all channels - 11 B and 9 A channels roughly.
+                currentChannelCount = 9 + 11;
+            } else {
+                currentChannelCount = s.channelSet.size();
+                // these are rough est - no real need to correct for reg-domain;
+                if (s.channelSet.contains("A")) currentChannelCount += (9 - 1);
+                if (s.channelSet.contains("B")) currentChannelCount += (11 - 1);
+
+            }
+            if (s.scanIntervalSec == BatchedScanSettings.UNSPECIFIED) {
+                currentScanInterval = BatchedScanSettings.DEFAULT_INTERVAL_SEC;
+            } else {
+                currentScanInterval = s.scanIntervalSec;
+            }
+            currentCsph = 60 * 60 * currentChannelCount / currentScanInterval;
+
+            if (currentCsph > responsibleCsph) {
+                responsibleUid = r.uid;
+                responsibleWorkSource = r.workSource;
+                responsibleCsph = currentCsph;
+            }
+
             if (s.maxScansPerBatch != BatchedScanSettings.UNSPECIFIED &&
                     s.maxScansPerBatch < setting.maxScansPerBatch) {
                 setting.maxScansPerBatch = s.maxScansPerBatch;
-                responsibleUid = r.uid;
             }
             if (s.maxApPerScan != BatchedScanSettings.UNSPECIFIED &&
                     (setting.maxApPerScan == BatchedScanSettings.UNSPECIFIED ||
@@ -490,7 +529,6 @@ public final class WifiService extends IWifiManager.Stub {
             if (s.scanIntervalSec != BatchedScanSettings.UNSPECIFIED &&
                     s.scanIntervalSec < setting.scanIntervalSec) {
                 setting.scanIntervalSec = s.scanIntervalSec;
-                responsibleUid = r.uid;
             }
             if (s.maxApForDistance != BatchedScanSettings.UNSPECIFIED &&
                     (setting.maxApForDistance == BatchedScanSettings.UNSPECIFIED ||
@@ -512,7 +550,8 @@ public final class WifiService extends IWifiManager.Stub {
         }
 
         setting.constrain();
-        mWifiStateMachine.setBatchedScanSettings(setting, responsibleUid);
+        mWifiStateMachine.setBatchedScanSettings(setting, responsibleUid, (int)responsibleCsph,
+                responsibleWorkSource);
     }
 
     private void enforceAccessPermission() {

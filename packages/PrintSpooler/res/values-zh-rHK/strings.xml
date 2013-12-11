@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"列印多工緩衝處理器"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"打印機設定"</string>
     <string name="print_button" msgid="645164566271246268">"列印"</string>
     <string name="save_button" msgid="1921310454071758999">"儲存"</string>
     <string name="label_destination" msgid="9132510997381599275">"目的地"</string>
@@ -25,7 +26,7 @@
     <string name="label_color" msgid="1108690305218188969">"顏色"</string>
     <string name="label_orientation" msgid="2853142581990496477">"方向"</string>
     <string name="label_pages" msgid="6300874667546617333">"頁數 (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <string name="pages_range_example" msgid="8558694453556945172">"例如：1–5、8、11–13"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"例如：1-5,8,11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"預覽列印"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"安裝預覽所需的 PDF 檢視器"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"列印應用程式當機了"</string>
@@ -40,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"搜尋框已顯示"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"搜尋框已隱藏"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"新增打印機"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"選取打印機"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"移除打印機"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"找到 <xliff:g id="COUNT">%1$s</xliff:g> 部打印機"</item>
     <item quantity="other" msgid="6533817036607128241">"找到 <xliff:g id="COUNT">%1$s</xliff:g> 部打印機"</item>

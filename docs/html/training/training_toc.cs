@@ -335,6 +335,30 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/printing/index.html"
+             description=
+             "How to print photos, HTML documents, and custom documents from your app."
+            >Printing Content</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/printing/photos.html">
+            Photos
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/printing/html-docs.html">
+            HTML Documents
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/printing/custom-docs.html">
+            Custom Documents
+          </a>
+          </li>
+        </ul>
+      </li>
+
     </ul>
   </li>
   <!-- End multimedia -->
@@ -940,6 +964,34 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
           <li><a href="<?cs var:toroot ?>training/accessibility/service.html">
             Developing Accessibility Services
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/system-ui/index.html"
+             description=
+             "How to hide and show status and navigation bars across different versions of Android,
+              while managing the display of other screen components."
+            >Managing the System UI</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/system-ui/dim.html">
+            Dimming the System Bars
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/system-ui/status.html">
+            Hiding the Status Bar
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/system-ui/navigation.html">
+            Hiding the Navigation Bar
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/system-ui/visibility.html">
+            Responding to UI Visibility Changes
           </a>
           </li>
         </ul>

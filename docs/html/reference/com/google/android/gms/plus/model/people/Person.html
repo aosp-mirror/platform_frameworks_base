@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -774,34 +786,8 @@ Summary:
          
         
         interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Collection.html">Person.Collection</a></td>
-      <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    No replacement.</em>&nbsp;</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
-        interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Cover.html">Person.Cover</a></td>
       <td class="jd-descrcol" width="100%">The cover photo content.&nbsp;</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a></td>
-      <td class="jd-descrcol" width="100%">&nbsp;</td>
     </tr>
     
     
@@ -860,27 +846,12 @@ Summary:
          
         
         interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.OrderBy.html">Person.OrderBy</a></td>
-      <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.OrderBy.html">PlusClient.OrderBy</a></code>.
-</em>&nbsp;</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
-        interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/Person.Organizations.html">Person.Organizations</a></td>
       <td class="jd-descrcol" width="100%">&nbsp;</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
         
          
@@ -892,7 +863,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
         
          
@@ -904,7 +875,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
         
          
@@ -1101,24 +1072,6 @@ Summary:
             
             
             
-            List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getEmails()">getEmails</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">A list of email addresses that this person has set to public on their Google+ profile.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1130,7 +1083,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1148,7 +1101,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1166,7 +1119,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1184,7 +1137,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1202,7 +1155,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1220,7 +1173,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1238,7 +1191,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1256,7 +1209,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1274,7 +1227,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1286,13 +1239,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#getPlusOneCount()">getPlusOneCount</a></span>()</nobr>
         
-        <div class="jd-descrdiv">If a Google+ Page, the number of people who have +1'ed this page.</div>
+        <div class="jd-descrdiv">If a Google+ Page, the number of people who have +1'd this page.</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1310,7 +1263,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1328,7 +1281,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1346,7 +1299,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1364,7 +1317,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1382,7 +1335,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1400,7 +1353,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1418,7 +1371,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1436,7 +1389,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1454,7 +1407,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1472,7 +1425,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1490,7 +1443,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1503,24 +1456,6 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#hasDisplayName()">hasDisplayName</a></span>()</nobr>
         
         <div class="jd-descrdiv">Indicates whether the "displayName" field is explicitly set to a value.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.html#hasEmails()">hasEmails</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">Indicates whether the "emails" field is explicitly set to a value.</div>
   
   </td></tr>
 
@@ -2208,37 +2143,6 @@ From interface
 </div>
 
 
-<A NAME="getEmails()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.Emails.html">Person.Emails</a>&gt;
-      </span>
-      <span class="sympad">getEmails</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>A list of email addresses that this person has set to public on their Google+ profile. You
- can also use the userinfo.email scope to retrieve an authenticated user's email address.
-</p></div>
-
-    </div>
-</div>
-
-
 <A NAME="getGender()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2538,7 +2442,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>If a Google+ Page, the number of people who have +1'ed this page.
+  <div class="jd-tagdata jd-tagdescr"><p>If a Google+ Page, the number of people who have +1'd this page.
 </p></div>
 
     </div>
@@ -2909,36 +2813,6 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "displayName" field is explicitly set to a value.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="hasEmails()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">hasEmails</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "emails" field is explicitly set to a value.
 </p></div>
 
     </div>

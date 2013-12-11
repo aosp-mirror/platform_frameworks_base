@@ -422,7 +422,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -508,26 +523,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -682,22 +694,26 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Callback interface for when the user taps on the map.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapLoadedCallback.html">GoogleMap.OnMapLoadedCallback</a></td>
+              <td class="jd-descrcol" width="100%">Callback interface for when the map has finished rendering.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapLongClickListener.html">GoogleMap.OnMapLongClickListener</a></td>
               <td class="jd-descrcol" width="100%">Callback interface for when the user long presses on the map.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMarkerClickListener.html">GoogleMap.OnMarkerClickListener</a></td>
               <td class="jd-descrcol" width="100%">Defines signatures for methods that are called when a marker is clicked or tapped.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMarkerDragListener.html">GoogleMap.OnMarkerDragListener</a></td>
               <td class="jd-descrcol" width="100%">Callback interface for drag events on markers.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationButtonClickListener.html">GoogleMap.OnMyLocationButtonClickListener</a></td>
               <td class="jd-descrcol" width="100%">Callback interface for when the My Location button is clicked.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationChangeListener.html">GoogleMap.OnMyLocationChangeListener</a></td>
               <td class="jd-descrcol" width="100%"><em>
       This interface is deprecated.
@@ -709,15 +725,15 @@ onkeyup="return search_changed(event, false, '/')" />
  Location Developer Guide</a>.
 </em>&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a></td>
               <td class="jd-descrcol" width="100%">Callback interface to notify when the snapshot has been taken.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/LocationSource.html">LocationSource</a></td>
               <td class="jd-descrcol" width="100%">Defines an interface for providing location data, typically to a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> object.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/LocationSource.OnLocationChangedListener.html">LocationSource.OnLocationChangedListener</a></td>
               <td class="jd-descrcol" width="100%">Handles a location update.&nbsp;</td>
           </tr>

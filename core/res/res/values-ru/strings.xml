@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Введите PUK-код из 8 или более цифр."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM-карта заблокирована с помощью кода PUK. Для разблокировки введите код PUK."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Для разблокировки SIM-карты введите PUK2."</string>
+    <string name="enablePin" msgid="209412020907207950">"Произошла ошибка. Включите блокировку SIM-карты или карты R-UIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована."</item>
+    <item quantity="other" msgid="7530597808358774740">"Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Идентификация вызывающего абонента"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Приложение сможет подключаться к базовому интерфейсу службы VPN. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"Привязка к фоновому рисунку"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Приложение сможет подключаться к базовому интерфейсу службы обоев. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"Подключение к удаленному дисплею"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Приложение сможет подключаться к базовому интерфейсу удаленного дисплея. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"Подключение к службе виджетов"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Приложение сможет подключаться к базовому интерфейсу службы виджетов. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"Взаимодействие с администратором устройства"</string>
@@ -1343,7 +1350,7 @@
     <string name="submit" msgid="1602335572089911941">"Отправить"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Включен режим \"Штурман\""</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Чтобы выйти, нажмите здесь."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-модем/точка доступа Wi-Fi используется"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Включен режим модема"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Нажмите для настройки."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Далее"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Клавиша смены регистра"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Клавиша ввода"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Выберите приложение"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Не удалось запустить приложение \"<xliff:g id="APPLICATION_NAME">%s</xliff:g>\""</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Открыть доступ:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Открыть доступ приложению \"<xliff:g id="APPLICATION_NAME">%s</xliff:g>\""</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Перетаскиваемый значок блокировки. Нажмите и удерживайте."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Система"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Воспроизведение звука через Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Беспроводной монитор"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Перенаправлять поток мультимедиа"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Подключение к устройству"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Подключение к удаленному дисплею"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Поиск устройств…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Настройки"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Отключить"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Сканирование..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Подключение..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Доступен"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Наложение № <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> х <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> тчк/дюйм"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безопасный"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Беспроводной проектор подключен"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Изображение передается на другое устройство"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Подключение к удаленному дисплею"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Подключение к <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Удаленный дисплей подключен"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Подключено к <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Отключить"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Экстренный вызов"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забыли графический ключ?"</string>

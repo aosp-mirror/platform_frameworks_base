@@ -428,36 +428,48 @@ public final class Message implements Parcelable {
     public Message() {
     }
 
+    @Override
     public String toString() {
         return toString(SystemClock.uptimeMillis());
     }
 
     String toString(long now) {
-        StringBuilder   b = new StringBuilder();
-        
-        b.append("{ what=");
-        b.append(what);
+        StringBuilder b = new StringBuilder();
+        b.append("{ when=");
+        TimeUtils.formatDuration(when - now, b);
 
-        b.append(" when=");
-        TimeUtils.formatDuration(when-now, b);
+        if (target != null) {
+            if (callback != null) {
+                b.append(" callback=");
+                b.append(callback.getClass().getName());
+            } else {
+                b.append(" what=");
+                b.append(what);
+            }
 
-        if (arg1 != 0) {
-            b.append(" arg1=");
+            if (arg1 != 0) {
+                b.append(" arg1=");
+                b.append(arg1);
+            }
+
+            if (arg2 != 0) {
+                b.append(" arg2=");
+                b.append(arg2);
+            }
+
+            if (obj != null) {
+                b.append(" obj=");
+                b.append(obj);
+            }
+
+            b.append(" target=");
+            b.append(target.getClass().getName());
+        } else {
+            b.append(" barrier=");
             b.append(arg1);
         }
 
-        if (arg2 != 0) {
-            b.append(" arg2=");
-            b.append(arg2);
-        }
-
-        if (obj != null) {
-            b.append(" obj=");
-            b.append(obj);
-        }
-
         b.append(" }");
-        
         return b.toString();
     }
 

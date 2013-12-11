@@ -26,4 +26,7 @@
 
     <dimen name="print_dialog_frame_max_width_dip">400dip</dimen>
 
+    <dimen name="printer_list_view_padding_start">16dip</dimen>
+    <dimen name="printer_list_view_padding_end">16dip</dimen>
+
 </resources>

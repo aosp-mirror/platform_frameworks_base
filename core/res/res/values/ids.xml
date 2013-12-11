@@ -81,4 +81,5 @@
   <item type="id" name="popup_submenu_presenter" />
   <item type="id" name="action_bar_spinner" />
   <item type="id" name="current_scene" />
+  <item type="id" name="scene_layoutid_cache" />
 </resources>

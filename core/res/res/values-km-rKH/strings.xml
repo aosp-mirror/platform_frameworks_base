@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"បញ្ចូល​កូដ PUK ដែល​មាន​ពី​ ៨ លេខ​ ឬ​វែង​ជាង​នេះ។"</string>
     <string name="needPuk" msgid="919668385956251611">"ស៊ីមកាត​​របស់​អ្នក​ជាប់​កូដ PUK ។ បញ្ចូល​កូដ PUK ដើម្បី​ដោះ​សោ។"</string>
     <string name="needPuk2" msgid="4526033371987193070">"បញ្ចូល​កូដ PUK2 ដើម្បី​ដោះ​សោ​ស៊ីម​កាត។"</string>
+    <string name="enablePin" msgid="209412020907207950">"បរាជ័យ, បើក​ការ​ចាក់សោ​ស៊ី​ម / RUIM ។"</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​ស៊ី​ម​ត្រូវ​បាន​ចាក់សោ​។"</item>
+    <item quantity="other" msgid="7530597808358774740">"អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​ស៊ី​ម​ត្រូវ​បាន​ចាក់សោ​។"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"លេខ​សម្គាល់​អ្នក​ហៅ​​ចូល"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម Vpn ។​ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ចង​ទៅ​ផ្ទាំង​រូបភាព"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ឲ្យ​ម្ចាស់​ចង​ចំណុចប្រទាក់​កម្រិត​កំពូល​នៃ​ផ្ទាំង​រូបភាព។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ភ្ជាប់​ទៅ​ការ​បង្ហាញ​ពី​ចម្ងាយ"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​ការ​បង្ហាញ​ពី​ចម្ងាយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ទាក់ទង​ជា​មួយ​អ្នកគ្រប់គ្រង​ឧបករណ៍"</string>
@@ -783,7 +790,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"ការ​ជជែក"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ជ្រើស​កម្មវិធី"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"មិន​អាច​ចាប់ផ្ដើម <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"ចែករំលែក​ជា​មួយ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"ចែក​រំលែក​ជា​មួយ <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"គ្រប់គ្រង​ការ​រុញ។ ប៉ះ &amp; សង្កត់។"</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ប្រព័ន្ធ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"សំឡេង​ប៊្លូធូស"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"បង្ហាញ​បណ្ដាញ​ឥត​ខ្សែ"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"រួចរាល់"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"លទ្ធផល​មេឌៀ"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"ភ្ជាប់​ឧបករណ៍"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ចាត់​ថ្នាក់​អេក្រង់​ទៅ​ឧបករណ៍"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"កំពុង​ស្វែងរក​ឧបករណ៍..."</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ការ​កំណត់"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ផ្ដាច់"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"កំពុង​វិភាគ​រក…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"កំពុង​​​ភ្ជាប់​…"</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"ទំនេរ"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"#<xliff:g id="ID">%1$d</xliff:g> ត្រួត​គ្នា"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", សុវត្ថិភាព"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"បាន​ភ្ជាប់​ការ​បង្ហាញ​បណ្ដាញ​ឥត​ខ្សែ"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"អេក្រង់​នេះ​បង្ហាញ​លើ​ឧបករណ៍​ផ្សេង"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"ចាត់​ថ្នាក់​អេក្រង់"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"កំពុង​តភ្ជាប់​ទៅ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"ចាត់​ថ្នាក់​អេក្រង់"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"តភ្ជាប់​ទៅ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"ផ្ដាច់"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"ការ​ហៅ​ពេល​អាសន្ន"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ភ្លេច​​លំនាំ"</string>

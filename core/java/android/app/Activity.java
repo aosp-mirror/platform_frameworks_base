@@ -58,6 +58,7 @@ import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.ActionMode;
@@ -4846,36 +4847,23 @@ public class Activity extends ContextThemeWrapper
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
                 writer.println(mCurrentConfig);
+
         if (mLoaderManager != null) {
             writer.print(prefix); writer.print("Loader Manager ");
                     writer.print(Integer.toHexString(System.identityHashCode(mLoaderManager)));
                     writer.println(":");
             mLoaderManager.dump(prefix + "  ", fd, writer, args);
         }
-        mFragments.dump(prefix, fd, writer, args);
-        writer.print(prefix); writer.println("View Hierarchy:");
-        dumpViewHierarchy(prefix + "  ", writer, getWindow().getDecorView());
-    }
 
-    private void dumpViewHierarchy(String prefix, PrintWriter writer, View view) {
-        writer.print(prefix);
-        if (view == null) {
-            writer.println("null");
-            return;
+        mFragments.dump(prefix, fd, writer, args);
+
+        if (getWindow() != null &&
+                getWindow().peekDecorView() != null &&
+                getWindow().peekDecorView().getViewRootImpl() != null) {
+            getWindow().peekDecorView().getViewRootImpl().dump(prefix, fd, writer, args);
         }
-        writer.println(view.toString());
-        if (!(view instanceof ViewGroup)) {
-            return;
-        }
-        ViewGroup grp = (ViewGroup)view;
-        final int N = grp.getChildCount();
-        if (N <= 0) {
-            return;
-        }
-        prefix = prefix + "  ";
-        for (int i=0; i<N; i++) {
-            dumpViewHierarchy(prefix, writer, grp.getChildAt(i));
-        }
+
+        mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
     }
 
     /**

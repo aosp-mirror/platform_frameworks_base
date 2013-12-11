@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Angiv en PUK-kode på 8 eller flere cifre."</string>
     <string name="needPuk" msgid="919668385956251611">"Dit SIM-kort er låst med PUK-koden. Indtast PUK-koden for at låse den op."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Indtast PUK2-koden for at låse op for SIM-kortet."</string>
+    <string name="enablePin" msgid="209412020907207950">"Mislykkedes. Aktivér SIM-/RUIM-lås."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Du har <xliff:g id="NUMBER">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver låst."</item>
+    <item quantity="other" msgid="7530597808358774740">"Du har <xliff:g id="NUMBER">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver låst."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI-nummer"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Indgående opkalds-id"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Tillader, at brugeren forpligter sig til en VPN-tjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt i almindelige apps."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"forpligt til et tapet"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Tillader, at indehaveren kan binde en baggrunds grænseflade på øverste niveau. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"bind til en ekstern skærm"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Tillader, at brugeren kan foretage en binding til grænsefladens øverste niveau på en ekstern skærm. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"forpligt til en widgettjeneste"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Tillader, at brugeren kan forpligte sig til en grænseflade for en widgettjeneste på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikere med en enhedsadministrator"</string>
@@ -440,7 +447,7 @@
     <string name="permlab_readContacts" msgid="8348481131899886131">"læse dine kontaktpersoner"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
-    <string name="permlab_writeContacts" msgid="5107492086416793544">"ændre dine kontaktpersoner"</string>
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"at ændre dine kontaktpersoner"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til dem, sendt dem en e-mail eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en e-mail til dem eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"læs opkaldsliste"</string>
@@ -1114,7 +1121,7 @@
     <string name="loading" msgid="7933681260296021180">"Indlæser…"</string>
     <string name="capital_on" msgid="1544682755514494298">"TIL"</string>
     <string name="capital_off" msgid="6815870386972805832">"FRA"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"Fuldfør handling ved hjælp af"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Brug"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vælg en startsideapp"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Brug som standard til denne handling."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ryd standard i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Angiv"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Vælg en app"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> kunne ikke startes"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Del med"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Del med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Glidende håndtag. Tryk og hold nede."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skærm"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Udfør"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieudgang"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Opret forbindelse til enheden"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Send skærm til enhed"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søger efter enheder…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Indstillinger"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Afbryd forbindelsen"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Søger..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Opretter forbindelse..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Tilgængelig"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlejring nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sikker"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Der er tilsluttet en trådløs skærm"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Denne skærm vises på en anden enhed"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Skærm sendes"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Der oprettes forbindelse til <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Skærm sendes"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Forbundet til <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Afbryd forbindelsen"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Nødopkald"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Glemt mønster"</string>

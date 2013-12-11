@@ -905,7 +905,8 @@ public final class ActivityStackSupervisor {
         if (idx < 0) {
             app.activities.add(r);
         }
-        mService.updateLruProcessLocked(app, true, true);
+        mService.updateLruProcessLocked(app, true, null);
+        mService.updateOomAdjLocked();
 
         final ActivityStack stack = r.task.stack;
         try {
@@ -1051,7 +1052,14 @@ public final class ActivityStackSupervisor {
 
         if (app != null && app.thread != null) {
             try {
-                app.addPackage(r.info.packageName, mService.mProcessStats);
+                if ((r.info.flags&ActivityInfo.FLAG_MULTIPROCESS) == 0
+                        || !"android".equals(r.info.packageName)) {
+                    // Don't add this if it is a platform component that is marked
+                    // to run in multiple processes, because this is actually
+                    // part of the framework so doesn't make sense to track as a
+                    // separate apk in the process.
+                    app.addPackage(r.info.packageName, mService.mProcessStats);
+                }
                 realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {
@@ -1254,15 +1262,16 @@ public final class ActivityStackSupervisor {
         final TaskRecord task = r.task;
         if (r.isApplicationActivity() || (task != null && task.isApplicationTask())) {
             if (task != null) {
-                if (mFocusedStack != task.stack) {
+                final ActivityStack taskStack = task.stack;
+                if (mFocusedStack != taskStack) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
                             "adjustStackFocus: Setting focused stack to r=" + r + " task=" + task);
-                    mFocusedStack = task.stack;
+                    mFocusedStack = taskStack.isHomeStack() ? null : taskStack;
                 } else {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
                         "adjustStackFocus: Focused stack already=" + mFocusedStack);
                 }
-                return mFocusedStack;
+                return taskStack;
             }
 
             if (mFocusedStack != null) {
@@ -1282,8 +1291,8 @@ public final class ActivityStackSupervisor {
             }
 
             // Time to create the first app stack for this user.
-            int stackId = mService.createStack(-1, HOME_STACK_ID,
-                StackBox.TASK_STACK_GOES_OVER, 1.0f);
+            int stackId =
+                    mService.createStack(-1, HOME_STACK_ID, StackBox.TASK_STACK_GOES_OVER, 1.0f);
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "adjustStackFocus: New stack r=" + r +
                     " stackId=" + stackId);
             mFocusedStack = getStack(stackId);
@@ -1308,7 +1317,8 @@ public final class ActivityStackSupervisor {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
                     "setFocusedStack: Setting focused stack to r=" + r + " task=" + r.task +
                     " Callers=" + Debug.getCallers(3));
-            mFocusedStack = r.task.stack;
+            final ActivityStack taskStack = r.task.stack;
+            mFocusedStack = taskStack.isHomeStack() ? null : taskStack;
             if (mStackState != STACK_STATE_HOME_IN_BACK) {
                 if (DEBUG_STACK) Slog.d(TAG, "setFocusedStack: mStackState old=" +
                         stackStateToString(mStackState) + " new=" +
@@ -1376,17 +1386,22 @@ public final class ActivityStackSupervisor {
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
         }
 
+        ActivityInfo newTaskInfo = null;
+        Intent newTaskIntent = null;
         final ActivityStack sourceStack;
         if (sourceRecord != null) {
             if (sourceRecord.finishing) {
                 // If the source is finishing, we can't further count it as our source.  This
                 // is because the task it is associated with may now be empty and on its way out,
                 // so we don't want to blindly throw it in to that task.  Instead we will take
-                // the NEW_TASK flow and try to find a task for it.
+                // the NEW_TASK flow and try to find a task for it. But save the task information
+                // so it can be used when creating the new task.
                 if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
                     Slog.w(TAG, "startActivity called from finishing " + sourceRecord
                             + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
                     launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+                    newTaskInfo = sourceRecord.info;
+                    newTaskIntent = sourceRecord.task.intent;
                 }
                 sourceRecord = null;
                 sourceStack = null;
@@ -1462,13 +1477,13 @@ public final class ActivityStackSupervisor {
                             // We really do want to push this one into the
                             // user's face, right now.
                             movedHome = true;
+                            targetStack.moveTaskToFrontLocked(intentActivity.task, r, options);
                             if ((launchFlags &
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                                     == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
                                 // Caller wants to appear on home activity.
                                 intentActivity.task.mOnTopOfHome = true;
                             }
-                            targetStack.moveTaskToFrontLocked(intentActivity.task, r, options);
                             options = null;
                         }
                     }
@@ -1658,8 +1673,10 @@ public final class ActivityStackSupervisor {
             targetStack = adjustStackFocus(r);
             moveHomeStack(targetStack.isHomeStack());
             if (reuseTask == null) {
-                r.setTask(targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
-                        null, true);
+                r.setTask(targetStack.createTaskRecord(getNextTaskId(),
+                        newTaskInfo != null ? newTaskInfo : r.info,
+                        newTaskIntent != null ? newTaskIntent : intent,
+                        true), null, true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r + " in new task " +
                         r.task);
             } else {
@@ -2367,12 +2384,13 @@ public final class ActivityStackSupervisor {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mDismissKeyguardOnNextActivity:");
+        pw.print(prefix); pw.print("mDismissKeyguardOnNextActivity=");
                 pw.println(mDismissKeyguardOnNextActivity);
-        pw.print(prefix); pw.print("mStackState="); pw.println(stackStateToString(mStackState));
-        pw.print(prefix); pw.println("mSleepTimeout: " + mSleepTimeout);
-        pw.print(prefix); pw.println("mCurTaskId: " + mCurTaskId);
-        pw.print(prefix); pw.println("mUserStackInFront: " + mUserStackInFront);
+        pw.print(prefix); pw.print("mFocusedStack=" + mFocusedStack);
+                pw.print(" mStackState="); pw.println(stackStateToString(mStackState));
+        pw.print(prefix); pw.println("mSleepTimeout=" + mSleepTimeout);
+        pw.print(prefix); pw.println("mCurTaskId=" + mCurTaskId);
+        pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {

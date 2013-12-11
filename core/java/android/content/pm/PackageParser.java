@@ -282,6 +282,10 @@ public class PackageParser {
                 || (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
     }
 
+    public static boolean isAvailable(PackageUserState state) {
+        return checkUseInstalledOrBlocked(0, state);
+    }
+
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
             HashSet<String> grantedPermissions, PackageUserState state, int userId) {

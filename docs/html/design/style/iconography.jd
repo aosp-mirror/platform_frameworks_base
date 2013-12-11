@@ -23,9 +23,9 @@ units, which are based on the pixel dimensions of a medium-density (MDPI) screen
 
 <img src="{@docRoot}design/media/devices_displays_density@2x.png" alt="" height="160" />
 
-<p>So, to create an icon for different densities, you should follow the <strong>2:3:4:6 scaling
-ratio</strong> between the four primary densities (medium, high, x-high, and xx-high,
-respectively). For example, consider that the size for a launcher icon is specified to be
+<p>So, to create an icon for different densities, you should follow the <strong>2:3:4:6:8
+scaling ratio</strong> between the five primary densities (medium, high, x-high, xx-high, and
+xxx-high respectively). For example, consider that the size for a launcher icon is specified to be
 48x48 dp. This means the baseline (MDPI) asset is 48x48 px, and the
 high density (HDPI) asset should be 1.5x the baseline at 72x72 px, and the x-high
 density (XHDPI) asset should be 2x the baseline at 96x96 px, and so on.</p>

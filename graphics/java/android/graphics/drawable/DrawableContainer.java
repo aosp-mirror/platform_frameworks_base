@@ -23,6 +23,7 @@ import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.SystemClock;
+import android.util.LayoutDirection;
 import android.util.SparseArray;
 
 /**
@@ -59,6 +60,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private long mExitAnimationEnd;
     private Drawable mLastDrawable;
 
+    private Insets mInsets = Insets.NONE;
+
     // overrides from Drawable
 
     @Override
@@ -78,18 +81,31 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 | mDrawableContainerState.mChildrenChangingConfigurations;
     }
 
+    private boolean needsMirroring() {
+        return isAutoMirrored() && getLayoutDirection() == LayoutDirection.RTL;
+    }
+
     @Override
     public boolean getPadding(Rect padding) {
         final Rect r = mDrawableContainerState.getConstantPadding();
+        boolean result;
         if (r != null) {
             padding.set(r);
-            return true;
-        }
-        if (mCurrDrawable != null) {
-            return mCurrDrawable.getPadding(padding);
+            result = (r.left | r.top | r.bottom | r.right) != 0;
         } else {
-            return super.getPadding(padding);
+            if (mCurrDrawable != null) {
+                result = mCurrDrawable.getPadding(padding);
+            } else {
+                result = super.getPadding(padding);
+            }
         }
+        if (needsMirroring()) {
+            final int left = padding.left;
+            final int right = padding.right;
+            padding.left = right;
+            padding.right = left;
+        }
+        return result;
     }
 
     /**
@@ -97,7 +113,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      */
     @Override
     public Insets getOpticalInsets() {
-        return (mCurrDrawable == null) ? Insets.NONE : mCurrDrawable.getOpticalInsets();
+        return mInsets;
     }
 
     @Override
@@ -334,6 +350,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCurrDrawable = d;
             mCurIndex = idx;
             if (d != null) {
+                mInsets = d.getOpticalInsets();
                 d.mutate();
                 if (mDrawableContainerState.mEnterFadeDuration > 0) {
                     mEnterAnimationEnd = now + mDrawableContainerState.mEnterFadeDuration;
@@ -348,9 +365,12 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.setBounds(getBounds());
                 d.setLayoutDirection(getLayoutDirection());
                 d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+            } else {
+                mInsets = Insets.NONE;
             }
         } else {
             mCurrDrawable = null;
+            mInsets = Insets.NONE;
             mCurIndex = -1;
         }
 

@@ -1,58 +1,58 @@
 ndk=true
 page.template=sdk
 
-ndk.mac64.legacy_download=android-ndk-r9-darwin-x86_64-legacy-toolchains.tar.bz2
-ndk.mac64.legacy_bytes=271922968
-ndk.mac64.legacy_checksum=251c21defcf90a2f0e8283bab90ed861
+ndk.mac64.legacy_download=android-ndk-r9b-darwin-x86_64-legacy-toolchains.tar.bz2
+ndk.mac64.legacy_bytes=122378495
+ndk.mac64.legacy_checksum=19c696a5b690b040409c68b21e9fcf46
 
-ndk.mac64_download=android-ndk-r9-darwin-x86_64.tar.bz2
-ndk.mac64_bytes=454408117
-ndk.mac64_checksum=ff27c8b9efc8260d9f883dc42d08f651
-
-
-ndk.mac32.legacy_download=android-ndk-r9-darwin-x86-legacy-toolchains.tar.bz2
-ndk.mac32.legacy_bytes=264053696
-ndk.mac32.legacy_checksum=9fd7f76a1f1f59386a34b019dcd20976
-
-ndk.mac32_download=android-ndk-r9-darwin-x86.tar.bz2
-ndk.mac32_bytes=446858202
-ndk.mac32_checksum=781da0e6bb5b072512e67b879b56a74c
+ndk.mac64_download=android-ndk-r9b-darwin-x86_64.tar.bz2
+ndk.mac64_bytes=354748937
+ndk.mac64_checksum=710d80b6ff807f03e585f9aacee3bf09
 
 
-ndk.linux64.legacy_download=android-ndk-r9-linux-x86_64-legacy-toolchains.tar.bz2
-ndk.linux64.legacy_bytes=244427866
-ndk.linux64.legacy_checksum=3976a8237d75526b8a0f275375dd68b5
+ndk.mac32.legacy_download=android-ndk-r9b-darwin-x86-legacy-toolchains.tar.bz2
+ndk.mac32.legacy_bytes=119394536
+ndk.mac32.legacy_checksum=be0a07bcea3695f7d93cbd1b880d3f75
 
-ndk.linux64_download=android-ndk-r9-linux-x86_64.tar.bz2
-ndk.linux64_bytes=425113267
-ndk.linux64_checksum=0ccfd9960526e61d1527155fa6f84ac0
-
-
-ndk.linux32.legacy_download=android-ndk-r9-linux-x86-legacy-toolchains.tar.bz2
-ndk.linux32.legacy_bytes=241172797
-ndk.linux32.legacy_checksum=957c415de9d7c7ce1c2377ec4d3d60f1
-
-ndk.linux32_download=android-ndk-r9-linux-x86.tar.bz2
-ndk.linux32_bytes=419862465
-ndk.linux32_checksum=beadafdc187461c057d513c40f0ac33b
+ndk.mac32_download=android-ndk-r9b-darwin-x86.tar.bz2
+ndk.mac32_bytes=349307548
+ndk.mac32_checksum=b5fa7aa3b9fca5a5b0c46bdd970d284b
 
 
-ndk.win64.legacy_download=android-ndk-r9-windows-x86_64-legacy-toolchains.zip
-ndk.win64.legacy_bytes=312340413
-ndk.win64.legacy_checksum=707d1eaa6f5d427ad439c764c8bd68d2
+ndk.linux64.legacy_download=android-ndk-r9b-linux-x86_64-legacy-toolchains.tar.bz2
+ndk.linux64.legacy_bytes=127742633
+ndk.linux64.legacy_checksum=f41017d5888a8dc210d1703dcdf1def7
 
-ndk.win64_download=android-ndk-r9-windows-x86_64.zip
-ndk.win64_bytes=514321606
-ndk.win64_checksum=96c725d16ace7fd487bf1bc1427af3a0
+ndk.linux64_download=android-ndk-r9b-linux-x86_64.tar.bz2
+ndk.linux64_bytes=366988131
+ndk.linux64_checksum=56c0999a2683d6711591843217f943e0
 
 
-ndk.win32.legacy_download=android-ndk-r9-windows-x86-legacy-toolchains.zip
-ndk.win32.legacy_bytes=292738221
-ndk.win32.legacy_checksum=ae3756d3773ec068fb653ff6fa411e35
+ndk.linux32.legacy_download=android-ndk-r9b-linux-x86-legacy-toolchains.tar.bz2
+ndk.linux32.legacy_bytes=125676842
+ndk.linux32.legacy_checksum=bfc7a1e6baf856b4348d57abffc761d2
 
-ndk.win32_download=android-ndk-r9-windows-x86.zip
-ndk.win32_bytes=485200055
-ndk.win32_checksum=8895aec43f5141212c8dac6e9f07d5a8
+ndk.linux32_download=android-ndk-r9b-linux-x86.tar.bz2
+ndk.linux32_bytes=361394055
+ndk.linux32_checksum=d7f783deaeea6b60cb515d9427c01c2e
+
+
+ndk.win64.legacy_download=android-ndk-r9b-windows-x86_64-legacy-toolchains.zip
+ndk.win64.legacy_bytes=166961852
+ndk.win64.legacy_checksum=6eee9459986e8b7f1032d62831dd775b
+
+ndk.win64_download=android-ndk-r9b-windows-x86_64.zip
+ndk.win64_bytes=479012553
+ndk.win64_checksum=1ba6be7ebf4e9272d77031dd70f81e94
+
+
+ndk.win32.legacy_download=android-ndk-r9b-windows-x86-legacy-toolchains.zip
+ndk.win32.legacy_bytes=152568224
+ndk.win32.legacy_checksum=00c8373b53ad9475f1bab1de4219b877
+
+ndk.win32_download=android-ndk-r9b-windows-x86.zip
+ndk.win32_bytes=455928388
+ndk.win32_checksum=cfb9402ea08a1554186e85ed28cb4593
 
 
 page.title=Android NDK
@@ -298,6 +298,165 @@ $('#Downloads').after($('#download-table'));
   <p>
     <a href="#" onclick="return toggleContent(this)"> <img
       src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+    >Android NDK, Revision 9b</a> <em>(October 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Important changes:</dt>
+      <dd>
+      <ul>
+        <li>Updated {@code include/android/*h} and {@code math.h} for all Android API levels up to
+          18, including the addition of levels 13, 15, 16 and 17.
+          For information on added APIs, see commit messages for Changes
+          <a href="https://android-review.googlesource.com/68012">68012</a> and
+          <a href="https://android-review.googlesource.com/68014">68014</a>.
+          (Issues <a href="http://b.android.com/47150">47150</a>,
+           <a href="http://b.android.com/58528">58528</a>, and
+           <a href="http://b.android.com/38423">38423</a>)</li>
+        <li>Added support for API level 19, including Renderscript binding.</li>
+        <li>Added support for <code>-mhard-float</code> in the existing armeabi-v7a ABI. For more
+          information and current restrictions on Clang, see
+          {@code tests/device/hard-float/jni/Android.mk}.</li>
+        <li>Migrated from GNU Compiler Collection (GCC) 4.8 to 4.8.2, and added diagnostic color
+          support. To enable diagnostic colors, set <code>-fdiagnostics-color=auto</code>,
+          <code>-fdiagnostics-color=always,</code> or export {@code GCC_COLORS} as shown below:
+<pre>
+GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+</pre>
+          For more information, see
+          <a href="http://gcc.gnu.org/onlinedocs/gcc/Language-Independent-Options.html">GCC
+          Language Independent Options</a>.
+        </li>
+        <li>Added two new samples to demonstrate OpenGL ES 3.0 features: Teapot and MoreTeapots.
+          These samples run on devices with Android 4.1 (API level 16) and higher.</li>
+        <li>Deprecated GCC 4.7 and Clang 3.2 support, which will be removed in the next
+          release.</li>
+      </ul>
+      </dd>
+
+      <dt>Important bug fixes:</dt>
+      <dd>
+      <ul>
+        <li>Fixed problem with ARM GCC 4.6 {@code thumb2} failing to generate 16-bit relative jump
+          tables. (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48328">GCC Issue</a>)</li>
+        <li>Fixed GCC 4.8 internal compiler error (ICE) on
+          {@code g++.dg/cpp0x/lambda/lambda-defarg3.C}.
+          (<a href="https://android-review.googlesource.com/62770">Change 62770</a>,
+          <a href="http://gcc.gnu.org/ml/gcc/2013-07/msg00424.html">GCC Issue</a>)</li>
+        <li>Fixed a problem with Windows 32-bit {@code *-gdb.exe} executables failing to launch.
+          (<a href="http://b.android.com/58975">Issue 58975</a>)</li>
+        <li>Fixed GCC 4.8 ICE when building bullet library. The error message is as follows:
+          <pre>internal compiler error: verify_flow_info failed</pre>
+          (<a href="http://b.android.com/58916">Issue 58916</a>,
+           <a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58165">GCC Issue</a>)</li>
+        <li>Modified GDB/ARM build to skip {@code ARM.exidx} data for unwinding in prologue code and
+          added a command ({@code set arm exidx-unwinding}) to control exidx-based stack unwinding.
+          (<a href="http://b.android.com/55826">Issue 55826</a>)</li>
+        <li>Fixed Clang 3.3 MIPS compiler problem where HI and LO registers are incorrectly
+          reused.</li>
+        <li>Fixed issue with MIPS 4.7 ICE in {@code dbx_reg_number}. The error message is as follows:
+<pre>
+external/icu4c/i18n/decimfmt.cpp:1322:1:
+internal compiler error: in dbx_reg_number, at dwarf2out.c:10185
+</pre>
+          (<a href="http://gcc.gnu.org/ml/gcc-patches/2012-12/msg00830.html">GCC Patch</a>)
+
+        </li>
+
+      </ul>
+      </dd>
+
+      <dt>Other bug fixes:</dt>
+      <dd>
+      <ul>
+        <li>Header fixes
+          <ul>
+            <li>Fixed the ARM {@code WCHAR_MIN} and {@code WCHAR_MAX} to be unsigned according to
+              spec (the X86/MIPS versions are signed). Define {@code _WCHAR_IS_ALWAYS_SIGNED} to
+              restore old behavior. (<a href="http://b.android.com/57749">Issue 57749</a>)</li>
+            <li>Fixed {@code include/netinet/tcp.h} to contain {@code TCP_INFO} state enum.
+              (<a href="http://b.android.com/38881">Issue 38881</a>)</li>
+            <li>Fixed the {@code cdefs_elh.h} macro {@code _C_LABEL_STRING} to stop generating
+               warnings in the GCC 4.8 toolchain when using c++11 mode.
+              (<a href="http://b.android.com/58135">Issue 58135</a>,
+               <a href="http://b.android.com/58652">Issue 58652</a>)</li>
+            <li>Removed non-existent functions {@code imaxabs} and {@code imaxdiv} from header
+              {@code inttypes.h}.</li>
+            <li>Fixed issue with {@code pthread_exit()} return values and {@code pthread_self()}.
+                 (<a href="http://b.android.com/60686">Issue 60686</a>)</li>
+            <li>Added missing {@code mkdtemp()} function, which already exists in {@code bionic}
+              header {@code stdlib.h}.</li>
+          </ul>
+        </li>
+        <li>Fixed problem building {@code samples/gles3jni} with Clang on Android API level 11.</li>
+        <li>Fixed MCLinker to allow multiple occurrences of the following options:
+          {@code -gc-sections} and {@code --eh-frame-hdr}.</li>
+        <li>Fixed MCLinker to accept the {@code --no-warn-mismatch} option.</li>
+        <li>Modified {@code cpu-features} option to not assume all VFPv4 devices support IDIV.
+          Now this option only adds IDIV to white-listed devices, including Nexus 4.
+          (<a href="http://b.android.com/57637">Issue 57637</a>)</li>
+        <li>Fixed problem with {@code android_native_app_glue.c} erroneously logging errors on event
+          predispatch operations.</li>
+        <li>Fixed all operations on {@code gabi++} terminate and unexpected_handler to be
+          thread-safe.</li>
+        <li>Fixed several issues with Clang <code>-integrated-as</code> option so it can pass
+          tests for {@code ssax-instructions} and {@code fenv}.</li>
+        <li>Fixed GCC 4.6/4.7/4.8 compiler to pass the linker option {@code --eh-frame-hdr} even
+          for static executables. For more information, see the
+          <a href="http://gcc.gnu.org/ml/gcc-patches/2012-09/msg00969.html">GCC patch</a>.</li>
+        <li>Fixed extra apostrophe in <code>CPU-ARCH-ABIS.html</code>. For more information, see
+          <code>NDK-DEPENDS.html</code>. (<a href="http://b.android.com/60142">Issue 60142</a>)</li>
+        <li>Fixed extra quotes in ndk-build output on Windows.
+          (<a href="http://b.android.com/60649">Issue 60649</a>)</li>
+        <li>Fixed Clang 3.3 to compile ARM's built-in, atomic operations such as
+          {@code __atomic_fetch_add}, {@code __atomic_fetch_sub}, and {@code __atomic_fetch_or}.
+          </li>
+        <li>Fixed Clang 3.3 ICE with customized {@code vfprintf}.
+          (<a href="http://llvm.org/bugs/show_bug.cgi?id=16344">Clang issue</a>)
+        </li>
+      </ul>
+      </dd>
+
+      <dt>Other changes:</dt>
+      <dd>
+      <ul>
+        <li>Enabled OpenMP for all GCC builds. To use this feature, add the following flags to your
+          build settings:
+<pre>
+LOCAL_CFLAGS += -fopenmp
+LOCAL_LDFLAGS += -fopenmp
+</pre>
+          For code examples, see {@code tests/device/test-openmp}</li>
+        <li>Reduced the size of {@code ld.mcld} significantly (1.5MB vs. {@code ld.bfd} 3.5MB and
+          {@code ld.gold} 7.5MB), resulting in a speed improvement of approximately 20%.</li>
+        <li>Added <code>LOCAL_CONLYFLAGS</code> and <code>APP_CONLYFLAGS</code> to specify
+          options applicable to C only but not C++. The existing <code>LOCAL_CFLAGS</code>
+          and <code>APP_CFLAGS</code> are also used for C++ compilation (to save trouble of
+          specifying most options twice), so options such as <code>-std=gnu99</code> may fail in
+          g++ builds with a warning and clang++ builds with an error.</li>
+        <li>Added {@code gabi++} array helper functions.</li>
+        <li>Modified GCC builds so that all {@code libgcc.a} files are built with
+          <code>-funwind-tables</code> to allow the stack to be unwound past previously blocked
+          points, such as <code>__aeabi_idiv0</code>.</li>
+        <li>Added Ingenic MXU support in MIPS GCC4.6/4.7/4.8 with new <code>-mmxu</code> option.</li>
+        <li>Extended MIPS GCC4.6/4.7/4.8 <code>-mldc1-sdc1</code> to control ldxc1/sdxc1 too</li>
+        <li>Added crazy linker. For more information, see
+          {@code sources/android/crazy_linker/README.TXT}.</li>
+        <li>Fixed {@code bitmap-plasma} to draw to full screen rather than a 200x200 pixel area.</li>
+        <li>Reduced linux and darwin toolchain sizes by 25% by creating symlinks to identical files.
+          </li>
+      </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p>
+    <a href="#" onclick="return toggleContent(this)"> <img
+      src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
     >Android NDK, Revision 9</a> <em>(July 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -441,7 +600,7 @@ $('#Downloads').after($('#download-table'));
           <li>Fixed the Clang 3.2 {@code -integrated-as} option.</li>
           <li>Fixed the Clang 3.2 ARM EHABI compact model {@code pr1} and {@code pr2} handler data.
             </li>
-          <li>Added clang {@code -mllvm -arm-enable-ehabi} option to fix the following clang error:
+          <li>Added Clang {@code -mllvm -arm-enable-ehabi} option to fix the following Clang error:
             <pre>clang: for the -arm-enable-ehabi option: may only occur zero or one times!</pre>
             </li>
           <li>Fixed build failure when there is no {@code uses-sdk} element in application

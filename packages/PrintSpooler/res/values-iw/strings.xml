@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Print Spooler"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"הגדרות מדפסת"</string>
     <string name="print_button" msgid="645164566271246268">"הדפס"</string>
     <string name="save_button" msgid="1921310454071758999">"שמור"</string>
     <string name="label_destination" msgid="9132510997381599275">"יעד"</string>
@@ -27,11 +28,11 @@
     <string name="label_pages" msgid="6300874667546617333">"עמודים (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"למשל 1–5‏,8,‏11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"תצוגה מקדימה של הדפסה"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"התקן מציג PDF ליצירת תצוגה מקדימה"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"‏התקן מציג PDF ליצירת תצוגה מקדימה"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"אפליקציית ההדפסה קרסה"</string>
     <string name="page_count_unknown" msgid="6058852665954511124">"עמודים"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"יוצר עבודת הדפסה"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"שמור כ-PDF"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"‏שמור כ-PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"כל המדפסות…"</string>
     <string name="print_dialog" msgid="32628687461331979">"תיבת דו שיח של מדפסת"</string>
     <string name="search" msgid="5421724265322228497">"חפש"</string>
@@ -40,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"תיבת החיפוש מוצגת"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"תיבת החיפוש מוסתרת"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"הוסף מדפסת"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"בחר מדפסת"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"שכח את המדפסת"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"נמצאה מדפסת <xliff:g id="COUNT">%1$s</xliff:g>"</item>
     <item quantity="other" msgid="6533817036607128241">"נמצאו <xliff:g id="COUNT">%1$s</xliff:g> מדפסות"</item>

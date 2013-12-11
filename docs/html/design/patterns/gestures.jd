@@ -5,112 +5,122 @@ page.tags="gesture","input","touch"
 <p>Gestures allow users to interact with your app by manipulating the screen objects you provide. The
 following table shows the core gesture set that is supported in Android.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="vspace size-2">&nbsp;</div>
 
+<div class="layout-content-row">
+
+  <div class="layout-content-col span-4">
     <img src="{@docRoot}design/media/gesture_touch.png">
-
-<h4>Touch</h4>
-<p>Triggers the default functionality for a given item.</p>
-
-<ul>
-  <li class="no-bullet with-icon action">
-    <h4>Action</h4>
-    <p>Press, lift</p></li>
-</ul>
-
+    <h4>Touch</h4>
+    <p>Triggers the default functionality for a given item.</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>Press, lift</p></li>
+    </ul>
   </div>
-  <div class="layout-content-col span-4">
 
+  <div class="layout-content-col span-4">
     <img src="{@docRoot}design/media/gesture_longtouch.png">
-
-<h4>Long press</h4>
-<p>Enters data selection mode. Allows you to select one or more items in a view and act upon
-  the data using a contextual action bar. Avoid using long press for showing contextual menus.</p>
-
-<ul>
-  <li class="no-bullet with-icon action">
-    <h4>Action</h4>
-    <p>Press, wait, lift</p></li>
-</ul>
-
+    <h4>Long press</h4>
+    <p>Enters data selection mode. Allows you to select one or more items in a view and act upon
+    the data using a contextual action bar. Avoid using long press for showing contextual menus.</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>Press, wait, lift</p></li>
+    </ul>
   </div>
-  <div class="layout-content-col span-4">
 
+  <div class="layout-content-col span-4">
     <img src="{@docRoot}design/media/gesture_swipe.png">
-
-<h4>Swipe</h4>
-<p>Scrolls overflowing content, or navigates between views in the same hierarchy.</p>
-
-<ul>
-  <li class="no-bullet with-icon action">
-    <h4>Action</h4>
-    <p>Press, move, lift</p></li>
-</ul>
-
+    <h4>Swipe or drag</h4>
+    <p>Scrolls overflowing content, or navigates between views in the same hierarchy. Swipes are
+    quick and affect the screen even after the finger is picked up. Drags are slower and more precise,
+    and the screen stops responding when the finger is picked up.</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>Press, move, lift</p></li>
+    </ul>
   </div>
+
 </div>
 
+<div class="vspace size-2">&nbsp;</div>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-4">
 
+  <div class="layout-content-col span-4">
     <img src="{@docRoot}design/media/gesture_drag.png">
-
-<h4>Drag</h4>
-<p>Rearranges data within a view, or moves data into a container (e.g. folders on Home Screen).</p>
-
-<ul>
-  <li class="no-bullet with-icon action">
-    <h4>Action</h4>
-    <p>Long press, move, lift</p></li>
-</ul>
-
+    <h4>Long press drag</h4>
+    <p>Rearranges data within a view, or moves data into a container (e.g. folders on Home Screen).</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>Long press, move, lift</p></li>
+    </ul>
   </div>
-  <div class="layout-content-col span-4">
 
+  <div class="layout-content-col span-4">
     <img src="{@docRoot}design/media/gesture_doubletouch.png">
-
-<h4>Double touch</h4>
-<p>Zooms into content. Also used as a secondary gesture for text selection.</p>
-
-<ul>
-  <li class="no-bullet with-icon action">
-    <h4>Action</h4>
-    <p>Two touches in quick succession</p></li>
-</ul>
-
+    <h4>Double touch </h4>
+    <p>Scales up the smallest targetable view, if available, or scales a standard amount
+      around the gesture. Also used as a secondary gesture for text selection.</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>Two touches in quick succession</p>
+      </li>
+    </ul>
   </div>
+
   <div class="layout-content-col span-4">
-
-    <img src="{@docRoot}design/media/gesture_pinchopen.png" style="margin-left:-4px">
-
-<h4>Pinch open</h4>
-<p>Zooms into content.</p>
-
-<ul>
-  <li class="no-bullet with-icon action">
-    <h4>Action</h4>
-    <p>2-finger press, move outwards, lift</p></li>
-</ul>
-
+    <img src="{@docRoot}design/media/gesture_doubletouchdrag.png">
+    <h4>Double touch drag</h4>
+    <p>Scales content by pushing away or pulling closer, centered around gesture.</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>A single touch followed in quick succession by a drag up or down:</p>
+        <ul style="padding-left:1.5em;list-style-type:disc;">
+          <li>Dragging up decreases content scale</li>
+          <li>Dragging down increases content scale</li>
+          <li>Reversing drag direction reverses scaling.</li>
+        </ul>
+      </li>
+    </ul>
   </div>
+  
 </div>
 
+
+<div class="vspace size-2">&nbsp;</div>
 
 <div class="layout-content-row">
+
   <div class="layout-content-col span-4">
-
-    <img src="{@docRoot}design/media/gesture_pinchclose.png">
-
-<h4>Pinch close</h4>
-<p>Zooms out of content.</p>
-
-<ul>
-  <li class="no-bullet with-icon action">
-    <h4>Action</h4>
-    <p>2-finger press, move inwards, lift</p></li>
-</ul>
-
+    <img src="{@docRoot}design/media/gesture_pinchopen.png" style="margin-left:-4px">
+    <h4>Pinch open</h4>
+    <p>Zooms into content.</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>2-finger press, move outwards, lift</p></li>
+    </ul>
   </div>
+
+  <div class="layout-content-col span-4">
+    <img src="{@docRoot}design/media/gesture_pinchclose.png">
+    <h4>Pinch close</h4>
+    <p>Zooms out of content.</p>
+    <ul>
+      <li class="no-bullet with-icon action">
+        <h4>Action</h4>
+        <p>2-finger press, move inwards, lift</p>
+      </li>
+    </ul>
+  </div>
+
 </div>
+

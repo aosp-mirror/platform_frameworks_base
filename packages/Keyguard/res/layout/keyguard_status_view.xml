@@ -26,7 +26,7 @@
     android:layout_height="match_parent"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width"
     androidprv:layout_maxHeight="@dimen/keyguard_security_height"
-    android:gravity="center_horizontal">
+    android:gravity="center">
 
     <com.android.keyguard.KeyguardStatusView
         android:id="@+id/keyguard_status_view_face_palm"

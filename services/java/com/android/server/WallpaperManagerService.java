@@ -40,6 +40,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -637,6 +638,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         return false;
     }
 
+    private Point getDefaultDisplaySize() {
+        Point p = new Point();
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display d = wm.getDefaultDisplay();
+        d.getRealSize(p);
+        return p;
+    }
+
     public void setDimensionHints(int width, int height) throws RemoteException {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_HINTS);
         synchronized (mLock) {
@@ -648,6 +657,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             if (width <= 0 || height <= 0) {
                 throw new IllegalArgumentException("width and height must be > 0");
             }
+            // Make sure it is at least as large as the display.
+            Point displaySize = getDefaultDisplaySize();
+            width = Math.max(width, displaySize.x);
+            height = Math.max(height, displaySize.y);
 
             int maxWidth = mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_wallpaperMaxWidth);
@@ -1152,15 +1165,19 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         // We always want to have some reasonable width hint.
-        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display d = wm.getDefaultDisplay();
-        int baseSize = d.getMaximumSizeDimension();
+        int baseSize = getMaximumSizeDimension();
         if (wallpaper.width < baseSize) {
             wallpaper.width = baseSize;
         }
         if (wallpaper.height < baseSize) {
             wallpaper.height = baseSize;
         }
+    }
+
+    private int getMaximumSizeDimension() {
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display d = wm.getDefaultDisplay();
+        return d.getMaximumSizeDimension();
     }
 
     // Called by SystemBackupAgent after files are restored to disk.

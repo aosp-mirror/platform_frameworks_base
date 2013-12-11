@@ -20,6 +20,7 @@ page.tags="adb"
       <li><a href="#am">Using activity manager (am)</a></li>
       <li><a href="#pm">Using package manager (pm)</a></li>
       <li><a href="#sqlite">Examining sqlite3 databases from a remote shell</a></li>
+      <li><a href="#screenrecord">Recording a device screen</a></li>
       <li><a href="#monkey">UI/Application Exerciser Monkey</a></li>
       <li><a href="#othershellcommands">Other shell commands</a></li>
     </ol>
@@ -1106,7 +1107,11 @@ manage SQLite databases created by Android applications. The
 <code>.schema</code> to print the SQL CREATE statement for an existing table.
 The tool also gives you the ability to execute SQLite commands on the fly.</p>
 
-<p>To use <code>sqlite3</code>, enter a remote shell on the emulator instance, as described above, then invoke the tool using the <code>sqlite3</code> command. Optionally, when invoking <code>sqlite3</code> you can specify the full path to the database you want to explore. Emulator/device instances store SQLite3 databases in the folder <code><span chatdir="1"><span chatindex="259474B4B070F261">/data/data/<em>&lt;package_name&gt;</em>/databases</span></span>/</code>. </p>
+<p>To use <code>sqlite3</code>, enter a remote shell on the emulator instance, as described above,
+then invoke the tool using the <code>sqlite3</code> command. Optionally, when invoking
+<code>sqlite3</code> you can specify the full path to the database you want to explore.
+Emulator/device instances store SQLite3 databases in the folder
+<code><span chatdir="1"><span chatindex="259474B4B070F261">/data/data/<em>&lt;package_name&gt;</em>/databases</span></span>/</code>. </p>
 
 <p>Here's an example: </p>
 
@@ -1117,9 +1122,105 @@ Enter &quot;.help&quot; for instructions
 <em>.... enter commands, then quit...</em>
 sqlite&gt; .exit </pre>
 
-<p>Once you've invoked <code>sqlite3</code>, you can issue <code>sqlite3</code> commands in the shell. To exit and return to the adb remote shell, use <code>exit</code> or <code>CTRL+D</code>.
+<p>Once you've invoked <code>sqlite3</code>, you can issue <code>sqlite3</code> commands in the
+shell. To exit and return to the adb remote shell, use <code>exit</code> or <code>CTRL+D</code>.
 
 
+
+
+<h3 id="screenrecord">Recording a device screen</h3>
+
+<p>The {@code screenrecord} command is a shell utility for recording the display of a device as you
+  use it. The utility records screen activity to an MPEG-4 file, which you can then download and use
+  as part of a video presentation. This utility is useful for developers who want to create
+  promotional or training videos without using a separate recording device.</p>
+
+<p>To use the {@code screenrecord} from the command line, type the following:
+
+<pre>
+$ adb shell screenrecord /sdcard/demo.mp4
+</pre>
+
+<p>Stop the screen recording by pressing Ctrl-C, otherwise the recording stops automatically
+at three minutes or the time limit set by {@code --time-limit}.</p>
+
+<p>Here's an example recording session, using the adb shell to record the video and the
+{@code pull} command to download the file from the device:<p>
+
+<pre>
+$ adb shell
+shell@ $ screenrecord --verbose /sdcard/demo.mp4
+(press Ctrl-C to stop)
+shell@ $ exit
+$ adb pull /sdcard/demo.mp4
+</pre>
+
+<p>The {@code screenrecord} utility can record at any supported resolution and bit rate you
+  request, while retaining the aspect ratio of the device display. The utility records at the native
+  display resolution and orientation by default, with a maximum length of three minutes.</p>
+
+<p>There are some known limitations of the {@code screenrecord} utility that you should be aware
+  of when using it:</p>
+
+<ul>
+  <li>Some devices may not be able to record at their native display resolution.
+    If you encounter problems with screen recording, try using a lower screen resolution.</li>
+  <li>Rotation of the screen during recording is not supported. If the screen does rotate during
+    recording, some of the screen is cut off in the recording.</li>
+  <li>Audio is not recorded with the video file.</li>
+</ul>
+
+
+<p class="table-caption"><strong>Table 4.</strong> {@code screenrecord} options</p>
+
+<table>
+  <tr>
+    <th>Options</th>
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><code>--help</code>
+    </td>
+    <td>Displays a usage summary.</td>
+  </tr>
+
+  <tr>
+    <td style="white-space:nowrap">
+      <code>--size &lt;WIDTHxHEIGHT&gt;</code>
+    </td>
+    <td>Sets the video size, for example: {@code 1280x720}. The default value is the device's main
+      display resolution (if supported), 1280x720 if not. For best results, use a size supported
+      by your device's Advanced Video Coding (AVC) encoder.</td>
+  </tr>
+
+  <tr>
+    <td><code>--bit-rate &lt;RATE&gt;</code></td>
+    <td>Sets the video bit rate for the video, in megabits per second. The default value is 4Mbps.
+      You can increase the bit rate to improve video quality or lower it for smaller movie
+      files. The following example sets the recording bit rate to 6Mbps:
+      <pre>screenrecord --bit-rate 6000000 &#47;sdcard&#47;demo.mp4</pre>
+      </td>
+  </tr>
+
+  <tr>
+    <td><code>--time-limit &lt;TIME&gt;</code></td>
+    <td>Sets the maximum recording time, in seconds. The default and maximum value is 180
+      (3 minutes).</td>
+  </tr>
+
+  <tr>
+    <td><code>--rotate</code></td>
+    <td>Rotates the output 90 degrees. This feature is experimental.</td>
+  </tr>
+
+  <tr>
+    <td><code>--verbose</code></td>
+    <td>Displays log information on command line screen. If you do not set this option,
+      the utility does not display any information while running.</td>
+  </tr>
+
+</table>
 
 
 
@@ -1151,9 +1252,9 @@ application and sends 500 pseudo-random events to it.</p>
 
 <p>Help is available for most of the commands. </p>
 
-<p>Table 4 lists some of the more common adb shell commands.</p>
+<p>Table 5 lists some of the more common adb shell commands.</p>
 
-<p class="table-caption"><strong>Table 4.</strong> Some other adb shell commands</p>
+<p class="table-caption"><strong>Table 5.</strong> Some other adb shell commands</p>
 <table>
 <tr>
   <th>Shell Command</th>

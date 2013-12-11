@@ -34,6 +34,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.RemoteException;
@@ -80,6 +81,9 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static final String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
+
+    /** {@hide} */
+    public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
 
     /**
      * Included in {@link AssetFileDescriptor#getExtras()} when returned
@@ -667,7 +671,9 @@ public final class DocumentsContract {
         try {
             return getDocumentThumbnail(client, documentUri, size, signal);
         } catch (Exception e) {
-            Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
+            if (!(e instanceof OperationCanceledException)) {
+                Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
+            }
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);

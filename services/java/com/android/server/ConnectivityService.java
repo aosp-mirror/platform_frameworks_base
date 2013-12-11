@@ -77,6 +77,7 @@ import android.net.wifi.WifiStateTracker;
 import android.net.wimax.WimaxManagerConstants;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -141,6 +142,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -153,6 +155,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 /**
  * @hide
@@ -3374,6 +3380,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             String pacFileUrl = "";
             if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
                     !TextUtils.isEmpty(proxyProperties.getPacFileUrl()))) {
+                if (!proxyProperties.isValid()) {
+                    if (DBG)
+                        log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
+                    return;
+                }
                 mGlobalProxy = new ProxyProperties(proxyProperties);
                 host = mGlobalProxy.getHost();
                 port = mGlobalProxy.getPort();
@@ -3417,6 +3428,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } else {
                 proxyProperties = new ProxyProperties(host, port, exclList);
             }
+            if (!proxyProperties.isValid()) {
+                if (DBG) log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
+                return;
+            }
+
             synchronized (mProxyLock) {
                 mGlobalProxy = proxyProperties;
             }
@@ -3441,6 +3457,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized (mProxyLock) {
             if (mDefaultProxy != null && mDefaultProxy.equals(proxy)) return;
             if (mDefaultProxy == proxy) return; // catches repeated nulls
+            if (proxy != null &&  !proxy.isValid()) {
+                if (DBG) log("Invalid proxy properties, ignoring: " + proxy.toString());
+                return;
+            }
             mDefaultProxy = proxy;
 
             if (mGlobalProxy != null) return;
@@ -4066,8 +4086,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     static class CheckMp extends
             AsyncTask<CheckMp.Params, Void, Integer> {
         private static final String CHECKMP_TAG = "CheckMp";
+
+        // adb shell setprop persist.checkmp.testfailures 1 to enable testing failures
+        private static boolean mTestingFailures;
+
+        // Choosing 4 loops as half of them will use HTTPS and the other half HTTP
+        private static final int MAX_LOOPS = 4;
+
+        // Number of milli-seconds to complete all of the retires
         public static final int MAX_TIMEOUT_MS =  60000;
+
+        // The socket should retry only 5 seconds, the default is longer
         private static final int SOCKET_TIMEOUT_MS = 5000;
+
+        // Sleep time for network errors
+        private static final int NET_ERROR_SLEEP_SEC = 3;
+
+        // Sleep time for network route establishment
+        private static final int NET_ROUTE_ESTABLISHMENT_SLEEP_SEC = 3;
+
+        // Short sleep time for polling :(
+        private static final int POLLING_SLEEP_SEC = 1;
+
         private Context mContext;
         private ConnectivityService mCs;
         private TelephonyManager mTm;
@@ -4093,6 +4133,31 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
+        // As explained to me by Brian Carlstrom and Kenny Root, Certificates can be
+        // issued by name or ip address, for Google its by name so when we construct
+        // this HostnameVerifier we'll pass the original Uri and use it to verify
+        // the host. If the host name in the original uril fails we'll test the
+        // hostname parameter just incase things change.
+        static class CheckMpHostnameVerifier implements HostnameVerifier {
+            Uri mOrgUri;
+
+            CheckMpHostnameVerifier(Uri orgUri) {
+                mOrgUri = orgUri;
+            }
+
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                HostnameVerifier hv = HttpsURLConnection.getDefaultHostnameVerifier();
+                String orgUriHost = mOrgUri.getHost();
+                boolean retVal = hv.verify(orgUriHost, session) || hv.verify(hostname, session);
+                if (DBG) {
+                    log("isMobileOk: hostnameVerify retVal=" + retVal + " hostname=" + hostname
+                        + " orgUriHost=" + orgUriHost);
+                }
+                return retVal;
+            }
+        }
+
         /**
          * The call back object passed in Params. onComplete will be called
          * on the main thread.
@@ -4103,6 +4168,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         public CheckMp(Context context, ConnectivityService cs) {
+            if (Build.IS_DEBUGGABLE) {
+                mTestingFailures =
+                        SystemProperties.getInt("persist.checkmp.testfailures", 0) == 1;
+            } else {
+                mTestingFailures = false;
+            }
+
             mContext = context;
             mCs = cs;
 
@@ -4174,7 +4246,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             mCs.setEnableFailFastMobileData(DctConstants.ENABLED);
                             break;
                         }
-                        sleep(1);
+                        sleep(POLLING_SLEEP_SEC);
                     }
                 }
 
@@ -4192,7 +4264,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     if (VDBG) log("isMobileOk: hipri not started yet");
                     result = CMP_RESULT_CODE_NO_CONNECTION;
-                    sleep(1);
+                    sleep(POLLING_SLEEP_SEC);
                 }
 
                 // Continue trying to connect until time has run out
@@ -4208,7 +4280,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 log("isMobileOk: not connected ni=" +
                                     mCs.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI));
                             }
-                            sleep(1);
+                            sleep(POLLING_SLEEP_SEC);
                             result = CMP_RESULT_CODE_NO_CONNECTION;
                             continue;
                         }
@@ -4226,7 +4298,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
                         // Get of the addresses associated with the url host. We need to use the
                         // address otherwise HttpURLConnection object will use the name to get
-                        // the addresses and is will try every address but that will bypass the
+                        // the addresses and will try every address but that will bypass the
                         // route to host we setup and the connection could succeed as the default
                         // interface might be connected to the internet via wifi or other interface.
                         InetAddress[] addresses;
@@ -4263,14 +4335,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
                         int addrTried = 0;
                         while (true) {
-                            // Loop through at most 3 valid addresses or until
+                            // Loop through at most MAX_LOOPS valid addresses or until
                             // we run out of time
-                            if (addrTried++ >= 3) {
-                                log("too many loops tried - giving up");
+                            if (addrTried++ >= MAX_LOOPS) {
+                                log("isMobileOk: too many loops tried - giving up");
                                 break;
                             }
                             if (SystemClock.elapsedRealtime() >= endTime) {
-                                log("spend too much time - giving up");
+                                log("isMobileOk: spend too much time - giving up");
                                 break;
                             }
 
@@ -4283,25 +4355,37 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 // Wait a short time to be sure the route is established ??
                                 log("isMobileOk:"
                                         + " wait to establish route to hostAddr=" + hostAddr);
-                                sleep(3);
+                                sleep(NET_ROUTE_ESTABLISHMENT_SLEEP_SEC);
                             } else {
                                 log("isMobileOk:"
                                         + " could not establish route to hostAddr=" + hostAddr);
+                                // Wait a short time before the next attempt
+                                sleep(NET_ERROR_SLEEP_SEC);
                                 continue;
                             }
 
-                            // Rewrite the url to have numeric address to use the specific route.
-                            // Add a pointless random query param to fool proxies into not caching.
-                            URL newUrl = new URL(orgUri.getScheme(),
-                                    hostAddr.getHostAddress(),
-                                    orgUri.getPath() + "?q=" + rand.nextInt(Integer.MAX_VALUE));
+                            // Rewrite the url to have numeric address to use the specific route
+                            // using http for half the attempts and https for the other half.
+                            // Doing https first and http second as on a redirected walled garden
+                            // such as t-mobile uses we get a SocketTimeoutException: "SSL
+                            // handshake timed out" which we declare as
+                            // CMP_RESULT_CODE_NO_TCP_CONNECTION. We could change this, but by
+                            // having http second we will be using logic used for some time.
+                            URL newUrl;
+                            String scheme = (addrTried <= (MAX_LOOPS/2)) ? "https" : "http";
+                            newUrl = new URL(scheme, hostAddr.getHostAddress(),
+                                        orgUri.getPath());
                             log("isMobileOk: newUrl=" + newUrl);
 
                             HttpURLConnection urlConn = null;
                             try {
-                                // Open the connection set the request header and get the response
-                                urlConn = (HttpURLConnection) newUrl.openConnection(
+                                // Open the connection set the request headers and get the response
+                                urlConn = (HttpURLConnection)newUrl.openConnection(
                                         java.net.Proxy.NO_PROXY);
+                                if (scheme.equals("https")) {
+                                    ((HttpsURLConnection)urlConn).setHostnameVerifier(
+                                            new CheckMpHostnameVerifier(orgUri));
+                                }
                                 urlConn.setInstanceFollowRedirects(false);
                                 urlConn.setConnectTimeout(SOCKET_TIMEOUT_MS);
                                 urlConn.setReadTimeout(SOCKET_TIMEOUT_MS);
@@ -4320,10 +4404,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 urlConn.disconnect();
                                 urlConn = null;
 
+                                if (mTestingFailures) {
+                                    // Pretend no connection, this tests using http and https
+                                    result = CMP_RESULT_CODE_NO_CONNECTION;
+                                    log("isMobileOk: TESTING_FAILURES, pretend no connction");
+                                    continue;
+                                }
+
                                 if (responseCode == 204) {
                                     // Return
                                     result = CMP_RESULT_CODE_CONNECTABLE;
-                                    log("isMobileOk: X expected responseCode=" + responseCode
+                                    log("isMobileOk: X got expected responseCode=" + responseCode
                                             + " result=" + result);
                                     return result;
                                 } else {
@@ -4337,12 +4428,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                     result = CMP_RESULT_CODE_REDIRECTED;
                                 }
                             } catch (Exception e) {
-                                log("isMobileOk: HttpURLConnection Exception e=" + e);
+                                log("isMobileOk: HttpURLConnection Exception" + e);
                                 result = CMP_RESULT_CODE_NO_TCP_CONNECTION;
                                 if (urlConn != null) {
                                     urlConn.disconnect();
                                     urlConn = null;
                                 }
+                                sleep(NET_ERROR_SLEEP_SEC);
+                                continue;
                             }
                         }
                         log("isMobileOk: X loops|timed out result=" + result);
@@ -4370,7 +4463,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             log("isMobileOk: connected ni=" +
                                 mCs.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI));
                         }
-                        sleep(1);
+                        sleep(POLLING_SLEEP_SEC);
                         continue;
                     }
                 }
@@ -4435,7 +4528,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        private void log(String s) {
+        private static void log(String s) {
             Slog.d(ConnectivityService.TAG, "[" + CHECKMP_TAG + "] " + s);
         }
     }

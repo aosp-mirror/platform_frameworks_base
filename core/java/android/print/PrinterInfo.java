@@ -21,7 +21,12 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 /**
- * This class represents the description of a printer.
+ * This class represents the description of a printer. Instances of
+ * this class are created by print services to report to the system
+ * the printers they manage. The information of this class has two
+ * major components, printer properties such as name, id, status,
+ * description and printer capabilities which describe the various
+ * print modes a printer supports such as media sizes, margins, etc.
  */
 public final class PrinterInfo implements Parcelable {
 
@@ -96,6 +101,10 @@ public final class PrinterInfo implements Parcelable {
      * Gets the printer status.
      *
      * @return The status.
+     *
+     * @see #STATUS_BUSY
+     * @see #STATUS_IDLE
+     * @see #STATUS_UNAVAILABLE
      */
     public int getStatus() {
         return mStatus;
@@ -216,6 +225,8 @@ public final class PrinterInfo implements Parcelable {
          * @param printerId The printer id. Cannot be null.
          * @param name The printer name. Cannot be empty.
          * @param status The printer status. Must be a valid status.
+         * @throws IllegalArgumentException If the printer id is null, or the
+         * printer name is empty or the status is not a valid one.
          */
         public Builder(PrinterId printerId, String name, int status) {
             if (printerId == null) {
@@ -259,7 +270,8 @@ public final class PrinterInfo implements Parcelable {
         }
 
         /**
-         * Sets the printer name.
+         * Sets the <strong>localized</strong> printer name which
+         * is shown to the user
          *
          * @param name The name.
          * @return This builder.
@@ -270,7 +282,8 @@ public final class PrinterInfo implements Parcelable {
         }
 
         /**
-         * Sets the printer description.
+         * Sets the <strong>localized</strong> printer description
+         * which is shown to the user
          *
          * @param description The description.
          * @return This builder.
@@ -292,12 +305,12 @@ public final class PrinterInfo implements Parcelable {
         }
 
         /**
-         * Crates a new {@link PrinterInfo}.
+         * Creates a new {@link PrinterInfo}.
          *
          * @return A new {@link PrinterInfo}.
          */
         public PrinterInfo build() {
-            return new PrinterInfo(mPrototype);
+            return mPrototype;
         }
 
         private boolean isValidStatus(int status) {

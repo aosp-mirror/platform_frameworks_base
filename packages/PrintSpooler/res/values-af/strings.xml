@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Drukwaglys"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"Drukkerinstellings"</string>
     <string name="print_button" msgid="645164566271246268">"Druk"</string>
     <string name="save_button" msgid="1921310454071758999">"Stoor"</string>
     <string name="label_destination" msgid="9132510997381599275">"Bestemming"</string>
@@ -40,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Soekkassie vertoon"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Soekkassie weggesteek"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Voeg drukker by"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Kies drukker"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Vergeet drukker"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"<xliff:g id="COUNT">%1$s</xliff:g> drukker gekry"</item>
     <item quantity="other" msgid="6533817036607128241">"<xliff:g id="COUNT">%1$s</xliff:g> drukkers gekry"</item>
@@ -60,7 +63,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Geen verbinding met drukker nie"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"onbekend"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – nie beskikbaar nie"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Kon nie druktaak genereer nie"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Kon nie uitdruktaak genereer nie"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Swart en wit"</item>
     <item msgid="2762241247228983754">"Kleur"</item>

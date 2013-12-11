@@ -21,8 +21,10 @@ import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.graphics.Rect;
 import android.os.Debug;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.TypedValue;
+import com.android.server.EventLogTags;
 
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
@@ -45,7 +47,7 @@ public class TaskStack {
 
     /** The Tasks that define this stack. Oldest Tasks are at the bottom. The ordering must match
      * mTaskHistory in the ActivityStack with the same mStackId */
-    private ArrayList<Task> mTasks = new ArrayList<Task>();
+    private final ArrayList<Task> mTasks = new ArrayList<Task>();
 
     /** The StackBox this sits in. */
     StackBox mStackBox;
@@ -70,7 +72,6 @@ public class TaskStack {
         mService = service;
         mStackId = stackId;
         mDisplayContent = displayContent;
-        final int displayId = displayContent.getDisplayId();
         mDimLayer = new DimLayer(service, this);
         mAnimationBackgroundSurface = new DimLayer(service, this);
     }
@@ -120,6 +121,7 @@ public class TaskStack {
         mTasks.add(stackNdx, task);
 
         task.mStack = this;
+        mDisplayContent.addTask(task, toTop);
         return mDisplayContent.moveHomeStackBox(mStackId == HOME_STACK_ID);
     }
 
@@ -145,11 +147,13 @@ public class TaskStack {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
         mStackBox.makeDirty();
         mTasks.remove(task);
+        mDisplayContent.removeTask(task);
     }
 
     int remove() {
         mAnimationBackgroundSurface.destroySurface();
         mDimLayer.destroySurface();
+        EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
         return mStackBox.remove();
     }
 
@@ -267,6 +271,8 @@ public class TaskStack {
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowState win = windows.get(winNdx);
                     if (!resizingWindows.contains(win)) {
+                        if (WindowManagerService.DEBUG_RESIZE) Slog.d(TAG,
+                                "setBounds: Resizing " + win);
                         resizingWindows.add(win);
                     }
                     win.mUnderStatusBar = underStatusBar;

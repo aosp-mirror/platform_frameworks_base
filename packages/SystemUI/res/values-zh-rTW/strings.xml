@@ -155,6 +155,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"電池電量：<xliff:g id="STATE">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"飛航模式：<xliff:g id="STATE">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"藍牙：<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"定位服務<xliff:g id="STATE">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"鬧鐘已設定為：<xliff:g id="TIME">%s</xliff:g>。"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"已停用 2G-3G 數據"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"已停用 4G 數據"</string>
@@ -197,8 +198,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未連線"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"沒有網路"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"關閉 Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi 顯示裝置"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"無線螢幕分享"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"投放螢幕"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"網路可能\n受到監控"</string>

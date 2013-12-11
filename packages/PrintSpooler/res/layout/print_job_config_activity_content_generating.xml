@@ -23,7 +23,6 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/editable_background"
         android:orientation="vertical">
 
         <TextView
@@ -51,23 +50,30 @@
             style="?android:attr/progressBarStyleLarge">
         </ProgressBar>
 
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/action_button_background">
+
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
             android:background="@color/separator">
         </View>
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/cancel"
+            android:textSize="16sp"
+            android:textColor="@color/important_text">
+        </Button>
 
-    <Button
-        android:id="@+id/cancel_button"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="fill_horizontal"
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/cancel"
-        android:textSize="16sp"
-        android:textColor="@color/important_text">
-    </Button>
+    </FrameLayout>
 
 </LinearLayout>

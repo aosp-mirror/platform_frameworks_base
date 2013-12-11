@@ -1,0 +1,11 @@
+page.title=Input
+@jd:body
+
+
+<div id="samples" class="input">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

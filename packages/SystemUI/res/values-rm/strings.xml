@@ -276,6 +276,8 @@
     <skip />
     <!-- no translation found for accessibility_quick_settings_bluetooth (5749054971341882340) -->
     <skip />
+    <!-- no translation found for accessibility_quick_settings_location (4577282329866813100) -->
+    <skip />
     <!-- no translation found for accessibility_quick_settings_alarm (3959908972897295660) -->
     <skip />
     <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
@@ -360,9 +362,7 @@
     <skip />
     <!-- no translation found for quick_settings_wifi_off_label (7558778100843885864) -->
     <skip />
-    <!-- no translation found for quick_settings_wifi_display_label (6893592964463624333) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_display_no_connection_label (2355298740765736918) -->
+    <!-- no translation found for quick_settings_remote_display_no_connection_label (372107699274391290) -->
     <skip />
     <!-- no translation found for quick_settings_brightness_dialog_title (8599674057673605368) -->
     <skip />

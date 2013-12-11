@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Veuillez saisir une clé PUK comportant au moins huit chiffres."</string>
     <string name="needPuk" msgid="919668385956251611">"Votre carte SIM est verrouillée par clé PUK. Saisissez la clé PUK pour la déverrouiller."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Saisissez la clé PUK2 pour débloquer la carte SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"Opération infructueuse. Activez le verrouillage SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative avant que votre carte SIM soit verrouillée."</item>
+    <item quantity="other" msgid="7530597808358774740">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative(s) avant que votre carte SIM soit verrouillée."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"Code IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Numéro de l\'appelant (entrant)"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service RPV. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"se fixer à un fond d\'écran"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un fond d\'écran. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"lier à un écran distant"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un écran distant. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"s\'associer à un service de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service de widget. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir avec l\'administrateur d\'un périphérique"</string>
@@ -783,7 +790,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Conversations"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Entrée"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Sélectionnez une application"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Impossible de lancer l\'application <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Partagez avec"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Partager avec <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Poignée coulissante. Appuyez de manière prolongée."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Système"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Affichage sans fil"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Terminé"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortie multimédia"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexion à l\'appareil"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Diffuser l\'écran sur l\'appareil"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Recherche d\'appareils en cours…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Paramètres"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Déconnecter"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Analyse en cours..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Connexion en cours..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Disponible"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposition n° <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g> : <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sécurisé"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"L\'affichage sans fil est connecté."</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Cet écran s\'affiche sur un autre appareil."</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Connexion à l\'écran en cours"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Connexion au réseau <xliff:g id="NAME">%1$s</xliff:g> en cours…"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Diffusion de l\'écran en cours"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Connecté à <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Déconnecter"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Appel d\'urgence"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"J\'ai oublié le schéma"</string>

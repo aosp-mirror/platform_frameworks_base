@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"พิมพ์รหัส PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"พิมพ์ PUK และรหัส PIN ใหม่"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"รหัส PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"รหัส PIN ใหม่"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"พิมพ์ PUK และรหัส PIN ใหม่"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"รหัส PUK ของซิม"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"รหัส PIN ของซิมใหม่"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"แตะเพื่อพิมพ์รหัสผ่าน"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"พิมพ์รหัสผ่านเพื่อปลดล็อก"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"พิมพ์ PIN เพื่อปลดล็อก"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"ป้อนรหัส PIN ที่ต้องการ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"ยืนยันรหัส PIN ที่ต้องการ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"กำลังปลดล็อกซิมการ์ด…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"รหัส PIN ไม่ถูกต้อง"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"พิมพ์ PIN ซึ่งเป็นเลข 4 ถึง 8 หลัก"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"รหัส PUK ต้องเป็นตัวเลขอย่างน้อย 8 หลัก"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"ใส่รหัส PUK ที่ถูกต้องอีกครั้ง การพยายามซ้ำหลายครั้งจะทำให้ซิมการ์ดถูกปิดใช้งานอย่างถาวร"</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"นำออก"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"รหัส PIN ของซิมไม่ถูกต้อง ตอนนี้คุณต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</item>
+    <item quantity="other" msgid="2215723361575359486">"รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้ง"</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ซิมไม่สามารถใช้งานได้ ติดต่อผู้ให้บริการของคุณ"</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร"</item>
+    <item quantity="other" msgid="5477305226026342036">"รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร"</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"การปลดล็อกด้วย PIN ของซิมล้มเหลว!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"การปลดล็อกด้วย PUK ของซิมล้มเหลว!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"รหัสได้รับการยอมรับ!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"ปุ่มแทร็กก่อนหน้า"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"ปุ่มแทร็กถัดไป"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"ปุ่มหยุดชั่วคราว"</string>

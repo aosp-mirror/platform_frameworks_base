@@ -1,0 +1,112 @@
+page.title=Your Branding
+page.tags="branding","logo"
+@jd:body
+
+<p>Following Android design patterns doesn't mean that your app has to look the same as
+everyone else's. In Android, your app can shine as an extension of your brand. </p>
+
+<h2 id="color">Color</h2>
+
+<p>Use your brand color for accent by overriding the Android framework's default blue in UI elements like checkboxes, progress bars, radio buttons, sliders, tabs, and scroll indicators.</p>
+
+<p>Look for opportunities to use high-contrast color for emphasis, for example, as the background color of the action bar or a primary button. But don't go overboard: not all actions are equal, so use it only for the one or two most important things.</p>
+<p>When customizing colors, <a href="{@docRoot}design/style/touch-feedback.html">touch feedback</a>
+  should be subtle &mdash; just slightly lighter or darker than the untouched color.</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/branding_wallet.png" style="width:94%">
+    <div class="figure-caption">
+      The four colors of the Google Wallet logo provide a playful accent to the four dots
+      that appear as the user enters a PIN.
+    </div>
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/branding_googlemusic.png" style="width:94%">
+    <div class="figure-caption">
+      The Google Play Music app has an orange theme color, which is used for emphasis
+      in the action bar and for accent in the selected tab, scroll indicator, and
+      hyperlinks.
+    </div>
+  </div>
+</div>
+
+<h2 id="logo">Logo</h2>
+
+<p>Your app's <a href="{@docRoot}design/style/iconography.html#launcher">launcher icon</a> is
+  a key place to incorporate your logo, because it's what
+  users will look for and touch to begin using your app. You can carry the launcher
+  icon through to all the screens in your app by showing it in the
+  <a href="{@docRoot}design/patterns/actionbar.html">action bar</a> along
+  with the name of the app.</p>
+
+<p>Another approach to consider is to have your logo take the place of the launcher icon
+and app name in the action bar.</p>
+
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+        <img src="{@docRoot}design/media/yourbranding_icon.png" style="width:60px;float:left;padding-right:1em;">
+    <div class="figure-caption" style="widdth:220px;margin-left:20px;">
+    The HowzAbout app uses a launcher icon that is a shortened version of its full logo.
+    </div>
+
+  </div>
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/yourbranding_app.png" style="width:94%">
+    <div class="figure-caption">
+      Example of a the logo in the action bar. This works well in cases where the brand's logo matches the name of the app.
+    </div>
+  </div>
+</div> 
+
+<h2 id="logo">Icons</h2>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <p>If you have icons that you're already using for your app on other platforms
+    and they have a distinctive look intended to fit your brand, use them on your
+    Android app as well. <strong>If you take this approach, make sure your brand styling is
+    applied to every single icon in your app</strong>.</p>
+
+  </div>
+
+  <div class="layout-content-col span-6">
+    <img src="{@docRoot}design/media/yourbranding_in-app-icons.png" style="width:300px;margin:12px 48px 0 16px;"">
+    </div>
+  </div>
+</div>
+  <p>One exception: For any icon in your existing set where the symbol is different from
+  Android's, use Android's symbol but give it your brand's styling. That way, users will
+  understand what the purpose of the icon is based on what they've learned in other
+  Android apps (Design principle:
+  <a href="{@docRoot}design/get-started/principles.html#give-me-tricks">Give me tricks that
+  work everywhere</a>). But the icon will still look like it belongs with all of
+  your other icons as a part of your brand.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <p><strong>Example</strong>:<br />
+    </p>
+    <p>The brand's normal icon for sharing on other platforms is a right arrow.
+  </div>
+
+  <div class="layout-content-col span-6 lasyout-with-list-item-margins">
+
+    <div style="margin-bottom:1em;">
+      <span class="do-dont-label bad" style="margin-left:12px">Don't</span>
+      <span style="margin-left: 44px;"  class="do-dont-label good"><strong>Do</strong></span>
+    </div>
+      <img src="{@docRoot}design/media/yourbranding_sharing.png" style="width:200px;">
+  </div>
+</div>
+
+<p>What if you don't already have your own icons &mdash; for example, if you're creating a
+brand new app only for Android? In this case, use Android's standard icons and rely
+more on color and logo for branding. Get the Action Bar Icon Pack, available for free
+in <a href="{@docRoot}design/downloads/index.html">Downloads</a>.</p>

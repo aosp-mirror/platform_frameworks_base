@@ -457,6 +457,13 @@ public class Build {
          * margins correctly.</li>
          * <li> {@link android.app.ActionBar}'s window content overlay is allowed to be
          * drawn.</li>
+         * <li>The {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+         * permission is now always enforced.</li>
+         * <li>Access to package-specific external storage directories belonging
+         * to the calling app no longer requires the
+         * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} or
+         * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+         * permissions.</li>
          * </ul>
          */
         public static final int KITKAT = 19;

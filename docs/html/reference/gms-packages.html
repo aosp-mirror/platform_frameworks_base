@@ -420,7 +420,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -506,26 +521,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -648,127 +660,169 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr class=" api apilevel-" >
         <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/ads/package-summary.html">com.google.android.gms.ads</a></td>
+        <td class="jd-descrcol" width="100%">Contains classes for Google Ads.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/ads/identifier/package-summary.html">com.google.android.gms.ads.identifier</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/ads/mediation/package-summary.html">com.google.android.gms.ads.mediation</a></td>
+        <td class="jd-descrcol" width="100%">Contains classes for Google Ads mediation adapters.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/ads/mediation/admob/package-summary.html">com.google.android.gms.ads.mediation.admob</a></td>
+        <td class="jd-descrcol" width="100%">Contains classes for the AdMob mediation adapter.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/ads/mediation/customevent/package-summary.html">com.google.android.gms.ads.mediation.customevent</a></td>
+        <td class="jd-descrcol" width="100%">Contains classes for Google Ads mediation custom events.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/appstate/package-summary.html">com.google.android.gms.appstate</a></td>
         <td class="jd-descrcol" width="100%">Contains classes for manipulating saved app state data.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/auth/package-summary.html">com.google.android.gms.auth</a></td>
         <td class="jd-descrcol" width="100%">Contains classes for authenticating Google accounts.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/common/package-summary.html">com.google.android.gms.common</a></td>
         <td class="jd-descrcol" width="100%">Contains utility classes for Google Play services.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/common/data/package-summary.html">com.google.android.gms.common.data</a></td>
         <td class="jd-descrcol" width="100%">Contains classes for accessing data from Google Play services.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/common/images/package-summary.html">com.google.android.gms.common.images</a></td>
         <td class="jd-descrcol" width="100%">Contains classes for loading images from Google Play services.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/package-summary.html">com.google.android.gms.games</a></td>
         <td class="jd-descrcol" width="100%">Contains the games client class.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/achievement/package-summary.html">com.google.android.gms.games.achievement</a></td>
         <td class="jd-descrcol" width="100%">Contains classes for loading and updating achievements.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/leaderboard/package-summary.html">com.google.android.gms.games.leaderboard</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for leaderboards.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/multiplayer/package-summary.html">com.google.android.gms.games.multiplayer</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for multiplayer functionality.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/multiplayer/realtime/package-summary.html">com.google.android.gms.games.multiplayer.realtime</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for real-time multiplayer functionality.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/gcm/package-summary.html">com.google.android.gms.gcm</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/location/package-summary.html">com.google.android.gms.location</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/maps/package-summary.html">com.google.android.gms.maps</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google Maps Android API classes.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/maps/model/package-summary.html">com.google.android.gms.maps.model</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google Maps Android API model classes.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/panorama/package-summary.html">com.google.android.gms.panorama</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/plus/package-summary.html">com.google.android.gms.plus</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google+ platform for Android.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/plus/model/moments/package-summary.html">com.google.android.gms.plus.model.moments</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/plus/model/people/package-summary.html">com.google.android.gms.plus.model.people</a></td>
         <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/wallet/package-summary.html">com.google.android.gms.wallet</a></td>
+        <td class="jd-descrcol" width="100%">Contains the Wallet Client for Google Play services.</td>
     </tr>
 
 

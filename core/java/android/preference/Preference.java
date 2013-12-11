@@ -1069,11 +1069,11 @@ public class Preference implements Comparable<Preference> {
      * @return 0 if the same; less than 0 if this Preference sorts ahead of <var>another</var>;
      *          greater than 0 if this Preference sorts after <var>another</var>.
      */
+    @Override
     public int compareTo(Preference another) {
-        if (mOrder != DEFAULT_ORDER
-                || (mOrder == DEFAULT_ORDER && another.mOrder != DEFAULT_ORDER)) {
+        if (mOrder != another.mOrder) {
             // Do order comparison
-            return mOrder - another.mOrder; 
+            return mOrder - another.mOrder;
         } else if (mTitle == another.mTitle) {
             // If titles are null or share same object comparison
             return 0;

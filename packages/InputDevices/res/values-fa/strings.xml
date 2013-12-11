@@ -2,17 +2,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Input Devices"</string>
-    <string name="keyboard_layouts_label" msgid="6688773268302087545">"صفحه‌کلید Android"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"‏صفحه‌کلید Android"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"انگلیسی (بریتانیا)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"انگلیسی (امریکا)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"انگلیسی (ایالات متحده)، سبک بین‌المللی"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"انگلیسی (ایالات متحده)، سبک Colemak"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"انگلیسی (ایالات متحده)، سبک Dvorak"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"‏انگلیسی (ایالات متحده)، سبک Colemak"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"‏انگلیسی (ایالات متحده)، سبک Dvorak"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"آلمانی"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"فرانسوی"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"فرانسوی (کانادا)‏"</string>
     <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"روسی"</string>
-    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"روسی، سبک Mac"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"‏روسی، سبک Mac"</string>
     <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"اسپانیایی"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"فرانسوی سوئیس"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"آلمانی سوئیسی"</string>

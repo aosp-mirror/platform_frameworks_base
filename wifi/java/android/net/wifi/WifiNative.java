@@ -39,7 +39,6 @@ import java.util.Locale;
 public class WifiNative {
 
     private static final boolean DBG = false;
-    private static final boolean VDBG = false;
     private final String mTAG;
     private static final int DEFAULT_GROUP_OWNER_INTENT     = 6;
 
@@ -118,12 +117,12 @@ public class WifiNative {
 
     public boolean connectToSupplicant() {
         // No synchronization necessary .. it is implemented in WifiMonitor
-        if (VDBG) localLog(mInterfacePrefix + "connectToSupplicant");
+        localLog(mInterfacePrefix + "connectToSupplicant");
         return connectToSupplicantNative();
     }
 
     public void closeSupplicantConnection() {
-        if (VDBG) localLog(mInterfacePrefix + "closeSupplicantConnection");
+        localLog(mInterfacePrefix + "closeSupplicantConnection");
         closeSupplicantConnectionNative();
     }
 
@@ -136,9 +135,9 @@ public class WifiNative {
         if (DBG) Log.d(mTAG, "doBoolean: " + command);
         synchronized (mLock) {
             int cmdId = getNewCmdIdLocked();
-            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
+            localLog(cmdId + "->" + mInterfacePrefix + command);
             boolean result = doBooleanCommandNative(mInterfacePrefix + command);
-            if (VDBG) localLog(cmdId + "<-" + result);
+            localLog(cmdId + "<-" + result);
             if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
@@ -148,9 +147,9 @@ public class WifiNative {
         if (DBG) Log.d(mTAG, "doInt: " + command);
         synchronized (mLock) {
             int cmdId = getNewCmdIdLocked();
-            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
+            localLog(cmdId + "->" + mInterfacePrefix + command);
             int result = doIntCommandNative(mInterfacePrefix + command);
-            if (VDBG) localLog(cmdId + "<-" + result);
+            localLog(cmdId + "<-" + result);
             if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
@@ -160,9 +159,9 @@ public class WifiNative {
         if (DBG) Log.d(mTAG, "doString: " + command);
         synchronized (mLock) {
             int cmdId = getNewCmdIdLocked();
-            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
+            localLog(cmdId + "->" + mInterfacePrefix + command);
             String result = doStringCommandNative(mInterfacePrefix + command);
-            if (VDBG) localLog(cmdId + "<-" + result);
+            localLog(cmdId + "<-" + result);
             if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
@@ -298,7 +297,9 @@ public class WifiNative {
      * the firmware can remember before it runs out of buffer space or -1 on error
      */
     public String setBatchedScanSettings(BatchedScanSettings settings) {
-        if (settings == null) return doStringCommand("DRIVER WLS_BATCHING STOP");
+        if (settings == null) {
+            return doStringCommand("DRIVER WLS_BATCHING STOP");
+        }
         String cmd = "DRIVER WLS_BATCHING SET SCANFREQ=" + settings.scanIntervalSec;
         cmd += " MSCAN=" + settings.maxScansPerBatch;
         if (settings.maxApPerScan != BatchedScanSettings.UNSPECIFIED) {

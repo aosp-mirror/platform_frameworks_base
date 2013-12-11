@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Введите PIN-код"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Введите PUK-код и новый PIN-код"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-код"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Новый PIN-код"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Введите PUK-код и новый PIN-код"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK-код"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Новый PIN-код"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Нажмите для ввода пароля"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Введите пароль"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Введите PIN-код"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Введите желаемый PIN-код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Введите PIN-код ещё раз"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Разблокировка SIM-карты…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Неверный PIN-код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Введите PIN-код (от 4 до 8 цифр)."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-код должен содержать не менее 8 символов."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Введите правильный PUK-код. После нескольких неудачных попыток SIM-карта будет заблокирована."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки телефона потребуется войти в аккаунт Google.\n\nПовтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Удалить"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неверный PIN-код. Обратитесь к оператору связи, чтобы разблокировать SIM-карту."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Неверный PIN-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована и вам придется обратиться к оператору связи."</item>
+    <item quantity="other" msgid="2215723361575359486">"Неверный PIN-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-карта заблокирована навсегда. Обратитесь к оператору связи."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Неверный PUK-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована навсегда."</item>
+    <item quantity="other" msgid="5477305226026342036">"Неверный PUK-код. Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>. После этого SIM-карта будет заблокирована навсегда."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Не удалось разблокировать SIM-карту"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Не удалось разблокировать SIM-карту"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Код принят"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Кнопка перехода к предыдущему треку"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Кнопка перехода к следующему треку"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Кнопка паузы"</string>

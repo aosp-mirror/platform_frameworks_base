@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"បញ្ចូល​កូដ PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"បញ្ចូល​កូដ PUK និង​ PIN ថ្មី"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"កូដ PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"កូដ PIN ថ្មី"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"បញ្ចូល​លេខ​កូដ PUK  និង​​ PIN ថ្មី​របស់​ស៊ីម"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"លេខ​កូដ PUK ស៊ីម"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"លេខ​កូដ PIN ស៊ីម​ថ្មី"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"ប៉ះ ដើម្បី​បញ្ចូល​ពាក្យ​សម្ងាត់"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"បញ្ចូល​ពាក្យ​សម្ងាត់​ ​ដើម្បី​ដោះ​សោ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"បញ្ចូល​កូដ PIN ដើម្បី​ដោះ​សោ"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"បញ្ចូល​កូដ PIN ដែល​ចង់​បាន"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"បញ្ជាក់​កូដ PIN ដែល​ចង់​បាន"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"កំពុង​ដោះ​សោ​​ស៊ីម​កាត..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"កូដ PIN មិន​ត្រឹមត្រូវ។"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"បញ្ចូល​កូដ PIN ដែល​មាន​ពី ៤ ដល់ ៨ លេខ។"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"កូដ PUK គួរ​តែ​មាន​​ ៨ លេខ ឬ​​ច្រើន​ជាង​នេះ។"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"បញ្ចូល​កូដ PUK ម្ដង​ទៀត។ ការ​ព្យាយាម​ដដែល​ច្រើន​ដឹង​នឹង​បិទ​ស៊ីម​កាត​ជា​អចិន្ត្រៃយ៍។"</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម​មិន​ជោគជ័យ​​ច្រើនជាង <xliff:g id="NUMBER_1">%d</xliff:g> ដង អ្នក​នឹង​ត្រូវ​បាន​​ស្នើ​ឲ្យ​ដោះ​សោ​ទូរស័ព្ទ​របស់​អ្នក​ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%d</xliff:g> វិនាទី។"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"លុប​ចេញ"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"លេខ​កូដ PIN ស៊ីម​មិន​ត្រឹមត្រូវ អ្នក​ត្រូវ​ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក​ឥឡូវ​នេះ ដើម្បី​ដោះ​សោ​ឧបករណ៍​របស់​អ្នក។"</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"លេខ​កូដ PIN ស៊ីម​មិន​​ត្រឹមត្រូវ​, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​អ្នក​ត្រូវ​​ទាក់ទង​ក្រុម​ហ៊ុន​​​បញ្ជូន​របស់​អ្នក​​ ដើម្បី​​​ដោះ​សោ​ឧបករណ៍​របស់​អ្នក​។"</item>
+    <item quantity="other" msgid="2215723361575359486">"លេខ​កូដ​ PIN ស៊ីម​មិន​ត្រឹមត្រូវ​, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅ​​សល់​។"</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ស៊ីម​មិន​អាច​ប្រើ​បាន។ ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក។"</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"លេខ​កូដ PUK ស៊ីម​មិន​ត្រឹមត្រូវ, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅ​សល់ មុន​ពេល​ស៊ីម​​ក្លាយ​ជា​មិន​អាច​ប្រើ​បាន​ជា​អចិន្ត្រៃយ៍​។"</item>
+    <item quantity="other" msgid="5477305226026342036">"លេខ​កូដ PUK ស៊ីម​មិន​ត្រឹមត្រូវ, អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅ​សល់ មុន​ពេល​ស៊ីម​​ក្លាយ​ជា​មិន​អាច​ប្រើ​បាន​ជា​អចិន្ត្រៃយ៍​។"</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​លេខ​កូដ PIN ស៊ីម!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​​លេខ​កូដ PUK ស៊ីម!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"បាន​ទទួល​យក​លេខ​កូដ​!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"ប៊ូតុង​បទ​មុន"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"ប៊ូតុង​បទ​បន្ទាប់"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"ប៊ូតុង​ផ្អាក"</string>

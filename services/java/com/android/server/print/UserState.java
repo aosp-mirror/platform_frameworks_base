@@ -231,10 +231,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         for (int i = 0; i < cachedPrintJobCount; i++) {
             PrintJobInfo cachedPrintJob = cachedPrintJobs.get(i);
             result.put(cachedPrintJob.getId(), cachedPrintJob);
-            // Strip out the tag - it is visible only to print services.
-            // Also the cached print jobs are delivered only to apps, so
-            // stripping the tag of a cached print job is fine.
+            // Strip out the tag and the advanced print options.
+            // They are visible only to print services.
             cachedPrintJob.setTag(null);
+            cachedPrintJob.setAdvancedOptions(null);
         }
 
         // Add everything else the spooler knows about.
@@ -245,8 +245,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             for (int i = 0; i < printJobCount; i++) {
                 PrintJobInfo printJob = printJobs.get(i);
                 result.put(printJob.getId(), printJob);
-                // Strip out the tag - it is visible only to print services.
+                // Strip out the tag and the advanced print options.
+                // They are visible only to print services.
                 printJob.setTag(null);
+                printJob.setAdvancedOptions(null);
             }
         }
 
@@ -255,10 +257,16 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
     public PrintJobInfo getPrintJobInfo(PrintJobId printJobId, int appId) {
         PrintJobInfo printJob = mPrintJobForAppCache.getPrintJob(printJobId, appId);
-        if (printJob != null) {
-            return printJob;
+        if (printJob == null) {
+            printJob = mSpooler.getPrintJobInfo(printJobId, appId);
         }
-        return mSpooler.getPrintJobInfo(printJobId, appId);
+        if (printJob != null) {
+            // Strip out the tag and the advanced print options.
+            // They are visible only to print services.
+            printJob.setTag(null);
+            printJob.setAdvancedOptions(null);
+        }
+        return printJob;
     }
 
     public void cancelPrintJob(PrintJobId printJobId, int appId) {

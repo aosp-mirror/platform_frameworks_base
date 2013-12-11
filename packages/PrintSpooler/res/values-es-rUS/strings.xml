@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Cola de impresión"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"Config. de impresora"</string>
     <string name="print_button" msgid="645164566271246268">"Imprimir"</string>
     <string name="save_button" msgid="1921310454071758999">"Guardar"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destino"</string>
@@ -40,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Cuadro de búsqueda visible"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Cuadro de búsqueda oculto"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Agregar impresora"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Seleccionar impresora"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"No recordar impresora"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"Se encontró <xliff:g id="COUNT">%1$s</xliff:g> impresora."</item>
     <item quantity="other" msgid="6533817036607128241">"Se encontraron <xliff:g id="COUNT">%1$s</xliff:g> impresoras."</item>

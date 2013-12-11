@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Wpisz kod PUK składający się z co najmniej 8 cyfr."</string>
     <string name="needPuk" msgid="919668385956251611">"Karta SIM jest zablokowana kodem PUK. Wprowadź kod PUK, aby odblokować kartę."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Wprowadź kod PUK2, aby odblokować kartę SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"Nie udało się. Włącz blokadę karty SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> próbę, zanim karta SIM zostanie zablokowana."</item>
+    <item quantity="other" msgid="7530597808358774740">"Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> prób(y), zanim karta SIM zostanie zablokowana."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Nazwa rozmówcy przy połączeniach przychodzących"</string>
@@ -377,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Pozwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi VPN. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"powiązanie z tapetą"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Pozwala na tworzenie powiązania z interfejsem najwyższego poziomu tapety. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"powiązanie z wyświetlaczem zdalnym"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu wyświetlacza zdalnego. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"powiązanie z usługą widżetów"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi widżetów. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcja z administratorem urządzenia"</string>
@@ -1204,7 +1211,7 @@
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Na czas połączenia z <xliff:g id="DEVICE_NAME">%1$s</xliff:g> telefon zostanie tymczasowo odłączony od Wi-Fi"</string>
     <string name="select_character" msgid="3365550120617701745">"Wstaw znak"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Wysyłanie wiadomości SMS"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wysyła wiele SMS-ów. Chcesz pozwolić tej aplikacji dalej wysyłać SMS-y?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"Aplikacja &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wysyła wiele SMS-ów. Chcesz pozwolić tej aplikacji dalej wysyłać SMS-y?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Pozwól"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Odmów"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce wysłać wiadomość do &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
@@ -1414,6 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Wybierz aplikację"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nie udało się uruchomić aplikacji <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>
@@ -1483,8 +1491,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Dźwięk Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Wyświetlacz bezprzewodowy"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Gotowe"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Wyjście multimediów"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Połącz z urządzeniem"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prezentuj ekran na urządzeniu"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Szukam urządzeń…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Ustawienia"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Rozłącz"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Skanuję..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Łączę..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Dostępne"</string>
@@ -1495,8 +1507,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Nakładka nr <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", bezpieczny"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Podłączony jest wyświetlacz bezprzewodowy"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Ten ekran jest wyświetlany na innym urządzeniu"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Rozpoczynam prezentowanie ekranu"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Łączę z <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Trwa prezentowanie ekranu"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Połączono z <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Rozłącz"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Połączenie alarmowe"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nie pamiętam wzoru"</string>

@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -785,6 +797,28 @@ Summary:
           static
           
           int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#adSize">adSize</a></td>
+          <td class="jd-descrcol" width="100%">The size of the ad.</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#adUnitId">adUnitId</a></td>
+          <td class="jd-descrcol" width="100%">The ad unit ID.</td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#cameraBearing">cameraBearing</a></td>
           <td class="jd-descrcol" width="100%"><p>Must be a floating point value, such as "<code>1.2</code>".</td>
       </tr>
@@ -962,12 +996,23 @@ Summary:
           static
           
           int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#name">name</a></td>
+          <td class="jd-descrcol" width="100%">The name of this parameter.</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#noIndex">noIndex</a></td>
           <td class="jd-descrcol" width="100%">Indicates if this section should not be indexed.</td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -978,7 +1023,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -989,7 +1034,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1000,7 +1045,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1008,6 +1053,17 @@ Summary:
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#trimmable">trimmable</a></td>
           <td class="jd-descrcol" width="100%">Indicates if documents from this corpus can be trimmed when the index reaches its quota.</td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#type">type</a></td>
+          <td class="jd-descrcol" width="100%">The type of this section.</td>
       </tr>
       
     
@@ -1094,12 +1150,23 @@ Summary:
           static
           
           int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#value">value</a></td>
+          <td class="jd-descrcol" width="100%">The value of this parameter.</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#version">version</a></td>
           <td class="jd-descrcol" width="100%">The version of the corpus.</td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1110,7 +1177,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1400,6 +1467,79 @@ From class
 <!-- ========= FIELD DETAIL ======== -->
 <h2>Fields</h2>
 
+
+
+
+<A NAME="adSize"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        adSize
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The size of the ad. It must be one of BANNER, FULL_BANNER, LEADERBOARD,
+    MEDIUM_RECTANGLE, SMART_BANNER, WIDE_SKYSCRAPER, or
+    &lt;width&gt;x&lt;height&gt;.
+
+         <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="adUnitId"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        adUnitId
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The ad unit ID. 
+         <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+</p></div>
+
+    
+    </div>
+</div>
 
 
 
@@ -1975,6 +2115,41 @@ containing a value of this type.
 
 
 
+<A NAME="name"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        name
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of this parameter. Required. 
+         <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
 <A NAME="noIndex"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2155,6 +2330,44 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="type"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        type
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The type of this section. Required. 
+         <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>match_global_nicknames</code></td><td>1</td><td>  Enable global nickname matching on this section </td></tr>
+<tr><td><code>demote_common_words</code></td><td>2</td><td>  Demote common words by a factor in this section </td></tr>
+</table>
 </p></div>
 
     
@@ -2388,6 +2601,41 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="value"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        value
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The value of this parameter. Optional. 
+         <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
 theme attribute (in the form

@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -867,6 +879,43 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setExpirationDuration(long)">setExpirationDuration</a></span>(long durationMillis)</nobr>
         
         <div class="jd-descrdiv">Sets the expiration duration of geofence.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setLoiteringDelay(int)">setLoiteringDelay</a></span>(int loiteringDelayMs)</nobr>
+        
+        <div class="jd-descrdiv">Sets the delay between GEOFENCE_TRANSITION_ENTER and
+ GEOFENCE_TRANSITION_DWELLING in milliseconds.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setNotificationResponsiveness(int)">setNotificationResponsiveness</a></span>(int notificationResponsivenessMs)</nobr>
+        
+        <div class="jd-descrdiv">Sets the best-effort notification responsiveness of the geofence.</div>
   
   </td></tr>
 
@@ -1324,6 +1373,106 @@ From class
             or <code><a href="/reference/com/google/android/gms/location/Geofence.html#NEVER_EXPIRE">NEVER_EXPIRE</a></code> to indicate no expiration. When
             positive, this geofence will be removed automatically
             after this amount of time.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setLoiteringDelay(int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a>
+      </span>
+      <span class="sympad">setLoiteringDelay</span>
+      <span class="normal">(int loiteringDelayMs)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the delay between GEOFENCE_TRANSITION_ENTER and
+ GEOFENCE_TRANSITION_DWELLING in milliseconds. For example, if
+ loitering delay is set to 300000 ms (i.e. 5 minutes) the geofence
+ service will send a <code><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_DWELL">GEOFENCE_TRANSITION_DWELL</a></code> alert roughly
+ 5 minutes after user enters a geofence if the user stays inside the
+ geofence during this period of time. If the user exits from the
+ geofence in this amount of time, <code><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_DWELL">GEOFENCE_TRANSITION_DWELL</a></code>
+ alert won't be sent.
+ <p>
+ This value is ignored if the transition types don't include a
+ <code><a href="/reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_DWELL">GEOFENCE_TRANSITION_DWELL</a></code> filter.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>loiteringDelayMs</td>
+          <td>the delay for confirming dwelling, in
+            milliseconds
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setNotificationResponsiveness(int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a>
+      </span>
+      <span class="sympad">setNotificationResponsiveness</span>
+      <span class="normal">(int notificationResponsivenessMs)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the best-effort notification responsiveness of the geofence.
+ Defaults to 0. Setting a big responsiveness value, for example 5
+ minutes, can save power significantly. However, setting a very small
+ responsiveness value, for example 5 seconds, doesn't necessarily mean
+ you will get notified right after the user enters or exits a
+ geofence: internally, the geofence might adjust the responsiveness
+ value to save power when needed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>notificationResponsivenessMs</td>
+          <td>(milliseconds) defines the
+            best-effort description of how soon should the callback be
+            called when the transition associated with the Geofence is
+            triggered. For instance, if set to 300000 milliseconds the
+            callback will be called 5 minutes within entering or
+            exiting the geofence.
 </td>
         </tr>
       </table>

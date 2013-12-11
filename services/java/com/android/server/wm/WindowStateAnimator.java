@@ -360,6 +360,10 @@ class WindowStateAnimator {
                     + mWin.mToken + ": first real window done animating");
             mService.mFinishedStarting.add(mWin.mAppToken);
             mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
+        } else if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.mPolicyVisibility) {
+            // Upon completion of a not-visible to visible status bar animation a relayout is
+            // required.
+            mWin.mDisplayContent.layoutNeeded = true;
         }
 
         finishExit();
@@ -845,9 +849,9 @@ class WindowStateAnimator {
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
-        if (mIsWallpaper && mService.mLowerWallpaperTarget == null
-                && mService.mWallpaperTarget != null) {
-            final WindowStateAnimator wallpaperAnimator = mService.mWallpaperTarget.mWinAnimator;
+        final WindowState wallpaperTarget = mService.mWallpaperTarget;
+        if (mIsWallpaper && wallpaperTarget != null && mService.mAnimateWallpaperWithTarget) {
+            final WindowStateAnimator wallpaperAnimator = wallpaperTarget.mWinAnimator;
             if (wallpaperAnimator.mHasLocalTransformation &&
                     wallpaperAnimator.mAnimation != null &&
                     !wallpaperAnimator.mAnimation.getDetachWallpaper()) {
@@ -856,8 +860,9 @@ class WindowStateAnimator {
                     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
                 }
             }
-            final AppWindowAnimator wpAppAnimator = mAnimator.getWallpaperAppAnimator();
-            if (wpAppAnimator != null && wpAppAnimator.hasTransformation
+            final AppWindowAnimator wpAppAnimator = wallpaperTarget.mAppToken == null ?
+                    null : wallpaperTarget.mAppToken.mAppAnimator;
+                if (wpAppAnimator != null && wpAppAnimator.hasTransformation
                     && wpAppAnimator.animation != null
                     && !wpAppAnimator.animation.getDetachWallpaper()) {
                 appTransformation = wpAppAnimator.transformation;

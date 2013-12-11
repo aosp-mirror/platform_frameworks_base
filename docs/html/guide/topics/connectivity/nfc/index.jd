@@ -14,6 +14,18 @@ page.title=Near Field Communication
   framework APIs are based around a <a href="http://www.nfc-forum.org/">NFC Forum</a> standard
   called NDEF (NFC Data Exchange Format).</p>
 
+<p>Android-powered devices with NFC simultaneously support three main modes of operation:</p>
+
+<ol>
+<li><strong>Reader/writer mode</strong>, allowing the NFC device to read and/or write 
+passive NFC tags and stickers.</li>
+<li><strong>P2P mode</strong>, allowing the NFC device to exchange data with other NFC 
+peers; this operation mode is used by Android Beam.</li>
+<li><strong>Card emulation mode</strong>, allowing the NFC device itself to act as an NFC 
+card. The emulated NFC card can then be accessed by an external NFC reader, 
+such as an NFC point-of-sale terminal.</li>
+</ol>
+
   <dl>
     <dt><strong><a href="{@docRoot}guide/topics/connectivity/nfc/nfc.html">NFC Basics</a></strong></dt>
     <dd>This document describes how Android handles discovered NFC tags and how it notifies
@@ -29,5 +41,10 @@ NFC feature set of Android.</dd>
     bytes using your own protocol stack. In these cases, Android provides support to detect
     certain tag technologies and to open communication with the tag using your own protocol
     stack.</dd>
+
+    <dt><strong><a href="{@docRoot}guide/topics/connectivity/nfc/hce.html">Host-based Card Emulation</a></strong></dt>
+    <dd>This document describes how Android devices can perform as NFC cards without using
+    a secure element, allowing any Android application to emulate a card and talk directly to
+    the NFC reader.</dd>
   </dl>
 </p>

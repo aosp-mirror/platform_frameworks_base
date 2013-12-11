@@ -1,0 +1,11 @@
+page.title=Connectivity
+@jd:body
+
+
+<div id="samples" class="connectivity">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

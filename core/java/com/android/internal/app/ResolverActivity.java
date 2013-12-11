@@ -181,11 +181,12 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             } else {
                 mAlwaysUseOption = false;
             }
-        }
-        final int initialHighlight = mAdapter.getInitialHighlight();
-        if (initialHighlight >= 0) {
-            mListView.setItemChecked(initialHighlight, true);
-            onItemClick(null, null, initialHighlight, 0); // Other entries are not used
+            // Set the initial highlight if there was a preferred or last used choice
+            final int initialHighlight = mAdapter.getInitialHighlight();
+            if (initialHighlight >= 0) {
+                mListView.setItemChecked(initialHighlight, true);
+                onItemClick(null, null, initialHighlight, 0); // Other entries are not used
+            }
         }
     }
 

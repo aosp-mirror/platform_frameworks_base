@@ -1,0 +1,89 @@
+page.title=Dimming the System Bars
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#dim">Dim the Status and Navigation Bars</a></li>
+  <li><a href="#reveal">Reveal the Status and Navigation Bars</a></li>
+</ol>
+
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}design/index.html">
+        Android Design Guide
+        </a>
+    </li>
+</ul>
+
+
+</div>
+</div>
+
+<p>This lesson describes how to dim the system bars (that is, the status and the navigation
+bars) on Android 4.0 (API level 14) and higher. Android does not provide a built-in way to dim the
+system bars on earlier versions.</p>
+
+<p>When you use this approach, the content doesn't resize, but the icons in the system bars
+visually recede. As soon as the user touches either the status bar or the navigation bar area of
+the screen, both bars become fully visible. The advantage of this
+approach is that the bars are still present but their details are obscured, thus
+creating an immersive experience without sacrificing easy access to the bars.</p>
+
+<h2 id="dim">Dim the Status and Navigation Bars</h2>
+
+<p>You can dim the status and notification bars on Android 4.0 and higher using the
+{@link android.view.View#SYSTEM_UI_FLAG_LOW_PROFILE} flag, as follows:</p>
+
+<pre>
+// This example uses decor view, but you can use any visible view.
+View decorView = getActivity().getWindow().getDecorView();
+int uiOptions = View.SYSTEM_UI_FLAG_LOW_PROFILE;
+decorView.setSystemUiVisibility(uiOptions);
+</pre>
+
+<p>As soon as the user touches the status or navigation bar, the flag is cleared,
+causing the bars to be undimmed. Once the flag has been cleared, your app needs to reset
+it if you want to dim the bars again.</p>
+
+<p>Figure 1 shows a gallery image in which the navigation bar is dimmed (note that the Gallery app
+completely hides the status bar; it doesn't dim it). Notice that the navigation bar (right
+side of the image) has faint white dots on it to represent the navigation controls:</p>
+
+<p class="figure" style="width:340px">
+  <img src="{@docRoot}images/training/low_profile_hide2x.png"
+  alt="system bars" />
+    <p class="img-caption"><strong>Figure 1.</strong> Dimmed system bars.</p>
+
+<p>Figure 2 shows the same gallery image, but with the system bars displayed:</p>
+
+<p class="figure" style="width:340px">
+  <img src="{@docRoot}images/training/low_profile_show2x.png"
+  alt="system bars" />
+    <p class="img-caption"><strong>Figure 2.</strong> Visible system bars.</p>
+
+    <h2 id="reveal">Reveal the Status and Navigation Bars</h2>
+
+<p>If you want to programmatically clear flags set with
+{@link android.view.View#setSystemUiVisibility setSystemUiVisibility()}, you can do so
+as follows:</p>
+
+<pre>
+View decorView = getActivity().getWindow().getDecorView();
+// Calling setSystemUiVisibility() with a value of 0 clears
+// all flags.
+decorView.setSystemUiVisibility(0);
+</pre>

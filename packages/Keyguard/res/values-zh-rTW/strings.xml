@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"輸入 PIN 碼"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"輸入 PUK 碼和新 PIN 碼"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 碼"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"新 PIN 碼"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"輸入 SIM 卡 PUK 碼和新 PIN 碼"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM 卡 PUK 碼"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"新增 SIM 卡 PIN 碼"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"輕觸即可輸入密碼"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"輸入 PIN 即可解鎖"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"輸入所需的 PIN 碼"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"確認所需的 PIN 碼"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解除 SIM 卡鎖定..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN 碼不正確。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"請輸入 4 到 8 碼的 PIN。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 碼至少必須為 8 碼。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"重新輸入正確的 PUK 碼。如果錯誤次數過多，SIM 卡將會永久停用。"</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM 卡的 PIN 碼輸入錯誤，您現在必須請行動通訊業者為裝置解鎖。"</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"SIM 卡的 PIN 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，就必須請行動通訊業者為裝置解鎖。"</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM 卡的 PIN 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。"</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM 卡無法使用，請與您的行動通訊業者聯絡。"</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"SIM 卡的 PUK 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將永久無法使用。"</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM 卡的 PUK 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將永久無法使用。"</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM 卡 PIN 碼操作失敗！"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM 卡 PUK 碼操作失敗！"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"密碼正確！"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"[上一首曲目] 按鈕"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"[下一首曲目] 按鈕"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"[暫停] 按鈕"</string>

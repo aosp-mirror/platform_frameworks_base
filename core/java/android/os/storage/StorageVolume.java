@@ -21,6 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
+import com.android.internal.util.IndentingPrintWriter;
+
+import java.io.CharArrayWriter;
 import java.io.File;
 
 /**
@@ -45,6 +48,10 @@ public class StorageVolume implements Parcelable {
     private final long mMaxFileSize;
     /** When set, indicates exclusive ownership of this volume */
     private final UserHandle mOwner;
+
+    private String mUuid;
+    private String mUserLabel;
+    private String mState;
 
     // StorageVolume extra for ACTION_MEDIA_REMOVED, ACTION_MEDIA_UNMOUNTED, ACTION_MEDIA_CHECKING,
     // ACTION_MEDIA_NOFS, ACTION_MEDIA_MOUNTED, ACTION_MEDIA_SHARED, ACTION_MEDIA_UNSHARED,
@@ -76,6 +83,9 @@ public class StorageVolume implements Parcelable {
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
         mOwner = in.readParcelable(null);
+        mUuid = in.readString();
+        mUserLabel = in.readString();
+        mState = in.readString();
     }
 
     public static StorageVolume fromTemplate(StorageVolume template, File path, UserHandle owner) {
@@ -189,6 +199,45 @@ public class StorageVolume implements Parcelable {
         return mOwner;
     }
 
+    public void setUuid(String uuid) {
+        mUuid = uuid;
+    }
+
+    public String getUuid() {
+        return mUuid;
+    }
+
+    /**
+     * Parse and return volume UUID as FAT volume ID, or return -1 if unable to
+     * parse or UUID is unknown.
+     */
+    public int getFatVolumeId() {
+        if (mUuid == null || mUuid.length() != 9) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(mUuid.replace("-", ""), 16);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    public void setUserLabel(String userLabel) {
+        mUserLabel = userLabel;
+    }
+
+    public String getUserLabel() {
+        return mUserLabel;
+    }
+
+    public void setState(String state) {
+        mState = state;
+    }
+
+    public String getState() {
+        return mState;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof StorageVolume && mPath != null) {
@@ -205,19 +254,28 @@ public class StorageVolume implements Parcelable {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder("StorageVolume [");
-        builder.append("mStorageId=").append(mStorageId);
-        builder.append(" mPath=").append(mPath);
-        builder.append(" mDescriptionId=").append(mDescriptionId);
-        builder.append(" mPrimary=").append(mPrimary);
-        builder.append(" mRemovable=").append(mRemovable);
-        builder.append(" mEmulated=").append(mEmulated);
-        builder.append(" mMtpReserveSpace=").append(mMtpReserveSpace);
-        builder.append(" mAllowMassStorage=").append(mAllowMassStorage);
-        builder.append(" mMaxFileSize=").append(mMaxFileSize);
-        builder.append(" mOwner=").append(mOwner);
-        builder.append("]");
-        return builder.toString();
+        final CharArrayWriter writer = new CharArrayWriter();
+        dump(new IndentingPrintWriter(writer, "    ", 80));
+        return writer.toString();
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("StorageVolume:");
+        pw.increaseIndent();
+        pw.printPair("mStorageId", mStorageId);
+        pw.printPair("mPath", mPath);
+        pw.printPair("mDescriptionId", mDescriptionId);
+        pw.printPair("mPrimary", mPrimary);
+        pw.printPair("mRemovable", mRemovable);
+        pw.printPair("mEmulated", mEmulated);
+        pw.printPair("mMtpReserveSpace", mMtpReserveSpace);
+        pw.printPair("mAllowMassStorage", mAllowMassStorage);
+        pw.printPair("mMaxFileSize", mMaxFileSize);
+        pw.printPair("mOwner", mOwner);
+        pw.printPair("mUuid", mUuid);
+        pw.printPair("mUserLabel", mUserLabel);
+        pw.printPair("mState", mState);
+        pw.decreaseIndent();
     }
 
     public static final Creator<StorageVolume> CREATOR = new Creator<StorageVolume>() {
@@ -249,5 +307,8 @@ public class StorageVolume implements Parcelable {
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
         parcel.writeLong(mMaxFileSize);
         parcel.writeParcelable(mOwner, flags);
+        parcel.writeString(mUuid);
+        parcel.writeString(mUserLabel);
+        parcel.writeString(mState);
     }
 }
