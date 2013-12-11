@@ -9712,6 +9712,8 @@ package android.graphics {
     method public void toggleInverseFillType();
     method public void transform(android.graphics.Matrix, android.graphics.Path);
     method public void transform(android.graphics.Matrix);
+    method public void trim(float, float, float);
+    method public void trim(float, float, float, android.graphics.Path);
   }
 
   public static final class Path.Direction extends java.lang.Enum {

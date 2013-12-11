@@ -268,7 +268,6 @@ public:
          return Op(*p1, *p2, op, r);
      }
 
-
     typedef SkPoint (*bezierCalculation)(float t, const SkPoint* points);
 
     static void addMove(std::vector<SkPoint>& segmentPoints, std::vector<float>& lengths,
@@ -396,6 +395,8 @@ public:
                 addMove(segmentPoints, lengths, points[0]);
                 break;
             case SkPath::kClose_Verb:
+                addLine(segmentPoints, lengths, points[0]);
+                break;
             case SkPath::kLine_Verb:
                 addLine(segmentPoints, lengths, points[1]);
                 break;
@@ -445,7 +446,7 @@ public:
         float totalLength = lengths.back();
 
         int approximationIndex = 0;
-        for (int i = 0; i < numPoints; i++) {
+        for (size_t i = 0; i < numPoints; i++) {
             const SkPoint& point = segmentPoints[i];
             approximation[approximationIndex++] = lengths[i] / totalLength;
             approximation[approximationIndex++] = point.x();
@@ -456,6 +457,51 @@ public:
         env->SetFloatArrayRegion(result, 0, approximationArraySize, approximation);
         delete[] approximation;
         return result;
+    }
+
+    static SkPathMeasure* trim(JNIEnv* env, jobject clazz, SkPath* inPath, SkPath* outPath,
+            SkPathMeasure* pathMeasure, jfloat trimStart, jfloat trimEnd, jfloat trimOffset) {
+        if (trimStart == 0 && trimEnd == 1) {
+            if (outPath != NULL) {
+                *outPath = *inPath;
+            }
+            return pathMeasure;
+        }
+
+        bool modifyPath = (outPath == NULL);
+        if (modifyPath) {
+            outPath = new SkPath();
+        } else {
+            outPath->reset();
+        }
+        if (pathMeasure == NULL) {
+            pathMeasure = new SkPathMeasure(*inPath, false);
+        }
+        float length = pathMeasure->getLength();
+        float start = (trimStart + trimOffset) * length;
+        float end = (trimEnd + trimOffset) * length;
+
+        if (end > length && start <= length) {
+            pathMeasure->getSegment(start, length, outPath, true);
+            pathMeasure->getSegment(0, end - length, outPath, true);
+        } else {
+            if (start > length) {
+                start -= length;
+                end -= length;
+            }
+            pathMeasure->getSegment(start, end, outPath, true);
+        }
+        if (modifyPath) {
+            delete pathMeasure;
+            pathMeasure = NULL;
+            *inPath = *outPath;
+            delete outPath;
+        }
+        return pathMeasure;
+    }
+
+    static void destroyMeasure(JNIEnv* env, jobject clazz, SkPathMeasure* measure) {
+        delete measure;
     }
 };
 
@@ -499,6 +545,8 @@ static JNINativeMethod methods[] = {
     {"native_transform","(II)V", (void*) SkPathGlue::transform__Matrix},
     {"native_op","(IIII)Z", (void*) SkPathGlue::op},
     {"native_approximate", "(IF)[F", (void*) SkPathGlue::approximate},
+    {"native_destroyMeasure","(I)V", (void*) SkPathGlue::destroyMeasure},
+    {"native_trim","(IIIFFF)I", (void*) SkPathGlue::trim},
 };
 
 int register_android_graphics_Path(JNIEnv* env) {
