@@ -53,8 +53,7 @@ LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
 LOCAL_C_INCLUDES := \
 	external/zlib
 
-LOCAL_STATIC_LIBRARIES := liblog
-LOCAL_WHOLE_STATIC_LIBRARIES := libziparchive-host
+LOCAL_STATIC_LIBRARIES := liblog libziparchive-host libutils
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
