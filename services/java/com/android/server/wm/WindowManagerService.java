@@ -432,8 +432,15 @@ public class WindowManagerService extends IWindowManager.Stub
     int mRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
-    ArrayList<IRotationWatcher> mRotationWatchers
-            = new ArrayList<IRotationWatcher>();
+    class RotationWatcher {
+        IRotationWatcher watcher;
+        IBinder.DeathRecipient deathRecipient;
+        RotationWatcher(IRotationWatcher w, IBinder.DeathRecipient d) {
+            watcher = w;
+            deathRecipient = d;
+        }
+    }
+    ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<RotationWatcher>();
     int mDeferredRotationPauseCount;
 
     int mSystemDecorLayer = 0;
@@ -5974,7 +5981,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         for (int i=mRotationWatchers.size()-1; i>=0; i--) {
             try {
-                mRotationWatchers.get(i).onRotationChanged(rotation);
+                mRotationWatchers.get(i).watcher.onRotationChanged(rotation);
             } catch (RemoteException e) {
             }
         }
@@ -6006,10 +6013,11 @@ public class WindowManagerService extends IWindowManager.Stub
             public void binderDied() {
                 synchronized (mWindowMap) {
                     for (int i=0; i<mRotationWatchers.size(); i++) {
-                        if (watcherBinder == mRotationWatchers.get(i).asBinder()) {
-                            IRotationWatcher removed = mRotationWatchers.remove(i);
-                            if (removed != null) {
-                                removed.asBinder().unlinkToDeath(this, 0);
+                        if (watcherBinder == mRotationWatchers.get(i).watcher.asBinder()) {
+                            RotationWatcher removed = mRotationWatchers.remove(i);
+                            IBinder binder = removed.watcher.asBinder();
+                            if (binder != null) {
+                                binder.unlinkToDeath(this, 0);
                             }
                             i--;
                         }
@@ -6021,7 +6029,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             try {
                 watcher.asBinder().linkToDeath(dr, 0);
-                mRotationWatchers.add(watcher);
+                mRotationWatchers.add(new RotationWatcher(watcher, dr));
             } catch (RemoteException e) {
                 // Client died, no cleanup needed.
             }
@@ -6035,8 +6043,13 @@ public class WindowManagerService extends IWindowManager.Stub
         final IBinder watcherBinder = watcher.asBinder();
         synchronized (mWindowMap) {
             for (int i=0; i<mRotationWatchers.size(); i++) {
-                if (watcherBinder == mRotationWatchers.get(i).asBinder()) {
-                    mRotationWatchers.remove(i);
+                RotationWatcher rotationWatcher = mRotationWatchers.get(i);
+                if (watcherBinder == rotationWatcher.watcher.asBinder()) {
+                    RotationWatcher removed = mRotationWatchers.remove(i);
+                    IBinder binder = removed.watcher.asBinder();
+                    if (binder != null) {
+                        binder.unlinkToDeath(removed.deathRecipient, 0);
+                    }
                     i--;
                 }
             }
