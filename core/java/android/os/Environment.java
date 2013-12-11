@@ -207,6 +207,10 @@ public class Environment {
             return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_OBB);
         }
 
+        public File[] buildExternalStorageAndroidObbDirsForVold() {
+            return buildPaths(mExternalDirsForVold, DIR_ANDROID, DIR_OBB);
+        }
+
         public File[] buildExternalStorageAppDataDirs(String packageName) {
             return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_DATA, packageName);
         }

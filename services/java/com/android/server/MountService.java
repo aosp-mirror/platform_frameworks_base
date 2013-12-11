@@ -2792,10 +2792,11 @@ class MountService extends IMountService.Stub
         if (path.startsWith(obbPath)) {
             path = path.substring(obbPath.length() + 1);
 
+            final UserEnvironment ownerEnv = new UserEnvironment(UserHandle.USER_OWNER);
             if (forVold) {
-                return new File(Environment.getEmulatedStorageObbSource(), path).getAbsolutePath();
+                return new File(ownerEnv.buildExternalStorageAndroidObbDirsForVold()[0], path)
+                        .getAbsolutePath();
             } else {
-                final UserEnvironment ownerEnv = new UserEnvironment(UserHandle.USER_OWNER);
                 return new File(ownerEnv.buildExternalStorageAndroidObbDirs()[0], path)
                         .getAbsolutePath();
             }
