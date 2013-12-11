@@ -4121,6 +4121,13 @@ public class WifiStateMachine extends StateMachine {
                         if (DBG) log("Turn on scanning after p2p disconnected");
                         sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
                                     ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
+                    } else if (mEnableBackgroundScan && !mP2pConnected.get() &&
+                               (mWifiConfigStore.getConfiguredNetworks().size() != 0)) {
+                        if (!mWifiNative.enableBackgroundScan(true)) {
+                            setScanAlarm(true);
+                        } else {
+                            setScanAlarm(false);
+                        }
                     }
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
