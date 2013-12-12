@@ -80,7 +80,7 @@ StorageClient</a></li>
 across all of their their preferred document storage providers. A standard, easy-to-use UI
 lets users browse files and access recents in a consistent way across apps and providers.</p>
 
-<p>Cloud or local storage services can participate in this ecosystem by implementing a new
+<p>Cloud or local storage services can participate in this ecosystem by implementing a
 {@link android.provider.DocumentsProvider} that encapsulates their services. Client
 apps that need access to a provider's documents can integrate with the SAF with just a few
 lines of code.</p>
