@@ -164,6 +164,15 @@ public class ActionBarImpl extends ActionBar {
         init(dialog.getWindow().getDecorView(), false);
     }
 
+    /**
+     * Only for edit mode.
+     * @hide
+     */
+    public ActionBarImpl(View layout) {
+        assert layout.isInEditMode();
+        init(layout, false);
+    }
+
     private void init(View decor, boolean overlayMode) {
         mContext = decor.getContext();
         mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
@@ -554,8 +563,8 @@ public class ActionBarImpl extends ActionBar {
             return;
         }
 
-        final FragmentTransaction trans = mActivity.getFragmentManager().beginTransaction()
-                .disallowAddToBackStack();
+        final FragmentTransaction trans = mActionView.isInEditMode() ? null :
+                mActivity.getFragmentManager().beginTransaction().disallowAddToBackStack();
 
         if (mSelectedTab == tab) {
             if (mSelectedTab != null) {
@@ -573,7 +582,7 @@ public class ActionBarImpl extends ActionBar {
             }
         }
 
-        if (!trans.isEmpty()) {
+        if (trans != null && !trans.isEmpty()) {
             trans.commit();
         }
     }
