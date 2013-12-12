@@ -3407,6 +3407,11 @@ public final class Settings {
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
 
         /**
+         * Whether the NFC unlock feature is enabled (0 = false, 1 = true)
+         */
+        public static final String NFC_UNLOCK_ENABLED = "nfc_unlock_enabled";
+
+        /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
          * true)
          *

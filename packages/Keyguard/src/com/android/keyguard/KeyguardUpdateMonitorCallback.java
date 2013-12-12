@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.WindowManagerPolicy;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -172,4 +173,9 @@ class KeyguardUpdateMonitorCallback {
      *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_PROX_SENSOR}.
      */
     public void onScreenTurnedOff(int why) { }
+
+    /**
+     * Called when the NFC Service has found a tag that is registered for NFC unlock.
+     */
+    public void onNfcUnlock() { }
 }
