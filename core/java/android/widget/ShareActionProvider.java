@@ -166,9 +166,11 @@ public class ShareActionProvider extends ActionProvider {
     @Override
     public View onCreateActionView() {
         // Create the view and set its data model.
-        ActivityChooserModel dataModel = ActivityChooserModel.get(mContext, mShareHistoryFileName);
         ActivityChooserView activityChooserView = new ActivityChooserView(mContext);
-        activityChooserView.setActivityChooserModel(dataModel);
+        if (!activityChooserView.isInEditMode()) {
+            ActivityChooserModel dataModel = ActivityChooserModel.get(mContext, mShareHistoryFileName);
+            activityChooserView.setActivityChooserModel(dataModel);
+        }
 
         // Lookup and set the expand action icon.
         TypedValue outTypedValue = new TypedValue();

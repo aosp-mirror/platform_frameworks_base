@@ -96,6 +96,7 @@ public class Main {
                         "android.pim.*", // for datepicker
                         "android.os.*",  // for android.os.Handler
                         "android.database.ContentObserver", // for Digital clock
+                        "com.android.internal.view.menu.ActionMenu",
                     },
                     excludeClasses);
             aa.analyze();

@@ -43,14 +43,15 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.bars.ActionBarLayout;
 import com.android.layoutlib.bridge.bars.CustomBar;
-import com.android.layoutlib.bridge.bars.FakeActionBar;
 import com.android.layoutlib.bridge.bars.NavigationBar;
 import com.android.layoutlib.bridge.bars.StatusBar;
 import com.android.layoutlib.bridge.bars.TabletSystemBar;
 import com.android.layoutlib.bridge.bars.TitleBar;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
+import com.android.resources.Density;
 import com.android.resources.ResourceType;
 import com.android.resources.ScreenOrientation;
 import com.android.resources.ScreenSize;
@@ -133,6 +134,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     // information being returned through the API
     private BufferedImage mImage;
     private List<ViewInfo> mViewInfoList;
+    private List<ViewInfo> mSystemViewInfoList;
 
     private static final class PostInflateException extends Exception {
         private static final long serialVersionUID = 1L;
@@ -217,7 +219,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             HardwareConfig hardwareConfig = params.getHardwareConfig();
             BridgeContext context = getContext();
 
-
             // the view group that receives the window background.
             ViewGroup backgroundView = null;
 
@@ -248,12 +249,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     topLayout.setOrientation(LinearLayout.HORIZONTAL);
 
                     try {
-                        NavigationBar navigationBar = new NavigationBar(context,
-                                hardwareConfig.getDensity(), LinearLayout.VERTICAL);
-                        navigationBar.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        mNavigationBarSize,
-                                        LayoutParams.MATCH_PARENT));
+                        CustomBar navigationBar = createNavigationBar(context,
+                                hardwareConfig.getDensity(), hardwareConfig.getScreenSize());
                         topLayout.addView(navigationBar);
                     } catch (XmlPullParserException e) {
 
@@ -285,9 +282,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 if (mViewRoot == null) {
                     mViewRoot = topLayout;
                 } else {
+                    int topLayoutWidth =
+                            params.getHardwareConfig().getScreenWidth() - mNavigationBarSize;
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-                    layoutParams.weight = 1;
+                            topLayoutWidth, LayoutParams.MATCH_PARENT);
                     topLayout.setLayoutParams(layoutParams);
 
                     // this is the case of soft buttons + vertical bar.
@@ -298,11 +296,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 if (mStatusBarSize > 0) {
                     // system bar
                     try {
-                        StatusBar systemBar = new StatusBar(context, hardwareConfig.getDensity());
-                        systemBar.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        LayoutParams.MATCH_PARENT, mStatusBarSize));
-                        topLayout.addView(systemBar);
+                        StatusBar statusBar = createStatusBar(context,
+                                hardwareConfig.getDensity());
+                        topLayout.addView(statusBar);
                     } catch (XmlPullParserException e) {
 
                     }
@@ -321,23 +317,16 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // if the theme says no title/action bar, then the size will be 0
                 if (mActionBarSize > 0) {
                     try {
-                        FakeActionBar actionBar = new FakeActionBar(context,
-                                hardwareConfig.getDensity(),
-                                params.getAppLabel(), params.getAppIcon());
-                        actionBar.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        LayoutParams.MATCH_PARENT, mActionBarSize));
+                        ActionBarLayout actionBar = createActionBar(context, params);
                         backgroundLayout.addView(actionBar);
+                        mContentRoot = (FrameLayout) actionBar.findViewById(android.R.id.content);
                     } catch (XmlPullParserException e) {
 
                     }
                 } else if (mTitleBarSize > 0) {
                     try {
-                        TitleBar titleBar = new TitleBar(context,
+                        TitleBar titleBar = createTitleBar(context,
                                 hardwareConfig.getDensity(), params.getAppLabel());
-                        titleBar.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        LayoutParams.MATCH_PARENT, mTitleBarSize));
                         backgroundLayout.addView(titleBar);
                     } catch (XmlPullParserException e) {
 
@@ -345,29 +334,21 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 }
 
                 // content frame
-                mContentRoot = new FrameLayout(context);
-                layoutParams = new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, 0);
-                layoutParams.weight = 1;
-                mContentRoot.setLayoutParams(layoutParams);
-                backgroundLayout.addView(mContentRoot);
+                if (mContentRoot == null) {
+                    mContentRoot = new FrameLayout(context);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LayoutParams.MATCH_PARENT, 0);
+                    layoutParams.weight = 1;
+                    mContentRoot.setLayoutParams(layoutParams);
+                    backgroundLayout.addView(mContentRoot);
+                }
 
                 if (mNavigationBarOrientation == LinearLayout.HORIZONTAL &&
                         mNavigationBarSize > 0) {
                     // system bar
                     try {
-                        CustomBar navigationBar;
-                        if (hardwareConfig.getScreenSize() == ScreenSize.XLARGE) {
-                            navigationBar = new TabletSystemBar(context,
-                                    hardwareConfig.getDensity());
-                        } else {
-                            navigationBar = new NavigationBar(context,
-                                    hardwareConfig.getDensity(), LinearLayout.HORIZONTAL);
-                        }
-
-                        navigationBar.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        LayoutParams.MATCH_PARENT, mNavigationBarSize));
+                        CustomBar navigationBar = createNavigationBar(context,
+                                hardwareConfig.getDensity(), hardwareConfig.getScreenSize());
                         topLayout.addView(navigationBar);
                     } catch (XmlPullParserException e) {
 
@@ -568,7 +549,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 mViewRoot.draw(mCanvas);
             }
 
-            mViewInfoList = startVisitingViews(mViewRoot, 0, params.getExtendedViewInfoMode());
+            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(), false);
 
             // success!
             return SUCCESS.createResult();
@@ -1357,50 +1338,126 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
     }
 
-    private List<ViewInfo> startVisitingViews(View view, int offset, boolean setExtendedInfo) {
-        if (view == null) {
-            return null;
-        }
-
-        // adjust the offset to this view.
-        offset += view.getTop();
-
-        if (view == mContentRoot) {
-            return visitAllChildren(mContentRoot, offset, setExtendedInfo);
-        }
-
-        // otherwise, look for mContentRoot in the children
-        if (view instanceof ViewGroup) {
-            ViewGroup group = ((ViewGroup) view);
-
-            for (int i = 0; i < group.getChildCount(); i++) {
-                List<ViewInfo> list = startVisitingViews(group.getChildAt(i), offset,
-                        setExtendedInfo);
-                if (list != null) {
-                    return list;
-                }
-            }
-        }
-
-        return null;
-    }
-
     /**
-     * Visits a View and its children and generate a {@link ViewInfo} containing the
+     * Visits a {@link View} and its children and generate a {@link ViewInfo} containing the
      * bounds of all the views.
+     *
      * @param view the root View
      * @param offset an offset for the view bounds.
      * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
+     * @param isContentFrame {@code true} if the {@code ViewInfo} to be created is part of the
+     *                       content frame.
+     *
+     * @return {@code ViewInfo} containing the bounds of the view and it children otherwise.
      */
-    private ViewInfo visit(View view, int offset, boolean setExtendedInfo) {
+    private ViewInfo visit(View view, int offset, boolean setExtendedInfo,
+            boolean isContentFrame) {
+        ViewInfo result = createViewInfo(view, offset, setExtendedInfo, isContentFrame);
+
+        if (view instanceof ViewGroup) {
+            ViewGroup group = ((ViewGroup) view);
+            result.setChildren(visitAllChildren(group, isContentFrame ? 0 : offset,
+                    setExtendedInfo, isContentFrame));
+        }
+        return result;
+    }
+
+    /**
+     * Visits all the children of a given ViewGroup and generates a list of {@link ViewInfo}
+     * containing the bounds of all the views. It also initializes the {@link mViewInfoList} with
+     * the children of the {@code mContentRoot}.
+     *
+     * @param viewGroup the root View
+     * @param offset an offset from the top for the content view frame.
+     * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
+     * @param isContentFrame {@code true} if the {@code ViewInfo} to be created is part of the
+     *                       content frame. {@code false} if the {@code ViewInfo} to be created is
+     *                       part of the system decor.
+     */
+    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int offset,
+            boolean setExtendedInfo, boolean isContentFrame) {
+        if (viewGroup == null) {
+            return null;
+        }
+
+        if (!isContentFrame) {
+            offset += viewGroup.getTop();
+        }
+
+        int childCount = viewGroup.getChildCount();
+        if (viewGroup == mContentRoot) {
+            List<ViewInfo> childrenWithoutOffset = new ArrayList<ViewInfo>(childCount);
+            List<ViewInfo> childrenWithOffset = new ArrayList<ViewInfo>(childCount);
+            for (int i = 0; i < childCount; i++) {
+                ViewInfo[] childViewInfo = visitContentRoot(viewGroup.getChildAt(i), offset,
+                        setExtendedInfo);
+                childrenWithoutOffset.add(childViewInfo[0]);
+                childrenWithOffset.add(childViewInfo[1]);
+            }
+            mViewInfoList = childrenWithOffset;
+            return childrenWithoutOffset;
+        } else {
+            List<ViewInfo> children = new ArrayList<ViewInfo>(childCount);
+            for (int i = 0; i < childCount; i++) {
+                children.add(visit(viewGroup.getChildAt(i), offset, setExtendedInfo,
+                        isContentFrame));
+            }
+            return children;
+        }
+    }
+
+    /**
+     * Visits the children of {@link #mContentRoot} and generates {@link ViewInfo} containing the
+     * bounds of all the views. It returns two {@code ViewInfo} objects with the same children,
+     * one with the {@code offset} and other without the {@code offset}. The offset is needed to
+     * get the right bounds if the {@code ViewInfo} hierarchy is accessed from
+     * {@code mViewInfoList}. When the hierarchy is accessed via {@code mSystemViewInfoList}, the
+     * offset is not needed.
+     *
+     * @return an array of length two, with ViewInfo at index 0 is without offset and ViewInfo at
+     *         index 1 is with the offset.
+     */
+    private ViewInfo[] visitContentRoot(View view, int offset, boolean setExtendedInfo) {
+        ViewInfo[] result = new ViewInfo[2];
+        if (view == null) {
+            return result;
+        }
+
+        result[0] = createViewInfo(view, 0, setExtendedInfo, true);
+        result[1] = createViewInfo(view, offset, setExtendedInfo, true);
+        if (view instanceof ViewGroup) {
+            List<ViewInfo> children = visitAllChildren((ViewGroup) view, 0, setExtendedInfo, true);
+            result[0].setChildren(children);
+            result[1].setChildren(children);
+        }
+        return result;
+    }
+
+    /**
+     * Creates a {@link ViewInfo} for the view. The {@code ViewInfo} corresponding to the children
+     * of the {@code view} are not created. Consequently, the children of {@code ViewInfo} is not
+     * set.
+     * @param offset an offset for the view bounds. Used only if view is part of the content frame.
+     */
+    private ViewInfo createViewInfo(View view, int offset, boolean setExtendedInfo,
+            boolean isContentFrame) {
         if (view == null) {
             return null;
         }
 
-        ViewInfo result = new ViewInfo(view.getClass().getName(),
-                getContext().getViewKey(view),
-                view.getLeft(), view.getTop() + offset, view.getRight(), view.getBottom() + offset,
-                view, view.getLayoutParams());
+        ViewInfo result;
+        if (isContentFrame) {
+            result = new ViewInfo(view.getClass().getName(),
+                    getContext().getViewKey(view),
+                    view.getLeft(), view.getTop() + offset, view.getRight(),
+                    view.getBottom() + offset, view, view.getLayoutParams());
+
+        } else {
+            result = new SystemViewInfo(view.getClass().getName(),
+                    getContext().getViewKey(view),
+                    view.getLeft(), view.getTop(), view.getRight(),
+                    view.getBottom(), view, view.getLayoutParams());
+        }
 
         if (setExtendedInfo) {
             MarginLayoutParams marginParams = null;
@@ -1415,37 +1472,68 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     marginParams != null ? marginParams.bottomMargin : 0);
         }
 
-        if (view instanceof ViewGroup) {
-            ViewGroup group = ((ViewGroup) view);
-            result.setChildren(visitAllChildren(group, 0 /*offset*/, setExtendedInfo));
-        }
-
         return result;
     }
 
-    /**
-     * Visits all the children of a given ViewGroup generate a list of {@link ViewInfo}
-     * containing the bounds of all the views.
-     * @param view the root View
-     * @param offset an offset for the view bounds.
-     * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
-     */
-    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int offset,
-            boolean setExtendedInfo) {
-        if (viewGroup == null) {
-            return null;
-        }
-
-        List<ViewInfo> children = new ArrayList<ViewInfo>();
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            children.add(visit(viewGroup.getChildAt(i), offset, setExtendedInfo));
-        }
-        return children;
-    }
-
-
     private void invalidateRenderingSize() {
         mMeasuredScreenWidth = mMeasuredScreenHeight = -1;
+    }
+
+    /**
+     * Creates the status bar with wifi and battery icons.
+     */
+    private StatusBar createStatusBar(BridgeContext context, Density density)
+            throws XmlPullParserException {
+        StatusBar statusBar = new StatusBar(context, density);
+        statusBar.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT, mStatusBarSize));
+        return statusBar;
+    }
+
+    /**
+     * Creates the navigation bar with back, home and recent buttons.
+     *
+     * @param isRtl true if the current locale is right-to-left
+     * @param isRtlSupported true is the project manifest declares that the application
+     *        is RTL aware.
+     */
+    private CustomBar createNavigationBar(BridgeContext context, Density density, ScreenSize size)
+            throws XmlPullParserException {
+        CustomBar navigationBar;
+        if (size == ScreenSize.XLARGE) {
+            navigationBar = new TabletSystemBar(context, density);
+        } else {
+            navigationBar = new NavigationBar(context, density,
+                    mNavigationBarOrientation);
+        }
+        if (mNavigationBarOrientation == LinearLayout.VERTICAL) {
+            navigationBar.setLayoutParams(new LinearLayout.LayoutParams(mNavigationBarSize,
+                    LayoutParams.MATCH_PARENT));
+        } else {
+            navigationBar.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                    mNavigationBarSize));
+        }
+        return navigationBar;
+    }
+
+    private TitleBar createTitleBar(BridgeContext context, Density density, String title)
+            throws XmlPullParserException {
+        TitleBar titleBar = new TitleBar(context, density, title);
+        titleBar.setLayoutParams(
+                new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, mTitleBarSize));
+        return titleBar;
+    }
+
+    /**
+     * Creates the action bar. Also queries the project callback for missing information.
+     */
+    private ActionBarLayout createActionBar(BridgeContext context, SessionParams params)
+            throws XmlPullParserException {
+        ActionBarLayout actionBar = new ActionBarLayout(context, params);
+        actionBar.setLayoutParams(new LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        return actionBar;
     }
 
     public BufferedImage getImage() {
@@ -1458,6 +1546,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     public List<ViewInfo> getViewInfos() {
         return mViewInfoList;
+    }
+
+    public List<ViewInfo> getSystemViewInfos() {
+        return mSystemViewInfoList;
     }
 
     public Map<String, String> getDefaultProperties(Object viewObject) {
