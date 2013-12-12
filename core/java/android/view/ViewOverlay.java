@@ -155,6 +155,11 @@ public class ViewOverlay {
             }
         }
 
+        @Override
+        protected boolean verifyDrawable(Drawable who) {
+            return super.verifyDrawable(who) || (mDrawables != null && mDrawables.contains(who));
+        }
+
         public void add(View child) {
             if (child.getParent() instanceof ViewGroup) {
                 ViewGroup parent = (ViewGroup) child.getParent();
