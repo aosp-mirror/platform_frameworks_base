@@ -1525,6 +1525,8 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
 
             if (DEBUG) {
                 setBackgroundColor(DEBUG_REGION_BACKGROUND);
+            } else {
+                setBackgroundColor(captionStyle.windowColor);
             }
         }
 
@@ -1537,6 +1539,8 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
                 final CueLayout cueBox = mRegionCueBoxes.get(i);
                 cueBox.setCaptionStyle(captionStyle, fontSize);
             }
+
+            setBackgroundColor(captionStyle.windowColor);
         }
 
         /**

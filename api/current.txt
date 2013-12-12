@@ -29925,6 +29925,7 @@ package android.view.accessibility {
     field public final int edgeColor;
     field public final int edgeType;
     field public final int foregroundColor;
+    field public final int windowColor;
   }
 
   public static abstract class CaptioningManager.CaptioningChangeListener {

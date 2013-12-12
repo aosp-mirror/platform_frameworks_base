@@ -3749,6 +3749,16 @@ public final class Settings {
                 "accessibility_captioning_edge_color";
 
         /**
+         * Integer property that specifes the window color for captions as a
+         * packed 32-bit color.
+         *
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_WINDOW_COLOR =
+                "accessibility_captioning_window_color";
+
+        /**
          * String property that specifies the typeface for captions, one of:
          * <ul>
          * <li>DEFAULT
