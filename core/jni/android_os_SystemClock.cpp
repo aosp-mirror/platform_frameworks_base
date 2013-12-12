@@ -43,16 +43,77 @@
 
 namespace android {
 
+static int setCurrentTimeMillisAlarmDriver(struct timeval *tv)
+{
+    struct timespec ts;
+    int fd;
+    int res;
+
+    fd = open("/dev/alarm", O_RDWR);
+    if(fd < 0) {
+        ALOGV("Unable to open alarm driver: %s\n", strerror(errno));
+        return -1;
+    }
+    ts.tv_sec = tv->tv_sec;
+    ts.tv_nsec = tv->tv_usec * 1000;
+    res = ioctl(fd, ANDROID_ALARM_SET_RTC, &ts);
+    if (res < 0)
+        ALOGV("ANDROID_ALARM_SET_RTC ioctl failed: %s\n", strerror(errno));
+    close(fd);
+    return res;
+}
+
+static int setCurrentTimeMillisRtc(struct timeval *tv)
+{
+    struct rtc_time rtc;
+    struct tm tm, *gmtime_res;
+    int fd;
+    int res;
+
+    fd = open("/dev/rtc0", O_RDWR);
+    if (fd < 0) {
+        ALOGV("Unable to open RTC driver: %s\n", strerror(errno));
+        return -1;
+    }
+
+    res = settimeofday(tv, NULL);
+    if (res < 0) {
+        ALOGV("settimeofday() failed: %s\n", strerror(errno));
+        goto done;
+    }
+
+    gmtime_res = gmtime_r(&tv->tv_sec, &tm);
+    if (!gmtime_res) {
+        ALOGV("gmtime_r() failed: %s\n", strerror(errno));
+        res = -1;
+        goto done;
+    }
+
+    memset(&rtc, 0, sizeof(rtc));
+    rtc.tm_sec = tm.tm_sec;
+    rtc.tm_min = tm.tm_min;
+    rtc.tm_hour = tm.tm_hour;
+    rtc.tm_mday = tm.tm_mday;
+    rtc.tm_mon = tm.tm_mon;
+    rtc.tm_year = tm.tm_year;
+    rtc.tm_wday = tm.tm_wday;
+    rtc.tm_yday = tm.tm_yday;
+    rtc.tm_isdst = tm.tm_isdst;
+    res = ioctl(fd, RTC_SET_TIME, &rtc);
+    if (res < 0)
+        ALOGV("RTC_SET_TIME ioctl failed: %s\n", strerror(errno));
+done:
+    close(fd);
+    return res;
+}
+
 /*
  * Set the current time.  This only works when running as root.
  */
 static int setCurrentTimeMillis(int64_t millis)
 {
     struct timeval tv;
-    struct timespec ts;
-    int fd;
-    int res;
-    int ret = 0;
+    int ret;
 
     if (millis <= 0 || millis / 1000LL >= INT_MAX) {
         return -1;
@@ -63,19 +124,14 @@ static int setCurrentTimeMillis(int64_t millis)
 
     ALOGD("Setting time of day to sec=%d\n", (int) tv.tv_sec);
 
-    fd = open("/dev/alarm", O_RDWR);
-    if(fd < 0) {
-        ALOGW("Unable to open alarm driver: %s\n", strerror(errno));
-        return -1;
-    }
-    ts.tv_sec = tv.tv_sec;
-    ts.tv_nsec = tv.tv_usec * 1000;
-    res = ioctl(fd, ANDROID_ALARM_SET_RTC, &ts);
-    if(res < 0) {
+    ret = setCurrentTimeMillisAlarmDriver(&tv);
+    if (ret < 0)
+        ret = setCurrentTimeMillisRtc(&tv);
+
+    if(ret < 0) {
         ALOGW("Unable to set rtc to %ld: %s\n", tv.tv_sec, strerror(errno));
         ret = -1;
     }
-    close(fd);
     return ret;
 }
 
