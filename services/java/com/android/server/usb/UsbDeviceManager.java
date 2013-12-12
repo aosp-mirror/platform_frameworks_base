@@ -53,6 +53,7 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -287,12 +288,7 @@ public class UsbDeviceManager {
     }
 
     private static boolean containsFunction(String functions, String function) {
-        int index = functions.indexOf(function);
-        if (index < 0) return false;
-        if (index > 0 && functions.charAt(index - 1) != ',') return false;
-        int charAfter = index + function.length();
-        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
-        return true;
+        return Arrays.asList(functions.split(",")).contains(function);
     }
 
     private final class UsbHandler extends Handler {
