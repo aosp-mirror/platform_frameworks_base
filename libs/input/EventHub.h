@@ -373,6 +373,7 @@ private:
     status_t openDeviceLocked(const char *devicePath);
     void createVirtualKeyboardLocked();
     void addDeviceLocked(Device* device);
+    void assignDescriptorLocked(InputDeviceIdentifier& identifier);
 
     status_t closeDeviceByPathLocked(const char *devicePath);
     void closeDeviceLocked(Device* device);
@@ -382,6 +383,7 @@ private:
     void scanDevicesLocked();
     status_t readNotifyLocked();
 
+    Device* getDeviceByDescriptorLocked(String8& descriptor) const;
     Device* getDeviceLocked(int32_t deviceId) const;
     Device* getDeviceByPathLocked(const char* devicePath) const;
 
