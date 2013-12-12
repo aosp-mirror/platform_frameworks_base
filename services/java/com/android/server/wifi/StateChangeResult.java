@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
- package android.net.wifi;
+package com.android.server.wifi;
+
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiSsid;
 
 /**
  * Stores supplicant state change information passed from WifiMonitor to

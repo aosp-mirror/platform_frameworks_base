@@ -78,7 +78,8 @@ public class WifiInfo implements Parcelable {
      */
     private boolean mMeteredHint;
 
-    WifiInfo() {
+    /** @hide */
+    public WifiInfo() {
         mWifiSsid = null;
         mBSSID = null;
         mNetworkId = -1;
@@ -105,7 +106,8 @@ public class WifiInfo implements Parcelable {
         }
     }
 
-    void setSSID(WifiSsid wifiSsid) {
+    /** @hide */
+    public void setSSID(WifiSsid wifiSsid) {
         mWifiSsid = wifiSsid;
     }
 
@@ -133,7 +135,8 @@ public class WifiInfo implements Parcelable {
         return mWifiSsid;
     }
 
-    void setBSSID(String BSSID) {
+    /** @hide */
+    public void setBSSID(String BSSID) {
         mBSSID = BSSID;
     }
 
@@ -156,7 +159,8 @@ public class WifiInfo implements Parcelable {
         return mRssi;
     }
 
-    void setRssi(int rssi) {
+    /** @hide */
+    public void setRssi(int rssi) {
         mRssi = rssi;
     }
 
@@ -169,15 +173,17 @@ public class WifiInfo implements Parcelable {
         return mLinkSpeed;
     }
 
-    void setLinkSpeed(int linkSpeed) {
+    /** @hide */
+    public void setLinkSpeed(int linkSpeed) {
         this.mLinkSpeed = linkSpeed;
     }
 
     /**
      * Record the MAC address of the WLAN interface
      * @param macAddress the MAC address in {@code XX:XX:XX:XX:XX:XX} form
+     * @hide
      */
-    void setMacAddress(String macAddress) {
+    public void setMacAddress(String macAddress) {
         this.mMacAddress = macAddress;
     }
 
@@ -195,7 +201,8 @@ public class WifiInfo implements Parcelable {
         return mMeteredHint;
     }
 
-    void setNetworkId(int id) {
+    /** @hide */
+    public void setNetworkId(int id) {
         mNetworkId = id;
     }
 
@@ -218,11 +225,13 @@ public class WifiInfo implements Parcelable {
         return mSupplicantState;
     }
 
-    void setSupplicantState(SupplicantState state) {
+    /** @hide */
+    public void setSupplicantState(SupplicantState state) {
         mSupplicantState = state;
     }
 
-    void setInetAddress(InetAddress address) {
+    /** @hide */
+    public void setInetAddress(InetAddress address) {
         mIpAddress = address;
     }
 

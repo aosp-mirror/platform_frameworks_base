@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package com.android.server.wifi;
 
 import static android.net.wifi.WifiManager.WIFI_STATE_DISABLED;
 import static android.net.wifi.WifiManager.WIFI_STATE_DISABLING;
@@ -52,9 +52,19 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.wifi.BatchedScanResult;
+import android.net.wifi.BatchedScanSettings;
+import android.net.wifi.RssiPacketCountInfo;
+import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiSsid;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.WpsResult;
 import android.net.wifi.WpsResult.Status;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pService;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -80,6 +90,7 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
 import com.android.server.net.BaseNetworkObserver;
+import com.android.server.wifi.p2p.WifiP2pService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

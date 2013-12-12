@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package com.android.server.wifi;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -26,6 +26,9 @@ import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.wifi.RssiPacketCountInfo;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -93,8 +96,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /* Notifications from/to WifiStateMachine */
     static final int POOR_LINK_DETECTED                             = BASE + 21;
     static final int GOOD_LINK_DETECTED                             = BASE + 22;
-
-    public static final boolean DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED = false;
 
     /*
      * RSSI levels as used by notification icon
@@ -440,7 +441,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         } else {
             mPoorNetworkDetectionEnabled = getSettingsGlobalBoolean(mContentResolver,
                     Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
-                    DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED);
+                    WifiManager.DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED);
         }
     }
 

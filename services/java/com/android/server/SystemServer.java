@@ -26,7 +26,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioService;
-import android.net.wifi.p2p.WifiP2pService;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -73,6 +72,7 @@ import com.android.server.search.SearchManagerService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
 import com.android.server.wifi.WifiService;
+import com.android.server.wifi.p2p.WifiP2pService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;

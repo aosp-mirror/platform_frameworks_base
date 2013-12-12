@@ -30,7 +30,6 @@ import android.net.wifi.WifiManager;
 import static android.net.wifi.WifiManager.WIFI_MODE_FULL;
 import static android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF;
 import static android.net.wifi.WifiManager.WIFI_MODE_SCAN_ONLY;
-import android.net.wifi.WifiStateMachine;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;

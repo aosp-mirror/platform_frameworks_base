@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package com.android.server.wifi;
 
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
-import android.net.wifi.StateChangeResult;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;

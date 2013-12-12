@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.p2p;
+package com.android.server.wifi.p2p;
 
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -32,11 +32,18 @@ import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.NetworkInfo;
 import android.net.NetworkUtils;
-import android.net.wifi.WifiMonitor;
-import android.net.wifi.WifiNative;
-import android.net.wifi.WifiStateMachine;
 import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.IWifiP2pManager;
+import android.net.wifi.p2p.WifiP2pConfig;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pGroupList;
 import android.net.wifi.p2p.WifiP2pGroupList.GroupDeleteListener;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pProvDiscEvent;
+import android.net.wifi.p2p.WifiP2pWfdInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
@@ -66,6 +73,9 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.server.wifi.WifiMonitor;
+import com.android.server.wifi.WifiNative;
+import com.android.server.wifi.WifiStateMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

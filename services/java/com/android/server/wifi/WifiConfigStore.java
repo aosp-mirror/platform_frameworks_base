@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package com.android.server.wifi;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,13 +24,18 @@ import android.net.NetworkUtils;
 import android.net.NetworkInfo.DetailedState;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiConfiguration.Status;
-import android.net.wifi.NetworkUpdateResult;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 
+import android.net.wifi.WifiEnterpriseConfig;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiSsid;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.WpsResult;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -113,7 +118,7 @@ import java.util.List;
  * - Maintain a list of configured networks for quick access
  *
  */
-class WifiConfigStore {
+public class WifiConfigStore {
 
     private Context mContext;
     private static final String TAG = "WifiConfigStore";
@@ -167,50 +172,19 @@ class WifiConfigStore {
      */
     public static final String OLD_PRIVATE_KEY_NAME = "private_key";
 
-    /**
-     * String representing the keystore OpenSSL ENGINE's ID.
-     */
-    public static final String ENGINE_ID_KEYSTORE = "keystore";
-
-    /**
-     * String representing the keystore URI used for wpa_supplicant.
-     */
-    public static final String KEYSTORE_URI = "keystore://";
-
-    /**
-     * String to set the engine value to when it should be enabled.
-     */
-    public static final String ENGINE_ENABLE = "1";
-
-    /**
-     * String to set the engine value to when it should be disabled.
-     */
-    public static final String ENGINE_DISABLE = "0";
-
-    public static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
-    public static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + Credentials.USER_CERTIFICATE;
-    public static final String EAP_KEY             = "eap";
-    public static final String PHASE2_KEY          = "phase2";
-    public static final String IDENTITY_KEY        = "identity";
-    public static final String ANON_IDENTITY_KEY   = "anonymous_identity";
-    public static final String PASSWORD_KEY        = "password";
-    public static final String CLIENT_CERT_KEY     = "client_cert";
-    public static final String CA_CERT_KEY         = "ca_cert";
-    public static final String SUBJECT_MATCH_KEY   = "subject_match";
-    public static final String ENGINE_KEY          = "engine";
-    public static final String ENGINE_ID_KEY       = "engine_id";
-    public static final String PRIVATE_KEY_ID_KEY  = "key_id";
-    public static final String OPP_KEY_CACHING     = "proactive_key_caching";
-
     /** This represents an empty value of an enterprise field.
      * NULL is used at wpa_supplicant to indicate an empty value
      */
     static final String EMPTY_VALUE = "NULL";
 
     /** Internal use only */
-    private static final String[] ENTERPRISE_CONFIG_SUPPLICANT_KEYS = new String[] { EAP_KEY,
-            PHASE2_KEY, IDENTITY_KEY, ANON_IDENTITY_KEY, PASSWORD_KEY, CLIENT_CERT_KEY,
-            CA_CERT_KEY, SUBJECT_MATCH_KEY, ENGINE_KEY, ENGINE_ID_KEY, PRIVATE_KEY_ID_KEY };
+    private static final String[] ENTERPRISE_CONFIG_SUPPLICANT_KEYS = new String[] {
+            WifiEnterpriseConfig.EAP_KEY, WifiEnterpriseConfig.PHASE2_KEY,
+            WifiEnterpriseConfig.IDENTITY_KEY, WifiEnterpriseConfig.ANON_IDENTITY_KEY,
+            WifiEnterpriseConfig.PASSWORD_KEY, WifiEnterpriseConfig.CLIENT_CERT_KEY,
+            WifiEnterpriseConfig.CA_CERT_KEY, WifiEnterpriseConfig.SUBJECT_MATCH_KEY,
+            WifiEnterpriseConfig.ENGINE_KEY, WifiEnterpriseConfig.ENGINE_ID_KEY,
+            WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY };
 
     private final LocalLog mLocalLog;
     private final WpaConfigFileObserver mFileObserver;
@@ -1663,7 +1637,7 @@ class WifiConfigStore {
         // initializeSoftwareKeystoreFlag(config.enterpriseConfig, mKeyStore);
     }
 
-    private String removeDoubleQuotes(String string) {
+    private static String removeDoubleQuotes(String string) {
         int length = string.length();
         if ((length > 1) && (string.charAt(0) == '"')
                 && (string.charAt(length - 1) == '"')) {
@@ -1672,11 +1646,11 @@ class WifiConfigStore {
         return string;
     }
 
-    private String convertToQuotedString(String string) {
+    private static String convertToQuotedString(String string) {
         return "\"" + string + "\"";
     }
 
-    private String makeString(BitSet set, String[] strings) {
+    private static String makeString(BitSet set, String[] strings) {
         StringBuffer buf = new StringBuffer();
         int nextSetBit = -1;
 
@@ -1782,8 +1756,8 @@ class WifiConfigStore {
         }
     }
 
-    // Certificate and privake key management for EnterpriseConfig
-    boolean needsKeyStore(WifiEnterpriseConfig config) {
+    // Certificate and private key management for EnterpriseConfig
+    static boolean needsKeyStore(WifiEnterpriseConfig config) {
         // Has no keys to be installed
         if (config.getClientCertificate() == null && config.getCaCertificate() == null)
             return false;
@@ -1798,7 +1772,7 @@ class WifiConfigStore {
         return KeyChain.isBoundKeyAlgorithm(certificate.getPublicKey().getAlgorithm());
     }
 
-    boolean needsSoftwareBackedKeyStore(WifiEnterpriseConfig config) {
+    static boolean needsSoftwareBackedKeyStore(WifiEnterpriseConfig config) {
         String client = config.getClientCertificateAlias();
         if (!TextUtils.isEmpty(client)) {
             // a valid client certificate is configured
@@ -1968,28 +1942,31 @@ class WifiConfigStore {
             }
         }
 
-        config.setFieldValue(ENGINE_KEY, ENGINE_ENABLE);
-        config.setFieldValue(ENGINE_ID_KEY, ENGINE_ID_KEYSTORE);
+        config.setFieldValue(WifiEnterpriseConfig.ENGINE_KEY, WifiEnterpriseConfig.ENGINE_ENABLE);
+        config.setFieldValue(WifiEnterpriseConfig.ENGINE_ID_KEY,
+                WifiEnterpriseConfig.ENGINE_ID_KEYSTORE);
 
         /*
         * The old key started with the keystore:// URI prefix, but we don't
         * need that anymore. Trim it off if it exists.
         */
         final String keyName;
-        if (oldPrivateKey.startsWith(KEYSTORE_URI)) {
-            keyName = new String(oldPrivateKey.substring(KEYSTORE_URI.length()));
+        if (oldPrivateKey.startsWith(WifiEnterpriseConfig.KEYSTORE_URI)) {
+            keyName = new String(
+                    oldPrivateKey.substring(WifiEnterpriseConfig.KEYSTORE_URI.length()));
         } else {
             keyName = oldPrivateKey;
         }
-        config.setFieldValue(PRIVATE_KEY_ID_KEY, keyName);
+        config.setFieldValue(WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY, keyName);
 
-        mWifiNative.setNetworkVariable(netId, ENGINE_KEY, config.getFieldValue(ENGINE_KEY, ""));
+        mWifiNative.setNetworkVariable(netId, WifiEnterpriseConfig.ENGINE_KEY,
+                config.getFieldValue(WifiEnterpriseConfig.ENGINE_KEY, ""));
 
-        mWifiNative.setNetworkVariable(netId, ENGINE_ID_KEY,
-                config.getFieldValue(ENGINE_ID_KEY, ""));
+        mWifiNative.setNetworkVariable(netId, WifiEnterpriseConfig.ENGINE_ID_KEY,
+                config.getFieldValue(WifiEnterpriseConfig.ENGINE_ID_KEY, ""));
 
-        mWifiNative.setNetworkVariable(netId, PRIVATE_KEY_ID_KEY,
-                config.getFieldValue(PRIVATE_KEY_ID_KEY, ""));
+        mWifiNative.setNetworkVariable(netId, WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY,
+                config.getFieldValue(WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY, ""));
 
         // Remove old private_key string so we don't run this again.
         mWifiNative.setNetworkVariable(netId, OLD_PRIVATE_KEY_NAME, EMPTY_VALUE);
@@ -2019,4 +1996,6 @@ class WifiConfigStore {
             }
         }
     }
+
 }
+

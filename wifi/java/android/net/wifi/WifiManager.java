@@ -522,6 +522,9 @@ public class WifiManager {
     /** @hide */
     public static final int DATA_ACTIVITY_INOUT        = 0x03;
 
+    /** @hide */
+    public static final boolean DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED = false;
+
     /* Maximum number of active locks we allow.
      * This limit was added to prevent apps from creating a ridiculous number
      * of locks and crashing the system by overflowing the global ref table.

@@ -33,11 +33,66 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
-/** 
+/**
  * Enterprise configuration details for Wi-Fi. Stores details about the EAP method
  * and any associated credentials.
  */
 public class WifiEnterpriseConfig implements Parcelable {
+
+    /** @hide */
+    public static final String EMPTY_VALUE         = "NULL";
+    /** @hide */
+    public static final String EAP_KEY             = "eap";
+    /** @hide */
+    public static final String PHASE2_KEY          = "phase2";
+    /** @hide */
+    public static final String IDENTITY_KEY        = "identity";
+    /** @hide */
+    public static final String ANON_IDENTITY_KEY   = "anonymous_identity";
+    /** @hide */
+    public static final String PASSWORD_KEY        = "password";
+    /** @hide */
+    public static final String SUBJECT_MATCH_KEY   = "subject_match";
+    /** @hide */
+    public static final String OPP_KEY_CACHING     = "proactive_key_caching";
+    /**
+     * String representing the keystore OpenSSL ENGINE's ID.
+     * @hide
+     */
+    public static final String ENGINE_ID_KEYSTORE = "keystore";
+
+    /**
+     * String representing the keystore URI used for wpa_supplicant.
+     * @hide
+     */
+    public static final String KEYSTORE_URI = "keystore://";
+
+    /**
+     * String to set the engine value to when it should be enabled.
+     * @hide
+     */
+    public static final String ENGINE_ENABLE = "1";
+
+    /**
+     * String to set the engine value to when it should be disabled.
+     * @hide
+     */
+    public static final String ENGINE_DISABLE = "0";
+
+    /** @hide */
+    public static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
+    /** @hide */
+    public static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + Credentials.USER_CERTIFICATE;
+    /** @hide */
+    public static final String CLIENT_CERT_KEY     = "client_cert";
+    /** @hide */
+    public static final String CA_CERT_KEY         = "ca_cert";
+    /** @hide */
+    public static final String ENGINE_KEY          = "engine";
+    /** @hide */
+    public static final String ENGINE_ID_KEY       = "engine_id";
+    /** @hide */
+    public static final String PRIVATE_KEY_ID_KEY  = "key_id";
 
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate mCaCert;
@@ -189,15 +244,17 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int GTC         = 4;
         private static final String PREFIX = "auth=";
         /** @hide */
-        public static final String[] strings = {WifiConfigStore.EMPTY_VALUE, "PAP", "MSCHAP",
+        public static final String[] strings = {EMPTY_VALUE, "PAP", "MSCHAP",
                 "MSCHAPV2", "GTC" };
 
         /** Prevent initialization */
         private Phase2() {}
     }
 
-    /** Internal use only */
-    HashMap<String, String> getFields() {
+    /** Internal use only
+     * @hide
+     */
+    public HashMap<String, String> getFields() {
         return mFields;
     }
 
@@ -214,8 +271,8 @@ public class WifiEnterpriseConfig implements Parcelable {
             case Eap.PWD:
             case Eap.TLS:
             case Eap.TTLS:
-                mFields.put(WifiConfigStore.EAP_KEY, Eap.strings[eapMethod]);
-                mFields.put(WifiConfigStore.OPP_KEY_CACHING, "1");
+                mFields.put(EAP_KEY, Eap.strings[eapMethod]);
+                mFields.put(OPP_KEY_CACHING, "1");
                 break;
             default:
                 throw new IllegalArgumentException("Unknown EAP method");
@@ -227,7 +284,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return eap method configured
      */
     public int getEapMethod() {
-        String eapMethod  = mFields.get(WifiConfigStore.EAP_KEY);
+        String eapMethod  = mFields.get(EAP_KEY);
         return getStringIndex(Eap.strings, eapMethod, Eap.NONE);
     }
 
@@ -243,14 +300,14 @@ public class WifiEnterpriseConfig implements Parcelable {
     public void setPhase2Method(int phase2Method) {
         switch (phase2Method) {
             case Phase2.NONE:
-                mFields.put(WifiConfigStore.PHASE2_KEY, WifiConfigStore.EMPTY_VALUE);
+                mFields.put(PHASE2_KEY, EMPTY_VALUE);
                 break;
             /** Valid methods */
             case Phase2.PAP:
             case Phase2.MSCHAP:
             case Phase2.MSCHAPV2:
             case Phase2.GTC:
-                mFields.put(WifiConfigStore.PHASE2_KEY, convertToQuotedString(
+                mFields.put(PHASE2_KEY, convertToQuotedString(
                         Phase2.PREFIX + Phase2.strings[phase2Method]));
                 break;
             default:
@@ -263,7 +320,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return a phase 2 method defined at {@link Phase2}
      * */
     public int getPhase2Method() {
-        String phase2Method = removeDoubleQuotes(mFields.get(WifiConfigStore.PHASE2_KEY));
+        String phase2Method = removeDoubleQuotes(mFields.get(PHASE2_KEY));
         // Remove auth= prefix
         if (phase2Method.startsWith(Phase2.PREFIX)) {
             phase2Method = phase2Method.substring(Phase2.PREFIX.length());
@@ -276,7 +333,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param identity
      */
     public void setIdentity(String identity) {
-        setFieldValue(WifiConfigStore.IDENTITY_KEY, identity, "");
+        setFieldValue(IDENTITY_KEY, identity, "");
     }
 
     /**
@@ -284,7 +341,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return the identity
      */
     public String getIdentity() {
-        return getFieldValue(WifiConfigStore.IDENTITY_KEY, "");
+        return getFieldValue(IDENTITY_KEY, "");
     }
 
     /**
@@ -293,14 +350,14 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param anonymousIdentity the anonymous identity
      */
     public void setAnonymousIdentity(String anonymousIdentity) {
-        setFieldValue(WifiConfigStore.ANON_IDENTITY_KEY, anonymousIdentity, "");
+        setFieldValue(ANON_IDENTITY_KEY, anonymousIdentity, "");
     }
 
     /** Get the anonymous identity
      * @return anonymous identity
      */
     public String getAnonymousIdentity() {
-        return getFieldValue(WifiConfigStore.ANON_IDENTITY_KEY, "");
+        return getFieldValue(ANON_IDENTITY_KEY, "");
     }
 
     /**
@@ -308,7 +365,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param password the password
      */
     public void setPassword(String password) {
-        setFieldValue(WifiConfigStore.PASSWORD_KEY, password, "");
+        setFieldValue(PASSWORD_KEY, password, "");
     }
 
     /**
@@ -318,7 +375,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * framework, returns "*".
      */
     public String getPassword() {
-        return getFieldValue(WifiConfigStore.PASSWORD_KEY, "");
+        return getFieldValue(PASSWORD_KEY, "");
     }
 
     /**
@@ -331,7 +388,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public void setCaCertificateAlias(String alias) {
-        setFieldValue(WifiConfigStore.CA_CERT_KEY, alias, WifiConfigStore.CA_CERT_PREFIX);
+        setFieldValue(CA_CERT_KEY, alias, CA_CERT_PREFIX);
     }
 
     /**
@@ -340,7 +397,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public String getCaCertificateAlias() {
-        return getFieldValue(WifiConfigStore.CA_CERT_KEY, WifiConfigStore.CA_CERT_PREFIX);
+        return getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
     }
 
     /**
@@ -381,8 +438,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         mCaCert = null;
     }
 
-    /**
-     * Set Client certificate alias.
+    /** Set Client certificate alias.
      *
      * <p> See the {@link android.security.KeyChain} for details on installing or choosing
      * a certificate
@@ -391,16 +447,15 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public void setClientCertificateAlias(String alias) {
-        setFieldValue(WifiConfigStore.CLIENT_CERT_KEY, alias, WifiConfigStore.CLIENT_CERT_PREFIX);
-        setFieldValue(WifiConfigStore.PRIVATE_KEY_ID_KEY, alias, Credentials.USER_PRIVATE_KEY);
+        setFieldValue(CLIENT_CERT_KEY, alias, CLIENT_CERT_PREFIX);
+        setFieldValue(PRIVATE_KEY_ID_KEY, alias, Credentials.USER_PRIVATE_KEY);
         // Also, set engine parameters
         if (TextUtils.isEmpty(alias)) {
-            mFields.put(WifiConfigStore.ENGINE_KEY, WifiConfigStore.ENGINE_DISABLE);
-            mFields.put(WifiConfigStore.ENGINE_ID_KEY, WifiConfigStore.EMPTY_VALUE);
+            mFields.put(ENGINE_KEY, ENGINE_DISABLE);
+            mFields.put(ENGINE_ID_KEY, EMPTY_VALUE);
         } else {
-            mFields.put(WifiConfigStore.ENGINE_KEY, WifiConfigStore.ENGINE_ENABLE);
-            mFields.put(WifiConfigStore.ENGINE_ID_KEY,
-                    convertToQuotedString(WifiConfigStore.ENGINE_ID_KEYSTORE));
+            mFields.put(ENGINE_KEY, ENGINE_ENABLE);
+            mFields.put(ENGINE_ID_KEY, convertToQuotedString(ENGINE_ID_KEYSTORE));
         }
     }
 
@@ -410,7 +465,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public String getClientCertificateAlias() {
-        return getFieldValue(WifiConfigStore.CLIENT_CERT_KEY, WifiConfigStore.CLIENT_CERT_PREFIX);
+        return getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
     }
 
     /**
@@ -472,7 +527,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param subjectMatch substring to be matched
      */
     public void setSubjectMatch(String subjectMatch) {
-        setFieldValue(WifiConfigStore.SUBJECT_MATCH_KEY, subjectMatch, "");
+        setFieldValue(SUBJECT_MATCH_KEY, subjectMatch, "");
     }
 
     /**
@@ -480,20 +535,20 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return the subject match string
      */
     public String getSubjectMatch() {
-        return getFieldValue(WifiConfigStore.SUBJECT_MATCH_KEY, "");
+        return getFieldValue(SUBJECT_MATCH_KEY, "");
     }
 
     /** See {@link WifiConfiguration#getKeyIdForCredentials} @hide */
     String getKeyId(WifiEnterpriseConfig current) {
-        String eap = mFields.get(WifiConfigStore.EAP_KEY);
-        String phase2 = mFields.get(WifiConfigStore.PHASE2_KEY);
+        String eap = mFields.get(EAP_KEY);
+        String phase2 = mFields.get(PHASE2_KEY);
 
         // If either eap or phase2 are not initialized, use current config details
         if (TextUtils.isEmpty((eap))) {
-            eap = current.mFields.get(WifiConfigStore.EAP_KEY);
+            eap = current.mFields.get(EAP_KEY);
         }
         if (TextUtils.isEmpty(phase2)) {
-            phase2 = current.mFields.get(WifiConfigStore.PHASE2_KEY);
+            phase2 = current.mFields.get(PHASE2_KEY);
         }
         return eap + "_" + phase2;
     }
@@ -532,10 +587,10 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return value
      * @hide
      */
-    String getFieldValue(String key, String prefix) {
+    public String getFieldValue(String key, String prefix) {
         String value = mFields.get(key);
         // Uninitialized or known to be empty after reading from supplicant
-        if (TextUtils.isEmpty(value) || WifiConfigStore.EMPTY_VALUE.equals(value)) return "";
+        if (TextUtils.isEmpty(value) || EMPTY_VALUE.equals(value)) return "";
 
         value = removeDoubleQuotes(value);
         if (value.startsWith(prefix)) {
@@ -549,10 +604,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param key into the hash
      * @param value to be set
      * @param prefix an optional value to be prefixed to actual value
+     * @hide
      */
-    private void setFieldValue(String key, String value, String prefix) {
+    public void setFieldValue(String key, String value, String prefix) {
         if (TextUtils.isEmpty(value)) {
-            mFields.put(key, WifiConfigStore.EMPTY_VALUE);
+            mFields.put(key, EMPTY_VALUE);
         } else {
             mFields.put(key, convertToQuotedString(prefix + value));
         }
@@ -567,7 +623,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public void setFieldValue(String key, String value) {
         if (TextUtils.isEmpty(value)) {
-           mFields.put(key, WifiConfigStore.EMPTY_VALUE);
+           mFields.put(key, EMPTY_VALUE);
         } else {
             mFields.put(key, convertToQuotedString(value));
         }
