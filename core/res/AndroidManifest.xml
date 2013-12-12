@@ -809,8 +809,15 @@
     <!-- Allows access to the loop radio (Android@Home mesh network) device.
 	@hide -->
     <permission android:name="android.permission.LOOP_RADIO"
-	android:permissionGroup="android.permission-group.NETWORK"
-	android:protectionLevel="signature|system" />
+	    android:permissionGroup="android.permission-group.NETWORK"
+	    android:protectionLevel="signature|system" />
+
+    <!-- Allows for the NFC process to unlock the device
+         @hide This should only be used by the Nfc apk
+    -->
+    <permission android:name="android.permission.NFC_UNLOCK"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
 
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->

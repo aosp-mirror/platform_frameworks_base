@@ -36,6 +36,7 @@ import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_HEALTH;
 import android.media.AudioManager;
 import android.media.IRemoteControlDisplay;
+import android.nfc.NfcUnlock;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -94,6 +95,7 @@ public class KeyguardUpdateMonitor {
     protected static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
     private static final int MSG_SCREEN_TURNED_ON = 319;
     private static final int MSG_SCREEN_TURNED_OFF = 320;
+    private static final int MSG_NFC_UNLOCK = 321;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -193,6 +195,9 @@ public class KeyguardUpdateMonitor {
                     break;
                 case MSG_SCREEN_TURNED_ON:
                     handleScreenTurnedOn();
+                    break;
+                case MSG_NFC_UNLOCK:
+                    handleNfcUnlock();
                     break;
             }
         }
@@ -311,6 +316,15 @@ public class KeyguardUpdateMonitor {
         }
     };
 
+    private final BroadcastReceiver mNfcUnlockReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (NfcUnlock.ACTION_NFC_UNLOCK.equals(intent.getAction())) {
+                mHandler.sendEmptyMessage(MSG_NFC_UNLOCK);
+            }
+        }
+    }
+    ;
     /**
      * When we receive a
      * {@link com.android.internal.telephony.TelephonyIntents#ACTION_SIM_STATE_CHANGED} broadcast,
@@ -495,6 +509,15 @@ public class KeyguardUpdateMonitor {
         }
     }
 
+    private void handleNfcUnlock() {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onNfcUnlock();
+            }
+        }
+    }
+
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
 
@@ -523,6 +546,11 @@ public class KeyguardUpdateMonitor {
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        final IntentFilter nfcUnlockIntentFilter = new IntentFilter();
+        nfcUnlockIntentFilter.addAction(NfcUnlock.ACTION_NFC_UNLOCK);
+        context.registerReceiver(mNfcUnlockReceiver, nfcUnlockIntentFilter,
+                NfcUnlock.NFC_UNLOCK_PERMISSION, null /* run on default scheduler */);
 
         final IntentFilter bootCompleteFilter = new IntentFilter();
         bootCompleteFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);

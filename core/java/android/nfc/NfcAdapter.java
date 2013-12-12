@@ -292,6 +292,7 @@ public final class NfcAdapter {
     static INfcAdapter sService;
     static INfcTag sTagService;
     static INfcCardEmulation sCardEmulationService;
+    static INfcUnlockSettings sNfcUnlockSettingsService;
 
     /**
      * The NfcAdapter object for each application context.
@@ -432,6 +433,13 @@ public final class NfcAdapter {
                 throw new UnsupportedOperationException();
             }
 
+            try {
+               sNfcUnlockSettingsService = sService.getNfcUnlockSettingsInterface();
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not retrieve NFC unlock settings service");
+                sNfcUnlockSettingsService = null;
+            }
+
             sIsInitialized = true;
         }
         if (context == null) {
@@ -546,6 +554,22 @@ public final class NfcAdapter {
     public INfcCardEmulation getCardEmulationService() {
         isEnabled();
         return sCardEmulationService;
+    }
+
+    /**
+     * Returns the binder interface to the NFC unlock service.
+     *
+     * @throws UnsupportedOperationException if the service is not available.
+     * @hide
+     */
+    public INfcUnlockSettings getNfcUnlockSettingsService() throws UnsupportedOperationException {
+         isEnabled();
+
+        if (sNfcUnlockSettingsService == null) {
+            throw new UnsupportedOperationException("NfcUnlockSettingsService not available");
+        }
+
+        return sNfcUnlockSettingsService;
     }
 
     /**
