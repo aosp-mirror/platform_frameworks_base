@@ -138,7 +138,6 @@ public final class BluetoothPan implements BluetoothProfile {
         }
         if (VDBG) Log.d(TAG, "BluetoothPan() call bindService");
         doBind();
-        if (VDBG) Log.d(TAG, "BluetoothPan(), bindService called");
     }
 
     boolean doBind() {
@@ -185,12 +184,22 @@ public final class BluetoothPan implements BluetoothProfile {
     final private IBluetoothStateChangeCallback mStateChangeCallback = new IBluetoothStateChangeCallback.Stub() {
 
         @Override
-        public void onBluetoothStateChange(boolean on) throws RemoteException {
-            //Handle enable request to bind again.
+        public void onBluetoothStateChange(boolean on) {
+            // Handle enable request to bind again.
+            Log.d(TAG, "onBluetoothStateChange on: " + on);
             if (on) {
-                Log.d(TAG, "onBluetoothStateChange(on) call bindService");
-                doBind();
-                if (VDBG) Log.d(TAG, "BluetoothPan(), bindService called");
+                try {
+                    if (mPanService == null) {
+                        if (VDBG) Log.d(TAG, "onBluetoothStateChange calling doBind()");
+                        doBind();
+                    }
+
+                } catch (IllegalStateException e) {
+                    Log.e(TAG,"onBluetoothStateChange: could not bind to PAN service: ", e);
+
+                } catch (SecurityException e) {
+                    Log.e(TAG,"onBluetoothStateChange: could not bind to PAN service: ", e);
+                }
             } else {
                 if (VDBG) Log.d(TAG,"Unbinding service...");
                 synchronized (mConnection) {
