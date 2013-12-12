@@ -167,7 +167,7 @@ static JNINativeMethod gWifiMethods[] = {
 
 int register_android_net_wifi_WifiNative(JNIEnv* env) {
     return AndroidRuntime::registerNativeMethods(env,
-            "android/net/wifi/WifiNative", gWifiMethods, NELEM(gWifiMethods));
+            "com/android/server/wifi/WifiNative", gWifiMethods, NELEM(gWifiMethods));
 }
 
 }; // namespace android

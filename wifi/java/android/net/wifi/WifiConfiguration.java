@@ -499,7 +499,7 @@ public class WifiConfiguration implements Parcelable {
      * @throws IllegalStateException if config is invalid for key id generation
      * @hide
      */
-    String getKeyIdForCredentials(WifiConfiguration current) {
+    public String getKeyIdForCredentials(WifiConfiguration current) {
         String keyMgmt = null;
 
         try {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package com.android.server.wifi;
 
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 
