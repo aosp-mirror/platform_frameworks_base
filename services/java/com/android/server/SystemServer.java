@@ -17,6 +17,8 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
+import android.app.IAlarmManager;
+import android.app.INotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -59,9 +61,12 @@ import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.input.InputManagerService;
+import com.android.server.lights.LightsManager;
+import com.android.server.lights.LightsService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
+import com.android.server.notification.NotificationManagerService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.PackageManagerService;
@@ -70,6 +75,10 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.print.PrintManagerService;
 import com.android.server.search.SearchManagerService;
+import com.android.server.statusbar.StatusBarManagerService;
+import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.twilight.TwilightManager;
+import com.android.server.twilight.TwilightService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
 import com.android.server.wifi.WifiService;
@@ -131,12 +140,12 @@ class ServerThread {
         Installer installer = null;
         AccountManagerService accountManager = null;
         ContentService contentService = null;
-        LightsService lights = null;
+        LightsManager lights = null;
         PowerManagerService power = null;
         DisplayManagerService display = null;
         BatteryService battery = null;
         VibratorService vibrator = null;
-        AlarmManagerService alarm = null;
+        IAlarmManager alarm = null;
         MountService mountService = null;
         NetworkManagementService networkManagement = null;
         NetworkStatsService networkStats = null;
@@ -152,8 +161,7 @@ class ServerThread {
         DockObserver dock = null;
         UsbService usb = null;
         SerialService serial = null;
-        TwilightService twilight = null;
-        UiModeManagerService uiMode = null;
+        TwilightManager twilight = null;
         RecognitionManagerService recognition = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         CommonTimeManagementService commonTimeMgmtService = null;
@@ -202,6 +210,8 @@ class ServerThread {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting bootstrap service", e);
         }
+
+        final SystemServiceManager systemServiceManager = new SystemServiceManager(context);
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
@@ -278,8 +288,8 @@ class ServerThread {
             Slog.i(TAG, "System Content Providers");
             ActivityManagerService.installSystemProviders();
 
-            Slog.i(TAG, "Lights Service");
-            lights = new LightsService(context);
+            systemServiceManager.startService(LightsService.class);
+            lights = LocalServices.getService(LightsManager.class);
 
             Slog.i(TAG, "Battery Service");
             battery = new BatteryService(context, lights);
@@ -295,17 +305,16 @@ class ServerThread {
 
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
-            power.init(context, lights, ActivityManagerService.self(), battery,
+            power.init(context, lights, battery,
                     BatteryStatsService.getService(),
                     ActivityManagerService.self().getAppOpsService(), display);
 
-            Slog.i(TAG, "Alarm Manager");
-            alarm = new AlarmManagerService(context);
-            ServiceManager.addService(Context.ALARM_SERVICE, alarm);
+            systemServiceManager.startService(AlarmManagerService.class);
+            alarm = IAlarmManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ALARM_SERVICE));
 
             Slog.i(TAG, "Init Watchdog");
-            Watchdog.getInstance().init(context, battery, power, alarm,
-                    ActivityManagerService.self());
+            Watchdog.getInstance().init(context, ActivityManagerService.self());
             Watchdog.getInstance().addThread(wmHandler, "WindowManager thread");
 
             Slog.i(TAG, "Input Manager");
@@ -350,9 +359,9 @@ class ServerThread {
 
         DevicePolicyManagerService devicePolicy = null;
         StatusBarManagerService statusBar = null;
+        INotificationManager notification = null;
         InputMethodManagerService imm = null;
         AppWidgetService appWidget = null;
-        NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
@@ -401,7 +410,7 @@ class ServerThread {
             ActivityManagerNative.getDefault().showBootMessage(
                     context.getResources().getText(
                             com.android.internal.R.string.android_upgrading_starting_apps),
-                            false);
+                    false);
         } catch (RemoteException e) {
         }
 
@@ -571,22 +580,12 @@ class ServerThread {
                 reportWtf("making Content Service ready", e);
             }
 
-            try {
-                Slog.i(TAG, "Notification Manager");
-                notification = new NotificationManagerService(context, statusBar, lights);
-                ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
-                networkPolicy.bindNotificationManager(notification);
-            } catch (Throwable e) {
-                reportWtf("starting Notification Manager", e);
-            }
+            systemServiceManager.startService(NotificationManagerService.class);
+            notification = INotificationManager.Stub.asInterface(
+                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+            networkPolicy.bindNotificationManager(notification);
 
-            try {
-                Slog.i(TAG, "Device Storage Monitor");
-                ServiceManager.addService(DeviceStorageMonitorService.SERVICE,
-                        new DeviceStorageMonitorService(context));
-            } catch (Throwable e) {
-                reportWtf("starting DeviceStorageMonitor service", e);
-            }
+            systemServiceManager.startService(DeviceStorageMonitorService.class);
 
             if (!disableLocation) {
                 try {
@@ -685,20 +684,10 @@ class ServerThread {
                 }
             }
 
-            try {
-                Slog.i(TAG, "Twilight Service");
-                twilight = new TwilightService(context);
-            } catch (Throwable e) {
-                reportWtf("starting TwilightService", e);
-            }
+            systemServiceManager.startService(TwilightService.class);
+            twilight = LocalServices.getService(TwilightManager.class);
 
-            try {
-                Slog.i(TAG, "UI Mode Manager Service");
-                // Listen for UI mode changes
-                uiMode = new UiModeManagerService(context, twilight);
-            } catch (Throwable e) {
-                reportWtf("starting UiModeManagerService", e);
-            }
+            systemServiceManager.startService(UiModeManagerService.class);
 
             if (!disableNonCoreServices) {
                 try {
@@ -858,13 +847,7 @@ class ServerThread {
             }
         }
 
-        if (notification != null) {
-            try {
-                notification.systemReady();
-            } catch (Throwable e) {
-                reportWtf("making Notification Service ready", e);
-            }
-        }
+        systemServiceManager.startBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         try {
             wm.systemReady();
@@ -913,8 +896,6 @@ class ServerThread {
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
         final UsbService usbF = usb;
-        final TwilightService twilightF = twilight;
-        final UiModeManagerService uiModeF = uiMode;
         final AppWidgetService appWidgetF = appWidget;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
@@ -992,16 +973,6 @@ class ServerThread {
                     reportWtf("making USB Service ready", e);
                 }
                 try {
-                    if (twilightF != null) twilightF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("makin Twilight Service ready", e);
-                }
-                try {
-                    if (uiModeF != null) uiModeF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making UI Mode Service ready", e);
-                }
-                try {
                     if (recognitionF != null) recognitionF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Recognition Service ready", e);
@@ -1010,6 +981,7 @@ class ServerThread {
 
                 // It is now okay to let the various system services start their
                 // third party code...
+                systemServiceManager.startBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
 
                 try {
                     if (appWidgetF != null) appWidgetF.systemRunning(safeMode);
@@ -1086,6 +1058,8 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("Notifying MediaRouterService running", e);
                 }
+
+                systemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
             }
         });
 

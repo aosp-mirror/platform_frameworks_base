@@ -38,10 +38,10 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
-import com.android.server.DeviceStorageMonitorService;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 
+import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -92,6 +92,7 @@ import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -127,7 +128,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 import android.view.Display;
-import android.view.WindowManager;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -162,6 +162,7 @@ import libcore.io.Libcore;
 import libcore.io.StructStat;
 
 import com.android.internal.R;
+import com.android.server.storage.DeviceStorageMonitorInternal;
 
 /**
  * Keep track of all those .apks everywhere.
@@ -1067,6 +1068,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
+    private static void getDefaultDisplayMetrics(Context context, DisplayMetrics metrics) {
+        DisplayManager displayManager = (DisplayManager) context.getSystemService(
+                Context.DISPLAY_SERVICE);
+        displayManager.getDisplay(Display.DEFAULT_DISPLAY).getMetrics(metrics);
+    }
+
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
@@ -1114,9 +1121,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         mInstaller = installer;
 
-        WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        Display d = wm.getDefaultDisplay();
-        d.getMetrics(mMetrics);
+        getDefaultDisplayMetrics(context, mMetrics);
 
         synchronized (mInstallLock) {
         // writer
@@ -7339,6 +7344,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             return pkgLite.recommendedInstallLocation;
         }
 
+        private long getMemoryLowThreshold() {
+            final DeviceStorageMonitorInternal
+                    dsm = LocalServices.getService(DeviceStorageMonitorInternal.class);
+            if (dsm == null) {
+                return 0L;
+            }
+            return dsm.getMemoryLowThreshold();
+        }
+
         /*
          * Invoke remote method to get package information and install
          * location values. Override install location based on default
@@ -7356,15 +7370,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Conflicting flags specified for installing on both internal and external");
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
-                final long lowThreshold;
-
-                final DeviceStorageMonitorService dsm = (DeviceStorageMonitorService) ServiceManager
-                        .getService(DeviceStorageMonitorService.SERVICE);
-                if (dsm == null) {
+                final long lowThreshold = getMemoryLowThreshold();
+                if (lowThreshold == 0L) {
                     Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
-                    lowThreshold = 0L;
-                } else {
-                    lowThreshold = dsm.getMemoryLowThreshold();
                 }
 
                 try {
@@ -7922,8 +7930,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
             final long lowThreshold;
 
-            final DeviceStorageMonitorService dsm = (DeviceStorageMonitorService) ServiceManager
-                    .getService(DeviceStorageMonitorService.SERVICE);
+            final DeviceStorageMonitorInternal
+                    dsm = LocalServices.getService(DeviceStorageMonitorInternal.class);
             if (dsm == null) {
                 Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
                 lowThreshold = 0L;
@@ -9738,10 +9746,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 clearExternalStorageDataSync(packageName, userId, true);
                 if (succeeded) {
                     // invoke DeviceStorageMonitor's update method to clear any notifications
-                    DeviceStorageMonitorService dsm = (DeviceStorageMonitorService)
-                            ServiceManager.getService(DeviceStorageMonitorService.SERVICE);
+                    DeviceStorageMonitorInternal
+                            dsm = LocalServices.getService(DeviceStorageMonitorInternal.class);
                     if (dsm != null) {
-                        dsm.updateMemory();
+                        dsm.checkMemory();
                     }
                 }
                 if(observer != null) {
@@ -11566,12 +11574,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
+    @Override
     public boolean isStorageLow() {
         final long token = Binder.clearCallingIdentity();
         try {
-            final DeviceStorageMonitorService dsm = (DeviceStorageMonitorService) ServiceManager
-                    .getService(DeviceStorageMonitorService.SERVICE);
-            return dsm.isMemoryLow();
+            final DeviceStorageMonitorInternal
+                    dsm = LocalServices.getService(DeviceStorageMonitorInternal.class);
+            if (dsm != null) {
+                return dsm.isMemoryLow();
+            } else {
+                return false;
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
