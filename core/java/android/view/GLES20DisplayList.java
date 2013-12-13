@@ -231,6 +231,21 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
+    public void setTranslationZ(float translationZ) {
+        if (hasNativeDisplayList()) {
+            nSetTranslationZ(mFinalizer.mNativeDisplayList, translationZ);
+        }
+    }
+
+    @Override
+    public float getTranslationZ() {
+        if (hasNativeDisplayList()) {
+            return nGetTranslationZ(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
+
+    @Override
     public void setRotation(float rotation) {
         if (hasNativeDisplayList()) {
             nSetRotation(mFinalizer.mNativeDisplayList, rotation);
@@ -306,10 +321,12 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
-    public void setTransformationInfo(float alpha, float translationX, float translationY,
+    public void setTransformationInfo(float alpha,
+            float translationX, float translationY, float translationZ,
             float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
         if (hasNativeDisplayList()) {
-            nSetTransformationInfo(mFinalizer.mNativeDisplayList, alpha, translationX, translationY,
+            nSetTransformationInfo(mFinalizer.mNativeDisplayList, alpha,
+                    translationX, translationY, translationZ,
                     rotation, rotationX, rotationY, scaleX, scaleY);
         }
     }
@@ -466,14 +483,15 @@ class GLES20DisplayList extends DisplayList {
             boolean hasOverlappingRendering);
     private static native void nSetTranslationX(int displayList, float translationX);
     private static native void nSetTranslationY(int displayList, float translationY);
+    private static native void nSetTranslationZ(int displayList, float translationZ);
     private static native void nSetRotation(int displayList, float rotation);
     private static native void nSetRotationX(int displayList, float rotationX);
     private static native void nSetRotationY(int displayList, float rotationY);
     private static native void nSetScaleX(int displayList, float scaleX);
     private static native void nSetScaleY(int displayList, float scaleY);
     private static native void nSetTransformationInfo(int displayList, float alpha,
-            float translationX, float translationY, float rotation, float rotationX,
-            float rotationY, float scaleX, float scaleY);
+            float translationX, float translationY, float translationZ,
+            float rotation, float rotationX, float rotationY, float scaleX, float scaleY);
     private static native void nSetStaticMatrix(int displayList, int nativeMatrix);
     private static native void nSetAnimationMatrix(int displayList, int animationMatrix);
 
@@ -489,6 +507,7 @@ class GLES20DisplayList extends DisplayList {
     private static native float nGetScaleY(int displayList);
     private static native float nGetTranslationX(int displayList);
     private static native float nGetTranslationY(int displayList);
+    private static native float nGetTranslationZ(int displayList);
     private static native float nGetRotation(int displayList);
     private static native float nGetRotationX(int displayList);
     private static native float nGetRotationY(int displayList);

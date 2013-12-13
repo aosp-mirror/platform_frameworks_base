@@ -438,6 +438,21 @@ public abstract class DisplayList {
     public abstract float getTranslationY();
 
     /**
+     * Sets the translation value for the display list on the Z axis
+     *
+     * @see View#setTranslationZ(float)
+     * @see #getTranslationZ()
+     */
+    public abstract void setTranslationZ(float translationZ);
+
+    /**
+     * Returns the translation value for this display list on the Z axis.
+     *
+     * @see #setTranslationZ(float)
+     */
+    public abstract float getTranslationZ();
+
+    /**
      * Sets the rotation value for the display list around the Z axis
      *
      * @param rotation The rotation value of the display list, in degrees
@@ -536,7 +551,8 @@ public abstract class DisplayList {
      *
      * @hide
      */
-    public abstract void setTransformationInfo(float alpha, float translationX, float translationY,
+    public abstract void setTransformationInfo(float alpha,
+            float translationX, float translationY, float translationZ,
             float rotation, float rotationX, float rotationY, float scaleX, float scaleY);
 
     /**

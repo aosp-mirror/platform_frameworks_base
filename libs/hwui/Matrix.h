@@ -121,6 +121,10 @@ public:
     void loadRotate(float angle);
     void loadRotate(float angle, float x, float y, float z);
     void loadMultiply(const Matrix4& u, const Matrix4& v);
+    void loadFrustum(float left, float top, float right, float bottom, float near, float far);
+    void loadLookAt(float eyeX, float eyeY, float eyeZ,
+            float centerX, float centerY, float centerZ,
+            float upX, float upY, float upZ);
 
     void loadOrtho(float left, float right, float bottom, float top, float near, float far);
 
@@ -134,17 +138,18 @@ public:
 
     void multiply(float v);
 
-    void translate(float x, float y) {
+    void translate(float x, float y, float z = 0) {
         if ((getType() & sGeometryMask) <= kTypeTranslate) {
             data[kTranslateX] += x;
             data[kTranslateY] += y;
+            data[kTranslateZ] += z;
         } else {
             // Doing a translation will only affect the translate bit of the type
             // Save the type
             uint8_t type = mType;
 
             Matrix4 u;
-            u.loadTranslate(x, y, 0.0f);
+            u.loadTranslate(x, y, z);
             multiply(u);
 
             // Restore the type and fix the translate bit
@@ -190,8 +195,9 @@ public:
     void copyTo(float* v) const;
     void copyTo(SkMatrix& v) const;
 
-    void mapRect(Rect& r) const;
-    void mapPoint(float& x, float& y) const;
+    void mapPoint3d(Vector3& vec) const;
+    void mapPoint(float& x, float& y) const; // 2d only
+    void mapRect(Rect& r) const; // 2d only
 
     float getTranslateX() const;
     float getTranslateY() const;

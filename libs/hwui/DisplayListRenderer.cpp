@@ -111,6 +111,7 @@ DisplayList* DisplayListRenderer::getDisplayList(DisplayList* displayList) {
     } else {
         displayList->initFromDisplayListRenderer(*this, true);
     }
+    // TODO: should just avoid setting the DisplayList's DisplayListData
     displayList->setRenderable(mHasDrawOps);
     return displayList;
 }
@@ -120,7 +121,8 @@ bool DisplayListRenderer::isDeferred() {
 }
 
 void DisplayListRenderer::setViewport(int width, int height) {
-    mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
+    // TODO: DisplayListRenderer shouldn't have a projection matrix, as it should never be used
+    mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     mWidth = width;
     mHeight = height;
@@ -248,7 +250,10 @@ status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
     //       resources cache, but we rely on the caller (UI toolkit) to
     //       do the right thing for now
 
-    addDrawOp(new (alloc()) DrawDisplayListOp(displayList, flags));
+    DrawDisplayListOp* op = new (alloc()) DrawDisplayListOp(displayList, flags, currentTransform());
+    addDrawOp(op);
+    mDisplayListData->children.push(op);
+
     return DrawGlInfo::kStatusDone;
 }
 

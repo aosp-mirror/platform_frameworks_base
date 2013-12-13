@@ -194,11 +194,9 @@ void Layer::defer() {
         dirtyRect.set(0, 0, width, height);
     }
 
-    if (deferredList) {
-        deferredList->reset(dirtyRect);
-    } else {
-        deferredList = new DeferredDisplayList(dirtyRect);
-    }
+    delete deferredList;
+    deferredList = new DeferredDisplayList(dirtyRect);
+
     DeferStateStruct deferredState(*deferredList, *renderer,
             DisplayList::kReplayFlag_ClipChildren);
 
@@ -206,6 +204,7 @@ void Layer::defer() {
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 
+    displayList->computeOrdering();
     displayList->defer(deferredState, 0);
 
     deferredUpdateScheduled = false;

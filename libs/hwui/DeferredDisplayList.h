@@ -79,13 +79,13 @@ public:
 };
 
 class DeferredDisplayList {
+    friend class DeferStateStruct; // used to give access to allocator
 public:
     DeferredDisplayList(const Rect& bounds, bool avoidOverdraw = true) :
             mBounds(bounds), mAvoidOverdraw(avoidOverdraw) {
         clear();
     }
     ~DeferredDisplayList() { clear(); }
-    void reset(const Rect& bounds) { mBounds.set(bounds); }
 
     enum OpBatchId {
         kOpBatch_None = 0, // Don't batch
@@ -120,6 +120,8 @@ public:
     void addDrawOp(OpenGLRenderer& renderer, DrawOp* op);
 
 private:
+    DeferredDisplayList(const DeferredDisplayList& other); // disallow copy
+
     DeferredDisplayState* createState() {
         return new (mAllocator) DeferredDisplayState();
     }
