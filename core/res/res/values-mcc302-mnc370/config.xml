@@ -37,6 +37,7 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string-array translatable="false" name="config_tether_apndata">
         <item>Fido LTE Tethering,ltedata.apn,,,,,,,,,302,370,,DUN</item>
+        <item>[ApnSettingV3]MTS Tethering,internet.mts,,,,,,,,,302,370,,DUN,,,true,0,,,,,,,gid,2C</item>
     </string-array>
 
     <!-- Configure mobile network MTU. Carrier specific value is set here.
