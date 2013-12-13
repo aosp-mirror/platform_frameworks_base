@@ -204,6 +204,14 @@ public final class Tag implements Parcelable {
     }
 
     /**
+     * For use by NfcService only.
+     * @hide
+     */
+    public int[] getTechCodeList() {
+        return mTechList;
+    }
+
+    /**
      * Get the Tag Identifier (if it has one).
      * <p>The tag identifier is a low level serial number, used for anti-collision
      * and identification.
