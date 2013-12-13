@@ -174,7 +174,7 @@ class FastScroller {
     /** Whether the preview image is visible. */
     private boolean mShowingPreview;
 
-    private BaseAdapter mListAdapter;
+    private Adapter mListAdapter;
     private SectionIndexer mSectionIndexer;
 
     /** Whether decorations should be laid out from right to left. */
@@ -892,15 +892,15 @@ class FastScroller {
                     .getAdapter();
             if (expAdapter instanceof SectionIndexer) {
                 mSectionIndexer = (SectionIndexer) expAdapter;
-                mListAdapter = (BaseAdapter) adapter;
+                mListAdapter = adapter;
                 mSections = mSectionIndexer.getSections();
             }
         } else if (adapter instanceof SectionIndexer) {
-            mListAdapter = (BaseAdapter) adapter;
+            mListAdapter = adapter;
             mSectionIndexer = (SectionIndexer) adapter;
             mSections = mSectionIndexer.getSections();
         } else {
-            mListAdapter = (BaseAdapter) adapter;
+            mListAdapter = adapter;
             mSections = null;
         }
     }
