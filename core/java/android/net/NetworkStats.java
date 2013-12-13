@@ -23,12 +23,12 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.Objects;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Collection of active network statistics. Can contain summary details across
@@ -337,7 +337,7 @@ public class NetworkStats implements Parcelable {
     public int findIndex(String iface, int uid, int set, int tag) {
         for (int i = 0; i < size; i++) {
             if (uid == this.uid[i] && set == this.set[i] && tag == this.tag[i]
-                    && Objects.equal(iface, this.iface[i])) {
+                    && Objects.equals(iface, this.iface[i])) {
                 return i;
             }
         }
@@ -362,7 +362,7 @@ public class NetworkStats implements Parcelable {
             }
 
             if (uid == this.uid[i] && set == this.set[i] && tag == this.tag[i]
-                    && Objects.equal(iface, this.iface[i])) {
+                    && Objects.equals(iface, this.iface[i])) {
                 return i;
             }
         }
