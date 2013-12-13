@@ -108,7 +108,7 @@ import java.util.Set;
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
-    private static final String TAG = "DevicePolicyManagerService";
+    private static final String LOG_TAG = "DevicePolicyManagerService";
 
     private static final String DEVICE_POLICIES_XML = "device_policies.xml";
 
@@ -177,7 +177,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     getSendingUserId());
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || ACTION_EXPIRED_PASSWORD_NOTIFICATION.equals(action)) {
-                if (DBG) Slog.v(TAG, "Sending password expiration notifications for action "
+                if (DBG) Slog.v(LOG_TAG, "Sending password expiration notifications for action "
                         + action + " for user " + userHandle);
                 mHandler.post(new Runnable() {
                     public void run() {
@@ -209,6 +209,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     };
 
     static class ActiveAdmin {
+        private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
+        private static final String TAG_DISABLE_CAMERA = "disable-camera";
+        private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
+        private static final String TAG_PASSWORD_EXPIRATION_DATE = "password-expiration-date";
+        private static final String TAG_PASSWORD_EXPIRATION_TIMEOUT = "password-expiration-timeout";
+        private static final String TAG_GLOBAL_PROXY_EXCLUSION_LIST = "global-proxy-exclusion-list";
+        private static final String TAG_GLOBAL_PROXY_SPEC = "global-proxy-spec";
+        private static final String TAG_SPECIFIES_GLOBAL_PROXY = "specifies-global-proxy";
+        private static final String TAG_MAX_FAILED_PASSWORD_WIPE = "max-failed-password-wipe";
+        private static final String TAG_MAX_TIME_TO_UNLOCK = "max-time-to-unlock";
+        private static final String TAG_MIN_PASSWORD_NONLETTER = "min-password-nonletter";
+        private static final String TAG_MIN_PASSWORD_SYMBOLS = "min-password-symbols";
+        private static final String TAG_MIN_PASSWORD_NUMERIC = "min-password-numeric";
+        private static final String TAG_MIN_PASSWORD_LETTERS = "min-password-letters";
+        private static final String TAG_MIN_PASSWORD_LOWERCASE = "min-password-lowercase";
+        private static final String TAG_MIN_PASSWORD_UPPERCASE = "min-password-uppercase";
+        private static final String TAG_PASSWORD_HISTORY_LENGTH = "password-history-length";
+        private static final String TAG_MIN_PASSWORD_LENGTH = "min-password-length";
+        private static final String ATTR_VALUE = "value";
+        private static final String TAG_PASSWORD_QUALITY = "password-quality";
+        private static final String TAG_POLICIES = "policies";
+
         final DeviceAdminInfo info;
 
         int passwordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -272,103 +294,103 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         void writeToXml(XmlSerializer out)
                 throws IllegalArgumentException, IllegalStateException, IOException {
-            out.startTag(null, "policies");
+            out.startTag(null, TAG_POLICIES);
             info.writePoliciesToXml(out);
-            out.endTag(null, "policies");
+            out.endTag(null, TAG_POLICIES);
             if (passwordQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
-                out.startTag(null, "password-quality");
-                out.attribute(null, "value", Integer.toString(passwordQuality));
-                out.endTag(null, "password-quality");
+                out.startTag(null, TAG_PASSWORD_QUALITY);
+                out.attribute(null, ATTR_VALUE, Integer.toString(passwordQuality));
+                out.endTag(null, TAG_PASSWORD_QUALITY);
                 if (minimumPasswordLength != DEF_MINIMUM_PASSWORD_LENGTH) {
-                    out.startTag(null, "min-password-length");
-                    out.attribute(null, "value", Integer.toString(minimumPasswordLength));
-                    out.endTag(null, "min-password-length");
+                    out.startTag(null, TAG_MIN_PASSWORD_LENGTH);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordLength));
+                    out.endTag(null, TAG_MIN_PASSWORD_LENGTH);
                 }
                 if(passwordHistoryLength != DEF_PASSWORD_HISTORY_LENGTH) {
-                    out.startTag(null, "password-history-length");
-                    out.attribute(null, "value", Integer.toString(passwordHistoryLength));
-                    out.endTag(null, "password-history-length");
+                    out.startTag(null, TAG_PASSWORD_HISTORY_LENGTH);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(passwordHistoryLength));
+                    out.endTag(null, TAG_PASSWORD_HISTORY_LENGTH);
                 }
                 if (minimumPasswordUpperCase != DEF_MINIMUM_PASSWORD_UPPER_CASE) {
-                    out.startTag(null, "min-password-uppercase");
-                    out.attribute(null, "value", Integer.toString(minimumPasswordUpperCase));
-                    out.endTag(null, "min-password-uppercase");
+                    out.startTag(null, TAG_MIN_PASSWORD_UPPERCASE);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordUpperCase));
+                    out.endTag(null, TAG_MIN_PASSWORD_UPPERCASE);
                 }
                 if (minimumPasswordLowerCase != DEF_MINIMUM_PASSWORD_LOWER_CASE) {
-                    out.startTag(null, "min-password-lowercase");
-                    out.attribute(null, "value", Integer.toString(minimumPasswordLowerCase));
-                    out.endTag(null, "min-password-lowercase");
+                    out.startTag(null, TAG_MIN_PASSWORD_LOWERCASE);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordLowerCase));
+                    out.endTag(null, TAG_MIN_PASSWORD_LOWERCASE);
                 }
                 if (minimumPasswordLetters != DEF_MINIMUM_PASSWORD_LETTERS) {
-                    out.startTag(null, "min-password-letters");
-                    out.attribute(null, "value", Integer.toString(minimumPasswordLetters));
-                    out.endTag(null, "min-password-letters");
+                    out.startTag(null, TAG_MIN_PASSWORD_LETTERS);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordLetters));
+                    out.endTag(null, TAG_MIN_PASSWORD_LETTERS);
                 }
                 if (minimumPasswordNumeric != DEF_MINIMUM_PASSWORD_NUMERIC) {
-                    out.startTag(null, "min-password-numeric");
-                    out.attribute(null, "value", Integer.toString(minimumPasswordNumeric));
-                    out.endTag(null, "min-password-numeric");
+                    out.startTag(null, TAG_MIN_PASSWORD_NUMERIC);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordNumeric));
+                    out.endTag(null, TAG_MIN_PASSWORD_NUMERIC);
                 }
                 if (minimumPasswordSymbols != DEF_MINIMUM_PASSWORD_SYMBOLS) {
-                    out.startTag(null, "min-password-symbols");
-                    out.attribute(null, "value", Integer.toString(minimumPasswordSymbols));
-                    out.endTag(null, "min-password-symbols");
+                    out.startTag(null, TAG_MIN_PASSWORD_SYMBOLS);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordSymbols));
+                    out.endTag(null, TAG_MIN_PASSWORD_SYMBOLS);
                 }
                 if (minimumPasswordNonLetter > DEF_MINIMUM_PASSWORD_NON_LETTER) {
-                    out.startTag(null, "min-password-nonletter");
-                    out.attribute(null, "value", Integer.toString(minimumPasswordNonLetter));
-                    out.endTag(null, "min-password-nonletter");
+                    out.startTag(null, TAG_MIN_PASSWORD_NONLETTER);
+                    out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordNonLetter));
+                    out.endTag(null, TAG_MIN_PASSWORD_NONLETTER);
                 }
             }
             if (maximumTimeToUnlock != DEF_MAXIMUM_TIME_TO_UNLOCK) {
-                out.startTag(null, "max-time-to-unlock");
-                out.attribute(null, "value", Long.toString(maximumTimeToUnlock));
-                out.endTag(null, "max-time-to-unlock");
+                out.startTag(null, TAG_MAX_TIME_TO_UNLOCK);
+                out.attribute(null, ATTR_VALUE, Long.toString(maximumTimeToUnlock));
+                out.endTag(null, TAG_MAX_TIME_TO_UNLOCK);
             }
             if (maximumFailedPasswordsForWipe != DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
-                out.startTag(null, "max-failed-password-wipe");
-                out.attribute(null, "value", Integer.toString(maximumFailedPasswordsForWipe));
-                out.endTag(null, "max-failed-password-wipe");
+                out.startTag(null, TAG_MAX_FAILED_PASSWORD_WIPE);
+                out.attribute(null, ATTR_VALUE, Integer.toString(maximumFailedPasswordsForWipe));
+                out.endTag(null, TAG_MAX_FAILED_PASSWORD_WIPE);
             }
             if (specifiesGlobalProxy) {
-                out.startTag(null, "specifies-global-proxy");
-                out.attribute(null, "value", Boolean.toString(specifiesGlobalProxy));
-                out.endTag(null, "specifies_global_proxy");
+                out.startTag(null, TAG_SPECIFIES_GLOBAL_PROXY);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(specifiesGlobalProxy));
+                out.endTag(null, TAG_SPECIFIES_GLOBAL_PROXY);
                 if (globalProxySpec != null) {
-                    out.startTag(null, "global-proxy-spec");
-                    out.attribute(null, "value", globalProxySpec);
-                    out.endTag(null, "global-proxy-spec");
+                    out.startTag(null, TAG_GLOBAL_PROXY_SPEC);
+                    out.attribute(null, ATTR_VALUE, globalProxySpec);
+                    out.endTag(null, TAG_GLOBAL_PROXY_SPEC);
                 }
                 if (globalProxyExclusionList != null) {
-                    out.startTag(null, "global-proxy-exclusion-list");
-                    out.attribute(null, "value", globalProxyExclusionList);
-                    out.endTag(null, "global-proxy-exclusion-list");
+                    out.startTag(null, TAG_GLOBAL_PROXY_EXCLUSION_LIST);
+                    out.attribute(null, ATTR_VALUE, globalProxyExclusionList);
+                    out.endTag(null, TAG_GLOBAL_PROXY_EXCLUSION_LIST);
                 }
             }
             if (passwordExpirationTimeout != DEF_PASSWORD_EXPIRATION_TIMEOUT) {
-                out.startTag(null, "password-expiration-timeout");
-                out.attribute(null, "value", Long.toString(passwordExpirationTimeout));
-                out.endTag(null, "password-expiration-timeout");
+                out.startTag(null, TAG_PASSWORD_EXPIRATION_TIMEOUT);
+                out.attribute(null, ATTR_VALUE, Long.toString(passwordExpirationTimeout));
+                out.endTag(null, TAG_PASSWORD_EXPIRATION_TIMEOUT);
             }
             if (passwordExpirationDate != DEF_PASSWORD_EXPIRATION_DATE) {
-                out.startTag(null, "password-expiration-date");
-                out.attribute(null, "value", Long.toString(passwordExpirationDate));
-                out.endTag(null, "password-expiration-date");
+                out.startTag(null, TAG_PASSWORD_EXPIRATION_DATE);
+                out.attribute(null, ATTR_VALUE, Long.toString(passwordExpirationDate));
+                out.endTag(null, TAG_PASSWORD_EXPIRATION_DATE);
             }
             if (encryptionRequested) {
-                out.startTag(null, "encryption-requested");
-                out.attribute(null, "value", Boolean.toString(encryptionRequested));
-                out.endTag(null, "encryption-requested");
+                out.startTag(null, TAG_ENCRYPTION_REQUESTED);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(encryptionRequested));
+                out.endTag(null, TAG_ENCRYPTION_REQUESTED);
             }
             if (disableCamera) {
-                out.startTag(null, "disable-camera");
-                out.attribute(null, "value", Boolean.toString(disableCamera));
-                out.endTag(null, "disable-camera");
+                out.startTag(null, TAG_DISABLE_CAMERA);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(disableCamera));
+                out.endTag(null, TAG_DISABLE_CAMERA);
             }
             if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
-                out.startTag(null, "disable-keyguard-features");
-                out.attribute(null, "value", Integer.toString(disabledKeyguardFeatures));
-                out.endTag(null, "disable-keyguard-features");
+                out.startTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
+                out.attribute(null, ATTR_VALUE, Integer.toString(disabledKeyguardFeatures));
+                out.endTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
             }
         }
 
@@ -382,67 +404,67 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     continue;
                 }
                 String tag = parser.getName();
-                if ("policies".equals(tag)) {
+                if (TAG_POLICIES.equals(tag)) {
                     info.readPoliciesFromXml(parser);
-                } else if ("password-quality".equals(tag)) {
+                } else if (TAG_PASSWORD_QUALITY.equals(tag)) {
                     passwordQuality = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("min-password-length".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MIN_PASSWORD_LENGTH.equals(tag)) {
                     minimumPasswordLength = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("password-history-length".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_PASSWORD_HISTORY_LENGTH.equals(tag)) {
                     passwordHistoryLength = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("min-password-uppercase".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MIN_PASSWORD_UPPERCASE.equals(tag)) {
                     minimumPasswordUpperCase = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("min-password-lowercase".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MIN_PASSWORD_LOWERCASE.equals(tag)) {
                     minimumPasswordLowerCase = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("min-password-letters".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MIN_PASSWORD_LETTERS.equals(tag)) {
                     minimumPasswordLetters = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("min-password-numeric".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MIN_PASSWORD_NUMERIC.equals(tag)) {
                     minimumPasswordNumeric = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("min-password-symbols".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MIN_PASSWORD_SYMBOLS.equals(tag)) {
                     minimumPasswordSymbols = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("min-password-nonletter".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MIN_PASSWORD_NONLETTER.equals(tag)) {
                     minimumPasswordNonLetter = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("max-time-to-unlock".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
                     maximumTimeToUnlock = Long.parseLong(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("max-failed-password-wipe".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MAX_FAILED_PASSWORD_WIPE.equals(tag)) {
                     maximumFailedPasswordsForWipe = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("specifies-global-proxy".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_SPECIFIES_GLOBAL_PROXY.equals(tag)) {
                     specifiesGlobalProxy = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("global-proxy-spec".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_GLOBAL_PROXY_SPEC.equals(tag)) {
                     globalProxySpec =
-                        parser.getAttributeValue(null, "value");
-                } else if ("global-proxy-exclusion-list".equals(tag)) {
+                        parser.getAttributeValue(null, ATTR_VALUE);
+                } else if (TAG_GLOBAL_PROXY_EXCLUSION_LIST.equals(tag)) {
                     globalProxyExclusionList =
-                        parser.getAttributeValue(null, "value");
-                } else if ("password-expiration-timeout".equals(tag)) {
+                        parser.getAttributeValue(null, ATTR_VALUE);
+                } else if (TAG_PASSWORD_EXPIRATION_TIMEOUT.equals(tag)) {
                     passwordExpirationTimeout = Long.parseLong(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("password-expiration-date".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_PASSWORD_EXPIRATION_DATE.equals(tag)) {
                     passwordExpirationDate = Long.parseLong(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("encryption-requested".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_ENCRYPTION_REQUESTED.equals(tag)) {
                     encryptionRequested = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("disable-camera".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DISABLE_CAMERA.equals(tag)) {
                     disableCamera = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, "value"));
-                } else if ("disable-keyguard-features".equals(tag)) {
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
-                            parser.getAttributeValue(null, "value"));
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
-                    Slog.w(TAG, "Unknown admin tag: " + tag);
+                    Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                 }
                 XmlUtils.skipCurrentTag(parser);
             }
@@ -504,7 +526,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void handlePackagesChanged(int userHandle) {
         boolean removed = false;
-        if (DBG) Slog.d(TAG, "Handling package changes for user " + userHandle);
+        if (DBG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
         IPackageManager pm = AppGlobals.getPackageManager();
         for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
@@ -576,7 +598,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void removeUserData(int userHandle) {
         synchronized (this) {
             if (userHandle == UserHandle.USER_OWNER) {
-                Slog.w(TAG, "Tried to remove device policy file for user 0! Ignoring.");
+                Slog.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
                 return;
             }
             DevicePolicyData policy = mUserData.get(userHandle);
@@ -586,7 +608,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             File policyFile = new File(Environment.getUserSystemDirectory(userHandle),
                     DEVICE_POLICIES_XML);
             policyFile.delete();
-            Slog.i(TAG, "Removed device policy file " + policyFile.getAbsolutePath());
+            Slog.i(LOG_TAG, "Removed device policy file " + policyFile.getAbsolutePath());
         }
     }
 
@@ -783,10 +805,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             return new DeviceAdminInfo(mContext, infos.get(0));
         } catch (XmlPullParserException e) {
-            Slog.w(TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName, e);
+            Slog.w(LOG_TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName,
+                    e);
             return null;
         } catch (IOException e) {
-            Slog.w(TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName, e);
+            Slog.w(LOG_TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName,
+                    e);
             return null;
         }
     }
@@ -913,7 +937,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 ComponentName.unflattenFromString(name), userHandle);
                         if (DBG && (UserHandle.getUserId(dai.getActivityInfo().applicationInfo.uid)
                                 != userHandle)) {
-                            Slog.w(TAG, "findAdmin returned an incorrect uid "
+                            Slog.w(LOG_TAG, "findAdmin returned an incorrect uid "
                                     + dai.getActivityInfo().applicationInfo.uid + " for user "
                                     + userHandle);
                         }
@@ -924,7 +948,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             policy.mAdminList.add(ap);
                         }
                     } catch (RuntimeException e) {
-                        Slog.w(TAG, "Failed loading admin " + name, e);
+                        Slog.w(LOG_TAG, "Failed loading admin " + name, e);
                     }
                 } else if ("failed-password-attempts".equals(tag)) {
                     policy.mFailedPasswordAttempts = Integer.parseInt(
@@ -953,22 +977,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, "nonletter"));
                     XmlUtils.skipCurrentTag(parser);
                 } else {
-                    Slog.w(TAG, "Unknown tag: " + tag);
+                    Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
         } catch (NullPointerException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
+            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
         } catch (NumberFormatException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
+            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
         } catch (XmlPullParserException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
+            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
         } catch (FileNotFoundException e) {
             // Don't be noisy, this is normal if we haven't defined any policies.
         } catch (IOException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
+            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
         } catch (IndexOutOfBoundsException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
+            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
         }
         try {
             if (stream != null) {
@@ -984,7 +1008,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // never normally happen.
         LockPatternUtils utils = new LockPatternUtils(mContext);
         if (utils.getActivePasswordQuality() < policy.mActivePasswordQuality) {
-            Slog.w(TAG, "Active password quality 0x"
+            Slog.w(LOG_TAG, "Active password quality 0x"
                     + Integer.toHexString(policy.mActivePasswordQuality)
                     + " does not match actual quality 0x"
                     + Integer.toHexString(utils.getActivePasswordQuality()));
@@ -1028,7 +1052,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             if (!haveOwner) {
-                Slog.w(TAG, "Previous password owner " + policy.mPasswordOwner
+                Slog.w(LOG_TAG, "Previous password owner " + policy.mPasswordOwner
                         + " no longer active; disabling");
                 policy.mPasswordOwner = -1;
             }
@@ -1048,7 +1072,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long token = Binder.clearCallingIdentity();
             try {
                 String value = cameraDisabled ? "1" : "0";
-                if (DBG) Slog.v(TAG, "Change in camera state ["
+                if (DBG) Slog.v(LOG_TAG, "Change in camera state ["
                         + SYSTEM_PROP_DISABLE_CAMERA + "] = " + value);
                 SystemProperties.set(SYSTEM_PROP_DISABLE_CAMERA, value);
             } finally {
@@ -1164,7 +1188,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (!refreshing && getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null) {
+                if (!refreshing
+                        && getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null) {
                     throw new IllegalArgumentException("Admin is already added");
                 }
                 ActiveAdmin newAdmin = new ActiveAdmin(info);
@@ -1434,7 +1459,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ap.passwordExpirationDate = expiration;
             ap.passwordExpirationTimeout = timeout;
             if (timeout > 0L) {
-                Slog.w(TAG, "setPasswordExpiration(): password will expire on "
+                Slog.w(LOG_TAG, "setPasswordExpiration(): password will expire on "
                         + DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT)
                         .format(new Date(expiration)));
             }
@@ -1780,11 +1805,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return true;
             }
             return policy.mActivePasswordUpperCase >= getPasswordMinimumUpperCase(null, userHandle)
-                    && policy.mActivePasswordLowerCase >= getPasswordMinimumLowerCase(null, userHandle)
-                    && policy.mActivePasswordLetters >= getPasswordMinimumLetters(null, userHandle)
-                    && policy.mActivePasswordNumeric >= getPasswordMinimumNumeric(null, userHandle)
-                    && policy.mActivePasswordSymbols >= getPasswordMinimumSymbols(null, userHandle)
-                    && policy.mActivePasswordNonLetter >= getPasswordMinimumNonLetter(null, userHandle);
+                && policy.mActivePasswordLowerCase >= getPasswordMinimumLowerCase(null, userHandle)
+                && policy.mActivePasswordLetters >= getPasswordMinimumLetters(null, userHandle)
+                && policy.mActivePasswordNumeric >= getPasswordMinimumNumeric(null, userHandle)
+                && policy.mActivePasswordSymbols >= getPasswordMinimumSymbols(null, userHandle)
+                && policy.mActivePasswordNonLetter >= getPasswordMinimumNonLetter(null, userHandle);
         }
     }
 
@@ -1862,7 +1887,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 int realQuality = LockPatternUtils.computePasswordQuality(password);
                 if (realQuality < quality
                         && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
-                    Slog.w(TAG, "resetPassword: password quality 0x"
+                    Slog.w(LOG_TAG, "resetPassword: password quality 0x"
                             + Integer.toHexString(realQuality)
                             + " does not meet required quality 0x"
                             + Integer.toHexString(quality));
@@ -1872,7 +1897,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             int length = getPasswordMinimumLength(null, userHandle);
             if (password.length() < length) {
-                Slog.w(TAG, "resetPassword: password length " + password.length()
+                Slog.w(LOG_TAG, "resetPassword: password length " + password.length()
                         + " does not meet required length " + length);
                 return false;
             }
@@ -1901,40 +1926,40 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 int neededLetters = getPasswordMinimumLetters(null, userHandle);
                 if(letters < neededLetters) {
-                    Slog.w(TAG, "resetPassword: number of letters " + letters
+                    Slog.w(LOG_TAG, "resetPassword: number of letters " + letters
                             + " does not meet required number of letters " + neededLetters);
                     return false;
                 }
                 int neededNumbers = getPasswordMinimumNumeric(null, userHandle);
                 if (numbers < neededNumbers) {
-                    Slog.w(TAG, "resetPassword: number of numerical digits " + numbers
+                    Slog.w(LOG_TAG, "resetPassword: number of numerical digits " + numbers
                             + " does not meet required number of numerical digits "
                             + neededNumbers);
                     return false;
                 }
                 int neededLowerCase = getPasswordMinimumLowerCase(null, userHandle);
                 if (lowercase < neededLowerCase) {
-                    Slog.w(TAG, "resetPassword: number of lowercase letters " + lowercase
+                    Slog.w(LOG_TAG, "resetPassword: number of lowercase letters " + lowercase
                             + " does not meet required number of lowercase letters "
                             + neededLowerCase);
                     return false;
                 }
                 int neededUpperCase = getPasswordMinimumUpperCase(null, userHandle);
                 if (uppercase < neededUpperCase) {
-                    Slog.w(TAG, "resetPassword: number of uppercase letters " + uppercase
+                    Slog.w(LOG_TAG, "resetPassword: number of uppercase letters " + uppercase
                             + " does not meet required number of uppercase letters "
                             + neededUpperCase);
                     return false;
                 }
                 int neededSymbols = getPasswordMinimumSymbols(null, userHandle);
                 if (symbols < neededSymbols) {
-                    Slog.w(TAG, "resetPassword: number of special symbols " + symbols
+                    Slog.w(LOG_TAG, "resetPassword: number of special symbols " + symbols
                             + " does not meet required number of special symbols " + neededSymbols);
                     return false;
                 }
                 int neededNonLetter = getPasswordMinimumNonLetter(null, userHandle);
                 if (nonletter < neededNonLetter) {
-                    Slog.w(TAG, "resetPassword: number of non-letter characters " + nonletter
+                    Slog.w(LOG_TAG, "resetPassword: number of non-letter characters " + nonletter
                             + " does not meet required number of non-letter characters "
                             + neededNonLetter);
                     return false;
@@ -1945,7 +1970,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int callingUid = Binder.getCallingUid();
         DevicePolicyData policy = getUserData(userHandle);
         if (policy.mPasswordOwner >= 0 && policy.mPasswordOwner != callingUid) {
-            Slog.w(TAG, "resetPassword: already set by another uid and not entered by user");
+            Slog.w(LOG_TAG, "resetPassword: already set by another uid and not entered by user");
             return false;
         }
 
@@ -2011,7 +2036,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 getIPowerManager().setMaximumScreenOffTimeoutFromDeviceAdmin((int)timeMs);
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failure talking with power manager", e);
+                Slog.w(LOG_TAG, "Failure talking with power manager", e);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2086,10 +2111,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             X509Certificate cert = parseCert(certBuffer);
             pemCert =  Credentials.convertToPem(cert);
         } catch (CertificateException ce) {
-            Log.e(TAG, "Problem converting cert", ce);
+            Log.e(LOG_TAG, "Problem converting cert", ce);
             return false;
         } catch (IOException ioe) {
-            Log.e(TAG, "Problem reading cert", ioe);
+            Log.e(LOG_TAG, "Problem reading cert", ioe);
             return false;
         }
         try {
@@ -2104,7 +2129,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         } catch (InterruptedException e1) {
-            Log.w(TAG, "installCaCertsToKeyChain(): ", e1);
+            Log.w(LOG_TAG, "installCaCertsToKeyChain(): ", e1);
             Thread.currentThread().interrupt();
         }
         return false;
@@ -2125,10 +2150,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             X509Certificate cert = parseCert(certBuffer);
             alias = certStore.getCertificateAlias(cert);
         } catch (CertificateException ce) {
-            Log.e(TAG, "Problem creating X509Certificate", ce);
+            Log.e(LOG_TAG, "Problem creating X509Certificate", ce);
             return;
         } catch (IOException ioe) {
-            Log.e(TAG, "Problem reading certificate", ioe);
+            Log.e(LOG_TAG, "Problem reading certificate", ioe);
             return;
         }
         try {
@@ -2137,13 +2162,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 service.deleteCaCertificate(alias);
             } catch (RemoteException e) {
-                Log.e(TAG, "from CaCertUninstaller: ", e);
+                Log.e(LOG_TAG, "from CaCertUninstaller: ", e);
             } finally {
                 keyChainConnection.close();
                 keyChainConnection = null;
             }
         } catch (InterruptedException ie) {
-            Log.w(TAG, "CaCertUninstaller: ", ie);
+            Log.w(LOG_TAG, "CaCertUninstaller: ", ie);
             Thread.currentThread().interrupt();
         }
     }
@@ -2164,7 +2189,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 RecoverySystem.rebootWipeUserData(mContext);
             } catch (IOException e) {
-                Slog.w(TAG, "Failed requesting data wipe", e);
+                Slog.w(LOG_TAG, "Failed requesting data wipe", e);
             }
         }
     }
@@ -2255,8 +2280,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (p.mActivePasswordQuality != quality || p.mActivePasswordLength != length
                     || p.mFailedPasswordAttempts != 0 || p.mActivePasswordLetters != letters
                     || p.mActivePasswordUpperCase != uppercase
-                    || p.mActivePasswordLowerCase != lowercase || p.mActivePasswordNumeric != numbers
-                    || p.mActivePasswordSymbols != symbols || p.mActivePasswordNonLetter != nonletter) {
+                    || p.mActivePasswordLowerCase != lowercase
+                    || p.mActivePasswordNumeric != numbers
+                    || p.mActivePasswordSymbols != symbols
+                    || p.mActivePasswordNonLetter != nonletter) {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     p.mActivePasswordQuality = quality;
@@ -2378,7 +2405,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // If the user is not the owner, don't set the global proxy. Fail silently.
             if (UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
-                Slog.w(TAG, "Only the owner is allowed to set the global proxy. User "
+                Slog.w(LOG_TAG, "Only the owner is allowed to set the global proxy. User "
                         + userHandle + " is not permitted.");
                 return null;
             }
@@ -2459,7 +2486,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         ProxyProperties proxyProperties = new ProxyProperties(data[0], proxyPort, exclusionList);
         if (!proxyProperties.isValid()) {
-            Slog.e(TAG, "Invalid proxy properties, ignoring: " + proxyProperties.toString());
+            Slog.e(LOG_TAG, "Invalid proxy properties, ignoring: " + proxyProperties.toString());
             return;
         }
         Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, data[0]);
@@ -2485,7 +2512,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Only owner can set storage encryption
             if (userHandle != UserHandle.USER_OWNER
                     || UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
-                Slog.w(TAG, "Only owner is allowed to set storage encryption. User "
+                Slog.w(LOG_TAG, "Only owner is allowed to set storage encryption. User "
                         + UserHandle.getCallingUserId() + " is not permitted.");
                 return 0;
             }
@@ -2871,7 +2898,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
             } catch (NameNotFoundException nnfe) {
-                Slog.w(TAG, "Device Owner package " + packageName + " not installed.");
+                Slog.w(LOG_TAG, "Device Owner package " + packageName + " not installed.");
             }
             return false;
         }
@@ -2896,9 +2923,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mOwnerName = parser.getAttributeValue(null, ATTR_NAME);
                 input.close();
             } catch (XmlPullParserException xppe) {
-                Slog.e(TAG, "Error parsing device-owner file\n" + xppe);
+                Slog.e(LOG_TAG, "Error parsing device-owner file\n" + xppe);
             } catch (IOException ioe) {
-                Slog.e(TAG, "IO Exception when reading device-owner file\n" + ioe);
+                Slog.e(LOG_TAG, "IO Exception when reading device-owner file\n" + ioe);
             }
         }
 
@@ -2926,7 +2953,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.flush();
                 file.finishWrite(output);
             } catch (IOException ioe) {
-                Slog.e(TAG, "IO Exception when writing device-owner file\n" + ioe);
+                Slog.e(LOG_TAG, "IO Exception when writing device-owner file\n" + ioe);
             }
         }
     }
