@@ -2299,6 +2299,7 @@ javax.crypto.CipherSpi
 javax.crypto.KeyAgreementSpi
 javax.crypto.MacSpi
 javax.crypto.SecretKey
+javax.crypto.spec.GCMParameterSpec
 javax.crypto.spec.IvParameterSpec
 javax.crypto.spec.SecretKeySpec
 javax.microedition.khronos.egl.EGL
