@@ -5022,7 +5022,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param text The announcement text.
      */
     public void announceForAccessibility(CharSequence text) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null
+                && isImportantForAccessibility()) {
             AccessibilityEvent event = AccessibilityEvent.obtain(
                     AccessibilityEvent.TYPE_ANNOUNCEMENT);
             onInitializeAccessibilityEvent(event);
@@ -5072,7 +5073,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
     void sendAccessibilityEventUncheckedInternal(AccessibilityEvent event) {
-        if (!isShown()) {
+        if (!isShown() || !isImportantForAccessibility()) {
             return;
         }
         onInitializeAccessibilityEvent(event);
@@ -7372,9 +7373,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param children The list of children for accessibility.
      */
     public void addChildrenForAccessibility(ArrayList<View> children) {
-        if (includeForAccessibility()) {
-            children.add(this);
-        }
+
     }
 
     /**
@@ -7388,7 +7387,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean includeForAccessibility() {
-        //noinspection SimplifiableIfStatement
         if (mAttachInfo != null) {
             return (mAttachInfo.mAccessibilityFetchFlags
                     & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
