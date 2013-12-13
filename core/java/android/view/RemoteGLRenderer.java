@@ -52,7 +52,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.DisplayMetrics;
@@ -73,11 +72,17 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
 /**
- * Hardware renderer using OpenGL
+ * Hardware renderer using OpenGL that's used as the remote endpoint
+ * of ThreadedRenderer
+ *
+ * Currently this is mostly a copy of GLRenderer, but with a few modifications
+ * to deal with the threading issues. Ideally native-side functionality
+ * will replace this, but we need this to bootstrap without risking breaking
+ * changes in GLRenderer
  *
  * @hide
  */
-public class GLRenderer extends HardwareRenderer {
+public class RemoteGLRenderer extends HardwareRenderer {
     static final int SURFACE_STATE_ERROR = 0;
     static final int SURFACE_STATE_SUCCESS = 1;
     static final int SURFACE_STATE_UPDATED = 2;
@@ -177,6 +182,7 @@ public class GLRenderer extends HardwareRenderer {
     private GLES20Canvas mGlCanvas;
 
     private DisplayMetrics mDisplayMetrics;
+    private ThreadedRenderer mOwningRenderer;
 
     private static EGLSurface sPbuffer;
     private static final Object[] sPbufferLock = new Object[0];
@@ -632,7 +638,8 @@ public class GLRenderer extends HardwareRenderer {
         sEgl.eglMakeCurrent(sEglDisplay, sPbuffer, sPbuffer, eglContext);
     }
 
-    GLRenderer(boolean translucent) {
+    RemoteGLRenderer(ThreadedRenderer owningRenderer, boolean translucent) {
+        mOwningRenderer = owningRenderer;
         mTranslucent = translucent;
 
         loadSystemProperties();
@@ -716,7 +723,7 @@ public class GLRenderer extends HardwareRenderer {
             }
         }
 
-        if (loadProperties()) {
+        if (GLRenderer.loadProperties()) {
             changed = true;
         }
 
@@ -989,7 +996,7 @@ public class GLRenderer extends HardwareRenderer {
         // If mDirtyRegions is set, this means we have an EGL configuration
         // with EGL_SWAP_BEHAVIOR_PRESERVED_BIT set
         if (sDirtyRegions) {
-            if (!(mDirtyRegionsEnabled = preserveBackBuffer())) {
+            if (!(mDirtyRegionsEnabled = GLRenderer.preserveBackBuffer())) {
                 Log.w(LOG_TAG, "Backbuffer cannot be preserved");
             }
         } else if (sDirtyRegionsRequested) {
@@ -999,7 +1006,7 @@ public class GLRenderer extends HardwareRenderer {
             // want to set mDirtyRegions. We try to do this only if dirty
             // regions were initially requested as part of the device
             // configuration (see RENDER_DIRTY_REGIONS)
-            mDirtyRegionsEnabled = isBackBufferPreserved();
+            mDirtyRegionsEnabled = GLRenderer.isBackBufferPreserved();
         }
     }
 
@@ -1106,13 +1113,23 @@ public class GLRenderer extends HardwareRenderer {
         mName = name;
     }
 
+    // TODO: Ping pong is fun and all, but this isn't the time or place
+    // However we don't yet have the ability for the RenderThread to run
+    // independently nor have a way to postDelayed, so this will work for now
+    private Runnable mDispatchFunctorsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            ThreadedRenderer.postToRenderThread(mFunctorsRunnable);
+        }
+    };
+
     class FunctorsRunnable implements Runnable {
         View.AttachInfo attachInfo;
 
         @Override
         public void run() {
             final HardwareRenderer renderer = attachInfo.mHardwareRenderer;
-            if (renderer == null || !renderer.isEnabled() || renderer != GLRenderer.this) {
+            if (renderer == null || !renderer.isEnabled() || renderer != mOwningRenderer) {
                 return;
             }
 
@@ -1123,17 +1140,18 @@ public class GLRenderer extends HardwareRenderer {
         }
     }
 
-    @Override
-    void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
-            Rect dirty) {
+    /**
+     * @param displayList The display list to draw
+     * @param attachInfo AttachInfo tied to the specified view.
+     * @param callbacks Callbacks invoked when drawing happens.
+     * @param dirty The dirty rectangle to update, can be null.
+     */
+    void drawDisplayList(DisplayList displayList, View.AttachInfo attachInfo,
+            HardwareDrawCallbacks callbacks, Rect dirty) {
         if (canDraw()) {
             if (!hasDirtyRegions()) {
                 dirty = null;
             }
-            attachInfo.mIgnoreDirtyState = true;
-            attachInfo.mDrawingTime = SystemClock.uptimeMillis();
-
-            view.mPrivateFlags |= View.PFLAG_DRAWN;
 
             // We are already on the correct thread
             final int surfaceState = checkRenderContextUnsafe();
@@ -1146,39 +1164,24 @@ public class GLRenderer extends HardwareRenderer {
 
                 dirty = beginFrame(canvas, dirty, surfaceState);
 
-                DisplayList displayList = buildDisplayList(view, canvas);
-
-                // buildDisplayList() calls into user code which can cause
-                // an eglMakeCurrent to happen with a different surface/context.
-                // We must therefore check again here.
-                if (checkRenderContextUnsafe() == SURFACE_STATE_ERROR) {
-                    return;
-                }
-
                 int saveCount = 0;
                 int status = DisplayList.STATUS_DONE;
 
-                long start = getSystemTime();
+                long start = GLRenderer.getSystemTime();
                 try {
                     status = prepareFrame(dirty);
 
                     saveCount = canvas.save();
                     callbacks.onHardwarePreDraw(canvas);
 
-                    if (displayList != null) {
-                        status |= drawDisplayList(attachInfo, canvas, displayList, status);
-                    } else {
-                        // Shouldn't reach here
-                        view.draw(canvas);
-                    }
+                    status |= doDrawDisplayList(attachInfo, canvas, displayList, status);
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "An error has occurred while drawing:", e);
                 } finally {
                     callbacks.onHardwarePostDraw(canvas);
                     canvas.restoreToCount(saveCount);
-                    view.mRecreateDisplayList = false;
 
-                    mDrawDelta = getSystemTime() - start;
+                    mDrawDelta = GLRenderer.getSystemTime() - start;
 
                     if (mDrawDelta > 0) {
                         mFrameCount++;
@@ -1200,6 +1203,12 @@ public class GLRenderer extends HardwareRenderer {
                 attachInfo.mIgnoreDirtyState = false;
             }
         }
+    }
+
+    @Override
+    void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
+            Rect dirty) {
+        throw new IllegalAccessError();
     }
 
     private void debugOverdraw(View.AttachInfo attachInfo, Rect dirty,
@@ -1251,35 +1260,14 @@ public class GLRenderer extends HardwareRenderer {
         return mDebugOverdrawPaint;
     }
 
-    private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {
-        if (mDrawDelta <= 0) {
-            return view.mDisplayList;
-        }
-
-        view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
-                == View.PFLAG_INVALIDATED;
-        view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
-
-        long buildDisplayListStartTime = startBuildDisplayListProfiling();
-        canvas.clearLayerUpdates();
-
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-        DisplayList displayList = view.getDisplayList();
-        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-
-        endBuildDisplayListProfiling(buildDisplayListStartTime);
-
-        return displayList;
-    }
-
     private Rect beginFrame(HardwareCanvas canvas, Rect dirty, int surfaceState) {
         // We had to change the current surface and/or context, redraw everything
         if (surfaceState == SURFACE_STATE_UPDATED) {
             dirty = null;
-            beginFrame(null);
+            GLRenderer.beginFrame(null);
         } else {
             int[] size = mSurfaceSize;
-            beginFrame(size);
+            GLRenderer.beginFrame(size);
 
             if (size[1] != mHeight || size[0] != mWidth) {
                 mWidth = size[0];
@@ -1296,27 +1284,6 @@ public class GLRenderer extends HardwareRenderer {
         return dirty;
     }
 
-    private long startBuildDisplayListProfiling() {
-        if (mProfileEnabled) {
-            mProfileCurrentFrame += PROFILE_FRAME_DATA_COUNT;
-            if (mProfileCurrentFrame >= mProfileData.length) {
-                mProfileCurrentFrame = 0;
-            }
-
-            return System.nanoTime();
-        }
-        return 0;
-    }
-
-    private void endBuildDisplayListProfiling(long getDisplayListStartTime) {
-        if (mProfileEnabled) {
-            long now = System.nanoTime();
-            float total = (now - getDisplayListStartTime) * 0.000001f;
-            //noinspection PointlessArithmeticExpression
-            mProfileData[mProfileCurrentFrame] = total;
-        }
-    }
-
     private int prepareFrame(Rect dirty) {
         int status;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "prepareFrame");
@@ -1328,7 +1295,7 @@ public class GLRenderer extends HardwareRenderer {
         return status;
     }
 
-    private int drawDisplayList(View.AttachInfo attachInfo, HardwareCanvas canvas,
+    private int doDrawDisplayList(View.AttachInfo attachInfo, HardwareCanvas canvas,
             DisplayList displayList, int status) {
 
         long drawDisplayListStartTime = 0;
@@ -1386,23 +1353,27 @@ public class GLRenderer extends HardwareRenderer {
         }
     }
 
-    private void handleFunctorStatus(View.AttachInfo attachInfo, int status) {
+    private void handleFunctorStatus(final View.AttachInfo attachInfo, int status) {
         // If the draw flag is set, functors will be invoked while executing
         // the tree of display lists
         if ((status & DisplayList.STATUS_DRAW) != 0) {
-            if (mRedrawClip.isEmpty()) {
-                attachInfo.mViewRootImpl.invalidate();
-            } else {
-                attachInfo.mViewRootImpl.invalidateChildInParent(null, mRedrawClip);
-                mRedrawClip.setEmpty();
-            }
+            // TODO: Can we just re-queue ourselves up to draw next frame instead
+            // of bouncing back to the UI thread?
+            // TODO: Respect mRedrawClip - for now just full inval
+            attachInfo.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    attachInfo.mViewRootImpl.invalidate();
+                }
+            });
+            mRedrawClip.setEmpty();
         }
 
         if ((status & DisplayList.STATUS_INVOKE) != 0 ||
-                attachInfo.mHandler.hasCallbacks(mFunctorsRunnable)) {
-            attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
+                attachInfo.mHandler.hasCallbacks(mDispatchFunctorsRunnable)) {
+            attachInfo.mHandler.removeCallbacks(mDispatchFunctorsRunnable);
             mFunctorsRunnable.attachInfo = attachInfo;
-            attachInfo.mHandler.postDelayed(mFunctorsRunnable, FUNCTOR_PROCESS_DELAY);
+            attachInfo.mHandler.postDelayed(mDispatchFunctorsRunnable, FUNCTOR_PROCESS_DELAY);
         }
     }
 
@@ -1418,8 +1389,8 @@ public class GLRenderer extends HardwareRenderer {
         if (mCanvas != null) {
             mCanvas.attachFunctor(functor);
             mFunctorsRunnable.attachInfo = attachInfo;
-            attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
-            attachInfo.mHandler.postDelayed(mFunctorsRunnable,  0);
+            attachInfo.mHandler.removeCallbacks(mDispatchFunctorsRunnable);
+            attachInfo.mHandler.postDelayed(mDispatchFunctorsRunnable,  0);
             return true;
         }
         return false;
@@ -1478,43 +1449,6 @@ public class GLRenderer extends HardwareRenderer {
     private static int dpToPx(int dp, float density) {
         return (int) (dp * density + 0.5f);
     }
-
-    static native boolean loadProperties();
-
-    static native void setupShadersDiskCache(String cacheFile);
-
-    /**
-     * Notifies EGL that the frame is about to be rendered.
-     * @param size
-     */
-    static native void beginFrame(int[] size);
-
-    /**
-     * Returns the current system time according to the renderer.
-     * This method is used for debugging only and should not be used
-     * as a clock.
-     */
-    static native long getSystemTime();
-
-    /**
-     * Preserves the back buffer of the current surface after a buffer swap.
-     * Calling this method sets the EGL_SWAP_BEHAVIOR attribute of the current
-     * surface to EGL_BUFFER_PRESERVED. Calling this method requires an EGL
-     * config that supports EGL_SWAP_BEHAVIOR_PRESERVED_BIT.
-     *
-     * @return True if the swap behavior was successfully changed,
-     *         false otherwise.
-     */
-    static native boolean preserveBackBuffer();
-
-    /**
-     * Indicates whether the current surface preserves its back buffer
-     * after a buffer swap.
-     *
-     * @return True, if the surface's EGL_SWAP_BEHAVIOR is EGL_BUFFER_PRESERVED,
-     *         false otherwise
-     */
-    static native boolean isBackBufferPreserved();
 
     class DrawPerformanceDataProvider extends GraphDataProvider {
         private final int mGraphType;

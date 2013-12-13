@@ -408,18 +408,6 @@ public abstract class HardwareRenderer {
             Rect dirty);
 
     /**
-     * Temporary hook to draw a display list directly, only used if sUseRenderThread
-     * is true.
-     *
-     * @param displayList The display list to draw
-     * @param attachInfo AttachInfo tied to the specified view.
-     * @param callbacks Callbacks invoked when drawing happens.
-     * @param dirty The dirty rectangle to update, can be null.
-     */
-    abstract void drawDisplayList(DisplayList displayList, View.AttachInfo attachInfo,
-            HardwareDrawCallbacks callbacks, Rect dirty);
-
-    /**
      * Creates a new hardware layer. A hardware layer built by calling this
      * method will be treated as a texture layer, instead of as a render target.
      *
@@ -527,10 +515,11 @@ public abstract class HardwareRenderer {
     static HardwareRenderer create(boolean translucent) {
         HardwareRenderer renderer = null;
         if (GLES20Canvas.isAvailable()) {
-            renderer = new GLRenderer(translucent);
-        }
-        if (renderer != null && sUseRenderThread) {
-            renderer = new ThreadedRenderer((GLRenderer)renderer);
+            if (sUseRenderThread) {
+                renderer = new ThreadedRenderer(translucent);
+            } else {
+                renderer = new GLRenderer(translucent);
+            }
         }
         return renderer;
     }
