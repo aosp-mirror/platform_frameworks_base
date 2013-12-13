@@ -87,7 +87,7 @@ status_t NativeDisplayEventReceiver::initialize() {
         return result;
     }
 
-    int rc = mMessageQueue->getLooper()->addFd(mReceiver.getFd(), 0, ALOOPER_EVENT_INPUT,
+    int rc = mMessageQueue->getLooper()->addFd(mReceiver.getFd(), 0, Looper::EVENT_INPUT,
             this, NULL);
     if (rc < 0) {
         return UNKNOWN_ERROR;
@@ -125,13 +125,13 @@ status_t NativeDisplayEventReceiver::scheduleVsync() {
 }
 
 int NativeDisplayEventReceiver::handleEvent(int receiveFd, int events, void* data) {
-    if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
+    if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "
                 "events=0x%x", events);
         return 0; // remove the callback
     }
 
-    if (!(events & ALOOPER_EVENT_INPUT)) {
+    if (!(events & Looper::EVENT_INPUT)) {
         ALOGW("Received spurious callback for unhandled poll event.  "
                 "events=0x%x", events);
         return 1; // keep the callback
