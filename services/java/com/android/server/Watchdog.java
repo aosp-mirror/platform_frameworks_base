@@ -76,9 +76,6 @@ public class Watchdog extends Thread {
     final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<HandlerChecker>();
     final HandlerChecker mMonitorChecker;
     ContentResolver mResolver;
-    BatteryService mBattery;
-    PowerManagerService mPower;
-    AlarmManagerService mAlarm;
     ActivityManagerService mActivity;
 
     int mPhonePid;
@@ -230,13 +227,8 @@ public class Watchdog extends Thread {
                 "i/o thread", DEFAULT_TIMEOUT));
     }
 
-    public void init(Context context, BatteryService battery,
-            PowerManagerService power, AlarmManagerService alarm,
-            ActivityManagerService activity) {
+    public void init(Context context, ActivityManagerService activity) {
         mResolver = context.getContentResolver();
-        mBattery = battery;
-        mPower = power;
-        mAlarm = alarm;
         mActivity = activity;
 
         context.registerReceiver(new RebootRequestReceiver(),

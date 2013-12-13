@@ -14,59 +14,38 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.lights;
+
+import com.android.server.SystemService;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IHardwareService;
-import android.os.ServiceManager;
 import android.os.Message;
 import android.util.Slog;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-public class LightsService {
-    private static final String TAG = "LightsService";
-    private static final boolean DEBUG = false;
+public class LightsService extends SystemService {
+    static final String TAG = "LightsService";
+    static final boolean DEBUG = false;
 
-    public static final int LIGHT_ID_BACKLIGHT = 0;
-    public static final int LIGHT_ID_KEYBOARD = 1;
-    public static final int LIGHT_ID_BUTTONS = 2;
-    public static final int LIGHT_ID_BATTERY = 3;
-    public static final int LIGHT_ID_NOTIFICATIONS = 4;
-    public static final int LIGHT_ID_ATTENTION = 5;
-    public static final int LIGHT_ID_BLUETOOTH = 6;
-    public static final int LIGHT_ID_WIFI = 7;
-    public static final int LIGHT_ID_COUNT = 8;
+    final LightImpl mLights[] = new LightImpl[LightsManager.LIGHT_ID_COUNT];
 
-    public static final int LIGHT_FLASH_NONE = 0;
-    public static final int LIGHT_FLASH_TIMED = 1;
-    public static final int LIGHT_FLASH_HARDWARE = 2;
+    private final class LightImpl extends Light {
 
-    /**
-     * Light brightness is managed by a user setting.
-     */
-    public static final int BRIGHTNESS_MODE_USER = 0;
-
-    /**
-     * Light brightness is managed by a light sensor.
-     */
-    public static final int BRIGHTNESS_MODE_SENSOR = 1;
-
-    private final Light mLights[] = new Light[LIGHT_ID_COUNT];
-
-    public final class Light {
-
-        private Light(int id) {
+        private LightImpl(int id) {
             mId = id;
         }
 
+        @Override
         public void setBrightness(int brightness) {
             setBrightness(brightness, BRIGHTNESS_MODE_USER);
         }
 
+        @Override
         public void setBrightness(int brightness, int brightnessMode) {
             synchronized (this) {
                 int color = brightness & 0x000000ff;
@@ -75,23 +54,26 @@ public class LightsService {
             }
         }
 
+        @Override
         public void setColor(int color) {
             synchronized (this) {
                 setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, 0);
             }
         }
 
+        @Override
         public void setFlashing(int color, int mode, int onMS, int offMS) {
             synchronized (this) {
                 setLightLocked(color, mode, onMS, offMS, BRIGHTNESS_MODE_USER);
             }
         }
 
-
+        @Override
         public void pulse() {
             pulse(0x00ffffff, 7);
         }
 
+        @Override
         public void pulse(int color, int onMS) {
             synchronized (this) {
                 if (mColor == 0 && !mFlashing) {
@@ -101,6 +83,7 @@ public class LightsService {
             }
         }
 
+        @Override
         public void turnOff() {
             synchronized (this) {
                 setLightLocked(0, LIGHT_FLASH_NONE, 0, 0, 0);
@@ -153,9 +136,10 @@ public class LightsService {
         }
 
         public void setFlashlightEnabled(boolean on) {
-            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.FLASHLIGHT)
+            final Context context = getContext();
+            if (context.checkCallingOrSelfPermission(android.Manifest.permission.FLASHLIGHT)
                     != PackageManager.PERMISSION_GRANTED &&
-                    mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
+                    context.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires FLASHLIGHT or HARDWARE_TEST permission");
             }
@@ -172,31 +156,41 @@ public class LightsService {
         }
     };
 
-    LightsService(Context context) {
-
+    @Override
+    public void onCreate(Context context) {
         mNativePointer = init_native();
-        mContext = context;
 
-        ServiceManager.addService("hardware", mLegacyFlashlightHack);
-
-        for (int i = 0; i < LIGHT_ID_COUNT; i++) {
-            mLights[i] = new Light(i);
+        for (int i = 0; i < LightsManager.LIGHT_ID_COUNT; i++) {
+            mLights[i] = new LightImpl(i);
         }
     }
+
+    @Override
+    public void onStart() {
+        publishBinderService("hardware", mLegacyFlashlightHack);
+        publishLocalService(LightsManager.class, mService);
+    }
+
+    private final LightsManager mService = new LightsManager() {
+        @Override
+        public com.android.server.lights.Light getLight(int id) {
+            if (id < LIGHT_ID_COUNT) {
+                return mLights[id];
+            } else {
+                return null;
+            }
+        }
+    };
 
     protected void finalize() throws Throwable {
         finalize_native(mNativePointer);
         super.finalize();
     }
 
-    public Light getLight(int id) {
-        return mLights[id];
-    }
-
     private Handler mH = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            Light light = (Light)msg.obj;
+            LightImpl light = (LightImpl)msg.obj;
             light.stopFlashing();
         }
     };
@@ -204,10 +198,8 @@ public class LightsService {
     private static native int init_native();
     private static native void finalize_native(int ptr);
 
-    private static native void setLight_native(int ptr, int light, int color, int mode,
+    static native void setLight_native(int ptr, int light, int color, int mode,
             int onMS, int offMS, int brightnessMode);
 
-    private final Context mContext;
-
-    private int mNativePointer;
+    int mNativePointer;
 }

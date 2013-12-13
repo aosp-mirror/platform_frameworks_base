@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.twilight;
+
+import com.android.server.SystemService;
+import com.android.server.TwilightCalculator;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -34,9 +37,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Slog;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 
 import libcore.util.Objects;
@@ -47,78 +48,88 @@ import libcore.util.Objects;
  * Used by the UI mode manager and other components to adjust night mode
  * effects based on sunrise and sunset.
  */
-public final class TwilightService {
-    private static final String TAG = "TwilightService";
-
-    private static final boolean DEBUG = false;
-
-    private static final String ACTION_UPDATE_TWILIGHT_STATE =
+public final class TwilightService extends SystemService {
+    static final String TAG = "TwilightService";
+    static final boolean DEBUG = false;
+    static final String ACTION_UPDATE_TWILIGHT_STATE =
             "com.android.server.action.UPDATE_TWILIGHT_STATE";
 
-    private final Context mContext;
-    private final AlarmManager mAlarmManager;
-    private final LocationManager mLocationManager;
-    private final LocationHandler mLocationHandler;
+    final Object mLock = new Object();
 
-    private final Object mLock = new Object();
+    AlarmManager mAlarmManager;
+    LocationManager mLocationManager;
+    LocationHandler mLocationHandler;
 
-    private final ArrayList<TwilightListenerRecord> mListeners =
+    final ArrayList<TwilightListenerRecord> mListeners =
             new ArrayList<TwilightListenerRecord>();
 
-    private boolean mSystemReady;
+    TwilightState mTwilightState;
 
-    private TwilightState mTwilightState;
-
-    public TwilightService(Context context) {
-        mContext = context;
-
-        mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-        mLocationManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
+    @Override
+    public void onStart() {
+        mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        mLocationManager = (LocationManager) getContext().getSystemService(
+                Context.LOCATION_SERVICE);
         mLocationHandler = new LocationHandler();
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        filter.addAction(ACTION_UPDATE_TWILIGHT_STATE);
+        getContext().registerReceiver(mUpdateLocationReceiver, filter);
+
+        publishLocalService(TwilightManager.class, mService);
     }
 
-    void systemReady() {
-        synchronized (mLock) {
-            mSystemReady = true;
+    private static class TwilightListenerRecord implements Runnable {
+        private final TwilightListener mListener;
+        private final Handler mHandler;
 
-            IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            filter.addAction(Intent.ACTION_TIME_CHANGED);
-            filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-            filter.addAction(ACTION_UPDATE_TWILIGHT_STATE);
-            mContext.registerReceiver(mUpdateLocationReceiver, filter);
+        public TwilightListenerRecord(TwilightListener listener, Handler handler) {
+            mListener = listener;
+            mHandler = handler;
+        }
 
-            if (!mListeners.isEmpty()) {
-                mLocationHandler.enableLocationUpdates();
+        public void postUpdate() {
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
+            mListener.onTwilightStateChanged();
+        }
+
+    }
+
+    private final TwilightManager mService = new TwilightManager() {
+        /**
+         * Gets the current twilight state.
+         *
+         * @return The current twilight state, or null if no information is available.
+         */
+        @Override
+        public TwilightState getCurrentState() {
+            synchronized (mLock) {
+                return mTwilightState;
             }
         }
-    }
 
-    /**
-     * Gets the current twilight state.
-     *
-     * @return The current twilight state, or null if no information is available.
-     */
-    public TwilightState getCurrentState() {
-        synchronized (mLock) {
-            return mTwilightState;
-        }
-    }
+        /**
+         * Listens for twilight time.
+         *
+         * @param listener The listener.
+         */
+        @Override
+        public void registerListener(TwilightListener listener, Handler handler) {
+            synchronized (mLock) {
+                mListeners.add(new TwilightListenerRecord(listener, handler));
 
-    /**
-     * Listens for twilight time.
-     *
-     * @param listener The listener.
-     * @param handler The handler on which to post calls into the listener.
-     */
-    public void registerListener(TwilightListener listener, Handler handler) {
-        synchronized (mLock) {
-            mListeners.add(new TwilightListenerRecord(listener, handler));
-
-            if (mSystemReady && mListeners.size() == 1) {
-                mLocationHandler.enableLocationUpdates();
+                if (mListeners.size() == 1) {
+                    mLocationHandler.enableLocationUpdates();
+                }
             }
         }
-    }
+    };
 
     private void setTwilightState(TwilightState state) {
         synchronized (mLock) {
@@ -128,9 +139,10 @@ public final class TwilightService {
                 }
 
                 mTwilightState = state;
-                int count = mListeners.size();
-                for (int i = 0; i < count; i++) {
-                    mListeners.get(i).post();
+
+                final int listenerLen = mListeners.size();
+                for (int i = 0; i < listenerLen; i++) {
+                    mListeners.get(i).postUpdate();
                 }
             }
         }
@@ -160,124 +172,6 @@ public final class TwilightService {
         // If the distance is greater than the combined accuracy of the two
         // points then they can't overlap and hence the user has moved.
         return distance >= totalAccuracy;
-    }
-
-    /**
-     * Describes whether it is day or night.
-     * This object is immutable.
-     */
-    public static final class TwilightState {
-        private final boolean mIsNight;
-        private final long mYesterdaySunset;
-        private final long mTodaySunrise;
-        private final long mTodaySunset;
-        private final long mTomorrowSunrise;
-
-        TwilightState(boolean isNight,
-                long yesterdaySunset,
-                long todaySunrise, long todaySunset,
-                long tomorrowSunrise) {
-            mIsNight = isNight;
-            mYesterdaySunset = yesterdaySunset;
-            mTodaySunrise = todaySunrise;
-            mTodaySunset = todaySunset;
-            mTomorrowSunrise = tomorrowSunrise;
-        }
-
-        /**
-         * Returns true if it is currently night time.
-         */
-        public boolean isNight() {
-            return mIsNight;
-        }
-
-        /**
-         * Returns the time of yesterday's sunset in the System.currentTimeMillis() timebase,
-         * or -1 if the sun never sets.
-         */
-        public long getYesterdaySunset() {
-            return mYesterdaySunset;
-        }
-
-        /**
-         * Returns the time of today's sunrise in the System.currentTimeMillis() timebase,
-         * or -1 if the sun never rises.
-         */
-        public long getTodaySunrise() {
-            return mTodaySunrise;
-        }
-
-        /**
-         * Returns the time of today's sunset in the System.currentTimeMillis() timebase,
-         * or -1 if the sun never sets.
-         */
-        public long getTodaySunset() {
-            return mTodaySunset;
-        }
-
-        /**
-         * Returns the time of tomorrow's sunrise in the System.currentTimeMillis() timebase,
-         * or -1 if the sun never rises.
-         */
-        public long getTomorrowSunrise() {
-            return mTomorrowSunrise;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof TwilightState && equals((TwilightState)o);
-        }
-
-        public boolean equals(TwilightState other) {
-            return other != null
-                    && mIsNight == other.mIsNight
-                    && mYesterdaySunset == other.mYesterdaySunset
-                    && mTodaySunrise == other.mTodaySunrise
-                    && mTodaySunset == other.mTodaySunset
-                    && mTomorrowSunrise == other.mTomorrowSunrise;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0; // don't care
-        }
-
-        @Override
-        public String toString() {
-            DateFormat f = DateFormat.getDateTimeInstance();
-            return "{TwilightState: isNight=" + mIsNight
-                    + ", mYesterdaySunset=" + f.format(new Date(mYesterdaySunset))
-                    + ", mTodaySunrise=" + f.format(new Date(mTodaySunrise))
-                    + ", mTodaySunset=" + f.format(new Date(mTodaySunset))
-                    + ", mTomorrowSunrise=" + f.format(new Date(mTomorrowSunrise))
-                    + "}";
-        }
-    }
-
-    /**
-     * Listener for changes in twilight state.
-     */
-    public interface TwilightListener {
-        public void onTwilightStateChanged();
-    }
-
-    private static final class TwilightListenerRecord implements Runnable {
-        private final TwilightListener mListener;
-        private final Handler mHandler;
-
-        public TwilightListenerRecord(TwilightListener listener, Handler handler) {
-            mListener = listener;
-            mHandler = handler;
-        }
-
-        public void post() {
-            mHandler.post(this);
-        }
-
-        @Override
-        public void run() {
-            mListener.onTwilightStateChanged();
-        }
     }
 
     private final class LocationHandler extends Handler {
@@ -518,11 +412,12 @@ public final class TwilightService {
             }
 
             Intent updateIntent = new Intent(ACTION_UPDATE_TWILIGHT_STATE);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, updateIntent, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    getContext(), 0, updateIntent, 0);
             mAlarmManager.cancel(pendingIntent);
             mAlarmManager.setExact(AlarmManager.RTC, nextUpdate, pendingIntent);
         }
-    };
+    }
 
     private final BroadcastReceiver mUpdateLocationReceiver = new BroadcastReceiver() {
         @Override

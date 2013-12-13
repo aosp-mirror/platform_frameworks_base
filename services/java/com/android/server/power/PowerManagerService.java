@@ -20,10 +20,11 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
-import com.android.server.LightsService;
-import com.android.server.TwilightService;
+import com.android.server.lights.LightsService;
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
+import com.android.server.twilight.TwilightManager;
 import com.android.server.Watchdog;
-import com.android.server.am.ActivityManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 
@@ -168,7 +169,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DREAM_BATTERY_LEVEL_DRAIN_CUTOFF = 5;
 
     private Context mContext;
-    private LightsService mLightsService;
+    private LightsManager mLightsManager;
     private BatteryService mBatteryService;
     private DisplayManagerService mDisplayManagerService;
     private IBatteryStats mBatteryStats;
@@ -181,7 +182,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private WirelessChargerDetector mWirelessChargerDetector;
     private SettingsObserver mSettingsObserver;
     private DreamManagerService mDreamManager;
-    private LightsService.Light mAttentionLight;
+    private Light mAttentionLight;
 
     private final Object mLock = new Object();
 
@@ -396,11 +397,11 @@ public final class PowerManagerService extends IPowerManager.Stub
      * Initialize the power manager.
      * Must be called before any other functions within the power manager are called.
      */
-    public void init(Context context, LightsService ls,
-            ActivityManagerService am, BatteryService bs, IBatteryStats bss,
+    public void init(Context context, LightsManager ls,
+            BatteryService bs, IBatteryStats bss,
             IAppOpsService appOps, DisplayManagerService dm) {
         mContext = context;
-        mLightsService = ls;
+        mLightsManager = ls;
         mBatteryService = bs;
         mBatteryStats = bss;
         mAppOps = appOps;
@@ -427,12 +428,12 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    public void systemReady(TwilightService twilight, DreamManagerService dreamManager) {
+    public void systemReady(TwilightManager twilight, DreamManagerService dreamManager) {
         synchronized (mLock) {
             mSystemReady = true;
             mDreamManager = dreamManager;
 
-            PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+            PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
             mScreenBrightnessSettingMaximum = pm.getMaximumScreenBrightnessSetting();
             mScreenBrightnessSettingDefault = pm.getDefaultScreenBrightnessSetting();
@@ -448,7 +449,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             // The display power controller runs on the power manager service's
             // own handler thread to ensure timely operation.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
-                    mContext, mNotifier, mLightsService, twilight, sensorManager,
+                    mContext, mNotifier, mLightsManager, twilight, sensorManager,
                     mDisplayManagerService, mDisplaySuspendBlocker, mDisplayBlanker,
                     mDisplayPowerControllerCallbacks, mHandler);
 
@@ -456,7 +457,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                     createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"),
                     mHandler);
             mSettingsObserver = new SettingsObserver(mHandler);
-            mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
+            mAttentionLight = mLightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
 
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
@@ -2061,7 +2062,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     private void setAttentionLightInternal(boolean on, int color) {
-        LightsService.Light light;
+        Light light;
         synchronized (mLock) {
             if (!mSystemReady) {
                 return;
@@ -2070,7 +2071,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
 
         // Control light outside of lock.
-        light.setFlashing(color, LightsService.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
+        light.setFlashing(color, Light.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
     }
 
     /**
