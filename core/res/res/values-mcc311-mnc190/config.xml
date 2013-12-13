@@ -35,6 +35,8 @@
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata">Tether,broadband.cellular1.net,,,,,,,,,311,190,,DUN</string>
+    <string-array translatable="false" name="config_tether_apndata">
+        <item>Tether,broadband.cellular1.net,,,,,,,,,311,190,,DUN</item>
+    </string-array>
 
 </resources>
