@@ -80,7 +80,7 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
         stats_line s;
         int64_t rawTag;
         if (sscanf(buffer, "%d %31s 0x%llx %u %u %llu %llu %llu %llu", &s.idx,
-                &s.iface, &rawTag, &s.uid, &s.set, &s.rxBytes, &s.rxPackets,
+                s.iface, &rawTag, &s.uid, &s.set, &s.rxBytes, &s.rxPackets,
                 &s.txBytes, &s.txPackets) == 9) {
             if (s.idx != lastIdx + 1) {
                 ALOGE("inconsistent idx=%d after lastIdx=%d", s.idx, lastIdx);
