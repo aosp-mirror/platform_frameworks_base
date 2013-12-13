@@ -16,15 +16,20 @@
 
 package android.app;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
-import android.text.TextUtils;
+import android.transition.Transition;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Helper class for building an options Bundle that can be used with
@@ -95,33 +100,29 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:animStartListener";
 
     /**
-     * A string array of names for the destination scene. This defines an API in the same
-     * way that intent action or extra names do and should follow a similar convention:
-     * "com.example.scene.FOO"
-     *
-     * @hide
-     */
-    public static final String KEY_DEST_SCENE_NAMES = "android:destSceneNames";
-
-    /**
-     * A string indicating the destination scene name that was chosen by the target.
-     * Used by {@link OnSceneTransitionStartedListener}.
-     * @hide
-     */
-    public static final String KEY_DEST_SCENE_NAME_CHOSEN = "android:destSceneNameChosen";
-
-    /**
-     * Callback for when scene transition is started.
-     * @hide
-     */
-    public static final String KEY_SCENE_TRANSITION_START_LISTENER =
-            "android:sceneTransitionStartListener";
-
-    /**
      * Arguments for the scene transition about to begin.
      * @hide
      */
     public static final String KEY_SCENE_TRANSITION_ARGS = "android:sceneTransitionArgs";
+
+    /**
+     * For Activity transitions, the calling Activity's TransitionListener used to
+     * notify the called Activity when the shared element and the exit transitions
+     * complete.
+     */
+    private static final String KEY_TRANSITION_COMPLETE_LISTENER
+            = "android:transitionCompleteListener";
+
+    /**
+     * For Activity transitions, the called Activity's listener to receive calls
+     * when transitions complete.
+     */
+    private static final String KEY_TRANSITION_TARGET_LISTENER = "android:transitionTargetListener";
+
+    /**
+     * The shared element's texture ID (TODO: not used yet).
+     */
+    private static final String KEY_SHARED_ELEMENT_TEXTURE_ID = "android:sharedElementTextureId";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -145,10 +146,9 @@ public class ActivityOptions {
     private int mStartY;
     private int mStartWidth;
     private int mStartHeight;
-    private String[] mDestSceneNames;
     private Bundle mTransitionArgs;
     private IRemoteCallback mAnimationStartedListener;
-    private IRemoteCallback mSceneTransitionStartedListener;
+    private IRemoteCallback mTransitionCompleteListener;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -215,24 +215,6 @@ public class ActivityOptions {
         }
     }
 
-    private void setOnSceneTransitionStartedListener(Handler handler,
-            OnSceneTransitionStartedListener listener) {
-        if (listener != null) {
-            final Handler h = handler;
-            final OnSceneTransitionStartedListener l = listener;
-            mSceneTransitionStartedListener = new IRemoteCallback.Stub() {
-                @Override public void sendResult(final Bundle data) throws RemoteException {
-                    h.post(new Runnable() {
-                        public void run() {
-                            l.onSceneTransitionStarted(data != null ?
-                                    data.getString(KEY_DEST_SCENE_NAME_CHOSEN) : null);
-                        }
-                    });
-                }
-            };
-        }
-    }
-
     /**
      * Callback for use with {@link ActivityOptions#makeThumbnailScaleUpAnimation}
      * to find out when the given animation has started running.
@@ -242,13 +224,10 @@ public class ActivityOptions {
         void onAnimationStarted();
     }
 
-    /**
-     * Callback for use with {@link ActivityOptions#makeSceneTransitionAnimation}
-     * to find out when a transition is about to begin.
-     * @hide
-     */
-    public interface OnSceneTransitionStartedListener {
-        void onSceneTransitionStarted(String destSceneName);
+    /** @hide */
+    public interface ActivityTransitionTarget {
+        void sharedElementTransitionComplete();
+        void exitTransitionComplete();
     }
 
     /**
@@ -369,18 +348,35 @@ public class ActivityOptions {
     }
 
     /**
-     * Create an ActivityOptions specifying an animation where an activity window is asked
-     * to perform animations within the window content.
+     * Create an ActivityOptions to transition between Activities using cross-Activity animation.
+     * When visual elements are to carry between Activities, args should be used to tell the called
+     * Activity about the location and size.
      *
-     * @hide
+     * TODO: Provide facility to capture layout and bitmap of shared elements.
+     *
+     * <p>When
+     * {@link android.app.Activity#startActivities(android.content.Intent[], android.os.Bundle)}
+     * is used with the {@link #toBundle()} result, the Activity's content scene will automatically
+     * transition out by setting their visibility to {@link View#INVISIBLE}. Shared elements
+     * ({@link android.view.View#setSharedElementName(String)}) are unmodified during the
+     * transition to allow the started Activity to seamlessly take it over. ViewGroups typically
+     * don't transition out, and instead transition out their children unless they have a
+     * background. To modify this behavior, use
+     * {@link android.view.ViewGroup#setTransitionGroup(boolean)}.</p>
+     *
+     * <p>This requires {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS} to be
+     * enabled on the calling Activity to cause an exit transition. The same must be in
+     * the called Activity to get an entering transition.</p>
+     *
+     * @param args Contains information for transferring a view between this Activity and the
+     *             target Activity. Will be used by the called Activity to transition the
+     *             view to its eventual destination
+     * @see android.app.Activity#startSharedElementTransition(android.os.Bundle)
      */
-    public static ActivityOptions makeSceneTransitionAnimation(String[] destSceneNames,
-            Bundle args, OnSceneTransitionStartedListener listener, Handler handler) {
+    public static ActivityOptions makeSceneTransitionAnimation(Bundle args) {
         ActivityOptions opts = new ActivityOptions();
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
-        opts.mDestSceneNames = destSceneNames;
         opts.mTransitionArgs = args;
-        opts.setOnSceneTransitionStartedListener(handler, listener);
         return opts;
     }
 
@@ -416,10 +412,9 @@ public class ActivityOptions {
                 break;
 
             case ANIM_SCENE_TRANSITION:
-                mDestSceneNames = opts.getStringArray(KEY_DEST_SCENE_NAMES);
                 mTransitionArgs = opts.getBundle(KEY_SCENE_TRANSITION_ARGS);
-                mSceneTransitionStartedListener = IRemoteCallback.Stub.asInterface(
-                        opts.getBinder(KEY_SCENE_TRANSITION_START_LISTENER));
+                mTransitionCompleteListener = IRemoteCallback.Stub.asInterface(
+                        opts.getBinder(KEY_TRANSITION_COMPLETE_LISTENER));
                 break;
         }
     }
@@ -470,11 +465,6 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public String[] getDestSceneNames() {
-        return mDestSceneNames;
-    }
-
-    /** @hide */
     public Bundle getSceneTransitionArgs() {
         return mTransitionArgs;
     }
@@ -485,18 +475,32 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public void dispatchSceneTransitionStarted(String destScene) {
-        if (mSceneTransitionStartedListener != null) {
-            Bundle data = null;
-            if (!TextUtils.isEmpty(destScene)) {
-                data = new Bundle();
-                data.putString(KEY_DEST_SCENE_NAME_CHOSEN, destScene);
-            }
+    public void dispatchSceneTransitionStarted(final ActivityTransitionTarget target) {
+        boolean listenerSent = false;
+        if (mTransitionCompleteListener != null) {
+            IRemoteCallback callback = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    if (data == null) {
+                        target.exitTransitionComplete();
+                    } else {
+                        // TODO: Use texture id
+                        target.sharedElementTransitionComplete();
+                    }
+                }
+            };
+            Bundle bundle = new Bundle();
+            bundle.putBinder(KEY_TRANSITION_TARGET_LISTENER, callback.asBinder());
             try {
-                mSceneTransitionStartedListener.sendResult(data);
+                mTransitionCompleteListener.sendResult(bundle);
+                listenerSent = true;
             } catch (RemoteException e) {
-                Log.e(TAG, "Caught exception dispatching scene transition start", e);
+                Log.w(TAG, "Couldn't retrieve transition notifications", e);
             }
+        }
+        if (!listenerSent) {
+            target.sharedElementTransitionComplete();
+            target.exitTransitionComplete();
         }
     }
 
@@ -505,12 +509,6 @@ public class ActivityOptions {
         if (mAnimationStartedListener != null) {
             try {
                 mAnimationStartedListener.sendResult(null);
-            } catch (RemoteException e) {
-            }
-        }
-        if (mSceneTransitionStartedListener != null) {
-            try {
-                mSceneTransitionStartedListener.sendResult(null);
             } catch (RemoteException e) {
             }
         }
@@ -545,9 +543,8 @@ public class ActivityOptions {
                     }
                 }
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
-                mSceneTransitionStartedListener = null;
+                mTransitionCompleteListener = null;
                 mTransitionArgs = null;
-                mDestSceneNames = null;
                 break;
             case ANIM_SCALE_UP:
                 mAnimationType = otherOptions.mAnimationType;
@@ -562,9 +559,8 @@ public class ActivityOptions {
                     }
                 }
                 mAnimationStartedListener = null;
-                mSceneTransitionStartedListener = null;
+                mTransitionCompleteListener = null;
                 mTransitionArgs = null;
-                mDestSceneNames = null;
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
@@ -579,20 +575,12 @@ public class ActivityOptions {
                     }
                 }
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
-                mSceneTransitionStartedListener = null;
+                mTransitionCompleteListener = null;
                 mTransitionArgs = null;
-                mDestSceneNames = null;
                 break;
             case ANIM_SCENE_TRANSITION:
                 mAnimationType = otherOptions.mAnimationType;
-                if (mSceneTransitionStartedListener != null) {
-                    try {
-                        mSceneTransitionStartedListener.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                }
-                mSceneTransitionStartedListener = otherOptions.mSceneTransitionStartedListener;
-                mDestSceneNames = otherOptions.mDestSceneNames;
+                mTransitionCompleteListener = otherOptions.mTransitionCompleteListener;
                 mTransitionArgs = otherOptions.mTransitionArgs;
                 mThumbnail = null;
                 mAnimationStartedListener = null;
@@ -639,10 +627,11 @@ public class ActivityOptions {
                 break;
             case ANIM_SCENE_TRANSITION:
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
-                b.putStringArray(KEY_DEST_SCENE_NAMES, mDestSceneNames);
                 b.putBundle(KEY_SCENE_TRANSITION_ARGS, mTransitionArgs);
-                b.putBinder(KEY_SCENE_TRANSITION_START_LISTENER, mSceneTransitionStartedListener
-                        != null ? mSceneTransitionStartedListener.asBinder() : null);
+                if (mTransitionCompleteListener != null) {
+                    b.putBinder(KEY_TRANSITION_COMPLETE_LISTENER,
+                            mTransitionCompleteListener.asBinder());
+                }
                 break;
         }
         return b;
@@ -660,5 +649,124 @@ public class ActivityOptions {
         }
 
         return null;
+    }
+
+    /** @hide */
+    public interface SharedElementSource {
+        int getTextureId();
+    }
+
+    /**
+     * In the calling Activity when transitioning out, sets the Transition to listen for
+     * changes.
+     * @hide
+     */
+    public void setExitTransition(Transition transition, SharedElementSource sharedElementSource) {
+        mTransitionCompleteListener = new ExitTransitionListener(transition, sharedElementSource);
+    }
+
+    private static class ExitTransitionListener extends IRemoteCallback.Stub
+            implements Transition.TransitionListener, Animator.AnimatorListener {
+        private ArrayList<Animator> mSharedElementAnimators = new ArrayList<Animator>();
+        private boolean mSharedElementNotified;
+        private Transition mExitTransition;
+        private IRemoteCallback mTransitionCompleteCallback;
+        private boolean mExitComplete;
+        private SharedElementSource mSharedElementSource;
+
+        public ExitTransitionListener(Transition transition, SharedElementSource sharedElementSource) {
+            mSharedElementSource = sharedElementSource;
+            mExitTransition = transition;
+            mExitTransition.addListener(this);
+        }
+
+        @Override
+        public void sendResult(Bundle data) throws RemoteException {
+            if (data != null) {
+                mTransitionCompleteCallback = IRemoteCallback.Stub.asInterface(
+                        data.getBinder(KEY_TRANSITION_TARGET_LISTENER));
+                notifySharedElement();
+                notifyExit();
+            }
+        }
+
+        @Override
+        public void onTransitionStart(Transition transition) {
+            ArrayMap<Animator, Transition.AnimationInfo> runningAnimators
+                    = Transition.getRunningAnimators();
+            for (Map.Entry<Animator, Transition.AnimationInfo> entry : runningAnimators.entrySet()) {
+                if (entry.getValue().view.getSharedElementName() != null) {
+                    mSharedElementAnimators.add(entry.getKey());
+                    entry.getKey().addListener(this);
+                }
+            }
+            notifySharedElement();
+        }
+
+        @Override
+        public void onTransitionEnd(Transition transition) {
+            mExitComplete = true;
+            notifyExit();
+            mExitTransition.removeListener(this);
+        }
+
+        @Override
+        public void onTransitionCancel(Transition transition) {
+            mExitComplete = true;
+            notifyExit();
+            mExitTransition.removeListener(this);
+        }
+
+        @Override
+        public void onTransitionPause(Transition transition) {
+        }
+
+        @Override
+        public void onTransitionResume(Transition transition) {
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mSharedElementAnimators.remove(animation);
+            notifySharedElement();
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mSharedElementAnimators.remove(animation);
+            notifySharedElement();
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+        }
+
+        private void notifySharedElement() {
+            if (!mSharedElementNotified && mSharedElementAnimators.isEmpty()
+                    && mTransitionCompleteCallback != null) {
+                mSharedElementNotified = true;
+                try {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(KEY_SHARED_ELEMENT_TEXTURE_ID, mSharedElementSource.getTextureId());
+                    mTransitionCompleteCallback.sendResult(bundle);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Couldn't notify that the transition ended", e);
+                }
+            }
+        }
+
+        private void notifyExit() {
+            if (mExitComplete && mTransitionCompleteCallback != null) {
+                try {
+                    mTransitionCompleteCallback.sendResult(null);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Couldn't notify that the transition ended", e);
+                }
+            }
+        }
     }
 }

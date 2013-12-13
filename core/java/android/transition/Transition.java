@@ -552,7 +552,8 @@ public abstract class Transition implements Cloneable {
         return false;
     }
 
-    private static ArrayMap<Animator, AnimationInfo> getRunningAnimators() {
+    /** @hide */
+    public static ArrayMap<Animator, AnimationInfo> getRunningAnimators() {
         ArrayMap<Animator, AnimationInfo> runningAnimators = sRunningAnimators.get();
         if (runningAnimators == null) {
             runningAnimators = new ArrayMap<Animator, AnimationInfo>();
@@ -1077,6 +1078,9 @@ public abstract class Transition implements Cloneable {
         if (view == null) {
             return;
         }
+        if (!isValidTarget(view, view.getId())) {
+            return;
+        }
         boolean isListViewItem = false;
         if (view.getParent() instanceof ListView) {
             isListViewItem = true;
@@ -1467,6 +1471,10 @@ public abstract class Transition implements Cloneable {
         mCanRemoveViews = canRemoveViews;
     }
 
+    public boolean canRemoveViews() {
+        return mCanRemoveViews;
+    }
+
     @Override
     public String toString() {
         return toString("");
@@ -1629,9 +1637,10 @@ public abstract class Transition implements Cloneable {
      * animation should be canceled or a new animation noop'd. The structure holds
      * information about the state that an animation is going to, to be compared to
      * end state of a new animation.
+     * @hide
      */
-    private static class AnimationInfo {
-        View view;
+    public static class AnimationInfo {
+        public View view;
         String name;
         TransitionValues values;
 

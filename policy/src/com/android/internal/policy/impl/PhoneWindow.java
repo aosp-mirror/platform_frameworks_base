@@ -22,6 +22,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.ActivityOptions;
 import android.transition.Scene;
 import android.transition.Transition;
@@ -88,6 +90,7 @@ import android.view.ViewManager;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -114,6 +117,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private final static String TAG = "PhoneWindow";
 
     private final static boolean SWEEP_OPEN_MENU = false;
+    private static final long MAX_TRANSITION_START_WAIT = 500;
+    private static final long MAX_TRANSITION_FINISH_WAIT = 1000;
 
     /**
      * Simple callback used by the context menu and its submenus. The options
@@ -136,22 +141,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ViewGroup mContentParent;
 
     SurfaceHolder.Callback2 mTakeSurfaceCallback;
-    
+
     InputQueue.Callback mTakeInputQueueCallback;
-    
+
     private boolean mIsFloating;
 
     private LayoutInflater mLayoutInflater;
 
     private TextView mTitleView;
-    
+
     private ActionBarView mActionBar;
     private ActionMenuPresenterCallback mActionMenuPresenterCallback;
     private PanelMenuPresenterCallback mPanelMenuPresenterCallback;
 
     private TransitionManager mTransitionManager;
     private Scene mContentScene;
-    private Bundle mTransitionOptions;
 
     // The icon resource has been explicitly set elsewhere
     // and should not be overwritten with a default.
@@ -233,6 +237,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     };
 
+    private ActivityOptions mActivityOptions;
+    private SceneTransitionListener mSceneTransitionListener;
+    private boolean mFadeEarly = true;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -300,11 +308,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public Scene getContentScene() {
         return mContentScene;
-    }
-
-    @Override
-    public void setTransitionOptions(Bundle options) {
-        mTransitionOptions = options;
     }
 
     @Override
@@ -378,26 +381,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void transitionTo(Scene scene) {
-        Transition selected = null;
-        if (mTransitionOptions != null) {
-            final ActivityOptions opts = new ActivityOptions(mTransitionOptions);
-            mTransitionOptions = null;
-
-            String selectedName = null;
-            for (String sceneName : opts.getDestSceneNames()) {
-                final Transition t = mTransitionManager.getNamedTransition(sceneName, scene);
-                if (t != null) {
-                    // TODO handle args/state; inject into t/clone with params
-                    selected = t;
-                    selectedName = sceneName;
-                    break;
-                }
+        if (mContentScene == null) {
+            scene.enter();
+            if (mActivityOptions != null) {
+                new EnterScene().start();
             }
-            opts.dispatchSceneTransitionStarted(selectedName);
-        }
-
-        if (selected != null) {
-            TransitionManager.go(scene, selected);
         } else {
             mTransitionManager.transitionTo(scene);
         }
@@ -413,11 +401,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void takeSurface(SurfaceHolder.Callback2 callback) {
         mTakeSurfaceCallback = callback;
     }
-    
+
     public void takeInputQueue(InputQueue.Callback callback) {
         mTakeInputQueueCallback = callback;
     }
-    
+
     @Override
     public boolean isFloating() {
         return mIsFloating;
@@ -3553,6 +3541,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return mVolumeControlStreamType;
     }
 
+    private boolean isTranslucent() {
+        TypedArray a = getWindowStyle();
+        return a.getBoolean(a.getResourceId(
+                com.android.internal.R.styleable.Window_windowIsTranslucent, 0), false);
+    }
+
     private static final class DrawableFeatureState {
         DrawableFeatureState(int _featureId) {
             featureId = _featureId;
@@ -3985,5 +3979,219 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     void sendCloseSystemWindows(String reason) {
         PhoneWindowManager.sendCloseSystemWindows(getContext(), reason);
+    }
+
+    @Override
+    public void setTransitionOptions(ActivityOptions options, SceneTransitionListener listener) {
+        mSceneTransitionListener = listener;
+        mActivityOptions = options;
+    }
+
+    @Override
+    public void setEarlyBackgroundTransition(boolean fadeEarly) {
+        mFadeEarly = fadeEarly;
+    }
+
+    @Override
+    public void startExitTransition(ActivityOptions activityOptions) {
+        Transition transition = mTransitionManager.getNamedTransition(getContentScene(), "null");
+        if (transition == null) {
+            transition = TransitionManager.getDefaultTransition().clone();
+        }
+        activityOptions.setExitTransition(transition, new ActivityOptions.SharedElementSource() {
+            @Override
+            public int getTextureId() {
+                // TODO: move shared elements to a layer and return the texture id
+                recurseHideExitingSharedElements(mContentParent);
+                return 0;
+            }
+        });
+        ViewGroup sceneRoot = getContentScene().getSceneRoot();
+        TransitionManager.beginDelayedTransition(sceneRoot, transition);
+        recurseExitNonSharedElements(mContentParent);
+    }
+
+    private static void recurseExitNonSharedElements(ViewGroup viewGroup) {
+        int numChildren = viewGroup.getChildCount();
+        for (int i = 0; i < numChildren; i++) {
+            View child = viewGroup.getChildAt(i);
+            if (child.getSharedElementName() != null || (child.getVisibility() != View.VISIBLE)) {
+                continue;
+            }
+            if (child instanceof ViewGroup && !((ViewGroup)child).isTransitionGroup()) {
+                recurseExitNonSharedElements((ViewGroup) child);
+            } else {
+                child.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    private static void recurseHideViews(ViewGroup viewGroup, ArrayList<View> nonSharedElements,
+            ArrayList<View> sharedElements) {
+        int numChildren = viewGroup.getChildCount();
+        for (int i = 0; i < numChildren; i++) {
+            View child = viewGroup.getChildAt(i);
+            if (child.getVisibility() != View.VISIBLE) {
+                continue;
+            }
+            if (child.getSharedElementName() != null) {
+                sharedElements.add(child);
+                child.setVisibility(View.INVISIBLE);
+            } else if (child instanceof ViewGroup && !((ViewGroup)child).isTransitionGroup()) {
+                recurseHideViews((ViewGroup) child, nonSharedElements, sharedElements);
+            } else {
+                nonSharedElements.add(child);
+                child.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    private static void recurseHideExitingSharedElements(ViewGroup viewGroup) {
+        int numChildren = viewGroup.getChildCount();
+        for (int i = 0; i < numChildren; i++) {
+            View child = viewGroup.getChildAt(i);
+            if (child.getVisibility() != View.VISIBLE) {
+                continue;
+            }
+            if (child.getSharedElementName() != null) {
+                child.setVisibility(View.INVISIBLE);
+            } else if (child instanceof ViewGroup) {
+                ViewGroup childViewGroup = (ViewGroup) child;
+                recurseHideExitingSharedElements(childViewGroup);
+            }
+        }
+    }
+
+    /**
+     * Provides code for handling the Activity transition entering scene.
+     * When the first scene is laid out (onPreDraw), it makes views invisible.
+     * It then starts the entering transition by making non-shared elements visible. When
+     * the entering transition is started, the calling Activity is notified that
+     * this Activity is ready to receive the shared element. When the calling Activity notifies
+     * that the shared element is ready, this Activity is notified through the
+     * SceneTransitionListener.
+     *
+     * This class also takes into account fading the background -- either waiting until the
+     * shared element is ready or the calling Activity's exit transition is complete.
+     */
+    private class EnterScene implements ViewTreeObserver.OnPreDrawListener, Runnable,
+            ActivityOptions.ActivityTransitionTarget, Animator.AnimatorListener {
+        private boolean mSharedElementReadyReceived;
+        private boolean mAllDone;
+        private Handler mHandler = new Handler();
+        private boolean mEnterTransitionStarted;
+        private ArrayList<View> mSharedElements = new ArrayList<View>();
+
+        public EnterScene() {
+            mSceneTransitionListener.nullPendingTransition();
+            Drawable background = getDecorView().getBackground();
+            if (background != null) {
+                setBackgroundDrawable(null);
+                background.setAlpha(0);
+                setBackgroundDrawable(background);
+            }
+            mSceneTransitionListener.convertToTranslucent();
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            ViewTreeObserver observer = mContentParent.getViewTreeObserver();
+            observer.removeOnPreDrawListener(this);
+            if (!mEnterTransitionStarted && mSceneTransitionListener != null) {
+                mEnterTransitionStarted = true;
+                ArrayList<View> enteringViews = new ArrayList<View>();
+                recurseHideViews(mContentParent, enteringViews, mSharedElements);
+                Transition transition = getTransitionManager().getNamedTransition("null",
+                        mContentScene);
+                if (transition == null) {
+                    transition = TransitionManager.getDefaultTransition().clone();
+                }
+                TransitionManager.beginDelayedTransition(mContentParent, transition);
+                for (View hidden : enteringViews) {
+                    hidden.setVisibility(View.VISIBLE);
+                }
+                observer.addOnPreDrawListener(this);
+            } else {
+                mHandler.postDelayed(this, MAX_TRANSITION_START_WAIT);
+                mActivityOptions.dispatchSceneTransitionStarted(this);
+            }
+            return true;
+        }
+
+        public void start() {
+            ViewTreeObserver observer = mContentParent.getViewTreeObserver();
+            observer.addOnPreDrawListener(this);
+        }
+
+        @Override
+        public void run() {
+            exitTransitionComplete();
+        }
+
+        @Override
+        public void sharedElementTransitionComplete() {
+            if (!mSharedElementReadyReceived) {
+                mSharedElementReadyReceived = true;
+                mHandler.removeCallbacks(this);
+                mHandler.postDelayed(this, MAX_TRANSITION_FINISH_WAIT);
+                for (View sharedElement: mSharedElements) {
+                    sharedElement.setVisibility(View.VISIBLE);
+                }
+                mSharedElements.clear();
+                mContentParent.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        mContentParent.getViewTreeObserver().removeOnPreDrawListener(this);
+                        mSceneTransitionListener.enterSharedElement(
+                                mActivityOptions.getSceneTransitionArgs());
+                        return false;
+                    }
+                });
+                if (mFadeEarly) {
+                    fadeInBackground();
+                }
+            }
+        }
+
+        private void fadeInBackground() {
+            Drawable background = getDecorView().getBackground();
+            if (background == null) {
+                mSceneTransitionListener.convertFromTranslucent();
+            } else {
+                ObjectAnimator animator = ObjectAnimator.ofInt(background, "alpha", 255);
+                animator.addListener(this);
+                animator.start();
+            }
+        }
+
+        @Override
+        public void exitTransitionComplete() {
+            if (mAllDone) {
+                return;
+            }
+            mAllDone = true;
+            sharedElementTransitionComplete();
+            mHandler.removeCallbacks(this);
+            if (!mFadeEarly) {
+                fadeInBackground();
+            }
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mSceneTransitionListener.convertFromTranslucent();
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+        }
     }
 }

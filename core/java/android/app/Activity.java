@@ -18,7 +18,6 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.transition.Scene;
-import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
@@ -771,6 +770,7 @@ public class Activity extends ContextThemeWrapper
 
     private Thread mUiThread;
     final Handler mHandler = new Handler();
+    private ActivityOptions mTransitionActivityOptions;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -3443,38 +3443,16 @@ public class Activity extends ContextThemeWrapper
      *
      * @throws android.content.ActivityNotFoundException
      *
-     * @see #startActivity 
+     * @see #startActivity
      */
     public void startActivityForResult(Intent intent, int requestCode) {
-        final TransitionManager tm = getWindow().getTransitionManager();
-        final Scene currScene = getWindow().getContentScene();
-        final String[] targetSceneNames = currScene != null && tm != null ?
-                tm.getTargetSceneNames(currScene) : null;
-
-        if (targetSceneNames == null || targetSceneNames.length == 0) {
-            startActivityForResult(intent, requestCode, null);
-        } else {
-            // TODO Capture the scene transition args and send along
-            final ActivityOptions opts = ActivityOptions.makeSceneTransitionAnimation(
-                    targetSceneNames, null,
-                    new ActivityOptions.OnSceneTransitionStartedListener() {
-                        @Override public void onSceneTransitionStarted(String destSceneName) {
-                            final Transition t = tm.getNamedTransition(currScene, destSceneName);
-                            // TODO Fill this in to notify the outgoing activity that it should
-                            // treat this as a sync point for the transition - the target
-                            // transition has started.
-                            Log.d(TAG, "Scene transition to scene " + destSceneName +
-                                    " transition " + t);
-                        }
-                    }, mHandler);
-            startActivityForResult(intent, requestCode, opts.toBundle());
-        }
+        startActivityForResult(intent, requestCode, null);
     }
 
     /**
      * Launch an activity for which you would like a result when it finished.
      * When this activity exits, your
-     * onActivityResult() method will be called with the given requestCode. 
+     * onActivityResult() method will be called with the given requestCode.
      * Using a negative requestCode is the same as calling 
      * {@link #startActivity} (the activity is not launched as a sub-activity).
      *
@@ -3487,9 +3465,9 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>As a special case, if you call startActivityForResult() with a requestCode 
      * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
-     * activity, then your window will not be displayed until a result is 
-     * returned back from the started activity.  This is to avoid visible 
-     * flickering when redirecting to another activity. 
+     * activity, then your window will not be displayed until a result is
+     * returned back from the started activity.  This is to avoid visible
+     * flickering when redirecting to another activity.
      *
      * <p>This method throws {@link android.content.ActivityNotFoundException}
      * if there was no Activity found to run the given Intent.
@@ -3503,9 +3481,17 @@ public class Activity extends ContextThemeWrapper
      *
      * @throws android.content.ActivityNotFoundException
      *
-     * @see #startActivity 
+     * @see #startActivity
      */
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+        TransitionManager tm = getContentTransitionManager();
+        if (tm != null && options != null) {
+            ActivityOptions activityOptions = new ActivityOptions(options);
+            if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+                getWindow().startExitTransition(activityOptions);
+                options = activityOptions.toBundle();
+            }
+        }
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
@@ -5313,7 +5299,7 @@ public class Activity extends ContextThemeWrapper
             mWindow.setUiOptions(info.uiOptions);
         }
         mUiThread = Thread.currentThread();
-        
+
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
@@ -5335,8 +5321,40 @@ public class Activity extends ContextThemeWrapper
             mWindow.setContainer(mParent.getWindow());
         }
         mWindowManager = mWindow.getWindowManager();
-        mWindow.setTransitionOptions(options);
         mCurrentConfig = config;
+        mTransitionActivityOptions = null;
+        Window.SceneTransitionListener sceneTransitionListener = null;
+        if (options != null) {
+            ActivityOptions activityOptions = new ActivityOptions(options);
+            if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+                mTransitionActivityOptions = activityOptions;
+                sceneTransitionListener = new Window.SceneTransitionListener() {
+                    @Override
+                    public void enterSharedElement(Bundle transitionArgs) {
+                        startSharedElementTransition(transitionArgs);
+                        mTransitionActivityOptions = null;
+                    }
+
+                    @Override
+                    public void nullPendingTransition() {
+                        overridePendingTransition(0, 0);
+                    }
+
+                    @Override
+                    public void convertFromTranslucent() {
+                        Activity.this.convertFromTranslucent();
+                    }
+
+                    @Override
+                    public void convertToTranslucent() {
+                        Activity.this.convertToTranslucent(null);
+                    }
+                };
+
+            }
+        }
+
+        mWindow.setTransitionOptions(mTransitionActivityOptions, sceneTransitionListener);
     }
 
     /** @hide */
@@ -5350,7 +5368,7 @@ public class Activity extends ContextThemeWrapper
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
     }
-    
+
     final void performStart() {
         mFragments.noteStateNotSaved();
         mCalled = false;
@@ -5507,7 +5525,7 @@ public class Activity extends ContextThemeWrapper
                     }
                 }
             }
-    
+
             mStopped = true;
         }
         mResumed = false;
@@ -5522,7 +5540,57 @@ public class Activity extends ContextThemeWrapper
             mLoaderManager.doDestroy();
         }
     }
-    
+
+    /**
+     * Gets the entering Activity transition args. Will be null if
+     * {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)} was
+     * not used to pass a Bundle to startActivity. The Bundle passed to that method in the
+     * calling Activity is returned here.
+     * <p>After startSharedElementTransition is called, this method will return null.</p>
+     *
+     * @return The Bundle passed into Bundle parameter of
+     *         {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)}
+     *         in the calling Activity.
+     */
+    public Bundle getTransitionArgs() {
+        if (mTransitionActivityOptions == null) {
+            return null;
+        }
+        return mTransitionActivityOptions.getSceneTransitionArgs();
+    }
+
+    /**
+     * Override to transfer a shared element from a calling Activity to this Activity.
+     * Shared elements will be made VISIBLE before this call. The Activity is responsible
+     * for transitioning the shared elements from their location to the eventual destination.
+     * The shared element will be laid out a the destination when this method is called.
+     *
+     * @param transitionArgs The same as returned from {@link #getTransitionArgs()}, this should
+     *                       contain information from the calling Activity to tell where the
+     *                       shared element should be placed.
+     */
+    protected void startSharedElementTransition(Bundle transitionArgs) {
+    }
+
+    /**
+     * Controls how the background fade is triggered when there is an entering Activity transition.
+     * If fadeEarly is true, the Window background will fade in as soon as the shared elements are
+     * ready to switch. If fadeEarly is false, the background will fade only after the calling
+     * Activity's exit transition completes. By default, the Window will fade in when the calling
+     * Activity's exit transition completes.
+     *
+     * @param fadeEarly Set to true to fade out the exiting Activity as soon as the shared elements
+     *                  are transferred. Set to false to fade out the exiting Activity as soon as
+     *                  the shared element is transferred.
+     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
+     */
+    public void setEarlyBackgroundTransition(boolean fadeEarly) {
+        if (mTransitionActivityOptions == null) {
+            return;
+        }
+        mWindow.setEarlyBackgroundTransition(fadeEarly);
+    }
+
     /**
      * @hide
      */
@@ -5530,7 +5598,7 @@ public class Activity extends ContextThemeWrapper
         return mResumed;
     }
 
-    void dispatchActivityResult(String who, int requestCode, 
+    void dispatchActivityResult(String who, int requestCode,
         int resultCode, Intent data) {
         if (false) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode

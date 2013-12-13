@@ -360,6 +360,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     static final int FLAG_ISOLATED_Z_VOLUME = 0x1000000;
 
+    static final int FLAG_IS_TRANSITION_GROUP = 0x2000000;
+
+    static final int FLAG_IS_TRANSITION_GROUP_SET = 0x4000000;
+
     /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
@@ -555,6 +559,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     break;
                 case R.styleable.ViewGroup_layoutMode:
                     setLayoutMode(a.getInt(attr, LAYOUT_MODE_UNDEFINED));
+                    break;
+                case R.styleable.ViewGroup_transitionGroup:
+                    setTransitionGroup(a.getBoolean(attr, false));
                     break;
             }
         }
@@ -2285,6 +2292,41 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public boolean isMotionEventSplittingEnabled() {
         return (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS;
+    }
+
+    /**
+     * Returns true if this ViewGroup should be considered as a single entity for removal
+     * when executing an Activity transition. If this is false, child elements will move
+     * individually during the transition.
+     * @return True if the ViewGroup should be acted on together during an Activity transition.
+     * The default value is false when the background is null and true when the background
+     * is not null.
+     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
+     */
+    public boolean isTransitionGroup() {
+        if ((mGroupFlags & FLAG_IS_TRANSITION_GROUP_SET) != 0) {
+            return ((mGroupFlags & FLAG_IS_TRANSITION_GROUP) != 0);
+        } else {
+            return getBackground() != null;
+        }
+    }
+
+    /**
+     * Changes whether or not this ViewGroup should be treated as a single entity during
+     * ActivityTransitions.
+     * @param isTransitionGroup Whether or not the ViewGroup should be treated as a unit
+     *                          in Activity transitions. If false, the ViewGroup won't transition,
+     *                          only its children. If true, the entire ViewGroup will transition
+     *                          together.
+     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
+     */
+    public void setTransitionGroup(boolean isTransitionGroup) {
+        mGroupFlags |= FLAG_IS_TRANSITION_GROUP_SET;
+        if (isTransitionGroup) {
+            mGroupFlags |= FLAG_IS_TRANSITION_GROUP;
+        } else {
+            mGroupFlags &= ~FLAG_IS_TRANSITION_GROUP;
+        }
     }
 
     /**
