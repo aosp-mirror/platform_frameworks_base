@@ -34,8 +34,9 @@ import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Objects;
 
 /**
  * Template definition used to generically match {@link NetworkIdentity},
@@ -176,7 +177,7 @@ public class NetworkTemplate implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mMatchRule, mSubscriberId, mNetworkId);
+        return Objects.hash(mMatchRule, mSubscriberId, mNetworkId);
     }
 
     @Override
@@ -184,8 +185,8 @@ public class NetworkTemplate implements Parcelable {
         if (obj instanceof NetworkTemplate) {
             final NetworkTemplate other = (NetworkTemplate) obj;
             return mMatchRule == other.mMatchRule
-                    && Objects.equal(mSubscriberId, other.mSubscriberId)
-                    && Objects.equal(mNetworkId, other.mNetworkId);
+                    && Objects.equals(mSubscriberId, other.mSubscriberId)
+                    && Objects.equals(mNetworkId, other.mNetworkId);
         }
         return false;
     }
@@ -235,7 +236,7 @@ public class NetworkTemplate implements Parcelable {
             return true;
         } else {
             return ((sForceAllNetworkTypes || contains(DATA_USAGE_NETWORK_TYPES, ident.mType))
-                    && Objects.equal(mSubscriberId, ident.mSubscriberId));
+                    && Objects.equals(mSubscriberId, ident.mSubscriberId));
         }
     }
 
@@ -280,7 +281,7 @@ public class NetworkTemplate implements Parcelable {
     private boolean matchesWifi(NetworkIdentity ident) {
         switch (ident.mType) {
             case TYPE_WIFI:
-                return Objects.equal(
+                return Objects.equals(
                         removeDoubleQuotes(mNetworkId), removeDoubleQuotes(ident.mNetworkId));
             default:
                 return false;
