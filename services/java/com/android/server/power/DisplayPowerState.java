@@ -16,7 +16,7 @@
 
 package com.android.server.power;
 
-import com.android.server.LightsService;
+import com.android.server.lights.Light;
 
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -56,7 +56,7 @@ final class DisplayPowerState {
     private final Choreographer mChoreographer;
     private final ElectronBeam mElectronBeam;
     private final DisplayBlanker mDisplayBlanker;
-    private final LightsService.Light mBacklight;
+    private final Light mBacklight;
     private final PhotonicModulator mPhotonicModulator;
 
     private boolean mScreenOn;
@@ -72,7 +72,7 @@ final class DisplayPowerState {
     private Runnable mCleanListener;
 
     public DisplayPowerState(ElectronBeam electronBean,
-            DisplayBlanker displayBlanker, LightsService.Light backlight) {
+            DisplayBlanker displayBlanker, Light backlight) {
         mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mElectronBeam = electronBean;
