@@ -16,10 +16,10 @@
 
 package com.android.media.remotedisplay;
 
-import com.android.internal.util.Objects;
-
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
 import android.text.TextUtils;
+
+import java.util.Objects;
 
 /**
  * Represents a remote display that has been discovered.
@@ -86,7 +86,7 @@ public class RemoteDisplay {
     }
 
     public void setName(String name) {
-        if (!Objects.equal(mMutableInfo.name, name)) {
+        if (!Objects.equals(mMutableInfo.name, name)) {
             mMutableInfo.name = name;
             mImmutableInfo = null;
         }
@@ -97,7 +97,7 @@ public class RemoteDisplay {
     }
 
     public void setDescription(String description) {
-        if (!Objects.equal(mMutableInfo.description, description)) {
+        if (!Objects.equals(mMutableInfo.description, description)) {
             mMutableInfo.description = description;
             mImmutableInfo = null;
         }

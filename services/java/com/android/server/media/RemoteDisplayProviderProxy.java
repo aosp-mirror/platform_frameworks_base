@@ -16,8 +16,6 @@
 
 package com.android.server.media;
 
-import com.android.internal.util.Objects;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +33,7 @@ import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 /**
  * Maintains a connection to a particular remote display provider service.
@@ -101,7 +100,7 @@ final class RemoteDisplayProviderProxy implements ServiceConnection {
     }
 
     public void setSelectedDisplay(String id) {
-        if (!Objects.equal(mSelectedDisplayId, id)) {
+        if (!Objects.equals(mSelectedDisplayId, id)) {
             if (mConnectionReady && mSelectedDisplayId != null) {
                 mActiveConnection.disconnect(mSelectedDisplayId);
             }
@@ -293,7 +292,7 @@ final class RemoteDisplayProviderProxy implements ServiceConnection {
     }
 
     private void setDisplayState(RemoteDisplayState state) {
-        if (!Objects.equal(mDisplayState, state)) {
+        if (!Objects.equals(mDisplayState, state)) {
             mDisplayState = state;
             if (!mScheduledDisplayStateChangedCallback) {
                 mScheduledDisplayStateChangedCallback = true;
