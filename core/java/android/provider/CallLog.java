@@ -86,9 +86,8 @@ public class CallLog {
         public static final String ALLOW_VOICEMAILS_PARAM_KEY = "allow_voicemails";
 
         /**
-         * Content uri with {@link #ALLOW_VOICEMAILS_PARAM_KEY} set. This uri is used to access
-         * call log entries, including voicemail records. You must have the READ_CALL_LOG and
-         * WRITE_CALL_LOG permissions to read and write to the call log.
+         * Content uri used to access call log entries, including voicemail records. You must have
+         * the READ_CALL_LOG and WRITE_CALL_LOG permissions to read and write to the call log.
          */
         public static final Uri CONTENT_URI_WITH_VOICEMAIL = CONTENT_URI.buildUpon()
                 .appendQueryParameter(ALLOW_VOICEMAILS_PARAM_KEY, "true")
