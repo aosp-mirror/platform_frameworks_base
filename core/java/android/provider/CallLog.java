@@ -86,10 +86,9 @@ public class CallLog {
         public static final String ALLOW_VOICEMAILS_PARAM_KEY = "allow_voicemails";
 
         /**
-         * Content uri with {@link #ALLOW_VOICEMAILS_PARAM_KEY} set. This can directly be used to
-         * access call log entries that includes voicemail records.
-         *
-         * @hide
+         * Content uri with {@link #ALLOW_VOICEMAILS_PARAM_KEY} set. This uri is used to access
+         * call log entries, including voicemail records. You must have the READ_CALL_LOG and
+         * WRITE_CALL_LOG permissions to read and write to the call log.
          */
         public static final Uri CONTENT_URI_WITH_VOICEMAIL = CONTENT_URI.buildUpon()
                 .appendQueryParameter(ALLOW_VOICEMAILS_PARAM_KEY, "true")
@@ -124,10 +123,7 @@ public class CallLog {
         public static final int OUTGOING_TYPE = 2;
         /** Call log type for missed calls. */
         public static final int MISSED_TYPE = 3;
-        /**
-         * Call log type for voicemails.
-         * @hide
-         */
+        /** Call log type for voicemails. */
         public static final int VOICEMAIL_TYPE = 4;
 
         /**
@@ -168,8 +164,6 @@ public class CallLog {
          * <P>
          * Type: TEXT
          * </P>
-         *
-         * @hide
          */
         public static final String COUNTRY_ISO = "countryiso";
 
@@ -220,7 +214,6 @@ public class CallLog {
         /**
          * URI of the voicemail entry. Populated only for {@link #VOICEMAIL_TYPE}.
          * <P>Type: TEXT</P>
-         * @hide
          */
         public static final String VOICEMAIL_URI = "voicemail_uri";
 
@@ -238,51 +231,48 @@ public class CallLog {
          * <p>
          * The string represents a city, state, or country associated with the number.
          * <P>Type: TEXT</P>
-         * @hide
          */
         public static final String GEOCODED_LOCATION = "geocoded_location";
 
         /**
          * The cached URI to look up the contact associated with the phone number, if it exists.
-         * This value is not guaranteed to be current, if the contact information
-         * associated with this number has changed.
+         * This value may not be current if the contact information associated with this number
+         * has changed.
          * <P>Type: TEXT</P>
-         * @hide
          */
         public static final String CACHED_LOOKUP_URI = "lookup_uri";
 
         /**
          * The cached phone number of the contact which matches this entry, if it exists.
-         * This value is not guaranteed to be current, if the contact information
-         * associated with this number has changed.
+         * This value may not be current if the contact information associated with this number
+         * has changed.
          * <P>Type: TEXT</P>
-         * @hide
          */
         public static final String CACHED_MATCHED_NUMBER = "matched_number";
 
         /**
-         * The cached normalized version of the phone number, if it exists.
-         * This value is not guaranteed to be current, if the contact information
-         * associated with this number has changed.
+         * The cached normalized(E164) version of the phone number, if it exists.
+         * This value may not be current if the contact information associated with this number
+         * has changed.
          * <P>Type: TEXT</P>
-         * @hide
          */
         public static final String CACHED_NORMALIZED_NUMBER = "normalized_number";
 
         /**
          * The cached photo id of the picture associated with the phone number, if it exists.
-         * This value is not guaranteed to be current, if the contact information
-         * associated with this number has changed.
+         * This value may not be current if the contact information associated with this number
+         * has changed.
          * <P>Type: INTEGER (long)</P>
-         * @hide
          */
         public static final String CACHED_PHOTO_ID = "photo_id";
 
         /**
-         * The cached formatted phone number.
-         * This value is not guaranteed to be present.
+         * The cached phone number, formatted with formatting rules based on the country the
+         * user was in when the call was made or received.
+         * This value is not guaranteed to be present, and may not be current if the contact
+         * information associated with this number
+         * has changed.
          * <P>Type: TEXT</P>
-         * @hide
          */
         public static final String CACHED_FORMATTED_NUMBER = "formatted_number";
 
