@@ -144,9 +144,10 @@ public class ViewPropertyAnimator {
     private static final int X              = 0x0080;
     private static final int Y              = 0x0100;
     private static final int ALPHA          = 0x0200;
+    private static final int TRANSLATION_Z  = 0x0400;
 
-    private static final int TRANSFORM_MASK = TRANSLATION_X | TRANSLATION_Y | SCALE_X | SCALE_Y |
-            ROTATION | ROTATION_X | ROTATION_Y | X | Y;
+    private static final int TRANSFORM_MASK = TRANSLATION_X | TRANSLATION_Y | TRANSLATION_Z |
+            SCALE_X | SCALE_Y | ROTATION | ROTATION_X | ROTATION_Y | X | Y;
 
     /**
      * The mechanism by which the user can request several properties that are then animated
@@ -573,6 +574,22 @@ public class ViewPropertyAnimator {
     }
 
     /**
+     * @hide
+     */
+    public ViewPropertyAnimator translationZ(float value) {
+        animateProperty(TRANSLATION_Z, value);
+        return this;
+    }
+
+    /**
+     * @hide
+     */
+    public ViewPropertyAnimator translationZBy(float value) {
+        animatePropertyBy(TRANSLATION_Z, value);
+        return this;
+    }
+
+    /**
      * This method will cause the View's <code>translationY</code> property to be animated to the
      * specified value. Animations already running on the property will be canceled.
      *
@@ -909,6 +926,10 @@ public class ViewPropertyAnimator {
                 info.mTranslationY = value;
                 if (displayList != null) displayList.setTranslationY(value);
                 break;
+            case TRANSLATION_Z:
+                info.mTranslationZ = value;
+                if (displayList != null) displayList.setTranslationZ(value);
+                break;
             case ROTATION:
                 info.mRotation = value;
                 if (displayList != null) displayList.setRotation(value);
@@ -957,6 +978,8 @@ public class ViewPropertyAnimator {
                 return info.mTranslationX;
             case TRANSLATION_Y:
                 return info.mTranslationY;
+            case TRANSLATION_Z:
+                return info.mTranslationZ;
             case ROTATION:
                 return info.mRotation;
             case ROTATION_X:

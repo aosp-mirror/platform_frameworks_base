@@ -114,6 +114,11 @@ static void android_view_GLES20DisplayList_setTranslationY(JNIEnv* env,
     displayList->setTranslationY(ty);
 }
 
+static void android_view_GLES20DisplayList_setTranslationZ(JNIEnv* env,
+        jobject clazz, DisplayList* displayList, float tz) {
+    displayList->setTranslationZ(tz);
+}
+
 static void android_view_GLES20DisplayList_setRotation(JNIEnv* env,
         jobject clazz, DisplayList* displayList, float rotation) {
     displayList->setRotation(rotation);
@@ -141,11 +146,12 @@ static void android_view_GLES20DisplayList_setScaleY(JNIEnv* env,
 
 static void android_view_GLES20DisplayList_setTransformationInfo(JNIEnv* env,
         jobject clazz, DisplayList* displayList, float alpha,
-        float translationX, float translationY, float rotation, float rotationX, float rotationY,
-        float scaleX, float scaleY) {
+        float translationX, float translationY, float translationZ,
+        float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
     displayList->setAlpha(alpha);
     displayList->setTranslationX(translationX);
     displayList->setTranslationY(translationY);
+    displayList->setTranslationZ(translationZ);
     displayList->setRotation(rotation);
     displayList->setRotationX(rotationX);
     displayList->setRotationY(rotationY);
@@ -320,12 +326,13 @@ static JNINativeMethod gMethods[] = {
             (void*) android_view_GLES20DisplayList_setHasOverlappingRendering },
     { "nSetTranslationX",      "(IF)V",  (void*) android_view_GLES20DisplayList_setTranslationX },
     { "nSetTranslationY",      "(IF)V",  (void*) android_view_GLES20DisplayList_setTranslationY },
+    { "nSetTranslationZ",      "(IF)V",  (void*) android_view_GLES20DisplayList_setTranslationZ },
     { "nSetRotation",          "(IF)V",  (void*) android_view_GLES20DisplayList_setRotation },
     { "nSetRotationX",         "(IF)V",  (void*) android_view_GLES20DisplayList_setRotationX },
     { "nSetRotationY",         "(IF)V",  (void*) android_view_GLES20DisplayList_setRotationY },
     { "nSetScaleX",            "(IF)V",  (void*) android_view_GLES20DisplayList_setScaleX },
     { "nSetScaleY",            "(IF)V",  (void*) android_view_GLES20DisplayList_setScaleY },
-    { "nSetTransformationInfo","(IFFFFFFFF)V",
+    { "nSetTransformationInfo","(IFFFFFFFFF)V",
             (void*) android_view_GLES20DisplayList_setTransformationInfo },
     { "nSetPivotX",            "(IF)V",  (void*) android_view_GLES20DisplayList_setPivotX },
     { "nSetPivotY",            "(IF)V",  (void*) android_view_GLES20DisplayList_setPivotY },

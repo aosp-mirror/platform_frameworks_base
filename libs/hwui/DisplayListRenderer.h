@@ -328,6 +328,7 @@ private:
         return patch;
     }
 
+    // TODO: move these to DisplayListData
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;

@@ -107,6 +107,21 @@ struct Vector2 {
     }
 }; // class Vector2
 
+class Vector3 {
+public:
+    float x;
+    float y;
+    float z;
+
+    Vector3() :
+        x(0.0f), y(0.0f), z(0.0f) {
+    }
+
+    Vector3(float px, float py, float pz) :
+        x(px), y(py), z(pz) {
+    }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////

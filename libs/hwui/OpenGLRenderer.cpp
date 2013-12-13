@@ -180,7 +180,21 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::initViewport(int width, int height) {
-    mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
+    float dist = std::max(width, height) * 1.5;
+
+    if (DEBUG_ENABLE_3D) {
+        // TODO: make view proj app configurable
+        Matrix4 projection;
+        projection.loadFrustum(-width / 2, -height / 2, width / 2, height / 2, dist, 0);
+        Matrix4 view;
+        view.loadLookAt(0, 0, dist,
+                0, 0, 0,
+                0, 1, 0);
+        mViewProjMatrix.loadMultiply(projection, view);
+        mViewProjMatrix.translate(-width/2, -height/2);
+    } else {
+        mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
+    }
 
     mWidth = width;
     mHeight = height;
@@ -753,7 +767,7 @@ bool OpenGLRenderer::restoreSnapshot() {
     if (restoreOrtho) {
         Rect& r = previous->viewport;
         glViewport(r.left, r.top, r.right, r.bottom);
-        mOrthoMatrix.load(current->orthoMatrix);
+        mViewProjMatrix.load(current->orthoMatrix);
     }
 
     mSaveCount--;
@@ -984,7 +998,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
     mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
     mSnapshot->height = bounds.getHeight();
-    mSnapshot->orthoMatrix.load(mOrthoMatrix);
+    mSnapshot->orthoMatrix.load(mViewProjMatrix);
 
     endTiling();
     debugOverdraw(false, false);
@@ -1013,7 +1027,9 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
 
     // Change the ortho projection
     glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
-    mOrthoMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
+
+    // TODO: determine best way to support 3d drawing within HW layers
+    mViewProjMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
 
     return true;
 }
@@ -1539,10 +1555,8 @@ void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
 }
 
 void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
-    SkMatrix transform;
-    currentTransform().copyTo(transform);
-    transform.preConcat(*matrix);
-    currentTransform().load(transform);
+    mat4 transform(*matrix);
+    currentTransform().multiply(transform);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1927,10 +1941,10 @@ void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
 
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
     if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, currentTransform(), offset);
+        mCaches.currentProgram->set(mViewProjMatrix, mModelView, currentTransform(), offset);
         if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, currentTransform());
     } else {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity(), offset);
+        mCaches.currentProgram->set(mViewProjMatrix, mModelView, mat4::identity(), offset);
         if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
     }
 }
@@ -2064,9 +2078,12 @@ void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
 status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         int32_t replayFlags) {
     status_t status;
+
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
+        // compute 3d ordering
+        displayList->computeOrdering();
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             status = startFrame();
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
@@ -2082,7 +2099,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         flushLayers();
         status = startFrame();
 
-        return status | deferredList.flush(*this, dirty);
+        return deferredList.flush(*this, dirty) | status;
     }
 
     return DrawGlInfo::kStatusDone;
@@ -3364,6 +3381,34 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
     SkXfermode::Mode mode = getXfermode(paint->getXfermode());
 
     return drawColorRects(rects, count, color, mode);
+}
+
+status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlpha,
+        float width, float height) {
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+
+    // For now, always and scissor
+    // TODO: use quickReject
+    mCaches.enableScissor();
+
+    SkPaint paint;
+    paint.setColor(0x3f000000);
+    paint.setAntiAlias(true);
+    VertexBuffer vertexBuffer;
+    {
+        //TODO: populate vertex buffer with better shadow geometry.
+        Vector3 pivot(width/2, height/2, 0.0f);
+        casterTransform.mapPoint3d(pivot);
+
+        float zScaleFactor = 0.5 + 0.0005f * pivot.z;
+
+        SkPath path;
+        path.addRect(pivot.x - width * zScaleFactor, pivot.y - height * zScaleFactor,
+                pivot.x + width * zScaleFactor, pivot.y + height * zScaleFactor);
+        PathTessellator::tessellatePath(path, &paint, mSnapshot->transform, vertexBuffer);
+    }
+
+    return drawVertexBuffer(vertexBuffer, &paint);
 }
 
 status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,

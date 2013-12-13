@@ -2981,6 +2981,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.ExportedProperty
         float mTranslationY = 0f;
 
+        @ViewDebug.ExportedProperty
+        float mTranslationZ = 0f;
+
         /**
          * The amount of scale in the x direction around the pivot point. A
          * value of 1 means no scaling is applied.
@@ -10508,6 +10511,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "drawing")
+    public float getTranslationZ() {
+        return mTransformationInfo != null ? mTransformationInfo.mTranslationZ : 0;
+    }
+
+    /**
+     * @hide
+     */
+    public void setTranslationZ(float translationZ) {
+        ensureTransformationInfo();
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mTranslationZ != translationZ) {
+            invalidateViewProperty(true, false);
+            info.mTranslationZ = translationZ;
+            info.mMatrixDirty = true;
+            invalidateViewProperty(false, true);
+            if (mDisplayList != null) {
+                mDisplayList.setTranslationZ(translationZ);
+            }
+            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
+        }
+    }
+
+    /**
      * Hit rectangle in parent's coordinates
      *
      * @param outRect The hit rectangle of the view.
@@ -14173,6 +14205,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
                 displayList.setTransformationInfo(alpha,
                         mTransformationInfo.mTranslationX, mTransformationInfo.mTranslationY,
+                        mTransformationInfo.mTranslationZ,
                         mTransformationInfo.mRotation, mTransformationInfo.mRotationX,
                         mTransformationInfo.mRotationY, mTransformationInfo.mScaleX,
                         mTransformationInfo.mScaleY);
