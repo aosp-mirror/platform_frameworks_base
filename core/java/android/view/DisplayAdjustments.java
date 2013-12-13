@@ -19,7 +19,7 @@ package android.view;
 import android.content.res.CompatibilityInfo;
 import android.os.IBinder;
 
-import com.android.internal.util.Objects;
+import java.util.Objects;
 
 /** @hide */
 public class DisplayAdjustments {
@@ -91,7 +91,7 @@ public class DisplayAdjustments {
             return false;
         }
         DisplayAdjustments daj = (DisplayAdjustments)o;
-        return Objects.equal(daj.mCompatInfo, mCompatInfo) &&
-                Objects.equal(daj.mActivityToken, mActivityToken);
+        return Objects.equals(daj.mCompatInfo, mCompatInfo) &&
+                Objects.equals(daj.mActivityToken, mActivityToken);
     }
 }
