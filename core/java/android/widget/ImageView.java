@@ -24,8 +24,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
@@ -1222,6 +1224,37 @@ public class ImageView extends View {
             mDrawable.setColorFilter(mColorFilter);
             mDrawable.setXfermode(mXfermode);
             mDrawable.setAlpha(mAlpha * mViewAlphaScale >> 8);
+        }
+    }
+
+    @Override
+    public boolean isOpaque() {
+        return super.isOpaque() || mDrawable != null && mXfermode == null
+                && mDrawable.getOpacity() == PixelFormat.OPAQUE
+                && mAlpha * mViewAlphaScale >> 8 == 255
+                && isFilledByImage();
+    }
+
+    private boolean isFilledByImage() {
+        if (mDrawable == null) {
+            return false;
+        }
+
+        final Rect bounds = mDrawable.getBounds();
+        final Matrix matrix = mDrawMatrix;
+        if (matrix == null) {
+            return bounds.left <= 0 && bounds.top <= 0 && bounds.right >= getWidth()
+                    && bounds.bottom >= getHeight();
+        } else if (matrix.rectStaysRect()) {
+            final RectF boundsSrc = mTempSrc;
+            final RectF boundsDst = mTempDst;
+            boundsSrc.set(bounds);
+            matrix.mapRect(boundsDst, boundsSrc);
+            return boundsDst.left <= 0 && boundsDst.top <= 0 && boundsDst.right >= getWidth()
+                    && boundsDst.bottom >= getHeight();
+        } else {
+            // If the matrix doesn't map to a rectangle, assume the worst.
+            return false;
         }
     }
 
