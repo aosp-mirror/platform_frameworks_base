@@ -1428,7 +1428,6 @@ com.android.internal.util.AsyncChannel
 com.android.internal.util.AsyncChannel$DeathMonitor
 com.android.internal.util.FastXmlSerializer
 com.android.internal.util.MemInfoReader
-com.android.internal.util.Objects
 com.android.internal.util.Preconditions
 com.android.internal.util.XmlUtils
 com.android.internal.view.ActionBarPolicy

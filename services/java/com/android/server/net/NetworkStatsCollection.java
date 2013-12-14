@@ -34,7 +34,6 @@ import android.util.AtomicFile;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -50,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import libcore.io.IoUtils;
 
@@ -508,7 +508,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             this.uid = uid;
             this.set = set;
             this.tag = tag;
-            hashCode = Objects.hashCode(ident, uid, set, tag);
+            hashCode = Objects.hash(ident, uid, set, tag);
         }
 
         @Override
@@ -521,7 +521,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             if (obj instanceof Key) {
                 final Key key = (Key) obj;
                 return uid == key.uid && set == key.set && tag == key.tag
-                        && Objects.equal(ident, key.ident);
+                        && Objects.equals(ident, key.ident);
             }
             return false;
         }

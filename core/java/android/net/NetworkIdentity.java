@@ -26,7 +26,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 
-import com.android.internal.util.Objects;
+import java.util.Objects;
 
 /**
  * Network definition that includes strong identity. Analogous to combining
@@ -60,7 +60,7 @@ public class NetworkIdentity {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mType, mSubType, mSubscriberId, mNetworkId, mRoaming);
+        return Objects.hash(mType, mSubType, mSubscriberId, mNetworkId, mRoaming);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class NetworkIdentity {
         if (obj instanceof NetworkIdentity) {
             final NetworkIdentity ident = (NetworkIdentity) obj;
             return mType == ident.mType && mSubType == ident.mSubType && mRoaming == ident.mRoaming
-                    && Objects.equal(mSubscriberId, ident.mSubscriberId)
-                    && Objects.equal(mNetworkId, ident.mNetworkId);
+                    && Objects.equals(mSubscriberId, ident.mSubscriberId)
+                    && Objects.equals(mNetworkId, ident.mNetworkId);
         }
         return false;
     }
