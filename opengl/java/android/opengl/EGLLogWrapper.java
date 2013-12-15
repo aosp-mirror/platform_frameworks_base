@@ -326,7 +326,7 @@ class EGLLogWrapper implements EGL11 {
     }
 
     public boolean eglSwapBuffers(EGLDisplay display, EGLSurface surface) {
-        begin("eglInitialize");
+        begin("eglSwapBuffers");
         arg("display", display);
         arg("surface", surface);
         end();
