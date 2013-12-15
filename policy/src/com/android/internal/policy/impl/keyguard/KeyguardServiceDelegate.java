@@ -34,7 +34,7 @@ public class KeyguardServiceDelegate {
     public static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
 
     private static final String TAG = "KeyguardServiceDelegate";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     protected KeyguardServiceWrapper mKeyguardService;
     private View mScrim; // shown if keyguard crashes
     private KeyguardState mKeyguardState = new KeyguardState();
