@@ -169,7 +169,7 @@ required classes, add the following lines in the
 
 -keepnames &#64;com.google.android.gms.common.annotation.KeepName class *
 -keepclassmembernames class * {
-    &#64;ccom.google.android.gms.common.annotation.KeepName *;
+    &#64;com.google.android.gms.common.annotation.KeepName *;
 }
 
 -keepnames class * implements android.os.Parcelable {
