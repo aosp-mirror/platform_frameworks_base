@@ -48,6 +48,7 @@ import android.database.ContentObserver;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
+import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.input.KeyboardLayout;
@@ -382,7 +383,7 @@ public class InputManagerService extends IInputManager.Stub
     public int getScanCodeState(int deviceId, int sourceMask, int scanCode) {
         return nativeGetScanCodeState(mPtr, deviceId, sourceMask, scanCode);
     }
-    
+
     /**
      * Gets the current state of a switch by switch code.
      * @param deviceId The input device id, or -1 to consult all devices.
@@ -417,10 +418,10 @@ public class InputManagerService extends IInputManager.Stub
             throw new IllegalArgumentException("keyExists must not be null and must be at "
                     + "least as large as keyCodes.");
         }
-        
+
         return nativeHasKeys(mPtr, deviceId, sourceMask, keyCodes, keyExists);
     }
-    
+
     /**
      * Creates an input channel that will receive all input from the input dispatcher.
      * @param inputChannelName The input channel name.
@@ -430,7 +431,7 @@ public class InputManagerService extends IInputManager.Stub
         if (inputChannelName == null) {
             throw new IllegalArgumentException("inputChannelName must not be null.");
         }
-        
+
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
         nativeRegisterInputChannel(mPtr, inputChannels[0], null, true);
         inputChannels[0].dispose(); // don't need to retain the Java object reference
@@ -448,10 +449,10 @@ public class InputManagerService extends IInputManager.Stub
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
-        
+
         nativeRegisterInputChannel(mPtr, inputChannel, inputWindowHandle, false);
     }
-    
+
     /**
      * Unregisters an input channel.
      * @param inputChannel The input channel to unregister.
@@ -460,7 +461,7 @@ public class InputManagerService extends IInputManager.Stub
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
-        
+
         nativeUnregisterInputChannel(mPtr, inputChannel);
     }
 
@@ -902,35 +903,62 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-    @Override // Binder call
-    public String getCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor) {
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+    /**
+     * Builds a layout descriptor for the vendor/product. This returns the
+     * descriptor for ids that aren't useful (such as the default 0, 0).
+     */
+    private String getLayoutDescriptor(InputDeviceIdentifier identifier) {
+        if (identifier == null || identifier.getDescriptor() == null) {
+            throw new IllegalArgumentException("identifier and descriptor must not be null");
         }
 
+        if (identifier.getVendorId() == 0 && identifier.getProductId() == 0) {
+            return identifier.getDescriptor();
+        }
+        StringBuilder bob = new StringBuilder();
+        bob.append("vendor:").append(identifier.getVendorId());
+        bob.append(",product:").append(identifier.getProductId());
+        return bob.toString();
+    }
+
+    @Override // Binder call
+    public String getCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier) {
+
+        String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
-            return mDataStore.getCurrentKeyboardLayout(inputDeviceDescriptor);
+            String layout = null;
+            // try loading it using the layout descriptor if we have it
+            layout = mDataStore.getCurrentKeyboardLayout(key);
+            if (layout == null && !key.equals(identifier.getDescriptor())) {
+                // if it doesn't exist fall back to the device descriptor
+                layout = mDataStore.getCurrentKeyboardLayout(identifier.getDescriptor());
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Loaded keyboard layout id for " + key + " and got "
+                        + layout);
+            }
+            return layout;
         }
     }
 
     @Override // Binder call
-    public void setCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    public void setCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
         if (!checkCallingPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT,
                 "setCurrentKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
         if (keyboardLayoutDescriptor == null) {
             throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
         }
 
+        String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
             try {
-                if (mDataStore.setCurrentKeyboardLayout(
-                        inputDeviceDescriptor, keyboardLayoutDescriptor)) {
+                if (mDataStore.setCurrentKeyboardLayout(key, keyboardLayoutDescriptor)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Saved keyboard layout using " + key);
+                    }
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
                 }
             } finally {
@@ -940,36 +968,39 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    public String[] getKeyboardLayoutsForInputDevice(String inputDeviceDescriptor) {
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-
+    public String[] getKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
+        String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
-            return mDataStore.getKeyboardLayouts(inputDeviceDescriptor);
+            String[] layouts = mDataStore.getKeyboardLayouts(key);
+            if ((layouts == null || layouts.length == 0)
+                    && !key.equals(identifier.getDescriptor())) {
+                layouts = mDataStore.getKeyboardLayouts(identifier.getDescriptor());
+            }
+            return layouts;
         }
     }
 
     @Override // Binder call
-    public void addKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
         if (!checkCallingPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT,
                 "addKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
         if (keyboardLayoutDescriptor == null) {
             throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
         }
 
+        String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
             try {
-                String oldLayout = mDataStore.getCurrentKeyboardLayout(inputDeviceDescriptor);
-                if (mDataStore.addKeyboardLayout(inputDeviceDescriptor, keyboardLayoutDescriptor)
+                String oldLayout = mDataStore.getCurrentKeyboardLayout(key);
+                if (oldLayout == null && !key.equals(identifier.getDescriptor())) {
+                    oldLayout = mDataStore.getCurrentKeyboardLayout(identifier.getDescriptor());
+                }
+                if (mDataStore.addKeyboardLayout(key, keyboardLayoutDescriptor)
                         && !Objects.equal(oldLayout,
-                                mDataStore.getCurrentKeyboardLayout(inputDeviceDescriptor))) {
+                                mDataStore.getCurrentKeyboardLayout(key))) {
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
                 }
             } finally {
@@ -979,26 +1010,31 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    public void removeKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    public void removeKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
         if (!checkCallingPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT,
                 "removeKeyboardLayoutForInputDevice()")) {
             throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
         }
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
         if (keyboardLayoutDescriptor == null) {
             throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
         }
 
+        String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
             try {
-                String oldLayout = mDataStore.getCurrentKeyboardLayout(inputDeviceDescriptor);
-                if (mDataStore.removeKeyboardLayout(inputDeviceDescriptor,
-                        keyboardLayoutDescriptor)
-                        && !Objects.equal(oldLayout,
-                                mDataStore.getCurrentKeyboardLayout(inputDeviceDescriptor))) {
+                String oldLayout = mDataStore.getCurrentKeyboardLayout(key);
+                if (oldLayout == null && !key.equals(identifier.getDescriptor())) {
+                    oldLayout = mDataStore.getCurrentKeyboardLayout(identifier.getDescriptor());
+                }
+                boolean removed = mDataStore.removeKeyboardLayout(key, keyboardLayoutDescriptor);
+                if (!key.equals(identifier.getDescriptor())) {
+                    // We need to remove from both places to ensure it is gone
+                    removed |= mDataStore.removeKeyboardLayout(identifier.getDescriptor(),
+                            keyboardLayoutDescriptor);
+                }
+                if (removed && !Objects.equal(oldLayout,
+                                mDataStore.getCurrentKeyboardLayout(key))) {
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
                 }
             } finally {
@@ -1015,14 +1051,15 @@ public class InputManagerService extends IInputManager.Stub
     private void handleSwitchKeyboardLayout(int deviceId, int direction) {
         final InputDevice device = getInputDevice(deviceId);
         if (device != null) {
-            final String inputDeviceDescriptor = device.getDescriptor();
             final boolean changed;
             final String keyboardLayoutDescriptor;
+
+            String key = getLayoutDescriptor(device.getIdentifier());
             synchronized (mDataStore) {
                 try {
-                    changed = mDataStore.switchKeyboardLayout(inputDeviceDescriptor, direction);
+                    changed = mDataStore.switchKeyboardLayout(key, direction);
                     keyboardLayoutDescriptor = mDataStore.getCurrentKeyboardLayout(
-                            inputDeviceDescriptor);
+                            key);
                 } finally {
                     mDataStore.saveIfNeeded();
                 }
@@ -1050,11 +1087,11 @@ public class InputManagerService extends IInputManager.Stub
     public void setInputWindows(InputWindowHandle[] windowHandles) {
         nativeSetInputWindows(mPtr, windowHandles);
     }
-    
+
     public void setFocusedApplication(InputApplicationHandle application) {
         nativeSetFocusedApplication(mPtr, application);
     }
-    
+
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
         nativeSetInputDispatchMode(mPtr, enabled, frozen);
     }
@@ -1435,13 +1472,12 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private String[] getKeyboardLayoutOverlay(String inputDeviceDescriptor) {
+    private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier) {
         if (!mSystemReady) {
             return null;
         }
 
-        String keyboardLayoutDescriptor = getCurrentKeyboardLayoutForInputDevice(
-                inputDeviceDescriptor);
+        String keyboardLayoutDescriptor = getCurrentKeyboardLayoutForInputDevice(identifier);
         if (keyboardLayoutDescriptor == null) {
             return null;
         }
