@@ -16,6 +16,7 @@
 
 package android.hardware.input;
 
+import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.os.IBinder;
@@ -41,13 +42,13 @@ interface IInputManager {
     // Keyboard layouts configuration.
     KeyboardLayout[] getKeyboardLayouts();
     KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor);
-    String getCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor);
-    void setCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    String getCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier);
+    void setCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
-    String[] getKeyboardLayoutsForInputDevice(String inputDeviceDescriptor);
-    void addKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    String[] getKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
+    void addKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
-    void removeKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    void removeKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
 
     // Registers an input devices changed listener.
