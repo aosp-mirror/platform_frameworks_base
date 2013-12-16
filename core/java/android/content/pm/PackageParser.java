@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.jar.StrictJarFile;
 import java.util.zip.ZipEntry;
 
 import com.android.internal.util.XmlUtils;
@@ -456,7 +456,7 @@ public class PackageParser {
         return pi;
     }
 
-    private Certificate[] loadCertificates(JarFile jarFile, JarEntry je,
+    private Certificate[] loadCertificates(StrictJarFile jarFile, ZipEntry je,
             byte[] readBuffer) {
         try {
             // We must read the stream for the JarEntry to retrieve
@@ -466,13 +466,11 @@ public class PackageParser {
                 // not using
             }
             is.close();
-            return je != null ? je.getCertificates() : null;
+            return je != null ? jarFile.getCertificates(je) : null;
         } catch (IOException e) {
-            Slog.w(TAG, "Exception reading " + je.getName() + " in "
-                    + jarFile.getName(), e);
+            Slog.w(TAG, "Exception reading " + je.getName() + " in " + jarFile, e);
         } catch (RuntimeException e) {
-            Slog.w(TAG, "Exception reading " + je.getName() + " in "
-                    + jarFile.getName(), e);
+            Slog.w(TAG, "Exception reading " + je.getName() + " in " + jarFile, e);
         }
         return null;
     }
@@ -591,9 +589,9 @@ public class PackageParser {
      */
     public boolean collectManifestDigest(Package pkg) {
         try {
-            final JarFile jarFile = new JarFile(mArchiveSourcePath);
+            final StrictJarFile jarFile = new StrictJarFile(mArchiveSourcePath);
             try {
-                final ZipEntry je = jarFile.getEntry(ANDROID_MANIFEST_FILENAME);
+                final ZipEntry je = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
                 if (je != null) {
                     pkg.manifestDigest = ManifestDigest.fromInputStream(jarFile.getInputStream(je));
                 }
@@ -624,7 +622,7 @@ public class PackageParser {
         }
 
         try {
-            JarFile jarFile = new JarFile(mArchiveSourcePath);
+            StrictJarFile jarFile = new StrictJarFile(mArchiveSourcePath);
 
             Certificate[] certs = null;
 
@@ -633,7 +631,7 @@ public class PackageParser {
                 // can trust it...  we'll just use the AndroidManifest.xml
                 // to retrieve its signatures, not validating all of the
                 // files.
-                JarEntry jarEntry = jarFile.getJarEntry(ANDROID_MANIFEST_FILENAME);
+                ZipEntry jarEntry = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
                 certs = loadCertificates(jarFile, jarEntry, readBuffer);
                 if (certs == null) {
                     Slog.e(TAG, "Package " + pkg.packageName
@@ -656,9 +654,9 @@ public class PackageParser {
                     }
                 }
             } else {
-                Enumeration<JarEntry> entries = jarFile.entries();
-                while (entries.hasMoreElements()) {
-                    final JarEntry je = entries.nextElement();
+                Iterator<ZipEntry> entries = jarFile.iterator();
+                while (entries.hasNext()) {
+                    final ZipEntry je = entries.next();
                     if (je.isDirectory()) continue;
 
                     final String name = je.getName();
@@ -741,6 +739,10 @@ public class PackageParser {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
             return false;
         } catch (IOException e) {
+            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+            return false;
+        } catch (SecurityException e) {
             Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
             mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
             return false;
