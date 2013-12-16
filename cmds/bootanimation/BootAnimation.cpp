@@ -52,7 +52,6 @@
 
 #include "BootAnimation.h"
 
-#define USER_BOOTANIMATION_FILE "/data/local/bootanimation.zip"
 #define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
 #define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
 #define EXIT_PROP_NAME "service.bootanim.exit"
@@ -284,9 +283,6 @@ status_t BootAnimation::readyToRun() {
     if ((encryptedAnimation &&
             (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0) &&
             ((zipFile = ZipFileRO::open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE)) != NULL)) ||
-
-            ((access(USER_BOOTANIMATION_FILE, R_OK) == 0) &&
-            ((zipFile = ZipFileRO::open(USER_BOOTANIMATION_FILE)) != NULL)) ||
 
             ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
             ((zipFile = ZipFileRO::open(SYSTEM_BOOTANIMATION_FILE)) != NULL))) {
