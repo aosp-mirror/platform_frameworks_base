@@ -473,7 +473,7 @@ bool Caches::unbindPixelBuffer() {
 // Meshes and textures
 ///////////////////////////////////////////////////////////////////////////////
 
-void Caches::bindPositionVertexPointer(bool force, GLvoid* vertices, GLsizei stride) {
+void Caches::bindPositionVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
     if (force || vertices != mCurrentPositionPointer || stride != mCurrentPositionStride) {
         GLuint slot = currentProgram->position;
         glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
@@ -482,7 +482,7 @@ void Caches::bindPositionVertexPointer(bool force, GLvoid* vertices, GLsizei str
     }
 }
 
-void Caches::bindTexCoordsVertexPointer(bool force, GLvoid* vertices, GLsizei stride) {
+void Caches::bindTexCoordsVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
     if (force || vertices != mCurrentTexCoordsPointer || stride != mCurrentTexCoordsStride) {
         GLuint slot = currentProgram->texCoords;
         glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
