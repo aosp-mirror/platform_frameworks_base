@@ -50,19 +50,20 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @SuppressWarnings("serial")
     static HashMap<String, Method> sMethodLut = new HashMap<String, Method>() {{
-        Method[] methods = HardwareRenderer.class.getDeclaredMethods();
+        Method[] methods = RemoteGLRenderer.class.getDeclaredMethods();
         for (Method m : methods) {
-            put(m.getName(), m);
+            m.setAccessible(true);
+            put(m.getName() + ":" + m.getParameterTypes().length, m);
         }
     }};
     static boolean sNeedsInit = true;
 
-    private HardwareRenderer mRemoteRenderer;
+    private RemoteGLRenderer mRemoteRenderer;
     private int mWidth, mHeight;
     private RTJob mPreviousDraw;
 
-    ThreadedRenderer(GLRenderer backingRenderer) {
-        mRemoteRenderer = backingRenderer;
+    ThreadedRenderer(boolean translucent) {
+        mRemoteRenderer = new RemoteGLRenderer(this, translucent);
         setEnabled(true);
         if (sNeedsInit) {
             sNeedsInit = false;
@@ -166,12 +167,6 @@ public class ThreadedRenderer extends HardwareRenderer {
         throw new NoSuchMethodError();
     }
 
-    @Override
-    void drawDisplayList(DisplayList displayList, AttachInfo attachInfo,
-            HardwareDrawCallbacks callbacks, Rect dirty) {
-        throw new NoSuchMethodError();
-    }
-
     /**
      * TODO: Remove
      * Temporary hack to allow RenderThreadTest prototype app to trigger
@@ -233,12 +228,12 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void detachFunctor(int functor) {
-        throw new NoSuchMethodError();
+        run("detachFunctor", functor);
     }
 
     @Override
     boolean attachFunctor(AttachInfo attachInfo, int functor) {
-        throw new NoSuchMethodError();
+        return (Boolean) run("attachFunctor", attachInfo, functor);
     }
 
     @Override
@@ -262,7 +257,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private RTJob post(String method, Object... args) {
         RTJob job = new RTJob();
-        job.method = sMethodLut.get(method);
+        job.method = sMethodLut.get(method + ":" + args.length);
         job.args = args;
         job.target = mRemoteRenderer;
         if (job.method == null) {
@@ -274,7 +269,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private Object run(String method, Object... args) {
         RTJob job = new RTJob();
-        job.method = sMethodLut.get(method);
+        job.method = sMethodLut.get(method + ":" + args.length);
         job.args = args;
         job.target = mRemoteRenderer;
         if (job.method == null) {
