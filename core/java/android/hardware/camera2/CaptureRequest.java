@@ -842,7 +842,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * shading map in output result metadata</p>
      * <p>When set to ON,
      * android.statistics.lensShadingMap must be provided in
-     * the output result metdata.</p>
+     * the output result metadata.</p>
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
      */
