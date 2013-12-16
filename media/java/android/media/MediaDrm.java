@@ -100,7 +100,7 @@ public final class MediaDrm {
     private EventHandler mEventHandler;
     private OnEventListener mOnEventListener;
 
-    private int mNativeContext;
+    private long mNativeContext;
 
     /**
      * Query if the given scheme identified by its UUID is supported on
