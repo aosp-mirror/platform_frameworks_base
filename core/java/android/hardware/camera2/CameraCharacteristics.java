@@ -267,8 +267,9 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
 
     /**
-     * <p>Dimensions of lens shading
-     * map</p>
+     * <p>Dimensions of lens shading map.</p>
+     * <p>The map should be on the order of 30-40 rows and columns, and
+     * must be smaller than 64x64.</p>
      */
     public static final Key<android.hardware.camera2.Size> LENS_INFO_SHADING_MAP_SIZE =
             new Key<android.hardware.camera2.Size>("android.lens.info.shadingMapSize", android.hardware.camera2.Size.class);
