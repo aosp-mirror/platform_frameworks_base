@@ -117,7 +117,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Adja meg újra a helyes PUK kódot. Az ismételt próbálkozással véglegesen letiltja a SIM kártyát."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"A PIN kódok nem egyeznek."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Túl sok mintarajzolási próbálkozás"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google Fiókjával."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Felhasználónév (e-mail cím)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Jelszó"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Bejelentkezés"</string>
