@@ -185,6 +185,24 @@ static void android_view_GLES20Canvas_setName(JNIEnv* env,
     }
 }
 
+static void android_view_GLES20Canvas_setProperty(JNIEnv* env,
+        jobject clazz, jstring name, jstring value) {
+    if (!Caches::hasInstance()) {
+        ALOGW("can't set property, no Caches instance");
+        return;
+    }
+
+    if (name == NULL || value == NULL) {
+        ALOGW("can't set prop, null passed");
+    }
+
+    const char* nameCharArray = env->GetStringUTFChars(name, NULL);
+    const char* valueCharArray = env->GetStringUTFChars(value, NULL);
+    Caches::getInstance().setTempProperty(nameCharArray, valueCharArray);
+    env->ReleaseStringUTFChars(name, nameCharArray);
+    env->ReleaseStringUTFChars(name, valueCharArray);
+}
+
 static void android_view_GLES20Canvas_setCountOverdrawEnabled(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jboolean enabled) {
     renderer->setCountOverdrawEnabled(enabled);
@@ -1011,6 +1029,8 @@ static JNINativeMethod gMethods[] = {
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
     { "nSetName",           "(ILjava/lang/String;)V",
             (void*) android_view_GLES20Canvas_setName },
+    { "nSetProperty",           "(Ljava/lang/String;Ljava/lang/String;)V",
+            (void*) android_view_GLES20Canvas_setProperty },
 
     { "nSetCountOverdrawEnabled", "(IZ)V",     (void*) android_view_GLES20Canvas_setCountOverdrawEnabled },
     { "nGetOverdraw",             "(I)F",      (void*) android_view_GLES20Canvas_getOverdraw },

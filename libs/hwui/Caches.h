@@ -353,6 +353,14 @@ public:
     PFNGLLABELOBJECTEXTPROC setLabel;
     PFNGLGETOBJECTLABELEXTPROC getLabel;
 
+    // TEMPORARY properties
+    void initTempProperties();
+    void setTempProperty(const char* name, const char* value);
+    bool propertyEnable3d;
+    bool propertyDirtyViewport; // flag set when dirtying the viewport
+    float propertyCameraDistance;
+    int propertyShadowStrength;
+
 private:
     enum OverdrawColorSet {
         kColorSet_Default = 0,
