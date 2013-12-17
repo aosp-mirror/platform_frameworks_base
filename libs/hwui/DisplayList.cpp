@@ -494,7 +494,8 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
  */
 void DisplayList::computeOrdering() {
     ATRACE_CALL();
-    mat4::identity();
+    if (mDisplayListData == NULL) return;
+
     for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children[i];
         childOp->mDisplayList->computeOrderingImpl(childOp, &m3dNodes, &mat4::identity());
@@ -505,6 +506,7 @@ void DisplayList::computeOrderingImpl(
         DrawDisplayListOp* opState,
         KeyedVector<float, Vector<DrawDisplayListOp*> >* compositedChildrenOf3dRoot,
         const mat4* transformFrom3dRoot) {
+
     // TODO: should avoid this calculation in most cases
     opState->mTransformFrom3dRoot.load(*transformFrom3dRoot);
     opState->mTransformFrom3dRoot.multiply(opState->mTransformFromParent);
@@ -537,7 +539,7 @@ void DisplayList::computeOrderingImpl(
         transformFrom3dRoot = &(opState->mTransformFrom3dRoot);
     }
 
-    if (mDisplayListData->children.size() > 0) {
+    if (mDisplayListData != NULL && mDisplayListData->children.size() > 0) {
         for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
             DrawDisplayListOp* childOp = mDisplayListData->children[i];
             childOp->mDisplayList->computeOrderingImpl(childOp,
