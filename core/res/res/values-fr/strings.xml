@@ -502,7 +502,7 @@
     <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Permet à l\'application de contrôler la lecture des contenus multimédias et d\'accéder aux informations associées, telles que le titre ou l\'auteur."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrer des fichiers audio"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrer des fichiers audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet à l\'application d\'enregistrer des contenus audio à l\'aide du microphone. Cette autorisation lui donne la possibilité d\'enregistrer du contenu audio à tout moment sans votre consentement."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
@@ -818,6 +818,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domicile"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Professionnelle"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Autre"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Aucune application permettant d\'afficher ce contact n\'a été trouvée."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Saisissez le code PIN."</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Saisissez la clé PUK et le nouveau code PIN."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Code PUK"</string>

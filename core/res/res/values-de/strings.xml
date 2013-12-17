@@ -818,6 +818,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Privat"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Geschäftlich"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Sonstige"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Es wurde keine App zum Anzeigen dieses Kontakts gefunden."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN-Code eingeben"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK und neuen PIN-Code eingeben"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-Code"</string>
@@ -1207,7 +1208,7 @@
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Einladung zum Aufbau einer Verbindung"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Von:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"An:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Geben Sie die erforderliche PIN ein:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Geben Sie die PIN ein:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Das Tablet wird vorübergehend vom WLAN getrennt, während eine Verbindung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> besteht."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Das Telefon wird vorübergehend vom WLAN getrennt, während eine Verbindung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> hergestellt wird."</string>
