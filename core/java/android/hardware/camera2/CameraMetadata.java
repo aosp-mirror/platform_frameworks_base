@@ -758,8 +758,8 @@ public abstract class CameraMetadata {
     public static final int EDGE_MODE_OFF = 0;
 
     /**
-     * <p>Must not slow down frame rate relative to raw
-     * bayer output</p>
+     * <p>Must not slow down frame rate relative to sensor
+     * output</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_FAST = 1;
@@ -823,8 +823,8 @@ public abstract class CameraMetadata {
     public static final int NOISE_REDUCTION_MODE_OFF = 0;
 
     /**
-     * <p>Must not slow down frame rate relative to raw
-     * bayer output</p>
+     * <p>Must not slow down frame rate relative to sensor
+     * output</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_FAST = 1;

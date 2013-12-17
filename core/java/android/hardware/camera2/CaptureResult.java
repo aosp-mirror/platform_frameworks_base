@@ -348,6 +348,13 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>Operation mode for edge
      * enhancement</p>
+     * <p>Edge/sharpness/detail enhancement. OFF means no
+     * enhancement will be applied by the HAL.</p>
+     * <p>FAST/HIGH_QUALITY both mean HAL-determined enhancement
+     * will be applied. HIGH_QUALITY mode indicates that the
+     * HAL should use the highest-quality enhancement algorithms,
+     * even if it slows down capture rate. FAST means the HAL should
+     * not slow down capture rate when applying edge enhancement.</p>
      * @see #EDGE_MODE_OFF
      * @see #EDGE_MODE_FAST
      * @see #EDGE_MODE_HIGH_QUALITY
@@ -487,6 +494,13 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>Mode of operation for the noise reduction
      * algorithm</p>
+     * <p>Noise filtering control. OFF means no noise reduction
+     * will be applied by the HAL.</p>
+     * <p>FAST/HIGH_QUALITY both mean HAL-determined noise filtering
+     * will be applied. HIGH_QUALITY mode indicates that the HAL
+     * should use the highest-quality noise filtering algorithms,
+     * even if it slows down capture rate. FAST means the HAL should not
+     * slow down capture rate when applying noise filtering.</p>
      * @see #NOISE_REDUCTION_MODE_OFF
      * @see #NOISE_REDUCTION_MODE_FAST
      * @see #NOISE_REDUCTION_MODE_HIGH_QUALITY
