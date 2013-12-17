@@ -395,8 +395,15 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     /**
      * <p>Whether AE is currently updating the sensor
      * exposure and sensitivity fields</p>
-     * <p>Only effective if android.control.mode =
-     * AUTO</p>
+     * <p>Only effective if android.control.mode = AUTO.</p>
+     * <p>If auto-exposure is active, HAL auto-focus routine is enabled,
+     * then HAL auto-exposure routine overrides the control variables
+     * that relate to auto-exposure routine, and these override values
+     * are then available in the result metadata for that capture.</p>
+     * <p>For example, if auto-exposure is enabled in a request, the HAL should
+     * overwrite the exposure, gain, and frame duration fields (and potentially
+     * the flash fields, depending on AE mode) of the request.  The overridden
+     * values are then provided back to the user in the corresponding result.</p>
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -455,6 +462,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     /**
      * <p>Whether AF is currently enabled, and what
      * mode it is set to</p>
+     * <p>Only effective if android.control.mode = AUTO.</p>
+     * <p>If lens is controlled by HAL auto-focus algorithm, the HAL should
+     * report the current AF status in android.control.afState in
+     * result metadata.</p>
      * @see #CONTROL_AF_MODE_OFF
      * @see #CONTROL_AF_MODE_AUTO
      * @see #CONTROL_AF_MODE_MACRO
@@ -517,6 +528,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * transform fields, and what its illumination target
      * is</p>
      * <p>[BC - AWB lock,AWB modes]</p>
+     * <p>Only effective if android.control.mode = AUTO.</p>
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
      * @see #CONTROL_AWB_MODE_INCANDESCENT
@@ -586,6 +598,16 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     /**
      * <p>Overall mode of 3A control
      * routines</p>
+     * <p>High-level 3A control. When set to OFF, all 3A control
+     * by the HAL is disabled. The application must set the fields for
+     * capture parameters itself.</p>
+     * <p>When set to AUTO, the individual algorithm controls in
+     * android.control.* are in effect, such as android.control.afMode.</p>
+     * <p>When set to USE_SCENE_MODE, the individual controls in
+     * android.control.* are mostly disabled, and the HAL implements
+     * one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
+     * as it wishes. The HAL scene mode 3A settings are provided by
+     * android.control.sceneModeOverrides.</p>
      * @see #CONTROL_MODE_OFF
      * @see #CONTROL_MODE_AUTO
      * @see #CONTROL_MODE_USE_SCENE_MODE
