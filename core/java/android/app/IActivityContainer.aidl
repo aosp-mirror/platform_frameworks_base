@@ -23,7 +23,7 @@ import android.os.IBinder;
 /** @hide */
 interface IActivityContainer {
     void attachToDisplay(int displayId);
-    int getStackId();
+    int getDisplayId();
     void detachFromDisplay();
-    void startActivity(in Intent intent);
+    int startActivity(in Intent intent);
 }

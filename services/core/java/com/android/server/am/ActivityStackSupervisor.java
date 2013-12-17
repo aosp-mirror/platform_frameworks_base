@@ -145,17 +145,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** The current user */
     private int mCurrentUser;
 
-    /** The stack containing the launcher app */
+    /** The stack containing the launcher app. Assumed to always be attached to
+     * Display.DEFAULT_DISPLAY. */
     private ActivityStack mHomeStack;
 
-    /** The non-home stack currently receiving input or launching the next activity. If home is
-     * in front then mHomeStack overrides mFocusedStack.
-     * DO NOT ACCESS DIRECTLY - It may be null, use getFocusedStack() */
+    /** The stack currently receiving input or launching the next activity. */
     private ActivityStack mFocusedStack;
 
     /** If this is the same as mFocusedStack then the activity on the top of the focused stack has
      * been resumed. If stacks are changing position this will hold the old stack until the new
-     * stack becomes resumed after which it will be set to the new stack. */
+     * stack becomes resumed after which it will be set to mFocusedStack. */
     private ActivityStack mLastFocusedStack;
 
     /** List of activities that are waiting for a new activity to become visible before completing
@@ -217,7 +216,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     SparseArray<ActivityContainer> mActivityContainers = new SparseArray<ActivityContainer>();
 
     /** Mapping from displayId to display current state */
-    SparseArray<ActivityDisplayInfo> mDisplayInfos = new SparseArray<ActivityDisplayInfo>();
+    SparseArray<ActivityDisplay> mActivityDisplays = new SparseArray<ActivityDisplay>();
 
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
@@ -243,8 +242,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Display[] displays = mDisplayManager.getDisplays();
             for (int displayNdx = displays.length - 1; displayNdx >= 0; --displayNdx) {
                 final int displayId = displays[displayNdx].getDisplayId();
-                ActivityDisplayInfo info = new ActivityDisplayInfo(displayId);
-                mDisplayInfos.put(displayId, info);
+                ActivityDisplay activityDisplay = new ActivityDisplay(displayId);
+                mActivityDisplays.put(displayId, activityDisplay);
             }
 
             createStackOnDisplay(null, HOME_STACK_ID, Display.DEFAULT_DISPLAY);
@@ -271,7 +270,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // TODO: Split into two methods isFrontStack for any visible stack and isFrontmostStack for the
     // top of all visible stacks.
     boolean isFrontStack(ActivityStack stack) {
-        ArrayList<ActivityStack> stacks = stack.getStacksLocked();
+        ArrayList<ActivityStack> stacks = stack.mStacks;
         if (stacks != null && !stacks.isEmpty()) {
             return stack == stacks.get(stacks.size() - 1);
         }
@@ -279,7 +278,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void moveHomeStack(boolean toFront) {
-        ArrayList<ActivityStack> stacks = mHomeStack.getStacksLocked();
+        ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
         int topNdx = stacks.size() - 1;
         if (topNdx <= 0) {
             return;
@@ -320,9 +319,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     TaskRecord anyTaskForIdLocked(int id) {
-        int numDisplays = mDisplayInfos.size();
+        int numDisplays = mActivityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 ActivityStack stack = stacks.get(stackNdx);
                 TaskRecord task = stack.taskForIdLocked(id);
@@ -335,9 +334,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityRecord isInAnyStackLocked(IBinder token) {
-        int numDisplays = mDisplayInfos.size();
+        int numDisplays = mActivityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityRecord r = stacks.get(stackNdx).isInStackLocked(token);
                 if (r != null) {
@@ -371,7 +370,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final int stackId = stack.mStackId;
             final int nextStackId = mWindowManager.removeStack(stackId);
             // TODO: Perhaps we need to let the ActivityManager determine the next focus...
-            mFocusedStack = getStack(nextStackId);
+            if (stack.isOnHomeDisplay()) {
+                mFocusedStack = getStack(nextStackId);
+            }
         }
     }
 
@@ -393,8 +394,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     boolean attachApplicationLocked(ProcessRecord app) throws Exception {
         final String processName = app.processName;
         boolean didSomething = false;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (!isFrontStack(stack)) {
@@ -424,8 +425,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean allResumedActivitiesIdle() {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (!isFrontStack(stack)) {
@@ -441,8 +442,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean allResumedActivitiesComplete() {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (isFrontStack(stack)) {
@@ -462,8 +463,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean allResumedActivitiesVisible() {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 final ActivityRecord r = stack.mResumedActivity;
@@ -482,8 +483,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
      */
     boolean pauseBackStacks(boolean userLeaving) {
         boolean someActivityPaused = false;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (!isFrontStack(stack) && stack.mResumedActivity != null) {
@@ -499,8 +500,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     boolean allPausedActivitiesComplete() {
         boolean pausing = true;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 final ActivityRecord r = stack.mPausingActivity;
@@ -555,7 +556,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         // Return to the home stack.
-        final ArrayList<ActivityStack> stacks = mHomeStack.getStacksLocked();
+        final ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
         for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = stacks.get(stackNdx);
             if (stack != focusedStack && isFrontStack(stack)) {
@@ -575,9 +576,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Gather all of the running tasks for each stack into runningTaskLists.
         ArrayList<ArrayList<RunningTaskInfo>> runningTaskLists =
                 new ArrayList<ArrayList<RunningTaskInfo>>();
-        final int numDisplays = mDisplayInfos.size();
+        final int numDisplays = mActivityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 ArrayList<RunningTaskInfo> stackTaskList = new ArrayList<RunningTaskInfo>();
@@ -666,14 +667,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void startHomeActivity(Intent intent, ActivityInfo aInfo) {
         moveHomeToTop();
         startActivityLocked(null, intent, null, aInfo, null, null, 0, 0, 0, null, 0,
-                null, false, null);
+                null, false, null, null);
     }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
             String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, String profileFile,
             ParcelFileDescriptor profileFd, WaitResult outResult, Configuration config,
-            Bundle options, int userId) {
+            Bundle options, int userId, IActivityContainer iContainer) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -687,6 +688,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityInfo aInfo = resolveActivity(intent, resolvedType, startFlags,
                 profileFile, profileFd, userId);
 
+        ActivityContainer container = (ActivityContainer)iContainer;
         synchronized (mService) {
             int callingPid;
             if (callingUid >= 0) {
@@ -698,7 +700,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 callingPid = callingUid = -1;
             }
 
-            final ActivityStack stack = getFocusedStack();
+            final ActivityStack stack;
+            if (container == null || container.mStack.isOnHomeDisplay()) {
+                stack = getFocusedStack();
+            } else {
+                stack = container.mStack;
+            }
             stack.mConfigWillChange = config != null
                     && mService.mConfiguration.diff(config) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG,
@@ -774,9 +781,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
 
-            int res = startActivityLocked(caller, intent, resolvedType,
-                    aInfo, resultTo, resultWho, requestCode, callingPid, callingUid,
-                    callingPackage, startFlags, options, componentSpecified, null);
+            int res = startActivityLocked(caller, intent, resolvedType, aInfo, resultTo, resultWho,
+                    requestCode, callingPid, callingUid, callingPackage, startFlags, options,
+                    componentSpecified, null, container);
 
             if (stack.mConfigWillChange) {
                 // If the caller also wants to switch to a new configuration,
@@ -891,7 +898,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     }
                     int res = startActivityLocked(caller, intent, resolvedTypes[i],
                             aInfo, resultTo, null, -1, callingPid, callingUid, callingPackage,
-                            0, theseOptions, componentSpecified, outActivity);
+                            0, theseOptions, componentSpecified, outActivity, null);
                     if (res < 0) {
                         return res;
                     }
@@ -1115,7 +1122,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Intent intent, String resolvedType, ActivityInfo aInfo, IBinder resultTo,
             String resultWho, int requestCode,
             int callingPid, int callingUid, String callingPackage, int startFlags, Bundle options,
-            boolean componentSpecified, ActivityRecord[] outActivity) {
+            boolean componentSpecified, ActivityRecord[] outActivity, ActivityContainer container) {
         int err = ActivityManager.START_SUCCESS;
 
         ProcessRecord callerApp = null;
@@ -1250,8 +1257,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
-                intent, resolvedType, aInfo, mService.mConfiguration,
-                resultRecord, resultWho, requestCode, componentSpecified, this);
+                intent, resolvedType, aInfo, mService.mConfiguration, resultRecord, resultWho,
+                requestCode, componentSpecified, this, container);
         if (outActivity != null) {
             outActivity[0] = r;
         }
@@ -1299,15 +1306,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (r.isApplicationActivity() || (task != null && task.isApplicationTask())) {
             if (task != null) {
                 final ActivityStack taskStack = task.stack;
-                if (mFocusedStack != taskStack) {
-                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
-                            "adjustStackFocus: Setting focused stack to r=" + r + " task=" + task);
-                    mFocusedStack = taskStack;
-                } else {
-                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
-                        "adjustStackFocus: Focused stack already=" + mFocusedStack);
+                if (taskStack.isOnHomeDisplay()) {
+                    if (mFocusedStack != taskStack) {
+                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "adjustStackFocus: Setting " +
+                                "focused stack to r=" + r + " task=" + task);
+                        mFocusedStack = taskStack;
+                    } else {
+                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
+                            "adjustStackFocus: Focused stack already=" + mFocusedStack);
+                    }
                 }
                 return taskStack;
+            }
+
+            final ActivityContainer container = r.mInitialActivityContainer;
+            if (container != null) {
+                // The first time put it on the desired stack, after this put on task stack.
+                r.mInitialActivityContainer = null;
+                return container.mStack;
             }
 
             if (mFocusedStack != mHomeStack) {
@@ -1316,17 +1332,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return mFocusedStack;
             }
 
-            int numDisplays = mDisplayInfos.size();
-            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
-                for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    ActivityStack stack = stacks.get(stackNdx);
-                    if (!stack.isHomeStack()) {
-                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
-                                "adjustStackFocus: Setting focused stack=" + stack);
-                        mFocusedStack = stack;
-                        return mFocusedStack;
-                    }
+            final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
+            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = homeDisplayStacks.get(stackNdx);
+                if (!stack.isHomeStack()) {
+                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
+                            "adjustStackFocus: Setting focused stack=" + stack);
+                    mFocusedStack = stack;
+                    return mFocusedStack;
                 }
             }
 
@@ -1471,7 +1484,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     targetStack.mLastPausedActivity = null;
                     if (DEBUG_TASKS) Slog.d(TAG, "Bring to front target: " + targetStack
                             + " from " + intentActivity);
-                    moveHomeStack(targetStack.isHomeStack());
+                    targetStack.moveToFront();
                     if (intentActivity.task.intent == null) {
                         // This task was started because of movement of
                         // the activity based on affinity...  now that we
@@ -1690,7 +1703,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (r.resultTo == null && !addingToTask
                 && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             targetStack = adjustStackFocus(r);
-            moveHomeStack(targetStack.isHomeStack());
+            targetStack.moveToFront();
             if (reuseTask == null) {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
                         newTaskInfo != null ? newTaskInfo : r.info,
@@ -1708,13 +1721,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME)) {
                     // Caller wants to appear on home activity, so before starting
                     // their own activity we will bring home to the front.
-                    r.task.mOnTopOfHome = true;
+                    r.task.mOnTopOfHome = r.task.stack.isOnHomeDisplay();
                 }
             }
         } else if (sourceRecord != null) {
             TaskRecord sourceTask = sourceRecord.task;
             targetStack = sourceTask.stack;
-            moveHomeStack(targetStack.isHomeStack());
+            targetStack.moveToFront();
             if (!addingToTask &&
                     (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
@@ -1768,7 +1781,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
             targetStack = adjustStackFocus(r);
-            moveHomeStack(targetStack.isHomeStack());
+            targetStack.moveToFront();
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task
                     : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
@@ -1960,8 +1973,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     boolean handleAppDiedLocked(ProcessRecord app) {
         boolean hasVisibleActivities = false;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 hasVisibleActivities |= stacks.get(stackNdx).handleAppDiedLocked(app);
             }
@@ -1970,8 +1983,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void closeSystemDialogsLocked() {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 stacks.get(stackNdx).closeSystemDialogsLocked();
             }
@@ -1987,8 +2000,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
      */
     boolean forceStopPackageLocked(String name, boolean doit, boolean evenPersistent, int userId) {
         boolean didSomething = false;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
@@ -2009,8 +2022,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // we don't blow away the previous app if this activity is being
         // hosted by the process that is actually still the foreground.
         ProcessRecord fgApp = null;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (isFrontStack(stack)) {
@@ -2044,8 +2057,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             targetStack = getFocusedStack();
         }
         boolean result = false;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (isFrontStack(stack)) {
@@ -2061,8 +2074,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void finishTopRunningActivityLocked(ProcessRecord app) {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
@@ -2072,8 +2085,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 if (stacks.get(stackNdx).findTaskToMoveToFrontLocked(taskId, flags, options)) {
                     if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack="
@@ -2094,8 +2107,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     ArrayList<ActivityStack> getStacks() {
         ArrayList<ActivityStack> allStacks = new ArrayList<ActivityStack>();
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            allStacks.addAll(mDisplayInfos.valueAt(displayNdx).stacks);
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            allStacks.addAll(mActivityDisplays.valueAt(displayNdx).mStacks);
         }
         return allStacks;
     }
@@ -2134,14 +2147,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     private int createStackOnDisplay(ActivityRecord parentActivity, int stackId, int displayId) {
-        ActivityDisplayInfo displayInfo = mDisplayInfos.get(displayId);
-        if (displayInfo == null) {
+        ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        if (activityDisplay == null) {
             return -1;
         }
 
         ActivityContainer activityContainer =
                 createActivityContainer(parentActivity, stackId, null);
-        activityContainer.attachToDisplayLocked(displayInfo);
+        activityContainer.attachToDisplayLocked(activityDisplay);
         return stackId;
     }
 
@@ -2175,8 +2188,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     ActivityRecord findTaskLocked(ActivityRecord r) {
         if (DEBUG_TASKS) Slog.d(TAG, "Looking for task of " + r);
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (!r.isApplicationActivity() && !stack.isHomeStack()) {
@@ -2194,8 +2207,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityRecord findActivityLocked(Intent intent, ActivityInfo info) {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityRecord ar = stacks.get(stackNdx).findActivityLocked(intent, info);
                 if (ar != null) {
@@ -2228,8 +2241,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final long endTime = System.currentTimeMillis() + timeout;
         while (true) {
             boolean cantShutdown = false;
-            for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-                final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+            for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+                final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                     cantShutdown |= stacks.get(stackNdx).checkReadyForSleepLocked();
                 }
@@ -2263,8 +2276,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (mGoingToSleep.isHeld()) {
             mGoingToSleep.release();
         }
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 stack.awakeFromSleepingLocked();
@@ -2289,8 +2302,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         if (!mSleepTimeout) {
             boolean dontSleep = false;
-            for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-                final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+            for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+                final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                     dontSleep |= stacks.get(stackNdx).checkReadyForSleepLocked();
                 }
@@ -2316,8 +2329,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 stacks.get(stackNdx).goToSleep();
             }
@@ -2347,8 +2360,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void handleAppCrashLocked(ProcessRecord app) {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
@@ -2360,8 +2373,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
         // First the front stacks. In case any are not fullscreen and are in front of home.
         boolean showHomeBehindStack = false;
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int topStackNdx = stacks.size() - 1;
             for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
@@ -2379,8 +2392,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void scheduleDestroyAllActivities(ProcessRecord app, String reason) {
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
@@ -2395,10 +2408,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mCurrentUser = userId;
 
         mStartingUsers.add(uss);
-        for (int displayNdx = mDisplayInfos.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                stacks.get(stackNdx).switchUserLocked(userId);
+                final ActivityStack stack = stacks.get(stackNdx);
+                stack.switchUserLocked(userId);
+                mWindowManager.moveTaskToTop(stack.topTask().taskId);
             }
         }
 
@@ -2407,8 +2422,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             stack = mHomeStack;
         }
         final boolean homeInFront = stack.isHomeStack();
-        moveHomeStack(homeInFront);
-        mWindowManager.moveTaskToTop(stack.topTask().taskId);
+        if (stack.isOnHomeDisplay()) {
+            moveHomeStack(homeInFront);
+            mWindowManager.moveTaskToTop(stack.topTask().taskId);
+        } else {
+            // Stack was moved to another display while user was swapped out.
+            resumeHomeActivity(null);
+        }
         return homeInFront;
     }
 
@@ -2521,10 +2541,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             boolean dumpClient, String dumpPackage) {
         boolean printed = false;
         boolean needSep = false;
-        for (int displayNdx = 0; displayNdx < mDisplayInfos.size(); ++displayNdx) {
-            ActivityDisplayInfo info = mDisplayInfos.valueAt(displayNdx);
-            pw.print("Display #"); pw.println(info.mDisplayId);
-            ArrayList<ActivityStack> stacks = info.stacks;
+        for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
+            ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
+            pw.print("Display #"); pw.println(activityDisplay.mDisplayId);
+            ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
@@ -2709,21 +2729,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     public void handleDisplayAddedLocked(int displayId) {
         synchronized (mService) {
-            ActivityDisplayInfo info = new ActivityDisplayInfo(displayId);
-            mDisplayInfos.put(displayId, info);
+            ActivityDisplay activityDisplay = new ActivityDisplay(displayId);
+            mActivityDisplays.put(displayId, activityDisplay);
         }
         mWindowManager.onDisplayAdded(displayId);
     }
 
     public void handleDisplayRemovedLocked(int displayId) {
         synchronized (mService) {
-            ActivityDisplayInfo info = mDisplayInfos.get(displayId);
-            if (info != null) {
-                ArrayList<ActivityStack> stacks = info.stacks;
+            ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+            if (activityDisplay != null) {
+                ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    info.detachActivities(stacks.get(stackNdx));
+                    activityDisplay.detachActivitiesLocked(stacks.get(stackNdx));
                 }
-                mDisplayInfos.remove(displayId);
+                mActivityDisplays.remove(displayId);
             }
         }
         mWindowManager.onDisplayRemoved(displayId);
@@ -2731,8 +2751,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     public void handleDisplayChangedLocked(int displayId) {
         synchronized (mService) {
-            ActivityDisplayInfo info = mDisplayInfos.get(displayId);
-            if (info != null) {
+            ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+            if (activityDisplay != null) {
                 // TODO: Update the bounds.
             }
         }
@@ -2772,8 +2792,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     ArrayList<StackInfo> getAllStackInfosLocked() {
         ArrayList<StackInfo> list = new ArrayList<StackInfo>();
-        for (int displayNdx = 0; displayNdx < mDisplayInfos.size(); ++displayNdx) {
-            ArrayList<ActivityStack> stacks = mDisplayInfos.valueAt(displayNdx).stacks;
+        for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int ndx = stacks.size() - 1; ndx >= 0; --ndx) {
                 list.add(getStackInfo(stacks.get(ndx)));
             }
@@ -2864,7 +2884,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ActivityRecord mParentActivity;
 
         /** Display this ActivityStack is currently on. Null if not attached to a Display. */
-        ActivityDisplayInfo mActivityDisplayInfo;
+        ActivityDisplay mActivityDisplay;
 
         ActivityContainer(ActivityRecord parentActivity, int stackId,
                 IActivityContainerCallback callback) {
@@ -2876,32 +2896,40 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
-        void attachToDisplayLocked(ActivityDisplayInfo displayInfo) {
-            mActivityDisplayInfo = displayInfo;
-            displayInfo.attachActivities(mStack);
-            mWindowManager.createStack(mStackId, displayInfo.mDisplayId);
+        void attachToDisplayLocked(ActivityDisplay activityDisplay) {
+            mActivityDisplay = activityDisplay;
+            mStack.mDisplayId = activityDisplay.mDisplayId;
+            mStack.mStacks = activityDisplay.mStacks;
+
+            activityDisplay.attachActivities(mStack);
+            mWindowManager.createStack(mStackId, activityDisplay.mDisplayId);
         }
 
         @Override
         public void attachToDisplay(int displayId) throws RemoteException {
             synchronized (mService) {
-                ActivityDisplayInfo displayInfo = mDisplayInfos.get(displayId);
-                if (displayInfo == null) {
+                ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+                if (activityDisplay == null) {
                     return;
                 }
-                attachToDisplayLocked(displayInfo);
+                attachToDisplayLocked(activityDisplay);
             }
         }
 
         @Override
-        public int getStackId() throws RemoteException {
-            return mStack.mStackId;
+        public int getDisplayId() throws RemoteException {
+            if (mActivityDisplay != null) {
+                return mActivityDisplay.mDisplayId;
+            }
+            return -1;
         }
 
         void detachLocked() {
-            if (mActivityDisplayInfo != null) {
-                mActivityDisplayInfo.detachActivities(mStack);
-                mActivityDisplayInfo = null;
+            if (mActivityDisplay != null) {
+                mActivityDisplay.detachActivitiesLocked(mStack);
+                mActivityDisplay = null;
+                mStack.mDisplayId = -1;
+                mStack.mStacks = null;
             }
         }
 
@@ -2913,8 +2941,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         @Override
-        public void startActivity(Intent intent) throws RemoteException {
-
+        public final int startActivity(Intent intent) {
+            mService.enforceNotIsolatedCaller("ActivityContainer");
+            int userId = mService.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), mCurrentUser, false, true, "ActivityContainer", null);
+            // TODO: Switch to user app stacks here.
+            String mimeType = intent.getType();
+            if (mimeType == null && intent.getData() != null
+                    && "content".equals(intent.getData().getScheme())) {
+                mimeType = mService.getProviderMimeType(intent.getData(), userId);
+            }
+            return startActivityMayWait(null, -1, null, intent, mimeType, null, null, 0, 0, null,
+                    null, null, null, null, userId, this);
         }
 
         @Override
@@ -2927,12 +2965,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         boolean isAttached() {
-            return mActivityDisplayInfo != null;
+            return mActivityDisplay != null;
         }
 
         void getBounds(Point outBounds) {
-            if (mActivityDisplayInfo != null) {
-                mActivityDisplayInfo.getBounds(outBounds);
+            if (mActivityDisplay != null) {
+                mActivityDisplay.getBounds(outBounds);
             } else {
                 outBounds.set(0, 0);
             }
@@ -2941,7 +2979,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** Exactly one of these classes per Display in the system. Capable of holding zero or more
      * attached {@link ActivityStack}s */
-    final class ActivityDisplayInfo {
+    final class ActivityDisplay {
         /** Actual Display this object tracks. */
         final int mDisplayId;
         final Display mDisplay;
@@ -2949,20 +2987,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         /** All of the stacks on this display. Order matters, topmost stack is in front of all other
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
-        final ArrayList<ActivityStack> stacks = new ArrayList<ActivityStack>();
+        final ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
 
-        ActivityDisplayInfo(int displayId) {
+        ActivityDisplay(int displayId) {
             mDisplayId = displayId;
             mDisplay = mDisplayManager.getDisplay(displayId);
             mDisplay.getDisplayInfo(mDisplayInfo);
         }
 
         void attachActivities(ActivityStack stack) {
-            stacks.add(stack);
+            if (DEBUG_STACK) Slog.v(TAG, "attachActivities: attaching " + stack + " to displayId="
+                    + mDisplayId);
+            mStacks.add(stack);
         }
 
-        void detachActivities(ActivityStack stack) {
-            stacks.remove(stack);
+        void detachActivitiesLocked(ActivityStack stack) {
+            if (DEBUG_STACK) Slog.v(TAG, "attachActivities: detaching " + stack
+                    + " from displayId=" + mDisplayId);
+            mStacks.remove(stack);
         }
 
         void getBounds(Point bounds) {
