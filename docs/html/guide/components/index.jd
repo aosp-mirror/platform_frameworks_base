@@ -1,6 +1,6 @@
 page.title=App Components
 page.landing=true
-page.landing.intro=Android's application framework lets you create extremely rich and innovative apps using a set of reusable components. This section explains how Android apps work and how you use components to build them. 
+page.landing.intro=Android's application framework lets you create rich and innovative apps using a set of reusable components. This section explains how you can build the components that define the building blocks of your app and how to connect them together using intents. 
 page.landing.image=images/develop/app_components.png
 
 @jd:body
