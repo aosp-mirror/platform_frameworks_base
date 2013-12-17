@@ -1446,7 +1446,14 @@ public class GradientDrawable extends Drawable {
             mStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mStrokePaint.setStyle(Paint.Style.STROKE);
             mStrokePaint.setStrokeWidth(state.mStrokeWidth);
-            mStrokePaint.setColor(state.mStrokeColor);
+            if (state.mStrokeColorStateList != null) {
+                final int[] currentState = getState();
+                final int strokeStateColor = state.mStrokeColorStateList.getColorForState(
+                        currentState, 0);
+                mStrokePaint.setColor(strokeStateColor);
+            } else {
+                mStrokePaint.setColor(state.mStrokeColor);
+            }
 
             if (state.mStrokeDashWidth != 0.0f) {
                 DashPathEffect e = new DashPathEffect(
