@@ -85,9 +85,6 @@
 // Turn on to highlight drawing batches and merged batches with different colors
 #define DEBUG_MERGE_BEHAVIOR 0
 
-// Turn on to enable 3D support in the renderer (off by default until API for control exists)
-#define DEBUG_ENABLE_3D 0
-
 // Turn on to enable debugging shadow
 #define DEBUG_SHADOW 0
 
