@@ -310,12 +310,12 @@ void DisplayList::updateMatrix() {
                     mPivotY = mPrevHeight / 2.0f;
                 }
             }
-            if (!DEBUG_ENABLE_3D && (mMatrixFlags & ROTATION_3D) == 0) {
+            if (!Caches::getInstance().propertyEnable3d && (mMatrixFlags & ROTATION_3D) == 0) {
                 mTransformMatrix->setTranslate(mTranslationX, mTranslationY);
                 mTransformMatrix->preRotate(mRotation, mPivotX, mPivotY);
                 mTransformMatrix->preScale(mScaleX, mScaleY, mPivotX, mPivotY);
             } else {
-                if (DEBUG_ENABLE_3D) {
+                if (Caches::getInstance().propertyEnable3d) {
                     mTransform.loadTranslate(mPivotX + mTranslationX, mPivotY + mTranslationY,
                             mTranslationZ);
                     mTransform.rotate(mRotationX, 1, 0, 0);
@@ -420,11 +420,11 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             renderer.translate(mTranslationX, mTranslationY);
             renderer.translateZ(mTranslationZ);
         } else {
-#if DEBUG_ENABLE_3D
-            renderer.concatMatrix(mTransform);
-#else
-            renderer.concatMatrix(mTransformMatrix);
-#endif
+            if (Caches::getInstance().propertyEnable3d) {
+                renderer.concatMatrix(mTransform);
+            } else {
+                renderer.concatMatrix(mTransformMatrix);
+            }
         }
     }
     bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
@@ -474,12 +474,12 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
         if (mMatrixFlags == TRANSLATION) {
             matrix.translate(mTranslationX, mTranslationY, mTranslationZ);
         } else {
-#if DEBUG_ENABLE_3D
-            matrix.multiply(mTransform);
-#else
-            mat4 temp(*mTransformMatrix);
-            matrix.multiply(temp);
-#endif
+            if (Caches::getInstance().propertyEnable3d) {
+                matrix.multiply(mTransform);
+            } else {
+                mat4 temp(*mTransformMatrix);
+                matrix.multiply(temp);
+            }
         }
     }
 }

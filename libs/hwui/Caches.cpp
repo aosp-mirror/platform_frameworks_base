@@ -55,6 +55,7 @@ Caches::Caches(): Singleton<Caches>(),
     initProperties();
     initStaticProperties();
     initExtensions();
+    initTempProperties();
 
     mDebugLevel = readDebugLevel();
     ALOGD("Enabling debug mode %d", mDebugLevel);
@@ -674,6 +675,37 @@ TextureVertex* Caches::getRegionMesh() {
     }
 
     return mRegionMesh;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Temporary Properties
+///////////////////////////////////////////////////////////////////////////////
+
+void Caches::initTempProperties() {
+    propertyDirtyViewport = false;
+    propertyEnable3d = false;
+    propertyCameraDistance = 1.0f;
+    propertyShadowStrength = 0x3f;
+}
+
+void Caches::setTempProperty(const char* name, const char* value) {
+    ALOGD("setting property %s to %s", name, value);
+    if (!strcmp(name, "enable3d")) {
+        propertyEnable3d = !strcmp(value, "true");
+        propertyDirtyViewport = true;
+        ALOGD("enable3d = %d", propertyEnable3d);
+        return;
+    } else if (!strcmp(name, "cameraDistance")) {
+        propertyCameraDistance = fmin(fmax(atof(value), 0.001), 10);
+        propertyDirtyViewport = true;
+        ALOGD("camera dist multiplier = %.2f", propertyCameraDistance);
+        return;
+    } else if (!strcmp(name, "shadowStrength")) {
+        propertyShadowStrength = atoi(value);
+        ALOGD("shadow strength = 0x%x out of 0xff", propertyShadowStrength);
+        return;
+    }
+    ALOGD("    failed");
 }
 
 }; // namespace uirenderer

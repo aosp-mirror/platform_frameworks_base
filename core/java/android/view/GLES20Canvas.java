@@ -153,6 +153,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nSetName(int renderer, String name);
 
+    public static void setProperty(String name, String value) {
+        nSetProperty(name, value);
+    }
+
+    private static native void nSetProperty(String name, String value);
+
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layers
     ///////////////////////////////////////////////////////////////////////////

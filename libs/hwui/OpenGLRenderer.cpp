@@ -182,10 +182,10 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::initViewport(int width, int height) {
-    float dist = std::max(width, height) * 1.5;
-
-    if (DEBUG_ENABLE_3D) {
+    if (mCaches.propertyEnable3d) {
         // TODO: make view proj app configurable
+        float dist = std::max(width, height) * 1.5;
+        dist *= mCaches.propertyCameraDistance;
         Matrix4 projection;
         projection.loadFrustum(-width / 2, -height / 2, width / 2, height / 2, dist, 0);
         Matrix4 view;
@@ -2081,6 +2081,12 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         int32_t replayFlags) {
     status_t status;
 
+    if (mCaches.propertyDirtyViewport) {
+        // force recalc of view/proj matrices
+        setViewport(mWidth, mHeight);
+        mCaches.propertyDirtyViewport = false;
+    }
+
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
@@ -3394,9 +3400,8 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     mCaches.enableScissor();
 
     SkPaint paint;
-    paint.setColor(0x3f000000);
-    // Force the draw to use alpha values.
-    paint.setAntiAlias(true);
+    paint.setColor(mCaches.propertyShadowStrength << 24);
+    paint.setAntiAlias(true); // want to use AlphaVertex
 
     VertexBuffer shadowVertexBuffer;
     ShadowTessellator::tessellateAmbientShadow(width, height, casterTransform,
