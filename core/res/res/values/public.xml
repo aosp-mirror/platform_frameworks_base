@@ -2108,5 +2108,11 @@
   <public type="style" name="Widget.DeviceDefault.Light.FastScroll" />
 
   <public type="style" name="Theme.Quantum" />
+  <public type="style" name="Theme.Quantum.NoActionBar" />
 
+  <public type="style" name="Widget.Quantum.Button" />
+  <public type="style" name="Widget.Quantum.Button.Small" />
+  <public type="style" name="Widget.Quantum.Button.Borderless" />
+  <public type="style" name="Widget.Quantum.Button.Borderless.Small" />
+  <public type="style" name="Widget.Quantum.ImageButton" />
 </resources>

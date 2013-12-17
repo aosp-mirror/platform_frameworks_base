@@ -598,7 +598,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     void handleFocusGainInternal(int direction, Rect previouslyFocusedRect) {
         if (mFocused != null) {
-            mFocused.unFocus();
+            mFocused.unFocus(this);
             mFocused = null;
         }
         super.handleFocusGainInternal(direction, previouslyFocusedRect);
@@ -616,12 +616,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         // Unfocus us, if necessary
-        super.unFocus();
+        super.unFocus(focused);
 
         // We had a previous notion of who had focus. Clear it.
         if (mFocused != child) {
             if (mFocused != null) {
-                mFocused.unFocus();
+                mFocused.unFocus(focused);
             }
 
             mFocused = child;
@@ -812,14 +812,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     @Override
-    void unFocus() {
+    void unFocus(View focused) {
         if (DBG) {
             System.out.println(this + " unFocus()");
         }
         if (mFocused == null) {
-            super.unFocus();
+            super.unFocus(focused);
         } else {
-            mFocused.unFocus();
+            mFocused.unFocus(focused);
             mFocused = null;
         }
     }
@@ -3827,7 +3827,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         boolean clearChildFocus = false;
         if (view == mFocused) {
-            view.unFocus();
+            view.unFocus(null);
             clearChildFocus = true;
         }
 
@@ -3922,7 +3922,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             if (view == focused) {
-                view.unFocus();
+                view.unFocus(null);
                 clearChildFocus = true;
             }
 
@@ -4009,7 +4009,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             if (view == focused) {
-                view.unFocus();
+                view.unFocus(null);
                 clearChildFocus = true;
             }
 

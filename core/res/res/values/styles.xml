@@ -2623,4 +2623,36 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.Light.FastScroll" parent="Widget.Holo.FastScroll">
     </style>
 
+    <!-- Begin Quantum styles -->
+
+    <style name="Widget.Quantum" parent="Widget.Holo.Light">
+    </style>
+
+    <style name="Widget.Quantum.Button" parent="Widget.Holo.Light.Button">
+        <item name="android:background">@android:drawable/btn_default_quantum</item>
+    </style>
+
+    <style name="Widget.Quantum.Button.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingStart">4dip</item>
+        <item name="android:paddingEnd">4dip</item>
+    </style>
+
+    <style name="Widget.Quantum.Button.Borderless.Small">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Widget.Quantum.Button.Small">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@android:color/primary_text_holo_light</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">48dip</item>
+    </style>
+
+    <style name="Widget.Quantum.Button.Inset">
+    </style>
+
+    <style name="Widget.Quantum.ImageButton" parent="Widget.Holo.Light.ImageButton">
+        <item name="android:background">@android:drawable/btn_default_quantum</item>
+    </style>
 </resources>

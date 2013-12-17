@@ -1930,6 +1930,24 @@ please see themes_device_defaults.xml.
     <style name="Theme.Quantum" parent="@android:style/Theme.Holo.Light">
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Quantum.Activity</item>
+
+        <!-- Button styles -->
+        <item name="buttonStyle">@android:style/Widget.Quantum.Button</item>
+
+        <item name="buttonStyleSmall">@android:style/Widget.Quantum.Button.Small</item>
+        <item name="buttonStyleInset">@android:style/Widget.Quantum.Button.Inset</item>
+
+        <item name="selectableItemBackground">@android:drawable/item_background_quantum</item>
+        <item name="borderlessButtonStyle">@android:style/Widget.Quantum.Button.Borderless</item>
+
+        <!-- Widget styles -->
+        <item name="imageButtonStyle">@android:style/Widget.Quantum.ImageButton</item>
+    </style>
+
+    <!-- Variant of the Quantum Paper theme with no action bar. -->
+    <style name="Theme.Quantum.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
 </resources>

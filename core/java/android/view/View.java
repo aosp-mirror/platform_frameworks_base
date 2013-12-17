@@ -57,6 +57,7 @@ import android.util.FloatProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.LongSparseLongArray;
+import android.util.MathUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
@@ -86,6 +87,7 @@ import static java.lang.Math.max;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -4748,8 +4750,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, this);
             }
 
+            manageFocusHotspot(true, oldFocus);
             onFocusChanged(true, direction, previouslyFocusedRect);
             refreshDrawableState();
+        }
+    }
+
+    /**
+     * Forwards focus information to the background drawable, if necessary. When
+     * the view is gaining focus, <code>v</code> is the previous focus holder.
+     * When the view is losing focus, <code>v</code> is the next focus holder.
+     *
+     * @param focused whether this view is focused
+     * @param v previous or the next focus holder, or null if none
+     */
+    private void manageFocusHotspot(boolean focused, View v) {
+        if (mBackground != null && mBackground.supportsHotspots()) {
+            final Rect r = new Rect();
+            if (v != null) {
+                v.getBoundsOnScreen(r);
+                final int[] location = new int[2];
+                getLocationOnScreen(location);
+                r.offset(-location[0], -location[1]);
+            } else {
+                r.set(mLeft, mTop, mRight, mBottom);
+            }
+
+            final float x = r.exactCenterX();
+            final float y = r.exactCenterY();
+            mBackground.setHotspot(Drawable.HOTSPOT_FOCUS, x, y);
+
+            if (!focused) {
+                mBackground.removeHotspot(Drawable.HOTSPOT_FOCUS);
+            }
         }
     }
 
@@ -4839,7 +4872,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             System.out.println(this + " clearFocus()");
         }
 
-        clearFocusInternal(true, true);
+        clearFocusInternal(null, true, true);
     }
 
     /**
@@ -4851,9 +4884,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param refocus when propagate is true, specifies whether to request the
      *            root view place new focus
      */
-    void clearFocusInternal(boolean propagate, boolean refocus) {
+    void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
+
+            if (hasFocus()) {
+                manageFocusHotspot(false, focused);
+            }
 
             if (propagate && mParent != null) {
                 mParent.clearChildFocus(this);
@@ -4888,12 +4925,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * after calling this method. Otherwise, the view hierarchy may be left in
      * an inconstent state.
      */
-    void unFocus() {
+    void unFocus(View focused) {
         if (DBG) {
             System.out.println(this + " unFocus()");
         }
 
-        clearFocusInternal(false, false);
+        clearFocusInternal(focused, false, false);
     }
 
     /**
@@ -8909,10 +8946,47 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                     break;
             }
+
+            if (mBackground != null && mBackground.supportsHotspots()) {
+                manageTouchHotspot(event);
+            }
+
             return true;
         }
 
         return false;
+    }
+
+    private void manageTouchHotspot(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                final int index = event.getActionIndex();
+                setPointerHotspot(event, index);
+            } break;
+            case MotionEvent.ACTION_MOVE: {
+                final int count = event.getPointerCount();
+                for (int index = 0; index < count; index++) {
+                    setPointerHotspot(event, index);
+                }
+            } break;
+            case MotionEvent.ACTION_POINTER_UP: {
+                final int actionIndex = event.getActionIndex();
+                final int pointerId = event.getPointerId(actionIndex);
+                mBackground.removeHotspot(pointerId);
+            } break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mBackground.clearHotspots();
+                break;
+        }
+    }
+
+    private void setPointerHotspot(MotionEvent event, int index) {
+        final int id = event.getPointerId(index);
+        final float x = event.getX(index);
+        final float y = event.getY(index);
+        mBackground.setHotspot(id, x, y);
     }
 
     /**
