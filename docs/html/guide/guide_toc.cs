@@ -6,16 +6,40 @@
        localized titles are added in the language order specified below.
 ?>
 <ul id="nav">
-  <!--  Walkthrough for Developers -- quick overview of what it's like to develop on Android -->
-  <!--<li style="color:red">Overview</li> -->
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/index.html">
+        <span class="en">Introduction</span>
+      </a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>guide/components/fundamentals.html">
+            <span class="en">App Fundamentals</span></a>
+      </li>
+      <li><a href="<?cs var:toroot ?>guide/practices/compatibility.html">
+            <span class="en">Device Compatibility</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/security/permissions.html">
+          <span class="en">System Permissions</span>
+        </a>
+      </li>
+    </ul>
+  </li>
+
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/components/index.html">
         <span class="en">App Components</span>
       </a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/components/fundamentals.html">
-            <span class="en">App Fundamentals</span></a>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/components/intents-filters.html">
+            <span class="en">Intents and Intent Filters</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/components/intents-common.html">
+            <span class="en">Common Intents</span>
+          </a></li>
+        </ul>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/components/activities.html">
@@ -69,24 +93,6 @@
         </ul>
       </li>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/components/intents-filters.html">
-            <span class="en">Intents and Intent Filters</span>
-          </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>guide/components/intents-common.html">
-            <span class="en">Common Intents</span>
-          </a></li>
-        </ul>
-      </li>
-      <li><a href="<?cs var:toroot ?>guide/components/processes-and-threads.html">
-          <span class="en">Processes and Threads</span>
-        </a>
-      </li>
-      <li><a href="<?cs var:toroot ?>guide/topics/security/permissions.html">
-          <span class="en">Permissions</span>
-        </a>
-      </li>
-      <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">
             <span class="en">App Widgets</span>
           </a></div>
@@ -96,42 +102,89 @@
             </a></li>
         </ul>
       </li>
-      <li class="nav-section">
-      <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-intro.html">
-          <span class="en">Android Manifest</span>
-        </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/action-element.html">&lt;action&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/application-element.html">&lt;application&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/category-element.html">&lt;category&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/compatible-screens-element.html">&lt;compatible-screens&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/data-element.html">&lt;data&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/path-permission-element.html">&lt;path-permission&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/service-element.html">&lt;service&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></li><!-- ##api level 4## -->
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></li> <!-- ##api level 4## -->
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
-        </ul>
-   </li><!-- end of the manifest file -->
-
+      <li><a href="<?cs var:toroot ?>guide/components/processes-and-threads.html">
+          <span class="en">Processes and Threads</span>
+        </a>
+      </li>
     </ul>
   </li>
+
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
+         <span class="en">App Resources</span>
+       </a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>guide/topics/resources/overview.html">
+          <span class="en">Overview</span>
+        </a></li>
+        <li><a href="<?cs var:toroot ?>guide/topics/resources/providing-resources.html">
+          <span class="en">Providing Resources</span>
+        </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/resources/accessing-resources.html">
+          <span class="en">Accessing Resources</span>
+        </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/resources/runtime-changes.html">
+            <span class="en">Handling Runtime Changes</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
+          <span class="en">Localization</span>
+        </a></li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">
+            <span class="en">Resource Types</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/animation-resource.html">Animation</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/color-list-resource.html">Color State List</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/drawable-resource.html">Drawable</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/layout-resource.html">Layout</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/menu-resource.html">Menu</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/string-resource.html">String</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/style-resource.html">Style</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/more-resources.html">More Types</a></li>
+        </ul>
+      </li><!-- end of resource types -->
+    </ul>
+  </li><!-- end of app resources -->
+
+
+
+  <li class="nav-section">
+  <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-intro.html">
+      <span class="en">App Manifest</span>
+    </a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/action-element.html">&lt;action&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/application-element.html">&lt;application&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/category-element.html">&lt;category&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/compatible-screens-element.html">&lt;compatible-screens&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/data-element.html">&lt;data&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/path-permission-element.html">&lt;path-permission&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/service-element.html">&lt;service&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></li><!-- ##api level 4## -->
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></li> <!-- ##api level 4## -->
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
+    </ul>
+  </li><!-- end of the manifest file -->
+
+
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/ui/index.html">
@@ -258,44 +311,6 @@
         </a></li>
     </ul>
   </li><!-- end of User Interface -->
-
-    <li class="nav-section">
-      <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
-           <span class="en">App Resources</span>
-         </a></div>
-      <ul>
-        <li><a href="<?cs var:toroot ?>guide/topics/resources/overview.html">
-            <span class="en">Overview</span>
-          </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/resources/providing-resources.html">
-            <span class="en">Providing Resources</span>
-          </a></li>
-        <li><a href="<?cs var:toroot ?>guide/topics/resources/accessing-resources.html">
-            <span class="en">Accessing Resources</span>
-          </a></li>
-        <li><a href="<?cs var:toroot ?>guide/topics/resources/runtime-changes.html">
-              <span class="en">Handling Runtime Changes</span>
-            </a></li>
-        <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
-            <span class="en">Localization</span>
-          </a></li>
-        <li class="nav-section">
-          <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">
-              <span class="en">Resource Types</span>
-            </a></div>
-          <ul>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/animation-resource.html">Animation</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/color-list-resource.html">Color State List</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/drawable-resource.html">Drawable</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/layout-resource.html">Layout</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/menu-resource.html">Menu</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/string-resource.html">String</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/style-resource.html">Style</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/resources/more-resources.html">More Types</a></li>
-          </ul>
-        </li><!-- end of resource types -->
-      </ul>
-    </li><!-- end of app resources -->
 
    <li class="nav-section">
       <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
@@ -527,9 +542,6 @@
       <span class="zh-tw" style="display:none">最佳實務</span>
     </div></a>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/practices/compatibility.html">
-            <span class="en">Compatibility</span>
-          </a></li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
           <span class="en">Supporting Multiple Screens</span>
@@ -550,74 +562,7 @@
     </ul>
   </li>
 
-      <!-- this needs to move
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
-               <span class="en">UI Guidelines</span>
-             </a></div>
-        <ul>
-          <li class="nav-section">
-            <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">
-                   <span class="en">Icon Design</span>
-                 </a></div>
-            <ul>
-              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_launcher.html">
-                    <span class="en">Launcher Icons</span>
-                  </a></li>
-              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_menu.html">
-                    <span class="en">Menu Icons</span>
-                  </a></li>
-              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_action_bar.html">
-                    <span class="en">Action Bar Icons</span>
-                  </a></li>
-              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_status_bar.html">
-                    <span class="en">Status Bar Icons</span>
-                  </a></li>
-              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_tab.html">
-                    <span class="en">Tab Icons</span>
-                  </a></li>
-              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_dialog.html">
-                    <span class="en">Dialog Icons</span>
-                  </a></li>
-              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_list.html">
-                    <span class="en">List View Icons</span>
-                  </a></li>
-            </ul>
-          </li>
-          <li><div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">
-                <span class="en">App Widget Design</span>
-              </a></div>
-          </li>
-        </ul>
-      </li>
-        </ul> -->
 
-<!-- Remove
-  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/appendix/index.html">
-        <span class="en">Appendix</span>
-        <span class="de" style="display:none">Anhang</span>
-        <span class="es" style="display:none">Apéndice</span>
-        <span class="fr" style="display:none">Annexes</span>
-        <span class="it" style="display:none">Appendice</span>
-        <span class="ja" style="display:none">付録</span>
-        <span class="zh-cn" style="display:none">附录</span>
-        <span class="zh-tw" style="display:none">附錄</span>
-      </a></div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>guide/appendix/g-app-intents.html">
-            <span class="en">Intents List: Google Apps</span>
-          </a></li>
-
-
-      <li><a href="<?cs var:toroot ?>guide/appendix/glossary.html">
-            <span class="en">Glossary</span>
-          </a></li>
-    </ul>
-  </li>
-
-</li>
--->
 </ul>
 
 

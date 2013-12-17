@@ -1,4 +1,4 @@
-page.title=Permissions
+page.title=System Permissions
 @jd:body
 
 <div id="qv-wrapper">
@@ -20,10 +20,6 @@ page.title=Permissions
 </ol>
 </div>
 </div>
-<p>This document describes how application developers can use the
-security features provided by Android.  A more general <a
-href="http://source.android.com/tech/security/index.html"> Android Security
-Overview</a> is provided in the Android Open Source Project.</p>
 
 <p>Android is a privilege-separated operating system, in which each
 application runs with a distinct system identity (Linux user ID and group
@@ -33,7 +29,13 @@ Linux thereby isolates applications from each other and from the system.</p>
 <p>Additional finer-grained security features are provided through a
 "permission" mechanism that enforces restrictions on the specific operations
 that a particular process can perform, and per-URI permissions for granting
-ad-hoc access to specific pieces of data.</p>
+ad hoc access to specific pieces of data.</p>
+
+<p>This document describes how application developers can use the
+security features provided by Android.  A more general <a
+href="http://source.android.com/tech/security/index.html"> Android Security
+Overview</a> is provided in the Android Open Source Project.</p>
+
 
 <a name="arch"></a>
 <h2>Security Architecture</h2>
@@ -42,10 +44,10 @@ ad-hoc access to specific pieces of data.</p>
 application, by default, has permission to perform any operations that would
 adversely impact other applications, the operating system, or the user.  This
 includes reading or writing the user's private data (such as contacts or
-e-mails), reading or writing another application's files, performing
-network access, keeping the device awake, etc.</p>
+emails), reading or writing another application's files, performing
+network access, keeping the device awake, and so on.</p>
 
-<p>Because Android sandboxes applications from each other, applications
+<p>Because each Android application operates in a process sandbox, applications
 must explicitly share resources and data. They do this by declaring the
 <em>permissions</em> they need for additional capabilities not provided by
 the basic sandbox. Applications statically declare the permissions they
@@ -65,10 +67,10 @@ other.</p>
 <a name="signing"></a>
 <h2>Application Signing</h2>
 
-<p>All Android applications (.apk files) must be signed with a certificate
+<p>All APKs ({@code .apk} files) must be signed with a certificate
 whose private key is held by their developer.  This certificate identifies
 the author of the application.  The certificate does <em>not</em> need to be
-signed by a certificate authority: it is perfectly allowable, and typical,
+signed by a certificate authority; it is perfectly allowable, and typical,
 for Android applications to use self-signed certificates. The purpose of
 certificates in Android is to distinguish application authors. This allows
 the system to grant or deny applications access to <a
@@ -86,7 +88,7 @@ device. On a different device, the same package may have a different UID;
 what matters is that each package has a distinct UID on a given device.</p>
 
 <p>Because security enforcement happens at the
-process level, the code of any two packages can not normally
+process level, the code of any two packages cannot normally
 run in the same process, since they need to run as different Linux users.
 You can use the {@link android.R.attr#sharedUserId} attribute in the
 <code>AndroidManifest.xml</code>'s
@@ -114,7 +116,7 @@ been set appropriately so any other application can see it.</p>
 <h2>Using Permissions</h2>
 
 <p>A basic Android application has no permissions associated with it by default,
-meaning it can not do anything that would adversely impact the user experience
+meaning it cannot do anything that would adversely impact the user experience
 or any data on the device.  To make use of protected features of the device,
 you must include in your <code>AndroidManifest.xml</code> one or more
 <code>{@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}</code>
@@ -133,9 +135,9 @@ specify:</p>
 granted to it by the package installer, based on checks against the
 signatures of the applications declaring those permissions and/or interaction
 with the user. <em>No</em> checks with the user
-are done while an application is running: it either was granted a particular
+are done while an application is running; the app is either granted a particular
 permission when installed, and can use that feature as desired, or the
-permission was not granted and any attempt to use the feature will fail
+permission is not granted and any attempt to use the feature fails
 without prompting the user.</p>
 
 <p>Often times a permission failure will result in a {@link
@@ -145,6 +147,12 @@ android.content.Context#sendBroadcast} method checks permissions as data is
 being delivered to each receiver, after the method call has returned, so you
 will not receive an exception if there are permission failures. In almost all
 cases, however, a permission failure will be printed to the system log.</p>
+
+<p>However, in a normal user situation (such as when the app is installed
+from Google Play Store), an app cannot be installed if the user does not grant the app
+each of the requested permissions. So you generally don't need to worry about runtime failures
+caused by missing permissions because the mere fact that the app is installed at all
+means that your app has been granted its desired permissions.</p>
 
 <p>The permissions provided by the Android system can be found at {@link
 android.Manifest.permission}. Any application may also define and enforce its
@@ -433,3 +441,37 @@ android:grantUriPermissions} attribute or
 {@link android.content.Context#checkUriPermission Context.checkUriPermission()}
 methods.</p>
 
+
+
+
+
+<div class="next-docs">
+<div class="col-6">
+  <h2 class="norule">Continue reading about:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions"
+        >Permissions that Imply Feature Requirements</a></dt>
+    <dd>Information about how requesting some permissions will implicitly restrict your app
+    to devices that include the corresponding hardware or software feature.</dd>
+    <dt><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code
+    &lt;uses-permission>}</a></dt>
+    <dd>API reference for the manifest tag that declare's your app's required system permissions.
+    </dd>
+    <dt>{@link android.Manifest.permission}</dt>
+    <dd>API reference for all system permissions.</dd>
+  </dl>
+</div>
+<div class="col-6">
+  <h2 class="norule">You might also be interested in:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/practices/compatibility.html"
+        >Device Compatibility</a></dt>
+    <dd>Information about Android works on different types of devices and an introduction
+    to how you can optimize your app for each device or restrict your app's availability
+    to different devices.</dd>
+    <dt><a href="{@docRoot}http://source.android.com/devices/tech/security/index.html"
+        class="external-link">Android Security Overview</a></dt>
+    <dd>A detailed discussion about the Android platform's security model.</dd>
+  </dl>
+</div>
+</div>
