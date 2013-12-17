@@ -208,6 +208,10 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>Whether AF is currently enabled, and what
      * mode it is set to</p>
+     * <p>Only effective if android.control.mode = AUTO.</p>
+     * <p>If lens is controlled by HAL auto-focus algorithm, the HAL should
+     * report the current AF status in android.control.afState in
+     * result metadata.</p>
      * @see #CONTROL_AF_MODE_OFF
      * @see #CONTROL_AF_MODE_AUTO
      * @see #CONTROL_AF_MODE_MACRO
@@ -272,6 +276,7 @@ public final class CaptureResult extends CameraMetadata {
      * transform fields, and what its illumination target
      * is</p>
      * <p>[BC - AWB lock,AWB modes]</p>
+     * <p>Only effective if android.control.mode = AUTO.</p>
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
      * @see #CONTROL_AWB_MODE_INCANDESCENT
@@ -323,6 +328,16 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>Overall mode of 3A control
      * routines</p>
+     * <p>High-level 3A control. When set to OFF, all 3A control
+     * by the HAL is disabled. The application must set the fields for
+     * capture parameters itself.</p>
+     * <p>When set to AUTO, the individual algorithm controls in
+     * android.control.* are in effect, such as android.control.afMode.</p>
+     * <p>When set to USE_SCENE_MODE, the individual controls in
+     * android.control.* are mostly disabled, and the HAL implements
+     * one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
+     * as it wishes. The HAL scene mode 3A settings are provided by
+     * android.control.sceneModeOverrides.</p>
      * @see #CONTROL_MODE_OFF
      * @see #CONTROL_MODE_AUTO
      * @see #CONTROL_MODE_USE_SCENE_MODE

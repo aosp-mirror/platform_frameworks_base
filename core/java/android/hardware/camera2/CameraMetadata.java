@@ -312,7 +312,7 @@ public abstract class CameraMetadata {
     public static final int CONTROL_AE_MODE_ON = 1;
 
     /**
-     * <p>if flash exists Autoexposure is active, auto
+     * <p>If autoexposure is active and flash exists, auto
      * flash control; flash may be fired when precapture
      * trigger is activated, and for captures for which
      * captureIntent = STILL_CAPTURE</p>
@@ -321,7 +321,7 @@ public abstract class CameraMetadata {
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2;
 
     /**
-     * <p>if flash exists Autoexposure is active, auto
+     * <p>If autoexposure is active and flash exists, auto
      * flash control for precapture trigger and always flash
      * when captureIntent = STILL_CAPTURE</p>
      * @see CaptureRequest#CONTROL_AE_MODE
@@ -329,7 +329,7 @@ public abstract class CameraMetadata {
     public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3;
 
     /**
-     * <p>optional Automatic red eye reduction with flash.
+     * <p>Optional. Automatic red eye reduction with flash.
      * If deemed necessary, red eye reduction sequence should
      * fire when precapture trigger is activated, and final
      * flash should fire when captureIntent =
@@ -362,7 +362,7 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>The 3A routines do not control the lens;
+     * <p>The auto-focus routine does not control the lens;
      * android.lens.focusDistance is controlled by the
      * application</p>
      * @see CaptureRequest#CONTROL_AF_MODE
@@ -371,13 +371,12 @@ public abstract class CameraMetadata {
 
     /**
      * <p>If lens is not fixed focus.</p>
-     * <p>Use android.lens.minimumFocusDistance to determine if lens
-     * is fixed focus In this mode, the lens does not move unless
+     * <p>Use android.lens.info.minimumFocusDistance to determine if lens
+     * is fixed-focus. In this mode, the lens does not move unless
      * the autofocus trigger action is called. When that trigger
      * is activated, AF must transition to ACTIVE_SCAN, then to
-     * the outcome of the scan (FOCUSED or
-     * NOT_FOCUSED).</p>
-     * <p>Triggering cancel AF resets the lens position to default,
+     * the outcome of the scan (FOCUSED or NOT_FOCUSED).</p>
+     * <p>Triggering AF_CANCEL resets the lens position to default,
      * and sets the AF state to INACTIVE.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
