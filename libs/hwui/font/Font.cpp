@@ -274,7 +274,7 @@ CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool pre
         if (!cachedGlyph->mIsValid) {
             SkAutoGlyphCache autoCache(*paint, NULL, &mDescription.mLookupTransform);
             const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), textUnit);
-            updateGlyphCache(paint, skiaGlyph, cachedGlyph, precaching);
+            updateGlyphCache(paint, skiaGlyph, autoCache.getCache(), cachedGlyph, precaching);
         }
     } else {
         cachedGlyph = cacheGlyph(paint, textUnit, precaching);
@@ -416,8 +416,8 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
     }
 }
 
-void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph,
-        bool precaching) {
+void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, SkGlyphCache* skiaGlyphCache,
+        CachedGlyphInfo* glyph, bool precaching) {
     glyph->mAdvanceX = skiaGlyph.fAdvanceX;
     glyph->mAdvanceY = skiaGlyph.fAdvanceY;
     glyph->mBitmapLeft = skiaGlyph.fLeft;
@@ -429,9 +429,8 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     uint32_t startY = 0;
 
     // Get the bitmap for the glyph
-    SkAutoGlyphCache autoCache(*paint, NULL, &mDescription.mLookupTransform);
     if (!skiaGlyph.fImage) {
-        autoCache.getCache()->findImage(skiaGlyph);
+        skiaGlyphCache->findImage(skiaGlyph);
     }
     mState->cacheBitmap(skiaGlyph, glyph, &startX, &startY, precaching);
 
@@ -470,7 +469,7 @@ CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching
     newGlyph->mIsValid = false;
     newGlyph->mGlyphIndex = skiaGlyph.fID;
 
-    updateGlyphCache(paint, skiaGlyph, newGlyph, precaching);
+    updateGlyphCache(paint, skiaGlyph, autoCache.getCache(), newGlyph, precaching);
 
     return newGlyph;
 }
