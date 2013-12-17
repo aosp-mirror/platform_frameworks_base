@@ -315,8 +315,8 @@ public class AudioEffect {
     private int mId;
 
     // accessed by native methods
-    private int mNativeAudioEffect;
-    private int mJniData;
+    private long mNativeAudioEffect;
+    private long mJniData;
 
     /**
      * Effect descriptor
