@@ -27,6 +27,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Denotes that a parameter, field or method return value can never be null.
  * <p>
  * This is a marker annotation and it has no specific attributes.
+ *
+ * @hide
  */
 @Retention(SOURCE)
 @Target({METHOD, PARAMETER, FIELD})

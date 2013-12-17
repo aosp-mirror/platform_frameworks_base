@@ -34,6 +34,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * null.
  * <p>
  * This is a marker annotation and it has no specific attributes.
+ *
+ * @hide
  */
 @Retention(SOURCE)
 @Target({METHOD, PARAMETER, FIELD})
