@@ -1493,10 +1493,10 @@ public class TelephonyManager {
      *            the end. If an error occurs, an empty string is returned.
      */
     public String iccTransmitApduLogicalChannel(int channel, int cla,
-            int command, int p1, int p2, int p3, String data) {
+            int instruction, int p1, int p2, int p3, String data) {
         try {
           return getITelephony().iccTransmitApduLogicalChannel(channel, cla,
-                  command, p1, p2, p3, data);
+                  instruction, p1, p2, p3, data);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
