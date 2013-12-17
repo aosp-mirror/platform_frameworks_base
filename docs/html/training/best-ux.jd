@@ -1,12 +1,13 @@
-page.title=Best Practices for User Experience &amp; UI
+page.title=Best Practices for Interaction and Engagement
 page.trainingcourse=true
 
 @jd:body
 
 
 
-<p>These classes focus on the best Android user experience for your app.
-In some cases, the success of your app on Android is heavily
-affected by whether your app conforms to the user's expectations for
-UI and navigation on an Android device. Follow these recommendations to ensure that
-your app looks and behaves in a way that satisfies Android users.</p>
+<p>These classes teach you how to engage and retain your users by implementing
+the best interaction patterns for Android. For instance, to help users quickly discover content
+in your app, your app should match their expectations for user interaction on Android.
+And to keep your users coming back, you should take advantage of
+platform capabilities that reveal and open your content without
+requiring users to go through the app launcher.</p>
