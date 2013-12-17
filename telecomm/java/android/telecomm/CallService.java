@@ -38,7 +38,7 @@ import android.ICallServiceAdapter;
  * we can unhide this API.
  *
  * Most public methods of this function are backed by a one-way AIDL interface which precludes
- * syncronous responses. As a result, most responses are handled by (or have TODOs to handle)
+ * synchronous responses. As a result, most responses are handled by (or have TODOs to handle)
  * response objects instead of return values.
  * TODO(santoscordon): Improve paragraph above once the final design is in place.
  * @hide
