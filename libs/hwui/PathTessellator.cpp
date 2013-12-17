@@ -69,14 +69,6 @@ void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint
     }
 }
 
-inline static void copyVertex(Vertex* destPtr, const Vertex* srcPtr) {
-    Vertex::set(destPtr, srcPtr->x, srcPtr->y);
-}
-
-inline static void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr) {
-    AlphaVertex::set(destPtr, srcPtr->x, srcPtr->y, srcPtr->alpha);
-}
-
 /**
  * Produces a pseudo-normal for a vertex, given the normals of the two incoming lines. If the offset
  * from each vertex in a perimeter is calculated, the resultant lines connecting the offset vertices
@@ -184,9 +176,9 @@ void getFillVerticesFromPerimeter(const Vector<Vertex>& perimeter, VertexBuffer&
     int srcAindex = 0;
     int srcBindex = perimeter.size() - 1;
     while (srcAindex <= srcBindex) {
-        copyVertex(&buffer[currentIndex++], &perimeter[srcAindex]);
+        buffer[currentIndex++] = perimeter[srcAindex];
         if (srcAindex == srcBindex) break;
-        copyVertex(&buffer[currentIndex++], &perimeter[srcBindex]);
+        buffer[currentIndex++] = perimeter[srcBindex];
         srcAindex++;
         srcBindex--;
     }
@@ -232,8 +224,8 @@ void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Ver
     }
 
     // wrap around to beginning
-    copyVertex(&buffer[currentIndex++], &buffer[0]);
-    copyVertex(&buffer[currentIndex++], &buffer[1]);
+    buffer[currentIndex++] = buffer[0];
+    buffer[currentIndex++] = buffer[1];
 
     DEBUG_DUMP_BUFFER();
 }
@@ -379,8 +371,8 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
     }
 
     // wrap around to beginning
-    copyAlphaVertex(&buffer[currentIndex++], &buffer[0]);
-    copyAlphaVertex(&buffer[currentIndex++], &buffer[1]);
+    buffer[currentIndex++] = buffer[0];
+    buffer[currentIndex++] = buffer[1];
 
     // zig zag between all previous points on the inside of the hull to create a
     // triangle strip that fills the hull, repeating the first inner point to
@@ -388,9 +380,9 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
     int srcAindex = 0;
     int srcBindex = perimeter.size() - 1;
     while (srcAindex <= srcBindex) {
-        copyAlphaVertex(&buffer[currentIndex++], &buffer[srcAindex * 2 + 1]);
+        buffer[currentIndex++] = buffer[srcAindex * 2 + 1];
         if (srcAindex == srcBindex) break;
-        copyAlphaVertex(&buffer[currentIndex++], &buffer[srcBindex * 2 + 1]);
+        buffer[currentIndex++] = buffer[srcBindex * 2 + 1];
         srcAindex++;
         srcBindex--;
     }
@@ -485,8 +477,8 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
 
             if (isFirst && i == extra - extraOffset) {
                 //copy most recent two points to first two points
-                copyAlphaVertex(&buffer[0], &buffer[capPerimIndex - 2]);
-                copyAlphaVertex(&buffer[1], &buffer[capPerimIndex - 1]);
+                buffer[0] = buffer[capPerimIndex - 2];
+                buffer[1] = buffer[capPerimIndex - 1];
 
                 capPerimIndex = 2; // start writing the rest of the round cap at index 2
             }
@@ -496,28 +488,28 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
             const int startCapFillIndex = capIndex + 2 * (extra - extraOffset) + 4;
             int capFillIndex = startCapFillIndex;
             for (int i = 0; i < extra + 2; i += 2) {
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[1 + i]);
+                buffer[capFillIndex++] = buffer[1 + i];
                 // TODO: to support odd numbers of divisions, break here on the last iteration
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[startCapFillIndex - 3 - i]);
+                buffer[capFillIndex++] = buffer[startCapFillIndex - 3 - i];
             }
         } else {
             int capFillIndex = 6 * vertices.size() + 2 + 6 * extra - (extra + 2);
             for (int i = 0; i < extra + 2; i += 2) {
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[capIndex + 1 + i]);
+                buffer[capFillIndex++] = buffer[capIndex + 1 + i];
                 // TODO: to support odd numbers of divisions, break here on the last iteration
-                copyAlphaVertex(&buffer[capFillIndex++], &buffer[capIndex + 3 + 2 * extra - i]);
+                buffer[capFillIndex++] = buffer[capIndex + 3 + 2 * extra - i];
             }
         }
         return;
     }
     if (isFirst) {
-        copyAlphaVertex(&buffer[0], &buffer[postCapIndex + 2]);
-        copyAlphaVertex(&buffer[1], &buffer[postCapIndex + 3]);
-        copyAlphaVertex(&buffer[postCapIndex + 4], &buffer[1]); // degenerate tris (the only two!)
-        copyAlphaVertex(&buffer[postCapIndex + 5], &buffer[postCapIndex + 1]);
+        buffer[0] = buffer[postCapIndex + 2];
+        buffer[1] = buffer[postCapIndex + 3];
+        buffer[postCapIndex + 4] = buffer[1]; // degenerate tris (the only two!)
+        buffer[postCapIndex + 5] = buffer[postCapIndex + 1];
     } else {
-        copyAlphaVertex(&buffer[6 * vertices.size()], &buffer[postCapIndex + 1]);
-        copyAlphaVertex(&buffer[6 * vertices.size() + 1], &buffer[postCapIndex + 3]);
+        buffer[6 * vertices.size()] = buffer[postCapIndex + 1];
+        buffer[6 * vertices.size() + 1] = buffer[postCapIndex + 3];
     }
 }
 
@@ -710,16 +702,16 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
     }
 
     // wrap each strip around to beginning, creating degenerate tris to bridge strips
-    copyAlphaVertex(&buffer[currentAAOuterIndex++], &buffer[0]);
-    copyAlphaVertex(&buffer[currentAAOuterIndex++], &buffer[1]);
-    copyAlphaVertex(&buffer[currentAAOuterIndex++], &buffer[1]);
+    buffer[currentAAOuterIndex++] = buffer[0];
+    buffer[currentAAOuterIndex++] = buffer[1];
+    buffer[currentAAOuterIndex++] = buffer[1];
 
-    copyAlphaVertex(&buffer[currentStrokeIndex++], &buffer[offset]);
-    copyAlphaVertex(&buffer[currentStrokeIndex++], &buffer[offset + 1]);
-    copyAlphaVertex(&buffer[currentStrokeIndex++], &buffer[offset + 1]);
+    buffer[currentStrokeIndex++] = buffer[offset];
+    buffer[currentStrokeIndex++] = buffer[offset + 1];
+    buffer[currentStrokeIndex++] = buffer[offset + 1];
 
-    copyAlphaVertex(&buffer[currentAAInnerIndex++], &buffer[2 * offset]);
-    copyAlphaVertex(&buffer[currentAAInnerIndex++], &buffer[2 * offset + 1]);
+    buffer[currentAAInnerIndex++] = buffer[2 * offset];
+    buffer[currentAAInnerIndex++] = buffer[2 * offset + 1];
     // don't need to create last degenerate tri
 
     DEBUG_DUMP_ALPHA_BUFFER();
