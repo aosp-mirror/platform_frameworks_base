@@ -170,7 +170,7 @@ static void videoEditor_stopEncoding(
 static void videoEditor_release(
                 JNIEnv*                             pEnv,
                 jobject                             thiz);
-static int videoEditor_getPixels(
+static jint videoEditor_getPixels(
                                  JNIEnv*                  env,
                                  jobject                  thiz,
                                  jstring                  path,
@@ -178,7 +178,7 @@ static int videoEditor_getPixels(
                                  M4OSA_UInt32             width,
                                  M4OSA_UInt32             height,
                                  M4OSA_UInt32             timeMS);
-static int videoEditor_getPixelsList(
+static jint videoEditor_getPixelsList(
                                      JNIEnv*                  env,
                                      jobject                  thiz,
                                      jstring                  path,
@@ -209,7 +209,7 @@ videoEditor_populateSettings(
                 jobject                 object,
                 jobject                 audioSettingObject);
 
-static int videoEditor_stopPreview(JNIEnv*  pEnv,
+static jint videoEditor_stopPreview(JNIEnv*  pEnv,
                               jobject  thiz);
 
 static jobject
@@ -218,7 +218,7 @@ videoEditor_getProperties(
                 jobject                             thiz,
                 jstring                             file);
 
-static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
+static jint videoEditor_renderPreviewFrame(JNIEnv* pEnv,
                                     jobject thiz,
                                     jobject    mSurface,
                                     jlong fromMs,
@@ -231,7 +231,7 @@ static int videoEditor_registerManualEditMethods(
 static void jniPreviewProgressCallback(void* cookie, M4OSA_UInt32 msgType,
                                         void *argc);
 
-static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
+static jint videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
                                                     jobject thiz,
                                                     jobject mSurface,
                                                     jstring filePath,
@@ -241,7 +241,7 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
                                                     jint surfaceHeight,
                                                     jlong fromMs);
 
-static int videoEditor_generateAudioWaveFormSync ( JNIEnv*     pEnv,
+static jint videoEditor_generateAudioWaveFormSync ( JNIEnv*     pEnv,
                                                   jobject     thiz,
                                                   jstring     pcmfilePath,
                                                   jstring     outGraphfilePath,
@@ -258,7 +258,7 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
                                     M4OSA_Char* infilePath,
                                     M4OSA_Char* pcmfilePath );
 
-static int
+static jint
 videoEditor_generateClip(
                 JNIEnv*                             pEnv,
                 jobject                             thiz,
@@ -572,7 +572,7 @@ static M4OSA_ERR checkClipVideoProfileAndLevel(M4DECODER_VideoDecoders *pDecoder
 
     return result;
 }
-static int videoEditor_stopPreview(JNIEnv*  pEnv,
+static jint videoEditor_stopPreview(JNIEnv*  pEnv,
                               jobject  thiz)
 {
     ManualEditContext* pContext = M4OSA_NULL;
@@ -594,7 +594,7 @@ static int videoEditor_stopPreview(JNIEnv*  pEnv,
         pContext->mOverlayFileName = NULL;
     }
 
-    return lastProgressTimeMs;
+    return (jint)lastProgressTimeMs;
 }
 
 static void videoEditor_clearSurface(JNIEnv* pEnv,
@@ -654,7 +654,7 @@ static void videoEditor_clearSurface(JNIEnv* pEnv,
 
   }
 
-static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
+static jint videoEditor_renderPreviewFrame(JNIEnv* pEnv,
                                     jobject thiz,
                                     jobject    mSurface,
                                     jlong fromMs,
@@ -976,10 +976,10 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
         free(yuvPlane);
     }
 
-    return tnTimeMs;
+    return (jint)tnTimeMs;
 }
 
-static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
+static jint videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
                                                     jobject thiz,
                                                     jobject mSurface,
                                                     jstring filePath,
@@ -1033,7 +1033,7 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
     /* get thumbnail*/
     result = ThumbnailOpen(&tnContext,(const M4OSA_Char*)pString, M4OSA_TRUE);
     if (result != M4NO_ERROR || tnContext  == M4OSA_NULL) {
-        return timeMs;
+        return (jint)timeMs;
     }
 
     framesizeYuv = ((frameWidth)*(frameHeight)*1.5);
@@ -1046,7 +1046,7 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
         ThumbnailClose(tnContext);
         pMessage = videoEditJava_getErrorName(M4ERR_ALLOC);
         jniThrowException(pEnv, "java/lang/RuntimeException", pMessage);
-        return timeMs;
+        return (jint)timeMs;
     }
 
     result = ThumbnailGetPixels16(tnContext, (M4OSA_Int16 *)pixelArray,
@@ -1055,7 +1055,7 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
     if (result != M4NO_ERROR) {
         free(pixelArray);
         ThumbnailClose(tnContext);
-        return fromMs;
+        return (jint)fromMs;
     }
 
 #ifdef DUMPTOFILESYSTEM
@@ -1131,10 +1131,10 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
         pEnv->ReleaseStringUTFChars(filePath, pString);
     }
 
-    return timeMs;
+    return (jint)timeMs;
 }
 
-int videoEditor_generateAudioRawFile(   JNIEnv*     pEnv,
+jint videoEditor_generateAudioRawFile(  JNIEnv*     pEnv,
                                         jobject     thiz,
                                         jstring     infilePath,
                                         jstring     pcmfilePath)
@@ -1178,7 +1178,7 @@ int videoEditor_generateAudioRawFile(   JNIEnv*     pEnv,
         pEnv->ReleaseStringUTFChars(pcmfilePath, pStringOutPCMFilePath);
     }
 
-    return result;
+    return (jint)result;
 }
 
 M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
@@ -2182,7 +2182,7 @@ videoEditor_getProperties(
     return object;
 
 }
-static int videoEditor_getPixels(
+static jint videoEditor_getPixels(
                     JNIEnv*                     env,
                     jobject                     thiz,
                     jstring                     path,
@@ -2234,10 +2234,10 @@ static int videoEditor_getPixels(
         env->ReleaseStringUTFChars(path, pString);
     }
 
-    return timeMS;
+    return (jint)timeMS;
 }
 
-static int videoEditor_getPixelsList(
+static jint videoEditor_getPixelsList(
                 JNIEnv*                 env,
                 jobject                 thiz,
                 jstring                 path,
@@ -2257,7 +2257,7 @@ static int videoEditor_getPixelsList(
     const char *pString = env->GetStringUTFChars(path, NULL);
     if (pString == M4OSA_NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Input string null");
-        return M4ERR_ALLOC;
+        return (jint)M4ERR_ALLOC;
     }
 
     err = ThumbnailOpen(&mContext,(const M4OSA_Char*)pString, M4OSA_FALSE);
@@ -2266,7 +2266,7 @@ static int videoEditor_getPixelsList(
         if (pString != NULL) {
             env->ReleaseStringUTFChars(path, pString);
         }
-        return err;
+        return (jint)err;
     }
 
     jlong duration = (endTime - startTime);
@@ -2307,7 +2307,7 @@ static int videoEditor_getPixelsList(
                 "ThumbnailGetPixels32 failed");
     }
 
-    return err;
+    return (jint)err;
 }
 
 static M4OSA_ERR
@@ -2892,7 +2892,7 @@ M4OSA_ERR videoEditor_processClip(
 }
 /*+ PROGRESS CB */
 
-static int
+static jint
 videoEditor_generateClip(
                 JNIEnv*                             pEnv,
                 jobject                             thiz,
@@ -2934,7 +2934,7 @@ videoEditor_generateClip(
     }
 
     ALOGV("videoEditor_generateClip END 0x%x", (unsigned int) result);
-    return result;
+    return (jint)result;
 }
 
 static void
@@ -3556,7 +3556,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
     return err;
 }
 
-static int videoEditor_generateAudioWaveFormSync (JNIEnv*  pEnv, jobject thiz,
+static jint videoEditor_generateAudioWaveFormSync (JNIEnv*  pEnv, jobject thiz,
                                                   jstring pcmfilePath,
                                                   jstring outGraphfilePath,
                                                   jint frameDuration, jint channels,
@@ -3619,7 +3619,7 @@ out:
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR",
         "videoEditor_generateAudioWaveFormSync pContext->bSkipState ");
 
-    return result;
+    return (jint)result;
 }
 
 /******** End Audio Graph *******/
