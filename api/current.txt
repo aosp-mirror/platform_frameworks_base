@@ -1814,6 +1814,7 @@ package android {
     field public static final int Theme_NoTitleBar_OverlayActionModes = 16973930; // 0x103006a
     field public static final int Theme_Panel = 16973913; // 0x1030059
     field public static final int Theme_Quantum = 16974318; // 0x10301ee
+    field public static final int Theme_Quantum_NoActionBar = 16974319; // 0x10301ef
     field public static final int Theme_Translucent = 16973839; // 0x103000f
     field public static final int Theme_Translucent_NoTitleBar = 16973840; // 0x1030010
     field public static final int Theme_Translucent_NoTitleBar_Fullscreen = 16973841; // 0x1030011
@@ -2101,6 +2102,11 @@ package android {
     field public static final int Widget_ProgressBar_Large_Inverse = 16973916; // 0x103005c
     field public static final int Widget_ProgressBar_Small = 16973854; // 0x103001e
     field public static final int Widget_ProgressBar_Small_Inverse = 16973917; // 0x103005d
+    field public static final int Widget_Quantum_Button = 16974320; // 0x10301f0
+    field public static final int Widget_Quantum_Button_Borderless = 16974322; // 0x10301f2
+    field public static final int Widget_Quantum_Button_Borderless_Small = 16974323; // 0x10301f3
+    field public static final int Widget_Quantum_Button_Small = 16974321; // 0x10301f1
+    field public static final int Widget_Quantum_ImageButton = 16974324; // 0x10301f4
     field public static final int Widget_RatingBar = 16973857; // 0x1030021
     field public static final int Widget_ScrollView = 16973869; // 0x103002d
     field public static final int Widget_SeekBar = 16973856; // 0x1030020
@@ -10423,6 +10429,10 @@ package android.graphics.drawable {
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
     method public void setPicture(android.graphics.Picture);
+  }
+
+  public class RevealDrawable extends android.graphics.drawable.LayerDrawable {
+    ctor public RevealDrawable(android.graphics.drawable.Drawable[]);
   }
 
   public class RotateDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {

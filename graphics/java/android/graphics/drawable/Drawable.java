@@ -117,6 +117,20 @@ import java.util.Arrays;
  * document.</p></div>
  */
 public abstract class Drawable {
+    /**
+     * Hotspot identifier mask for tracking touch points.
+     *
+     * @hide until hotspot APIs are finalized
+     */
+    public static final int HOTSPOT_TOUCH_MASK = 0xFF;
+
+    /**
+     * Hotspot identifier for tracking keyboard focus.
+     *
+     * @hide until hotspot APIs are finalized
+     */
+    public static final int HOTSPOT_FOCUS = 0x100;
+
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
 
     private int[] mStateSet = StateSet.WILD_CARD;
@@ -449,6 +463,46 @@ public abstract class Drawable {
     public void clearColorFilter() {
         setColorFilter(null);
     }
+
+    /**
+     * Indicates whether the drawable supports hotspots. Hotspots are uniquely
+     * identifiable coordinates the may be added, updated and removed within the
+     * drawable.
+     *
+     * @return true if hotspots are supported
+     * @see #setHotspot(int, float, float)
+     * @see #removeHotspot(int)
+     * @see #clearHotspots()
+     * @hide until hotspot APIs are finalized
+     */
+    public boolean supportsHotspots() {
+        return false;
+    }
+
+    /**
+     * Specifies a hotspot's location within the drawable.
+     *
+     * @param id unique identifier for the hotspot
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @hide until hotspot APIs are finalized
+     */
+    public void setHotspot(int id, float x, float y) {}
+
+    /**
+     * Removes the specified hotspot from the drawable.
+     *
+     * @param id unique identifier for the hotspot
+     * @hide until hotspot APIs are finalized
+     */
+    public void removeHotspot(int id) {}
+
+    /**
+     * Removes all hotspots from the drawable.
+     *
+     * @hide until hotspot APIs are finalized
+     */
+    public void clearHotspots() {}
 
     /**
      * Indicates whether this view will change its appearance based on state.
@@ -903,6 +957,8 @@ public abstract class Drawable {
             drawable = new LayerDrawable();
         } else if (name.equals("transition")) {
             drawable = new TransitionDrawable();
+        } else if (name.equals("reveal")) {
+            drawable = new RevealDrawable();
         } else if (name.equals("color")) {
             drawable = new ColorDrawable();
         } else if (name.equals("shape")) {

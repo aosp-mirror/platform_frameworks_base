@@ -3331,7 +3331,7 @@ public final class ViewRootImpl implements ViewParent,
                 } else {
                     // There's nothing to focus. Clear and propagate through the
                     // hierarchy, but don't attempt to place new focus.
-                    focused.clearFocusInternal(true, false);
+                    focused.clearFocusInternal(null, true, false);
                     return true;
                 }
             }
