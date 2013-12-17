@@ -13,13 +13,11 @@
 # limitations under the License.
 
 #
-# Danish keyboard layout.
+# Danish (EU based + Sami) keyboard layout.
 #
 
 type OVERLAY
 
-map key 12 SLASH
-map key 53 MINUS
 map key 86 PLUS
 
 ### ROW 1
@@ -61,6 +59,7 @@ key 5 {
     label:                              '5'
     base:                               '5'
     shift:                              '%'
+    ralt:                               '\u20ac'
 }
 
 key 6 {
@@ -97,7 +96,7 @@ key 0 {
     ralt:                               '}'
 }
 
-key SLASH {
+key MINUS {
     label:                              '+'
     base:                               '+'
     shift:                              '?'
@@ -116,6 +115,8 @@ key Q {
     label:                              'Q'
     base:                               'q'
     shift, capslock:                    'Q'
+    ralt:                               '\u00e2'
+    ralt+capslock, shift+ralt:          '\u00c2'
 }
 
 key W {
@@ -129,6 +130,7 @@ key E {
     base:                               'e'
     shift, capslock:                    'E'
     ralt:                               '\u20ac'
+    ralt+capslock:                      '\u20ac'
 }
 
 key R {
@@ -141,6 +143,8 @@ key T {
     label:                              'T'
     base:                               't'
     shift, capslock:                    'T'
+    ralt:                               '\u0167'
+    ralt+capslock, shift+ralt:          '\u0166'
 }
 
 key Y {
@@ -159,12 +163,16 @@ key I {
     label:                              'I'
     base:                               'i'
     shift, capslock:                    'I'
+    ralt:                               '\u00ef'
+    ralt+capslock, shift+ralt:          '\u00cf'
 }
 
 key O {
     label:                              'O'
     base:                               'o'
     shift, capslock:                    'O'
+    ralt:                               '\u00f5'
+    ralt+capslock, shift+ralt:          '\u00d5'
 }
 
 key P {
@@ -192,36 +200,48 @@ key A {
     label:                              'A'
     base:                               'a'
     shift, capslock:                    'A'
+    ralt:                               '\u00e1'
+    ralt+capslock, shift+ralt:          '\u00c1'
 }
 
 key S {
     label:                              'S'
     base:                               's'
     shift, capslock:                    'S'
+    ralt:                               '\u0161'
+    ralt+capslock, shift+ralt:          '\u0160'
 }
 
 key D {
     label:                              'D'
     base:                               'd'
     shift, capslock:                    'D'
+    ralt:                               '\u0111'
+    ralt+capslock, shift+ralt:          '\u0110'
 }
 
 key F {
     label:                              'F'
     base:                               'f'
     shift, capslock:                    'F'
+    ralt:                               '\u01e5'
+    ralt+capslock, shift+ralt:          '\u01e4'
 }
 
 key G {
     label:                              'G'
     base:                               'g'
     shift, capslock:                    'G'
+    ralt:                               '\u01e7'
+    ralt+capslock, shift+ralt:          '\u01e6'
 }
 
 key H {
     label:                              'H'
     base:                               'h'
     shift, capslock:                    'H'
+    ralt:                               '\u021f'
+    ralt+capslock, shift+ralt:          '\u021e'
 }
 
 key J {
@@ -234,6 +254,8 @@ key K {
     label:                              'K'
     base:                               'k'
     shift, capslock:                    'K'
+    ralt:                               '\u01e9'
+    ralt+capslock, shift+ralt:          '\u01e8'
 }
 
 key L {
@@ -246,12 +268,16 @@ key SEMICOLON {
     label:                              '\u00c6'
     base:                               '\u00e6'
     shift, capslock:                    '\u00c6'
+    ralt:                               '\u00e4'
+    ralt+capslock, shift+ralt:          '\u00c4'
 }
 
 key APOSTROPHE {
     label:                              '\u00d8'
     base:                               '\u00f8'
     shift, capslock:                    '\u00d8'
+    ralt:                               '\u00f6'
+    ralt+capslock, shift+ralt:          '\u00d6'
 }
 
 key BACKSLASH {
@@ -273,6 +299,8 @@ key Z {
     label:                              'Z'
     base:                               'z'
     shift, capslock:                    'Z'
+    ralt:                               '\u017e'
+    ralt+capslock, shift+ralt:          '\u017d'
 }
 
 key X {
@@ -285,31 +313,39 @@ key C {
     label:                              'C'
     base:                               'c'
     shift, capslock:                    'C'
+    ralt:                               '\u010d'
+    ralt+capslock, shift+ralt:          '\u010c'
 }
 
 key V {
     label:                              'V'
     base:                               'v'
     shift, capslock:                    'V'
+    ralt:                               '\u01ef'
+    ralt+capslock, shift+ralt:          '\u01ee'
 }
 
 key B {
     label:                              'B'
     base:                               'b'
     shift, capslock:                    'B'
+    ralt:                               '\u0292'
+    ralt+capslock, shift+ralt:          '\u01b7'
 }
 
 key N {
     label:                              'N'
     base:                               'n'
     shift, capslock:                    'N'
+    ralt:                               '\u014b'
+    ralt+capslock, shift+ralt:          '\u014a'
 }
 
 key M {
     label:                              'M'
     base:                               'm'
     shift, capslock:                    'M'
-    ralt:                               '\u00b5'
+    ralt, ralt+capslock:                '\u00b5'
 }
 
 key COMMA {
@@ -324,7 +360,7 @@ key PERIOD {
     shift:                              ':'
 }
 
-key MINUS {
+key SLASH {
     label:                              '-'
     base:                               '-'
     shift:                              '_'
