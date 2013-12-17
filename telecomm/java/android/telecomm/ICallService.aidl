@@ -34,6 +34,13 @@ import android.telecomm.ICallServiceAdapter;
 oneway interface ICallService {
 
     /**
+     * Sets an implementation of ICallServiceAdapter which the call service can use to add new calls
+     * and communicate state changes of existing calls. This is the first method that is called
+     * after a the framework binds to the call service.
+     */
+    void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter);
+
+    /**
      * Determines if the CallService can make calls to the handle.
      * TODO(santoscordon): Move this method into its own service interface long term.
      * TODO(santoscordon): Add response callback parameter.
@@ -54,11 +61,4 @@ oneway interface ICallService {
      * Disconnects the call identified by callId.
      */
     void disconnect(String callId);
-
-    /**
-     * Sets an implementation of ICallServiceAdapter which the call service can use to add new calls
-     * and communicate state changes of existing calls. This is the first method that is called
-     * after a the framework binds to the call service.
-     */
-    void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter);
 }
