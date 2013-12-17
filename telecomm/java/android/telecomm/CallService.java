@@ -22,8 +22,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
-import android.ICallService;
-import android.ICallServiceAdapter;
+import android.telecomm.ICallService;
+import android.telecomm.ICallServiceAdapter;
 
 /**
  * Base implementation of CallService which can be used to provide calls for the system

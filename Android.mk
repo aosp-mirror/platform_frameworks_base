@@ -277,6 +277,10 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteDisplayProvider.aidl \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
+	telecomm/java/android/telecomm/ICallService.aidl \
+	telecomm/java/android/telecomm/ICallServiceAdapter.aidl \
+	telecomm/java/android/telecomm/ICallServiceProvider.aidl \
+	telecomm/java/android/telecomm/ICallServiceProviderAdapter.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
@@ -426,11 +430,6 @@ aidl_files := \
 	frameworks/base/location/java/android/location/FusedBatchOptions.aidl \
 	frameworks/base/location/java/com/android/internal/location/ProviderProperties.aidl \
 	frameworks/base/location/java/com/android/internal/location/ProviderRequest.aidl \
-	frameworks/base/telecomm/java/android/telecomm/CallInfo.aidl \
-	frameworks/base/telecomm/java/android/telecomm/ICallService.aidl \
-	frameworks/base/telecomm/java/android/telecomm/ICallServiceAdapter.aidl \
-	frameworks/base/telecomm/java/android/telecomm/ICallServiceProvider.aidl \
-	frameworks/base/telecomm/java/android/telecomm/ICallServiceProviderAdapter.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \

@@ -37,13 +37,18 @@ oneway interface ICallService {
      * Sets an implementation of ICallServiceAdapter which the call service can use to add new calls
      * and communicate state changes of existing calls. This is the first method that is called
      * after a the framework binds to the call service.
+     *
+     * @param callServiceAdapter Interface to CallsManager for adding and updating calls.
      */
-    void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter);
+    void setCallServiceAdapter(in ICallServiceAdapter callServiceAdapter);
 
     /**
      * Determines if the CallService can make calls to the handle.
      * TODO(santoscordon): Move this method into its own service interface long term.
      * TODO(santoscordon): Add response callback parameter.
+     *
+     * @param handle The destination handle to test against. Method should return true via the
+     * response callback if it can make a call to this handle.
      */
     void isCompatibleWith(String handle);
 
@@ -54,11 +59,15 @@ oneway interface ICallService {
      * handle-calling systems.  See {@link #isCompatibleWith}.
      * TODO(santoscordon): Should this have a response attached to it to ensure that the call
      * service actually plans to make the call?
+     *
+     * @param handle The destination handle to call.
      */
     void call(String handle);
 
     /**
      * Disconnects the call identified by callId.
+     *
+     * @param callId The identifier of the call to disconnect.
      */
     void disconnect(String callId);
 }

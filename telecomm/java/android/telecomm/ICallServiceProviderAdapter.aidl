@@ -16,7 +16,7 @@
 
 package android.telecomm;
 
-import android.telecomm.CallService;
+import android.telecomm.ICallService;
 
 /**
  * Provides ICallServiceProvider implementations with the relevant CallsManager APIs.
@@ -26,7 +26,10 @@ oneway interface ICallServiceProviderAdapter {
 
     /**
      * Provides the CallsManager with the services made available by this application.
-     * @param callServices the relevant services to make the CallManager aware of.
+     *
+     * @param callServices The relevant services to make the CallsManager aware of. Parameter is
+     *     a list of IBinder which can be cast to ICallService.
+     *     NOTE: IBinder is required by AIDL processor when passing a list of interfaces.
      */
-    void registerCallServices(List<CallService> callServices);
+    void registerCallServices(in List<IBinder> callServices);
 }

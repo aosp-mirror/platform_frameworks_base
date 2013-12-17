@@ -32,32 +32,51 @@ oneway interface ICallServiceAdapter {
 
     /**
      * Tells CallsManager of a new incoming call.
+     *
+     * @param callId The unique ID (via {@link #getNextCallId}) of the new incoming call.
+     * @param info Information about the new call including but not limited to the start time of the
+     *     call and information about the caller's handle.
      */
-    void newIncomingCall(String callId, CallInfo info);
+    void newIncomingCall(String callId, in CallInfo info);
 
     /**
-     * Tells CallsManager of a new outgoing call.
+     * Tells CallsManager of a new outgoing call. Use of this method should always follow
+     * {@link ICallService#call}.
+     *
+     * @param callId The unique ID (via {@link #getNextCallId}) of the new outgoing call.
+     *     TODO(santoscordon): May be easier to have ICallService#call provide an ID instead of
+     *     requiring a separate call to getNextCallId().
+     * @param info Information about the new call including but not limited to the start time of the
+     *     call and information about the caller's handle.
      */
-    void newOutgoingCall(String callId, CallInfo info);
+    void newOutgoingCall(String callId, in CallInfo info);
 
     /**
      * Sets a call's state to active (e.g., an ongoing call where two parties can actively
      * communicate).
+     *
+     * @param callId The unique ID of the call whose state is changing to active.
      */
     void setActive(String callId);
 
     /**
      * Sets a call's state to ringing (e.g., an inbound ringing call).
+     *
+     * @param callId The unique ID of the call whose state is changing to ringing.
      */
     void setRinging(String callId);
 
     /**
      * Sets a call's state to dialing (e.g., dialing an outbound call).
+     *
+     * @param callId The unique ID of the call whose state is changing to dialing.
      */
     void setDialing(String callId);
 
     /**
      * Sets a call's state to disconnected.
+     *
+     * @param callId The unique ID of the call whose state is changing to disconnected.
      */
     void setDisconnected(String callId);
 }

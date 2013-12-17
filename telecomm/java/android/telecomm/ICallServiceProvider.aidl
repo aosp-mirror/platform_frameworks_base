@@ -16,6 +16,8 @@
 
 package android.telecomm;
 
+import android.telecomm.ICallServiceProviderAdapter;
+
 /**
  * Interface for applications interested in providing call-service implementations.  Only used in
  * outgoing-call scenarios where the best-candidate service to issue the call over may need to be
@@ -36,8 +38,11 @@ oneway interface ICallServiceProvider {
     /**
      * Sets an implementation of ICallServiceProviderAdapter to allow call-service providers to
      * communicate with the CallsManager.
+     *
+     * @param callServiceProviderAdapter The interface through which {@link ICallService}
+     *     implementations are passed to CallsManager.
      */
-    void setCallServiceProviderAdapter(ICallServiceProviderAdapter callServiceProviderAdapter);
+    void setCallServiceProviderAdapter(in ICallServiceProviderAdapter callServiceProviderAdapter);
 
     /**
      * Provides the application with the opportunity to "register" ICallServiceProvider
