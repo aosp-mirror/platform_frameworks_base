@@ -390,6 +390,6 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end. If an error occurs, an empty string is returned.
      */
-    String iccTransmitApduLogicalChannel(int channel, int cla, int command,
+    String iccTransmitApduLogicalChannel(int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
 }
