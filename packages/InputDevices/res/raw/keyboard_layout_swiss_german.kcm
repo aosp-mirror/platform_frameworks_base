@@ -56,12 +56,14 @@ key 4 {
     label:                              '4'
     base:                               '4'
     shift:                              '\u00e7'
+    ralt:                               '\u00b0'
 }
 
 key 5 {
     label:                              '5'
     base:                               '5'
     shift:                              '%'
+    ralt:                               '\u00a7'
 }
 
 key 6 {
@@ -178,6 +180,8 @@ key LEFT_BRACKET {
     label:                              '\u00fc'
     base:                               '\u00fc'
     shift:                              '\u00e8'
+    capslock:                           '\u00dc'
+    capslock+shift:                     '\u00c8'
     ralt:                               '['
 }
 
@@ -248,12 +252,16 @@ key SEMICOLON {
     label:                              '\u00f6'
     base:                               '\u00f6'
     shift:                              '\u00e9'
+    capslock:                           '\u00d6'
+    capslock+shift:                     '\u00c9'
 }
 
 key APOSTROPHE {
     label:                              '\u00e4'
     base:                               '\u00e4'
     shift:                              '\u00e0'
+    capslock:                           '\u00c4'
+    capslock+shift:                     '\u00c0'
     ralt:                               '{'
 }
 

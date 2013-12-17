@@ -56,12 +56,14 @@ key 4 {
     label:                              '4'
     base:                               '4'
     shift:                              '\u00e7'
+    ralt:                               '\u00b0'
 }
 
 key 5 {
     label:                              '5'
     base:                               '5'
     shift:                              '%'
+    ralt:                               '\u00a7'
 }
 
 key 6 {
