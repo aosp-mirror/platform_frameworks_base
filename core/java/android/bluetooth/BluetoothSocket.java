@@ -417,27 +417,28 @@ public final class BluetoothSocket implements Closeable {
      *             if an i/o error occurs.
      */
     /*package*/ void flush() throws IOException {
+        if (mSocketOS == null) throw new IOException("flush is called on null OutputStream");
         if (VDBG) Log.d(TAG, "flush: " + mSocketOS);
         mSocketOS.flush();
     }
 
     /*package*/ int read(byte[] b, int offset, int length) throws IOException {
-
-            if (VDBG) Log.d(TAG, "read in:  " + mSocketIS + " len: " + length);
-            int ret = mSocketIS.read(b, offset, length);
-            if(ret < 0)
-                throw new IOException("bt socket closed, read return: " + ret);
-            if (VDBG) Log.d(TAG, "read out:  " + mSocketIS + " ret: " + ret);
-            return ret;
+        if (mSocketIS == null) throw new IOException("read is called on null InputStream");
+        if (VDBG) Log.d(TAG, "read in:  " + mSocketIS + " len: " + length);
+        int ret = mSocketIS.read(b, offset, length);
+        if(ret < 0)
+            throw new IOException("bt socket closed, read return: " + ret);
+        if (VDBG) Log.d(TAG, "read out:  " + mSocketIS + " ret: " + ret);
+        return ret;
     }
 
     /*package*/ int write(byte[] b, int offset, int length) throws IOException {
-
-            if (VDBG) Log.d(TAG, "write: " + mSocketOS + " length: " + length);
-            mSocketOS.write(b, offset, length);
-            // There is no good way to confirm since the entire process is asynchronous anyway
-            if (VDBG) Log.d(TAG, "write out: " + mSocketOS + " length: " + length);
-            return length;
+        if (mSocketOS == null) throw new IOException("write is called on null OutputStream");
+        if (VDBG) Log.d(TAG, "write: " + mSocketOS + " length: " + length);
+        mSocketOS.write(b, offset, length);
+        // There is no good way to confirm since the entire process is asynchronous anyway
+        if (VDBG) Log.d(TAG, "write out: " + mSocketOS + " length: " + length);
+        return length;
     }
 
     @Override
