@@ -989,6 +989,14 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to communicate with a SIM card using logical
+         channels. -->
+    <permission android:name="android.permission.SIM_COMMUNICATION"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:label="@string/permlab_sim_communication"
+        android:description="@string/permdesc_sim_communication"
+        android:protectionLevel="dangerous" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with audio capture -->
     <!-- =========================================== -->
