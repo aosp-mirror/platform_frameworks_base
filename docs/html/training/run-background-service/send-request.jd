@@ -28,7 +28,7 @@ trainingnavtop=true
     The previous lesson showed you how to create an {@link android.app.IntentService} class. This
     lesson shows you how to trigger the {@link android.app.IntentService} to run an operation by
     sending it an {@link android.content.Intent}. This {@link android.content.Intent} can
-    contain optionally contain data for the {@link android.app.IntentService} to process. You can
+    optionally contain data for the {@link android.app.IntentService} to process. You can
     send an {@link android.content.Intent} to an {@link android.app.IntentService} from any point
     in an {@link android.app.Activity} or {@link android.app.Fragment}
 </p>
