@@ -512,7 +512,7 @@ public class Time {
      * <pre>
      * Time time = new Time();
      * time.set(4, 10, 2007);  // set the date to Nov 4, 2007, 12am
-     * time.normalize();       // this sets isDst = 1
+     * time.normalize(false);       // this sets isDst = 1
      * time.monthDay += 1;     // changes the date to Nov 5, 2007, 12am
      * millis = time.toMillis(false);   // millis is Nov 4, 2007, 11pm
      * millis = time.toMillis(true);    // millis is Nov 5, 2007, 12am
