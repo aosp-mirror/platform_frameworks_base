@@ -382,7 +382,7 @@ class FastScroller {
         if (mEnabled != enabled) {
             mEnabled = enabled;
 
-            onStateDependencyChanged();
+            onStateDependencyChanged(true);
         }
     }
 
@@ -400,7 +400,7 @@ class FastScroller {
         if (mAlwaysShow != alwaysShow) {
             mAlwaysShow = alwaysShow;
 
-            onStateDependencyChanged();
+            onStateDependencyChanged(false);
         }
     }
 
@@ -414,12 +414,17 @@ class FastScroller {
 
     /**
      * Called when one of the variables affecting enabled state changes.
+     *
+     * @param peekIfEnabled whether the thumb should peek, if enabled
      */
-    private void onStateDependencyChanged() {
+    private void onStateDependencyChanged(boolean peekIfEnabled) {
         if (isEnabled()) {
             if (isAlwaysShowEnabled()) {
                 setState(STATE_VISIBLE);
             } else if (mState == STATE_VISIBLE) {
+                postAutoHide();
+            } else if (peekIfEnabled) {
+                setState(STATE_VISIBLE);
                 postAutoHide();
             }
         } else {
@@ -496,7 +501,7 @@ class FastScroller {
         if (mLongList != longList) {
             mLongList = longList;
 
-            onStateDependencyChanged();
+            onStateDependencyChanged(false);
         }
     }
 
