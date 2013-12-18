@@ -48,8 +48,8 @@
     <string name="mismatchPin" msgid="609379054496863419">"A beírt PIN kódok nem egyeznek."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Írjon be egy 4-8 számjegyű PIN-kódot."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 számjegyű vagy hosszabb PUK kódot írjon be."</string>
-    <string name="needPuk" msgid="919668385956251611">"A SIM-kártya le van zárva a PUK-kóddal. A feloldáshoz adja meg a PUK-kódot."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"A SIM-kártya feloldásához adja meg a PUK2-kódot."</string>
+    <string name="needPuk" msgid="919668385956251611">"A SIM kártya le van zárva a PUK kóddal. A feloldáshoz adja meg a PUK kódot."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"A SIM kártya feloldásához adja meg a PUK2 kódot."</string>
     <string name="enablePin" msgid="209412020907207950">"Sikertelen, engedélyezze a SIM-/RUIM-zárolást."</string>
   <plurals name="pinpuk_attempts">
     <item quantity="one" msgid="6596245285809790142">"Még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt zároljuk a SIM kártyát."</item>
@@ -842,8 +842,8 @@
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Csatlakoztassa a töltőt."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nincs SIM kártya."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nincs SIM-kártya a táblagépben."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Nincs SIM-kártya a telefonban."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nincs SIM kártya a táblagépben."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Nincs SIM kártya a telefonban."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Helyezzen be egy SIM kártyát."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"A SIM kártya hiányzik vagy nem olvasható. Helyezzen be egy SIM kártyát."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"A SIM kártya nem használható."</string>
@@ -857,8 +857,8 @@
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"A hálózat lezárva"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A SIM-kártya le van zárva a PUK-kóddal."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Nézze meg a felhasználói útmutatót, vagy vegye fel a kapcsolatot az ügyfélszolgálattal."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"A SIM-kártya le van zárva."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-kártya feloldása..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"A SIM kártya le van zárva."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM kártya feloldása..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal rosszul rajzolta le feloldási mintát. \n\nKérjük, <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva próbálja újra."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Ön helytelenül adta meg a jelszót <xliff:g id="NUMBER_0">%d</xliff:g> alkalommal. \n \n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Ön <xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg PIN kódját. \n \n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
@@ -872,7 +872,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Elfelejtette a mintát?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Fiók feloldása"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Túl sok mintarajzolási próbálkozás"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"A feloldáshoz jelentkezzen be Google Fiókjával."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Felhasználónév (e-mail cím)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Jelszó"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Bejelentkezés"</string>
@@ -1223,10 +1223,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Módosítás: Beállítások &gt; Alkalmazások"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Engedélyezés mindig"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Soha nem engedélyezem"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kártya eltávolítva"</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM kártya eltávolítva"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"A mobilhálózat nem lesz elérhető, amíg újra nem indítja egy érvényes SIM kártya behelyezése után."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kész"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"SIM-kártya hozzáadva"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM kártya hozzáadva"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"A mobilhálózathoz eléréséhez indítsa újra az eszközt."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Újraindítás"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Idő beállítása"</string>
@@ -1532,7 +1532,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Adja meg újra a helyes PUK kódot. Az ismételt próbálkozással véglegesen letiltja a SIM kártyát."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"A PIN kódok nem egyeznek."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Túl sok mintarajzolási próbálkozás"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google Fiókjával."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Felhasználónév (e-mail cím)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Jelszó"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Bejelentkezés"</string>

@@ -502,7 +502,7 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"optage lyd"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tillader, at appen kan optage lyd med mikrofonen. Med denne tilladelse kan appen til enhver tid optage lyd uden din bekræftelse."</string>
-    <string name="permlab_camera" msgid="3616391919559751192">"tag billeder og optag video"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"tage billeder og optage video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillader, at appen kan tage billeder og videoer med kameraet. Med denne tilladelse kan appen til enhver tid bruge kameraet uden din bekræftelse."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"deaktiver sendelysdioden, når kameraet er i brug"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Tillader, at en forudinstalleret systemapplikation deaktiverer lysdioden for brug af kameraet."</string>

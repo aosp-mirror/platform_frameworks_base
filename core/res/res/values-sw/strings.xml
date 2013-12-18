@@ -350,7 +350,7 @@
     <string name="permlab_backup" msgid="470013022865453920">"Dhibiti kuhifadhi nakala na kurejesha kwa mfumo"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Inaruhusu programu kudhibiti utaratibu wa kucheleza na kurejesha wa mfumo. Si kwa matumizi na programu za kawaida."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"thibitisha chelezo kamilifu au rejesha upya uendeshaji"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Inaruhusu programu kuzindua UI ya kuthibitisha chelezo kamili. Si ya kutumiwa na programu yoyote."</string>
+    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Huruhusu programu kuzindua kiolesura cha kuthibitisha kuhifadhiwa kwa nakala rudufu kamili. Haitumiwi na programu yoyote."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"onyesha madirisha yasiyoidhinishwa"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Huruhusu programu kuunda madirisha ambayo yananuiwa kutumiwa na kusano ya mtumiaji ya mfumo wa ndani. Sio ya matumizi na programu za kawaida."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"chora juu ya programu zingine"</string>
