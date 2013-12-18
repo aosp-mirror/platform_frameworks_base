@@ -2682,12 +2682,6 @@ package android.animation {
 
 package android.annotation {
 
-  public abstract class NonNull implements java.lang.annotation.Annotation {
-  }
-
-  public abstract class Nullable implements java.lang.annotation.Annotation {
-  }
-
   public abstract class SuppressLint implements java.lang.annotation.Annotation {
   }
 
