@@ -19,6 +19,7 @@
 
 #include <utils/KeyedVector.h>
 
+#include <SkGlyphCache.h>
 #include <SkScalerContext.h>
 #include <SkPaint.h>
 #include <SkPathMeasure.h>
@@ -117,8 +118,8 @@ private:
     void invalidateTextureCache(CacheTexture* cacheTexture = NULL);
 
     CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching);
-    void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph,
-            bool precaching);
+    void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, SkGlyphCache* skiaGlyphCache,
+            CachedGlyphInfo* glyph, bool precaching);
 
     void measureCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
