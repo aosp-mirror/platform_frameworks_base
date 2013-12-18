@@ -54,7 +54,6 @@
             android:paddingRight="@dimen/timepicker_ampm_left_padding"
             android:layout_toRightOf="@+id/separator"
             android:layout_alignBaseline="@+id/separator"
-            android:textAppearance="?android:attr/timePickerHeaderAmPmLabelTextAppearance"
-            android:importantForAccessibility="no" />
+            android:textAppearance="?android:attr/timePickerHeaderAmPmLabelTextAppearance" />
 
 </RelativeLayout>

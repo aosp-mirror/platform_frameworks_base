@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -44,6 +45,7 @@ import com.android.internal.R;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * A view for selecting the time of day, in either 24 hour or AM/PM mode.
@@ -119,6 +121,8 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
     private String mSelectHours;
     private String mMinutePickerDescription;
     private String mSelectMinutes;
+
+    private Calendar mTempCalendar;
 
     public TimePickerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
                               int defStyleAttr, int defStyleRes) {
@@ -506,23 +510,40 @@ class TimePickerDelegate extends TimePicker.AbstractTimePickerDelegate implement
     }
 
     @Override
+    public void setCurrentLocale(Locale locale) {
+        super.setCurrentLocale(locale);
+        mTempCalendar = Calendar.getInstance(locale);
+    }
+
+    @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        return mRadialTimePickerView.dispatchPopulateAccessibilityEvent(event);
+        onPopulateAccessibilityEvent(event);
+        return true;
     }
 
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        mRadialTimePickerView.onPopulateAccessibilityEvent(event);
+        int flags = DateUtils.FORMAT_SHOW_TIME;
+        if (mIs24HourView) {
+            flags |= DateUtils.FORMAT_24HOUR;
+        } else {
+            flags |= DateUtils.FORMAT_12HOUR;
+        }
+        mTempCalendar.set(Calendar.HOUR_OF_DAY, getCurrentHour());
+        mTempCalendar.set(Calendar.MINUTE, getCurrentMinute());
+        String selectedDate = DateUtils.formatDateTime(mContext,
+                mTempCalendar.getTimeInMillis(), flags);
+        event.getText().add(selectedDate);
     }
 
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        mRadialTimePickerView.onInitializeAccessibilityEvent(event);
+        event.setClassName(TimePicker.class.getName());
     }
 
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        mRadialTimePickerView.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(TimePicker.class.getName());
     }
 
     /**
