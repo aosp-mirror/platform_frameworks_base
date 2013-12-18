@@ -65,8 +65,6 @@ import java.util.Map;
 
 final public class MediaMuxer {
 
-    private long mNativeContext;
-
     static {
         System.loadLibrary("media_jni");
     }
