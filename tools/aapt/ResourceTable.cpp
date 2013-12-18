@@ -1342,7 +1342,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curType = string16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsStyled = true;
-                curIsPseudolocalizable = true;
+                curIsPseudolocalizable = (translatable != false16);
             } else if (strcmp16(block.getElementName(&len), drawable16.string()) == 0) {
                 curTag = &drawable16;
                 curType = drawable16;
@@ -1408,15 +1408,24 @@ status_t compileResourceFile(Bundle* bundle,
                 // Check whether these strings need valid formats.
                 // (simplified form of what string16 does above)
                 size_t n = block.getAttributeCount();
+
+                // Pseudolocalizable by default, unless this string array isn't
+                // translatable.
+                curIsPseudolocalizable = true;
                 for (size_t i = 0; i < n; i++) {
                     size_t length;
                     const uint16_t* attr = block.getAttributeName(i, &length);
-                    if (strcmp16(attr, translatable16.string()) == 0
-                            || strcmp16(attr, formatted16.string()) == 0) {
+                    if (strcmp16(attr, translatable16.string()) == 0) {
+                        const uint16_t* value = block.getAttributeStringValue(i, &length);
+                        if (strcmp16(value, false16.string()) == 0) {
+                            curIsPseudolocalizable = false;
+                        }
+                    }
+
+                    if (strcmp16(attr, formatted16.string()) == 0) {
                         const uint16_t* value = block.getAttributeStringValue(i, &length);
                         if (strcmp16(value, false16.string()) == 0) {
                             curIsFormatted = false;
-                            break;
                         }
                     }
                 }
@@ -1426,7 +1435,6 @@ status_t compileResourceFile(Bundle* bundle,
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsBag = true;
                 curIsBagReplaceOnOverwrite = true;
-                curIsPseudolocalizable = true;
             } else if (strcmp16(block.getElementName(&len), integer_array16.string()) == 0) {
                 curTag = &integer_array16;
                 curType = array16;
