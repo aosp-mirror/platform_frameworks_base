@@ -21,14 +21,13 @@ import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 
-import android.app.ActivityManager.StackBoxInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Debug;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -74,6 +73,7 @@ class DisplayContent {
     private final Display mDisplay;
 
     Rect mBaseDisplayRect = new Rect();
+    Rect mContentRect = new Rect();
 
     // Accessed directly by all users.
     boolean layoutNeeded;
@@ -92,11 +92,12 @@ class DisplayContent {
      */
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
-    /** Array containing the home StackBox and possibly one more which would contain apps. Array
+    /** Array containing all TaskStacks on this display.  Array
      * is stored in display order with the current bottom stack at 0. */
-    private ArrayList<StackBox> mStackBoxes = new ArrayList<StackBox>();
+    private ArrayList<TaskStack> mStacks = new ArrayList<TaskStack>();
 
-    /** True when the home StackBox is at the top of mStackBoxes, false otherwise. */
+    /** A special TaskStack with id==HOME_STACK_ID that moves to the bottom whenever any TaskStack
+     * (except a future lockscreen TaskStack) moves to the top. */
     private TaskStack mHomeStack = null;
 
     /** Detect user tapping outside of current focused stack bounds .*/
@@ -123,13 +124,6 @@ class DisplayContent {
         display.getDisplayInfo(mDisplayInfo);
         isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
         mService = service;
-
-        StackBox newBox = new StackBox(service, this, null);
-        mStackBoxes.add(newBox);
-        TaskStack newStack = new TaskStack(service, HOME_STACK_ID, this);
-        newStack.mStackBox = newBox;
-        newBox.mStack = newStack;
-        mHomeStack = newStack;
     }
 
     int getDisplayId() {
@@ -153,10 +147,6 @@ class DisplayContent {
      */
     public boolean hasAccess(int uid) {
         return mDisplay.hasAccess(uid);
-    }
-
-    boolean homeOnTop() {
-        return mStackBoxes.get(0).mStack != mHomeStack;
     }
 
     public boolean isPrivate() {
@@ -205,16 +195,32 @@ class DisplayContent {
     }
 
     void updateDisplayInfo() {
+        // Save old size.
+        int oldWidth = mDisplayInfo.logicalWidth;
+        int oldHeight = mDisplayInfo.logicalHeight;
         mDisplay.getDisplayInfo(mDisplayInfo);
+
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            if (!stack.isFullscreen()) {
+                stack.resizeBounds(oldWidth, oldHeight, mDisplayInfo.logicalWidth,
+                        mDisplayInfo.logicalHeight);
+            }
+        }
     }
 
     void getLogicalDisplayRect(Rect out) {
         updateDisplayInfo();
         // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
+        final int orientation = mDisplayInfo.rotation;
+        boolean rotated = (orientation == Surface.ROTATION_90
+                || orientation == Surface.ROTATION_270);
+        final int physWidth = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
+        final int physHeight = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
         int width = mDisplayInfo.logicalWidth;
-        int left = (mBaseDisplayWidth - width) / 2;
+        int left = (physWidth - width) / 2;
         int height = mDisplayInfo.logicalHeight;
-        int top = (mBaseDisplayHeight - height) / 2;
+        int top = (physHeight - height) / 2;
         out.set(left, top, left + width, top + height);
     }
 
@@ -227,159 +233,62 @@ class DisplayContent {
         return count;
     }
 
-    /** Refer to {@link WindowManagerService#createStack(int, int, int, float)} */
-    TaskStack createStack(int stackId, int relativeStackBoxId, int position, float weight) {
-        TaskStack newStack = null;
-        if (DEBUG_STACK) Slog.d(TAG, "createStack: stackId=" + stackId + " relativeStackBoxId="
-                + relativeStackBoxId + " position=" + position + " weight=" + weight);
+    /** Refer to {@link WindowManagerService#createStack(int, int)} */
+    TaskStack createStack(int stackId) {
+        if (DEBUG_STACK) Slog.d(TAG, "createStack: stackId=" + stackId);
+        TaskStack newStack = new TaskStack(mService, stackId, this);
         if (stackId == HOME_STACK_ID) {
-            if (mStackBoxes.size() != 1) {
+            if (mHomeStack != null) {
                 throw new IllegalArgumentException("createStack: HOME_STACK_ID (0) not first.");
             }
-            newStack = mHomeStack;
-        } else {
-            int stackBoxNdx;
-            for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-                final StackBox box = mStackBoxes.get(stackBoxNdx);
-                if (position == StackBox.TASK_STACK_GOES_OVER
-                        || position == StackBox.TASK_STACK_GOES_UNDER) {
-                    // Position indicates a new box is added at top level only.
-                    if (box.contains(relativeStackBoxId)) {
-                        StackBox newBox = new StackBox(mService, this, null);
-                        newStack = new TaskStack(mService, stackId, this);
-                        newStack.mStackBox = newBox;
-                        newBox.mStack = newStack;
-                        final int offset = position == StackBox.TASK_STACK_GOES_OVER ? 1 : 0;
-                        if (DEBUG_STACK) Slog.d(TAG, "createStack: inserting stack at " +
-                                (stackBoxNdx + offset));
-                        mStackBoxes.add(stackBoxNdx + offset, newBox);
-                        break;
-                    }
-                } else {
-                    // Remaining position values indicate a box must be split.
-                    newStack = box.split(stackId, relativeStackBoxId, position, weight);
-                    if (newStack != null) {
-                        break;
-                    }
-                }
-            }
-            if (stackBoxNdx < 0) {
-                throw new IllegalArgumentException("createStack: stackBoxId " + relativeStackBoxId
-                        + " not found.");
-            }
+            mHomeStack = newStack;
         }
-        if (newStack != null) {
-            layoutNeeded = true;
-        }
-        EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, relativeStackBoxId, position,
-                (int)(weight * 100 + 0.5));
+        mStacks.add(newStack);
+        layoutNeeded = true;
         return newStack;
     }
 
-    /** Refer to {@link WindowManagerService#resizeStackBox(int, float)} */
-    boolean resizeStack(int stackBoxId, float weight) {
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            final StackBox box = mStackBoxes.get(stackBoxNdx);
-            if (box.resize(stackBoxId, weight)) {
-                layoutNeeded = true;
+    void moveStack(TaskStack stack, boolean toTop) {
+        mStacks.remove(stack);
+        mStacks.add(toTop ? mStacks.size() : 0, stack);
+    }
+
+    TaskStack removeStack(TaskStack stack) {
+        mStacks.remove(stack);
+        if (!mStacks.isEmpty()) {
+            return mStacks.get(mStacks.size() - 1);
+        }
+        return null;
+    }
+
+    /**
+     * Propagate the new bounds to all child stacks.
+     * @param contentRect The bounds to apply at the top level.
+     */
+    void resize(Rect contentRect) {
+        mContentRect.set(contentRect);
+    }
+
+    boolean getStackBounds(int stackId, Rect bounds) {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mStacks.get(stackNdx);
+            if (stackId == stack.mStackId) {
+                bounds.set(stack.mBounds);
                 return true;
             }
         }
         return false;
     }
 
-    void addStackBox(StackBox box, boolean toTop) {
-        if (mStackBoxes.size() >= 2) {
-            throw new RuntimeException("addStackBox: Too many toplevel StackBoxes!");
-        }
-        mStackBoxes.add(toTop ? mStackBoxes.size() : 0, box);
-    }
-
-    void removeStackBox(StackBox box) {
-        if (DEBUG_STACK) Slog.d(TAG, "removeStackBox: box=" + box);
-        final TaskStack stack = box.mStack;
-        if (stack != null && stack.mStackId == HOME_STACK_ID) {
-            // Never delete the home stack, even if it is empty.
-            if (DEBUG_STACK) Slog.d(TAG, "removeStackBox: Not deleting home stack.");
-            return;
-        }
-        mStackBoxes.remove(box);
-    }
-
-    StackBoxInfo getStackBoxInfo(StackBox box) {
-        StackBoxInfo info = new StackBoxInfo();
-        info.stackBoxId = box.mStackBoxId;
-        info.weight = box.mWeight;
-        info.vertical = box.mVertical;
-        info.bounds = new Rect(box.mBounds);
-        if (box.mStack != null) {
-            info.stackId = box.mStack.mStackId;
-            // ActivityManagerService will fill in the StackInfo.
-        } else {
-            info.stackId = -1;
-            info.children = new StackBoxInfo[2];
-            info.children[0] = getStackBoxInfo(box.mFirst);
-            info.children[1] = getStackBoxInfo(box.mSecond);
-        }
-        return info;
-    }
-
-    ArrayList<StackBoxInfo> getStackBoxInfos() {
-        ArrayList<StackBoxInfo> list = new ArrayList<StackBoxInfo>();
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            list.add(getStackBoxInfo(mStackBoxes.get(stackBoxNdx)));
-        }
-        return list;
-    }
-
-    /**
-     * Move the home StackBox to the top or bottom of mStackBoxes. That is the only place
-     * it is allowed to be. This is a nop if the home StackBox is already in the correct position.
-     * @param toTop Move home to the top of mStackBoxes if true, to the bottom if false.
-     * @return true if a change was made, false otherwise.
-     */
-    boolean moveHomeStackBox(boolean toTop) {
-        if (DEBUG_STACK) Slog.d(TAG, "moveHomeStackBox: toTop=" + toTop + " Callers=" +
-                Debug.getCallers(4));
-        EventLog.writeEvent(EventLogTags.WM_HOME_STACK_MOVED, toTop ? 1 : 0);
-        switch (mStackBoxes.size()) {
-            case 0: throw new RuntimeException("moveHomeStackBox: No home StackBox!");
-            case 1: return false; // Only the home StackBox exists.
-            case 2:
-                if (homeOnTop() ^ toTop) {
-                    mStackBoxes.add(mStackBoxes.remove(0));
-                    return true;
-                }
-                return false;
-            default: throw new RuntimeException("moveHomeStackBox: Too many toplevel StackBoxes!");
-        }
-    }
-
-    /**
-     * Propagate the new bounds to all child stack boxes, applying weights as we move down.
-     * @param contentRect The bounds to apply at the top level.
-     */
-    boolean setStackBoxSize(Rect contentRect) {
-        boolean change = false;
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            change |= mStackBoxes.get(stackBoxNdx).setStackBoxSizes(contentRect, true);
-        }
-        return change;
-    }
-
-    Rect getStackBounds(int stackId) {
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            Rect bounds = mStackBoxes.get(stackBoxNdx).getStackBounds(stackId);
-            if (bounds != null) {
-                return bounds;
+    int stackIdFromPoint(int x, int y) {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mStacks.get(stackNdx);
+            stack.getBounds(mTmpRect);
+            if (mTmpRect.contains(x, y)) {
+                return stack.mStackId;
             }
         }
-        return null;
-    }
-
-    int stackIdFromPoint(int x, int y) {
-        StackBox topBox = mStackBoxes.get(mStackBoxes.size() - 1);
-        return topBox.stackIdFromPoint(x, y);
+        return -1;
     }
 
     void setTouchExcludeRegion(TaskStack focusedStack) {
@@ -408,48 +317,48 @@ class DisplayContent {
             }
         }
 
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            mStackBoxes.get(stackBoxNdx).switchUserStacks(newUserId);
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            mStacks.get(stackNdx).switchUser(newUserId);
         }
     }
 
     void resetAnimationBackgroundAnimator() {
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            mStackBoxes.get(stackBoxNdx).resetAnimationBackgroundAnimator();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            mStacks.get(stackNdx).resetAnimationBackgroundAnimator();
         }
     }
 
     boolean animateDimLayers() {
         boolean result = false;
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            result |= mStackBoxes.get(stackBoxNdx).animateDimLayers();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            result |= mStacks.get(stackNdx).animateDimLayers();
         }
         return result;
     }
 
     void resetDimming() {
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            mStackBoxes.get(stackBoxNdx).resetDimming();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            mStacks.get(stackNdx).resetDimmingTag();
         }
     }
 
     boolean isDimming() {
         boolean result = false;
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            result |= mStackBoxes.get(stackBoxNdx).isDimming();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            result |= mStacks.get(stackNdx).isDimming();
         }
         return result;
     }
 
     void stopDimmingIfNeeded() {
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            mStackBoxes.get(stackBoxNdx).stopDimmingIfNeeded();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            mStacks.get(stackNdx).stopDimmingIfNeeded();
         }
     }
 
     void close() {
-        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
-            mStackBoxes.get(stackBoxNdx).close();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            mStacks.get(stackNdx).close();
         }
     }
 
@@ -477,9 +386,10 @@ class DisplayContent {
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
             pw.print(subPrefix); pw.print("layoutNeeded="); pw.println(layoutNeeded);
-        for (int boxNdx = 0; boxNdx < mStackBoxes.size(); ++boxNdx) {
-            pw.print(prefix); pw.print("StackBox #"); pw.println(boxNdx);
-            mStackBoxes.get(boxNdx).dump(prefix + "  ", pw);
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mStacks.get(stackNdx);
+            pw.print(prefix); pw.print("mStacks[" + stackNdx + "]"); pw.println(stack.mStackId);
+            stack.dump(prefix + "  ", pw);
         }
         int ndx = numTokens();
         if (ndx > 0) {
