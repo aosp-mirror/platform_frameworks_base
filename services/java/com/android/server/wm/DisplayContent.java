@@ -27,6 +27,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -211,10 +212,15 @@ class DisplayContent {
     void getLogicalDisplayRect(Rect out) {
         updateDisplayInfo();
         // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
+        final int orientation = mDisplayInfo.rotation;
+        boolean rotated = (orientation == Surface.ROTATION_90
+                || orientation == Surface.ROTATION_270);
+        final int physWidth = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
+        final int physHeight = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
         int width = mDisplayInfo.logicalWidth;
-        int left = (mBaseDisplayWidth - width) / 2;
+        int left = (physWidth - width) / 2;
         int height = mDisplayInfo.logicalHeight;
-        int top = (mBaseDisplayHeight - height) / 2;
+        int top = (physHeight - height) / 2;
         out.set(left, top, left + width, top + height);
     }
 
@@ -247,8 +253,12 @@ class DisplayContent {
         mStacks.add(toTop ? mStacks.size() : 0, stack);
     }
 
-    TaskStack topStack() {
-        return mStacks.get(mStacks.size() - 1);
+    TaskStack removeStack(TaskStack stack) {
+        mStacks.remove(stack);
+        if (!mStacks.isEmpty()) {
+            return mStacks.get(mStacks.size() - 1);
+        }
+        return null;
     }
 
     /**

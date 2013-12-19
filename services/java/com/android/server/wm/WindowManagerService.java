@@ -4840,7 +4840,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 int nextStackId = stack.remove();
                 stack.getDisplayContent().layoutNeeded = true;
                 requestTraversalLocked();
-                return nextStackId;
+                if (nextStackId > HOME_STACK_ID) {
+                    return nextStackId;
+                }
             }
             if (DEBUG_STACK) Slog.i(TAG, "removeStack: could not find stackId=" + stackId);
         }
@@ -8774,7 +8776,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (canBeSeen) {
                 // This function assumes that the contents of the default display are
                 // processed first before secondary displays.
-                if (w.mDisplayContent.isDefaultDisplay) {
+                final DisplayContent displayContent = w.mDisplayContent;
+                if (displayContent.isDefaultDisplay) {
                     // While a dream or keyguard is showing, obscure ordinary application
                     // content on secondary displays (by forcibly enabling mirroring unless
                     // there is other content we want to show) but still allow opaque

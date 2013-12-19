@@ -118,7 +118,6 @@ public interface IActivityManager extends IInterface {
     public void moveTaskToBack(int task) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
-    public int createStack(int taskId) throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
     public void resizeStack(int stackId, Rect bounds) throws RemoteException;
     public List<StackInfo> getAllStackInfos() throws RemoteException;
@@ -408,6 +407,11 @@ public interface IActivityManager extends IInterface {
 
     public void performIdleMaintenance() throws RemoteException;
 
+    public IActivityContainer createActivityContainer(IBinder parentActivityToken,
+            IActivityContainerCallback callback) throws RemoteException;
+
+    public IBinder getHomeActivityToken() throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -678,7 +682,7 @@ public interface IActivityManager extends IInterface {
     int KILL_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
     int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
     int HANG_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+166;
-    int CREATE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
+    int CREATE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
     int MOVE_TASK_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+168;
     int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+169;
     int GET_ALL_STACK_INFOS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
@@ -694,4 +698,5 @@ public interface IActivityManager extends IInterface {
     int RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+180;
     int GET_PERSISTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+181;
     int APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+182;
+    int GET_HOME_ACTIVITY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+183;
 }
