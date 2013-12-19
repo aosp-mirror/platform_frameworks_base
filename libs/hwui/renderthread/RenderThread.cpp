@@ -39,7 +39,7 @@ RenderThread::~RenderThread() {
 bool RenderThread::threadLoop() {
     for (;;) {
         int result = mLooper->pollAll(-1);
-        if (result == ALOOPER_POLL_ERROR) {
+        if (result == Looper::POLL_ERROR) {
             // TODO Something?
             break;
         }
