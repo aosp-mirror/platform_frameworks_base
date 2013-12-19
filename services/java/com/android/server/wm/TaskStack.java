@@ -205,7 +205,11 @@ public class TaskStack {
         mAnimationBackgroundSurface.destroySurface();
         mDimLayer.destroySurface();
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
-        return mDisplayContent.topStack().mStackId;
+        TaskStack next = mDisplayContent.removeStack(this);
+        if (next != null) {
+            return next.mStackId;
+        }
+        return -1;
     }
 
     void resetAnimationBackgroundAnimator() {

@@ -39,6 +39,7 @@ import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
+import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.TaskGroup;
 import com.android.server.wm.WindowManagerService;
@@ -52,7 +53,6 @@ import android.app.IThumbnailReceiver;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -138,8 +138,6 @@ final class ActivityStack {
 
     final ActivityManagerService mService;
     final WindowManagerService mWindowManager;
-
-    final Context mContext;
 
     /**
      * The back history of all previous (and possibly still
@@ -229,6 +227,8 @@ final class ActivityStack {
     int mCurrentUser;
 
     final int mStackId;
+
+    final ActivityContainer mActivityContainer;
 
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
@@ -327,14 +327,14 @@ final class ActivityStack {
         return count;
     }
 
-    ActivityStack(ActivityManagerService service, Context context, Looper looper, int stackId) {
-        mHandler = new ActivityStackHandler(looper);
-        mService = service;
-        mWindowManager = service.mWindowManager;
-        mStackSupervisor = service.mStackSupervisor;
-        mContext = context;
-        mStackId = stackId;
-        mCurrentUser = service.mCurrentUserId;
+    ActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer) {
+        mActivityContainer = activityContainer;
+        mStackSupervisor = activityContainer.getOuter();
+        mService = mStackSupervisor.mService;
+        mHandler = new ActivityStackHandler(mService.mHandler.getLooper());
+        mWindowManager = mService.mWindowManager;
+        mStackId = activityContainer.mStackId;
+        mCurrentUser = mService.mCurrentUserId;
     }
 
     boolean okToShow(ActivityRecord r) {
@@ -436,25 +436,6 @@ final class ActivityStack {
         return null;
     }
 
-    boolean containsApp(ProcessRecord app) {
-        if (app == null) {
-            return false;
-        }
-        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                if (r.finishing) {
-                    continue;
-                }
-                if (r.app == app) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     final boolean updateLRUListLocked(ActivityRecord r) {
         final boolean hadit = mLRUActivities.remove(r);
         mLRUActivities.add(r);
@@ -463,6 +444,13 @@ final class ActivityStack {
 
     final boolean isHomeStack() {
         return mStackId == HOME_STACK_ID;
+    }
+
+    ArrayList<ActivityStack> getStacksLocked() {
+        if (mActivityContainer.isAttached()) {
+            return mActivityContainer.mActivityDisplayInfo.stacks;
+        }
+        return null;
     }
 
     /**

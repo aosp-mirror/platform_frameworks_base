@@ -28,13 +28,15 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.app.AppOpsManager;
+import android.app.IActivityContainer;
+import android.app.IActivityContainerCallback;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
 import android.util.ArrayMap;
-import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
@@ -47,7 +49,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
-import com.android.internal.app.ProcessMap;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -1770,7 +1771,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
         mStackSupervisor.setWindowManager(wm);
-        wm.createStack(HOME_STACK_ID, Display.DEFAULT_DISPLAY);
     }
 
     public void startObservingNativeCrashes() {
@@ -1801,7 +1801,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         m.mFactoryTest = factoryTest;
         m.mIntentFirewall = new IntentFirewall(m.new IntentFirewallInterface());
 
-        m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
+        m.mStackSupervisor = new ActivityStackSupervisor(m);
 
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
@@ -7096,22 +7096,28 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public int createStack(int taskId) {
+    public IBinder getHomeActivityToken() throws RemoteException {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "createStack()");
-        if (DEBUG_STACK) Slog.d(TAG, "createStack: taskId=" + taskId);
+                "getHomeActivityToken()");
         synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                int stackId = mStackSupervisor.createStack();
-                mWindowManager.createStack(stackId, Display.DEFAULT_DISPLAY);
-                if (taskId > 0) {
-                    moveTaskToStack(taskId, stackId, true);
-                }
-                return stackId;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            return mStackSupervisor.getHomeActivityToken();
+        }
+    }
+
+    @Override
+    public IActivityContainer createActivityContainer(IBinder parentActivityToken,
+            IActivityContainerCallback callback) throws RemoteException {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "createActivityContainer()");
+        synchronized (this) {
+            if (parentActivityToken == null) {
+                throw new IllegalArgumentException("parent token must not be null");
             }
+            ActivityRecord r = ActivityRecord.forToken(parentActivityToken);
+            if (r == null) {
+                return null;
+            }
+            return mStackSupervisor.createActivityContainer(r, callback);
         }
     }
 
@@ -7150,11 +7156,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public List<StackInfo> getAllStackInfos() {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getStackBoxes()");
+                "getAllStackInfos()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                return mStackSupervisor.getAllStackInfos();
+                return mStackSupervisor.getAllStackInfosLocked();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -7168,7 +7174,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                return mStackSupervisor.getStackInfo(stackId);
+                return mStackSupervisor.getStackInfoLocked(stackId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -14049,18 +14055,21 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean kept = true;
         final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
-        if (changes != 0 && starting == null) {
-            // If the configuration changed, and the caller is not already
-            // in the process of starting an activity, then find the top
-            // activity to check if its configuration needs to change.
-            starting = mainStack.topRunningActivityLocked(null);
-        }
+        // mainStack is null during startup.
+        if (mainStack != null) {
+            if (changes != 0 && starting == null) {
+                // If the configuration changed, and the caller is not already
+                // in the process of starting an activity, then find the top
+                // activity to check if its configuration needs to change.
+                starting = mainStack.topRunningActivityLocked(null);
+            }
 
-        if (starting != null) {
-            kept = mainStack.ensureActivityConfigurationLocked(starting, changes);
-            // And we need to make sure at this point that all other activities
-            // are made visible with the correct configuration.
-            mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
+            if (starting != null) {
+                kept = mainStack.ensureActivityConfigurationLocked(starting, changes);
+                // And we need to make sure at this point that all other activities
+                // are made visible with the correct configuration.
+                mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
+            }
         }
 
         if (values != null && mWindowManager != null) {
