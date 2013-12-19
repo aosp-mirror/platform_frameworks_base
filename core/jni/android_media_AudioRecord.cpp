@@ -81,6 +81,17 @@ jint android_media_translateRecorderErrorCode(int code) {
     }
 }
 
+static audio_format_t audioFormatToNative(int audioFormat)
+{
+    switch (audioFormat) {
+    case ENCODING_PCM_16BIT:
+        return AUDIO_FORMAT_PCM_16_BIT;
+    case ENCODING_PCM_8BIT:
+        return AUDIO_FORMAT_PCM_8_BIT;
+    default:
+        return AUDIO_FORMAT_INVALID;
+    }
+}
 
 // ----------------------------------------------------------------------------
 static void recorderCallback(int event, void* user, void *info) {
@@ -173,21 +184,19 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     uint32_t nbChannels = popcount(channelMask);
 
     // compare the format against the Java constants
-    if ((audioFormat != ENCODING_PCM_16BIT)
-        && (audioFormat != ENCODING_PCM_8BIT)) {
+    audio_format_t format = audioFormatToNative(audioFormat);
+    if (format == AUDIO_FORMAT_INVALID) {
         ALOGE("Error creating AudioRecord: unsupported audio format %d.", audioFormat);
         return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
     }
 
-    int bytesPerSample = audioFormat == ENCODING_PCM_16BIT ? 2 : 1;
-    audio_format_t format = audioFormat == ENCODING_PCM_16BIT ?
-            AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
+    size_t bytesPerSample = audio_bytes_per_sample(format);
 
     if (buffSizeInBytes == 0) {
          ALOGE("Error creating AudioRecord: frameCount is 0.");
         return AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
     }
-    int frameSize = nbChannels * bytesPerSample;
+    size_t frameSize = nbChannels * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
 
     if ((uint32_t(source) >= AUDIO_SOURCE_CNT) && (uint32_t(source) != AUDIO_SOURCE_HOTWORD)) {
@@ -513,10 +522,10 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
           sampleRateInHertz, nbChannels, audioFormat);
 
     size_t frameCount = 0;
+    audio_format_t format = audioFormatToNative(audioFormat);
     status_t result = AudioRecord::getMinFrameCount(&frameCount,
             sampleRateInHertz,
-            (audioFormat == ENCODING_PCM_16BIT ?
-                AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT),
+            format,
             audio_channel_in_mask_from_count(nbChannels));
 
     if (result == BAD_VALUE) {
@@ -525,7 +534,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     if (result != NO_ERROR) {
         return -1;
     }
-    return frameCount * nbChannels * (audioFormat == ENCODING_PCM_16BIT ? 2 : 1);
+    return frameCount * nbChannels * audio_bytes_per_sample(format);
 }
 
 
