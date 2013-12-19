@@ -163,7 +163,7 @@ final class TaskRecord extends ThumbnailHolder {
     final void setFrontOfTask() {
         boolean foundFront = false;
         final int numActivities = mActivities.size();
-        for (int activityNdx = 0; numActivities < activityNdx; ++activityNdx) {
+        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
             if (foundFront || r.finishing) {
                 r.frontOfTask = false;
