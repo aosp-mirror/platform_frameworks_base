@@ -273,7 +273,7 @@ float AMotionEvent_getHistoricalAxisValue(const AInputEvent* motion_event,
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
         int ident, ALooper_callbackFunc callback, void* data) {
     InputQueue* iq = static_cast<InputQueue*>(queue);
-    Looper* l = static_cast<Looper*>(looper);
+    Looper* l = reinterpret_cast<Looper*>(looper);
     iq->attachLooper(l, ident, callback, data);
 }
 
