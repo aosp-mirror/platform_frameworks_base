@@ -732,7 +732,9 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
 
         if (mRs == 0) {
             mRs = new RSC::RS();
-            if (!mRs->init(RSC::RS_INIT_LOW_LATENCY | RSC::RS_INIT_SYNCHRONOUS)) {
+            // a null path is OK because there are no custom kernels used
+            // hence nothing gets cached by RS
+            if (!mRs->init("", RSC::RS_INIT_LOW_LATENCY | RSC::RS_INIT_SYNCHRONOUS)) {
                 ALOGE("blur RS failed to init");
             }
 
