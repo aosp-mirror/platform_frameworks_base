@@ -65,8 +65,6 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
      *
      * @param countryCode the ISO 3166-1 two-letter country code that indicates the country/region
      * where the phone number is being entered.
-     *
-     * @hide
      */
     public PhoneNumberFormattingTextWatcher(String countryCode) {
         if (countryCode == null) throw new IllegalArgumentException();
