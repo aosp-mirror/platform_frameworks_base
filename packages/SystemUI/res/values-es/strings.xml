@@ -116,8 +116,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Dos barras"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Tres barras"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Señal al máximo"</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Activado"</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"Desactivado"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Sí"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"No"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Conectado"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
