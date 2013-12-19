@@ -21,6 +21,7 @@ import com.android.internal.R.styleable;
 import com.android.internal.app.ResolverActivity;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
 import android.app.ActivityOptions;
 import android.app.ResultInfo;
@@ -138,6 +139,7 @@ final class ActivityRecord {
     boolean forceNewConfig; // force re-create with new config next time
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last lauch of this activity
+    ArrayList<ActivityStack> mChildContainers = new ArrayList<ActivityStack>();
 
     String stringName;      // for caching of toString().
 

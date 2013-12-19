@@ -28,11 +28,15 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.app.AppOpsManager;
+import android.app.IActivityContainer;
+import android.app.IActivityContainerCallback;
 import android.appwidget.AppWidgetManager;
+import android.graphics.Rect;
 import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
@@ -45,14 +49,12 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
-import com.android.internal.app.ProcessMap;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.AppTransition;
-import com.android.server.wm.StackBox;
 import com.android.server.wm.WindowManagerService;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -68,7 +70,6 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackBoxInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -1770,7 +1771,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
         mStackSupervisor.setWindowManager(wm);
-        wm.createStack(HOME_STACK_ID, -1, StackBox.TASK_STACK_GOES_OVER, 1.0f);
     }
 
     public void startObservingNativeCrashes() {
@@ -1801,7 +1801,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         m.mFactoryTest = factoryTest;
         m.mIntentFirewall = new IntentFirewall(m.new IntentFirewallInterface());
 
-        m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
+        m.mStackSupervisor = new ActivityStackSupervisor(m);
 
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
@@ -7100,23 +7100,28 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public int createStack(int taskId, int relativeStackBoxId, int position, float weight) {
+    public IBinder getHomeActivityToken() throws RemoteException {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "createStack()");
-        if (DEBUG_STACK) Slog.d(TAG, "createStack: taskId=" + taskId + " relStackBoxId=" +
-                relativeStackBoxId + " position=" + position + " weight=" + weight);
+                "getHomeActivityToken()");
         synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                int stackId = mStackSupervisor.createStack();
-                mWindowManager.createStack(stackId, relativeStackBoxId, position, weight);
-                if (taskId > 0) {
-                    moveTaskToStack(taskId, stackId, true);
-                }
-                return stackId;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            return mStackSupervisor.getHomeActivityToken();
+        }
+    }
+
+    @Override
+    public IActivityContainer createActivityContainer(IBinder parentActivityToken,
+            IActivityContainerCallback callback) throws RemoteException {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "createActivityContainer()");
+        synchronized (this) {
+            if (parentActivityToken == null) {
+                throw new IllegalArgumentException("parent token must not be null");
             }
+            ActivityRecord r = ActivityRecord.forToken(parentActivityToken);
+            if (r == null) {
+                return null;
+            }
+            return mStackSupervisor.createActivityContainer(r, callback);
         }
     }
 
@@ -7141,99 +7146,40 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void resizeStackBox(int stackBoxId, float weight) {
+    public void resizeStack(int stackBoxId, Rect bounds) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "resizeStackBox()");
         long ident = Binder.clearCallingIdentity();
         try {
-            mWindowManager.resizeStackBox(stackBoxId, weight);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    private ArrayList<StackInfo> getStacks() {
-        synchronized (this) {
-            ArrayList<ActivityManager.StackInfo> list = new ArrayList<ActivityManager.StackInfo>();
-            ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
-            for (ActivityStack stack : stacks) {
-                ActivityManager.StackInfo stackInfo = new ActivityManager.StackInfo();
-                int stackId = stack.mStackId;
-                stackInfo.stackId = stackId;
-                stackInfo.bounds = mWindowManager.getStackBounds(stackId);
-                ArrayList<TaskRecord> tasks = stack.getAllTasks();
-                final int numTasks = tasks.size();
-                int[] taskIds = new int[numTasks];
-                String[] taskNames = new String[numTasks];
-                for (int i = 0; i < numTasks; ++i) {
-                    final TaskRecord task = tasks.get(i);
-                    taskIds[i] = task.taskId;
-                    taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
-                            : task.realActivity != null ? task.realActivity.flattenToString()
-                            : task.getTopActivity() != null ? task.getTopActivity().packageName
-                            : "unknown";
-                }
-                stackInfo.taskIds = taskIds;
-                stackInfo.taskNames = taskNames;
-                list.add(stackInfo);
-            }
-            return list;
-        }
-    }
-
-    private void addStackInfoToStackBoxInfo(StackBoxInfo stackBoxInfo, List<StackInfo> stackInfos) {
-        final int stackId = stackBoxInfo.stackId;
-        if (stackId >= 0) {
-            for (StackInfo stackInfo : stackInfos) {
-                if (stackId == stackInfo.stackId) {
-                    stackBoxInfo.stack = stackInfo;
-                    stackInfos.remove(stackInfo);
-                    return;
-                }
-            }
-        } else {
-            addStackInfoToStackBoxInfo(stackBoxInfo.children[0], stackInfos);
-            addStackInfoToStackBoxInfo(stackBoxInfo.children[1], stackInfos);
-        }
-    }
-
-    @Override
-    public List<StackBoxInfo> getStackBoxes() {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getStackBoxes()");
-        long ident = Binder.clearCallingIdentity();
-        try {
-            List<StackBoxInfo> stackBoxInfos = mWindowManager.getStackBoxInfos();
-            synchronized (this) {
-                List<StackInfo> stackInfos = getStacks();
-                for (StackBoxInfo stackBoxInfo : stackBoxInfos) {
-                    addStackInfoToStackBoxInfo(stackBoxInfo, stackInfos);
-                }
-            }
-            return stackBoxInfos;
+            mWindowManager.resizeStack(stackBoxId, bounds);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override
-    public StackBoxInfo getStackBoxInfo(int stackBoxId) {
+    public List<StackInfo> getAllStackInfos() {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getStackBoxInfo()");
+                "getAllStackInfos()");
         long ident = Binder.clearCallingIdentity();
         try {
-            List<StackBoxInfo> stackBoxInfos = mWindowManager.getStackBoxInfos();
-            StackBoxInfo info = null;
             synchronized (this) {
-                List<StackInfo> stackInfos = getStacks();
-                for (StackBoxInfo stackBoxInfo : stackBoxInfos) {
-                    addStackInfoToStackBoxInfo(stackBoxInfo, stackInfos);
-                    if (stackBoxInfo.stackBoxId == stackBoxId) {
-                        info = stackBoxInfo;
-                    }
-                }
+                return mStackSupervisor.getAllStackInfosLocked();
             }
-            return info;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public StackInfo getStackInfo(int stackId) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "getStackInfo()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                return mStackSupervisor.getStackInfoLocked(stackId);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -14117,18 +14063,21 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean kept = true;
         final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
-        if (changes != 0 && starting == null) {
-            // If the configuration changed, and the caller is not already
-            // in the process of starting an activity, then find the top
-            // activity to check if its configuration needs to change.
-            starting = mainStack.topRunningActivityLocked(null);
-        }
+        // mainStack is null during startup.
+        if (mainStack != null) {
+            if (changes != 0 && starting == null) {
+                // If the configuration changed, and the caller is not already
+                // in the process of starting an activity, then find the top
+                // activity to check if its configuration needs to change.
+                starting = mainStack.topRunningActivityLocked(null);
+            }
 
-        if (starting != null) {
-            kept = mainStack.ensureActivityConfigurationLocked(starting, changes);
-            // And we need to make sure at this point that all other activities
-            // are made visible with the correct configuration.
-            mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
+            if (starting != null) {
+                kept = mainStack.ensureActivityConfigurationLocked(starting, changes);
+                // And we need to make sure at this point that all other activities
+                // are made visible with the correct configuration.
+                mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes);
+            }
         }
 
         if (values != null && mWindowManager != null) {

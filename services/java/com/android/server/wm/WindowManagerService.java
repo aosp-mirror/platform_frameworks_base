@@ -45,7 +45,6 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
-import android.app.ActivityManager.StackBoxInfo;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -3775,10 +3774,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (stack == null) {
                 mFocusedStackFrame.setVisibility(false);
             } else {
-                final StackBox box = stack.mStackBox;
-                final Rect bounds = box.mBounds;
-                final boolean multipleStacks = box.mParent != null;
-                mFocusedStackFrame.setBounds(bounds);
+                mFocusedStackFrame.setBounds(stack);
+                final boolean multipleStacks = !stack.isFullscreen();
                 mFocusedStackFrame.setVisibility(multipleStacks);
             }
         } finally {
@@ -4783,10 +4780,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 final TaskStack stack = task.mStack;
                 final DisplayContent displayContent = task.getDisplayContent();
-                final boolean isHomeStackTask = stack.isHomeStack();
-                if (isHomeStackTask != displayContent.homeOnTop()) {
-                    // First move the stack itself.
-                    displayContent.moveHomeStackBox(isHomeStackTask);
+                displayContent.moveStack(stack, true);
+                final TaskStack homeStack = displayContent.getHomeStack();
+                if (homeStack != stack) {
+                    // When a non-home stack moves to the top, the home stack moves to the
+                    // bottom.
+                    displayContent.moveStack(homeStack, false);
                 }
                 stack.moveTaskToTop(task);
             }
@@ -4817,36 +4816,19 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Create a new TaskStack and place it next to an existing stack.
      * @param stackId The unique identifier of the new stack.
-     * @param relativeStackBoxId The existing stack that this stack goes before or after.
-     * @param position One of:
-     *      {@link StackBox#TASK_STACK_GOES_BEFORE}
-     *      {@link StackBox#TASK_STACK_GOES_AFTER}
-     *      {@link StackBox#TASK_STACK_GOES_ABOVE}
-     *      {@link StackBox#TASK_STACK_GOES_BELOW}
-     *      {@link StackBox#TASK_STACK_GOES_UNDER}
-     *      {@link StackBox#TASK_STACK_GOES_OVER}
-     * @param weight Relative weight for determining how big to make the new TaskStack.
      */
-    public void createStack(int stackId, int relativeStackBoxId, int position, float weight) {
+    public void createStack(int stackId, int displayId) {
         synchronized (mWindowMap) {
-            if (position <= StackBox.TASK_STACK_GOES_BELOW &&
-                    (weight < STACK_WEIGHT_MIN || weight > STACK_WEIGHT_MAX)) {
-                throw new IllegalArgumentException(
-                        "createStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
-                        STACK_WEIGHT_MAX + ", weight=" + weight);
-            }
             final int numDisplays = mDisplayContents.size();
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
                 final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-                TaskStack stack = displayContent.createStack(stackId, relativeStackBoxId, position,
-                        weight);
-                if (stack != null) {
+                if (displayContent.getDisplayId() == displayId) {
+                    TaskStack stack = displayContent.createStack(stackId);
                     mStackIdToStack.put(stackId, stack);
                     performLayoutAndPlaceSurfacesLocked();
                     return;
                 }
             }
-            Slog.e(TAG, "createStack: Unable to find relativeStackBoxId=" + relativeStackBoxId);
         }
     }
 
@@ -4858,7 +4840,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 int nextStackId = stack.remove();
                 stack.getDisplayContent().layoutNeeded = true;
                 requestTraversalLocked();
-                return nextStackId;
+                if (nextStackId > HOME_STACK_ID) {
+                    return nextStackId;
+                }
             }
             if (DEBUG_STACK) Slog.i(TAG, "removeStack: could not find stackId=" + stackId);
         }
@@ -4893,40 +4877,27 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void resizeStackBox(int stackBoxId, float weight) {
-        if (weight < STACK_WEIGHT_MIN || weight > STACK_WEIGHT_MAX) {
-            throw new IllegalArgumentException(
-                    "resizeStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
-                    STACK_WEIGHT_MAX + ", weight=" + weight);
-        }
+    public void resizeStack(int stackId, Rect bounds) {
         synchronized (mWindowMap) {
-            final int numDisplays = mDisplayContents.size();
-            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                if (mDisplayContents.valueAt(displayNdx).resizeStack(stackBoxId, weight)) {
-                    performLayoutAndPlaceSurfacesLocked();
-                    return;
-                }
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null) {
+                throw new IllegalArgumentException("resizeStack: stackId " + stackId
+                        + " not found.");
             }
-        }
-        throw new IllegalArgumentException("resizeStack: stackBoxId " + stackBoxId
-                + " not found.");
-    }
-
-    public ArrayList<StackBoxInfo> getStackBoxInfos() {
-        synchronized(mWindowMap) {
-            return getDefaultDisplayContentLocked().getStackBoxInfos();
+            if (stack.setBounds(bounds)) {
+                stack.getDisplayContent().layoutNeeded = true;
+                performLayoutAndPlaceSurfacesLocked();
+            }
         }
     }
 
-    public Rect getStackBounds(int stackId) {
-        final int numDisplays = mDisplayContents.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            Rect bounds = mDisplayContents.valueAt(displayNdx).getStackBounds(stackId);
-            if (bounds != null) {
-                return bounds;
-            }
+    public void getStackBounds(int stackId, Rect bounds) {
+        final TaskStack stack = mStackIdToStack.get(stackId);
+        if (stack != null) {
+            stack.getBounds(bounds);
+            return;
         }
-        return null;
+        bounds.setEmpty();
     }
 
     // -------------------------------------------------------------
@@ -5583,7 +5554,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 continue;
                             }
                             appWin = ws;
-                            stackBounds.set(ws.getStackBounds());
+                            ws.getStackBounds(stackBounds);
                         }
                     }
 
@@ -8210,7 +8181,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mPolicy.getContentRectLw(mTmpContentRect);
-        displayContent.setStackBoxSize(mTmpContentRect);
+        displayContent.resize(mTmpContentRect);
 
         int seq = mLayoutSeq+1;
         if (seq < 0) seq = 0;
@@ -8805,7 +8776,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (canBeSeen) {
                 // This function assumes that the contents of the default display are
                 // processed first before secondary displays.
-                if (w.mDisplayContent.isDefaultDisplay) {
+                final DisplayContent displayContent = w.mDisplayContent;
+                if (displayContent.isDefaultDisplay) {
                     // While a dream or keyguard is showing, obscure ordinary application
                     // content on secondary displays (by forcibly enabling mirroring unless
                     // there is other content we want to show) but still allow opaque

@@ -19,8 +19,9 @@
 package com.android.commands.am;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
+import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
@@ -31,9 +32,11 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -106,11 +109,11 @@ public class Am extends BaseCommand {
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
-                "       am stack create <TASK_ID> <RELATIVE_STACK_BOX_ID> <POSITION> <WEIGHT>\n" +
+                "       am stack create <TASK_ID> <DISPLAY_ID>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
-                "       am stack resize <STACK_ID> <WEIGHT>\n" +
-                "       am stack boxes\n" +
-                "       am stack box <STACK_BOX_ID>\n" +
+                "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack list\n" +
+                "       am stack info <STACK_ID>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -204,24 +207,16 @@ public class Am extends BaseCommand {
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit switch to it.\n" +
                 "\n" +
-                "am stack create: create a new stack relative to an existing one.\n" +
-                "   <TASK_ID>: the task to populate the new stack with. Must exist.\n" +
-                "   <RELATIVE_STACK_BOX_ID>: existing stack box's id.\n" +
-                "   <POSITION>: 0: before <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
-                "               1: after <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
-                "               2: to left of <RELATIVE_STACK_BOX_ID>,\n" +
-                "               3: to right of <RELATIVE_STACK_BOX_ID>," +
-                "               4: above <RELATIVE_STACK_BOX_ID>, 5: below <RELATIVE_STACK_BOX_ID>\n" +
-                "   <WEIGHT>: float between 0.2 and 0.8 inclusive.\n" +
+                "am stack create: create a new stack containing <TASK_ID> which must exist\n" +
                 "\n" +
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
                 "\n" +
-                "am stack resize: change <STACK_ID> relative size to new <WEIGHT>.\n" +
+                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>.\n" +
                 "\n" +
-                "am stack boxes: list the hierarchy of stack boxes and their contents.\n" +
+                "am stack list: list all of the activity stacks and their sizes.\n" +
                 "\n" +
-                "am stack box: list the hierarchy of stack boxes rooted at <STACK_BOX_ID>.\n" +
+                "am stack info: display the information about activity stack <STACK_ID>.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -1551,11 +1546,11 @@ public class Am extends BaseCommand {
         } else if (op.equals("movetask")) {
             runStackMoveTask();
         } else if (op.equals("resize")) {
-            runStackBoxResize();
-        } else if (op.equals("boxes")) {
-            runStackBoxes();
-        } else if (op.equals("box")) {
-            runStackBoxInfo();
+            runStackResize();
+        } else if (op.equals("list")) {
+            runStackList();
+        } else if (op.equals("info")) {
+            runStackInfo();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -1565,16 +1560,16 @@ public class Am extends BaseCommand {
     private void runStackCreate() throws Exception {
         String taskIdStr = nextArgRequired();
         int taskId = Integer.valueOf(taskIdStr);
-        String relativeToStr = nextArgRequired();
-        int relativeTo = Integer.valueOf(relativeToStr);
-        String positionStr = nextArgRequired();
-        int position = Integer.valueOf(positionStr);
-        String weightStr = nextArgRequired();
-        float weight = Float.valueOf(weightStr);
+        String displayIdStr = nextArgRequired();
+        int displayId = Integer.valueOf(displayIdStr);
 
         try {
-            int stackId = mAm.createStack(taskId, relativeTo, position, weight);
-            System.out.println("createStack returned new stackId=" + stackId + "\n\n");
+            IBinder homeActivityToken = mAm.getHomeActivityToken();
+            IActivityContainer container = mAm.createActivityContainer(homeActivityToken, null);
+            final int stackId = container.getStackId();
+            System.out.println("createStack returned new stackId=" + stackId + "\n");
+            container.attachToDisplay(displayId);
+            mAm.moveTaskToStack(taskId, stackId, true);
         } catch (RemoteException e) {
         }
     }
@@ -1601,34 +1596,40 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runStackBoxResize() throws Exception {
-        String stackBoxIdStr = nextArgRequired();
-        int stackBoxId = Integer.valueOf(stackBoxIdStr);
-        String weightStr = nextArgRequired();
-        float weight = Float.valueOf(weightStr);
+    private void runStackResize() throws Exception {
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.valueOf(stackIdStr);
+        String leftStr = nextArgRequired();
+        int left = Integer.valueOf(leftStr);
+        String topStr = nextArgRequired();
+        int top = Integer.valueOf(topStr);
+        String rightStr = nextArgRequired();
+        int right = Integer.valueOf(rightStr);
+        String bottomStr = nextArgRequired();
+        int bottom = Integer.valueOf(bottomStr);
 
         try {
-            mAm.resizeStackBox(stackBoxId, weight);
+            mAm.resizeStack(stackId, new Rect(left, top, right, bottom));
         } catch (RemoteException e) {
         }
     }
 
-    private void runStackBoxes() throws Exception {
+    private void runStackList() throws Exception {
         try {
-            List<StackBoxInfo> stackBoxes = mAm.getStackBoxes();
-            for (StackBoxInfo info : stackBoxes) {
+            List<StackInfo> stacks = mAm.getAllStackInfos();
+            for (StackInfo info : stacks) {
                 System.out.println(info);
             }
         } catch (RemoteException e) {
         }
     }
 
-    private void runStackBoxInfo() throws Exception {
+    private void runStackInfo() throws Exception {
         try {
-            String stackBoxIdStr = nextArgRequired();
-            int stackBoxId = Integer.valueOf(stackBoxIdStr);
-            StackBoxInfo stackBoxInfo = mAm.getStackBoxInfo(stackBoxId); 
-            System.out.println(stackBoxInfo);
+            String stackIdStr = nextArgRequired();
+            int stackId = Integer.valueOf(stackIdStr);
+            StackInfo info = mAm.getStackInfo(stackId);
+            System.out.println(info);
         } catch (RemoteException e) {
         }
     }

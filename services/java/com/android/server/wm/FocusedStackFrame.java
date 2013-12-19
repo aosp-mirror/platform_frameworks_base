@@ -41,7 +41,7 @@ class FocusedStackFrame {
     private final SurfaceControl mSurfaceControl;
     private final Surface mSurface = new Surface();
     private final Rect mLastBounds = new Rect();
-    private final Rect mBounds = new Rect();
+    final Rect mBounds = new Rect();
     private final Rect mTmpDrawRect = new Rect();
 
     public FocusedStackFrame(Display display, SurfaceSession session) {
@@ -131,9 +131,9 @@ class FocusedStackFrame {
         }
     }
 
-    public void setBounds(Rect bounds) {
-        if (false && DEBUG_STACK) Slog.i(TAG, "setBounds: bounds=" + bounds);
-        mBounds.set(bounds);
+    public void setBounds(TaskStack stack) {
+        stack.getBounds(mBounds);
+        if (false && DEBUG_STACK) Slog.i(TAG, "setBounds: bounds=" + mBounds);
     }
 
     public void setLayer(int layer) {
