@@ -829,6 +829,10 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"registrar audio"</string>
     <!-- no translation found for permdesc_recordAudio (4906839301087980680) -->
     <skip />
+    <!-- no translation found for permlab_sim_communication (1180265879464893029) -->
+    <skip />
+    <!-- no translation found for permdesc_sim_communication (5725159654279639498) -->
+    <skip />
     <string name="permlab_camera" msgid="3616391919559751192">"fotografar e registrar videos"</string>
     <!-- no translation found for permdesc_camera (8497216524735535009) -->
     <skip />

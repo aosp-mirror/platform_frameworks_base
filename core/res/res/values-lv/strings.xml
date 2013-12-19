@@ -504,6 +504,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ļauj lietotnei mainīt globālos audio iestatījumus, piemēram, skaļumu un izejai izmantoto skaļruni."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ierakstīt audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Ļauj lietotnei ierakstīt audio, izmantojot mikrofonu. Šī atļauja ļauj lietotnei ierakstīt audio jebkurā brīdī bez jūsu apstiprinājuma."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM saziņa"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Ļauj lietotnei sūtīt komandas uz SIM karti. Tas ir ļoti bīstami!"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"uzņemt attēlus un videoklipus"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Ļauj lietotnei uzņemt attēlus un videoklipus ar kameru. Ar šo atļauju lietotne var jebkurā brīdī izmantot kameru bez jūsu apstiprinājuma."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Atspējot pārraidīšanas LED indikatoru, kad kamera tiek izmantota"</string>

@@ -504,6 +504,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"აპს შეეძლება აუდიოს გლობალური პარამეტრების შეცვლა. მაგ.: ხმის სიმაღლე და რომელი დინამიკი გამოიყენება სიგნალის გამოსტანად."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"აუდიოს ჩაწერა"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"აპს შეეძლება აუდიო ჩაწერა მიკროფონით. ნებართვა აპს აუდიო ჩაწერის უფლებას აძლევს ნებისმიერ დროს, თქვენი თანხმობის გარეშე."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"კომუნიკაცია SIM-თან"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"აპისთვის ნების დართვა გაუგზავნოს ბრძანებები SIM-ბარათს. ეს ძალიან საშიშია."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"სურათებისა და ვიდეოების გადაღება"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"აპს შეეძლება კამერით სურათისა და ვიდეოს გადაღება. ეს ნებართვა აპს უფლებას აძლევს, ნებისმიერ დროს გამოიყენოს კამერა თქვენი დადასტურების გარეშე."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"კამერის გამოყენებისას გადამცემი ინდიკატორის LED გათიშვა"</string>
