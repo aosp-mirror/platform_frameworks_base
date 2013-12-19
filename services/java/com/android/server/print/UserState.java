@@ -71,6 +71,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -594,6 +595,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     .append(installedService.getSettingsActivityName()).println();
             pw.append(installedServicePrefix).append(tab).append("addPrintersActivity=")
                     .append(installedService.getAddPrintersActivityName()).println();
+            pw.append(installedServicePrefix).append(tab).append("avancedOptionsActivity=")
+                   .append(installedService.getAdvancedOptionsActivityName()).println();
         }
 
         pw.append(prefix).append(tab).append("enabled services:").println();
@@ -787,11 +790,16 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     }
 
     private void onConfigurationChangedLocked() {
+        Set<ComponentName> installedComponents = new ArraySet<ComponentName>();
+
         final int installedCount = mInstalledServices.size();
         for (int i = 0; i < installedCount; i++) {
             ResolveInfo resolveInfo = mInstalledServices.get(i).getResolveInfo();
             ComponentName serviceName = new ComponentName(resolveInfo.serviceInfo.packageName,
                     resolveInfo.serviceInfo.name);
+
+            installedComponents.add(serviceName);
+
             if (mEnabledServices.contains(serviceName)) {
                 if (!mActiveServices.containsKey(serviceName)) {
                     RemotePrintService service = new RemotePrintService(
@@ -803,6 +811,18 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 if (service != null) {
                     removeServiceLocked(service);
                 }
+            }
+        }
+
+        Iterator<Map.Entry<ComponentName, RemotePrintService>> iterator =
+                mActiveServices.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<ComponentName, RemotePrintService> entry = iterator.next();
+            ComponentName serviceName = entry.getKey();
+            RemotePrintService service = entry.getValue();
+            if (!installedComponents.contains(serviceName)) {
+                removeServiceLocked(service);
+                iterator.remove();
             }
         }
     }
