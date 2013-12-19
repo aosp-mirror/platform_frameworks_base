@@ -25,20 +25,28 @@ using android::Looper;
 using android::sp;
 using android::IPCThreadState;
 
+static inline Looper* ALooper_to_Looper(ALooper* alooper) {
+    return reinterpret_cast<Looper*>(alooper);
+}
+
+static inline ALooper* Looper_to_ALooper(Looper* looper) {
+    return reinterpret_cast<ALooper*>(looper);
+}
+
 ALooper* ALooper_forThread() {
-    return Looper::getForThread().get();
+    return Looper_to_ALooper(Looper::getForThread().get());
 }
 
 ALooper* ALooper_prepare(int opts) {
-    return Looper::prepare(opts).get();
+    return Looper_to_ALooper(Looper::prepare(opts).get());
 }
 
 void ALooper_acquire(ALooper* looper) {
-    static_cast<Looper*>(looper)->incStrong((void*)ALooper_acquire);
+    ALooper_to_Looper(looper)->incStrong((void*)ALooper_acquire);
 }
 
 void ALooper_release(ALooper* looper) {
-    static_cast<Looper*>(looper)->decStrong((void*)ALooper_acquire);
+    ALooper_to_Looper(looper)->decStrong((void*)ALooper_acquire);
 }
 
 int ALooper_pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outData) {
@@ -64,14 +72,14 @@ int ALooper_pollAll(int timeoutMillis, int* outFd, int* outEvents, void** outDat
 }
 
 void ALooper_wake(ALooper* looper) {
-    static_cast<Looper*>(looper)->wake();
+    ALooper_to_Looper(looper)->wake();
 }
 
 int ALooper_addFd(ALooper* looper, int fd, int ident, int events,
         ALooper_callbackFunc callback, void* data) {
-    return static_cast<Looper*>(looper)->addFd(fd, ident, events, callback, data);
+    return ALooper_to_Looper(looper)->addFd(fd, ident, events, callback, data);
 }
 
 int ALooper_removeFd(ALooper* looper, int fd) {
-    return static_cast<Looper*>(looper)->removeFd(fd);
+    return ALooper_to_Looper(looper)->removeFd(fd);
 }
