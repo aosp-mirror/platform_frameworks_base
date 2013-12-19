@@ -29,6 +29,7 @@ public class SystemServiceManager {
     private static final String TAG = "SystemServiceManager";
 
     private final Context mContext;
+    private boolean mSafeMode;
 
     // Services that should receive lifecycle events.
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
@@ -37,6 +38,14 @@ public class SystemServiceManager {
 
     public SystemServiceManager(Context context) {
         mContext = context;
+    }
+
+    public void startService(String className) {
+        try {
+            startService(Class.forName(className));
+        } catch (ClassNotFoundException cnfe) {
+            Slog.i(TAG, className + " not available, ignoring.");
+        }
     }
 
     /**
@@ -89,6 +98,19 @@ public class SystemServiceManager {
                         " threw an Exception processing boot phase " + mCurrentPhase, e);
             }
         }
+    }
+
+    /** Sets the safe mode flag for services to query. */
+    public void setSafeMode(boolean safeMode) {
+        mSafeMode = safeMode;
+    }
+
+    /**
+     * Returns whether we are booting into safe mode.
+     * @return safe mode flag
+     */
+    public boolean isSafeMode() {
+        return mSafeMode;
     }
 
     /**

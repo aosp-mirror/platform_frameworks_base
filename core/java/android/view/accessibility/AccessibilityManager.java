@@ -213,7 +213,8 @@ public final class AccessibilityManager {
                     userId = UserHandle.myUserId();
                 }
                 IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
-                IAccessibilityManager service = IAccessibilityManager.Stub.asInterface(iBinder);
+                IAccessibilityManager service = iBinder == null
+                        ? null : IAccessibilityManager.Stub.asInterface(iBinder);
                 sInstance = new AccessibilityManager(context, service, userId);
             }
         }
@@ -233,10 +234,14 @@ public final class AccessibilityManager {
         mHandler = new MyHandler(context.getMainLooper());
         mService = service;
         mUserId = userId;
-
+        if (mService == null) {
+            mIsEnabled = false;
+        }
         try {
-            final int stateFlags = mService.addClient(mClient, userId);
-            setState(stateFlags);
+            if (mService != null) {
+                final int stateFlags = mService.addClient(mClient, userId);
+                setState(stateFlags);
+            }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
         }
@@ -358,14 +363,16 @@ public final class AccessibilityManager {
     public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList() {
         List<AccessibilityServiceInfo> services = null;
         try {
-            services = mService.getInstalledAccessibilityServiceList(mUserId);
-            if (DEBUG) {
-                Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
+            if (mService != null) {
+                services = mService.getInstalledAccessibilityServiceList(mUserId);
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
+                }
             }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
         }
-        return Collections.unmodifiableList(services);
+        return services != null ? Collections.unmodifiableList(services) : Collections.EMPTY_LIST;
     }
 
     /**
@@ -385,14 +392,16 @@ public final class AccessibilityManager {
             int feedbackTypeFlags) {
         List<AccessibilityServiceInfo> services = null;
         try {
-            services = mService.getEnabledAccessibilityServiceList(feedbackTypeFlags, mUserId);
-            if (DEBUG) {
-                Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
+            if (mService != null) {
+                services = mService.getEnabledAccessibilityServiceList(feedbackTypeFlags, mUserId);
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
+                }
             }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
         }
-        return Collections.unmodifiableList(services);
+        return services != null ? Collections.unmodifiableList(services) : Collections.EMPTY_LIST;
     }
 
     /**
@@ -502,6 +511,9 @@ public final class AccessibilityManager {
      */
     public int addAccessibilityInteractionConnection(IWindow windowToken,
             IAccessibilityInteractionConnection connection) {
+        if (mService == null) {
+            return View.NO_ID;
+        }
         try {
             return mService.addAccessibilityInteractionConnection(windowToken, connection, mUserId);
         } catch (RemoteException re) {
@@ -518,7 +530,9 @@ public final class AccessibilityManager {
      */
     public void removeAccessibilityInteractionConnection(IWindow windowToken) {
         try {
-            mService.removeAccessibilityInteractionConnection(windowToken);
+            if (mService != null) {
+                mService.removeAccessibilityInteractionConnection(windowToken);
+            }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while removing an accessibility interaction connection. ", re);
         }
