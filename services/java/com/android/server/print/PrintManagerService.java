@@ -401,13 +401,17 @@ public final class PrintManagerService extends IPrintManager.Stub {
             @Override
             public void onPackageModified(String packageName) {
                 synchronized (mLock) {
+                    boolean servicesChanged = false;
                     UserState userState = getOrCreateUserStateLocked(getChangingUserId());
                     Iterator<ComponentName> iterator = userState.getEnabledServices().iterator();
                     while (iterator.hasNext()) {
                         ComponentName componentName = iterator.next();
                         if (packageName.equals(componentName.getPackageName())) {
-                            userState.updateIfNeededLocked();
+                            servicesChanged = true;
                         }
+                    }
+                    if (servicesChanged) {
+                        userState.updateIfNeededLocked();
                     }
                 }
             }
@@ -415,18 +419,21 @@ public final class PrintManagerService extends IPrintManager.Stub {
             @Override
             public void onPackageRemoved(String packageName, int uid) {
                 synchronized (mLock) {
+                    boolean servicesRemoved = false;
                     UserState userState = getOrCreateUserStateLocked(getChangingUserId());
                     Iterator<ComponentName> iterator = userState.getEnabledServices().iterator();
                     while (iterator.hasNext()) {
                         ComponentName componentName = iterator.next();
                         if (packageName.equals(componentName.getPackageName())) {
                             iterator.remove();
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.ENABLED_PRINT_SERVICES,
-                                    userState.getEnabledServices(), getChangingUserId());
-                            userState.updateIfNeededLocked();
-                            return;
+                            servicesRemoved = true;
                         }
+                    }
+                    if (servicesRemoved) {
+                        persistComponentNamesToSettingLocked(
+                                Settings.Secure.ENABLED_PRINT_SERVICES,
+                                userState.getEnabledServices(), getChangingUserId());
+                        userState.updateIfNeededLocked();
                     }
                 }
             }
