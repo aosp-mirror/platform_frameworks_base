@@ -504,6 +504,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lehetővé teszi az alkalmazás számára az általános hangbeállítások, például a hangerő és a használni kívánt kimeneti hangszóró módosítását."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"hanganyag rögzítése"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Lehetővé teszi az alkalmazás számára a mikrofonnal való hangfelvételt.Az engedéllyel rendelkező alkalmazás az Ön jóváhagyása nélkül, bármikor rögzíthet hanganyagot."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM-kommunikáció"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Engedélyezi, hogy az alkalmazás parancsokat küldjön a SIM kártyára. Ez rendkívül veszélyes lehet."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotók és videók készítése"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Lehetővé teszi az alkalmazás számára, hogy a fényképezőgéppel fotókat és videókat készítsen. Az engedéllyel rendelkező alkalmazás bármikor, az Ön jóváhagyása nélkül használhatja a fényképezőgépet."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"átviteljelző LED letiltása, ha a kamera használatban van"</string>

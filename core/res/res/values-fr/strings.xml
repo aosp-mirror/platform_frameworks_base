@@ -230,7 +230,7 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Accès et contrôle de faible niveau du système."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Outils de développement"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Ces fonctionnalités sont destinées uniquement aux développeurs d\'applications."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Interface utilisateur d\'une autre application"</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Interface des autres applis"</string>
     <string name="permgroupdesc_display" msgid="6051002031933013714">"Effet sur l\'interface utilisateur d\'autres applications"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accéder à la  mémoire de stockage USB"</string>
@@ -353,7 +353,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Permet à l\'application de lancer l\'interface utilisateur de confirmation de sauvegarde complète. Seules certaines applications peuvent bénéficier de cette permission."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"Affichage de fenêtres non autorisées"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Permet à l\'application de créer des fenêtres destinées à être utilisées par l\'interface utilisateur du système interne. Les applications standards ne doivent pas utiliser cette fonctionnalité."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ignorer les autres applications"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"S\'afficher en surimpression dans les autres applis"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Permet à l\'application d\'ignorer d\'autres applications ou certaines parties de l\'interface utilisateur. Cela peut altérer votre utilisation de l\'interface de n\'importe quelle application, ou modifier ce que vous pensez voir dans d\'autres applications."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"Réglage de la vitesse des animations"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permet à l\'application de modifier à tout moment la vitesse générale des animations pour les ralentir ou les accélérer."</string>
@@ -504,6 +504,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrer des fichiers audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet à l\'application d\'enregistrer des contenus audio à l\'aide du microphone. Cette autorisation lui donne la possibilité d\'enregistrer du contenu audio à tout moment sans votre consentement."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"Communication avec la carte SIM"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Autoriser l\'envoi de commandes à la carte SIM via l\'application. Cette fonctionnalité est très risquée."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"désactiver l\'indicateur d\'émission LED lorsque la caméra est en cours d\'utilisation"</string>

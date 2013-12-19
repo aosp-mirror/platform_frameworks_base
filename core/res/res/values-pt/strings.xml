@@ -504,6 +504,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que o aplicativo modifique configurações de áudio globais como volume e alto-falantes de saída."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite que o aplicativo grave áudio com o microfone. Esta permissão autoriza o aplicativo a gravar áudio a qualquer momento, sem sua confirmação."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"comunicação com sim"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite que o aplicativo envie comandos ao SIM. Muito perigoso."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tirar fotos e gravar vídeos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que o aplicativo tire fotos e filme vídeos com a câmera. Esta permissão autoriza o aplicativo a usar a câmera a qualquer momento sem sua confirmação."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desativar a transmissão do LED indicador quando a câmera estiver em uso"</string>

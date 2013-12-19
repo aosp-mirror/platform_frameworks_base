@@ -504,6 +504,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Antaa sovelluksen muokata yleisiä ääniasetuksia, kuten äänenvoimakkuutta ja käytettävää kaiutinta."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"tallentaa ääntä"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Antaa sovelluksen tallentaa ääntä mikrofonin avulla. Sovellus voi tallentaa ääntä milloin tahansa pyytämättä sinulta lupaa."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM-viestintä"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Antaa sovelluksen lähettää komentoja SIM-kortille. Tämä ei ole turvallista."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ota kuvia ja videoita"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Antaa sovelluksen ottaa kuvia ja kuvata videoita kameralla. Sovellus voi käyttää kameraa milloin tahansa ilman lupaasi."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"poista lähetyksen merkkivalo käytöstä, kun kameraa käytetään"</string>
