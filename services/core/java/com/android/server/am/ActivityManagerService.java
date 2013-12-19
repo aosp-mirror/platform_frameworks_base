@@ -1074,6 +1074,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int REQUEST_ALL_PSS_MSG = 39;
     static final int START_RELATED_USERS_MSG = 40;
+    static final int UPDATE_TIME = 41;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1690,6 +1691,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             case START_RELATED_USERS_MSG: {
                 synchronized (ActivityManagerService.this) {
                     startRelatedUsersLocked();
+                }
+                break;
+            }
+            case UPDATE_TIME: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                        ProcessRecord r = mLruProcesses.get(i);
+                        if (r.thread != null) {
+                            try {
+                                r.thread.updateTimePrefs(msg.arg1 == 0 ? false : true);
+                            } catch (RemoteException ex) {
+                                Slog.w(TAG, "Failed to update preferences for: " + r.info.processName);
+                            }
+                        }
+                    }
                 }
                 break;
             }
@@ -13441,11 +13457,20 @@ public final class ActivityManagerService extends ActivityManagerNative
          * of all currently running processes. This message will get queued up before the broadcast
          * happens.
          */
-        if (intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
+        if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
             mHandler.sendEmptyMessage(UPDATE_TIME_ZONE);
         }
 
-        if (intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
+        /*
+         * If the user set the time, let all running processes know.
+         */
+        if (Intent.ACTION_TIME_CHANGED.equals(intent.getAction())) {
+            final int is24Hour = intent.getBooleanExtra(
+                    Intent.EXTRA_TIME_PREF_24_HOUR_FORMAT, false) ? 1 : 0;
+            mHandler.sendMessage(mHandler.obtainMessage(UPDATE_TIME, is24Hour, 0));
+        }
+
+        if (Intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
             mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
         }
 

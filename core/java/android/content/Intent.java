@@ -3334,6 +3334,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_SHUTDOWN_USERSPACE_ONLY
             = "android.intent.extra.SHUTDOWN_USERSPACE_ONLY";
 
+    /**
+     * Optional boolean extra for {@link #ACTION_TIME_CHANGED} that indicates the
+     * user has set their time format preferences to the 24 hour format.
+     *
+     * @hide for internal use only.
+     */
+    public static final String EXTRA_TIME_PREF_24_HOUR_FORMAT =
+            "android.intent.extra.TIME_PREF_24_HOUR_FORMAT";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).

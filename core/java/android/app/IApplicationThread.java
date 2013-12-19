@@ -139,6 +139,7 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void setProcessState(int state) throws RemoteException;
     void scheduleInstallProvider(ProviderInfo provider) throws RemoteException;
+    void updateTimePrefs(boolean is24Hour) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -192,4 +193,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_TRANSLUCENT_CONVERSION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+48;
     int SET_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+49;
     int SCHEDULE_INSTALL_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+50;
+    int UPDATE_TIME_PREFS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+51;
 }
