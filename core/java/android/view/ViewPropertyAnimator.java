@@ -136,15 +136,15 @@ public class ViewPropertyAnimator {
     private static final int NONE           = 0x0000;
     private static final int TRANSLATION_X  = 0x0001;
     private static final int TRANSLATION_Y  = 0x0002;
-    private static final int SCALE_X        = 0x0004;
-    private static final int SCALE_Y        = 0x0008;
-    private static final int ROTATION       = 0x0010;
-    private static final int ROTATION_X     = 0x0020;
-    private static final int ROTATION_Y     = 0x0040;
-    private static final int X              = 0x0080;
-    private static final int Y              = 0x0100;
-    private static final int ALPHA          = 0x0200;
-    private static final int TRANSLATION_Z  = 0x0400;
+    private static final int TRANSLATION_Z  = 0x0004;
+    private static final int SCALE_X        = 0x0008;
+    private static final int SCALE_Y        = 0x0010;
+    private static final int ROTATION       = 0x0020;
+    private static final int ROTATION_X     = 0x0040;
+    private static final int ROTATION_Y     = 0x0080;
+    private static final int X              = 0x0100;
+    private static final int Y              = 0x0200;
+    private static final int ALPHA          = 0x0400;
 
     private static final int TRANSFORM_MASK = TRANSLATION_X | TRANSLATION_Y | TRANSLATION_Z |
             SCALE_X | SCALE_Y | ROTATION | ROTATION_X | ROTATION_Y | X | Y;
@@ -574,22 +574,6 @@ public class ViewPropertyAnimator {
     }
 
     /**
-     * @hide
-     */
-    public ViewPropertyAnimator translationZ(float value) {
-        animateProperty(TRANSLATION_Z, value);
-        return this;
-    }
-
-    /**
-     * @hide
-     */
-    public ViewPropertyAnimator translationZBy(float value) {
-        animatePropertyBy(TRANSLATION_Z, value);
-        return this;
-    }
-
-    /**
      * This method will cause the View's <code>translationY</code> property to be animated to the
      * specified value. Animations already running on the property will be canceled.
      *
@@ -615,6 +599,31 @@ public class ViewPropertyAnimator {
         return this;
     }
 
+    /**
+     * This method will cause the View's <code>translationZ</code> property to be animated to the
+     * specified value. Animations already running on the property will be canceled.
+     *
+     * @param value The value to be animated to.
+     * @see View#setTranslationZ(float)
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator translationZ(float value) {
+        animateProperty(TRANSLATION_Z, value);
+        return this;
+    }
+
+    /**
+     * This method will cause the View's <code>translationZ</code> property to be animated by the
+     * specified value. Animations already running on the property will be canceled.
+     *
+     * @param value The amount to be animated by, as an offset from the current value.
+     * @see View#setTranslationZ(float)
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator translationZBy(float value) {
+        animatePropertyBy(TRANSLATION_Z, value);
+        return this;
+    }
     /**
      * This method will cause the View's <code>scaleX</code> property to be animated to the
      * specified value. Animations already running on the property will be canceled.
