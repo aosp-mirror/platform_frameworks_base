@@ -124,7 +124,7 @@ class GLES20RenderLayer extends GLES20Layer {
     @Override
     void redrawLater(DisplayList displayList, Rect dirtyRect) {
         GLES20Canvas.nUpdateRenderLayer(mLayer, mCanvas.getRenderer(),
-                ((GLES20DisplayList) displayList).getNativeDisplayList(),
+                displayList.getNativeDisplayList(),
                 dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
     }
 }
