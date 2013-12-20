@@ -24,6 +24,8 @@ import android.util.ArrayMap;
  *
  * Once all services are converted to the SystemService interface, this class can be absorbed
  * into SystemServiceManager.
+ *
+ * {@hide}
  */
 public final class LocalServices {
     private LocalServices() {}
