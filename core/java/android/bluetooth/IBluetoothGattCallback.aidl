@@ -63,5 +63,4 @@ interface IBluetoothGattCallback {
                              in int charInstId, in ParcelUuid charUuid,
                              in byte[] value);
     void onReadRemoteRssi(in String address, in int rssi, in int status);
-    void onListen(in int status);
 }

@@ -73,6 +73,9 @@ public final class BluetoothUuid {
     public static final ParcelUuid MAS =
             ParcelUuid.fromString("00001132-0000-1000-8000-00805F9B34FB");
 
+    public static final ParcelUuid BASE_UUID =
+            ParcelUuid.fromString("00000000-0000-1000-8000-00805F9B34FB");
+
 
     public static final ParcelUuid[] RESERVED_UUIDS = {
         AudioSink, AudioSource, AdvAudioDist, HSP, Handsfree, AvrcpController, AvrcpTarget,
@@ -210,5 +213,18 @@ public final class BluetoothUuid {
         UUID uuid = parcelUuid.getUuid();
         long value = (uuid.getMostSignificantBits() & 0x0000FFFF00000000L) >>> 32;
         return (int)value;
+    }
+
+    /**
+     * Check whether the given parcelUuid can be converted to 16 bit bluetooth uuid.
+     * @param parcelUuid
+     * @return true if the parcelUuid can be converted to 16 bit uuid, false otherwise.
+     */
+    public static boolean isShortUuid(ParcelUuid parcelUuid) {
+      UUID uuid = parcelUuid.getUuid();
+      if (uuid.getLeastSignificantBits() != BASE_UUID.getUuid().getLeastSignificantBits()) {
+        return false;
+      }
+      return ((uuid.getMostSignificantBits() & 0xFFFF0000FFFFFFFFL) == 0x1000L);
     }
 }
