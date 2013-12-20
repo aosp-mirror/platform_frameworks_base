@@ -98,7 +98,7 @@ public class ExifInterface {
     private static SimpleDateFormat sFormatter;
 
     static {
-        System.loadLibrary("exif_jni");
+        System.loadLibrary("jhead_jni");
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
