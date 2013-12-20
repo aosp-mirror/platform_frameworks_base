@@ -39,6 +39,12 @@ public class SubtitleView extends View {
     // Ratio of inner padding to font size.
     private static final float INNER_PADDING_RATIO = 0.125f;
 
+    /** Color used for the shadowed edge of a bevel. */
+    private static final int COLOR_BEVEL_DARK = 0x80000000;
+
+    /** Color used for the illuminated edge of a bevel. */
+    private static final int COLOR_BEVEL_LIGHT = 0x80FFFFFF;
+
     // Styled dimensions.
     private final float mCornerRadius;
     private final float mOutlineWidth;
@@ -113,7 +119,6 @@ public class SubtitleView extends View {
         // Set up density-dependent properties.
         // TODO: Move these to a default style.
         final Resources res = getContext().getResources();
-        final DisplayMetrics m = res.getDisplayMetrics();
         mCornerRadius = res.getDimensionPixelSize(com.android.internal.R.dimen.subtitle_corner_radius);
         mOutlineWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.subtitle_outline_width);
         mShadowRadius = res.getDimensionPixelSize(com.android.internal.R.dimen.subtitle_shadow_radius);
@@ -312,7 +317,8 @@ public class SubtitleView extends View {
             }
         }
 
-        if (mEdgeType == CaptionStyle.EDGE_TYPE_OUTLINE) {
+        final int edgeType = mEdgeType;
+        if (edgeType == CaptionStyle.EDGE_TYPE_OUTLINE) {
             textPaint.setStrokeJoin(Join.ROUND);
             textPaint.setStrokeWidth(mOutlineWidth);
             textPaint.setColor(mEdgeColor);
@@ -321,8 +327,24 @@ public class SubtitleView extends View {
             for (int i = 0; i < lineCount; i++) {
                 layout.drawText(c, i, i);
             }
-        } else if (mEdgeType == CaptionStyle.EDGE_TYPE_DROP_SHADOW) {
+        } else if (edgeType == CaptionStyle.EDGE_TYPE_DROP_SHADOW) {
             textPaint.setShadowLayer(mShadowRadius, mShadowOffsetX, mShadowOffsetY, mEdgeColor);
+        } else if (edgeType == CaptionStyle.EDGE_TYPE_RAISED
+                || edgeType == CaptionStyle.EDGE_TYPE_DEPRESSED) {
+            final boolean raised = edgeType == CaptionStyle.EDGE_TYPE_RAISED;
+            final int colorUp = raised ? Color.WHITE : mEdgeColor;
+            final int colorDown = raised ? mEdgeColor : Color.WHITE;
+            final float offset = mShadowRadius / 2f;
+
+            textPaint.setColor(mForegroundColor);
+            textPaint.setStyle(Style.FILL);
+            textPaint.setShadowLayer(mShadowRadius, -offset, -offset, colorUp);
+
+            for (int i = 0; i < lineCount; i++) {
+                layout.drawText(c, i, i);
+            }
+
+            textPaint.setShadowLayer(mShadowRadius, offset, offset, colorDown);
         }
 
         textPaint.setColor(mForegroundColor);

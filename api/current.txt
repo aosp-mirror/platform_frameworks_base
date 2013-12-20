@@ -29982,9 +29982,11 @@ package android.view.accessibility {
 
   public static final class CaptioningManager.CaptionStyle {
     method public android.graphics.Typeface getTypeface();
+    field public static final int EDGE_TYPE_DEPRESSED = 4; // 0x4
     field public static final int EDGE_TYPE_DROP_SHADOW = 2; // 0x2
     field public static final int EDGE_TYPE_NONE = 0; // 0x0
     field public static final int EDGE_TYPE_OUTLINE = 1; // 0x1
+    field public static final int EDGE_TYPE_RAISED = 3; // 0x3
     field public final int backgroundColor;
     field public final int edgeColor;
     field public final int edgeType;
