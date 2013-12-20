@@ -250,6 +250,9 @@ public class CaptioningManager {
      * background colors, edge properties, and typeface.
      */
     public static final class CaptionStyle {
+        /** Packed value for a color of 'none' and a cached opacity of 100%. */
+        private static final int COLOR_NONE_OPAQUE = 0x000000FF;
+
         private static final CaptionStyle WHITE_ON_BLACK;
         private static final CaptionStyle BLACK_ON_WHITE;
         private static final CaptionStyle YELLOW_ON_BLACK;
@@ -271,6 +274,12 @@ public class CaptioningManager {
         /** Edge type value specifying drop-shadowed character edges. */
         public static final int EDGE_TYPE_DROP_SHADOW = 2;
 
+        /** Edge type value specifying raised bevel character edges. */
+        public static final int EDGE_TYPE_RAISED = 3;
+
+        /** Edge type value specifying depressed bevel character edges. */
+        public static final int EDGE_TYPE_DEPRESSED = 4;
+
         /** The preferred foreground color for video captions. */
         public final int foregroundColor;
 
@@ -283,6 +292,8 @@ public class CaptioningManager {
          * <li>{@link #EDGE_TYPE_NONE}
          * <li>{@link #EDGE_TYPE_OUTLINE}
          * <li>{@link #EDGE_TYPE_DROP_SHADOW}
+         * <li>{@link #EDGE_TYPE_RAISED}
+         * <li>{@link #EDGE_TYPE_DEPRESSED}
          * </ul>
          */
         public final int edgeType;
@@ -352,13 +363,13 @@ public class CaptioningManager {
 
         static {
             WHITE_ON_BLACK = new CaptionStyle(Color.WHITE, Color.BLACK, EDGE_TYPE_NONE,
-                    Color.BLACK, Color.TRANSPARENT, null);
+                    Color.BLACK, COLOR_NONE_OPAQUE, null);
             BLACK_ON_WHITE = new CaptionStyle(Color.BLACK, Color.WHITE, EDGE_TYPE_NONE,
-                    Color.BLACK, Color.TRANSPARENT, null);
+                    Color.BLACK, COLOR_NONE_OPAQUE, null);
             YELLOW_ON_BLACK = new CaptionStyle(Color.YELLOW, Color.BLACK, EDGE_TYPE_NONE,
-                    Color.BLACK, Color.TRANSPARENT, null);
+                    Color.BLACK, COLOR_NONE_OPAQUE, null);
             YELLOW_ON_BLUE = new CaptionStyle(Color.YELLOW, Color.BLUE, EDGE_TYPE_NONE,
-                    Color.BLACK, Color.TRANSPARENT, null);
+                    Color.BLACK, COLOR_NONE_OPAQUE, null);
 
             PRESETS = new CaptionStyle[] {
                     WHITE_ON_BLACK, BLACK_ON_WHITE, YELLOW_ON_BLACK, YELLOW_ON_BLUE
