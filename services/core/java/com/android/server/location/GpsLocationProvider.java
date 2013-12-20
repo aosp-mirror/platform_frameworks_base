@@ -791,6 +791,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void handleDisable() {
         if (DEBUG) Log.d(TAG, "handleDisable");
 
+        updateClientUids(new WorkSource());
         stopNavigating();
         mAlarmManager.cancel(mWakeupIntent);
         mAlarmManager.cancel(mTimeoutIntent);
