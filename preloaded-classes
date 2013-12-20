@@ -977,14 +977,13 @@ android.view.DisplayEventReceiver
 android.view.DisplayInfo
 android.view.DisplayInfo$1
 android.view.DisplayList
+android.view.DisplayList$DisplayListFinalizer
 android.view.FallbackEventHandler
 android.view.FocusFinder
 android.view.FocusFinder$1
 android.view.FocusFinder$SequentialFocusComparator
 android.view.GLES20Canvas
 android.view.GLES20Canvas$CanvasFinalizer
-android.view.GLES20DisplayList
-android.view.GLES20DisplayList$DisplayListFinalizer
 android.view.GLES20Layer
 android.view.GLES20Layer$Finalizer
 android.view.GLES20RecordingCanvas

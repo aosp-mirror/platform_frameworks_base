@@ -416,7 +416,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public int drawDisplayList(DisplayList displayList, Rect dirty, int flags) {
-        return nDrawDisplayList(mRenderer, ((GLES20DisplayList) displayList).getNativeDisplayList(),
+        return nDrawDisplayList(mRenderer, displayList.getNativeDisplayList(),
                 dirty, flags);
     }
 

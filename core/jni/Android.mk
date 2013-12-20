@@ -42,6 +42,7 @@ LOCAL_SRC_FILES:= \
 	android_database_SQLiteDebug.cpp \
 	android_emoji_EmojiFactory.cpp \
 	android_view_DisplayEventReceiver.cpp \
+	android_view_DisplayList.cpp \
 	android_view_Surface.cpp \
 	android_view_SurfaceControl.cpp \
 	android_view_SurfaceSession.cpp \
@@ -55,7 +56,6 @@ LOCAL_SRC_FILES:= \
 	android_view_KeyCharacterMap.cpp \
 	android_view_GraphicBuffer.cpp \
 	android_view_GLRenderer.cpp \
-	android_view_GLES20DisplayList.cpp \
 	android_view_GLES20Canvas.cpp \
 	android_view_ThreadedRenderer.cpp \
 	android_view_MotionEvent.cpp \

@@ -33,13 +33,13 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     private static final SynchronizedPool<GLES20RecordingCanvas> sPool =
             new SynchronizedPool<GLES20RecordingCanvas>(POOL_LIMIT);
 
-    private GLES20DisplayList mDisplayList;
+    private DisplayList mDisplayList;
 
     private GLES20RecordingCanvas() {
         super(true, true);
     }
 
-    static GLES20RecordingCanvas obtain(GLES20DisplayList displayList) {
+    static GLES20RecordingCanvas obtain(DisplayList displayList) {
         GLES20RecordingCanvas canvas = sPool.acquire();
         if (canvas == null) {
             canvas = new GLES20RecordingCanvas();
