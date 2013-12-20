@@ -18,6 +18,8 @@ package android.view;
 
 import android.graphics.Matrix;
 
+import java.util.ArrayList;
+
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
@@ -120,12 +122,23 @@ import android.graphics.Matrix;
  *
  * @hide
  */
-public abstract class DisplayList {
+public class DisplayList {
     private boolean mDirty;
+    private ArrayList<DisplayList> mChildDisplayLists;
+
+    private GLES20RecordingCanvas mCanvas;
+    private boolean mValid;
+
+    // Used for debugging
+    private final String mName;
+
+    // The native display list will be destroyed when this object dies.
+    // DO NOT overwrite this reference once it is set.
+    private DisplayListFinalizer mFinalizer;
 
     /**
      * Flag used when calling
-     * {@link HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)} 
+     * {@link HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)}
      * When this flag is set, draw operations lying outside of the bounds of the
      * display list will be culled early. It is recommeneded to always set this
      * flag.
@@ -173,6 +186,10 @@ public abstract class DisplayList {
      */
     public static final int STATUS_DREW = 0x4;
 
+    private DisplayList(String name) {
+        mName = name;
+    }
+
     /**
      * Creates a new display list that can be used to record batches of
      * drawing operations.
@@ -184,7 +201,7 @@ public abstract class DisplayList {
      * @hide
      */
     public static DisplayList create(String name) {
-        return new GLES20DisplayList(name);
+        return new DisplayList(name);
     }
 
     /**
@@ -202,7 +219,21 @@ public abstract class DisplayList {
      * @see #end()
      * @see #isValid()
      */
-    public abstract HardwareCanvas start(int width, int height);
+    public HardwareCanvas start(int width, int height) {
+        if (mCanvas != null) {
+            throw new IllegalStateException("Recording has already started");
+        }
+
+        mValid = false;
+        mCanvas = GLES20RecordingCanvas.obtain(this);
+        mCanvas.start();
+
+        mCanvas.setViewport(width, height);
+        // The dirty rect should always be null for a display list
+        mCanvas.onPreDraw(null);
+
+        return mCanvas;
+    }
 
     /**
      * Ends the recording for this display list. A display list cannot be
@@ -212,7 +243,20 @@ public abstract class DisplayList {
      * @see #start(int, int)
      * @see #isValid()
      */
-    public abstract void end();
+    public void end() {
+        if (mCanvas != null) {
+            mCanvas.onPostDraw();
+            if (mFinalizer != null) {
+                mCanvas.end(mFinalizer.mNativeDisplayList);
+            } else {
+                mFinalizer = new DisplayListFinalizer(mCanvas.end(0));
+                nSetDisplayListName(mFinalizer.mNativeDisplayList, mName);
+            }
+            mCanvas.recycle();
+            mCanvas = null;
+            mValid = true;
+        }
+    }
 
     /**
      * Clears resources held onto by this display list. After calling this method
@@ -221,8 +265,26 @@ public abstract class DisplayList {
      * @see #isValid()
      * @see #reset()
      */
-    public abstract void clear();
+    public void clear() {
+        clearDirty();
 
+        if (mCanvas != null) {
+            mCanvas.recycle();
+            mCanvas = null;
+        }
+        mValid = false;
+
+        clearReferences();
+    }
+
+    void clearReferences() {
+        if (mChildDisplayLists != null) mChildDisplayLists.clear();
+    }
+
+    ArrayList<DisplayList> getChildDisplayLists() {
+        if (mChildDisplayLists == null) mChildDisplayLists = new ArrayList<DisplayList>();
+        return mChildDisplayLists;
+    }
 
     /**
      * Reset native resources. This is called when cleaning up the state of display lists
@@ -233,7 +295,12 @@ public abstract class DisplayList {
      *
      * @hide
      */
-    public abstract void reset();
+    public void reset() {
+        if (hasNativeDisplayList()) {
+            nReset(mFinalizer.mNativeDisplayList);
+        }
+        clear();
+    }
 
     /**
      * Sets the dirty flag. When a display list is dirty, {@link #clear()} should
@@ -279,16 +346,30 @@ public abstract class DisplayList {
      *
      * @return boolean true if the display list is able to be replayed, false otherwise.
      */
-    public abstract boolean isValid();
+    public boolean isValid() { return mValid; }
 
     /**
      * Return the amount of memory used by this display list.
-     * 
+     *
      * @return The size of this display list in bytes
      *
      * @hide
      */
-    public abstract int getSize();
+    public int getSize() {
+        if (mFinalizer == null) return 0;
+        return nGetDisplayListSize(mFinalizer.mNativeDisplayList);
+    }
+
+    boolean hasNativeDisplayList() {
+        return mValid && mFinalizer != null;
+    }
+
+    int getNativeDisplayList() {
+        if (!mValid || mFinalizer == null) {
+            throw new IllegalStateException("The display list is not valid.");
+        }
+        return mFinalizer.mNativeDisplayList;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // DisplayList Property Setters
@@ -303,7 +384,11 @@ public abstract class DisplayList {
      *
      * @hide
      */
-    public abstract void setCaching(boolean caching);
+    public void setCaching(boolean caching) {
+        if (hasNativeDisplayList()) {
+            nSetCaching(mFinalizer.mNativeDisplayList, caching);
+        }
+    }
 
     /**
      * Set whether the display list should clip itself to its bounds. This property is controlled by
@@ -311,7 +396,11 @@ public abstract class DisplayList {
      *
      * @param clipToBounds true if the display list should clip to its bounds
      */
-    public abstract void setClipToBounds(boolean clipToBounds);
+    public void setClipToBounds(boolean clipToBounds) {
+        if (hasNativeDisplayList()) {
+            nSetClipToBounds(mFinalizer.mNativeDisplayList, clipToBounds);
+        }
+    }
 
     /**
      * Set the static matrix on the display list. The specified matrix is combined with other
@@ -322,7 +411,11 @@ public abstract class DisplayList {
      * @see #getMatrix(android.graphics.Matrix)
      * @see #getMatrix()
      */
-    public abstract void setMatrix(Matrix matrix);
+    public void setMatrix(Matrix matrix) {
+        if (hasNativeDisplayList()) {
+            nSetStaticMatrix(mFinalizer.mNativeDisplayList, matrix.native_instance);
+        }
+    }
 
     /**
      * Returns the static matrix set on this display list.
@@ -348,7 +441,12 @@ public abstract class DisplayList {
      * @see #getMatrix()
      * @see #setMatrix(android.graphics.Matrix)
      */
-    public abstract Matrix getMatrix(Matrix matrix);
+    public Matrix getMatrix(Matrix matrix) {
+        if (hasNativeDisplayList()) {
+            nGetMatrix(mFinalizer.mNativeDisplayList, matrix.native_instance);
+        }
+        return matrix;
+    }
 
     /**
      * Set the Animation matrix on the display list. This matrix exists if an Animation is
@@ -360,7 +458,12 @@ public abstract class DisplayList {
      *
      * @hide
      */
-    public abstract void setAnimationMatrix(Matrix matrix);
+    public void setAnimationMatrix(Matrix matrix) {
+        if (hasNativeDisplayList()) {
+            nSetAnimationMatrix(mFinalizer.mNativeDisplayList,
+                    (matrix != null) ? matrix.native_instance : 0);
+        }
+    }
 
     /**
      * Sets the translucency level for the display list.
@@ -370,7 +473,11 @@ public abstract class DisplayList {
      * @see View#setAlpha(float)
      * @see #getAlpha()
      */
-    public abstract void setAlpha(float alpha);
+    public void setAlpha(float alpha) {
+        if (hasNativeDisplayList()) {
+            nSetAlpha(mFinalizer.mNativeDisplayList, alpha);
+        }
+    }
 
     /**
      * Returns the translucency level of this display list.
@@ -379,7 +486,12 @@ public abstract class DisplayList {
      *
      * @see #setAlpha(float)
      */
-    public abstract float getAlpha();
+    public float getAlpha() {
+        if (hasNativeDisplayList()) {
+            return nGetAlpha(mFinalizer.mNativeDisplayList);
+        }
+        return 1.0f;
+    }
 
     /**
      * Sets whether the display list renders content which overlaps. Non-overlapping rendering
@@ -392,7 +504,11 @@ public abstract class DisplayList {
      * @see android.view.View#hasOverlappingRendering()
      * @see #hasOverlappingRendering()
      */
-    public abstract void setHasOverlappingRendering(boolean hasOverlappingRendering);
+    public void setHasOverlappingRendering(boolean hasOverlappingRendering) {
+        if (hasNativeDisplayList()) {
+            nSetHasOverlappingRendering(mFinalizer.mNativeDisplayList, hasOverlappingRendering);
+        }
+    }
 
     /**
      * Indicates whether the content of this display list overlaps.
@@ -401,7 +517,13 @@ public abstract class DisplayList {
      *
      * @see #setHasOverlappingRendering(boolean)
      */
-    public abstract boolean hasOverlappingRendering();
+    public boolean hasOverlappingRendering() {
+        //noinspection SimplifiableIfStatement
+        if (hasNativeDisplayList()) {
+            return nHasOverlappingRendering(mFinalizer.mNativeDisplayList);
+        }
+        return true;
+    }
 
     /**
      * Sets the translation value for the display list on the X axis
@@ -411,14 +533,23 @@ public abstract class DisplayList {
      * @see View#setTranslationX(float)
      * @see #getTranslationX()
      */
-    public abstract void setTranslationX(float translationX);
+    public void setTranslationX(float translationX) {
+        if (hasNativeDisplayList()) {
+            nSetTranslationX(mFinalizer.mNativeDisplayList, translationX);
+        }
+    }
 
     /**
      * Returns the translation value for this display list on the X axis, in pixels.
      *
      * @see #setTranslationX(float)
      */
-    public abstract float getTranslationX();
+    public float getTranslationX() {
+        if (hasNativeDisplayList()) {
+            return nGetTranslationX(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the translation value for the display list on the Y axis
@@ -428,14 +559,23 @@ public abstract class DisplayList {
      * @see View#setTranslationY(float)
      * @see #getTranslationY()
      */
-    public abstract void setTranslationY(float translationY);
+    public void setTranslationY(float translationY) {
+        if (hasNativeDisplayList()) {
+            nSetTranslationY(mFinalizer.mNativeDisplayList, translationY);
+        }
+    }
 
     /**
      * Returns the translation value for this display list on the Y axis, in pixels.
      *
      * @see #setTranslationY(float)
      */
-    public abstract float getTranslationY();
+    public float getTranslationY() {
+        if (hasNativeDisplayList()) {
+            return nGetTranslationY(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the translation value for the display list on the Z axis
@@ -443,14 +583,23 @@ public abstract class DisplayList {
      * @see View#setTranslationZ(float)
      * @see #getTranslationZ()
      */
-    public abstract void setTranslationZ(float translationZ);
+    public void setTranslationZ(float translationZ) {
+        if (hasNativeDisplayList()) {
+            nSetTranslationZ(mFinalizer.mNativeDisplayList, translationZ);
+        }
+    }
 
     /**
      * Returns the translation value for this display list on the Z axis.
      *
      * @see #setTranslationZ(float)
      */
-    public abstract float getTranslationZ();
+    public float getTranslationZ() {
+        if (hasNativeDisplayList()) {
+            return nGetTranslationZ(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the rotation value for the display list around the Z axis
@@ -460,14 +609,23 @@ public abstract class DisplayList {
      * @see View#setRotation(float)
      * @see #getRotation()
      */
-    public abstract void setRotation(float rotation);
+    public void setRotation(float rotation) {
+        if (hasNativeDisplayList()) {
+            nSetRotation(mFinalizer.mNativeDisplayList, rotation);
+        }
+    }
 
     /**
      * Returns the rotation value for this display list around the Z axis, in degrees.
      *
      * @see #setRotation(float)
      */
-    public abstract float getRotation();
+    public float getRotation() {
+        if (hasNativeDisplayList()) {
+            return nGetRotation(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the rotation value for the display list around the X axis
@@ -477,14 +635,23 @@ public abstract class DisplayList {
      * @see View#setRotationX(float)
      * @see #getRotationX()
      */
-    public abstract void setRotationX(float rotationX);
+    public void setRotationX(float rotationX) {
+        if (hasNativeDisplayList()) {
+            nSetRotationX(mFinalizer.mNativeDisplayList, rotationX);
+        }
+    }
 
     /**
      * Returns the rotation value for this display list around the X axis, in degrees.
      *
      * @see #setRotationX(float)
      */
-    public abstract float getRotationX();
+    public float getRotationX() {
+        if (hasNativeDisplayList()) {
+            return nGetRotationX(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the rotation value for the display list around the Y axis
@@ -494,14 +661,23 @@ public abstract class DisplayList {
      * @see View#setRotationY(float)
      * @see #getRotationY()
      */
-    public abstract void setRotationY(float rotationY);
+    public void setRotationY(float rotationY) {
+        if (hasNativeDisplayList()) {
+            nSetRotationY(mFinalizer.mNativeDisplayList, rotationY);
+        }
+    }
 
     /**
      * Returns the rotation value for this display list around the Y axis, in degrees.
      *
      * @see #setRotationY(float)
      */
-    public abstract float getRotationY();
+    public float getRotationY() {
+        if (hasNativeDisplayList()) {
+            return nGetRotationY(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the scale value for the display list on the X axis
@@ -511,14 +687,23 @@ public abstract class DisplayList {
      * @see View#setScaleX(float)
      * @see #getScaleX()
      */
-    public abstract void setScaleX(float scaleX);
+    public void setScaleX(float scaleX) {
+        if (hasNativeDisplayList()) {
+            nSetScaleX(mFinalizer.mNativeDisplayList, scaleX);
+        }
+    }
 
     /**
      * Returns the scale value for this display list on the X axis.
      *
      * @see #setScaleX(float)
      */
-    public abstract float getScaleX();
+    public float getScaleX() {
+        if (hasNativeDisplayList()) {
+            return nGetScaleX(mFinalizer.mNativeDisplayList);
+        }
+        return 1.0f;
+    }
 
     /**
      * Sets the scale value for the display list on the Y axis
@@ -528,14 +713,23 @@ public abstract class DisplayList {
      * @see View#setScaleY(float)
      * @see #getScaleY()
      */
-    public abstract void setScaleY(float scaleY);
+    public void setScaleY(float scaleY) {
+        if (hasNativeDisplayList()) {
+            nSetScaleY(mFinalizer.mNativeDisplayList, scaleY);
+        }
+    }
 
     /**
      * Returns the scale value for this display list on the Y axis.
      *
      * @see #setScaleY(float)
      */
-    public abstract float getScaleY();
+    public float getScaleY() {
+        if (hasNativeDisplayList()) {
+            return nGetScaleY(mFinalizer.mNativeDisplayList);
+        }
+        return 1.0f;
+    }
 
     /**
      * Sets all of the transform-related values of the display list
@@ -551,9 +745,15 @@ public abstract class DisplayList {
      *
      * @hide
      */
-    public abstract void setTransformationInfo(float alpha,
+    public void setTransformationInfo(float alpha,
             float translationX, float translationY, float translationZ,
-            float rotation, float rotationX, float rotationY, float scaleX, float scaleY);
+            float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
+        if (hasNativeDisplayList()) {
+            nSetTransformationInfo(mFinalizer.mNativeDisplayList, alpha,
+                    translationX, translationY, translationZ,
+                    rotation, rotationX, rotationY, scaleX, scaleY);
+        }
+    }
 
     /**
      * Sets the pivot value for the display list on the X axis
@@ -563,14 +763,23 @@ public abstract class DisplayList {
      * @see View#setPivotX(float)
      * @see #getPivotX()
      */
-    public abstract void setPivotX(float pivotX);
+    public void setPivotX(float pivotX) {
+        if (hasNativeDisplayList()) {
+            nSetPivotX(mFinalizer.mNativeDisplayList, pivotX);
+        }
+    }
 
     /**
      * Returns the pivot value for this display list on the X axis, in pixels.
      *
      * @see #setPivotX(float)
      */
-    public abstract float getPivotX();
+    public float getPivotX() {
+        if (hasNativeDisplayList()) {
+            return nGetPivotX(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the pivot value for the display list on the Y axis
@@ -580,14 +789,23 @@ public abstract class DisplayList {
      * @see View#setPivotY(float)
      * @see #getPivotY()
      */
-    public abstract void setPivotY(float pivotY);
+    public void setPivotY(float pivotY) {
+        if (hasNativeDisplayList()) {
+            nSetPivotY(mFinalizer.mNativeDisplayList, pivotY);
+        }
+    }
 
     /**
      * Returns the pivot value for this display list on the Y axis, in pixels.
      *
      * @see #setPivotY(float)
      */
-    public abstract float getPivotY();
+    public float getPivotY() {
+        if (hasNativeDisplayList()) {
+            return nGetPivotY(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the camera distance for the display list. Refer to
@@ -599,14 +817,23 @@ public abstract class DisplayList {
      * @see View#setCameraDistance(float)
      * @see #getCameraDistance()
      */
-    public abstract void setCameraDistance(float distance);
+    public void setCameraDistance(float distance) {
+        if (hasNativeDisplayList()) {
+            nSetCameraDistance(mFinalizer.mNativeDisplayList, distance);
+        }
+    }
 
     /**
      * Returns the distance in Z of the camera of the display list.
      *
      * @see #setCameraDistance(float)
      */
-    public abstract float getCameraDistance();
+    public float getCameraDistance() {
+        if (hasNativeDisplayList()) {
+            return nGetCameraDistance(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the left position for the display list.
@@ -616,14 +843,23 @@ public abstract class DisplayList {
      * @see View#setLeft(int)
      * @see #getLeft()
      */
-    public abstract void setLeft(int left);
+    public void setLeft(int left) {
+        if (hasNativeDisplayList()) {
+            nSetLeft(mFinalizer.mNativeDisplayList, left);
+        }
+    }
 
     /**
      * Returns the left position for the display list in pixels.
      *
      * @see #setLeft(int)
      */
-    public abstract float getLeft();
+    public float getLeft() {
+        if (hasNativeDisplayList()) {
+            return nGetLeft(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the top position for the display list.
@@ -633,14 +869,23 @@ public abstract class DisplayList {
      * @see View#setTop(int)
      * @see #getTop()
      */
-    public abstract void setTop(int top);
+    public void setTop(int top) {
+        if (hasNativeDisplayList()) {
+            nSetTop(mFinalizer.mNativeDisplayList, top);
+        }
+    }
 
     /**
      * Returns the top position for the display list in pixels.
      *
      * @see #setTop(int)
      */
-    public abstract float getTop();
+    public float getTop() {
+        if (hasNativeDisplayList()) {
+            return nGetTop(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the right position for the display list.
@@ -650,14 +895,23 @@ public abstract class DisplayList {
      * @see View#setRight(int)
      * @see #getRight()
      */
-    public abstract void setRight(int right);
+    public void setRight(int right) {
+        if (hasNativeDisplayList()) {
+            nSetRight(mFinalizer.mNativeDisplayList, right);
+        }
+    }
 
     /**
      * Returns the right position for the display list in pixels.
      *
      * @see #setRight(int)
      */
-    public abstract float getRight();
+    public float getRight() {
+        if (hasNativeDisplayList()) {
+            return nGetRight(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the bottom position for the display list.
@@ -667,14 +921,23 @@ public abstract class DisplayList {
      * @see View#setBottom(int)
      * @see #getBottom()
      */
-    public abstract void setBottom(int bottom);
+    public void setBottom(int bottom) {
+        if (hasNativeDisplayList()) {
+            nSetBottom(mFinalizer.mNativeDisplayList, bottom);
+        }
+    }
 
     /**
      * Returns the bottom position for the display list in pixels.
      *
      * @see #setBottom(int)
      */
-    public abstract float getBottom();
+    public float getBottom() {
+        if (hasNativeDisplayList()) {
+            return nGetBottom(mFinalizer.mNativeDisplayList);
+        }
+        return 0.0f;
+    }
 
     /**
      * Sets the left and top positions for the display list
@@ -689,7 +952,11 @@ public abstract class DisplayList {
      * @see View#setRight(int)
      * @see View#setBottom(int)
      */
-    public abstract void setLeftTopRightBottom(int left, int top, int right, int bottom);
+    public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
+        if (hasNativeDisplayList()) {
+            nSetLeftTopRightBottom(mFinalizer.mNativeDisplayList, left, top, right, bottom);
+        }
+    }
 
     /**
      * Offsets the left and right positions for the display list
@@ -699,7 +966,11 @@ public abstract class DisplayList {
      *
      * @see View#offsetLeftAndRight(int)
      */
-    public abstract void offsetLeftAndRight(float offset);
+    public void offsetLeftAndRight(float offset) {
+        if (hasNativeDisplayList()) {
+            nOffsetLeftAndRight(mFinalizer.mNativeDisplayList, offset);
+        }
+    }
 
     /**
      * Offsets the top and bottom values for the display list
@@ -709,7 +980,11 @@ public abstract class DisplayList {
      *
      * @see View#offsetTopAndBottom(int)
      */
-    public abstract void offsetTopAndBottom(float offset);
+    public void offsetTopAndBottom(float offset) {
+        if (hasNativeDisplayList()) {
+            nOffsetTopAndBottom(mFinalizer.mNativeDisplayList, offset);
+        }
+    }
 
     /**
      * Outputs the display list to the log. This method exists for use by
@@ -717,5 +992,91 @@ public abstract class DisplayList {
      *
      * @hide
      */
-    public abstract void output();
+    public void output() {
+        if (hasNativeDisplayList()) {
+            nOutput(mFinalizer.mNativeDisplayList);
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Native methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    private static native void nDestroyDisplayList(int displayList);
+    private static native int nGetDisplayListSize(int displayList);
+    private static native void nSetDisplayListName(int displayList, String name);
+
+    // Properties
+
+    private static native void nReset(int displayList);
+    private static native void nOffsetTopAndBottom(int displayList, float offset);
+    private static native void nOffsetLeftAndRight(int displayList, float offset);
+    private static native void nSetLeftTopRightBottom(int displayList, int left, int top,
+            int right, int bottom);
+    private static native void nSetBottom(int displayList, int bottom);
+    private static native void nSetRight(int displayList, int right);
+    private static native void nSetTop(int displayList, int top);
+    private static native void nSetLeft(int displayList, int left);
+    private static native void nSetCameraDistance(int displayList, float distance);
+    private static native void nSetPivotY(int displayList, float pivotY);
+    private static native void nSetPivotX(int displayList, float pivotX);
+    private static native void nSetCaching(int displayList, boolean caching);
+    private static native void nSetClipToBounds(int displayList, boolean clipToBounds);
+    private static native void nSetAlpha(int displayList, float alpha);
+    private static native void nSetHasOverlappingRendering(int displayList,
+            boolean hasOverlappingRendering);
+    private static native void nSetTranslationX(int displayList, float translationX);
+    private static native void nSetTranslationY(int displayList, float translationY);
+    private static native void nSetTranslationZ(int displayList, float translationZ);
+    private static native void nSetRotation(int displayList, float rotation);
+    private static native void nSetRotationX(int displayList, float rotationX);
+    private static native void nSetRotationY(int displayList, float rotationY);
+    private static native void nSetScaleX(int displayList, float scaleX);
+    private static native void nSetScaleY(int displayList, float scaleY);
+    private static native void nSetTransformationInfo(int displayList, float alpha,
+            float translationX, float translationY, float translationZ,
+            float rotation, float rotationX, float rotationY, float scaleX, float scaleY);
+    private static native void nSetStaticMatrix(int displayList, int nativeMatrix);
+    private static native void nSetAnimationMatrix(int displayList, int animationMatrix);
+
+    private static native boolean nHasOverlappingRendering(int displayList);
+    private static native void nGetMatrix(int displayList, int matrix);
+    private static native float nGetAlpha(int displayList);
+    private static native float nGetLeft(int displayList);
+    private static native float nGetTop(int displayList);
+    private static native float nGetRight(int displayList);
+    private static native float nGetBottom(int displayList);
+    private static native float nGetCameraDistance(int displayList);
+    private static native float nGetScaleX(int displayList);
+    private static native float nGetScaleY(int displayList);
+    private static native float nGetTranslationX(int displayList);
+    private static native float nGetTranslationY(int displayList);
+    private static native float nGetTranslationZ(int displayList);
+    private static native float nGetRotation(int displayList);
+    private static native float nGetRotationX(int displayList);
+    private static native float nGetRotationY(int displayList);
+    private static native float nGetPivotX(int displayList);
+    private static native float nGetPivotY(int displayList);
+    private static native void nOutput(int displayList);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Finalization
+    ///////////////////////////////////////////////////////////////////////////
+
+    private static class DisplayListFinalizer {
+        final int mNativeDisplayList;
+
+        public DisplayListFinalizer(int nativeDisplayList) {
+            mNativeDisplayList = nativeDisplayList;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                nDestroyDisplayList(mNativeDisplayList);
+            } finally {
+                super.finalize();
+            }
+        }
+    }
 }
