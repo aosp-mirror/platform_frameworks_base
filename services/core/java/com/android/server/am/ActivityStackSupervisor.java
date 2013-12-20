@@ -59,6 +59,8 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.display.VirtualDisplay;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -79,6 +81,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.TransferPipe;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
@@ -88,6 +91,7 @@ import com.android.server.wm.WindowManagerService;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,6 +123,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int HANDLE_DISPLAY_CHANGED = FIRST_SUPERVISOR_STACK_MSG + 6;
     static final int HANDLE_DISPLAY_REMOVED = FIRST_SUPERVISOR_STACK_MSG + 7;
 
+    private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
     // For debugging to make sure the caller when acquiring/releasing our
     // wake lock is the system process.
@@ -212,11 +217,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Stack id of the front stack when user switched, indexed by userId. */
     SparseIntArray mUserStackInFront = new SparseIntArray(2);
 
+    // TODO: Add listener for removal of references.
     /** Mapping from (ActivityStack/TaskStack).mStackId to their current state */
-    SparseArray<ActivityContainer> mActivityContainers = new SparseArray<ActivityContainer>();
+    SparseArray<WeakReference<ActivityContainer>> mActivityContainers =
+            new SparseArray<WeakReference<ActivityContainer>>();
 
     /** Mapping from displayId to display current state */
-    SparseArray<ActivityDisplay> mActivityDisplays = new SparseArray<ActivityDisplay>();
+    private SparseArray<ActivityDisplay> mActivityDisplays = new SparseArray<ActivityDisplay>();
 
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
@@ -2098,9 +2105,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityStack getStack(int stackId) {
-        ActivityContainer activityContainer = mActivityContainers.get(stackId);
-        if (activityContainer != null) {
-            return activityContainer.mStack;
+        WeakReference<ActivityContainer> weakReference = mActivityContainers.get(stackId);
+        if (weakReference != null) {
+            ActivityContainer activityContainer = weakReference.get();
+            if (activityContainer != null) {
+                return activityContainer.mStack;
+            } else {
+                mActivityContainers.remove(stackId);
+            }
         }
         return null;
     }
@@ -2134,7 +2146,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             IActivityContainerCallback callback) {
         ActivityContainer activityContainer = new ActivityContainer(parentActivity, stackId,
                 callback);
-        mActivityContainers.put(stackId, activityContainer);
+        mActivityContainers.put(stackId, new WeakReference<ActivityContainer>(activityContainer));
         if (parentActivity != null) {
             parentActivity.mChildContainers.add(activityContainer.mStack);
         }
@@ -2728,11 +2740,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     public void handleDisplayAddedLocked(int displayId) {
+        boolean newDisplay;
         synchronized (mService) {
-            ActivityDisplay activityDisplay = new ActivityDisplay(displayId);
-            mActivityDisplays.put(displayId, activityDisplay);
+            newDisplay = mActivityDisplays.get(displayId) == null;
+            if (newDisplay) {
+                ActivityDisplay activityDisplay = new ActivityDisplay(displayId);
+                mActivityDisplays.put(displayId, activityDisplay);
+            }
         }
-        mWindowManager.onDisplayAdded(displayId);
+        if (newDisplay) {
+            mWindowManager.onDisplayAdded(displayId);
+        }
     }
 
     public void handleDisplayRemovedLocked(int displayId) {
@@ -2960,6 +2978,49 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return this;
         }
 
+        @Override
+        public void createActivityView(Surface surface, int width, int height, int density) {
+            DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+            VirtualDisplay virtualDisplay;
+            long ident = Binder.clearCallingIdentity();
+            try {
+                virtualDisplay = dm.createVirtualDisplay(mService.mContext,
+                        VIRTUAL_DISPLAY_BASE_NAME, width, height, density, surface,
+                        // TODO: Add VIRTUAL_DISPLAY_FLAG_DISABLE_MIRRORING when it is available.
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+
+            final Display display = virtualDisplay.getDisplay();
+            final int displayId = display.getDisplayId();
+
+            // Do WindowManager operation first so that it is ahead of CREATE_STACK in the H queue.
+            mWindowManager.onDisplayAdded(displayId);
+
+            synchronized (mService) {
+                ActivityDisplay activityDisplay = new ActivityDisplay(display);
+                mActivityDisplays.put(displayId, activityDisplay);
+                attachToDisplayLocked(activityDisplay);
+                activityDisplay.mVirtualDisplay = virtualDisplay;
+            }
+        }
+
+        @Override
+        public void deleteActivityView() {
+            synchronized (mService) {
+                if (!isAttached()) {
+                    return;
+                }
+                VirtualDisplay virtualDisplay = mActivityDisplay.mVirtualDisplay;
+                if (virtualDisplay != null) {
+                    virtualDisplay.release();
+                    mActivityDisplay.mVirtualDisplay = null;
+                }
+                detachLocked();
+            }
+        }
+
         ActivityStackSupervisor getOuter() {
             return ActivityStackSupervisor.this;
         }
@@ -2989,9 +3050,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
         final ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
 
+        /** If this display is for an ActivityView then the VirtualDisplay created for it is stored
+         * here. */
+        VirtualDisplay mVirtualDisplay;
+
         ActivityDisplay(int displayId) {
-            mDisplayId = displayId;
-            mDisplay = mDisplayManager.getDisplay(displayId);
+            this(mDisplayManager.getDisplay(displayId));
+        }
+
+        ActivityDisplay(Display display) {
+            mDisplay = display;
+            mDisplayId = display.getDisplayId();
             mDisplay.getDisplayInfo(mDisplayInfo);
         }
 

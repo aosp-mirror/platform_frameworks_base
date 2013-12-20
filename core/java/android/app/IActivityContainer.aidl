@@ -19,6 +19,7 @@ package android.app;
 import android.app.IActivityContainerCallback;
 import android.content.Intent;
 import android.os.IBinder;
+import android.view.Surface;
 
 /** @hide */
 interface IActivityContainer {
@@ -26,4 +27,6 @@ interface IActivityContainer {
     int getDisplayId();
     void detachFromDisplay();
     int startActivity(in Intent intent);
+    void createActivityView(in Surface surface, int width, int height, int density);
+    void deleteActivityView();
 }

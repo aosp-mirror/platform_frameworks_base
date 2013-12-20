@@ -4817,22 +4817,31 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void createStack(int stackId, int displayId) {
+        mH.sendMessage(mH.obtainMessage(H.CREATE_STACK, stackId, displayId));
+    }
+
     /**
      * Create a new TaskStack and place it next to an existing stack.
      * @param stackId The unique identifier of the new stack.
      */
-    public void createStack(int stackId, int displayId) {
-        synchronized (mWindowMap) {
-            final int numDisplays = mDisplayContents.size();
-            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-                if (displayContent.getDisplayId() == displayId) {
-                    TaskStack stack = displayContent.createStack(stackId);
-                    mStackIdToStack.put(stackId, stack);
-                    performLayoutAndPlaceSurfacesLocked();
-                    return;
+    private void createStackLocked(int stackId, int displayId) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mWindowMap) {
+                final int numDisplays = mDisplayContents.size();
+                for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                    final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+                    if (displayContent.getDisplayId() == displayId) {
+                        TaskStack stack = displayContent.createStack(stackId);
+                        mStackIdToStack.put(stackId, stack);
+                        performLayoutAndPlaceSurfacesLocked();
+                        return;
+                    }
                 }
             }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -7038,6 +7047,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int REMOVE_STARTING_TIMEOUT = 33;
 
+        public static final int CREATE_STACK = 34;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7479,6 +7490,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     try {
                         mActivityManager.notifyActivityDrawn((IBinder) msg.obj);
                     } catch (RemoteException e) {
+                    }
+                    break;
+                case CREATE_STACK:
+                    synchronized (mWindowMap) {
+                        createStackLocked(msg.arg1, msg.arg2);
                     }
                     break;
             }
