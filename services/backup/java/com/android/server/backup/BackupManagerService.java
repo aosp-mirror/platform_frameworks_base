@@ -84,6 +84,7 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
 import com.android.internal.backup.LocalTransport;
 import com.android.server.EventLogTags;
+import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 
 import java.io.BufferedInputStream;
@@ -137,6 +138,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class BackupManagerService extends IBackupManager.Stub {
+
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
     private static final boolean MORE_DEBUG = false;
@@ -6089,7 +6091,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     }
                 }
 
-                // clean up the BackupManagerService side of the bookkeeping
+                // clean up the BackupManagerImpl side of the bookkeeping
                 // and cancel any pending timeout message
                 mBackupManager.clearRestoreSession(mSession);
             }

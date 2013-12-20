@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES :=
 
 # TODO: Move this to the product makefiles
-REQUIRED_SERVICES := core appwidget backup devicepolicy accessibility print
+REQUIRED_SERVICES := core accessibility appwidget backup devicepolicy print
 
 include $(patsubst %,$(LOCAL_PATH)/%/java/service.mk,$(REQUIRED_SERVICES))
 
