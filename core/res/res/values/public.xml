@@ -2096,6 +2096,7 @@
   <public type="attr" name="fastScrollStyle" />
   <public type="attr" name="windowContentTransitions" />
   <public type="attr" name="windowContentTransitionManager" />
+  <public type="attr" name="translationZ" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />

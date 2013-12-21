@@ -2093,9 +2093,12 @@
              property of the view, which is set by its layout. -->
         <attr name="translationX" format="dimension" />
 
-        <!-- translation in y of the view. This value is added post-layout to the left
+        <!-- translation in y of the view. This value is added post-layout to the top
              property of the view, which is set by its layout. -->
         <attr name="translationY" format="dimension" />
+
+        <!-- translation in z of the view. This value is added post-layout to its position. -->
+        <attr name="translationZ" format="dimension" />
 
         <!-- x location of the pivot point around which the view will rotate and scale.
              This xml attribute sets the pivotX property of the View. -->

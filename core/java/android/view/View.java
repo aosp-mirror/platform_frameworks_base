@@ -57,7 +57,6 @@ import android.util.FloatProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.LongSparseLongArray;
-import android.util.MathUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
@@ -673,6 +672,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_transformPivotY
  * @attr ref android.R.styleable#View_translationX
  * @attr ref android.R.styleable#View_translationY
+ * @attr ref android.R.styleable#View_translationZ
  * @attr ref android.R.styleable#View_visibility
  *
  * @see android.view.ViewGroup
@@ -3664,6 +3664,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         float tx = 0;
         float ty = 0;
+        float tz = 0;
         float rotation = 0;
         float rotationX = 0;
         float rotationY = 0;
@@ -3741,6 +3742,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_translationY:
                     ty = a.getDimensionPixelOffset(attr, 0);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_translationZ:
+                    tz = a.getDimensionPixelOffset(attr, 0);
                     transformSet = true;
                     break;
                 case com.android.internal.R.styleable.View_rotation:
@@ -4084,6 +4089,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (transformSet) {
             setTranslationX(tx);
             setTranslationY(ty);
+            setTranslationZ(tz);
             setRotation(rotation);
             setRotationX(rotationX);
             setRotationY(rotationY);
@@ -10585,7 +10591,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @hide
+     * The depth location of this view relative to its parent.
+     *
+     * @return The depth of this view relative to its parent.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getTranslationZ() {
@@ -10593,7 +10601,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @hide
+     * Sets the depth location of this view relative to its parent.
+     *
+     * @attr ref android.R.styleable#View_translationZ
      */
     public void setTranslationZ(float translationZ) {
         ensureTransformationInfo();
@@ -14251,6 +14261,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mParent instanceof ViewGroup) {
                 displayList.setClipToBounds(
                         (((ViewGroup) mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
+            }
+            if (this instanceof ViewGroup) {
+                displayList.setIsContainedVolume(
+                        (((ViewGroup) this).mGroupFlags & ViewGroup.FLAG_IS_CONTAINED_VOLUME) != 0);
             }
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
@@ -18390,6 +18404,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @Override
         public Float get(View object) {
             return object.getTranslationY();
+        }
+    };
+
+    /**
+     * A Property wrapper around the <code>translationZ</code> functionality handled by the
+     * {@link View#setTranslationZ(float)} and {@link View#getTranslationZ()} methods.
+     */
+    public static final Property<View, Float> TRANSLATION_Z = new FloatProperty<View>("translationZ") {
+        @Override
+        public void setValue(View object, float value) {
+            object.setTranslationZ(value);
+        }
+
+        @Override
+        public Float get(View object) {
+            return object.getTranslationZ();
         }
     };
 

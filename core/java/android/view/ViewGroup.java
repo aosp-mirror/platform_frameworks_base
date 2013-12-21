@@ -355,6 +355,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET = 0x800000;
 
     /**
+     * When true, indicates that all 3d composited descendents are contained within this group, and
+     * will not be interleaved with other 3d composited content.
+     */
+    static final int FLAG_IS_CONTAINED_VOLUME = 0x1000000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -486,6 +492,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= FLAG_ANIMATION_DONE;
         mGroupFlags |= FLAG_ANIMATION_CACHE;
         mGroupFlags |= FLAG_ALWAYS_DRAWN_WITH_CACHE;
+        mGroupFlags |= FLAG_IS_CONTAINED_VOLUME;
 
         if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
             mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
@@ -3104,7 +3111,44 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Returns whether ths group's children are clipped to their bounds before drawing.
+     * Returns whether this group's descendents are drawn in their own
+     * independent Z volume. Views drawn in one contained volume will not
+     * interleave with views in another, even if their Z values are interleaved.
+     * The default value is true.
+     * @see #setIsContainedVolume(boolean)
+     *
+     * @return True if the ViewGroup is a contained volume.
+     *
+     * @hide
+     */
+    public boolean isContainedVolume() {
+        return ((mGroupFlags & FLAG_IS_CONTAINED_VOLUME) != 0);
+    }
+
+    /**
+     * By default, only direct children of a group can interleave with
+     * interleaved Z values. Set to false on individual groups to enable Z
+     * interleaving of views that aren't direct siblings.
+     *
+     * @return True if the group should be a contained volume with its own Z
+     *         ordering space, false if its decendents should join the current Z
+     *         ordering volume.
+     * @attr ref android.R.styleable#ViewGroup_isContainedVolume
+     *
+     * @hide
+     */
+    public void setIsContainedVolume(boolean isContainedVolume) {
+        boolean previousValue = (mGroupFlags & FLAG_IS_CONTAINED_VOLUME) == FLAG_IS_CONTAINED_VOLUME;
+        if (isContainedVolume != previousValue) {
+            setBooleanFlag(FLAG_IS_CONTAINED_VOLUME, isContainedVolume);
+            if (mDisplayList != null) {
+                mDisplayList.setIsContainedVolume(isContainedVolume);
+            }
+        }
+    }
+
+    /**
+     * Returns whether this group's children are clipped to their bounds before drawing.
      * The default value is true.
      * @see #setClipChildren(boolean)
      *

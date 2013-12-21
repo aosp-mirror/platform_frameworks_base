@@ -185,6 +185,10 @@ public:
         mClipToBounds = clipToBounds;
     }
 
+    void setIsContainedVolume(bool isContainedVolume) {
+        mIsContainedVolume = isContainedVolume;
+    }
+
     void setStaticMatrix(SkMatrix* matrix) {
         delete mStaticMatrix;
         mStaticMatrix = new SkMatrix(*matrix);
@@ -570,6 +574,7 @@ private:
 
     // View properties
     bool mClipToBounds;
+    bool mIsContainedVolume;
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;
@@ -591,8 +596,6 @@ private:
     SkMatrix* mAnimationMatrix;
     Matrix4 mTransform;
     bool mCaching;
-    bool mIs3dRoot;
-
 
     /**
      * Draw time state - these properties are only set and used during rendering
