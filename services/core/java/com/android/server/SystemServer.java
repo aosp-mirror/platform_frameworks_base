@@ -31,6 +31,7 @@ import android.media.AudioService;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -52,11 +53,8 @@ import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.appwidget.AppWidgetService;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.content.ContentService;
-import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.input.InputManagerService;
@@ -72,7 +70,6 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
-import com.android.server.print.PrintManagerService;
 import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
@@ -97,6 +94,19 @@ class ServerThread {
     private static final String ENCRYPTED_STATE = "1";
 
     ContentResolver mContentResolver;
+
+    /*
+     * Implementation class names. TODO: Move them to a codegen class or load
+     * them from the build system somehow.
+     */
+    private static final String BACKUP_MANAGER_SERVICE_CLASS =
+            "com.android.server.backup.BackupManagerSystemService";
+    private static final String DEVICE_POLICY_MANAGER_SERVICE_CLASS =
+            "com.android.server.devicepolicy.DevicePolicyManagerSystemService";
+    private static final String APPWIDGET_SERVICE_CLASS =
+            "com.android.server.appwidget.AppWidgetService";
+    private static final String PRINT_MANAGER_SERVICE_CLASS =
+            "com.android.server.print.PrintManagerService";
 
     void reportWtf(String msg, Throwable e) {
         Slog.w(TAG, "***********************************************");
@@ -357,11 +367,9 @@ class ServerThread {
             Slog.e("System", "************ Failure starting core service", e);
         }
 
-        DevicePolicyManagerService devicePolicy = null;
         StatusBarManagerService statusBar = null;
         INotificationManager notification = null;
         InputMethodManagerService imm = null;
-        AppWidgetService appWidget = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
@@ -369,7 +377,6 @@ class ServerThread {
         LockSettingsService lockSettings = null;
         DreamManagerService dreamy = null;
         AssetAtlasService atlas = null;
-        PrintManagerService printManager = null;
         MediaRouterService mediaRouter = null;
 
         // Bring up services needed for UI.
@@ -441,8 +448,7 @@ class ServerThread {
 
                 try {
                     Slog.i(TAG, "Device Policy");
-                    devicePolicy = new DevicePolicyManagerService(context);
-                    ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
+                    systemServiceManager.startService(DEVICE_POLICY_MANAGER_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting DevicePolicyService", e);
                 }
@@ -692,16 +698,14 @@ class ServerThread {
             if (!disableNonCoreServices) {
                 try {
                     Slog.i(TAG, "Backup Service");
-                    ServiceManager.addService(Context.BACKUP_SERVICE,
-                            new BackupManagerService(context));
+                    systemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting Backup Service", e);
                 }
 
                 try {
                     Slog.i(TAG, "AppWidget Service");
-                    appWidget = new AppWidgetService(context);
-                    ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
+                    systemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting AppWidget Service", e);
                 }
@@ -792,8 +796,7 @@ class ServerThread {
 
             try {
                 Slog.i(TAG, "Print Service");
-                printManager = new PrintManagerService(context);
-                ServiceManager.addService(Context.PRINT_SERVICE, printManager);
+                systemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
             }
@@ -839,13 +842,8 @@ class ServerThread {
             }
         }
 
-        if (devicePolicy != null) {
-            try {
-                devicePolicy.systemReady();
-            } catch (Throwable e) {
-                reportWtf("making Device Policy Service ready", e);
-            }
-        }
+        // Needed by DevicePolicyManager for initialization
+        systemServiceManager.startBootPhase(SystemService.PHASE_LOCK_SETTINGS_READY);
 
         systemServiceManager.startBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
@@ -896,7 +894,6 @@ class ServerThread {
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
         final UsbService usbF = usb;
-        final AppWidgetService appWidgetF = appWidget;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
         final RecognitionManagerService recognitionF = recognition;
@@ -910,7 +907,6 @@ class ServerThread {
         final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
-        final PrintManagerService printManagerF = printManager;
         final MediaRouterService mediaRouterF = mediaRouter;
 
         // We now tell the activity manager it is okay to run third party
@@ -984,11 +980,6 @@ class ServerThread {
                 systemServiceManager.startBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
 
                 try {
-                    if (appWidgetF != null) appWidgetF.systemRunning(safeMode);
-                } catch (Throwable e) {
-                    reportWtf("Notifying AppWidgetService running", e);
-                }
-                try {
                     if (wallpaperF != null) wallpaperF.systemRunning();
                 } catch (Throwable e) {
                     reportWtf("Notifying WallpaperService running", e);
@@ -1045,12 +1036,6 @@ class ServerThread {
                     if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
                 } catch (Throwable e) {
                     reportWtf("Notifying TelephonyRegistry running", e);
-                }
-
-                try {
-                    if (printManagerF != null) printManagerF.systemRuning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying PrintManagerService running", e);
                 }
 
                 try {
