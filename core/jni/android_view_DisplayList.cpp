@@ -94,6 +94,11 @@ static void android_view_DisplayList_setClipToBounds(JNIEnv* env,
     displayList->setClipToBounds(clipToBounds);
 }
 
+static void android_view_DisplayList_setIsContainedVolume(JNIEnv* env,
+        jobject clazz, DisplayList* displayList, jboolean isContainedVolume) {
+    displayList->setIsContainedVolume(isContainedVolume);
+}
+
 static void android_view_DisplayList_setAlpha(JNIEnv* env,
         jobject clazz, DisplayList* displayList, float alpha) {
     displayList->setAlpha(alpha);
@@ -321,6 +326,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetStaticMatrix",      "(II)V",  (void*) android_view_DisplayList_setStaticMatrix },
     { "nSetAnimationMatrix",   "(II)V",  (void*) android_view_DisplayList_setAnimationMatrix },
     { "nSetClipToBounds",      "(IZ)V",  (void*) android_view_DisplayList_setClipToBounds },
+    { "nSetIsContainedVolume", "(IZ)V",  (void*) android_view_DisplayList_setIsContainedVolume },
     { "nSetAlpha",             "(IF)V",  (void*) android_view_DisplayList_setAlpha },
     { "nSetHasOverlappingRendering", "(IZ)V",
             (void*) android_view_DisplayList_setHasOverlappingRendering },

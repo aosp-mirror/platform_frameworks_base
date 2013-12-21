@@ -1152,6 +1152,7 @@ package android {
     field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
+    field public static final int translationZ = 16843766; // 0x10103f6
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
@@ -28474,6 +28475,7 @@ package android.view {
     method public java.util.ArrayList<android.view.View> getTouchables();
     method public float getTranslationX();
     method public float getTranslationY();
+    method public float getTranslationZ();
     method public int getVerticalFadingEdgeLength();
     method public int getVerticalScrollbarPosition();
     method public int getVerticalScrollbarWidth();
@@ -28721,6 +28723,7 @@ package android.view {
     method public void setTouchDelegate(android.view.TouchDelegate);
     method public void setTranslationX(float);
     method public void setTranslationY(float);
+    method public void setTranslationZ(float);
     method public void setVerticalFadingEdgeEnabled(boolean);
     method public void setVerticalScrollBarEnabled(boolean);
     method public void setVerticalScrollbarPosition(int);
@@ -28851,6 +28854,7 @@ package android.view {
     field public static final int TEXT_DIRECTION_RTL = 4; // 0x4
     field public static final android.util.Property TRANSLATION_X;
     field public static final android.util.Property TRANSLATION_Y;
+    field public static final android.util.Property TRANSLATION_Z;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";
     field public static final int VISIBLE = 0; // 0x0
     field protected static final int[] WINDOW_FOCUSED_STATE_SET;
@@ -29274,6 +29278,8 @@ package android.view {
     method public android.view.ViewPropertyAnimator translationXBy(float);
     method public android.view.ViewPropertyAnimator translationY(float);
     method public android.view.ViewPropertyAnimator translationYBy(float);
+    method public android.view.ViewPropertyAnimator translationZ(float);
+    method public android.view.ViewPropertyAnimator translationZBy(float);
     method public android.view.ViewPropertyAnimator withEndAction(java.lang.Runnable);
     method public android.view.ViewPropertyAnimator withLayer();
     method public android.view.ViewPropertyAnimator withStartAction(java.lang.Runnable);

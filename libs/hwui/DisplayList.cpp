@@ -237,6 +237,7 @@ void DisplayList::init() {
     mRight = 0;
     mBottom = 0;
     mClipToBounds = true;
+    mIsContainedVolume = true;
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
@@ -258,7 +259,6 @@ void DisplayList::init() {
     mHeight = 0;
     mPivotExplicitlySet = false;
     mCaching = false;
-    mIs3dRoot = true; // TODO: setter, java side impl
 }
 
 size_t DisplayList::getSize() {
@@ -531,7 +531,7 @@ void DisplayList::computeOrderingImpl(
     }
 
     m3dNodes.clear();
-    if (mIs3dRoot) {
+    if (mIsContainedVolume) {
         // create a new 3d space for children by separating their ordering
         compositedChildrenOf3dRoot = &m3dNodes;
         transformFrom3dRoot = &mat4::identity();

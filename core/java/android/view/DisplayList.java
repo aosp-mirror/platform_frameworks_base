@@ -403,6 +403,18 @@ public class DisplayList {
     }
 
     /**
+     * Set whether the display list should collect and Z order all 3d composited descendents, and
+     * draw them in order with the default Z=0 content.
+     *
+     * @param isContainedVolume true if the display list should collect and Z order descendents.
+     */
+    public void setIsContainedVolume(boolean isContainedVolume) {
+        if (hasNativeDisplayList()) {
+            nSetIsContainedVolume(mFinalizer.mNativeDisplayList, isContainedVolume);
+        }
+    }
+
+    /**
      * Set the static matrix on the display list. The specified matrix is combined with other
      * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
      *
@@ -526,7 +538,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the translation value for the display list on the X axis
+     * Sets the translation value for the display list on the X axis.
      *
      * @param translationX The X axis translation value of the display list, in pixels
      *
@@ -552,7 +564,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the translation value for the display list on the Y axis
+     * Sets the translation value for the display list on the Y axis.
      *
      * @param translationY The Y axis translation value of the display list, in pixels
      *
@@ -578,7 +590,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the translation value for the display list on the Z axis
+     * Sets the translation value for the display list on the Z axis.
      *
      * @see View#setTranslationZ(float)
      * @see #getTranslationZ()
@@ -602,7 +614,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the rotation value for the display list around the Z axis
+     * Sets the rotation value for the display list around the Z axis.
      *
      * @param rotation The rotation value of the display list, in degrees
      *
@@ -628,7 +640,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the rotation value for the display list around the X axis
+     * Sets the rotation value for the display list around the X axis.
      *
      * @param rotationX The rotation value of the display list, in degrees
      *
@@ -654,7 +666,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the rotation value for the display list around the Y axis
+     * Sets the rotation value for the display list around the Y axis.
      *
      * @param rotationY The rotation value of the display list, in degrees
      *
@@ -680,7 +692,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the scale value for the display list on the X axis
+     * Sets the scale value for the display list on the X axis.
      *
      * @param scaleX The scale value of the display list
      *
@@ -706,7 +718,7 @@ public class DisplayList {
     }
 
     /**
-     * Sets the scale value for the display list on the Y axis
+     * Sets the scale value for the display list on the Y axis.
      *
      * @param scaleY The scale value of the display list
      *
@@ -1022,6 +1034,7 @@ public class DisplayList {
     private static native void nSetPivotX(int displayList, float pivotX);
     private static native void nSetCaching(int displayList, boolean caching);
     private static native void nSetClipToBounds(int displayList, boolean clipToBounds);
+    private static native void nSetIsContainedVolume(int displayList, boolean isContainedVolume);
     private static native void nSetAlpha(int displayList, float alpha);
     private static native void nSetHasOverlappingRendering(int displayList,
             boolean hasOverlappingRendering);
