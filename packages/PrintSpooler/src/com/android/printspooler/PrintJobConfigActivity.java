@@ -454,7 +454,11 @@ public class PrintJobConfigActivity extends Activity {
                 return;
             }
 
-            mControllerState = CONTROLLER_STATE_LAYOUT_COMPLETED;
+            final int oldControllerState = mControllerState;
+
+            if (mControllerState == CONTROLLER_STATE_LAYOUT_STARTED) {
+                mControllerState = CONTROLLER_STATE_LAYOUT_COMPLETED;
+            }
 
             // For layout purposes we care only whether the type or the page
             // count changed. We still do not have the size since we did not
@@ -476,6 +480,8 @@ public class PrintJobConfigActivity extends Activity {
                 mSpoolerProvider.getSpooler().setPrintJobPagesNoPersistence(
                         mPrintJobId, null);
             }
+
+            PageRange[] oldRequestedPages = mRequestedPages;
 
             // No pages means that the user selected an invalid range while we
             // were doing a layout or the layout returned a document info for
@@ -504,14 +510,21 @@ public class PrintJobConfigActivity extends Activity {
                 }
             }
 
-            // If the info and the layout did not change and we already have
-            // the requested pages, then nothing else to do.
+            // If the info and the layout did not change...
             if (!infoChanged && !layoutChanged
-                    && PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
+                    // and we have the requested pages ... 
+                    && (PageRangeUtils.contains(mDocument.pages, mRequestedPages))
+                        // ...or the requested pages are being written...
+                        || (oldControllerState == CONTROLLER_STATE_WRITE_STARTED
+                            && oldRequestedPages != null
+                            && PageRangeUtils.contains(oldRequestedPages, mRequestedPages))) {
                 // Nothing interesting changed and we have all requested pages.
                 // Then update the print jobs's pages as we will not do a write
                 // and we usually update the pages in the write complete callback.
-                updatePrintJobPages(mDocument.pages, mRequestedPages);
+                if (mDocument.pages != null) {
+                    // Update the print job's pages given we have them.
+                    updatePrintJobPages(mDocument.pages, mRequestedPages);
+                }
                 mEditor.updateUi();
                 if (mEditor.isDone()) {
                     requestCreatePdfFileOrFinish();
@@ -616,7 +629,9 @@ public class PrintJobConfigActivity extends Activity {
                 // We did not get the pages we requested, then the application
                 // misbehaves, so we fail quickly.
                 mControllerState = CONTROLLER_STATE_FAILED;
-                Log.e(LOG_TAG, "Received invalid pages from the app");
+                Log.e(LOG_TAG, "Received invalid pages from the app: requested="
+                        + Arrays.toString(requestedPages) + " written="
+                        + Arrays.toString(writtenPages));
                 mEditor.showUi(Editor.UI_ERROR, null);
             }
         }
@@ -1276,7 +1291,7 @@ public class PrintJobConfigActivity extends Activity {
                     // Initially, we have only safe to PDF as a printer but after some
                     // printers are loaded we want to select the user's favorite one
                     // which is the first.
-                    if (!mFavoritePrinterSelected && mDestinationSpinnerAdapter.getCount() > 2) {
+                    if (!mFavoritePrinterSelected && mDestinationSpinnerAdapter.getCount() > 1) {
                         mFavoritePrinterSelected = true;
                         mDestinationSpinner.setSelection(0);
                         // Workaround again the weird spinner behavior to notify for selection
@@ -1350,6 +1365,7 @@ public class PrintJobConfigActivity extends Activity {
 
                                 if (mCurrentPrinter.getCapabilities() == null) {
                                     if (printer.getCapabilities() != null) {
+                                        updatePrintAttributes(printer.getCapabilities());
                                         capabilitiesChanged = true;
                                     }
                                 } else if (!mCurrentPrinter.getCapabilities().equals(
