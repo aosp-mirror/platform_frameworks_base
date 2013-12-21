@@ -153,8 +153,7 @@ number of in-app items.</p>
   </li>
   <li><strong>Description</strong>
     <p>The description is a long descriptor for the item. For example, "Instantly puts creatures to
-    sleep. Does not work on angry elves." Every item must have a description. The description is
-    visible to users during checkout. Descriptions can be up to 80 characters in length.</p>
+    sleep. Does not work on angry elves." Every item must have a description. Descriptions can be up to 80 characters in length.</p>
   </li>
   <li><strong>Price</strong>
     <p>You must provide a default price in your home currency. You can also provide prices in other
