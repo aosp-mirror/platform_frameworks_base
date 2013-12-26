@@ -136,7 +136,7 @@ device compatibility.</p>
   <dd>Specifies a single hardware or software feature used by the application,
 as a descriptor string. Valid descriptor values are listed in the <a
 href="#hw-features">Hardware features</a> and <a href="#sw-features">Software
-features</a> tables, below. </dd>
+features</a> tables, below. Descriptor string values are case-sensitive.</dd>
 
   <dt><a name="required"></a><code>android:required</code></dt>  <!-- added in api level 5 -->
   <dd>Boolean value that indicates whether the application requires
