@@ -443,7 +443,7 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
     renderer->drawBitmapData(bitmap, left, top, paint);
 
     // If the renderer is a deferred renderer it will own the bitmap
-    if (!renderer->isDeferred()) {
+    if (!renderer->isRecording()) {
         delete bitmap;
     }
 }

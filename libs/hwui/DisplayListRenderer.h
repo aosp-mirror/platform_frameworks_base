@@ -63,7 +63,7 @@ public:
 
     ANDROID_API DisplayList* getDisplayList(DisplayList* displayList);
 
-    virtual bool isDeferred();
+    virtual bool isRecording() { return true; }
 
     virtual void setViewport(int width, int height);
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
@@ -81,7 +81,7 @@ public:
     virtual int saveLayer(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags);
 
-    virtual void translate(float dx, float dy);
+    virtual void translate(float dx, float dy, float dz);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
