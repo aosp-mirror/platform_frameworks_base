@@ -842,7 +842,7 @@ include the action bar on devices running Android 2.1 or higher."
              "How to enable deep linking and indexing of your application
 content so that users can open this content directly from their mobile search
 results."
-            >Making Your App Content Searchable</a>
+            >Making Your App Content Searchable by Google</a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/app-indexing/deep-linking.html">
