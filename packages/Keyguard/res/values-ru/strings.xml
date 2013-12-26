@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM-карта отсутствует или недоступна. Вставьте SIM-карту."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM-карта непригодна."</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"SIM-карта окончательно заблокирована.\nЧтобы получить новую, обратитесь к своему оператору."</string>
-    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-карта заблокирована."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-карта заблокирована"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Для разблокировки SIM-карты требуется PUK-код."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Разблокировка SIM-карты…"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виджет %2$d из %3$d."</string>
