@@ -951,14 +951,14 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
     /**
      * <p>Whether black-level compensation is locked
-     * to its current values, or is free to vary</p>
+     * to its current values, or is free to vary.</p>
      * <p>When set to ON, the values used for black-level
-     * compensation must not change until the lock is set to
-     * OFF</p>
+     * compensation will not change until the lock is set to
+     * OFF.</p>
      * <p>Since changes to certain capture parameters (such as
      * exposure time) may require resetting of black level
-     * compensation, the HAL must report whether setting the
-     * black level lock was successful in the output result
+     * compensation, the camera device must report whether setting
+     * the black level lock was successful in the output result
      * metadata.</p>
      * <p>For example, if a sequence of requests is as follows:</p>
      * <ul>
@@ -969,8 +969,9 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * <li>Request 5: Exposure = 20ms, Black level lock = ON</li>
      * <li>Request 6: Exposure = 20ms, Black level lock = ON</li>
      * </ul>
-     * <p>And the exposure change in Request 4 requires resetting the black
-     * level offsets, then the output result metadata is expected to be:</p>
+     * <p>And the exposure change in Request 4 requires the camera
+     * device to reset the black level offsets, then the output
+     * result metadata is expected to be:</p>
      * <ul>
      * <li>Result 1: Exposure = 10ms, Black level lock = OFF</li>
      * <li>Result 2: Exposure = 10ms, Black level lock = ON</li>
@@ -979,15 +980,13 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * <li>Result 5: Exposure = 20ms, Black level lock = ON</li>
      * <li>Result 6: Exposure = 20ms, Black level lock = ON</li>
      * </ul>
-     * <p>This indicates to the application that on frame 4, black levels were
-     * reset due to exposure value changes, and pixel values may not be
-     * consistent across captures.</p>
-     * <p>The black level locking must happen at the sensor, and not at the ISP.
-     * If for some reason black level locking is no longer legal (for example,
-     * the analog gain has changed, which forces black levels to be
-     * recalculated), then the HAL is free to override this request (and it
-     * must report 'OFF' when this does happen) until the next time locking
-     * is legal again.</p>
+     * <p>This indicates to the application that on frame 4, black
+     * levels were reset due to exposure value changes, and pixel
+     * values may not be consistent across captures.</p>
+     * <p>The camera device will maintain the lock to the extent
+     * possible, only overriding the lock to OFF when changes to
+     * other request parameters require a black level recalculation
+     * or reset.</p>
      */
     public static final Key<Boolean> BLACK_LEVEL_LOCK =
             new Key<Boolean>("android.blackLevel.lock", boolean.class);
