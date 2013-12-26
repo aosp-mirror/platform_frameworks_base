@@ -1195,7 +1195,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏אין אפשרות להתחבר ל-Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" אינו מחובר היטב לאינטרנט."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"‏Wi-Fi ישיר"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"‏הפעל Wi-Fi ישיר. פעולה זו תכבה את הלקוח/הנקודה החמה של ה-Wi-Fi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"‏הפעל Wi-Fi ישיר. פעולה זו תכבה את הנקודה לשיתוף אינטרנט ב-Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"‏לא ניתן להפעיל Wi-Fi ישיר"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"‏Wi-Fi ישיר מופעל"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"גע עבור הגדרות"</string>
@@ -1350,7 +1350,7 @@
     <string name="submit" msgid="1602335572089911941">"שלח"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"מצב מכונית מופעל"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"גע כדי לצאת ממצב מכונית."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"קשור או פעיל כנקודה חמה"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"שיתוף אינטרנט פעיל"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"גע כדי להגדיר."</string>
     <string name="back_button_label" msgid="2300470004503343439">"הקודם"</string>
     <string name="next_button_label" msgid="1080555104677992408">"הבא"</string>

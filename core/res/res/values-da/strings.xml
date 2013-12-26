@@ -353,7 +353,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Tillader, at appen kan åbne brugergrænsefladen til bekræftelse af komplet sikkerhedskopiering. Må ikke anvendes af nogen app."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserede vinduer"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Tillader, at appen kan oprette vinduer, der er beregnet til brugergrænsefladen i det interne system. Anvendes ikke af normale apps."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"trække over andre apps"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ignorere andre apps"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Tillader, at appen trækkes oven på andre applikationer eller dele af brugergrænsefladen. De kan forstyrre din brug af grænsefladen i en applikation eller ændre det, du tror, du ser i andre applikationer."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"rediger global animationshastighed"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Tillader, at appen til enhver tid kan ændre den globale animationshastighed (hurtigere eller langsommere animationer)."</string>
@@ -441,13 +441,13 @@
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"køre ved opstart"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Tillader, at appen kan starte af sig selv, så snart systemet er færdig med at starte. Dette kan gøre tablettens opstartstid længere og give appen tilladelse til at gøre tabletten langsommere ved altid at lade appen køre."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Tillader, at appen kan åbne sig selv, når systemet er færdig med at starte op. Dette kan gøre opstarten af telefonen langsommere og generelt gøre systemet langsommere, når appen altid kører."</string>
-    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"send klæbende udsendelse"</string>
+    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sende klæbende udsendelse"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Tillader, at appen kan sende klæbende udsendelser, der forbliver tilbage, når udsendelsen er slut. Overdreven brug kan gøre din tablet langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Tillader, at appen kan sende klæbende udsendelser, der forbliver tilbage, når udsendelsen er slut. Overdreven brug kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"læse dine kontaktpersoner"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
-    <string name="permlab_writeContacts" msgid="5107492086416793544">"at ændre dine kontaktpersoner"</string>
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"ændre dine kontaktpersoner"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til dem, sendt dem en e-mail eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en e-mail til dem eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"læs opkaldsliste"</string>
@@ -464,7 +464,7 @@
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Tillader, at appen kan få adgang til og synkronisere sociale opdateringer fra dig og dine venner. Vær forsigtig, når du deler oplysninger – med denne tilladelse kan appen læse kommunikation mellem dig og dine venner på sociale netværk, uanset fortrolighed. Bemærk! Denne tilladelse håndhæves muligvis ikke på alle sociale netværk."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"skriv i din sociale strøm"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Tillader, at appen kan vise sociale opdateringer fra dine venner. Vær forsigtig, når du deler oplysninger – med denne tilladelse kan appen producere meddelelser, der kan synes at komme fra en ven. Bemærk! Denne tilladelse håndhæves muligvis ikke på alle sociale netværk."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"læs kalenderbegivenheder plus fortrolige oplysninger"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"læse kalenderbegivenheder og fortrolige oplysninger"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tillader, at appen kan læse alle de kalenderbegivenheder, der er gemt på din tablet, f.eks. venners eller kollegers. Med denne tilladelse kan appen dele eller gemme dine kalenderdata, uanset fortrolighed eller følsomhed."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Tillader, at appen kan læse alle de kalenderbegivenheder, der er gemt på din telefon, f.eks. venners eller kollegers. Med denne tilladelse kan appen dele eller gemme dine kalenderdata, uanset fortrolighed eller følsomhed."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"tilføje eller ændre kalenderbegivenheder og sende e-mail til gæster uden ejerens viden"</string>
@@ -540,9 +540,9 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Tillader adgang til kerne-MTP-driveren for at implementere MTB USB-protokollen."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"test hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Tillader, at appen kan kontrollere forskellige perifere enheder til at teste hardwaren."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"ring direkte op til telefonnumre"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"ringe direkte op til telefonnumre"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede opkrævninger eller opkald. Bemærk, at appen med denne tilladelse ikke kan ringe til nødopkaldsnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ring direkte op til alle telefonnumre"</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ringe direkte op til alle telefonnumre"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Tillader, at appen kan ringe til et hvilket som helst nummer, bl.a. nødopkald uden din indgriben. Ondsindede apps kan foretage unødvendige og ulovlige opkald til nødtjenester."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"start CDMA-opsætning af tabletcomputeren direkte"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"start CDMA-telefonopsætning direkte"</string>
@@ -557,7 +557,7 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Tillader, at appen kan styre enhedens telefonfunktioner. En app med denne tilladelse kan skifte netværk, slå telefonsenderen til og fra og lignende uden at underrette dig."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"læse telefonens status og identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillader, at appen kan få adgang til telefonfunktionerne på enheden. Med denne tilladelse kan appen fastslå telefonnummeret og enheds-id\'erne, hvorvidt et opkald er aktivt samt det eksterne nummer, der oprettes forbindelse til via et opkald."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"afhold tabletcomputeren fra at gå i dvale"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"afholde tabletcomputeren fra at gå i dvale"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"afholde telefonen fra at gå i dvale"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Tillader, at appen kan forhindre tabletten i at gå i dvale."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Tillader, at appen kan forhindre, at telefonen går i dvale."</string>
