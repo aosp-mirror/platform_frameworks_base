@@ -719,8 +719,11 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Byte>("android.jpeg.thumbnailQuality", byte.class);
 
     /**
-     * <p>Resolution of embedded JPEG
-     * thumbnail</p>
+     * <p>Resolution of embedded JPEG thumbnail</p>
+     * <p>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
+     * but the captured JPEG must still be a valid image.</p>
+     * <p>When a jpeg image capture is issued, the thumbnail size selected should have
+     * the same aspect ratio as the jpeg image.</p>
      */
     public static final Key<android.hardware.camera2.Size> JPEG_THUMBNAIL_SIZE =
             new Key<android.hardware.camera2.Size>("android.jpeg.thumbnailSize", android.hardware.camera2.Size.class);

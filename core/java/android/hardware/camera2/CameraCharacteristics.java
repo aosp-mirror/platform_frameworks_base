@@ -205,8 +205,20 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Byte>("android.flash.info.available", byte.class);
 
     /**
-     * <p>Supported resolutions for the JPEG
-     * thumbnail</p>
+     * <p>Supported resolutions for the JPEG thumbnail</p>
+     * <p>Below condiditions must be satisfied for this size list:</p>
+     * <ul>
+     * <li>The sizes must be sorted by increasing pixel area (width x height).
+     * If several resolutions have the same area, they must be sorted by increasing width.</li>
+     * <li>The aspect ratio of the largest thumbnail size must be same as the
+     * aspect ratio of largest size in android.scaler.availableJpegSizes.
+     * The largest size is defined as the size that has the largest pixel area
+     * in a given size list.</li>
+     * <li>Each size in android.scaler.availableJpegSizes must have at least
+     * one corresponding size that has the same aspect ratio in availableThumbnailSizes,
+     * and vice versa.</li>
+     * <li>All non (0, 0) sizes must have non-zero widths and heights.</li>
+     * </ul>
      */
     public static final Key<android.hardware.camera2.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.jpeg.availableThumbnailSizes", android.hardware.camera2.Size[].class);
