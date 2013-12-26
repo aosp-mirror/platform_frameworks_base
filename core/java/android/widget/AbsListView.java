@@ -730,7 +730,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          *
          * @param view The view whose scroll state is being reported
          *
-         * @param scrollState The current scroll state. One of {@link #SCROLL_STATE_IDLE},
+         * @param scrollState The current scroll state. One of 
          * {@link #SCROLL_STATE_TOUCH_SCROLL} or {@link #SCROLL_STATE_IDLE}.
          */
         public void onScrollStateChanged(AbsListView view, int scrollState);
