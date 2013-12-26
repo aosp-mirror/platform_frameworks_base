@@ -157,7 +157,7 @@ public void onCreate(Bundle savedInstanceState) {
 &#64;Override
 public void onDestroy() {
     super.onDestroy();
-    if (mServiceConn != null) {
+    if (mService != null) {
         unbindService(mServiceConn);
     }	
 }
