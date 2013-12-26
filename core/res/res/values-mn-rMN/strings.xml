@@ -505,7 +505,7 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"аудио бичих"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Апп нь микрофоноор аудио бичих боломжтой. Энэ зөвшөөрөл нь апп-д ямар ч үед таны зөвшөөрөлгүйгээр аудио бичих боломжийг олгоно."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"сим холбоо"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Апп-д SIM рүү тушаал өгөх боломж олгоно. Энэ маш аюултай."</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Апп-д SIM рүү комманд илгээхийг зөвшөөрнө. Энэ маш аюултай."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"зураг авах болон видео бичих"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Апп нь камераар зураг авах болон видео бичих боломжтой. Энэ зөвшөөрөл нь апп-д ямар ч үед таны зөвшөөрөлгүйгээр камер ашиглах боломжийг олгоно."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"камер ашиглаж байх үед дамжууллыг заагч LED-г идэвхгүй болгох"</string>

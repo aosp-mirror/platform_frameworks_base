@@ -505,7 +505,7 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"录音"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"允许该应用使用麦克风录制音频。此权限可让该应用不经您的确认即可随时录制音频。"</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM卡通信"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"允许应用将命令发送到SIM卡（此权限非常具有危险性）。"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"允许应用向SIM卡发送命令（此权限具有很高的危险性）。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"允许该应用使用相机拍摄照片和视频。此权限可让该应用随时使用相机，而无需您的确认。"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"在相机使用过程中停用传输指示灯 LED"</string>
