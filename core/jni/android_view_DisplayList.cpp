@@ -42,17 +42,20 @@ using namespace uirenderer;
 // ----------------------------------------------------------------------------
 
 static void android_view_DisplayList_reset(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->reset();
 }
 
 static jint android_view_DisplayList_getDisplayListSize(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getSize();
 }
 
 static void android_view_DisplayList_setDisplayListName(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, jstring name) {
+        jobject clazz, jint displayListPtr, jstring name) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     if (name != NULL) {
         const char* textArray = env->GetStringUTFChars(name, NULL);
         displayList->setName(textArray);
@@ -61,12 +64,14 @@ static void android_view_DisplayList_setDisplayListName(JNIEnv* env,
 }
 
 static void android_view_DisplayList_output(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->output();
 }
 
 static void android_view_DisplayList_destroyDisplayList(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     DisplayList::destroyDisplayListDeferred(displayList);
 }
 
@@ -75,84 +80,102 @@ static void android_view_DisplayList_destroyDisplayList(JNIEnv* env,
 // ----------------------------------------------------------------------------
 
 static void android_view_DisplayList_setCaching(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, jboolean caching) {
+        jobject clazz, jint displayListPtr, jboolean caching) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setCaching(caching);
 }
 
 static void android_view_DisplayList_setStaticMatrix(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, SkMatrix* matrix) {
+        jobject clazz, jint displayListPtr, jint matrixPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
     displayList->setStaticMatrix(matrix);
 }
 
 static void android_view_DisplayList_setAnimationMatrix(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, SkMatrix* matrix) {
+        jobject clazz, jint displayListPtr, jint matrixPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
     displayList->setAnimationMatrix(matrix);
 }
 
 static void android_view_DisplayList_setClipToBounds(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, jboolean clipToBounds) {
+        jobject clazz, jint displayListPtr, jboolean clipToBounds) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setClipToBounds(clipToBounds);
 }
 
 static void android_view_DisplayList_setIsContainedVolume(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, jboolean isContainedVolume) {
+        jobject clazz, jint displayListPtr, jboolean isContainedVolume) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setIsContainedVolume(isContainedVolume);
 }
 
 static void android_view_DisplayList_setAlpha(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float alpha) {
+        jobject clazz, jint displayListPtr, float alpha) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setAlpha(alpha);
 }
 
 static void android_view_DisplayList_setHasOverlappingRendering(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, bool hasOverlappingRendering) {
+        jobject clazz, jint displayListPtr, bool hasOverlappingRendering) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setHasOverlappingRendering(hasOverlappingRendering);
 }
 
 static void android_view_DisplayList_setTranslationX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float tx) {
+        jobject clazz, jint displayListPtr, float tx) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setTranslationX(tx);
 }
 
 static void android_view_DisplayList_setTranslationY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float ty) {
+        jobject clazz, jint displayListPtr, float ty) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setTranslationY(ty);
 }
 
 static void android_view_DisplayList_setTranslationZ(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float tz) {
+        jobject clazz, jint displayListPtr, float tz) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setTranslationZ(tz);
 }
 
 static void android_view_DisplayList_setRotation(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float rotation) {
+        jobject clazz, jint displayListPtr, float rotation) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setRotation(rotation);
 }
 
 static void android_view_DisplayList_setRotationX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float rx) {
+        jobject clazz, jint displayListPtr, float rx) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setRotationX(rx);
 }
 
 static void android_view_DisplayList_setRotationY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float ry) {
+        jobject clazz, jint displayListPtr, float ry) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setRotationY(ry);
 }
 
 static void android_view_DisplayList_setScaleX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float sx) {
+        jobject clazz, jint displayListPtr, float sx) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setScaleX(sx);
 }
 
 static void android_view_DisplayList_setScaleY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float sy) {
+        jobject clazz, jint displayListPtr, float sy) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setScaleY(sy);
 }
 
 static void android_view_DisplayList_setTransformationInfo(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float alpha,
+        jobject clazz, jint displayListPtr, float alpha,
         float translationX, float translationY, float translationZ,
         float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setAlpha(alpha);
     displayList->setTranslationX(translationX);
     displayList->setTranslationY(translationY);
@@ -165,58 +188,70 @@ static void android_view_DisplayList_setTransformationInfo(JNIEnv* env,
 }
 
 static void android_view_DisplayList_setPivotX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float px) {
+        jobject clazz, jint displayListPtr, float px) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setPivotX(px);
 }
 
 static void android_view_DisplayList_setPivotY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float py) {
+        jobject clazz, jint displayListPtr, float py) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setPivotY(py);
 }
 
 static void android_view_DisplayList_setCameraDistance(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float distance) {
+        jobject clazz, jint displayListPtr, float distance) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setCameraDistance(distance);
 }
 
 static void android_view_DisplayList_setLeft(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, int left) {
+        jobject clazz, jint displayListPtr, int left) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setLeft(left);
 }
 
 static void android_view_DisplayList_setTop(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, int top) {
+        jobject clazz, jint displayListPtr, int top) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setTop(top);
 }
 
 static void android_view_DisplayList_setRight(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, int right) {
+        jobject clazz, jint displayListPtr, int right) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setRight(right);
 }
 
 static void android_view_DisplayList_setBottom(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, int bottom) {
+        jobject clazz, jint displayListPtr, int bottom) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setBottom(bottom);
 }
 
 static void android_view_DisplayList_setLeftTopRightBottom(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, int left, int top,
+        jobject clazz, jint displayListPtr, int left, int top,
         int right, int bottom) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->setLeftTopRightBottom(left, top, right, bottom);
 }
 
 static void android_view_DisplayList_offsetLeftAndRight(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float offset) {
+        jobject clazz, jint displayListPtr, float offset) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->offsetLeftRight(offset);
 }
 
 static void android_view_DisplayList_offsetTopAndBottom(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float offset) {
+        jobject clazz, jint displayListPtr, float offset) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     displayList->offsetTopBottom(offset);
 }
 
 static void android_view_DisplayList_getMatrix(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, SkMatrix* matrix) {
+        jobject clazz, jint displayListPtr, jint matrixPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
     SkMatrix* source = displayList->getStaticMatrix();
     if (source) {
         matrix->setConcat(SkMatrix::I(), *source);
@@ -226,82 +261,98 @@ static void android_view_DisplayList_getMatrix(JNIEnv* env,
 }
 
 static jboolean android_view_DisplayList_hasOverlappingRendering(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->hasOverlappingRendering();
 }
 
 static jfloat android_view_DisplayList_getAlpha(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getAlpha();
 }
 
 static jfloat android_view_DisplayList_getLeft(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getLeft();
 }
 
 static jfloat android_view_DisplayList_getTop(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getTop();
 }
 
 static jfloat android_view_DisplayList_getRight(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getRight();
 }
 
 static jfloat android_view_DisplayList_getBottom(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getBottom();
 }
 
 static jfloat android_view_DisplayList_getCameraDistance(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getCameraDistance();
 }
 
 static jfloat android_view_DisplayList_getScaleX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getScaleX();
 }
 
 static jfloat android_view_DisplayList_getScaleY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getScaleY();
 }
 
 static jfloat android_view_DisplayList_getTranslationX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getTranslationX();
 }
 
 static jfloat android_view_DisplayList_getTranslationY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getTranslationY();
 }
 
 static jfloat android_view_DisplayList_getRotation(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getRotation();
 }
 
 static jfloat android_view_DisplayList_getRotationX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getRotationX();
 }
 
 static jfloat android_view_DisplayList_getRotationY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getRotationY();
 }
 
 static jfloat android_view_DisplayList_getPivotX(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getPivotX();
 }
 
 static jfloat android_view_DisplayList_getPivotY(JNIEnv* env,
-        jobject clazz, DisplayList* displayList) {
+        jobject clazz, jint displayListPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     return displayList->getPivotY();
 }
 
