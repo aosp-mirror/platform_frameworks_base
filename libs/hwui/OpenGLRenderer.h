@@ -41,15 +41,21 @@
 #include "Matrix.h"
 #include "Program.h"
 #include "Rect.h"
-#include "Snapshot.h"
-#include "Vertex.h"
-#include "SkiaShader.h"
+#include "Renderer.h"
 #include "SkiaColorFilter.h"
+#include "Snapshot.h"
 #include "UvMapper.h"
+#include "Vertex.h"
 #include "Caches.h"
 
 namespace android {
 namespace uirenderer {
+
+class DeferredDisplayState;
+class DisplayList;
+class TextSetupFunctor;
+class VertexBuffer;
+class SkiaShader;
 
 struct DrawModifiers {
     DrawModifiers() {
@@ -80,12 +86,6 @@ struct DrawModifiers {
 enum StateDeferFlags {
     kStateDeferFlag_Draw = 0x1,
     kStateDeferFlag_Clip = 0x2
-};
-
-enum DrawOpMode {
-    kDrawOpMode_Immediate,
-    kDrawOpMode_Defer,
-    kDrawOpMode_Flush
 };
 
 enum ClipSideFlags {
@@ -119,102 +119,24 @@ enum ModelViewMode {
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
-
-class DeferredDisplayState;
-class DisplayList;
-class TextSetupFunctor;
-class VertexBuffer;
-
 /**
  * OpenGL renderer used to draw accelerated 2D graphics. The API is a
  * simplified version of Skia's Canvas API.
  */
-class OpenGLRenderer {
+class OpenGLRenderer : public Renderer {
 public:
     ANDROID_API OpenGLRenderer();
     virtual ~OpenGLRenderer();
 
-    /**
-     * Sets the name of this renderer. The name is optional and
-     * empty by default. If the pointer is null the name is set
-     * to the empty string.
-     */
-    ANDROID_API void setName(const char* name);
-
-    /**
-     * Returns the name of this renderer as UTF8 string.
-     * The returned pointer is never null.
-     */
-    ANDROID_API const char* getName() const;
-
-    /**
-     * Read externally defined properties to control the behavior
-     * of the renderer.
-     */
     ANDROID_API void initProperties();
 
-    /**
-     * Indicates whether this renderer executes drawing commands immediately.
-     * If this method returns true, the drawing commands will be executed
-     * later.
-     */
-    virtual bool isDeferred();
-
-    /**
-     * Sets the dimension of the underlying drawing surface. This method must
-     * be called at least once every time the drawing surface changes size.
-     *
-     * @param width The width in pixels of the underlysing surface
-     * @param height The height in pixels of the underlysing surface
-     */
     virtual void setViewport(int width, int height);
 
-    /**
-     * Prepares the renderer to draw a frame. This method must be invoked
-     * at the beginning of each frame. When this method is invoked, the
-     * entire drawing surface is assumed to be redrawn.
-     *
-     * @param opaque If true, the target surface is considered opaque
-     *               and will not be cleared. If false, the target surface
-     *               will be cleared
-     */
-    ANDROID_API status_t prepare(bool opaque);
-
-    /**
-     * Prepares the renderer to draw a frame. This method must be invoked
-     * at the beginning of each frame. Only the specified rectangle of the
-     * frame is assumed to be dirty. A clip will automatically be set to
-     * the specified rectangle.
-     *
-     * @param left The left coordinate of the dirty rectangle
-     * @param top The top coordinate of the dirty rectangle
-     * @param right The right coordinate of the dirty rectangle
-     * @param bottom The bottom coordinate of the dirty rectangle
-     * @param opaque If true, the target surface is considered opaque
-     *               and will not be cleared. If false, the target surface
-     *               will be cleared in the specified dirty rectangle
-     */
+    virtual status_t prepare(bool opaque);
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
 
-    /**
-     * Indicates the end of a frame. This method must be invoked whenever
-     * the caller is done rendering a frame.
-     */
     virtual void finish();
-
-    /**
-     * This method must be invoked before handing control over to a draw functor.
-     * See callDrawGLFunction() for instance.
-     *
-     * This command must not be recorded inside display lists.
-     */
     virtual void interrupt();
-
-    /**
-     * This method must be invoked after getting control back from a draw functor.
-     *
-     * This command must not be recorded inside display lists.
-     */
     virtual void resume();
 
     ANDROID_API void setCountOverdrawEnabled(bool enabled) {
@@ -256,23 +178,20 @@ public:
     int saveLayerDeferred(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags);
 
-    virtual void translate(float dx, float dy);
+    virtual void translate(float dx, float dy, float dz = 0);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
     bool hasRectToRectTransform();
-    ANDROID_API void getMatrix(SkMatrix* matrix);
+    ANDROID_API void getMatrix(SkMatrix* matrix) const;
     virtual void setMatrix(SkMatrix* matrix);
     virtual void concatMatrix(SkMatrix* matrix);
     virtual void concatMatrix(Matrix4& matrix) {
         currentTransform().multiply(matrix);
     }
-    void translateZ(float z) {
-        currentTransform().translate(0,0,z);
-    }
 
-    ANDROID_API const Rect& getClipBounds();
+    ANDROID_API const Rect& getClipBounds() const;
 
     ANDROID_API bool quickRejectConservative(float left, float top,
             float right, float bottom) const;
@@ -1160,9 +1079,6 @@ private:
     // an increment stencil buffer in the color buffer
     bool mCountOverdraw;
     float mOverdraw;
-
-    // Optional name of the renderer
-    String8 mName;
 
     friend class DisplayListRenderer;
     friend class Layer;

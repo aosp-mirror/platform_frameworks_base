@@ -116,10 +116,6 @@ DisplayList* DisplayListRenderer::getDisplayList(DisplayList* displayList) {
     return displayList;
 }
 
-bool DisplayListRenderer::isDeferred() {
-    return true;
-}
-
 void DisplayListRenderer::setViewport(int width, int height) {
     // TODO: DisplayListRenderer shouldn't have a projection matrix, as it should never be used
     mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
@@ -188,12 +184,13 @@ int DisplayListRenderer::saveLayer(float left, float top, float right, float bot
     return OpenGLRenderer::save(flags);
 }
 
-void DisplayListRenderer::translate(float dx, float dy) {
+void DisplayListRenderer::translate(float dx, float dy, float dz) {
+    // ignore dz, not used at defer time
     mHasTranslate = true;
     mTranslateX += dx;
     mTranslateY += dy;
     insertRestoreToCount();
-    OpenGLRenderer::translate(dx, dy);
+    OpenGLRenderer::translate(dx, dy, dz);
 }
 
 void DisplayListRenderer::rotate(float degrees) {

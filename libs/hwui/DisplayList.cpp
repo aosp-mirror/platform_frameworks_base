@@ -417,8 +417,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
     }
     if (mMatrixFlags != 0) {
         if (mMatrixFlags == TRANSLATION) {
-            renderer.translate(mTranslationX, mTranslationY);
-            renderer.translateZ(mTranslationZ);
+            renderer.translate(mTranslationX, mTranslationY, mTranslationZ);
         } else {
             if (Caches::getInstance().propertyEnable3d) {
                 renderer.concatMatrix(mTransform);

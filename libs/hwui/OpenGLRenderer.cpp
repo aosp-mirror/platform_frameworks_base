@@ -156,22 +156,6 @@ void OpenGLRenderer::initProperties() {
 // Setup
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::setName(const char* name) {
-    if (name) {
-        mName.setTo(name);
-    } else {
-        mName.clear();
-    }
-}
-
-const char* OpenGLRenderer::getName() const {
-    return mName.string();
-}
-
-bool OpenGLRenderer::isDeferred() {
-    return false;
-}
-
 void OpenGLRenderer::setViewport(int width, int height) {
     initViewport(width, height);
 
@@ -1524,8 +1508,8 @@ void OpenGLRenderer::setupMergedMultiDraw(const Rect* clipRect) {
 // Transforms
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::translate(float dx, float dy) {
-    currentTransform().translate(dx, dy);
+void OpenGLRenderer::translate(float dx, float dy, float dz) {
+    currentTransform().translate(dx, dy, dz);
 }
 
 void OpenGLRenderer::rotate(float degrees) {
@@ -1552,7 +1536,7 @@ bool OpenGLRenderer::hasRectToRectTransform() {
     return CC_LIKELY(currentTransform().rectToRect());
 }
 
-void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
+void OpenGLRenderer::getMatrix(SkMatrix* matrix) const {
     currentTransform().copyTo(*matrix);
 }
 
@@ -1642,7 +1626,7 @@ void OpenGLRenderer::setStencilFromClip() {
     }
 }
 
-const Rect& OpenGLRenderer::getClipBounds() {
+const Rect& OpenGLRenderer::getClipBounds() const {
     return mSnapshot->getLocalClip();
 }
 
@@ -1728,7 +1712,7 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
         return true;
     }
 
-    if (!isDeferred()) {
+    if (!isRecording()) {
         // not quick rejected, so enable the scissor if clipRequired
         mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
     }
@@ -1737,7 +1721,7 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
 
 void OpenGLRenderer::debugClip() {
 #if DEBUG_CLIP_REGIONS
-    if (!isDeferred() && !mSnapshot->clipRegion->isEmpty()) {
+    if (!isRecording() && !mSnapshot->clipRegion->isEmpty()) {
         drawRegionRects(*mSnapshot->clipRegion, 0x7f00ff00, SkXfermode::kSrcOver_Mode);
     }
 #endif
