@@ -467,7 +467,7 @@
     <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 및 기밀정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"앱이 친구나 동료의 일정을 포함하여 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 비밀유지 또는 기밀성을 무시하고 캘린더 데이터를 공유 또는 저장할 수도 있습니다."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"앱이 친구나 동료의 일정을 포함하여 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 비밀유지 또는 기밀성과 관계 없이 캘린더 데이터를 공유 또는 저장할 수도 있습니다."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"소유자 몰래 캘린더 일정을 추가 또는 수정하고 참석자에게 이메일 전송"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"소유자에게 알리지 않고 캘린더 일정을 추가 또는 수정하고 참석자에게 이메일 전송"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"앱이 친구나 동료의 일정을 포함하여 태블릿에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"앱이 친구나 동료의 일정을 포함하여 휴대전화에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"테스트를 위해 위치 정보제공자로 가장"</string>
