@@ -17,10 +17,18 @@
 #ifndef ANDROID_HWUI_RENDERER_H
 #define ANDROID_HWUI_RENDERER_H
 
+#include <SkRegion.h>
+
+#include <utils/String8.h>
+
 #include "AssetAtlas.h"
 #include "SkPaint.h"
 
 namespace android {
+
+class Functor;
+class Res_png_9patch;
+
 namespace uirenderer {
 
 class DisplayList;
@@ -152,12 +160,8 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas state operations
 // ----------------------------------------------------------------------------
-    // getters
+    // Save (layer)
     virtual int getSaveCount() const = 0;
-    virtual void getMatrix(SkMatrix* outMatrix) const = 0;
-    virtual const Rect& getClipBounds() const = 0;
-
-    // save (layer)
     virtual int save(int flags) = 0;
     virtual void restore() = 0;
     virtual void restoreToCount(int saveCount) = 0;
@@ -180,6 +184,7 @@ public:
             int alpha, SkXfermode::Mode mode, int flags) = 0;
 
     // Matrix
+    virtual void getMatrix(SkMatrix* outMatrix) const = 0;
     virtual void translate(float dx, float dy, float dz = 0.0f) = 0;
     virtual void rotate(float degrees) = 0;
     virtual void scale(float sx, float sy) = 0;
@@ -187,9 +192,11 @@ public:
 
     virtual void setMatrix(SkMatrix* matrix) = 0;
     virtual void concatMatrix(SkMatrix* matrix) = 0;
-    virtual void concatMatrix(Matrix4& matrix) = 0;
 
-    // Clip
+    // clip
+    virtual const Rect& getClipBounds() const = 0;
+    virtual bool quickRejectConservative(float left, float top,
+            float right, float bottom) const = 0;
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op) = 0;
     virtual bool clipPath(SkPath* path, SkRegion::Op op) = 0;
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op) = 0;

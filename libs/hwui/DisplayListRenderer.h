@@ -65,22 +65,26 @@ public:
 
     virtual bool isRecording() { return true; }
 
+// ----------------------------------------------------------------------------
+// Frame state operations
+// ----------------------------------------------------------------------------
     virtual void setViewport(int width, int height);
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
-
-    virtual status_t callDrawGLFunction(Functor *functor, Rect& dirty);
-
     virtual void interrupt();
     virtual void resume();
 
+// ----------------------------------------------------------------------------
+// Canvas state operations
+// ----------------------------------------------------------------------------
+    // Save (layer)
     virtual int save(int flags);
     virtual void restore();
     virtual void restoreToCount(int saveCount);
-
     virtual int saveLayer(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags);
 
+    // Matrix
     virtual void translate(float dx, float dy, float dz);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
@@ -89,43 +93,12 @@ public:
     virtual void setMatrix(SkMatrix* matrix);
     virtual void concatMatrix(SkMatrix* matrix);
 
+    // Clip
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
     virtual bool clipPath(SkPath* path, SkRegion::Op op);
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
 
-    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags);
-    virtual status_t drawLayer(Layer* layer, float x, float y);
-    virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
-            float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, SkPaint* paint);
-    virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-            float* vertices, int* colors, SkPaint* paint);
-    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-            float left, float top, float right, float bottom, SkPaint* paint);
-    virtual status_t drawColor(int color, SkXfermode::Mode mode);
-    virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
-    virtual status_t drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, SkPaint* paint);
-    virtual status_t drawCircle(float x, float y, float radius, SkPaint* paint);
-    virtual status_t drawOval(float left, float top, float right, float bottom, SkPaint* paint);
-    virtual status_t drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
-    virtual status_t drawPath(SkPath* path, SkPaint* paint);
-    virtual status_t drawLines(float* points, int count, SkPaint* paint);
-    virtual status_t drawPoints(float* points, int count, SkPaint* paint);
-    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
-            float hOffset, float vOffset, SkPaint* paint);
-    virtual status_t drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, SkPaint* paint);
-    virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
-            DrawOpMode drawOpMode);
-
-    virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
-
+    // Misc - should be implemented with SkPaint inspection
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
 
@@ -138,6 +111,58 @@ public:
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
 
+// ----------------------------------------------------------------------------
+// Canvas draw operations
+// ----------------------------------------------------------------------------
+    virtual status_t drawColor(int color, SkXfermode::Mode mode);
+
+    // Bitmap-based
+    virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
+    virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
+    virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+            float srcRight, float srcBottom, float dstLeft, float dstTop,
+            float dstRight, float dstBottom, SkPaint* paint);
+    virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
+    virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
+            float* vertices, int* colors, SkPaint* paint);
+    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
+            float left, float top, float right, float bottom, SkPaint* paint);
+
+    // Shapes
+    virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
+    virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
+    virtual status_t drawRoundRect(float left, float top, float right, float bottom,
+            float rx, float ry, SkPaint* paint);
+    virtual status_t drawCircle(float x, float y, float radius, SkPaint* paint);
+    virtual status_t drawOval(float left, float top, float right, float bottom, SkPaint* paint);
+    virtual status_t drawArc(float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
+    virtual status_t drawPath(SkPath* path, SkPaint* paint);
+    virtual status_t drawLines(float* points, int count, SkPaint* paint);
+    virtual status_t drawPoints(float* points, int count, SkPaint* paint);
+
+    // Text
+    virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
+            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
+            DrawOpMode drawOpMode = kDrawOpMode_Immediate);
+    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
+            float hOffset, float vOffset, SkPaint* paint);
+    virtual status_t drawPosText(const char* text, int bytesCount, int count,
+            const float* positions, SkPaint* paint);
+
+// ----------------------------------------------------------------------------
+// Canvas draw operations - special
+// ----------------------------------------------------------------------------
+    virtual status_t drawLayer(Layer* layer, float x, float y);
+    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty,
+            int32_t replayFlags);
+
+    // TODO: rename for consistency
+    virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
+
+// ----------------------------------------------------------------------------
+// DisplayList / resource management
+// ----------------------------------------------------------------------------
     ANDROID_API void reset();
 
     sp<DisplayListData> getDisplayListData() const {

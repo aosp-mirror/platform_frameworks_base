@@ -44,8 +44,6 @@ namespace RSC {
 }
 #endif
 
-class Functor;
-
 namespace android {
 namespace uirenderer {
 

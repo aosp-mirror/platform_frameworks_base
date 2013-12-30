@@ -92,7 +92,7 @@ void LayerRenderer::finish() {
     // who will invoke OpenGLRenderer::resume()
 }
 
-GLint LayerRenderer::getTargetFbo() const {
+GLuint LayerRenderer::getTargetFbo() const {
     return mLayer->getFbo();
 }
 
