@@ -211,7 +211,7 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
     src.fTop = 0;
     dst.fTop = bounds.fTop;
     // The first row always starts with the top being at y=0 and the bottom
-    // being either yDivs[1] (if yDivs[0]=0) of yDivs[0].  In the former case
+    // being either yDivs[1] (if yDivs[0]=0) or yDivs[0].  In the former case
     // the first row is stretchable along the Y axis, otherwise it is fixed.
     // The last row always ends with the bottom being bitmap.height and the top
     // being either yDivs[numYDivs-2] (if yDivs[numYDivs-1]=bitmap.height) or
