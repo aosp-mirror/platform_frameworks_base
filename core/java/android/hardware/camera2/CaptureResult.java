@@ -853,10 +853,11 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Whether black-level compensation is locked
-     * to its current values, or is free to vary</p>
-     * <p>Whether the black level offset was locked for this frame.
-     * Should be ON if android.blackLevel.lock was ON in the capture request,
-     * unless a change in capture settings forced a black level reset.</p>
+     * to its current values, or is free to vary.</p>
+     * <p>Whether the black level offset was locked for this frame.  Should be
+     * ON if android.blackLevel.lock was ON in the capture request, unless
+     * a change in other capture settings forced the camera device to
+     * perform a black level reset.</p>
      */
     public static final Key<Boolean> BLACK_LEVEL_LOCK =
             new Key<Boolean>("android.blackLevel.lock", boolean.class);
