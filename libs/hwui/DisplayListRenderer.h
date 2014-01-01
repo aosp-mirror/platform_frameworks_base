@@ -54,7 +54,7 @@ class DrawOp;
 class StateOp;
 
 /**
- * Records drawing commands in a display list for latter playback.
+ * Records drawing commands in a display list for later playback into an OpenGLRenderer.
  */
 class DisplayListRenderer: public OpenGLRenderer {
 public:

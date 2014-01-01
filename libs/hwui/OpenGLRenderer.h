@@ -170,10 +170,6 @@ public:
     int saveLayerDeferred(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags);
 
-    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    virtual bool clipPath(SkPath* path, SkRegion::Op op);
-    virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
-
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags);
     virtual status_t drawLayer(Layer* layer, float x, float y);
     virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
@@ -246,7 +242,7 @@ public:
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
 
     ANDROID_API bool isCurrentTransformSimple() {
-        return currentTransform().isSimple();
+        return currentTransform()->isSimple();
     }
 
     Caches& getCaches() {
@@ -258,8 +254,8 @@ public:
         return mSnapshot->clipRegion->isEmpty();
     }
 
-    int getViewportWidth() { return getSnapshot()->viewport.getWidth(); }
-    int getViewportHeight() { return getSnapshot()->viewport.getHeight(); }
+    int getViewportWidth() { return currentSnapshot()->viewport.getWidth(); }
+    int getViewportHeight() { return currentSnapshot()->viewport.getHeight(); }
 
     /**
      * Scales the alpha on the current snapshot. This alpha value will be modulated
@@ -396,10 +392,6 @@ protected:
      */
     void dirtyLayerUnchecked(Rect& bounds, Region* region);
 
-    sp<Snapshot> getSnapshot() const {
-        return mSnapshot;
-    }
-
     /**
      * Returns the region of the current layer.
      */
@@ -482,12 +474,11 @@ private:
 
     /**
      * Tells the GPU what part of the screen is about to be redrawn.
-     * This method will use the clip rect that we started drawing the
-     * frame with.
+     * This method will use the current layer space clip rect.
      * This method needs to be invoked every time getTargetFbo() is
      * bound again.
      */
-    void startTiling(const Snapshot& snapshot, bool opaque = false);
+    void startTilingCurrentClip(bool opaque = false);
 
     /**
      * Tells the GPU what part of the screen is about to be redrawn.
@@ -987,9 +978,6 @@ private:
     SortedVector<Functor*> mFunctors;
     // List of layers to update at the beginning of a frame
     Vector<Layer*> mLayerUpdates;
-
-    // Indicates whether the clip must be restored
-    bool mDirtyClip;
 
     // The following fields are used to setup drawing
     // Used to describe the shaders to generate

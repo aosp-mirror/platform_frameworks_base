@@ -208,7 +208,7 @@ status_t OpenGLRenderer::startFrame() {
     // invoked during the frame
     mSuppressTiling = mCaches.hasRegisteredFunctors();
 
-    startTiling(*mSnapshot, true);
+    startTilingCurrentClip(true);
 
     debugOverdraw(true, true);
 
@@ -225,7 +225,7 @@ status_t OpenGLRenderer::prepareDirty(float left, float top,
     // The framebuffer renderer will first defer the display list
     // for each layer and wait until the first drawing command
     // to start the frame
-    if (currentSnapshot().fbo == 0) {
+    if (currentSnapshot()->fbo == 0) {
         syncState();
         updateLayers();
     } else {
@@ -252,7 +252,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
     if (!opaque || mCountOverdraw) {
         mCaches.enableScissor();
-        mCaches.setScissor(left, currentSnapshot().height - bottom, right - left, bottom - top);
+        mCaches.setScissor(left, currentSnapshot()->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
         return DrawGlInfo::kStatusDrew;
     }
@@ -269,14 +269,16 @@ void OpenGLRenderer::syncState() {
     }
 }
 
-void OpenGLRenderer::startTiling(const Snapshot& s, bool opaque) {
+void OpenGLRenderer::startTilingCurrentClip(bool opaque) {
     if (!mSuppressTiling) {
+        const Snapshot* snapshot = currentSnapshot();
+
         const Rect* clip = &mTilingClip;
-        if (s.flags & Snapshot::kFlagFboTarget) {
-            clip = &(s.layer->clipRect);
+        if (snapshot->flags & Snapshot::kFlagFboTarget) {
+            clip = &(snapshot->layer->clipRect);
         }
 
-        startTiling(*clip, s.height, opaque);
+        startTiling(*clip, snapshot->height, opaque);
     }
 }
 
@@ -355,9 +357,9 @@ void OpenGLRenderer::interrupt() {
 }
 
 void OpenGLRenderer::resume() {
-    const Snapshot& snapshot = currentSnapshot();
-    glViewport(0, 0, snapshot.viewport.getWidth(), snapshot.viewport.getHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot.fbo);
+    const Snapshot* snapshot = currentSnapshot();
+    glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
+    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
     debugOverdraw(true, false);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -377,9 +379,9 @@ void OpenGLRenderer::resume() {
 }
 
 void OpenGLRenderer::resumeAfterLayer() {
-    const Snapshot& snapshot = currentSnapshot();
-    glViewport(0, 0, snapshot.viewport.getWidth(), snapshot.viewport.getHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot.fbo);
+    const Snapshot* snapshot = currentSnapshot();
+    glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
+    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
     debugOverdraw(true, false);
 
     mCaches.resetScissor();
@@ -433,16 +435,16 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
 }
 
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
-    if (currentSnapshot().isIgnored()) return DrawGlInfo::kStatusDone;
+    if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     detachFunctor(functor);
 
 
-    Rect clip(currentClipRect());
+    Rect clip(*currentClipRect());
     clip.snapToPixelBoundaries();
 
     // Since we don't know what the functor will draw, let's dirty
-    // tne entire clip region
+    // the entire clip region
     if (hasLayer()) {
         dirtyLayerUnchecked(clip, getRegion());
     }
@@ -453,9 +455,9 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.clipRight = clip.right;
     info.clipBottom = clip.bottom;
     info.isLayer = hasLayer();
-    info.width = getSnapshot()->viewport.getWidth();
-    info.height = getSnapshot()->height;
-    getSnapshot()->transform->copyTo(&info.transform[0]);
+    info.width = currentSnapshot()->viewport.getWidth();
+    info.height = currentSnapshot()->height;
+    currentTransform()->copyTo(&info.transform[0]);
 
     bool dirtyClip = mDirtyClip;
     // setup GL state for functor
@@ -518,7 +520,7 @@ void OpenGLRenderer::renderOverdraw() {
         const Rect* clip = &mTilingClip;
 
         mCaches.enableScissor();
-        mCaches.setScissor(clip->left, mFirstSnapshot->height - clip->bottom,
+        mCaches.setScissor(clip->left, firstSnapshot()->height - clip->bottom,
                 clip->right - clip->left, clip->bottom - clip->top);
 
         // 1x overdraw
@@ -580,7 +582,7 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
 
         if (inFrame) {
             resumeAfterLayer();
-            startTiling(*mSnapshot);
+            startTilingCurrentClip();
         }
 
         layer->debugDrawUpdate = mCaches.debugLayersUpdates;
@@ -709,7 +711,7 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
     if (restoreOrtho) {
         const Rect& r = restored.viewport;
         glViewport(r.left, r.top, r.right, r.bottom);
-        mViewProjMatrix.load(removed.orthoMatrix); // todo: should ortho be stored in 'restored'?
+        mViewProjMatrix.load(removed.orthoMatrix); // TODO: should ortho be stored in 'restored'?
     }
 
     if (restoreClip) {
@@ -732,7 +734,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         int alpha, SkXfermode::Mode mode, int flags) {
     const int count = saveSnapshot(flags);
 
-    if (!currentSnapshot().isIgnored()) {
+    if (!currentSnapshot()->isIgnored()) {
         createLayer(left, top, right, bottom, alpha, mode, flags);
     }
 
@@ -742,22 +744,22 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool fboLayer) {
     const Rect untransformedBounds(bounds);
 
-    currentTransform().mapRect(bounds);
+    currentTransform()->mapRect(bounds);
 
     // Layers only make sense if they are in the framebuffer's bounds
-    if (bounds.intersect(currentClipRect())) {
+    if (bounds.intersect(*currentClipRect())) {
         // We cannot work with sub-pixels in this case
         bounds.snapToPixelBoundaries();
 
         // When the layer is not an FBO, we may use glCopyTexImage so we
         // need to make sure the layer does not extend outside the bounds
         // of the framebuffer
-        if (!bounds.intersect(currentSnapshot().previous->viewport)) {
+        if (!bounds.intersect(currentSnapshot()->previous->viewport)) {
             bounds.setEmpty();
         } else if (fboLayer) {
             clip.set(bounds);
             mat4 inverse;
-            inverse.loadInverse(currentTransform());
+            inverse.loadInverse(*currentTransform());
             inverse.mapRect(clip);
             clip.snapToPixelBoundaries();
             if (clip.intersect(untransformedBounds)) {
@@ -787,7 +789,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         int alpha, SkXfermode::Mode mode, int flags) {
     const int count = saveSnapshot(flags);
 
-    if (!currentSnapshot().isIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
+    if (!currentSnapshot()->isIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
         // initialize the snapshot as though it almost represents an FBO layer so deferred draw
         // operations will be able to store and restore the current clip and transform info, and
         // quick rejection will be correct (for display lists)
@@ -797,7 +799,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         calculateLayerBoundsAndClip(bounds, clip, true);
         updateSnapshotIgnoreForLayer(bounds, clip, true, alpha);
 
-        if (!currentSnapshot().isIgnored()) {
+        if (!currentSnapshot()->isIgnored()) {
             mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
             mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
             mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
@@ -873,7 +875,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     updateSnapshotIgnoreForLayer(bounds, clip, fboLayer, alpha);
 
     // Bail out if we won't draw in this snapshot
-    if (currentSnapshot().isIgnored()) {
+    if (currentSnapshot()->isIgnored()) {
         return false;
     }
 
@@ -952,7 +954,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
 
-    startTiling(*mSnapshot, true);
+    startTilingCurrentClip(true);
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
     mCaches.enableScissor();
@@ -1001,7 +1003,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
         glBindFramebuffer(GL_FRAMEBUFFER, restored.fbo);
         debugOverdraw(true, false);
 
-        startTiling(restored);
+        startTilingCurrentClip();
     }
 
     if (!fboLayer && layer->getAlpha() < 255) {
@@ -1067,11 +1069,11 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     } else {
         setupDrawExternalTexture(layer->getTexture());
     }
-    if (currentTransform().isPureTranslate() &&
+    if (currentTransform()->isPureTranslate() &&
             layer->getWidth() == (uint32_t) rect.getWidth() &&
             layer->getHeight() == (uint32_t) rect.getHeight()) {
-        const float x = (int) floorf(rect.left + currentTransform().getTranslateX() + 0.5f);
-        const float y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
+        const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
+        const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
 
         layer->setFilter(GL_NEAREST);
         setupDrawModelView(kModelViewMode_TranslateAndScale, false,
@@ -1095,15 +1097,15 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 
         float x = rect.left;
         float y = rect.top;
-        bool simpleTransform = currentTransform().isPureTranslate() &&
+        bool simpleTransform = currentTransform()->isPureTranslate() &&
                 layer->getWidth() == (uint32_t) rect.getWidth() &&
                 layer->getHeight() == (uint32_t) rect.getHeight();
 
         if (simpleTransform) {
             // When we're swapping, the layer is already in screen coordinates
             if (!swap) {
-                x = (int) floorf(rect.left + currentTransform().getTranslateX() + 0.5f);
-                y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
+                x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
+                y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
             }
 
             layer->setFilter(GL_NEAREST, true);
@@ -1186,9 +1188,9 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         setupDrawPureColorUniforms();
         setupDrawColorFilterUniforms();
         setupDrawTexture(layer->getTexture());
-        if (currentTransform().isPureTranslate()) {
-            const float x = (int) floorf(rect.left + currentTransform().getTranslateX() + 0.5f);
-            const float y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
+        if (currentTransform()->isPureTranslate()) {
+            const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
+            const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
 
             layer->setFilter(GL_NEAREST);
             setupDrawModelView(kModelViewMode_Translate, false,
@@ -1298,7 +1300,7 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 }
 
 void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
-    if (bounds.intersect(currentClipRect())) {
+    if (bounds.intersect(*currentClipRect())) {
         bounds.snapToPixelBoundaries();
         android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
         if (!dirty.isEmpty()) {
@@ -1326,7 +1328,7 @@ void OpenGLRenderer::clearLayerRegions() {
     const size_t count = mLayers.size();
     if (count == 0) return;
 
-    if (!currentSnapshot().isIgnored()) {
+    if (!currentSnapshot()->isIgnored()) {
         // Doing several glScissor/glClear here can negatively impact
         // GPUs with a tiler architecture, instead we draw quads with
         // the Clear blending mode
@@ -1378,51 +1380,51 @@ void OpenGLRenderer::clearLayerRegions() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDeferFlags) {
-    const Rect& currentClip = currentClipRect();
-    const mat4& currentMatrix = currentTransform();
+    const Rect* currentClip = currentClipRect();
+    const mat4* currentMatrix = currentTransform();
 
     if (stateDeferFlags & kStateDeferFlag_Draw) {
         // state has bounds initialized in local coordinates
         if (!state.mBounds.isEmpty()) {
-            currentMatrix.mapRect(state.mBounds);
+            currentMatrix->mapRect(state.mBounds);
             Rect clippedBounds(state.mBounds);
             // NOTE: if we ever want to use this clipping info to drive whether the scissor
             // is used, it should more closely duplicate the quickReject logic (in how it uses
             // snapToPixelBoundaries)
 
-            if(!clippedBounds.intersect(currentClip)) {
+            if(!clippedBounds.intersect(*currentClip)) {
                 // quick rejected
                 return true;
             }
 
             state.mClipSideFlags = kClipSide_None;
-            if (!currentClip.contains(state.mBounds)) {
+            if (!currentClip->contains(state.mBounds)) {
                 int& flags = state.mClipSideFlags;
                 // op partially clipped, so record which sides are clipped for clip-aware merging
-                if (currentClip.left > state.mBounds.left) flags |= kClipSide_Left;
-                if (currentClip.top > state.mBounds.top) flags |= kClipSide_Top;
-                if (currentClip.right < state.mBounds.right) flags |= kClipSide_Right;
-                if (currentClip.bottom < state.mBounds.bottom) flags |= kClipSide_Bottom;
+                if (currentClip->left > state.mBounds.left) flags |= kClipSide_Left;
+                if (currentClip->top > state.mBounds.top) flags |= kClipSide_Top;
+                if (currentClip->right < state.mBounds.right) flags |= kClipSide_Right;
+                if (currentClip->bottom < state.mBounds.bottom) flags |= kClipSide_Bottom;
             }
             state.mBounds.set(clippedBounds);
         } else {
             // Empty bounds implies size unknown. Label op as conservatively clipped to disable
             // overdraw avoidance (since we don't know what it overlaps)
             state.mClipSideFlags = kClipSide_ConservativeFull;
-            state.mBounds.set(currentClip);
+            state.mBounds.set(*currentClip);
         }
     }
 
     state.mClipValid = (stateDeferFlags & kStateDeferFlag_Clip);
     if (state.mClipValid) {
-        state.mClip.set(currentClip);
+        state.mClip.set(*currentClip);
     }
 
     // Transform, drawModifiers, and alpha always deferred, since they are used by state operations
     // (Note: saveLayer/restore use colorFilter and alpha, so we just save restore everything)
-    state.mMatrix.load(currentMatrix);
+    state.mMatrix.load(*currentMatrix);
     state.mDrawModifiers = mDrawModifiers;
-    state.mAlpha = currentSnapshot().alpha;
+    state.mAlpha = currentSnapshot()->alpha;
     return false;
 }
 
@@ -1460,10 +1462,10 @@ void OpenGLRenderer::setupMergedMultiDraw(const Rect* clipRect) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    Rect clip(currentClipRect());
+    Rect clip(*currentClipRect());
     clip.snapToPixelBoundaries();
 
-    if (mCaches.setScissor(clip.left, currentSnapshot().height - clip.bottom,
+    if (mCaches.setScissor(clip.left, currentSnapshot()->height - clip.bottom,
             clip.getWidth(), clip.getHeight())) {
         mDirtyClip = false;
     }
@@ -1474,7 +1476,7 @@ void OpenGLRenderer::ensureStencilBuffer() {
     // cannot attach a stencil buffer to fbo0 dynamically. Let's
     // just hope we have one when hasLayer() returns false.
     if (hasLayer()) {
-        attachStencilBufferToLayer(currentSnapshot().layer);
+        attachStencilBufferToLayer(currentSnapshot()->layer);
     }
 }
 
@@ -1496,7 +1498,7 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
 
 void OpenGLRenderer::setStencilFromClip() {
     if (!mCaches.debugOverdraw) {
-        if (!currentSnapshot().clipRegion->isEmpty()) {
+        if (!currentSnapshot()->clipRegion->isEmpty()) {
             // NOTE: The order here is important, we must set dirtyClip to false
             //       before any draw call to avoid calling back into this method
             mDirtyClip = false;
@@ -1521,7 +1523,7 @@ void OpenGLRenderer::setStencilFromClip() {
 
             // The last parameter is important: we are not drawing in the color buffer
             // so we don't want to dirty the current layer, if any
-            drawRegionRects(*(currentSnapshot().clipRegion),
+            drawRegionRects(*(currentSnapshot()->clipRegion),
                     0xff000000, SkXfermode::kSrc_Mode, false);
 
             mCaches.stencil.enableTest();
@@ -1529,7 +1531,7 @@ void OpenGLRenderer::setStencilFromClip() {
             // Draw the region used to generate the stencil if the appropriate debug
             // mode is enabled
             if (mCaches.debugStencilClip == Caches::kStencilShowRegion) {
-                drawRegionRects(*(currentSnapshot().clipRegion),
+                drawRegionRects(*(currentSnapshot()->clipRegion),
                         0x7f0000ff, SkXfermode::kSrcOver_Mode);
             }
         } else {
@@ -1570,62 +1572,10 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
 
 void OpenGLRenderer::debugClip() {
 #if DEBUG_CLIP_REGIONS
-    if (!isRecording() && !currentSnapshot().clipRegion->isEmpty()) {
-        drawRegionRects(*(currentSnapshot().clipRegion), 0x7f00ff00, SkXfermode::kSrcOver_Mode);
+    if (!isRecording() && !currentSnapshot()->clipRegion->isEmpty()) {
+        drawRegionRects(*(currentSnapshot()->clipRegion), 0x7f00ff00, SkXfermode::kSrcOver_Mode);
     }
 #endif
-}
-
-bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
-    if (CC_LIKELY(currentTransform().rectToRect())) {
-        bool clipped = mSnapshot->clip(left, top, right, bottom, op);
-        if (clipped) {
-            dirtyClip();
-        }
-        return !mSnapshot->clipRect->isEmpty();
-    }
-
-    SkPath path;
-    path.addRect(left, top, right, bottom);
-
-    return OpenGLRenderer::clipPath(&path, op);
-}
-
-bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
-    SkMatrix transform;
-    currentTransform().copyTo(transform);
-
-    SkPath transformed;
-    path->transform(transform, &transformed);
-
-    SkRegion clip;
-    if (!mSnapshot->previous->clipRegion->isEmpty()) {
-        clip.setRegion(*mSnapshot->previous->clipRegion);
-    } else {
-        if (mSnapshot->previous == mFirstSnapshot) {
-            clip.setRect(0, 0, getWidth(), getHeight());
-        } else {
-            Rect* bounds = mSnapshot->previous->clipRect;
-            clip.setRect(bounds->left, bounds->top, bounds->right, bounds->bottom);
-        }
-    }
-
-    SkRegion region;
-    region.setPath(transformed, clip);
-
-    bool clipped = mSnapshot->clipRegionTransformed(region, op);
-    if (clipped) {
-        dirtyClip();
-    }
-    return !mSnapshot->clipRect->isEmpty();
-}
-
-bool OpenGLRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
-    bool clipped = mSnapshot->clipRegionTransformed(*region, op);
-    if (clipped) {
-        dirtyClip();
-    }
-    return !mSnapshot->clipRect->isEmpty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1772,8 +1722,8 @@ void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
 
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
     if (!ignoreTransform) {
-        mCaches.currentProgram->set(mViewProjMatrix, mModelView, currentTransform(), offset);
-        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, currentTransform());
+        mCaches.currentProgram->set(mViewProjMatrix, mModelView, *currentTransform(), offset);
+        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *currentTransform());
     } else {
         mCaches.currentProgram->set(mViewProjMatrix, mModelView, mat4::identity(), offset);
         if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
@@ -1799,7 +1749,7 @@ void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
             // because it was built into modelView / the geometry, and the SkiaShader needs to
             // compensate.
             mat4 modelViewWithoutTransform;
-            modelViewWithoutTransform.loadInverse(currentTransform());
+            modelViewWithoutTransform.loadInverse(*currentTransform());
             modelViewWithoutTransform.multiply(mModelView);
             mModelView.load(modelViewWithoutTransform);
         }
@@ -1929,7 +1879,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         }
 
         bool avoidOverdraw = !mCaches.debugOverdraw && !mCountOverdraw; // shh, don't tell devs!
-        DeferredDisplayList deferredList(*(mSnapshot->clipRect), avoidOverdraw);
+        DeferredDisplayList deferredList(*currentClipRect(), avoidOverdraw);
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         displayList->defer(deferStruct, 0);
 
@@ -1955,9 +1905,9 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
     bool ignoreTransform = false;
-    if (currentTransform().isPureTranslate()) {
-        x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
-        y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
+    if (currentTransform()->isPureTranslate()) {
+        x = (int) floorf(left + currentTransform()->getTranslateX() + 0.5f);
+        y = (int) floorf(top + currentTransform()->getTranslateY() + 0.5f);
         ignoreTransform = true;
 
         texture->setFilter(GL_NEAREST, true);
@@ -2085,7 +2035,7 @@ status_t OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
 
 status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
         float* vertices, int* colors, SkPaint* paint) {
-    if (!vertices || mSnapshot->isIgnored()) {
+    if (!vertices || currentSnapshot()->isIgnored()) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2173,7 +2123,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     float a = alpha / 255.0f;
 
     if (hasLayer()) {
-        dirtyLayer(left, top, right, bottom, currentTransform());
+        dirtyLayer(left, top, right, bottom, *currentTransform());
     }
 
     setupDraw();
@@ -2243,9 +2193,9 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     bool useScaleTransform = mDrawModifiers.mShader && scaled;
     bool ignoreTransform = false;
 
-    if (CC_LIKELY(currentTransform().isPureTranslate() && !useScaleTransform)) {
-        float x = (int) floorf(dstLeft + currentTransform().getTranslateX() + 0.5f);
-        float y = (int) floorf(dstTop + currentTransform().getTranslateY() + 0.5f);
+    if (CC_LIKELY(currentTransform()->isPureTranslate() && !useScaleTransform)) {
+        float x = (int) floorf(dstLeft + currentTransform()->getTranslateX() + 0.5f);
+        float y = (int) floorf(dstTop + currentTransform()->getTranslateY() + 0.5f);
 
         dstRight = x + (dstRight - dstLeft);
         dstBottom = y + (dstBottom - dstTop);
@@ -2325,11 +2275,11 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtl
         SkXfermode::Mode mode;
         getAlphaAndMode(paint, &alpha, &mode);
 
-        const bool pureTranslate = currentTransform().isPureTranslate();
+        const bool pureTranslate = currentTransform()->isPureTranslate();
         // Mark the current layer dirty where we are going to draw the patch
         if (hasLayer() && mesh->hasEmptyQuads) {
-            const float offsetX = left + currentTransform().getTranslateX();
-            const float offsetY = top + currentTransform().getTranslateY();
+            const float offsetX = left + currentTransform()->getTranslateX();
+            const float offsetY = top + currentTransform()->getTranslateY();
             const size_t count = mesh->quads.size();
             for (size_t i = 0; i < count; i++) {
                 const Rect& bounds = mesh->quads.itemAt(i);
@@ -2339,15 +2289,15 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtl
                     dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getHeight());
                 } else {
                     dirtyLayer(left + bounds.left, top + bounds.top,
-                            left + bounds.right, top + bounds.bottom, currentTransform());
+                            left + bounds.right, top + bounds.bottom, *currentTransform());
                 }
             }
         }
 
         bool ignoreTransform = false;
         if (CC_LIKELY(pureTranslate)) {
-            const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
-            const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
+            const float x = (int) floorf(left + currentTransform()->getTranslateX() + 0.5f);
+            const float y = (int) floorf(top + currentTransform()->getTranslateY() + 0.5f);
 
             right = x + right - left;
             bottom = y + bottom - top;
@@ -2453,12 +2403,12 @@ status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPa
 status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
     VertexBuffer vertexBuffer;
     // TODO: try clipping large paths to viewport
-    PathTessellator::tessellatePath(path, paint, mSnapshot->transform, vertexBuffer);
+    PathTessellator::tessellatePath(path, paint, *currentTransform(), vertexBuffer);
 
     if (hasLayer()) {
         SkRect bounds = path.getBounds();
         PathTessellator::expandBoundsForStroke(bounds, paint);
-        dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
+        dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
     }
 
     return drawVertexBuffer(vertexBuffer, paint);
@@ -2476,40 +2426,40 @@ status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
  * memory transfer by removing need for degenerate vertices.
  */
 status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored() || count < 4) return DrawGlInfo::kStatusDone;
+    if (currentSnapshot()->isIgnored() || count < 4) return DrawGlInfo::kStatusDone;
 
     count &= ~0x3; // round down to nearest four
 
     VertexBuffer buffer;
     SkRect bounds;
-    PathTessellator::tessellateLines(points, count, paint, mSnapshot->transform, bounds, buffer);
+    PathTessellator::tessellateLines(points, count, paint, *currentTransform(), bounds, buffer);
 
     // can't pass paint, since style would be checked for outset. outset done by tessellation.
     if (quickRejectSetupScissor(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
 
     bool useOffset = !paint->isAntiAlias();
     return drawVertexBuffer(buffer, paint, useOffset);
 }
 
 status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored() || count < 2) return DrawGlInfo::kStatusDone;
+    if (currentSnapshot()->isIgnored() || count < 2) return DrawGlInfo::kStatusDone;
 
     count &= ~0x1; // round down to nearest two
 
     VertexBuffer buffer;
     SkRect bounds;
-    PathTessellator::tessellatePoints(points, count, paint, mSnapshot->transform, bounds, buffer);
+    PathTessellator::tessellatePoints(points, count, paint, *currentTransform(), bounds, buffer);
 
     // can't pass paint, since style would be checked for outset. outset done by tessellation.
     if (quickRejectSetupScissor(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
 
     bool useOffset = !paint->isAntiAlias();
     return drawVertexBuffer(buffer, paint, useOffset);
@@ -2517,9 +2467,9 @@ status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
 
 status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     // No need to check against the clip, we fill the clip region
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+    if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
-    Rect& clip(*mSnapshot->clipRect);
+    Rect clip(*currentClipRect());
     clip.snapToPixelBoundaries();
 
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
@@ -2542,7 +2492,7 @@ status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* tex
 
 status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
+    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2567,7 +2517,7 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
 }
 
 status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectSetupScissor(x - radius, y - radius,
+    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(x - radius, y - radius,
             x + radius, y + radius, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
@@ -2589,7 +2539,7 @@ status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) 
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
         SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
+    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2611,7 +2561,7 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
+    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2648,7 +2598,7 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
 #define SkPaintDefaults_MiterLimit SkIntToScalar(4)
 
 status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
+    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2672,7 +2622,7 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
         return drawConvexPath(path, p);
     }
 
-    if (p->isAntiAlias() && !currentTransform().isSimple()) {
+    if (p->isAntiAlias() && !currentTransform()->isSimple()) {
         SkPath path;
         path.addRect(left, top, right, bottom);
         return drawConvexPath(path, p);
@@ -2731,12 +2681,12 @@ bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
 
 status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
-    if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
+    if (text == NULL || count == 0 || currentSnapshot()->isIgnored() || canSkipText(paint)) {
         return DrawGlInfo::kStatusDone;
     }
 
     // NOTE: Skia does not support perspective transform on drawPosText yet
-    if (!currentTransform().isSimple()) {
+    if (!currentTransform()->isSimple()) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2744,10 +2694,10 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
 
     float x = 0.0f;
     float y = 0.0f;
-    const bool pureTranslate = currentTransform().isPureTranslate();
+    const bool pureTranslate = currentTransform()->isPureTranslate();
     if (pureTranslate) {
-        x = (int) floorf(x + currentTransform().getTranslateX() + 0.5f);
-        y = (int) floorf(y + currentTransform().getTranslateY() + 0.5f);
+        x = (int) floorf(x + currentTransform()->getTranslateX() + 0.5f);
+        y = (int) floorf(y + currentTransform()->getTranslateY() + 0.5f);
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
@@ -2763,7 +2713,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     }
 
     // Pick the appropriate texture filtering
-    bool linearFilter = currentTransform().changesBounds();
+    bool linearFilter = currentTransform()->changesBounds();
     if (pureTranslate && !linearFilter) {
         linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
     }
@@ -2779,7 +2729,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
             positions, hasActiveLayer ? &bounds : NULL, &functor)) {
         if (hasActiveLayer) {
             if (!pureTranslate) {
-                currentTransform().mapRect(bounds);
+                currentTransform()->mapRect(bounds);
             }
             dirtyLayerUnchecked(bounds, getRegion());
         }
@@ -2797,7 +2747,7 @@ mat4 OpenGLRenderer::findBestFontTransform(const mat4& transform) const {
             fontTransform = mat4::identity();
         } else {
             float sx, sy;
-            currentTransform().decomposeScale(sx, sy);
+            currentTransform()->decomposeScale(sx, sy);
             fontTransform.loadScale(sx, sy, 1.0f);
         }
     }
@@ -2811,7 +2761,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     if (drawOpMode == kDrawOpMode_Immediate) {
         // The checks for corner-case ignorable text and quick rejection is only done for immediate
         // drawing as ops from DeferredDisplayList are already filtered for these
-        if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint) ||
+        if (text == NULL || count == 0 || currentSnapshot()->isIgnored() || canSkipText(paint) ||
                 quickRejectSetupScissor(bounds)) {
             return DrawGlInfo::kStatusDone;
         }
@@ -2820,7 +2770,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     const float oldX = x;
     const float oldY = y;
 
-    const mat4& transform = currentTransform();
+    const mat4& transform = *currentTransform();
     const bool pureTranslate = transform.isPureTranslate();
 
     if (CC_LIKELY(pureTranslate)) {
@@ -2861,7 +2811,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     fontRenderer.setTextureFiltering(linearFilter);
 
     // TODO: Implement better clipping for scaled/rotated text
-    const Rect* clip = !pureTranslate ? NULL : mSnapshot->clipRect;
+    const Rect* clip = !pureTranslate ? NULL : currentClipRect();
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;
@@ -2893,7 +2843,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
 
 status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
         float hOffset, float vOffset, SkPaint* paint) {
-    if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
+    if (text == NULL || count == 0 || currentSnapshot()->isIgnored() || canSkipText(paint)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2917,7 +2867,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
             hOffset, vOffset, hasActiveLayer ? &bounds : NULL, &functor)) {
         if (hasActiveLayer) {
-            currentTransform().mapRect(bounds);
+            currentTransform()->mapRect(bounds);
             dirtyLayerUnchecked(bounds, getRegion());
         }
     }
@@ -2926,7 +2876,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
 }
 
 status_t OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+    if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     mCaches.activeTexture(0);
 
@@ -2990,9 +2940,9 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             setupDrawPureColorUniforms();
             setupDrawColorFilterUniforms();
             setupDrawTexture(layer->getTexture());
-            if (CC_LIKELY(currentTransform().isPureTranslate())) {
-                int tx = (int) floorf(x + currentTransform().getTranslateX() + 0.5f);
-                int ty = (int) floorf(y + currentTransform().getTranslateY() + 0.5f);
+            if (CC_LIKELY(currentTransform()->isPureTranslate())) {
+                int tx = (int) floorf(x + currentTransform()->getTranslateX() + 0.5f);
+                int ty = (int) floorf(y + currentTransform()->getTranslateY() + 0.5f);
 
                 layer->setFilter(GL_NEAREST);
                 setupDrawModelView(kModelViewMode_Translate, false, tx, ty,
@@ -3206,7 +3156,7 @@ void OpenGLRenderer::drawTextDecorations(float underlineWidth, float x, float y,
 }
 
 status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) {
+    if (currentSnapshot()->isIgnored()) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -3222,7 +3172,7 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
 
 status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlpha,
         float width, float height) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+    if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     // For now, always and scissor
     // TODO: use quickReject
@@ -3275,7 +3225,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
 
     setupDraw();
     setupDrawNoTexture();
-    setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
+    setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
     setupDrawShader();
     setupDrawColorFilter();
     setupDrawBlending(mode);
@@ -3288,7 +3238,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     setupDrawColorFilterUniforms();
 
     if (dirty && hasLayer()) {
-        dirtyLayer(left, top, right, bottom, currentTransform());
+        dirtyLayer(left, top, right, bottom, *currentTransform());
     }
 
     issueIndexedQuadDraw(&mesh[0], count / 4);
@@ -3305,7 +3255,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 
     setupDraw();
     setupDrawNoTexture();
-    setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
+    setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
     setupDrawShader();
     setupDrawColorFilter();
     setupDrawBlending(mode);
@@ -3341,9 +3291,9 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
         resetDrawTextureTexCoords(uvs.left, uvs.top, uvs.right, uvs.bottom);
     }
 
-    if (CC_LIKELY(currentTransform().isPureTranslate())) {
-        const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
-        const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
+    if (CC_LIKELY(currentTransform()->isPureTranslate())) {
+        const float x = (int) floorf(left + currentTransform()->getTranslateX() + 0.5f);
+        const float y = (int) floorf(top + currentTransform()->getTranslateY() + 0.5f);
 
         texture->setFilter(GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
@@ -3516,7 +3466,7 @@ void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mod
         // if drawing a layer, ignore the paint's alpha
         *alpha = mDrawModifiers.mOverrideLayerAlpha * 255;
     }
-    *alpha *= mSnapshot->alpha;
+    *alpha *= currentSnapshot()->alpha;
 }
 
 float OpenGLRenderer::getLayerAlpha(Layer* layer) const {
@@ -3526,7 +3476,7 @@ float OpenGLRenderer::getLayerAlpha(Layer* layer) const {
     } else {
         alpha = layer->getAlpha() / 255.0f;
     }
-    return alpha * mSnapshot->alpha;
+    return alpha * currentSnapshot()->alpha;
 }
 
 }; // namespace uirenderer

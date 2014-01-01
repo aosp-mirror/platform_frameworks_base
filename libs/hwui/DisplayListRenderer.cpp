@@ -218,19 +218,19 @@ void DisplayListRenderer::concatMatrix(SkMatrix* matrix) {
 bool DisplayListRenderer::clipRect(float left, float top, float right, float bottom,
         SkRegion::Op op) {
     addStateOp(new (alloc()) ClipRectOp(left, top, right, bottom, op));
-    return OpenGLRenderer::clipRect(left, top, right, bottom, op);
+    return StatefulBaseRenderer::clipRect(left, top, right, bottom, op);
 }
 
 bool DisplayListRenderer::clipPath(SkPath* path, SkRegion::Op op) {
     path = refPath(path);
     addStateOp(new (alloc()) ClipPathOp(path, op));
-    return OpenGLRenderer::clipPath(path, op);
+    return StatefulBaseRenderer::clipPath(path, op);
 }
 
 bool DisplayListRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
     region = refRegion(region);
     addStateOp(new (alloc()) ClipRegionOp(region, op));
-    return OpenGLRenderer::clipRegion(region, op);
+    return StatefulBaseRenderer::clipRegion(region, op);
 }
 
 status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
@@ -242,7 +242,8 @@ status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
     //       resources cache, but we rely on the caller (UI toolkit) to
     //       do the right thing for now
 
-    DrawDisplayListOp* op = new (alloc()) DrawDisplayListOp(displayList, flags, currentTransform());
+    DrawDisplayListOp* op = new (alloc()) DrawDisplayListOp(displayList,
+            flags, *currentTransform());
     addDrawOp(op);
     mDisplayListData->children.push(op);
 
