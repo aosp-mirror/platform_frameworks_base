@@ -42,6 +42,7 @@
 #include "Program.h"
 #include "Rect.h"
 #include "Renderer.h"
+#include "StatefulBaseRenderer.h"
 #include "SkiaColorFilter.h"
 #include "Snapshot.h"
 #include "UvMapper.h"
@@ -120,10 +121,9 @@ enum ModelViewMode {
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 /**
- * OpenGL renderer used to draw accelerated 2D graphics. The API is a
- * simplified version of Skia's Canvas API.
+ * OpenGL Renderer implementation.
  */
-class OpenGLRenderer : public Renderer {
+class OpenGLRenderer : public StatefulBaseRenderer {
 public:
     ANDROID_API OpenGLRenderer();
     virtual ~OpenGLRenderer();
@@ -131,10 +131,7 @@ public:
     ANDROID_API void initProperties();
 
     virtual void setViewport(int width, int height);
-
-    virtual status_t prepare(bool opaque);
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
-
     virtual void finish();
     virtual void interrupt();
     virtual void resume();
@@ -157,11 +154,6 @@ public:
     ANDROID_API void clearLayerUpdates();
     ANDROID_API void flushLayerUpdates();
 
-    ANDROID_API int getSaveCount() const;
-    virtual int save(int flags);
-    virtual void restore();
-    virtual void restoreToCount(int saveCount);
-
     ANDROID_API int saveLayer(float left, float top, float right, float bottom,
             SkPaint* paint, int flags) {
         SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode;
@@ -178,28 +170,9 @@ public:
     int saveLayerDeferred(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags);
 
-    virtual void translate(float dx, float dy, float dz = 0);
-    virtual void rotate(float degrees);
-    virtual void scale(float sx, float sy);
-    virtual void skew(float sx, float sy);
-
-    bool hasRectToRectTransform();
-    ANDROID_API void getMatrix(SkMatrix* matrix) const;
-    virtual void setMatrix(SkMatrix* matrix);
-    virtual void concatMatrix(SkMatrix* matrix);
-    virtual void concatMatrix(Matrix4& matrix) {
-        currentTransform().multiply(matrix);
-    }
-
-    ANDROID_API const Rect& getClipBounds() const;
-
-    ANDROID_API bool quickRejectConservative(float left, float top,
-            float right, float bottom) const;
-
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
     virtual bool clipPath(SkPath* path, SkRegion::Op op);
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
-    virtual Rect* getClipRect();
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags);
     virtual status_t drawLayer(Layer* layer, float x, float y);
@@ -273,7 +246,7 @@ public:
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
 
     ANDROID_API bool isCurrentTransformSimple() {
-        return mSnapshot->transform->isSimple();
+        return currentTransform().isSimple();
     }
 
     Caches& getCaches() {
@@ -400,9 +373,6 @@ protected:
      */
     void attachStencilBufferToLayer(Layer* layer);
 
-    bool calculateQuickRejectForScissor(float left, float top, float right, float bottom,
-            bool* clipRequired, bool snapOut) const;
-
     bool quickRejectSetupScissor(float left, float top, float right, float bottom,
             SkPaint* paint = NULL);
     bool quickRejectSetupScissor(const Rect& bounds, SkPaint* paint = NULL) {
@@ -419,16 +389,13 @@ protected:
      * @param curent The current snapshot containing the layer to compose
      * @param previous The previous snapshot to compose the current layer with
      */
-    virtual void composeLayer(sp<Snapshot> current, sp<Snapshot> previous);
+    virtual void composeLayer(const Snapshot& current, const Snapshot& previous);
 
     /**
      * Marks the specified region as dirty at the specified bounds.
      */
     void dirtyLayerUnchecked(Rect& bounds, Region* region);
 
-    /**
-     * Returns the current snapshot.
-     */
     sp<Snapshot> getSnapshot() const {
         return mSnapshot;
     }
@@ -450,7 +417,7 @@ protected:
     /**
      * Returns the name of the FBO this renderer is rendering into.
      */
-    virtual GLint getTargetFbo() const {
+    virtual GLuint getTargetFbo() const {
         return 0;
     }
 
@@ -520,7 +487,7 @@ private:
      * This method needs to be invoked every time getTargetFbo() is
      * bound again.
      */
-    void startTiling(const sp<Snapshot>& snapshot, bool opaque = false);
+    void startTiling(const Snapshot& snapshot, bool opaque = false);
 
     /**
      * Tells the GPU what part of the screen is about to be redrawn.
@@ -535,23 +502,7 @@ private:
      */
     void endTiling();
 
-    /**
-     * Saves the current state of the renderer as a new snapshot.
-     * The new snapshot is saved in mSnapshot and the previous snapshot
-     * is linked from mSnapshot->previous.
-     *
-     * @param flags The save flags; see SkCanvas for more information
-     *
-     * @return The new save count. This value can be passed to #restoreToCount()
-     */
-    int saveSnapshot(int flags);
-
-    /**
-     * Restores the current snapshot; mSnapshot becomes mSnapshot->previous.
-     *
-     * @return True if the clip was modified.
-     */
-    bool restoreSnapshot();
+    void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored);
 
     /**
      * Sets the clipping rectangle using glScissor. The clip is defined by
@@ -979,10 +930,6 @@ private:
         mDirtyClip = true;
     }
 
-    inline mat4& currentTransform() const {
-        return *mSnapshot->transform;
-    }
-
     inline const UvMapper& getMapper(const Texture* texture) {
         return texture && texture->uvMapper ? *texture->uvMapper : mUvMapper;
     }
@@ -993,9 +940,6 @@ private:
      * NULL, the texture could not be found and/or allocated.
      */
     Texture* getTexture(SkBitmap* bitmap);
-
-    // Dimensions of the drawing surface
-    int mWidth, mHeight;
 
     // Matrix used for view/projection in shaders
     mat4 mViewProjMatrix;
@@ -1016,12 +960,6 @@ private:
      */
     mat4 mModelView;
 
-    // Number of saved states
-    int mSaveCount;
-    // Base state
-    sp<Snapshot> mFirstSnapshot;
-    // Current state
-    sp<Snapshot> mSnapshot;
     // State used to define the clipping region
     Rect mTilingClip;
     // Is the target render surface opaque

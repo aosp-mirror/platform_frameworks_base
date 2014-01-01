@@ -120,19 +120,14 @@ void DisplayListRenderer::setViewport(int width, int height) {
     // TODO: DisplayListRenderer shouldn't have a projection matrix, as it should never be used
     mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
-    mWidth = width;
-    mHeight = height;
+    initializeViewport(width, height);
 }
 
 status_t DisplayListRenderer::prepareDirty(float left, float top,
         float right, float bottom, bool opaque) {
-    mSnapshot = new Snapshot(mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    mSaveCount = 1;
+    initializeSaveStack(0, 0, getWidth(), getHeight());
 
-    mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
     mDirtyClip = opaque;
-
     mRestoreSaveCount = -1;
 
     return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
@@ -158,7 +153,7 @@ status_t DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) 
 
 int DisplayListRenderer::save(int flags) {
     addStateOp(new (alloc()) SaveOp(flags));
-    return OpenGLRenderer::save(flags);
+    return StatefulBaseRenderer::save(flags);
 }
 
 void DisplayListRenderer::restore() {
@@ -169,19 +164,19 @@ void DisplayListRenderer::restore() {
 
     mRestoreSaveCount--;
     insertTranslate();
-    OpenGLRenderer::restore();
+    StatefulBaseRenderer::restore();
 }
 
 void DisplayListRenderer::restoreToCount(int saveCount) {
     mRestoreSaveCount = saveCount;
     insertTranslate();
-    OpenGLRenderer::restoreToCount(saveCount);
+    StatefulBaseRenderer::restoreToCount(saveCount);
 }
 
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
         int alpha, SkXfermode::Mode mode, int flags) {
     addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, alpha, mode, flags));
-    return OpenGLRenderer::save(flags);
+    return StatefulBaseRenderer::save(flags);
 }
 
 void DisplayListRenderer::translate(float dx, float dy, float dz) {
@@ -190,34 +185,34 @@ void DisplayListRenderer::translate(float dx, float dy, float dz) {
     mTranslateX += dx;
     mTranslateY += dy;
     insertRestoreToCount();
-    OpenGLRenderer::translate(dx, dy, dz);
+    StatefulBaseRenderer::translate(dx, dy, dz);
 }
 
 void DisplayListRenderer::rotate(float degrees) {
     addStateOp(new (alloc()) RotateOp(degrees));
-    OpenGLRenderer::rotate(degrees);
+    StatefulBaseRenderer::rotate(degrees);
 }
 
 void DisplayListRenderer::scale(float sx, float sy) {
     addStateOp(new (alloc()) ScaleOp(sx, sy));
-    OpenGLRenderer::scale(sx, sy);
+    StatefulBaseRenderer::scale(sx, sy);
 }
 
 void DisplayListRenderer::skew(float sx, float sy) {
     addStateOp(new (alloc()) SkewOp(sx, sy));
-    OpenGLRenderer::skew(sx, sy);
+    StatefulBaseRenderer::skew(sx, sy);
 }
 
 void DisplayListRenderer::setMatrix(SkMatrix* matrix) {
     matrix = refMatrix(matrix);
     addStateOp(new (alloc()) SetMatrixOp(matrix));
-    OpenGLRenderer::setMatrix(matrix);
+    StatefulBaseRenderer::setMatrix(matrix);
 }
 
 void DisplayListRenderer::concatMatrix(SkMatrix* matrix) {
     matrix = refMatrix(matrix);
     addStateOp(new (alloc()) ConcatMatrixOp(matrix));
-    OpenGLRenderer::concatMatrix(matrix);
+    StatefulBaseRenderer::concatMatrix(matrix);
 }
 
 bool DisplayListRenderer::clipRect(float left, float top, float right, float bottom,

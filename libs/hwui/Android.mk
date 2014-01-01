@@ -42,6 +42,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
 		Snapshot.cpp \
+		StatefulBaseRenderer.cpp \
 		Stencil.cpp \
 		Texture.cpp \
 		TextureCache.cpp \

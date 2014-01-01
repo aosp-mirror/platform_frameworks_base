@@ -129,7 +129,6 @@ OpenGLRenderer::OpenGLRenderer():
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
-    mFirstSnapshot = new Snapshot;
     mFrameStarted = false;
     mCountOverdraw = false;
 
@@ -182,24 +181,15 @@ void OpenGLRenderer::initViewport(int width, int height) {
         mViewProjMatrix.loadOrtho(0, width, height, 0, -1, 1);
     }
 
-    mWidth = width;
-    mHeight = height;
-
-    mFirstSnapshot->height = height;
-    mFirstSnapshot->viewport.set(0, 0, width, height);
+    initializeViewport(width, height);
 }
 
 void OpenGLRenderer::setupFrameState(float left, float top,
         float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
 
+    initializeSaveStack(left, top, right, bottom);
     mOpaque = opaque;
-    mSnapshot = new Snapshot(mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    mSnapshot->fbo = getTargetFbo();
-    mSaveCount = 1;
-
-    mSnapshot->setClip(left, top, right, bottom);
     mTilingClip.set(left, top, right, bottom);
 }
 
@@ -211,23 +201,19 @@ status_t OpenGLRenderer::startFrame() {
 
     discardFramebuffer(mTilingClip.left, mTilingClip.top, mTilingClip.right, mTilingClip.bottom);
 
-    glViewport(0, 0, mWidth, mHeight);
+    glViewport(0, 0, getWidth(), getHeight());
 
     // Functors break the tiling extension in pretty spectacular ways
     // This ensures we don't use tiling when a functor is going to be
     // invoked during the frame
     mSuppressTiling = mCaches.hasRegisteredFunctors();
 
-    startTiling(mSnapshot, true);
+    startTiling(*mSnapshot, true);
 
     debugOverdraw(true, true);
 
     return clear(mTilingClip.left, mTilingClip.top,
             mTilingClip.right, mTilingClip.bottom, mOpaque);
-}
-
-status_t OpenGLRenderer::prepare(bool opaque) {
-    return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
 }
 
 status_t OpenGLRenderer::prepareDirty(float left, float top,
@@ -239,7 +225,7 @@ status_t OpenGLRenderer::prepareDirty(float left, float top,
     // The framebuffer renderer will first defer the display list
     // for each layer and wait until the first drawing command
     // to start the frame
-    if (mSnapshot->fbo == 0) {
+    if (currentSnapshot().fbo == 0) {
         syncState();
         updateLayers();
     } else {
@@ -254,7 +240,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
     // perform a discard to let the driver know we don't need to preserve
     // the back buffer for this frame.
     if (mExtensions.hasDiscardFramebuffer() &&
-            left <= 0.0f && top <= 0.0f && right >= mWidth && bottom >= mHeight) {
+            left <= 0.0f && top <= 0.0f && right >= getWidth() && bottom >= getHeight()) {
         const bool isFbo = getTargetFbo() == 0;
         const GLenum attachments[] = {
                 isFbo ? (const GLenum) GL_COLOR_EXT : (const GLenum) GL_COLOR_ATTACHMENT0,
@@ -266,7 +252,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
     if (!opaque || mCountOverdraw) {
         mCaches.enableScissor();
-        mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
+        mCaches.setScissor(left, currentSnapshot().height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
         return DrawGlInfo::kStatusDrew;
     }
@@ -283,14 +269,14 @@ void OpenGLRenderer::syncState() {
     }
 }
 
-void OpenGLRenderer::startTiling(const sp<Snapshot>& s, bool opaque) {
+void OpenGLRenderer::startTiling(const Snapshot& s, bool opaque) {
     if (!mSuppressTiling) {
-        Rect* clip = &mTilingClip;
-        if (s->flags & Snapshot::kFlagFboTarget) {
-            clip = &(s->layer->clipRect);
+        const Rect* clip = &mTilingClip;
+        if (s.flags & Snapshot::kFlagFboTarget) {
+            clip = &(s.layer->clipRect);
         }
 
-        startTiling(*clip, s->height, opaque);
+        startTiling(*clip, s.height, opaque);
     }
 }
 
@@ -369,9 +355,9 @@ void OpenGLRenderer::interrupt() {
 }
 
 void OpenGLRenderer::resume() {
-    sp<Snapshot> snapshot = (mSnapshot != NULL) ? mSnapshot : mFirstSnapshot;
-    glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
+    const Snapshot& snapshot = currentSnapshot();
+    glViewport(0, 0, snapshot.viewport.getWidth(), snapshot.viewport.getHeight());
+    glBindFramebuffer(GL_FRAMEBUFFER, snapshot.fbo);
     debugOverdraw(true, false);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -391,9 +377,9 @@ void OpenGLRenderer::resume() {
 }
 
 void OpenGLRenderer::resumeAfterLayer() {
-    sp<Snapshot> snapshot = (mSnapshot != NULL) ? mSnapshot : mFirstSnapshot;
-    glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
+    const Snapshot& snapshot = currentSnapshot();
+    glViewport(0, 0, snapshot.viewport.getWidth(), snapshot.viewport.getHeight());
+    glBindFramebuffer(GL_FRAMEBUFFER, snapshot.fbo);
     debugOverdraw(true, false);
 
     mCaches.resetScissor();
@@ -447,12 +433,12 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
 }
 
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+    if (currentSnapshot().isIgnored()) return DrawGlInfo::kStatusDone;
 
     detachFunctor(functor);
 
 
-    Rect clip(*mSnapshot->clipRect);
+    Rect clip(currentClipRect());
     clip.snapToPixelBoundaries();
 
     // Since we don't know what the functor will draw, let's dirty
@@ -556,9 +542,9 @@ void OpenGLRenderer::renderOverdraw() {
 }
 
 void OpenGLRenderer::countOverdraw() {
-    size_t count = mWidth * mHeight;
+    size_t count = getWidth() * getHeight();
     uint32_t* buffer = new uint32_t[count];
-    glReadPixels(0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, &buffer[0]);
+    glReadPixels(0, 0, getWidth(), getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, &buffer[0]);
 
     size_t total = 0;
     for (size_t i = 0; i < count; i++) {
@@ -594,7 +580,7 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
 
         if (inFrame) {
             resumeAfterLayer();
-            startTiling(mSnapshot);
+            startTiling(*mSnapshot);
         }
 
         layer->debugDrawUpdate = mCaches.debugLayersUpdates;
@@ -715,49 +701,16 @@ void OpenGLRenderer::flushLayerUpdates() {
 // State management
 ///////////////////////////////////////////////////////////////////////////////
 
-int OpenGLRenderer::getSaveCount() const {
-    return mSaveCount;
-}
-
-int OpenGLRenderer::save(int flags) {
-    return saveSnapshot(flags);
-}
-
-void OpenGLRenderer::restore() {
-    if (mSaveCount > 1) {
-        restoreSnapshot();
-    }
-}
-
-void OpenGLRenderer::restoreToCount(int saveCount) {
-    if (saveCount < 1) saveCount = 1;
-
-    while (mSaveCount > saveCount) {
-        restoreSnapshot();
-    }
-}
-
-int OpenGLRenderer::saveSnapshot(int flags) {
-    mSnapshot = new Snapshot(mSnapshot, flags);
-    return mSaveCount++;
-}
-
-bool OpenGLRenderer::restoreSnapshot() {
-    bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
-    bool restoreLayer = mSnapshot->flags & Snapshot::kFlagIsLayer;
-    bool restoreOrtho = mSnapshot->flags & Snapshot::kFlagDirtyOrtho;
-
-    sp<Snapshot> current = mSnapshot;
-    sp<Snapshot> previous = mSnapshot->previous;
+void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {
+    bool restoreOrtho = removed.flags & Snapshot::kFlagDirtyOrtho;
+    bool restoreClip = removed.flags & Snapshot::kFlagClipSet;
+    bool restoreLayer = removed.flags & Snapshot::kFlagIsLayer;
 
     if (restoreOrtho) {
-        Rect& r = previous->viewport;
+        const Rect& r = restored.viewport;
         glViewport(r.left, r.top, r.right, r.bottom);
-        mViewProjMatrix.load(current->orthoMatrix);
+        mViewProjMatrix.load(removed.orthoMatrix); // todo: should ortho be stored in 'restored'?
     }
-
-    mSaveCount--;
-    mSnapshot = previous;
 
     if (restoreClip) {
         dirtyClip();
@@ -766,11 +719,9 @@ bool OpenGLRenderer::restoreSnapshot() {
     if (restoreLayer) {
         endMark(); // Savelayer
         startMark("ComposeLayer");
-        composeLayer(current, previous);
+        composeLayer(removed, restored);
         endMark();
     }
-
-    return restoreClip;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -781,7 +732,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         int alpha, SkXfermode::Mode mode, int flags) {
     const int count = saveSnapshot(flags);
 
-    if (!mSnapshot->isIgnored()) {
+    if (!currentSnapshot().isIgnored()) {
         createLayer(left, top, right, bottom, alpha, mode, flags);
     }
 
@@ -794,14 +745,14 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
     currentTransform().mapRect(bounds);
 
     // Layers only make sense if they are in the framebuffer's bounds
-    if (bounds.intersect(*mSnapshot->clipRect)) {
+    if (bounds.intersect(currentClipRect())) {
         // We cannot work with sub-pixels in this case
         bounds.snapToPixelBoundaries();
 
         // When the layer is not an FBO, we may use glCopyTexImage so we
         // need to make sure the layer does not extend outside the bounds
         // of the framebuffer
-        if (!bounds.intersect(mSnapshot->previous->viewport)) {
+        if (!bounds.intersect(currentSnapshot().previous->viewport)) {
             bounds.setEmpty();
         } else if (fboLayer) {
             clip.set(bounds);
@@ -836,7 +787,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         int alpha, SkXfermode::Mode mode, int flags) {
     const int count = saveSnapshot(flags);
 
-    if (!mSnapshot->isIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
+    if (!currentSnapshot().isIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
         // initialize the snapshot as though it almost represents an FBO layer so deferred draw
         // operations will be able to store and restore the current clip and transform info, and
         // quick rejection will be correct (for display lists)
@@ -846,7 +797,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         calculateLayerBoundsAndClip(bounds, clip, true);
         updateSnapshotIgnoreForLayer(bounds, clip, true, alpha);
 
-        if (!mSnapshot->isIgnored()) {
+        if (!currentSnapshot().isIgnored()) {
             mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
             mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
             mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
@@ -922,7 +873,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     updateSnapshotIgnoreForLayer(bounds, clip, fboLayer, alpha);
 
     // Bail out if we won't draw in this snapshot
-    if (mSnapshot->isIgnored()) {
+    if (currentSnapshot().isIgnored()) {
         return false;
     }
 
@@ -1001,7 +952,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
 
-    startTiling(mSnapshot, true);
+    startTiling(*mSnapshot, true);
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
     mCaches.enableScissor();
@@ -1023,15 +974,15 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
 /**
  * Read the documentation of createLayer() before doing anything in this method.
  */
-void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
-    if (!current->layer) {
+void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& restored) {
+    if (!removed.layer) {
         ALOGE("Attempting to compose a layer that does not exist");
         return;
     }
 
-    Layer* layer = current->layer;
+    Layer* layer = removed.layer;
     const Rect& rect = layer->layer;
-    const bool fboLayer = current->flags & Snapshot::kFlagIsFboLayer;
+    const bool fboLayer = removed.flags & Snapshot::kFlagIsFboLayer;
 
     bool clipRequired = false;
     calculateQuickRejectForScissor(rect.left, rect.top, rect.right, rect.bottom,
@@ -1047,10 +998,10 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         layer->removeFbo(false);
 
         // Unbind current FBO and restore previous one
-        glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, restored.fbo);
         debugOverdraw(true, false);
 
-        startTiling(previous);
+        startTiling(restored);
     }
 
     if (!fboLayer && layer->getAlpha() < 255) {
@@ -1067,7 +1018,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     // When the layer is stored in an FBO, we can save a bit of fillrate by
     // drawing only the dirty region
     if (fboLayer) {
-        dirtyLayer(rect.left, rect.top, rect.right, rect.bottom, *previous->transform);
+        dirtyLayer(rect.left, rect.top, rect.right, rect.bottom, *restored.transform);
         if (layer->getColorFilter()) {
             setupColorFilter(layer->getColorFilter());
         }
@@ -1347,7 +1298,7 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 }
 
 void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
-    if (bounds.intersect(*mSnapshot->clipRect)) {
+    if (bounds.intersect(currentClipRect())) {
         bounds.snapToPixelBoundaries();
         android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
         if (!dirty.isEmpty()) {
@@ -1375,7 +1326,7 @@ void OpenGLRenderer::clearLayerRegions() {
     const size_t count = mLayers.size();
     if (count == 0) return;
 
-    if (!mSnapshot->isIgnored()) {
+    if (!currentSnapshot().isIgnored()) {
         // Doing several glScissor/glClear here can negatively impact
         // GPUs with a tiler architecture, instead we draw quads with
         // the Clear blending mode
@@ -1427,8 +1378,8 @@ void OpenGLRenderer::clearLayerRegions() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDeferFlags) {
-    const Rect& currentClip = *(mSnapshot->clipRect);
-    const mat4& currentMatrix = *(mSnapshot->transform);
+    const Rect& currentClip = currentClipRect();
+    const mat4& currentMatrix = currentTransform();
 
     if (stateDeferFlags & kStateDeferFlag_Draw) {
         // state has bounds initialized in local coordinates
@@ -1471,14 +1422,14 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
     // (Note: saveLayer/restore use colorFilter and alpha, so we just save restore everything)
     state.mMatrix.load(currentMatrix);
     state.mDrawModifiers = mDrawModifiers;
-    state.mAlpha = mSnapshot->alpha;
+    state.mAlpha = currentSnapshot().alpha;
     return false;
 }
 
 void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore) {
-    currentTransform().load(state.mMatrix);
-    mDrawModifiers = state.mDrawModifiers;
+    setMatrix(state.mMatrix);
     mSnapshot->alpha = state.mAlpha;
+    mDrawModifiers = state.mDrawModifiers;
 
     if (state.mClipValid && !skipClipRestore) {
         mSnapshot->setClip(state.mClip.left, state.mClip.top,
@@ -1498,51 +1449,10 @@ void OpenGLRenderer::setupMergedMultiDraw(const Rect* clipRect) {
     if (clipRect != NULL) {
         mSnapshot->setClip(clipRect->left, clipRect->top, clipRect->right, clipRect->bottom);
     } else {
-        mSnapshot->setClip(0, 0, mWidth, mHeight);
+        mSnapshot->setClip(0, 0, getWidth(), getHeight());
     }
     dirtyClip();
     mCaches.setScissorEnabled(clipRect != NULL || mScissorOptimizationDisabled);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Transforms
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::translate(float dx, float dy, float dz) {
-    currentTransform().translate(dx, dy, dz);
-}
-
-void OpenGLRenderer::rotate(float degrees) {
-    currentTransform().rotate(degrees, 0.0f, 0.0f, 1.0f);
-}
-
-void OpenGLRenderer::scale(float sx, float sy) {
-    currentTransform().scale(sx, sy, 1.0f);
-}
-
-void OpenGLRenderer::skew(float sx, float sy) {
-    currentTransform().skew(sx, sy);
-}
-
-void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
-    if (matrix) {
-        currentTransform().load(*matrix);
-    } else {
-        currentTransform().loadIdentity();
-    }
-}
-
-bool OpenGLRenderer::hasRectToRectTransform() {
-    return CC_LIKELY(currentTransform().rectToRect());
-}
-
-void OpenGLRenderer::getMatrix(SkMatrix* matrix) const {
-    currentTransform().copyTo(*matrix);
-}
-
-void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
-    mat4 transform(*matrix);
-    currentTransform().multiply(transform);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1550,10 +1460,10 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    Rect clip(*mSnapshot->clipRect);
+    Rect clip(currentClipRect());
     clip.snapToPixelBoundaries();
 
-    if (mCaches.setScissor(clip.left, mSnapshot->height - clip.bottom,
+    if (mCaches.setScissor(clip.left, currentSnapshot().height - clip.bottom,
             clip.getWidth(), clip.getHeight())) {
         mDirtyClip = false;
     }
@@ -1564,7 +1474,7 @@ void OpenGLRenderer::ensureStencilBuffer() {
     // cannot attach a stencil buffer to fbo0 dynamically. Let's
     // just hope we have one when hasLayer() returns false.
     if (hasLayer()) {
-        attachStencilBufferToLayer(mSnapshot->layer);
+        attachStencilBufferToLayer(currentSnapshot().layer);
     }
 }
 
@@ -1586,7 +1496,7 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
 
 void OpenGLRenderer::setStencilFromClip() {
     if (!mCaches.debugOverdraw) {
-        if (!mSnapshot->clipRegion->isEmpty()) {
+        if (!currentSnapshot().clipRegion->isEmpty()) {
             // NOTE: The order here is important, we must set dirtyClip to false
             //       before any draw call to avoid calling back into this method
             mDirtyClip = false;
@@ -1611,82 +1521,21 @@ void OpenGLRenderer::setStencilFromClip() {
 
             // The last parameter is important: we are not drawing in the color buffer
             // so we don't want to dirty the current layer, if any
-            drawRegionRects(*mSnapshot->clipRegion, 0xff000000, SkXfermode::kSrc_Mode, false);
+            drawRegionRects(*(currentSnapshot().clipRegion),
+                    0xff000000, SkXfermode::kSrc_Mode, false);
 
             mCaches.stencil.enableTest();
 
             // Draw the region used to generate the stencil if the appropriate debug
             // mode is enabled
             if (mCaches.debugStencilClip == Caches::kStencilShowRegion) {
-                drawRegionRects(*mSnapshot->clipRegion, 0x7f0000ff, SkXfermode::kSrcOver_Mode);
+                drawRegionRects(*(currentSnapshot().clipRegion),
+                        0x7f0000ff, SkXfermode::kSrcOver_Mode);
             }
         } else {
             mCaches.stencil.disable();
         }
     }
-}
-
-const Rect& OpenGLRenderer::getClipBounds() const {
-    return mSnapshot->getLocalClip();
-}
-
-/**
- * Calculates whether content drawn within the passed bounds would be outside of, or intersect with
- * the clipRect. Does not modify the scissor.
- *
- * @param clipRequired if not null, will be set to true if element intersects clip
- *         (and wasn't rejected)
- *
- * @param snapOut if set, the geometry will be treated as having an AA ramp.
- *         See Rect::snapGeometryToPixelBoundaries()
- */
-bool OpenGLRenderer::calculateQuickRejectForScissor(float left, float top,
-        float right, float bottom, bool* clipRequired, bool snapOut) const {
-    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
-        return true;
-    }
-
-    Rect r(left, top, right, bottom);
-    currentTransform().mapRect(r);
-    r.snapGeometryToPixelBoundaries(snapOut);
-
-    Rect clipRect(*mSnapshot->clipRect);
-    clipRect.snapToPixelBoundaries();
-
-    if (!clipRect.intersects(r)) return true;
-
-    // clip is required if geometry intersects clip rect
-    if (clipRequired) *clipRequired = !clipRect.contains(r);
-    return false;
-}
-
-/**
- * Returns false if drawing won't be clipped out.
- *
- * Makes the decision conservatively, by rounding out the mapped rect before comparing with the
- * clipRect. To be used when perfect, pixel accuracy is not possible (esp. with tessellation) but
- * rejection is still desired.
- *
- * This function, unlike quickRejectSetupScissor, should be used where precise geometry information
- * isn't known (esp. when geometry adjusts based on scale). Generally, this will be first pass
- * rejection where precise rejection isn't important, or precise information isn't available.
- */
-bool OpenGLRenderer::quickRejectConservative(float left, float top,
-        float right, float bottom) const {
-    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
-        return true;
-    }
-
-    Rect r(left, top, right, bottom);
-    currentTransform().mapRect(r);
-    r.roundOut(); // rounded out to be conservative
-
-    Rect clipRect(*mSnapshot->clipRect);
-    clipRect.snapToPixelBoundaries();
-
-    if (!clipRect.intersects(r)) return true;
-
-    return false;
 }
 
 /**
@@ -1721,8 +1570,8 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
 
 void OpenGLRenderer::debugClip() {
 #if DEBUG_CLIP_REGIONS
-    if (!isRecording() && !mSnapshot->clipRegion->isEmpty()) {
-        drawRegionRects(*mSnapshot->clipRegion, 0x7f00ff00, SkXfermode::kSrcOver_Mode);
+    if (!isRecording() && !currentSnapshot().clipRegion->isEmpty()) {
+        drawRegionRects(*(currentSnapshot().clipRegion), 0x7f00ff00, SkXfermode::kSrcOver_Mode);
     }
 #endif
 }
@@ -1754,7 +1603,7 @@ bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
         clip.setRegion(*mSnapshot->previous->clipRegion);
     } else {
         if (mSnapshot->previous == mFirstSnapshot) {
-            clip.setRect(0, 0, mWidth, mHeight);
+            clip.setRect(0, 0, getWidth(), getHeight());
         } else {
             Rect* bounds = mSnapshot->previous->clipRect;
             clip.setRect(bounds->left, bounds->top, bounds->right, bounds->bottom);
@@ -1777,10 +1626,6 @@ bool OpenGLRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
         dirtyClip();
     }
     return !mSnapshot->clipRect->isEmpty();
-}
-
-Rect* OpenGLRenderer::getClipRect() {
-    return mSnapshot->clipRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2067,7 +1912,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
 
     if (mCaches.propertyDirtyViewport) {
         // force recalc of view/proj matrices
-        setViewport(mWidth, mHeight);
+        setViewport(getWidth(), getHeight());
         mCaches.propertyDirtyViewport = false;
     }
 
@@ -3107,7 +2952,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
         transform = &layer->getTransform();
         if (!transform->isIdentity()) {
             save(0);
-            currentTransform().multiply(*transform);
+            concatMatrix(*transform);
         }
     }
 
