@@ -197,7 +197,7 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"WLAN"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未连接"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"无网络"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN 已关闭"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN：关闭"</string>
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"投射屏幕"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
