@@ -154,6 +154,11 @@ public class ProcessErrorsTest extends AndroidTestCase {
 
         // launch app, and wait 7 seconds for it to start/settle
         final Intent intent = intentForActivity(app);
+        if (intent == null) {
+            Log.i(TAG, String.format("Activity %s/%s is disabled, skipping",
+                    app.activityInfo.packageName, app.activityInfo.name));
+            return Collections.EMPTY_LIST;
+        }
         getContext().startActivity(intent);
         try {
             Thread.sleep(appLaunchWait);
@@ -238,10 +243,16 @@ public class ProcessErrorsTest extends AndroidTestCase {
     /**
      * A helper function to create an {@link Intent} to run, given a {@link ResolveInfo} specifying
      * an activity to be launched.
+     * 
+     * @return the {@link Intent} or <code>null</code> if given app is disabled
      */
-    static Intent intentForActivity(ResolveInfo app) {
+    Intent intentForActivity(ResolveInfo app) {
         final ComponentName component = new ComponentName(app.activityInfo.packageName,
                 app.activityInfo.name);
+        if (getContext().getPackageManager().getComponentEnabledSetting(component) == 
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+            return null;
+        }
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setComponent(component);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
