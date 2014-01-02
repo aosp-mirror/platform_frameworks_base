@@ -26,10 +26,18 @@ namespace android {
 namespace uirenderer {
 
 /**
- * Implementation for Renderer state methods
+ * Abstract Renderer subclass, which implements Canvas state methods.
  *
- * Eventually, this class should have abstract protected methods
- * for allowing subclasses to hook into save/saveLayer and restore
+ * Manages the Snapshot stack, implementing matrix, save/restore, and clipping methods in the
+ * Renderer interface. Drawing and recording classes that extend StatefulBaseRenderer will have
+ * different use cases:
+ *
+ * Drawing subclasses (i.e. OpenGLRenderer) can query attributes (such as transform) or hook into
+ * changes (e.g. save/restore) with minimal surface area for manipulating the stack itself.
+ *
+ * Recording subclasses (i.e. DisplayListRenderer) can both record and pass through state operations
+ * to StatefulBaseRenderer, so that not only will querying operations work (getClip/Matrix), but so
+ * that quickRejection can also be used.
  */
 class StatefulBaseRenderer : public Renderer {
 public:
@@ -43,7 +51,7 @@ public:
 
     // getters
     bool hasRectToRectTransform() const {
-        return CC_LIKELY(currentTransform().rectToRect());
+        return CC_LIKELY(currentTransform()->rectToRect());
     }
 
     // Save (layer)
@@ -70,10 +78,9 @@ public:
     const Rect& getClipBounds() const { return mSnapshot->getLocalClip(); }
     virtual bool quickRejectConservative(float left, float top, float right, float bottom) const;
 
-    // TODO: implement these with hooks to enable scissor/stencil usage in OpenGLRenderer
-    // virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    // virtual bool clipPath(SkPath* path, SkRegion::Op op);
-    // virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
+    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
+    virtual bool clipPath(SkPath* path, SkRegion::Op op);
+    virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
 
 protected:
     int getWidth() { return mWidth; }
@@ -101,20 +108,28 @@ protected:
      */
     virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {};
 
-    inline const Rect& currentClipRect() const {
-        return *(mSnapshot->clipRect);
+    inline const Rect* currentClipRect() const {
+        return mSnapshot->clipRect;
     }
 
-    inline const mat4& currentTransform() const {
-        return *(mSnapshot->transform);
+    inline const mat4* currentTransform() const {
+        return mSnapshot->transform;
     }
 
-    inline const Snapshot& currentSnapshot() const {
-        return mSnapshot != NULL ? *mSnapshot : *mFirstSnapshot;
+    inline const Snapshot* currentSnapshot() const {
+        return mSnapshot != NULL ? mSnapshot.get() : mFirstSnapshot.get();
     }
 
-    // TODO: below should be private so that snapshot stack manipulation
-    // goes though (mostly) public methods
+    inline const Snapshot* firstSnapshot() const {
+        return mFirstSnapshot.get();
+    }
+
+    // indicites that the clip has been changed since the last time it was consumed
+    bool mDirtyClip;
+
+private:
+    // Dimensions of the drawing surface
+    int mWidth, mHeight;
 
     // Number of saved states
     int mSaveCount;
@@ -122,12 +137,10 @@ protected:
     // Base state
     sp<Snapshot> mFirstSnapshot;
 
+protected:
     // Current state
+    // TODO: should become private, once hooks needed by OpenGLRenderer are added
     sp<Snapshot> mSnapshot;
-
-private:
-    // Dimensions of the drawing surface
-    int mWidth, mHeight;
 
 }; // class StatefulBaseRenderer
 

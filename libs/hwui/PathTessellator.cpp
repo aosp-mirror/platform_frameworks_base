@@ -88,16 +88,16 @@ inline static vec2 totalOffsetFromNormals(const vec2& normalA, const vec2& norma
  */
 struct PaintInfo {
 public:
-    PaintInfo(const SkPaint* paint, const mat4 *transform) :
+    PaintInfo(const SkPaint* paint, const mat4& transform) :
             style(paint->getStyle()), cap(paint->getStrokeCap()), isAA(paint->isAntiAlias()),
             inverseScaleX(1.0f), inverseScaleY(1.0f),
             halfStrokeWidth(paint->getStrokeWidth() * 0.5f), maxAlpha(1.0f) {
         // compute inverse scales
-        if (CC_UNLIKELY(!transform->isPureTranslate())) {
-            float m00 = transform->data[Matrix4::kScaleX];
-            float m01 = transform->data[Matrix4::kSkewY];
-            float m10 = transform->data[Matrix4::kSkewX];
-            float m11 = transform->data[Matrix4::kScaleY];
+        if (CC_UNLIKELY(!transform.isPureTranslate())) {
+            float m00 = transform.data[Matrix4::kScaleX];
+            float m01 = transform.data[Matrix4::kSkewY];
+            float m10 = transform.data[Matrix4::kSkewX];
+            float m11 = transform.data[Matrix4::kScaleY];
             float scaleX = sqrt(m00 * m00 + m01 * m01);
             float scaleY = sqrt(m10 * m10 + m11 * m11);
             inverseScaleX = (scaleX != 0) ? (1.0f / scaleX) : 1.0f;
@@ -718,7 +718,7 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
 }
 
 void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
-        const mat4 *transform, VertexBuffer& vertexBuffer) {
+        const mat4& transform, VertexBuffer& vertexBuffer) {
     ATRACE_CALL();
 
     const PaintInfo paintInfo(paint, transform);
@@ -806,7 +806,7 @@ static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
 }
 
 void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* paint,
-        const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
+        const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
     const PaintInfo paintInfo(paint, transform);
 
     // determine point shape
@@ -846,7 +846,7 @@ void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* 
 }
 
 void PathTessellator::tessellateLines(const float* points, int count, SkPaint* paint,
-        const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
+        const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
     ATRACE_CALL();
     const PaintInfo paintInfo(paint, transform);
 

@@ -22,6 +22,7 @@ namespace android {
 namespace uirenderer {
 
 StatefulBaseRenderer::StatefulBaseRenderer() :
+        mDirtyClip(false), mWidth(-1), mHeight(-1),
         mSaveCount(1), mFirstSnapshot(new Snapshot), mSnapshot(mFirstSnapshot) {
 }
 
@@ -138,6 +139,48 @@ void StatefulBaseRenderer::concatMatrix(const Matrix4& matrix) {
 // Clip
 ///////////////////////////////////////////////////////////////////////////////
 
+bool StatefulBaseRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
+    if (CC_LIKELY(currentTransform()->rectToRect())) {
+        mDirtyClip |= mSnapshot->clip(left, top, right, bottom, op);
+        return !mSnapshot->clipRect->isEmpty();
+    }
+
+    SkPath path;
+    path.addRect(left, top, right, bottom);
+
+    return StatefulBaseRenderer::clipPath(&path, op);
+}
+
+bool StatefulBaseRenderer::clipPath(SkPath* path, SkRegion::Op op) {
+    SkMatrix transform;
+    currentTransform()->copyTo(transform);
+
+    SkPath transformed;
+    path->transform(transform, &transformed);
+
+    SkRegion clip;
+    if (!mSnapshot->previous->clipRegion->isEmpty()) {
+        clip.setRegion(*mSnapshot->previous->clipRegion);
+    } else {
+        if (mSnapshot->previous == firstSnapshot()) {
+            clip.setRect(0, 0, getWidth(), getHeight());
+        } else {
+            Rect* bounds = mSnapshot->previous->clipRect;
+            clip.setRect(bounds->left, bounds->top, bounds->right, bounds->bottom);
+        }
+    }
+
+    SkRegion region;
+    region.setPath(transformed, clip);
+
+    mDirtyClip |= mSnapshot->clipRegionTransformed(region, op);
+    return !mSnapshot->clipRect->isEmpty();
+}
+
+bool StatefulBaseRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
+    mDirtyClip |= mSnapshot->clipRegionTransformed(*region, op);
+    return !mSnapshot->clipRect->isEmpty();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Quick Rejection
@@ -160,10 +203,10 @@ bool StatefulBaseRenderer::calculateQuickRejectForScissor(float left, float top,
     }
 
     Rect r(left, top, right, bottom);
-    currentTransform().mapRect(r);
+    currentTransform()->mapRect(r);
     r.snapGeometryToPixelBoundaries(snapOut);
 
-    Rect clipRect(currentClipRect());
+    Rect clipRect(*currentClipRect());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;
@@ -191,10 +234,10 @@ bool StatefulBaseRenderer::quickRejectConservative(float left, float top,
     }
 
     Rect r(left, top, right, bottom);
-    currentTransform().mapRect(r);
+    currentTransform()->mapRect(r);
     r.roundOut(); // rounded out to be conservative
 
-    Rect clipRect(currentClipRect());
+    Rect clipRect(*currentClipRect());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;

@@ -117,7 +117,7 @@ void LayerRenderer::ensureStencilBuffer() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Region* LayerRenderer::getRegion() const {
-    if (getSnapshot()->flags & Snapshot::kFlagFboTarget) {
+    if (currentSnapshot()->flags & Snapshot::kFlagFboTarget) {
         return OpenGLRenderer::getRegion();
     }
     return &mLayer->region;
