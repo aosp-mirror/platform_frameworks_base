@@ -137,6 +137,8 @@ public class MediaNames {
     public static final String INVALD_VIDEO_PATH =
             "/sdcard/media_api/filepathdoesnotexist" + "/filepathdoesnotexist/temp.3gp";
 
+    public static final String RECORDED_SURFACE_3GP = "/sdcard/surface.3gp";
+
     public static final long RECORDED_TIME = 5000;
     public static final long VALID_VIDEO_DURATION = 2000;
 
