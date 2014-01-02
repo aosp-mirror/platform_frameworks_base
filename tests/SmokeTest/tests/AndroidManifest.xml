@@ -27,15 +27,6 @@
     </application>
 
     <!--
-    This declares that this app uses the instrumentation test runner targeting the package of
-    com.android.smoketest.  To run the tests use the command:
-    `adb shell am instrument -w com.android.smoketest.tests/android.test.InstrumentationTestRunner`
-    -->
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
-                     android:targetPackage="com.android.smoketest"
-                     android:label="System Smoke Tests"/>
-
-    <!--
     This declares a method to run the instrumentation with a special runner, which will run each
     app as a separate testcase.  To do so, use the command:
     `adb shell am instrument -w com.android.smoketest.tests/com.android.smoketest.SmokeTestRunner`
