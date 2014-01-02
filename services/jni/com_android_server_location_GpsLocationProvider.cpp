@@ -387,7 +387,11 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
 }
 
 static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* env, jclass clazz) {
-    return (sGpsInterface != NULL);
+    if (sGpsInterface != NULL) {
+        return JNI_TRUE;
+    } else {
+        return JNI_FALSE;
+    }
 }
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
@@ -398,7 +402,7 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
 
     // fail if the main interface fails to initialize
     if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
-        return false;
+        return JNI_FALSE;
 
     // if XTRA initialization fails we will disable it by sGpsXtraInterface to NULL,
     // but continue to allow the rest of the GPS interface to work.
@@ -413,7 +417,7 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
     if (sGpsGeofencingInterface)
         sGpsGeofencingInterface->init(&sGpsGeofenceCallbacks);
 
-    return true;
+    return JNI_FALSE;
 }
 
 static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject obj)
@@ -425,27 +429,42 @@ static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject ob
 static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* env, jobject obj,
         jint mode, jint recurrence, jint min_interval, jint preferred_accuracy, jint preferred_time)
 {
-    if (sGpsInterface)
-        return (sGpsInterface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
-                preferred_time) == 0);
+    if (sGpsInterface) {
+        if (sGpsInterface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
+                preferred_time) == 0) {
+            return JNI_TRUE;
+        } else {
+            return JNI_FALSE;
+        }
+    }
     else
-        return false;
+        return JNI_FALSE;
 }
 
 static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject obj)
 {
-    if (sGpsInterface)
-        return (sGpsInterface->start() == 0);
+    if (sGpsInterface) {
+        if (sGpsInterface->start() == 0) {
+            return JNI_TRUE;
+        } else {
+            return JNI_FALSE;
+        }
+    }
     else
-        return false;
+        return JNI_FALSE;
 }
 
 static jboolean android_location_GpsLocationProvider_stop(JNIEnv* env, jobject obj)
 {
-    if (sGpsInterface)
-        return (sGpsInterface->stop() == 0);
+    if (sGpsInterface) {
+        if (sGpsInterface->stop() == 0) {
+            return JNI_TRUE;
+        } else {
+            return JNI_FALSE;
+        }
+    }
     else
-        return false;
+        return JNI_FALSE;
 }
 
 static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* env, jobject obj, jint flags)
@@ -482,7 +501,7 @@ static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, job
     env->ReleaseFloatArrayElements(elevArray, elev, 0);
     env->ReleaseFloatArrayElements(azumArray, azim, 0);
     env->ReleaseIntArrayElements(maskArray, mask, 0);
-    return num_svs;
+    return (jint) num_svs;
 }
 
 static void android_location_GpsLocationProvider_agps_set_reference_location_cellid(JNIEnv* env,
@@ -552,7 +571,7 @@ static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject 
         length = buffer_size;
     memcpy(nmea, sNmeaString, length);
     env->ReleasePrimitiveArrayCritical(nmeaArray, nmea, JNI_ABORT);
-    return length;
+    return (jint) length;
 }
 
 static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobject obj,
@@ -571,7 +590,11 @@ static void android_location_GpsLocationProvider_inject_location(JNIEnv* env, jo
 
 static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* env, jobject obj)
 {
-    return (sGpsXtraInterface != NULL);
+    if (sGpsXtraInterface != NULL) {
+        return JNI_TRUE;
+    } else {
+        return JNI_FALSE;
+    }
 }
 
 static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, jobject obj,
@@ -658,7 +681,7 @@ static jstring android_location_GpsLocationProvider_get_internal_state(JNIEnv* e
 }
 
 static void android_location_GpsLocationProvider_update_network_state(JNIEnv* env, jobject obj,
-        jboolean connected, int type, jboolean roaming, jboolean available, jstring extraInfo, jstring apn)
+        jboolean connected, jint type, jboolean roaming, jboolean available, jstring extraInfo, jstring apn)
 {
 
     if (sAGpsRilInterface && sAGpsRilInterface->update_network_state) {
