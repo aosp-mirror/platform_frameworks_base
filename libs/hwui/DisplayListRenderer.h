@@ -63,7 +63,7 @@ public:
 
     ANDROID_API DisplayList* getDisplayList(DisplayList* displayList);
 
-    virtual bool isRecording() { return true; }
+    virtual bool isRecording() const { return true; }
 
 // ----------------------------------------------------------------------------
 // Frame state operations
