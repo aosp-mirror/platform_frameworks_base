@@ -580,7 +580,7 @@ This attribute was introduced in API Level 3.
   <a href="#nm"><code>android:name</code></a> attribute.
 
 <p>The system reads this attribute to determine which activity should be started when
-  the use presses the Up button in the action bar. The system can also use this information to
+  the user presses the Up button in the action bar. The system can also use this information to
   synthesize a back stack of activities with {@link android.app.TaskStackBuilder}.</p>
 
 <p>To support API levels 4 - 16, you can also declare the parent activity with a {@code
