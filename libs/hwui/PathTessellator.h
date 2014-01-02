@@ -32,13 +32,13 @@ public:
     static void expandBoundsForStroke(SkRect& bounds, const SkPaint* paint);
 
     static void tessellatePath(const SkPath& path, const SkPaint* paint,
-            const mat4 *transform, VertexBuffer& vertexBuffer);
+            const mat4& transform, VertexBuffer& vertexBuffer);
 
     static void tessellatePoints(const float* points, int count, SkPaint* paint,
-            const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer);
+            const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
 
     static void tessellateLines(const float* points, int count, SkPaint* paint,
-            const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer);
+            const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
 
 private:
     static bool approximatePathOutlineVertices(const SkPath &path, bool forceClose,
