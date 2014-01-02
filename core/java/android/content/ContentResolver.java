@@ -344,7 +344,7 @@ public abstract class ContentResolver {
      * @param url A Uri identifying content (either a list or specific type),
      * using the content:// scheme.
      * @param mimeTypeFilter The desired MIME type.  This may be a pattern,
-     * such as *\/*, to query for all available MIME types that match the
+     * such as *&#47;*, to query for all available MIME types that match the
      * pattern.
      * @return Returns an array of MIME type strings for all available
      * data streams that match the given mimeTypeFilter.  If there are none,
@@ -815,7 +815,7 @@ public abstract class ContentResolver {
      *
      * <p>Note that if this function is called for read-only input (mode is "r")
      * on a content: URI, it will instead call {@link #openTypedAssetFileDescriptor}
-     * for you with a MIME type of "*\/*".  This allows such callers to benefit
+     * for you with a MIME type of "*&#47;*".  This allows such callers to benefit
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
@@ -868,7 +868,7 @@ public abstract class ContentResolver {
      *
      * <p>Note that if this function is called for read-only input (mode is "r")
      * on a content: URI, it will instead call {@link #openTypedAssetFileDescriptor}
-     * for you with a MIME type of "*\/*".  This allows such callers to benefit
+     * for you with a MIME type of "*&#47;*".  This allows such callers to benefit
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
@@ -993,7 +993,7 @@ public abstract class ContentResolver {
      *
      * @param uri The desired URI to open.
      * @param mimeType The desired MIME type of the returned data.  This can
-     * be a pattern such as *\/*, which will allow the content provider to
+     * be a pattern such as *&#47;*, which will allow the content provider to
      * select a type, though there is no way for you to determine what type
      * it is returning.
      * @param opts Additional provider-dependent options.
@@ -1026,7 +1026,7 @@ public abstract class ContentResolver {
      *
      * @param uri The desired URI to open.
      * @param mimeType The desired MIME type of the returned data.  This can
-     * be a pattern such as *\/*, which will allow the content provider to
+     * be a pattern such as *&#47;*, which will allow the content provider to
      * select a type, though there is no way for you to determine what type
      * it is returning.
      * @param opts Additional provider-dependent options.

@@ -1326,7 +1326,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param uri The data in the content provider being queried.
      * @param mimeTypeFilter The type of data the client desires.  May be
-     * a pattern, such as *\/* to retrieve all possible data types.
+     * a pattern, such as *&#47;* to retrieve all possible data types.
      * @return Returns {@code null} if there are no possible data streams for the
      * given mimeTypeFilter.  Otherwise returns an array of all available
      * concrete MIME types.
@@ -1364,7 +1364,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param uri The data in the content provider being queried.
      * @param mimeTypeFilter The type of data the client desires.  May be
-     * a pattern, such as *\/*, if the caller does not have specific type
+     * a pattern, such as *&#47;*, if the caller does not have specific type
      * requirements; in this case the content provider will pick its best
      * type matching the pattern.
      * @param opts Additional options from the client.  The definitions of
@@ -1425,7 +1425,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param uri The data in the content provider being queried.
      * @param mimeTypeFilter The type of data the client desires.  May be
-     * a pattern, such as *\/*, if the caller does not have specific type
+     * a pattern, such as *&#47;*, if the caller does not have specific type
      * requirements; in this case the content provider will pick its best
      * type matching the pattern.
      * @param opts Additional options from the client.  The definitions of
