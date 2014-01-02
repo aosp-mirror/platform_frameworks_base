@@ -76,7 +76,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     private NativeContentView mNativeContentView;
     private InputMethodManager mIMM;
 
-    private int mNativeHandle;
+    private long mNativeHandle;
     
     private InputQueue mCurInputQueue;
     private SurfaceHolder mCurSurfaceHolder;
@@ -91,27 +91,26 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
 
     private boolean mDestroyed;
     
-    private native int loadNativeCode(String path, String funcname, MessageQueue queue,
+    private native long loadNativeCode(String path, String funcname, MessageQueue queue,
             String internalDataPath, String obbPath, String externalDataPath, int sdkVersion,
             AssetManager assetMgr, byte[] savedState);
-    private native void unloadNativeCode(int handle);
-    
-    private native void onStartNative(int handle);
-    private native void onResumeNative(int handle);
-    private native byte[] onSaveInstanceStateNative(int handle);
-    private native void onPauseNative(int handle);
-    private native void onStopNative(int handle);
-    private native void onConfigurationChangedNative(int handle);
-    private native void onLowMemoryNative(int handle);
-    private native void onWindowFocusChangedNative(int handle, boolean focused);
-    private native void onSurfaceCreatedNative(int handle, Surface surface);
-    private native void onSurfaceChangedNative(int handle, Surface surface,
+    private native void unloadNativeCode(long handle);
+    private native void onStartNative(long handle);
+    private native void onResumeNative(long handle);
+    private native byte[] onSaveInstanceStateNative(long handle);
+    private native void onPauseNative(long handle);
+    private native void onStopNative(long handle);
+    private native void onConfigurationChangedNative(long handle);
+    private native void onLowMemoryNative(long handle);
+    private native void onWindowFocusChangedNative(long handle, boolean focused);
+    private native void onSurfaceCreatedNative(long handle, Surface surface);
+    private native void onSurfaceChangedNative(long handle, Surface surface,
             int format, int width, int height);
-    private native void onSurfaceRedrawNeededNative(int handle, Surface surface);
-    private native void onSurfaceDestroyedNative(int handle);
-    private native void onInputQueueCreatedNative(int handle, int queuePtr);
-    private native void onInputQueueDestroyedNative(int handle, int queuePtr);
-    private native void onContentRectChangedNative(int handle, int x, int y, int w, int h);
+    private native void onSurfaceRedrawNeededNative(long handle, Surface surface);
+    private native void onSurfaceDestroyedNative(long handle);
+    private native void onInputQueueCreatedNative(long handle, long queuePtr);
+    private native void onInputQueueDestroyedNative(long handle, long queuePtr);
+    private native void onContentRectChangedNative(long handle, int x, int y, int w, int h);
 
     static class NativeContentView extends View {
         NativeActivity mActivity;
