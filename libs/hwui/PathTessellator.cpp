@@ -162,8 +162,8 @@ public:
     void expandBoundsForStrokeAA(SkRect& bounds) const {
         float outset = halfStrokeWidth;
         if (outset == 0) outset = 0.5f;
-        bounds.outset(outset * inverseScaleX + Vertex::gGeometryFudgeFactor,
-                outset * inverseScaleY + Vertex::gGeometryFudgeFactor);
+        bounds.outset(outset * inverseScaleX + Vertex::GeometryFudgeFactor(),
+                outset * inverseScaleY + Vertex::GeometryFudgeFactor());
     }
 };
 

@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include <utils/Log.h>
+#include <utils/Vector.h>
 
 #include "AmbientShadow.h"
 #include "Vertex.h"
@@ -60,10 +61,11 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
     Vector2 centroid;
     calculatePolygonCentroid(vertices, vertexCount, centroid);
 
-    Vector2 dir[rays];
+    Vector<Vector2> dir; // TODO: use C++11 unique_ptr
+    dir.setCapacity(rays);
     float rayDist[rays];
     float rayHeight[rays];
-    calculateRayDirections(rays, dir);
+    calculateRayDirections(rays, dir.editArray());
 
     // Calculate the length and height of the points along the edge.
     //
@@ -105,7 +107,7 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
         for (int i = 0; i < rays; i++) {
 
             Vector2 normal(1.0f, 0.0f);
-            calculateNormal(rays, i, dir, rayDist, normal);
+            calculateNormal(rays, i, dir.array(), rayDist, normal);
 
             float opacity = strength * (0.5f) / (1 + rayHeight[i] / heightFactor);
 

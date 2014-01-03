@@ -36,7 +36,8 @@ namespace uirenderer {
  * Represents a Skia color filter. A color filter modifies a ProgramDescription
  * and sets uniforms on the resulting shaders.
  */
-struct SkiaColorFilter {
+class SkiaColorFilter {
+public:
     /**
      * Type of Skia color filter in use.
      */
@@ -80,7 +81,8 @@ private:
 /**
  * A color filter that multiplies the source color with a matrix and adds a vector.
  */
-struct SkiaColorMatrixFilter: public SkiaColorFilter {
+class SkiaColorMatrixFilter: public SkiaColorFilter {
+public:
     ANDROID_API SkiaColorMatrixFilter(SkColorFilter *skFilter, float* matrix, float* vector);
     ~SkiaColorMatrixFilter();
 
@@ -96,7 +98,8 @@ private:
  * A color filters that multiplies the source color with a fixed value and adds
  * another fixed value. Ignores the alpha channel of both arguments.
  */
-struct SkiaLightingFilter: public SkiaColorFilter {
+class SkiaLightingFilter: public SkiaColorFilter {
+public:
     ANDROID_API SkiaLightingFilter(SkColorFilter *skFilter, int multiply, int add);
 
     void describe(ProgramDescription& description, const Extensions& extensions);
@@ -111,7 +114,8 @@ private:
  * A color filters that blends the source color with a specified destination color
  * and PorterDuff blending mode.
  */
-struct SkiaBlendFilter: public SkiaColorFilter {
+class SkiaBlendFilter: public SkiaColorFilter {
+public:
     ANDROID_API SkiaBlendFilter(SkColorFilter *skFilter, int color, SkXfermode::Mode mode);
 
     void describe(ProgramDescription& description, const Extensions& extensions);

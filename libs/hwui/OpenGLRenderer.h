@@ -861,7 +861,7 @@ private:
      * transformations are stored in the modelView matrix and uploaded to the shader.
      *
      * @param offset Set to true if the the matrix should be fudged (translated) slightly to disambiguate
-     * geometry pixel positioning. See Vertex::gGeometryFudgeFactor.
+     * geometry pixel positioning. See Vertex::GeometryFudgeFactor().
      *
      * @param ignoreTransform Set to true if l,t,r,b coordinates already in layer space,
      * currentTransform() will be ignored. (e.g. when drawing clip in layer coordinates to stencil,
@@ -879,9 +879,9 @@ private:
     void setupDrawTextureTransform();
     void setupDrawTextureTransformUniforms(mat4& transform);
     void setupDrawTextGammaUniforms();
-    void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
-    void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors);
-    void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
+    void setupDrawMesh(const GLvoid* vertices, const GLvoid* texCoords = NULL, GLuint vbo = 0);
+    void setupDrawMesh(const GLvoid* vertices, const GLvoid* texCoords, const GLvoid* colors);
+    void setupDrawMeshIndices(const GLvoid* vertices, const GLvoid* texCoords, GLuint vbo = 0);
     void setupDrawIndexedVertices(GLvoid* vertices);
     void accountForClear(SkXfermode::Mode mode);
 

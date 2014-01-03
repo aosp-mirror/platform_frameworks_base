@@ -1795,7 +1795,8 @@ void OpenGLRenderer::setupDrawTextureTransformUniforms(mat4& transform) {
             GL_FALSE, &transform.data[0]);
 }
 
-void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {
+void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
+        const GLvoid* texCoords, GLuint vbo) {
     bool force = false;
     if (!vertices || vbo) {
         force = mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
@@ -1811,7 +1812,8 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint v
     mCaches.unbindIndicesBuffer();
 }
 
-void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors) {
+void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
+        const GLvoid* texCoords, const GLvoid* colors) {
     bool force = mCaches.unbindMeshBuffer();
     GLsizei stride = sizeof(ColorTextureVertex);
 
@@ -1828,7 +1830,8 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* 
     mCaches.unbindIndicesBuffer();
 }
 
-void OpenGLRenderer::setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {
+void OpenGLRenderer::setupDrawMeshIndices(const GLvoid* vertices,
+        const GLvoid* texCoords, GLuint vbo) {
     bool force = false;
     // If vbo is != 0 we want to treat the vertices parameter as an offset inside
     // a VBO. However, if vertices is set to NULL and vbo == 0 then we want to
@@ -2049,8 +2052,9 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
 
     const uint32_t count = meshWidth * meshHeight * 6;
 
-    ColorTextureVertex mesh[count];
-    ColorTextureVertex* vertex = mesh;
+    Vector<ColorTextureVertex> mesh; // TODO: use C++11 unique_ptr
+    mesh.setCapacity(count);
+    ColorTextureVertex* vertex = mesh.editArray();
 
     bool cleanupColors = false;
     if (!colors) {

@@ -610,14 +610,14 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
     handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
-    for (int i = 0; i < m3dNodes.size(); i++) {
+    for (size_t i = 0; i < m3dNodes.size(); i++) {
         const float zValue = m3dNodes.keyAt(i);
 
         if (mode == kPositiveZChildren && zValue < 0.0f) continue;
         if (mode == kNegativeZChildren && zValue > 0.0f) break;
 
         const Vector<DrawDisplayListOp*>& nodesAtZ = m3dNodes[i];
-        for (int j = 0; j < nodesAtZ.size(); j++) {
+        for (size_t j = 0; j < nodesAtZ.size(); j++) {
             DrawDisplayListOp* op = nodesAtZ[j];
             if (mode == kPositiveZChildren) {
                 /* draw shadow on renderer with parent matrix applied, passing in the child's total matrix
