@@ -36,7 +36,8 @@ namespace uirenderer {
 // 9-patch structures
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Patch {
+class Patch {
+public:
     Patch();
     ~Patch();
 

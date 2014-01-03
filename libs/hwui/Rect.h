@@ -190,19 +190,19 @@ public:
              * from this inset will only incur similarly small errors in output, due to transparency
              * in extreme outside of the geometry.
              */
-            left = floorf(left + Vertex::gGeometryFudgeFactor);
-            top = floorf(top + Vertex::gGeometryFudgeFactor);
-            right = ceilf(right - Vertex::gGeometryFudgeFactor);
-            bottom = ceilf(bottom - Vertex::gGeometryFudgeFactor);
+            left = floorf(left + Vertex::GeometryFudgeFactor());
+            top = floorf(top + Vertex::GeometryFudgeFactor());
+            right = ceilf(right - Vertex::GeometryFudgeFactor());
+            bottom = ceilf(bottom - Vertex::GeometryFudgeFactor());
         } else {
             /* For other geometry, we do the regular rounding in order to snap, but also outset the
              * bounds by a fudge factor. This ensures that ambiguous geometry (e.g. a non-AA Rect
              * with top left at (0.5, 0.5)) will err on the side of a larger damage rect.
              */
-            left = floorf(left + 0.5f - Vertex::gGeometryFudgeFactor);
-            top = floorf(top + 0.5f - Vertex::gGeometryFudgeFactor);
-            right = floorf(right + 0.5f + Vertex::gGeometryFudgeFactor);
-            bottom = floorf(bottom + 0.5f + Vertex::gGeometryFudgeFactor);
+            left = floorf(left + 0.5f - Vertex::GeometryFudgeFactor());
+            top = floorf(top + 0.5f - Vertex::GeometryFudgeFactor());
+            right = floorf(right + 0.5f + Vertex::GeometryFudgeFactor());
+            bottom = floorf(bottom + 0.5f + Vertex::GeometryFudgeFactor());
         }
     }
 

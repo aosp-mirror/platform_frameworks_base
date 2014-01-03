@@ -43,7 +43,8 @@ class Caches;
  * Represents a Skia shader. A shader will modify the GL context and active
  * program to recreate the original effect.
  */
-struct SkiaShader {
+class SkiaShader {
+public:
     /**
      * Type of Skia shader in use.
      */

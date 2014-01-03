@@ -32,7 +32,7 @@ class SkBitmap;
 class SkCanvas;
 class SkPaint;
 class SkPath;
-class SkRect;
+struct SkRect;
 
 namespace android {
 namespace uirenderer {
