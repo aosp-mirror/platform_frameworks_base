@@ -187,7 +187,7 @@ private:
     }
 };
 
-static jint nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ, jobject msgQ, jfloatArray scratch) {
+static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ, jobject msgQ, jfloatArray scratch) {
     SensorManager& mgr(SensorManager::getInstance());
     sp<SensorEventQueue> queue(mgr.createEventQueue());
 
@@ -199,28 +199,28 @@ static jint nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ
 
     sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQ, scratch);
     receiver->incStrong((void*)nativeInitSensorEventQueue);
-    return jint(receiver.get());
+    return jlong(receiver.get());
 }
 
-static jint nativeEnableSensor(JNIEnv *env, jclass clazz, jint eventQ, jint handle, jint rate_us,
+static jint nativeEnableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint handle, jint rate_us,
                                jint maxBatchReportLatency, jint reservedFlags) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     return receiver->getSensorEventQueue()->enableSensor(handle, rate_us, maxBatchReportLatency,
                                                          reservedFlags);
 }
 
-static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jint eventQ, jint handle) {
+static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint handle) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     return receiver->getSensorEventQueue()->disableSensor(handle);
 }
 
-static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jint eventQ, jint handle) {
+static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jlong eventQ, jint handle) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     receiver->destroy();
     receiver->decStrong((void*)nativeInitSensorEventQueue);
 }
 
-static jint nativeFlushSensor(JNIEnv *env, jclass clazz, jint eventQ) {
+static jint nativeFlushSensor(JNIEnv *env, jclass clazz, jlong eventQ) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     return receiver->getSensorEventQueue()->flush();
 }
@@ -239,23 +239,23 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
 
 static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
-            "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[F)I",
+            "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[F)J",
             (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
-            "(IIIII)I",
+            "(JIIII)I",
             (void*)nativeEnableSensor },
 
     {"nativeDisableSensor",
-            "(II)I",
+            "(JI)I",
             (void*)nativeDisableSensor },
 
     {"nativeDestroySensorEventQueue",
-            "(I)V",
+            "(J)V",
             (void*)nativeDestroySensorEventQueue },
 
     {"nativeFlushSensor",
-            "(I)I",
+            "(J)I",
             (void*)nativeFlushSensor },
 };
 
