@@ -106,9 +106,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     private final Runnable mCallOnClosed = new Runnable() {
         public void run() {
-            if (!CameraDevice.this.isClosed()) {
-                mDeviceListener.onClosed(CameraDevice.this);
-            }
+            mDeviceListener.onClosed(CameraDevice.this);
         }
     };
 
