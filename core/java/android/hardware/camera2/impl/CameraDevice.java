@@ -351,8 +351,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         }
     }
 
-    @Override
-    public void waitUntilIdle() throws CameraAccessException {
+    private void waitUntilIdle() throws CameraAccessException {
 
         synchronized (mLock) {
             checkIfCameraClosed();
