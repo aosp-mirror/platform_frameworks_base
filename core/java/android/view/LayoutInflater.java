@@ -91,6 +91,8 @@ public abstract class LayoutInflater {
     private static final String TAG_1995 = "blink";
     private static final String TAG_REQUEST_FOCUS = "requestFocus";
 
+    private static final String ATTR_THEME = "theme";
+
     /**
      * Hook to allow clients of the LayoutInflater to restrict the set of Views that are allowed
      * to be inflated.
@@ -677,23 +679,44 @@ public abstract class LayoutInflater {
             name = attrs.getAttributeValue(null, "class");
         }
 
+        // Apply a theme override, if necessary.
+        final Context viewContext;
+        final int themeResId = attrs.getAttributeResourceValue(null, ATTR_THEME, 0);
+        if (themeResId != 0) {
+            viewContext = new ContextThemeWrapper(mContext, themeResId);
+        } else if (parent != null) {
+            viewContext = parent.getContext();
+        } else {
+            viewContext = mContext;
+        }
+
         if (DEBUG) System.out.println("******** Creating view: " + name);
 
         try {
             View view;
-            if (mFactory2 != null) view = mFactory2.onCreateView(parent, name, mContext, attrs);
-            else if (mFactory != null) view = mFactory.onCreateView(name, mContext, attrs);
-            else view = null;
+            if (mFactory2 != null) {
+                view = mFactory2.onCreateView(parent, name, viewContext, attrs);
+            } else if (mFactory != null) {
+                view = mFactory.onCreateView(name, viewContext, attrs);
+            } else {
+                view = null;
+            }
 
             if (view == null && mPrivateFactory != null) {
-                view = mPrivateFactory.onCreateView(parent, name, mContext, attrs);
+                view = mPrivateFactory.onCreateView(parent, name, viewContext, attrs);
             }
-            
+
             if (view == null) {
-                if (-1 == name.indexOf('.')) {
-                    view = onCreateView(parent, name, attrs);
-                } else {
-                    view = createView(name, null, attrs);
+                final Object lastContext = mConstructorArgs[0];
+                mConstructorArgs[0] = viewContext;
+                try {
+                    if (-1 == name.indexOf('.')) {
+                        view = onCreateView(parent, name, attrs);
+                    } else {
+                        view = createView(name, null, attrs);
+                    }
+                } finally {
+                    mConstructorArgs[0] = lastContext;
                 }
             }
 
