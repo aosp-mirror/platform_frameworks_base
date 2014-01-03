@@ -49,7 +49,8 @@ class DeferStateStruct;
 /**
  * A layer has dimensions and is backed by an OpenGL texture or FBO.
  */
-struct Layer {
+class Layer {
+public:
     Layer(const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 

@@ -173,7 +173,7 @@ void Program::set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
             // up and to the left.
             // This offset value is based on an assumption that some hardware may use as
             // little as 12.4 precision, so we offset by slightly more than 1/16.
-            p.translate(Vertex::gGeometryFudgeFactor, Vertex::gGeometryFudgeFactor);
+            p.translate(Vertex::GeometryFudgeFactor(), Vertex::GeometryFudgeFactor());
             glUniformMatrix4fv(projection, 1, GL_FALSE, &p.data[0]);
         }
         mProjection = projectionMatrix;

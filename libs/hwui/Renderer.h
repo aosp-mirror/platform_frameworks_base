@@ -27,7 +27,7 @@
 namespace android {
 
 class Functor;
-class Res_png_9patch;
+struct Res_png_9patch;
 
 namespace uirenderer {
 
