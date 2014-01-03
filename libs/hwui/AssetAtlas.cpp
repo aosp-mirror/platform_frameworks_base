@@ -74,12 +74,12 @@ void AssetAtlas::terminate() {
 // Entries
 ///////////////////////////////////////////////////////////////////////////////
 
-AssetAtlas::Entry* AssetAtlas::getEntry(SkBitmap* const bitmap) const {
+AssetAtlas::Entry* AssetAtlas::getEntry(const SkBitmap* bitmap) const {
     ssize_t index = mEntries.indexOfKey(bitmap);
     return index >= 0 ? mEntries.valueAt(index) : NULL;
 }
 
-Texture* AssetAtlas::getEntryTexture(SkBitmap* const bitmap) const {
+Texture* AssetAtlas::getEntryTexture(const SkBitmap* bitmap) const {
     ssize_t index = mEntries.indexOfKey(bitmap);
     return index >= 0 ? mEntries.valueAt(index)->texture : NULL;
 }

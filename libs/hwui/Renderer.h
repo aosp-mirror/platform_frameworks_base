@@ -190,16 +190,16 @@ public:
     virtual void scale(float sx, float sy) = 0;
     virtual void skew(float sx, float sy) = 0;
 
-    virtual void setMatrix(SkMatrix* matrix) = 0;
-    virtual void concatMatrix(SkMatrix* matrix) = 0;
+    virtual void setMatrix(const SkMatrix* matrix) = 0;
+    virtual void concatMatrix(const SkMatrix* matrix) = 0;
 
     // clip
     virtual const Rect& getClipBounds() const = 0;
     virtual bool quickRejectConservative(float left, float top,
             float right, float bottom) const = 0;
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op) = 0;
-    virtual bool clipPath(SkPath* path, SkRegion::Op op) = 0;
-    virtual bool clipRegion(SkRegion* region, SkRegion::Op op) = 0;
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op) = 0;
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) = 0;
 
     // Misc - should be implemented with SkPaint inspection
     virtual void resetShader() = 0;
@@ -220,38 +220,43 @@ public:
     virtual status_t drawColor(int color, SkXfermode::Mode mode) = 0;
 
     // Bitmap-based
-    virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) = 0;
-    virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) = 0;
-    virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+    virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
+            const SkPaint* paint) = 0;
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+            const SkPaint* paint) = 0;
+    virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, SkPaint* paint) = 0;
-    virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint) = 0;
-    virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-            float* vertices, int* colors, SkPaint* paint) = 0;
-    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-            float left, float top, float right, float bottom, SkPaint* paint) = 0;
+            float dstRight, float dstBottom, const SkPaint* paint) = 0;
+    virtual status_t drawBitmapData(const SkBitmap* bitmap, float left, float top,
+            const SkPaint* paint) = 0;
+    virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+            const float* vertices, const int* colors, const SkPaint* paint) = 0;
+    virtual status_t drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+            float left, float top, float right, float bottom, const SkPaint* paint) = 0;
 
     // Shapes
-    virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint) = 0;
-    virtual status_t drawRects(const float* rects, int count, SkPaint* paint) = 0;
+    virtual status_t drawRect(float left, float top, float right, float bottom,
+            const SkPaint* paint) = 0;
+    virtual status_t drawRects(const float* rects, int count, const SkPaint* paint) = 0;
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, SkPaint* paint) = 0;
-    virtual status_t drawCircle(float x, float y, float radius, SkPaint* paint) = 0;
-    virtual status_t drawOval(float left, float top, float right, float bottom, SkPaint* paint) = 0;
+            float rx, float ry, const SkPaint* paint) = 0;
+    virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint) = 0;
+    virtual status_t drawOval(float left, float top, float right, float bottom,
+            const SkPaint* paint) = 0;
     virtual status_t drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) = 0;
-    virtual status_t drawPath(SkPath* path, SkPaint* paint) = 0;
-    virtual status_t drawLines(float* points, int count, SkPaint* paint) = 0;
-    virtual status_t drawPoints(float* points, int count, SkPaint* paint) = 0;
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) = 0;
+    virtual status_t drawPath(const SkPath* path, const SkPaint* paint) = 0;
+    virtual status_t drawLines(const float* points, int count, const SkPaint* paint) = 0;
+    virtual status_t drawPoints(const float* points, int count, const SkPaint* paint) = 0;
 
     // Text
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
+            const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate) = 0;
-    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
-            float hOffset, float vOffset, SkPaint* paint) = 0;
+    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+            float hOffset, float vOffset, const SkPaint* paint) = 0;
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, SkPaint* paint) = 0;
+            const float* positions, const SkPaint* paint) = 0;
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special

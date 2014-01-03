@@ -267,7 +267,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
             glyph->mCacheTexture);
 }
 
-CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool precaching) {
+CachedGlyphInfo* Font::getCachedGlyph(const SkPaint* paint, glyph_t textUnit, bool precaching) {
     CachedGlyphInfo* cachedGlyph = mCachedGlyphs.valueFor(textUnit);
     if (cachedGlyph) {
         // Is the glyph still in texture cache?
@@ -283,14 +283,14 @@ CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool pre
     return cachedGlyph;
 }
 
-void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32_t len,
             int numGlyphs, int x, int y, const float* positions) {
     render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL,
             0, 0, NULL, positions);
 }
 
-void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
-        int numGlyphs, SkPath* path, float hOffset, float vOffset) {
+void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+        int numGlyphs, const SkPath* path, float hOffset, float vOffset) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
@@ -339,7 +339,7 @@ void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len
     }
 }
 
-void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+void Font::measure(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, Rect *bounds, const float* positions) {
     if (bounds == NULL) {
         ALOGE("No return rectangle provided to measure text");
@@ -349,7 +349,7 @@ void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t le
     render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds, positions);
 }
 
-void Font::precache(SkPaint* paint, const char* text, int numGlyphs) {
+void Font::precache(const SkPaint* paint, const char* text, int numGlyphs) {
     ATRACE_NAME("precacheText");
 
     if (numGlyphs == 0 || text == NULL) {
@@ -370,7 +370,7 @@ void Font::precache(SkPaint* paint, const char* text, int numGlyphs) {
     }
 }
 
-void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+void Font::render(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
         uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* positions) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
@@ -416,8 +416,8 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
     }
 }
 
-void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, SkGlyphCache* skiaGlyphCache,
-        CachedGlyphInfo* glyph, bool precaching) {
+void Font::updateGlyphCache(const SkPaint* paint, const SkGlyph& skiaGlyph,
+        SkGlyphCache* skiaGlyphCache, CachedGlyphInfo* glyph, bool precaching) {
     glyph->mAdvanceX = skiaGlyph.fAdvanceX;
     glyph->mAdvanceY = skiaGlyph.fAdvanceY;
     glyph->mBitmapLeft = skiaGlyph.fLeft;
@@ -460,7 +460,7 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, SkGlyphCac
     }
 }
 
-CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching) {
+CachedGlyphInfo* Font::cacheGlyph(const SkPaint* paint, glyph_t glyph, bool precaching) {
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 

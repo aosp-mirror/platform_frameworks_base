@@ -49,7 +49,7 @@ namespace uirenderer {
  * Any texture added to the cache causing the cache to grow beyond the maximum
  * allowed size will also cause the oldest texture to be kicked out.
  */
-class TextureCache: public OnEntryRemoved<SkBitmap*, Texture*> {
+class TextureCache: public OnEntryRemoved<const SkBitmap*, Texture*> {
 public:
     TextureCache();
     TextureCache(uint32_t maxByteSize);
@@ -59,28 +59,28 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(SkBitmap*& bitmap, Texture*& texture);
+    void operator()(const SkBitmap*& bitmap, Texture*& texture);
 
     /**
      * Returns the texture associated with the specified bitmap. If the texture
      * cannot be found in the cache, a new texture is generated.
      */
-    Texture* get(SkBitmap* bitmap);
+    Texture* get(const SkBitmap* bitmap);
     /**
      * Returns the texture associated with the specified bitmap. The generated
      * texture is not kept in the cache. The caller must destroy the texture.
      */
-    Texture* getTransient(SkBitmap* bitmap);
+    Texture* getTransient(const SkBitmap* bitmap);
     /**
      * Removes the texture associated with the specified bitmap.
      * Upon remove the texture is freed.
      */
-    void remove(SkBitmap* bitmap);
+    void remove(const SkBitmap* bitmap);
     /**
      * Removes the texture associated with the specified bitmap. This is meant
      * to be called from threads that are not the EGL context thread.
      */
-    void removeDeferred(SkBitmap* bitmap);
+    void removeDeferred(const SkBitmap* bitmap);
     /**
      * Process deferred removals.
      */
@@ -122,15 +122,15 @@ private:
      * @param regenerate If true, the bitmap data is reuploaded into the texture, but
      *        no new texture is generated.
      */
-    void generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate = false);
+    void generateTexture(const SkBitmap* bitmap, Texture* texture, bool regenerate = false);
 
-    void uploadLoFiTexture(bool resize, SkBitmap* bitmap, uint32_t width, uint32_t height);
+    void uploadLoFiTexture(bool resize, const SkBitmap* bitmap, uint32_t width, uint32_t height);
     void uploadToTexture(bool resize, GLenum format, GLsizei stride,
             GLsizei width, GLsizei height, GLenum type, const GLvoid * data);
 
     void init();
 
-    LruCache<SkBitmap*, Texture*> mCache;
+    LruCache<const SkBitmap*, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
@@ -140,7 +140,7 @@ private:
 
     bool mDebugEnabled;
 
-    Vector<SkBitmap*> mGarbage;
+    Vector<const SkBitmap*> mGarbage;
     mutable Mutex mLock;
 }; // class TextureCache
 

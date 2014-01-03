@@ -172,41 +172,46 @@ public:
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags);
     virtual status_t drawLayer(Layer* layer, float x, float y);
-    virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    status_t drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
-            TextureVertex* vertices, bool pureTranslate, const Rect& bounds, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+    virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
+            const SkPaint* paint);
+    status_t drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
+            TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+            const SkPaint* paint);
+    virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, SkPaint* paint);
-    virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-            float* vertices, int* colors, SkPaint* paint);
-    status_t drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
-            TextureVertex* vertices, uint32_t indexCount, SkPaint* paint);
-    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-            float left, float top, float right, float bottom, SkPaint* paint);
-    status_t drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
-            float left, float top, float right, float bottom, SkPaint* paint);
+            float dstRight, float dstBottom, const SkPaint* paint);
+    virtual status_t drawBitmapData(const SkBitmap* bitmap, float left, float top,
+            const SkPaint* paint);
+    virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+            const float* vertices, const int* colors, const SkPaint* paint);
+    status_t drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
+            TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint);
+    virtual status_t drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+            float left, float top, float right, float bottom, const SkPaint* paint);
+    status_t drawPatch(const SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
+            float left, float top, float right, float bottom, const SkPaint* paint);
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
-    virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
+    virtual status_t drawRect(float left, float top, float right, float bottom,
+            const SkPaint* paint);
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, SkPaint* paint);
-    virtual status_t drawCircle(float x, float y, float radius, SkPaint* paint);
-    virtual status_t drawOval(float left, float top, float right, float bottom, SkPaint* paint);
+            float rx, float ry, const SkPaint* paint);
+    virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint);
+    virtual status_t drawOval(float left, float top, float right, float bottom,
+            const SkPaint* paint);
     virtual status_t drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
-    virtual status_t drawPath(SkPath* path, SkPaint* paint);
-    virtual status_t drawLines(float* points, int count, SkPaint* paint);
-    virtual status_t drawPoints(float* points, int count, SkPaint* paint);
-    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
-            float hOffset, float vOffset, SkPaint* paint);
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint);
+    virtual status_t drawPath(const SkPath* path, const SkPaint* paint);
+    virtual status_t drawLines(const float* points, int count, const SkPaint* paint);
+    virtual status_t drawPoints(const float* points, int count, const SkPaint* paint);
+    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+            float hOffset, float vOffset, const SkPaint* paint);
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, SkPaint* paint);
+            const float* positions, const SkPaint* paint);
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
+            const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate);
-    virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
+    virtual status_t drawRects(const float* rects, int count, const SkPaint* paint);
 
     status_t drawShadow(const mat4& casterTransform, float casterAlpha,
             float width, float height);
@@ -226,7 +231,7 @@ public:
     // If this value is set to < 1.0, it overrides alpha set on layer (see drawBitmap, drawLayer)
     void setOverrideLayerAlpha(float alpha) { mDrawModifiers.mOverrideLayerAlpha = alpha; }
 
-    SkPaint* filterPaint(SkPaint* paint);
+    const SkPaint* filterPaint(const SkPaint* paint);
 
     /**
      * Store the current display state (most importantly, the current clip and transform), and
@@ -292,12 +297,12 @@ public:
      * @param alpha Where to store the resulting alpha
      * @param mode Where to store the resulting xfermode
      */
-    static inline void getAlphaAndModeDirect(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
+    static inline void getAlphaAndModeDirect(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
         *mode = getXfermodeDirect(paint);
         *alpha = getAlphaDirect(paint);
     }
 
-    static inline SkXfermode::Mode getXfermodeDirect(SkPaint* paint) {
+    static inline SkXfermode::Mode getXfermodeDirect(const SkPaint* paint) {
         if (!paint) return SkXfermode::kSrcOver_Mode;
         return getXfermode(paint->getXfermode());
     }
@@ -370,8 +375,8 @@ protected:
     void attachStencilBufferToLayer(Layer* layer);
 
     bool quickRejectSetupScissor(float left, float top, float right, float bottom,
-            SkPaint* paint = NULL);
-    bool quickRejectSetupScissor(const Rect& bounds, SkPaint* paint = NULL) {
+            const SkPaint* paint = NULL);
+    bool quickRejectSetupScissor(const Rect& bounds, const SkPaint* paint = NULL) {
         return quickRejectSetupScissor(bounds.left, bounds.top,
                 bounds.right, bounds.bottom, paint);
     }
@@ -430,7 +435,7 @@ protected:
      * @param alpha Where to store the resulting alpha
      * @param mode Where to store the resulting xfermode
      */
-    inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const;
+    inline void getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const;
 
     /**
      * Gets the alpha from a layer, accounting for snapshot alpha and overrideLayerAlpha
@@ -624,7 +629,7 @@ private:
      * @param texture The texture reprsenting the shape
      * @param paint The paint to draw the shape with
      */
-    status_t drawShape(float left, float top, const PathTexture* texture, SkPaint* paint);
+    status_t drawShape(float left, float top, const PathTexture* texture, const SkPaint* paint);
 
     /**
      * Draws the specified texture as an alpha bitmap. Alpha bitmaps obey
@@ -635,7 +640,7 @@ private:
      * @param top The y coordinate of the bitmap
      * @param paint The paint to render with
      */
-    void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
+    void drawAlphaBitmap(Texture* texture, float left, float top, const SkPaint* paint);
 
     /**
      * Renders a strip of polygons with the specified paint, used for tessellated geometry.
@@ -644,7 +649,7 @@ private:
      * @param paint The paint to render with
      * @param useOffset Offset the vertexBuffer (used in drawing non-AA lines)
      */
-    status_t drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPaint* paint,
+    status_t drawVertexBuffer(const VertexBuffer& vertexBuffer, const SkPaint* paint,
             bool useOffset = false);
 
     /**
@@ -653,7 +658,7 @@ private:
      * @param path The hull of the path to draw
      * @param paint The paint to render with
      */
-    status_t drawConvexPath(const SkPath& path, SkPaint* paint);
+    status_t drawConvexPath(const SkPath& path, const SkPaint* paint);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -683,7 +688,7 @@ private:
      * @param paint The paint containing the alpha, blending mode, etc.
      */
     void drawTextureRect(float left, float top, float right, float bottom,
-            Texture* texture, SkPaint* paint);
+            Texture* texture, const SkPaint* paint);
 
     /**
      * Draws a textured mesh with the specified texture. If the indices are omitted,
@@ -742,7 +747,7 @@ private:
      * @param y The y coordinate where the text will be drawn
      * @param paint The paint to draw the text with
      */
-    void drawTextDecorations(float totalAdvance, float x, float y, SkPaint* paint);
+    void drawTextDecorations(float totalAdvance, float x, float y, const SkPaint* paint);
 
    /**
      * Draws shadow layer on text (with optional positions).
@@ -758,7 +763,7 @@ private:
      * @param x The x coordinate where the shadow will be drawn
      * @param y The y coordinate where the shadow will be drawn
      */
-    void drawTextShadow(SkPaint* paint, const char* text, int bytesCount, int count,
+    void drawTextShadow(const SkPaint* paint, const char* text, int bytesCount, int count,
             const float* positions, FontRenderer& fontRenderer, int alpha, SkXfermode::Mode mode,
             float x, float y);
 
@@ -771,7 +776,7 @@ private:
      * @param y The y coordinate where the texture will be drawn
      * @param paint The paint to draw the texture with
      */
-     void drawPathTexture(const PathTexture* texture, float x, float y, SkPaint* paint);
+     void drawPathTexture(const PathTexture* texture, float x, float y, const SkPaint* paint);
 
     /**
      * Resets the texture coordinates stored in mMeshVertices. Setting the values
@@ -930,7 +935,7 @@ private:
      * come from the texture cache or an atlas. If this method returns
      * NULL, the texture could not be found and/or allocated.
      */
-    Texture* getTexture(SkBitmap* bitmap);
+    Texture* getTexture(const SkBitmap* bitmap);
 
     // Matrix used for view/projection in shaders
     mat4 mViewProjMatrix;

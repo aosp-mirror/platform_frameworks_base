@@ -90,13 +90,13 @@ public:
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
-    virtual void setMatrix(SkMatrix* matrix);
-    virtual void concatMatrix(SkMatrix* matrix);
+    virtual void setMatrix(const SkMatrix* matrix);
+    virtual void concatMatrix(const SkMatrix* matrix);
 
     // Clip
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    virtual bool clipPath(SkPath* path, SkRegion::Op op);
-    virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op);
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
     // Misc - should be implemented with SkPaint inspection
     virtual void resetShader();
@@ -117,38 +117,43 @@ public:
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
 
     // Bitmap-based
-    virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
-    virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+    virtual status_t drawBitmap(const SkBitmap* bitmap, float left, float top,
+            const SkPaint* paint);
+    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+            const SkPaint* paint);
+    virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, SkPaint* paint);
-    virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-            float* vertices, int* colors, SkPaint* paint);
-    virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-            float left, float top, float right, float bottom, SkPaint* paint);
+            float dstRight, float dstBottom, const SkPaint* paint);
+    virtual status_t drawBitmapData(const SkBitmap* bitmap, float left, float top,
+            const SkPaint* paint);
+    virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+            const float* vertices, const int* colors, const SkPaint* paint);
+    virtual status_t drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+            float left, float top, float right, float bottom, const SkPaint* paint);
 
     // Shapes
-    virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
-    virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
+    virtual status_t drawRect(float left, float top, float right, float bottom,
+            const SkPaint* paint);
+    virtual status_t drawRects(const float* rects, int count, const SkPaint* paint);
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, SkPaint* paint);
-    virtual status_t drawCircle(float x, float y, float radius, SkPaint* paint);
-    virtual status_t drawOval(float left, float top, float right, float bottom, SkPaint* paint);
+            float rx, float ry, const SkPaint* paint);
+    virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint);
+    virtual status_t drawOval(float left, float top, float right, float bottom,
+            const SkPaint* paint);
     virtual status_t drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
-    virtual status_t drawPath(SkPath* path, SkPaint* paint);
-    virtual status_t drawLines(float* points, int count, SkPaint* paint);
-    virtual status_t drawPoints(float* points, int count, SkPaint* paint);
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint);
+    virtual status_t drawPath(const SkPath* path, const SkPaint* paint);
+    virtual status_t drawLines(const float* points, int count, const SkPaint* paint);
+    virtual status_t drawPoints(const float* points, int count, const SkPaint* paint);
 
     // Text
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
+            const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate);
-    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
-            float hOffset, float vOffset, SkPaint* paint);
+    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+            float hOffset, float vOffset, const SkPaint* paint);
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, SkPaint* paint);
+            const float* positions, const SkPaint* paint);
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
@@ -169,11 +174,11 @@ public:
         return mDisplayListData;
     }
 
-    const Vector<SkBitmap*>& getBitmapResources() const {
+    const Vector<const SkBitmap*>& getBitmapResources() const {
         return mBitmapResources;
     }
 
-    const Vector<SkBitmap*>& getOwnedBitmapResources() const {
+    const Vector<const SkBitmap*>& getOwnedBitmapResources() const {
         return mOwnedBitmapResources;
     }
 
@@ -181,7 +186,7 @@ public:
         return mFilterResources;
     }
 
-    const Vector<Res_png_9patch*>& getPatchResources() const {
+    const Vector<const Res_png_9patch*>& getPatchResources() const {
         return mPatchResources;
     }
 
@@ -189,19 +194,19 @@ public:
         return mShaders;
     }
 
-    const Vector<SkPaint*>& getPaints() const {
+    const Vector<const SkPaint*>& getPaints() const {
         return mPaints;
     }
 
-    const Vector<SkPath*>& getPaths() const {
+    const Vector<const SkPath*>& getPaths() const {
         return mPaths;
     }
 
-    const SortedVector<SkPath*>& getSourcePaths() const {
+    const SortedVector<const SkPath*>& getSourcePaths() const {
         return mSourcePaths;
     }
 
-    const Vector<SkRegion*>& getRegions() const {
+    const Vector<const SkRegion*>& getRegions() const {
         return mRegions;
     }
 
@@ -209,7 +214,7 @@ public:
         return mLayers;
     }
 
-    const Vector<SkMatrix*>& getMatrices() const {
+    const Vector<const SkMatrix*>& getMatrices() const {
         return mMatrices;
     }
 
@@ -231,8 +236,9 @@ private:
     }
 
     template<class T>
-    inline T* refBuffer(const T* srcBuffer, int32_t count) {
-        if (srcBuffer == NULL) return NULL;
+    inline const T* refBuffer(const T* srcBuffer, int32_t count) {
+        if (!srcBuffer) return NULL;
+
         T* dstBuffer = (T*) mDisplayListData->allocator.alloc(count * sizeof(T));
         memcpy(dstBuffer, srcBuffer, count * sizeof(T));
         return dstBuffer;
@@ -242,13 +248,15 @@ private:
         return (char*) refBuffer<uint8_t>((uint8_t*)text, byteLength);
     }
 
-    inline SkPath* refPath(SkPath* path) {
+    inline const SkPath* refPath(const SkPath* path) {
         if (!path) return NULL;
 
-        SkPath* pathCopy = mPathMap.valueFor(path);
+        const SkPath* pathCopy = mPathMap.valueFor(path);
         if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
-            pathCopy = new SkPath(*path);
-            pathCopy->setSourcePath(path);
+            SkPath* newPathCopy = new SkPath(*path);
+            newPathCopy->setSourcePath(path);
+
+            pathCopy = newPathCopy;
             // replaceValueFor() performs an add if the entry doesn't exist
             mPathMap.replaceValueFor(path, pathCopy);
             mPaths.add(pathCopy);
@@ -260,12 +268,12 @@ private:
         return pathCopy;
     }
 
-    inline SkPaint* refPaint(SkPaint* paint) {
+    inline const SkPaint* refPaint(const SkPaint* paint) {
         if (!paint) {
             return paint;
         }
 
-        SkPaint* paintCopy = mPaintMap.valueFor(paint);
+        const SkPaint* paintCopy = mPaintMap.valueFor(paint);
         if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
             paintCopy = new SkPaint(*paint);
             // replaceValueFor() performs an add if the entry doesn't exist
@@ -276,12 +284,12 @@ private:
         return paintCopy;
     }
 
-    inline SkRegion* refRegion(SkRegion* region) {
+    inline const SkRegion* refRegion(const SkRegion* region) {
         if (!region) {
             return region;
         }
 
-        SkRegion* regionCopy = mRegionMap.valueFor(region);
+        const SkRegion* regionCopy = mRegionMap.valueFor(region);
         // TODO: Add generation ID to SkRegion
         if (regionCopy == NULL) {
             regionCopy = new SkRegion(*region);
@@ -293,11 +301,11 @@ private:
         return regionCopy;
     }
 
-    inline SkMatrix* refMatrix(SkMatrix* matrix) {
+    inline const SkMatrix* refMatrix(const SkMatrix* matrix) {
         if (matrix) {
             // Copying the matrix is cheap and prevents against the user changing
             // the original matrix before the operation that uses it
-            SkMatrix* copy = new SkMatrix(*matrix);
+            const SkMatrix* copy = new SkMatrix(*matrix);
             mMatrices.add(copy);
             return copy;
         }
@@ -310,7 +318,7 @@ private:
         return layer;
     }
 
-    inline SkBitmap* refBitmap(SkBitmap* bitmap) {
+    inline const SkBitmap* refBitmap(const SkBitmap* bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
@@ -320,7 +328,7 @@ private:
         return bitmap;
     }
 
-    inline SkBitmap* refBitmapData(SkBitmap* bitmap) {
+    inline const SkBitmap* refBitmapData(const SkBitmap* bitmap) {
         mOwnedBitmapResources.add(bitmap);
         mCaches.resourceCache.incrementRefcount(bitmap);
         return bitmap;
@@ -347,33 +355,33 @@ private:
         return colorFilter;
     }
 
-    inline Res_png_9patch* refPatch(Res_png_9patch* patch) {
+    inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
         mPatchResources.add(patch);
         mCaches.resourceCache.incrementRefcount(patch);
         return patch;
     }
 
     // TODO: move these to DisplayListData
-    Vector<SkBitmap*> mBitmapResources;
-    Vector<SkBitmap*> mOwnedBitmapResources;
+    Vector<const SkBitmap*> mBitmapResources;
+    Vector<const SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
-    Vector<Res_png_9patch*> mPatchResources;
+    Vector<const Res_png_9patch*> mPatchResources;
 
-    Vector<SkPaint*> mPaints;
-    DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;
+    Vector<const SkPaint*> mPaints;
+    DefaultKeyedVector<const SkPaint*, const SkPaint*> mPaintMap;
 
-    Vector<SkPath*> mPaths;
-    DefaultKeyedVector<SkPath*, SkPath*> mPathMap;
+    Vector<const SkPath*> mPaths;
+    DefaultKeyedVector<const SkPath*, const SkPath*> mPathMap;
 
-    SortedVector<SkPath*> mSourcePaths;
+    SortedVector<const SkPath*> mSourcePaths;
 
-    Vector<SkRegion*> mRegions;
-    DefaultKeyedVector<SkRegion*, SkRegion*> mRegionMap;
+    Vector<const SkRegion*> mRegions;
+    DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
 
     Vector<SkiaShader*> mShaders;
     DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
 
-    Vector<SkMatrix*> mMatrices;
+    Vector<const SkMatrix*> mMatrices;
 
     Vector<Layer*> mLayers;
 

@@ -69,9 +69,9 @@ public:
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
-    virtual void setMatrix(SkMatrix* matrix);
+    virtual void setMatrix(const SkMatrix* matrix);
     void setMatrix(const Matrix4& matrix); // internal only convenience method
-    virtual void concatMatrix(SkMatrix* matrix);
+    virtual void concatMatrix(const SkMatrix* matrix);
     void concatMatrix(const Matrix4& matrix); // internal only convenience method
 
     // Clip
@@ -79,8 +79,8 @@ public:
     virtual bool quickRejectConservative(float left, float top, float right, float bottom) const;
 
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    virtual bool clipPath(SkPath* path, SkRegion::Op op);
-    virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op);
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
 protected:
     int getWidth() { return mWidth; }

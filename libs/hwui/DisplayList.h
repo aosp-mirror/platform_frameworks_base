@@ -549,16 +549,16 @@ private:
         const char* mText;
     };
 
-    Vector<SkBitmap*> mBitmapResources;
-    Vector<SkBitmap*> mOwnedBitmapResources;
+    Vector<const SkBitmap*> mBitmapResources;
+    Vector<const SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
-    Vector<Res_png_9patch*> mPatchResources;
+    Vector<const Res_png_9patch*> mPatchResources;
 
-    Vector<SkPaint*> mPaints;
-    Vector<SkPath*> mPaths;
-    SortedVector<SkPath*> mSourcePaths;
-    Vector<SkRegion*> mRegions;
-    Vector<SkMatrix*> mMatrices;
+    Vector<const SkPaint*> mPaints;
+    Vector<const SkPath*> mPaths;
+    SortedVector<const SkPath*> mSourcePaths;
+    Vector<const SkRegion*> mRegions;
+    Vector<const SkMatrix*> mMatrices;
     Vector<SkiaShader*> mShaders;
     Vector<Layer*> mLayers;
 

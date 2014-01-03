@@ -203,13 +203,13 @@ void DisplayListRenderer::skew(float sx, float sy) {
     StatefulBaseRenderer::skew(sx, sy);
 }
 
-void DisplayListRenderer::setMatrix(SkMatrix* matrix) {
+void DisplayListRenderer::setMatrix(const SkMatrix* matrix) {
     matrix = refMatrix(matrix);
     addStateOp(new (alloc()) SetMatrixOp(matrix));
     StatefulBaseRenderer::setMatrix(matrix);
 }
 
-void DisplayListRenderer::concatMatrix(SkMatrix* matrix) {
+void DisplayListRenderer::concatMatrix(const SkMatrix* matrix) {
     matrix = refMatrix(matrix);
     addStateOp(new (alloc()) ConcatMatrixOp(matrix));
     StatefulBaseRenderer::concatMatrix(matrix);
@@ -221,13 +221,13 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     return StatefulBaseRenderer::clipRect(left, top, right, bottom, op);
 }
 
-bool DisplayListRenderer::clipPath(SkPath* path, SkRegion::Op op) {
+bool DisplayListRenderer::clipPath(const SkPath* path, SkRegion::Op op) {
     path = refPath(path);
     addStateOp(new (alloc()) ClipPathOp(path, op));
     return StatefulBaseRenderer::clipPath(path, op);
 }
 
-bool DisplayListRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
+bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     region = refRegion(region);
     addStateOp(new (alloc()) ClipRegionOp(region, op));
     return StatefulBaseRenderer::clipRegion(region, op);
@@ -256,7 +256,8 @@ status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, float left, float top,
+        const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
     paint = refPaint(paint);
 
@@ -264,7 +265,8 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+        const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
     matrix = refMatrix(matrix);
     paint = refPaint(paint);
@@ -273,9 +275,9 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkP
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+status_t DisplayListRenderer::drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop,
-        float dstRight, float dstBottom, SkPaint* paint) {
+        float dstRight, float dstBottom, const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
     paint = refPaint(paint);
 
@@ -294,8 +296,8 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float 
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
-        SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmapData(const SkBitmap* bitmap, float left, float top,
+        const SkPaint* paint) {
     bitmap = refBitmapData(bitmap);
     paint = refPaint(paint);
 
@@ -303,8 +305,8 @@ status_t DisplayListRenderer::drawBitmapData(SkBitmap* bitmap, float left, float
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-        float* vertices, int* colors, SkPaint* paint) {
+status_t DisplayListRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+        const float* vertices, const int* colors, const SkPaint* paint) {
     int count = (meshWidth + 1) * (meshHeight + 1) * 2;
     bitmap = refBitmap(bitmap);
     vertices = refBuffer<float>(vertices, count);
@@ -316,8 +318,8 @@ status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, in
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-        float left, float top, float right, float bottom, SkPaint* paint) {
+status_t DisplayListRenderer::drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     bitmap = refBitmap(bitmap);
     patch = refPatch(patch);
     paint = refPaint(paint);
@@ -332,41 +334,41 @@ status_t DisplayListRenderer::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 status_t DisplayListRenderer::drawRect(float left, float top, float right, float bottom,
-        SkPaint* paint) {
+        const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawRectOp(left, top, right, bottom, paint));
     return DrawGlInfo::kStatusDone;
 }
 
 status_t DisplayListRenderer::drawRoundRect(float left, float top, float right, float bottom,
-        float rx, float ry, SkPaint* paint) {
+        float rx, float ry, const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawRoundRectOp(left, top, right, bottom, rx, ry, paint));
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
+status_t DisplayListRenderer::drawCircle(float x, float y, float radius, const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawCircleOp(x, y, radius, paint));
     return DrawGlInfo::kStatusDone;
 }
 
 status_t DisplayListRenderer::drawOval(float left, float top, float right, float bottom,
-        SkPaint* paint) {
+        const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawOvalOp(left, top, right, bottom, paint));
     return DrawGlInfo::kStatusDone;
 }
 
 status_t DisplayListRenderer::drawArc(float left, float top, float right, float bottom,
-        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
+        float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
     paint = refPaint(paint);
     addDrawOp(new (alloc()) DrawArcOp(left, top, right, bottom,
                     startAngle, sweepAngle, useCenter, paint));
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
+status_t DisplayListRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
     path = refPath(path);
     paint = refPaint(paint);
 
@@ -374,7 +376,7 @@ status_t DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawLines(float* points, int count, SkPaint* paint) {
+status_t DisplayListRenderer::drawLines(const float* points, int count, const SkPaint* paint) {
     points = refBuffer<float>(points, count);
     paint = refPaint(paint);
 
@@ -382,7 +384,7 @@ status_t DisplayListRenderer::drawLines(float* points, int count, SkPaint* paint
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawPoints(float* points, int count, SkPaint* paint) {
+status_t DisplayListRenderer::drawPoints(const float* points, int count, const SkPaint* paint) {
     points = refBuffer<float>(points, count);
     paint = refPaint(paint);
 
@@ -391,7 +393,7 @@ status_t DisplayListRenderer::drawPoints(float* points, int count, SkPaint* pain
 }
 
 status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
-        SkPath* path, float hOffset, float vOffset, SkPaint* paint) {
+        const SkPath* path, float hOffset, float vOffset, const SkPaint* paint) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
     text = refText(text, bytesCount);
@@ -405,7 +407,7 @@ status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, i
 }
 
 status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int count,
-        const float* positions, SkPaint* paint) {
+        const float* positions, const SkPaint* paint) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
     text = refText(text, bytesCount);
@@ -418,7 +420,7 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
 }
 
 status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, const float* positions, SkPaint* paint,
+        float x, float y, const float* positions, const SkPaint* paint,
         float totalAdvance, const Rect& bounds, DrawOpMode drawOpMode) {
 
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
@@ -433,7 +435,7 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawRects(const float* rects, int count, SkPaint* paint) {
+status_t DisplayListRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
     if (count <= 0) return DrawGlInfo::kStatusDone;
 
     rects = refBuffer<float>(rects, count);

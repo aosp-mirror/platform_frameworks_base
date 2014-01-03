@@ -160,13 +160,13 @@ public:
      * Returns the entry in the atlas associated with the specified
      * bitmap. If the bitmap is not in the atlas, return NULL.
      */
-    Entry* getEntry(SkBitmap* const bitmap) const;
+    Entry* getEntry(const SkBitmap* bitmap) const;
 
     /**
      * Returns the texture for the atlas entry associated with the
      * specified bitmap. If the bitmap is not in the atlas, return NULL.
      */
-    Texture* getEntryTexture(SkBitmap* const bitmap) const;
+    Texture* getEntryTexture(const SkBitmap* bitmap) const;
 
     /**
      * Returns the current generation id of the atlas.
@@ -186,7 +186,7 @@ private:
     const bool mBlendKey;
     const bool mOpaqueKey;
 
-    KeyedVector<SkBitmap*, Entry*> mEntries;
+    KeyedVector<const SkBitmap*, Entry*> mEntries;
 }; // class AssetAtlas
 
 }; // namespace uirenderer

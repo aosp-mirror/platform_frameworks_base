@@ -587,11 +587,11 @@ void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
     }
 }
 
-void FontRenderer::setFont(SkPaint* paint, const mat4& matrix) {
+void FontRenderer::setFont(const SkPaint* paint, const mat4& matrix) {
     mCurrentFont = Font::create(this, paint, matrix);
 }
 
-FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
+FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius, const float* positions) {
     checkInit();
 
@@ -676,7 +676,8 @@ void FontRenderer::finishRender() {
     issueDrawCommand();
 }
 
-void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix) {
+void FontRenderer::precache(const SkPaint* paint, const char* text, int numGlyphs,
+        const mat4& matrix) {
     Font* font = Font::create(this, paint, matrix);
     font->precache(paint, text, numGlyphs);
 }
@@ -685,7 +686,7 @@ void FontRenderer::endPrecaching() {
     checkTextureUpdate();
 }
 
-bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *text,
+bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
         const float* positions, Rect* bounds, Functor* functor, bool forceFinish) {
     if (!mCurrentFont) {
@@ -703,8 +704,8 @@ bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *t
     return mDrawn;
 }
 
-bool FontRenderer::renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, SkPath* path,
+bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
+        uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
         float hOffset, float vOffset, Rect* bounds, Functor* functor) {
     if (!mCurrentFont) {
         ALOGE("No font set");
