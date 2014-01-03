@@ -501,31 +501,6 @@ public interface CameraDevice extends AutoCloseable {
     public void stopRepeating() throws CameraAccessException;
 
     /**
-     * <p>Wait until all the submitted requests have finished processing</p>
-     *
-     * <p>This method blocks until all the requests that have been submitted to
-     * the camera device, either through {@link #capture capture},
-     * {@link #captureBurst captureBurst},
-     * {@link #setRepeatingRequest setRepeatingRequest}, or
-     * {@link #setRepeatingBurst setRepeatingBurst}, have completed their
-     * processing.</p>
-     *
-     * <p>Once this call returns successfully, the device is in an idle state,
-     * and can be reconfigured with {@link #configureOutputs configureOutputs}.</p>
-     *
-     * <p>This method cannot be used if there is an active repeating request or
-     * burst, set with {@link #setRepeatingRequest setRepeatingRequest} or
-     * {@link #setRepeatingBurst setRepeatingBurst}. Call
-     * {@link #stopRepeating stopRepeating} before calling this method.</p>
-     *
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device has been closed, the
-     * device has encountered a fatal error, or if there is an active repeating
-     * request or burst.
-     */
-    public void waitUntilIdle() throws CameraAccessException;
-
-    /**
      * Flush all captures currently pending and in-progress as fast as
      * possible.
      *
