@@ -1547,7 +1547,7 @@ void OpenGLRenderer::setStencilFromClip() {
  *         style, and tessellated AA ramp
  */
 bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right, float bottom,
-        SkPaint* paint) {
+        const SkPaint* paint) {
     bool clipRequired = false;
     bool snapOut = paint && paint->isAntiAlias();
 
@@ -1895,7 +1895,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
     return DrawGlInfo::kStatusDone;
 }
 
-void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint) {
+void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, const SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -1930,8 +1930,9 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
  * will not set the scissor enable or dirty the current layer, if any.
  * The caller is responsible for properly dirtying the current layer.
  */
-status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
-        TextureVertex* vertices, bool pureTranslate, const Rect& bounds, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
+        int bitmapCount, TextureVertex* vertices, bool pureTranslate,
+        const Rect& bounds, const SkPaint* paint) {
     mCaches.activeTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
@@ -1965,7 +1966,8 @@ status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry,
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, float left, float top,
+        const SkPaint* paint) {
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
 
@@ -1987,7 +1989,8 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkP
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix* matrix,
+        const SkPaint* paint) {
     Rect r(0.0f, 0.0f, bitmap->width(), bitmap->height());
     const mat4 transform(*matrix);
     transform.mapRect(r);
@@ -2015,7 +2018,8 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint*
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmapData(const SkBitmap* bitmap, float left, float top,
+        const SkPaint* paint) {
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
 
@@ -2036,8 +2040,8 @@ status_t OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
-        float* vertices, int* colors, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+        const float* vertices, const int* colors, const SkPaint* paint) {
     if (!vertices || currentSnapshot()->isIgnored()) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2059,8 +2063,9 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     bool cleanupColors = false;
     if (!colors) {
         uint32_t colorsCount = (meshWidth + 1) * (meshHeight + 1);
-        colors = new int[colorsCount];
-        memset(colors, 0xff, colorsCount * sizeof(int));
+        int* newColors = new int[colorsCount];
+        memset(newColors, 0xff, colorsCount * sizeof(int));
+        colors = newColors;
         cleanupColors = true;
     }
 
@@ -2155,10 +2160,10 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
+status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
          float srcLeft, float srcTop, float srcRight, float srcBottom,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
-         SkPaint* paint) {
+         const SkPaint* paint) {
     if (quickRejectSetupScissor(dstLeft, dstTop, dstRight, dstBottom)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2247,8 +2252,8 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-        float left, float top, float right, float bottom, SkPaint* paint) {
+status_t OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     if (quickRejectSetupScissor(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2260,8 +2265,9 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     return drawPatch(bitmap, mesh, entry, left, top, right, bottom, paint);
 }
 
-status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
-        float left, float top, float right, float bottom, SkPaint* paint) {
+status_t OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
+        AssetAtlas::Entry* entry, float left, float top, float right, float bottom,
+        const SkPaint* paint) {
     if (quickRejectSetupScissor(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2323,8 +2329,8 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtl
  * will not set the scissor enable or dirty the current layer, if any.
  * The caller is responsible for properly dirtying the current layer.
  */
-status_t OpenGLRenderer::drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
-        TextureVertex* vertices, uint32_t indexCount, SkPaint* paint) {
+status_t OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
+        TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint) {
     mCaches.activeTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
@@ -2344,7 +2350,7 @@ status_t OpenGLRenderer::drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPaint* paint,
+status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, const SkPaint* paint,
         bool useOffset) {
     // not missing call to quickReject/dirtyLayer, always done at a higher level
 
@@ -2404,7 +2410,7 @@ status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPa
  *
  * Doesn't yet support joins, caps, or path effects.
  */
-status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
+status_t OpenGLRenderer::drawConvexPath(const SkPath& path, const SkPaint* paint) {
     VertexBuffer vertexBuffer;
     // TODO: try clipping large paths to viewport
     PathTessellator::tessellatePath(path, paint, *currentTransform(), vertexBuffer);
@@ -2429,7 +2435,7 @@ status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
  * TODO: try using a fixed input buffer for non-capped lines as in text rendering. this may reduce
  * memory transfer by removing need for degenerate vertices.
  */
-status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
+status_t OpenGLRenderer::drawLines(const float* points, int count, const SkPaint* paint) {
     if (currentSnapshot()->isIgnored() || count < 4) return DrawGlInfo::kStatusDone;
 
     count &= ~0x3; // round down to nearest four
@@ -2449,7 +2455,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     return drawVertexBuffer(buffer, paint, useOffset);
 }
 
-status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
+status_t OpenGLRenderer::drawPoints(const float* points, int count, const SkPaint* paint) {
     if (currentSnapshot()->isIgnored() || count < 2) return DrawGlInfo::kStatusDone;
 
     count &= ~0x1; // round down to nearest two
@@ -2482,7 +2488,7 @@ status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* texture,
-        SkPaint* paint) {
+        const SkPaint* paint) {
     if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
@@ -2495,7 +2501,7 @@ status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* tex
 }
 
 status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
-        float rx, float ry, SkPaint* p) {
+        float rx, float ry, const SkPaint* p) {
     if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
@@ -2520,7 +2526,7 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
     return drawConvexPath(path, p);
 }
 
-status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) {
+status_t OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p) {
     if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(x - radius, y - radius,
             x + radius, y + radius, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
@@ -2542,7 +2548,7 @@ status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) 
 }
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
-        SkPaint* p) {
+        const SkPaint* p) {
     if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
@@ -2564,7 +2570,7 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 }
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
-        float startAngle, float sweepAngle, bool useCenter, SkPaint* p) {
+        float startAngle, float sweepAngle, bool useCenter, const SkPaint* p) {
     if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
@@ -2601,7 +2607,8 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
 // See SkPaintDefaults.h
 #define SkPaintDefaults_MiterLimit SkIntToScalar(4)
 
-status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
+status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
+        const SkPaint* p) {
     if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
@@ -2636,9 +2643,9 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
     }
 }
 
-void OpenGLRenderer::drawTextShadow(SkPaint* paint, const char* text, int bytesCount, int count,
-        const float* positions, FontRenderer& fontRenderer, int alpha, SkXfermode::Mode mode,
-        float x, float y) {
+void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
+        int bytesCount, int count, const float* positions,
+        FontRenderer& fontRenderer, int alpha, SkXfermode::Mode mode, float x, float y) {
     mCaches.activeTexture(0);
 
     // NOTE: The drop shadow will not perform gamma correction
@@ -2684,7 +2691,7 @@ bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
 }
 
 status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
-        const float* positions, SkPaint* paint) {
+        const float* positions, const SkPaint* paint) {
     if (text == NULL || count == 0 || currentSnapshot()->isIgnored() || canSkipText(paint)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2759,7 +2766,7 @@ mat4 OpenGLRenderer::findBestFontTransform(const mat4& transform) const {
 }
 
 status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float x, float y,
-        const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
+        const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
         DrawOpMode drawOpMode) {
 
     if (drawOpMode == kDrawOpMode_Immediate) {
@@ -2845,8 +2852,8 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
-        float hOffset, float vOffset, SkPaint* paint) {
+status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
+        const SkPath* path, float hOffset, float vOffset, const SkPaint* paint) {
     if (text == NULL || count == 0 || currentSnapshot()->isIgnored() || canSkipText(paint)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2879,7 +2886,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
+status_t OpenGLRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     mCaches.activeTexture(0);
@@ -3056,7 +3063,7 @@ void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
     mDrawModifiers.mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
 }
 
-SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
+const SkPaint* OpenGLRenderer::filterPaint(const SkPaint* paint) {
     if (CC_LIKELY(!mDrawModifiers.mHasDrawFilter || !paint)) {
         return paint;
     }
@@ -3074,7 +3081,7 @@ SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
 // Drawing implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-Texture* OpenGLRenderer::getTexture(SkBitmap* bitmap) {
+Texture* OpenGLRenderer::getTexture(const SkBitmap* bitmap) {
     Texture* texture = mCaches.assetAtlas.getEntryTexture(bitmap);
     if (!texture) {
         return mCaches.textureCache.get(bitmap);
@@ -3083,7 +3090,7 @@ Texture* OpenGLRenderer::getTexture(SkBitmap* bitmap) {
 }
 
 void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
-        float x, float y, SkPaint* paint) {
+        float x, float y, const SkPaint* paint) {
     if (quickRejectSetupScissor(x, y, x + texture->width, y + texture->height)) {
         return;
     }
@@ -3115,7 +3122,8 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
 #define kStdUnderline_Offset    (1.0f / 9.0f)
 #define kStdUnderline_Thickness (1.0f / 18.0f)
 
-void OpenGLRenderer::drawTextDecorations(float underlineWidth, float x, float y, SkPaint* paint) {
+void OpenGLRenderer::drawTextDecorations(float underlineWidth, float x, float y,
+        const SkPaint* paint) {
     // Handle underline and strike-through
     uint32_t flags = paint->getFlags();
     if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
@@ -3159,7 +3167,7 @@ void OpenGLRenderer::drawTextDecorations(float underlineWidth, float x, float y,
     }
 }
 
-status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint) {
+status_t OpenGLRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
     if (currentSnapshot()->isIgnored()) {
         return DrawGlInfo::kStatusDone;
     }
@@ -3275,7 +3283,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        Texture* texture, SkPaint* paint) {
+        Texture* texture, const SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -3464,7 +3472,7 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
     TextureVertex::setUV(v++, u2, v2);
 }
 
-void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const {
+void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const {
     getAlphaAndModeDirect(paint, alpha,  mode);
     if (mDrawModifiers.mOverrideLayerAlpha < 1.0f) {
         // if drawing a layer, ignore the paint's alpha

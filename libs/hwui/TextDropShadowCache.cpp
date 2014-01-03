@@ -168,7 +168,7 @@ void TextDropShadowCache::clear() {
     mCache.clear();
 }
 
-ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32_t len,
+ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* text, uint32_t len,
         int numGlyphs, float radius, const float* positions) {
     ShadowText entry(paint, radius, len, text, positions);
     ShadowTexture* texture = mCache.get(entry);

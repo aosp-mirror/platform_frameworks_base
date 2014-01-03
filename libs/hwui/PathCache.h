@@ -116,7 +116,7 @@ struct PathDescription {
     SkPathEffect* pathEffect;
     union Shape {
         struct Path {
-            SkPath* mPath;
+            const SkPath* mPath;
         } path;
         struct RoundRect {
             float mWidth;
@@ -145,7 +145,7 @@ struct PathDescription {
     } shape;
 
     PathDescription();
-    PathDescription(ShapeType shapeType, SkPaint* paint);
+    PathDescription(ShapeType shapeType, const SkPaint* paint);
 
     hash_t hash() const;
 
@@ -207,13 +207,13 @@ public:
      */
     uint32_t getSize();
 
-    PathTexture* getRoundRect(float width, float height, float rx, float ry, SkPaint* paint);
-    PathTexture* getCircle(float radius, SkPaint* paint);
-    PathTexture* getOval(float width, float height, SkPaint* paint);
-    PathTexture* getRect(float width, float height, SkPaint* paint);
+    PathTexture* getRoundRect(float width, float height, float rx, float ry, const SkPaint* paint);
+    PathTexture* getCircle(float radius, const SkPaint* paint);
+    PathTexture* getOval(float width, float height, const SkPaint* paint);
+    PathTexture* getRect(float width, float height, const SkPaint* paint);
     PathTexture* getArc(float width, float height, float startAngle, float sweepAngle,
-            bool useCenter, SkPaint* paint);
-    PathTexture* get(SkPath* path, SkPaint* paint);
+            bool useCenter, const SkPaint* paint);
+    PathTexture* get(const SkPath* path, const SkPaint* paint);
 
     /**
      * Removes the specified path. This is meant to be called from threads
@@ -239,9 +239,9 @@ public:
     /**
      * Precaches the specified path using background threads.
      */
-    void precache(SkPath* path, SkPaint* paint);
+    void precache(const SkPath* path, const SkPaint* paint);
 
-    static bool canDrawAsConvexPath(SkPath* path, SkPaint* paint);
+    static bool canDrawAsConvexPath(SkPath* path, const SkPaint* paint);
     static void computePathBounds(const SkPath* path, const SkPaint* paint,
             float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
     static void computeBounds(const SkRect& bounds, const SkPaint* paint,
@@ -292,7 +292,7 @@ private:
 
     class PathTask: public Task<SkBitmap*> {
     public:
-        PathTask(SkPath* path, SkPaint* paint, PathTexture* texture):
+        PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture):
             path(path), paint(paint), texture(texture) {
         }
 
@@ -300,8 +300,8 @@ private:
             delete future()->get();
         }
 
-        SkPath* path;
-        SkPaint* paint;
+        const SkPath* path;
+        const SkPaint* paint;
         PathTexture* texture;
     };
 

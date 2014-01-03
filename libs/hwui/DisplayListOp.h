@@ -111,7 +111,7 @@ public:
 class DrawOp : public DisplayListOp {
 friend class MergingDrawBatch;
 public:
-    DrawOp(SkPaint* paint)
+    DrawOp(const SkPaint* paint)
             : mPaint(paint), mQuickRejected(false) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
@@ -191,7 +191,7 @@ public:
     }
 
 protected:
-    SkPaint* getPaint(OpenGLRenderer& renderer) {
+    const SkPaint* getPaint(OpenGLRenderer& renderer) {
         return renderer.filterPaint(mPaint);
     }
 
@@ -212,22 +212,22 @@ protected:
 
     }
 
-    SkPaint* mPaint; // should be accessed via getPaint() when applying
+    const SkPaint* mPaint; // should be accessed via getPaint() when applying
     bool mQuickRejected;
 };
 
 class DrawBoundedOp : public DrawOp {
 public:
-    DrawBoundedOp(float left, float top, float right, float bottom, SkPaint* paint)
+    DrawBoundedOp(float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawOp(paint), mLocalBounds(left, top, right, bottom) {}
 
-    DrawBoundedOp(const Rect& localBounds, SkPaint* paint)
+    DrawBoundedOp(const Rect& localBounds, const SkPaint* paint)
             : DrawOp(paint), mLocalBounds(localBounds) {}
 
     // Calculates bounds as smallest rect encompassing all points
     // NOTE: requires at least 1 vertex, and doesn't account for stroke size (should be handled in
     // subclass' constructor)
-    DrawBoundedOp(const float* points, int count, SkPaint* paint)
+    DrawBoundedOp(const float* points, int count, const SkPaint* paint)
             : DrawOp(paint), mLocalBounds(points[0], points[1], points[0], points[1]) {
         for (int i = 2; i < count; i += 2) {
             mLocalBounds.left = fminf(mLocalBounds.left, points[i]);
@@ -238,7 +238,7 @@ public:
     }
 
     // default empty constructor for bounds, to be overridden in child constructor body
-    DrawBoundedOp(SkPaint* paint): DrawOp(paint) { }
+    DrawBoundedOp(const SkPaint* paint): DrawOp(paint) { }
 
     bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
         localBounds.set(mLocalBounds);
@@ -456,7 +456,7 @@ private:
 
 class SetMatrixOp : public StateOp {
 public:
-    SetMatrixOp(SkMatrix* matrix)
+    SetMatrixOp(const SkMatrix* matrix)
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
@@ -474,12 +474,12 @@ public:
     virtual const char* name() { return "SetMatrix"; }
 
 private:
-    SkMatrix* mMatrix;
+    const SkMatrix* mMatrix;
 };
 
 class ConcatMatrixOp : public StateOp {
 public:
-    ConcatMatrixOp(SkMatrix* matrix)
+    ConcatMatrixOp(const SkMatrix* matrix)
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
@@ -493,7 +493,7 @@ public:
     virtual const char* name() { return "ConcatMatrix"; }
 
 private:
-    SkMatrix* mMatrix;
+    const SkMatrix* mMatrix;
 };
 
 class ClipOp : public StateOp {
@@ -551,7 +551,7 @@ private:
 
 class ClipPathOp : public ClipOp {
 public:
-    ClipPathOp(SkPath* path, SkRegion::Op op)
+    ClipPathOp(const SkPath* path, SkRegion::Op op)
             : ClipOp(op), mPath(path) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
@@ -567,12 +567,12 @@ public:
     virtual const char* name() { return "ClipPath"; }
 
 private:
-    SkPath* mPath;
+    const SkPath* mPath;
 };
 
 class ClipRegionOp : public ClipOp {
 public:
-    ClipRegionOp(SkRegion* region, SkRegion::Op op)
+    ClipRegionOp(const SkRegion* region, SkRegion::Op op)
             : ClipOp(op), mRegion(region) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
@@ -588,7 +588,7 @@ public:
     virtual const char* name() { return "ClipRegion"; }
 
 private:
-    SkRegion* mRegion;
+    const SkRegion* mRegion;
 };
 
 class ResetShaderOp : public StateOp {
@@ -728,7 +728,7 @@ private:
 
 class DrawBitmapOp : public DrawBoundedOp {
 public:
-    DrawBitmapOp(SkBitmap* bitmap, float left, float top, SkPaint* paint)
+    DrawBitmapOp(const SkBitmap* bitmap, float left, float top, const SkPaint* paint)
             : DrawBoundedOp(left, top, left + bitmap->width(), top + bitmap->height(), paint),
             mBitmap(bitmap), mAtlas(Caches::getInstance().assetAtlas) {
         mEntry = mAtlas.getEntry(bitmap);
@@ -827,7 +827,7 @@ public:
 
     const SkBitmap* bitmap() { return mBitmap; }
 protected:
-    SkBitmap* mBitmap;
+    const SkBitmap* mBitmap;
     const AssetAtlas& mAtlas;
     uint32_t mEntryGenerationId;
     AssetAtlas::Entry* mEntry;
@@ -836,7 +836,7 @@ protected:
 
 class DrawBitmapMatrixOp : public DrawBoundedOp {
 public:
-    DrawBitmapMatrixOp(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint)
+    DrawBitmapMatrixOp(const SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint)
             : DrawBoundedOp(paint), mBitmap(bitmap), mMatrix(matrix) {
         mLocalBounds.set(0, 0, bitmap->width(), bitmap->height());
         const mat4 transform(*matrix);
@@ -859,14 +859,15 @@ public:
     }
 
 private:
-    SkBitmap* mBitmap;
-    SkMatrix* mMatrix;
+    const SkBitmap* mBitmap;
+    const SkMatrix* mMatrix;
 };
 
 class DrawBitmapRectOp : public DrawBoundedOp {
 public:
-    DrawBitmapRectOp(SkBitmap* bitmap, float srcLeft, float srcTop, float srcRight, float srcBottom,
-            float dstLeft, float dstTop, float dstRight, float dstBottom, SkPaint* paint)
+    DrawBitmapRectOp(const SkBitmap* bitmap,
+            float srcLeft, float srcTop, float srcRight, float srcBottom,
+            float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint)
             : DrawBoundedOp(dstLeft, dstTop, dstRight, dstBottom, paint),
             mBitmap(bitmap), mSrc(srcLeft, srcTop, srcRight, srcBottom) {}
 
@@ -889,13 +890,13 @@ public:
     }
 
 private:
-    SkBitmap* mBitmap;
+    const SkBitmap* mBitmap;
     Rect mSrc;
 };
 
 class DrawBitmapDataOp : public DrawBitmapOp {
 public:
-    DrawBitmapDataOp(SkBitmap* bitmap, float left, float top, SkPaint* paint)
+    DrawBitmapDataOp(const SkBitmap* bitmap, float left, float top, const SkPaint* paint)
             : DrawBitmapOp(bitmap, left, top, paint) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
@@ -917,8 +918,8 @@ public:
 
 class DrawBitmapMeshOp : public DrawBoundedOp {
 public:
-    DrawBitmapMeshOp(SkBitmap* bitmap, int meshWidth, int meshHeight,
-            float* vertices, int* colors, SkPaint* paint)
+    DrawBitmapMeshOp(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+            const float* vertices, const int* colors, const SkPaint* paint)
             : DrawBoundedOp(vertices, 2 * (meshWidth + 1) * (meshHeight + 1), paint),
             mBitmap(bitmap), mMeshWidth(meshWidth), mMeshHeight(meshHeight),
             mVertices(vertices), mColors(colors) {}
@@ -940,17 +941,17 @@ public:
     }
 
 private:
-    SkBitmap* mBitmap;
+    const SkBitmap* mBitmap;
     int mMeshWidth;
     int mMeshHeight;
-    float* mVertices;
-    int* mColors;
+    const float* mVertices;
+    const int* mColors;
 };
 
 class DrawPatchOp : public DrawBoundedOp {
 public:
-    DrawPatchOp(SkBitmap* bitmap, Res_png_9patch* patch,
-            float left, float top, float right, float bottom, SkPaint* paint)
+    DrawPatchOp(const SkBitmap* bitmap, const Res_png_9patch* patch,
+            float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawBoundedOp(left, top, right, bottom, paint),
             mBitmap(bitmap), mPatch(patch), mGenerationId(0), mMesh(NULL),
             mAtlas(Caches::getInstance().assetAtlas) {
@@ -1082,8 +1083,8 @@ public:
     }
 
 private:
-    SkBitmap* mBitmap;
-    Res_png_9patch* mPatch;
+    const SkBitmap* mBitmap;
+    const Res_png_9patch* mPatch;
 
     uint32_t mGenerationId;
     const Patch* mMesh;
@@ -1115,7 +1116,7 @@ private:
 
 class DrawStrokableOp : public DrawBoundedOp {
 public:
-    DrawStrokableOp(float left, float top, float right, float bottom, SkPaint* paint)
+    DrawStrokableOp(float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawBoundedOp(left, top, right, bottom, paint) {};
 
     bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
@@ -1140,7 +1141,7 @@ public:
 
 class DrawRectOp : public DrawStrokableOp {
 public:
-    DrawRectOp(float left, float top, float right, float bottom, SkPaint* paint)
+    DrawRectOp(float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
@@ -1164,7 +1165,7 @@ public:
 
 class DrawRectsOp : public DrawBoundedOp {
 public:
-    DrawRectsOp(const float* rects, int count, SkPaint* paint)
+    DrawRectsOp(const float* rects, int count, const SkPaint* paint)
             : DrawBoundedOp(rects, count, paint),
             mRects(rects), mCount(count) {}
 
@@ -1191,7 +1192,7 @@ private:
 class DrawRoundRectOp : public DrawStrokableOp {
 public:
     DrawRoundRectOp(float left, float top, float right, float bottom,
-            float rx, float ry, SkPaint* paint)
+            float rx, float ry, const SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint), mRx(rx), mRy(ry) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
@@ -1212,7 +1213,7 @@ private:
 
 class DrawCircleOp : public DrawStrokableOp {
 public:
-    DrawCircleOp(float x, float y, float radius, SkPaint* paint)
+    DrawCircleOp(float x, float y, float radius, const SkPaint* paint)
             : DrawStrokableOp(x - radius, y - radius, x + radius, y + radius, paint),
             mX(x), mY(y), mRadius(radius) {}
 
@@ -1234,7 +1235,7 @@ private:
 
 class DrawOvalOp : public DrawStrokableOp {
 public:
-    DrawOvalOp(float left, float top, float right, float bottom, SkPaint* paint)
+    DrawOvalOp(float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
@@ -1252,7 +1253,7 @@ public:
 class DrawArcOp : public DrawStrokableOp {
 public:
     DrawArcOp(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint)
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint)
             : DrawStrokableOp(left, top, right, bottom, paint),
             mStartAngle(startAngle), mSweepAngle(sweepAngle), mUseCenter(useCenter) {}
 
@@ -1277,7 +1278,7 @@ private:
 
 class DrawPathOp : public DrawBoundedOp {
 public:
-    DrawPathOp(SkPath* path, SkPaint* paint)
+    DrawPathOp(const SkPath* path, const SkPaint* paint)
             : DrawBoundedOp(paint), mPath(path) {
         float left, top, offset;
         uint32_t width, height;
@@ -1293,7 +1294,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
-        SkPaint* paint = getPaint(renderer);
+        const SkPaint* paint = getPaint(renderer);
         renderer.getCaches().pathCache.precache(mPath, paint);
 
         deferInfo.batchId = DeferredDisplayList::kOpBatch_AlphaMaskTexture;
@@ -1306,12 +1307,12 @@ public:
     virtual const char* name() { return "DrawPath"; }
 
 private:
-    SkPath* mPath;
+    const SkPath* mPath;
 };
 
 class DrawLinesOp : public DrawBoundedOp {
 public:
-    DrawLinesOp(float* points, int count, SkPaint* paint)
+    DrawLinesOp(const float* points, int count, const SkPaint* paint)
             : DrawBoundedOp(points, count, paint),
             mPoints(points), mCount(count) {
         mLocalBounds.outset(strokeWidthOutset());
@@ -1335,13 +1336,13 @@ public:
     }
 
 protected:
-    float* mPoints;
+    const float* mPoints;
     int mCount;
 };
 
 class DrawPointsOp : public DrawLinesOp {
 public:
-    DrawPointsOp(float* points, int count, SkPaint* paint)
+    DrawPointsOp(const float* points, int count, const SkPaint* paint)
             : DrawLinesOp(points, count, paint) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
@@ -1357,7 +1358,7 @@ public:
 
 class DrawSomeTextOp : public DrawOp {
 public:
-    DrawSomeTextOp(const char* text, int bytesCount, int count, SkPaint* paint)
+    DrawSomeTextOp(const char* text, int bytesCount, int count, const SkPaint* paint)
             : DrawOp(paint), mText(text), mBytesCount(bytesCount), mCount(count) {};
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -1366,7 +1367,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
-        SkPaint* paint = getPaint(renderer);
+        const SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         fontRenderer.precache(paint, mText, mCount, mat4::identity());
 
@@ -1384,7 +1385,7 @@ protected:
 class DrawTextOnPathOp : public DrawSomeTextOp {
 public:
     DrawTextOnPathOp(const char* text, int bytesCount, int count,
-            SkPath* path, float hOffset, float vOffset, SkPaint* paint)
+            const SkPath* path, float hOffset, float vOffset, const SkPaint* paint)
             : DrawSomeTextOp(text, bytesCount, count, paint),
             mPath(path), mHOffset(hOffset), mVOffset(vOffset) {
         /* TODO: inherit from DrawBounded and init mLocalBounds */
@@ -1398,7 +1399,7 @@ public:
     virtual const char* name() { return "DrawTextOnPath"; }
 
 private:
-    SkPath* mPath;
+    const SkPath* mPath;
     float mHOffset;
     float mVOffset;
 };
@@ -1406,7 +1407,7 @@ private:
 class DrawPosTextOp : public DrawSomeTextOp {
 public:
     DrawPosTextOp(const char* text, int bytesCount, int count,
-            const float* positions, SkPaint* paint)
+            const float* positions, const SkPaint* paint)
             : DrawSomeTextOp(text, bytesCount, count, paint), mPositions(positions) {
         /* TODO: inherit from DrawBounded and init mLocalBounds */
     }
@@ -1424,7 +1425,7 @@ private:
 class DrawTextOp : public DrawBoundedOp {
 public:
     DrawTextOp(const char* text, int bytesCount, int count, float x, float y,
-            const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds)
+            const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds)
             : DrawBoundedOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
             mX(x), mY(y), mPositions(positions), mTotalAdvance(totalAdvance) {
         memset(&mPrecacheTransform.data[0], 0xff, 16 * sizeof(float));
@@ -1432,7 +1433,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
-        SkPaint* paint = getPaint(renderer);
+        const SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         const mat4& transform = renderer.findBestFontTransform(state.mMatrix);
         if (mPrecacheTransform != transform) {

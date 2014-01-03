@@ -34,7 +34,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 TextureCache::TextureCache():
-        mCache(LruCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<const SkBitmap*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
         mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE) {
     char property[PROPERTY_VALUE_MAX];
@@ -58,7 +58,7 @@ TextureCache::TextureCache():
 }
 
 TextureCache::TextureCache(uint32_t maxByteSize):
-        mCache(LruCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<const SkBitmap*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     init();
 }
@@ -103,7 +103,7 @@ void TextureCache::setFlushRate(float flushRate) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextureCache::operator()(SkBitmap*&, Texture*& texture) {
+void TextureCache::operator()(const SkBitmap*&, Texture*& texture) {
     // This will be called already locked
     if (texture) {
         mSize -= texture->bitmapSize;
@@ -121,7 +121,7 @@ void TextureCache::operator()(SkBitmap*&, Texture*& texture) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-Texture* TextureCache::get(SkBitmap* bitmap) {
+Texture* TextureCache::get(const SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap);
 
     if (!texture) {
@@ -161,7 +161,7 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
     return texture;
 }
 
-Texture* TextureCache::getTransient(SkBitmap* bitmap) {
+Texture* TextureCache::getTransient(const SkBitmap* bitmap) {
     Texture* texture = new Texture();
     texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
     texture->cleanup = true;
@@ -171,11 +171,11 @@ Texture* TextureCache::getTransient(SkBitmap* bitmap) {
     return texture;
 }
 
-void TextureCache::remove(SkBitmap* bitmap) {
+void TextureCache::remove(const SkBitmap* bitmap) {
     mCache.remove(bitmap);
 }
 
-void TextureCache::removeDeferred(SkBitmap* bitmap) {
+void TextureCache::removeDeferred(const SkBitmap* bitmap) {
     Mutex::Autolock _l(mLock);
     mGarbage.push(bitmap);
 }
@@ -209,7 +209,7 @@ void TextureCache::flush() {
     }
 }
 
-void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate) {
+void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, bool regenerate) {
     SkAutoLockPixels alp(*bitmap);
 
     if (!bitmap->readyToDraw()) {
@@ -282,7 +282,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     }
 }
 
-void TextureCache::uploadLoFiTexture(bool resize, SkBitmap* bitmap,
+void TextureCache::uploadLoFiTexture(bool resize, const SkBitmap* bitmap,
         uint32_t width, uint32_t height) {
     SkBitmap rgbaBitmap;
     rgbaBitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);

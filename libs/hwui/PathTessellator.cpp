@@ -805,7 +805,7 @@ static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
     dstBuffer.createDegenerateSeparators<TYPE>(verticesPerPoint);
 }
 
-void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* paint,
+void PathTessellator::tessellatePoints(const float* points, int count, const SkPaint* paint,
         const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
     const PaintInfo paintInfo(paint, transform);
 
@@ -845,7 +845,7 @@ void PathTessellator::tessellatePoints(const float* points, int count, SkPaint* 
 
 }
 
-void PathTessellator::tessellateLines(const float* points, int count, SkPaint* paint,
+void PathTessellator::tessellateLines(const float* points, int count, const SkPaint* paint,
         const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
     ATRACE_CALL();
     const PaintInfo paintInfo(paint, transform);

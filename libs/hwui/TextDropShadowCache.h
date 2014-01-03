@@ -38,7 +38,7 @@ struct ShadowText {
     }
 
     // len is the number of bytes in text
-    ShadowText(SkPaint* paint, float radius, uint32_t len, const char* srcText,
+    ShadowText(const SkPaint* paint, float radius, uint32_t len, const char* srcText,
             const float* positions):
             len(len), radius(radius), positions(positions) {
         // TODO: Propagate this through the API, we should not cast here
@@ -135,7 +135,7 @@ public:
      */
     void operator()(ShadowText& text, ShadowTexture*& texture);
 
-    ShadowTexture* get(SkPaint* paint, const char* text, uint32_t len,
+    ShadowTexture* get(const SkPaint* paint, const char* text, uint32_t len,
             int numGlyphs, float radius, const float* positions);
 
     /**

@@ -90,7 +90,7 @@ void DisplayList::clearResources() {
     }
 
     for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
-        SkBitmap* bitmap = mOwnedBitmapResources.itemAt(i);
+        const SkBitmap* bitmap = mOwnedBitmapResources.itemAt(i);
         caches.resourceCache.decrementRefcountLocked(bitmap);
         caches.resourceCache.destructorLocked(bitmap);
     }
@@ -173,16 +173,16 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     caches.registerFunctors(mFunctorCount);
     caches.resourceCache.lock();
 
-    const Vector<SkBitmap*>& bitmapResources = recorder.getBitmapResources();
+    const Vector<const SkBitmap*>& bitmapResources = recorder.getBitmapResources();
     for (size_t i = 0; i < bitmapResources.size(); i++) {
-        SkBitmap* resource = bitmapResources.itemAt(i);
+        const SkBitmap* resource = bitmapResources.itemAt(i);
         mBitmapResources.add(resource);
         caches.resourceCache.incrementRefcountLocked(resource);
     }
 
-    const Vector<SkBitmap*> &ownedBitmapResources = recorder.getOwnedBitmapResources();
+    const Vector<const SkBitmap*>& ownedBitmapResources = recorder.getOwnedBitmapResources();
     for (size_t i = 0; i < ownedBitmapResources.size(); i++) {
-        SkBitmap* resource = ownedBitmapResources.itemAt(i);
+        const SkBitmap* resource = ownedBitmapResources.itemAt(i);
         mOwnedBitmapResources.add(resource);
         caches.resourceCache.incrementRefcountLocked(resource);
     }
@@ -194,9 +194,9 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
         caches.resourceCache.incrementRefcountLocked(resource);
     }
 
-    const Vector<Res_png_9patch*>& patchResources = recorder.getPatchResources();
+    const Vector<const Res_png_9patch*>& patchResources = recorder.getPatchResources();
     for (size_t i = 0; i < patchResources.size(); i++) {
-        Res_png_9patch* resource = patchResources.itemAt(i);
+        const Res_png_9patch* resource = patchResources.itemAt(i);
         mPatchResources.add(resource);
         caches.resourceCache.incrementRefcountLocked(resource);
     }
@@ -208,7 +208,7 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
         caches.resourceCache.incrementRefcountLocked(resource);
     }
 
-    const SortedVector<SkPath*>& sourcePaths = recorder.getSourcePaths();
+    const SortedVector<const SkPath*>& sourcePaths = recorder.getSourcePaths();
     for (size_t i = 0; i < sourcePaths.size(); i++) {
         mSourcePaths.add(sourcePaths.itemAt(i));
         caches.resourceCache.incrementRefcountLocked(sourcePaths.itemAt(i));

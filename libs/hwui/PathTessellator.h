@@ -34,10 +34,10 @@ public:
     static void tessellatePath(const SkPath& path, const SkPaint* paint,
             const mat4& transform, VertexBuffer& vertexBuffer);
 
-    static void tessellatePoints(const float* points, int count, SkPaint* paint,
+    static void tessellatePoints(const float* points, int count, const SkPaint* paint,
             const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
 
-    static void tessellateLines(const float* points, int count, SkPaint* paint,
+    static void tessellateLines(const float* points, int count, const SkPaint* paint,
             const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
 
 private:

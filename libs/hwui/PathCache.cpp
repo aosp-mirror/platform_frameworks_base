@@ -51,7 +51,7 @@ PathDescription::PathDescription():
     memset(&shape, 0, sizeof(Shape));
 }
 
-PathDescription::PathDescription(ShapeType type, SkPaint* paint):
+PathDescription::PathDescription(ShapeType type, const SkPaint* paint):
         type(type),
         join(paint->getStrokeJoin()),
         cap(paint->getStrokeCap()),
@@ -82,7 +82,7 @@ int PathDescription::compare(const PathDescription& rhs) const {
 // Utilities
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PathCache::canDrawAsConvexPath(SkPath* path, SkPaint* paint) {
+bool PathCache::canDrawAsConvexPath(SkPath* path, const SkPaint* paint) {
     // NOTE: This should only be used after PathTessellator handles joins properly
     return paint->getPathEffect() == NULL && path->getConvexity() == SkPath::kConvex_Convexity;
 }
@@ -413,7 +413,7 @@ void PathCache::clearGarbage() {
  * in the cache. The source path is also used to reclaim garbage when a
  * Dalvik Path object is collected.
  */
-static SkPath* getSourcePath(SkPath* path) {
+static const SkPath* getSourcePath(const SkPath* path) {
     const SkPath* sourcePath = path->getSourcePath();
     if (sourcePath && sourcePath->getGenerationID() == path->getGenerationID()) {
         return const_cast<SkPath*>(sourcePath);
@@ -421,7 +421,7 @@ static SkPath* getSourcePath(SkPath* path) {
     return path;
 }
 
-PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
+PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
     path = getSourcePath(path);
 
     PathDescription entry(kShapePath, paint);
@@ -459,7 +459,7 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     return texture;
 }
 
-void PathCache::precache(SkPath* path, SkPaint* paint) {
+void PathCache::precache(const SkPath* path, const SkPaint* paint) {
     if (!Caches::getInstance().tasks.canRunTasks()) {
         return;
     }
@@ -507,7 +507,7 @@ void PathCache::precache(SkPath* path, SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getRoundRect(float width, float height,
-        float rx, float ry, SkPaint* paint) {
+        float rx, float ry, const SkPaint* paint) {
     PathDescription entry(kShapeRoundRect, paint);
     entry.shape.roundRect.mWidth = width;
     entry.shape.roundRect.mHeight = height;
@@ -532,7 +532,7 @@ PathTexture* PathCache::getRoundRect(float width, float height,
 // Circles
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getCircle(float radius, SkPaint* paint) {
+PathTexture* PathCache::getCircle(float radius, const SkPaint* paint) {
     PathDescription entry(kShapeCircle, paint);
     entry.shape.circle.mRadius = radius;
 
@@ -552,7 +552,7 @@ PathTexture* PathCache::getCircle(float radius, SkPaint* paint) {
 // Ovals
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getOval(float width, float height, SkPaint* paint) {
+PathTexture* PathCache::getOval(float width, float height, const SkPaint* paint) {
     PathDescription entry(kShapeOval, paint);
     entry.shape.oval.mWidth = width;
     entry.shape.oval.mHeight = height;
@@ -575,7 +575,7 @@ PathTexture* PathCache::getOval(float width, float height, SkPaint* paint) {
 // Rects
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getRect(float width, float height, SkPaint* paint) {
+PathTexture* PathCache::getRect(float width, float height, const SkPaint* paint) {
     PathDescription entry(kShapeRect, paint);
     entry.shape.rect.mWidth = width;
     entry.shape.rect.mHeight = height;
@@ -599,7 +599,7 @@ PathTexture* PathCache::getRect(float width, float height, SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getArc(float width, float height,
-        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
+        float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
     PathDescription entry(kShapeArc, paint);
     entry.shape.arc.mWidth = width;
     entry.shape.arc.mHeight = height;

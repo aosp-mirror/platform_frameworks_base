@@ -114,7 +114,7 @@ void StatefulBaseRenderer::skew(float sx, float sy) {
     mSnapshot->transform->skew(sx, sy);
 }
 
-void StatefulBaseRenderer::setMatrix(SkMatrix* matrix) {
+void StatefulBaseRenderer::setMatrix(const SkMatrix* matrix) {
     if (matrix) {
         mSnapshot->transform->load(*matrix);
     } else {
@@ -126,7 +126,7 @@ void StatefulBaseRenderer::setMatrix(const Matrix4& matrix) {
     mSnapshot->transform->load(matrix);
 }
 
-void StatefulBaseRenderer::concatMatrix(SkMatrix* matrix) {
+void StatefulBaseRenderer::concatMatrix(const SkMatrix* matrix) {
     mat4 transform(*matrix);
     mSnapshot->transform->multiply(transform);
 }
@@ -151,7 +151,7 @@ bool StatefulBaseRenderer::clipRect(float left, float top, float right, float bo
     return StatefulBaseRenderer::clipPath(&path, op);
 }
 
-bool StatefulBaseRenderer::clipPath(SkPath* path, SkRegion::Op op) {
+bool StatefulBaseRenderer::clipPath(const SkPath* path, SkRegion::Op op) {
     SkMatrix transform;
     currentTransform()->copyTo(transform);
 
@@ -177,7 +177,7 @@ bool StatefulBaseRenderer::clipPath(SkPath* path, SkRegion::Op op) {
     return !mSnapshot->clipRect->isEmpty();
 }
 
-bool StatefulBaseRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
+bool StatefulBaseRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     mDirtyClip |= mSnapshot->clipRegionTransformed(*region, op);
     return !mSnapshot->clipRect->isEmpty();
 }
