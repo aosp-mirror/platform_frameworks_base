@@ -52,6 +52,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	# RenderThread stuff
 	LOCAL_SRC_FILES += \
 		renderthread/CanvasContext.cpp \
+		renderthread/RenderProxy.cpp \
 		renderthread/RenderTask.cpp \
 		renderthread/RenderThread.cpp
 
