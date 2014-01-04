@@ -1892,45 +1892,6 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * Sets the selected item and positions the selection y pixels from the top edge
-     * of the ListView. (If in touch mode, the item will not be selected but it will
-     * still be positioned appropriately.)
-     *
-     * @param position Index (starting at 0) of the data item to be selected.
-     * @param y The distance from the top edge of the ListView (plus padding) that the
-     *        item will be positioned.
-     */
-    public void setSelectionFromTop(int position, int y) {
-        if (mAdapter == null) {
-            return;
-        }
-
-        if (!isInTouchMode()) {
-            position = lookForSelectablePosition(position, true);
-            if (position >= 0) {
-                setNextSelectedPositionInt(position);
-            }
-        } else {
-            mResurrectToPosition = position;
-        }
-
-        if (position >= 0) {
-            mLayoutMode = LAYOUT_SPECIFIC;
-            mSpecificTop = mListPadding.top + y;
-
-            if (mNeedSync) {
-                mSyncPosition = position;
-                mSyncRowId = mAdapter.getItemId(position);
-            }
-
-            if (mPositionScroller != null) {
-                mPositionScroller.stop();
-            }
-            requestLayout();
-        }
-    }
-
-    /**
      * Makes the item at the supplied position selected.
      * 
      * @param position the position of the item to select
@@ -3743,6 +3704,84 @@ public class ListView extends AbsListView {
             }
         }
         return new long[0];
+    }
+
+    @Override
+    int getHeightForPosition(int position) {
+        final int height = super.getHeightForPosition(position);
+        if (shouldAdjustHeightForDivider(position)) {
+            return height + mDividerHeight;
+        }
+        return height;
+    }
+
+    private boolean shouldAdjustHeightForDivider(int itemIndex) {
+        final int dividerHeight = mDividerHeight;
+        final Drawable overscrollHeader = mOverScrollHeader;
+        final Drawable overscrollFooter = mOverScrollFooter;
+        final boolean drawOverscrollHeader = overscrollHeader != null;
+        final boolean drawOverscrollFooter = overscrollFooter != null;
+        final boolean drawDividers = dividerHeight > 0 && mDivider != null;
+
+        if (drawDividers) {
+            final boolean fillForMissingDividers = isOpaque() && !super.isOpaque();
+            final int itemCount = mItemCount;
+            final int headerCount = mHeaderViewInfos.size();
+            final int footerLimit = (itemCount - mFooterViewInfos.size());
+            final boolean isHeader = (itemIndex < headerCount);
+            final boolean isFooter = (itemIndex >= footerLimit);
+            final boolean headerDividers = mHeaderDividersEnabled;
+            final boolean footerDividers = mFooterDividersEnabled;
+            if ((headerDividers || !isHeader) && (footerDividers || !isFooter)) {
+                final ListAdapter adapter = mAdapter;
+                if (!mStackFromBottom) {
+                    final boolean isLastItem = (itemIndex == (itemCount - 1));
+                    if (!drawOverscrollFooter || !isLastItem) {
+                        final int nextIndex = itemIndex + 1;
+                        // Draw dividers between enabled items, headers
+                        // and/or footers when enabled and requested, and
+                        // after the last enabled item.
+                        if (adapter.isEnabled(itemIndex) && (headerDividers || !isHeader
+                                && (nextIndex >= headerCount)) && (isLastItem
+                                || adapter.isEnabled(nextIndex) && (footerDividers || !isFooter
+                                                && (nextIndex < footerLimit)))) {
+                            return true;
+                        } else if (fillForMissingDividers) {
+                            return true;
+                        }
+                    }
+                } else {
+                    final int start = drawOverscrollHeader ? 1 : 0;
+                    final boolean isFirstItem = (itemIndex == start);
+                    if (!isFirstItem) {
+                        final int previousIndex = (itemIndex - 1);
+                        // Draw dividers between enabled items, headers
+                        // and/or footers when enabled and requested, and
+                        // before the first enabled item.
+                        if (adapter.isEnabled(itemIndex) && (headerDividers || !isHeader
+                                && (previousIndex >= headerCount)) && (isFirstItem ||
+                                adapter.isEnabled(previousIndex) && (footerDividers || !isFooter
+                                        && (previousIndex < footerLimit)))) {
+                            return true;
+                        } else if (fillForMissingDividers) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public int getRowForPosition(int position) {
+        return position;
+    }
+
+    @Override
+    public int getFirstPositionForRow(int row) {
+        return row;
     }
 
     @Override
