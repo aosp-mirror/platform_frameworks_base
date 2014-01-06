@@ -1129,7 +1129,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Dokončiť akciu pomocou aplikácie"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskú aplikáciu"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použiť ako predvolené nastavenie pre túto akciu."</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vymazať predvolené nastavenia v sekcii Nastavenia systému &gt; Aplikácie &gt; Prevzaté položky."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vymazať predvolené nastavenia v sekcii Nastavenia systému &gt; Aplikácie &gt; Stiahnuté položky."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Zvoľte akciu"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Zvoľte aplikáciu pre zariadenie USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Túto akciu nemôžu vykonávať žiadne aplikácie."</string>
@@ -1150,7 +1150,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"Pôvodne bola spustená aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Prispôsobiť veľkosť"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vždy zobraziť"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Povoľte to znova v sekcii Nastavenia systému &gt; Aplikácie &gt; Prevzaté súbory."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Povoľte to znova v sekcii Nastavenia systému &gt; Aplikácie &gt; Stiahnuté súbory."</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila svoje vlastné vynútené pravidlá StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil svoje vlastné vynútené pravidlá StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Prebieha inovácia systému Android..."</string>
