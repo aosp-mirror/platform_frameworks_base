@@ -13187,6 +13187,7 @@ package android.media {
     ctor public MediaRecorder();
     method public static final int getAudioSourceMax();
     method public int getMaxAmplitude() throws java.lang.IllegalStateException;
+    method public android.view.Surface getSurface();
     method public void prepare() throws java.io.IOException, java.lang.IllegalStateException;
     method public void release();
     method public void reset();
@@ -13271,6 +13272,7 @@ package android.media {
   public final class MediaRecorder.VideoSource {
     field public static final int CAMERA = 1; // 0x1
     field public static final int DEFAULT = 0; // 0x0
+    field public static final int SURFACE = 2; // 0x2
   }
 
   public class MediaRouter {

@@ -124,6 +124,18 @@ public class MediaRecorder
     public native void setCamera(Camera c);
 
     /**
+     * Gets the surface to record from when using SURFACE video source.
+     * <p>
+     * Should only be called after prepare(). Frames rendered before start()
+     * will be discarded.
+     * </p>
+     * @throws IllegalStateException if it is called before prepare(), after
+     * stop() or is called when VideoSource is not set to SURFACE.
+     * @see android.media.MediaRecorder.VideoSource
+     */
+    public native Surface getSurface();
+
+    /**
      * Sets a Surface to show a preview of recorded media (video). Calls this
      * before prepare() to make sure that the desirable preview display is
      * set. If {@link #setCamera(Camera)} is used and the surface has been
@@ -225,10 +237,23 @@ public class MediaRecorder
        */
         private VideoSource() {}
         public static final int DEFAULT = 0;
-        /** Camera video source */
+        /** Camera video source
+         * <p>
+         * Using android.hardware.Camera as video source.
+         * </p>
+         */
         public static final int CAMERA = 1;
-        /** @hide */
-        public static final int GRALLOC_BUFFER = 2;
+        /** Surface video source
+         * <p>
+         * Using a Surface as video source.
+         * </p><p>
+         * This flag must be used when recording from an
+         * android.hardware.camera2.CameraDevice source.
+         * </p><p>
+         * When using this video source type, use {@link MediaRecorder#getSurface()}
+         * to retrieve the surface created by MediaRecorder.
+         */
+        public static final int SURFACE = 2;
     }
 
     /**
