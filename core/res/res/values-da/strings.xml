@@ -551,8 +551,8 @@
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"start CDMA-opsætning af tabletcomputeren direkte"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"start CDMA-telefonopsætning direkte"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Tillader, at appen kan starte CDMA-levering. Ondsindede apps kan starte unødvendig CDMA-levering."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"kontroller meddelelser om placeringsopdatering"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Tillader, at appen kan aktivere/deaktivere meddelelser om placeringsopdatering fra senderen. Anvendes ikke i almindelige apps."</string>
+    <string name="permlab_locationUpdates" msgid="7785408253364335740">"kontroller underretninger om placeringsopdatering"</string>
+    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Tillader, at appen kan aktivere/deaktivere underretninger om placeringsopdatering fra senderen. Anvendes ikke i almindelige apps."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"egenskaber for adgangskontrol"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillader, at appen kan få læse/skrive-adgang til egenskaber, der er uploadet af kontroltjenesten. Anvendes ikke af almindelige apps."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"vælg widgets"</string>
