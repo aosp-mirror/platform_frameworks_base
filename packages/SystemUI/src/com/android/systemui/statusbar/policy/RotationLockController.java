@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.UserHandle;
 
 import com.android.internal.view.RotationPolicy;
@@ -42,42 +43,32 @@ public final class RotationLockController {
 
     public RotationLockController(Context context) {
         mContext = context;
-        notifyChanged();
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            RotationPolicy.registerRotationPolicyListener(mContext,
-                    mRotationPolicyListener, UserHandle.USER_ALL);
-        }
+        RotationPolicy.registerRotationPolicyListener(mContext,
+                mRotationPolicyListener, UserHandle.USER_ALL);
     }
 
     public void addRotationLockControllerCallback(RotationLockControllerCallback callback) {
         mCallbacks.add(callback);
     }
 
+    public int getRotationLockOrientation() {
+        return RotationPolicy.getRotationLockOrientation(mContext);
+    }
+
     public boolean isRotationLocked() {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            return RotationPolicy.isRotationLocked(mContext);
-        }
-        return false;
+        return RotationPolicy.isRotationLocked(mContext);
     }
 
     public void setRotationLocked(boolean locked) {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            RotationPolicy.setRotationLock(mContext, locked);
-        }
+        RotationPolicy.setRotationLock(mContext, locked);
     }
 
     public boolean isRotationLockAffordanceVisible() {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            return RotationPolicy.isRotationLockToggleVisible(mContext);
-        }
-        return false;
+        return RotationPolicy.isRotationLockToggleVisible(mContext);
     }
 
     public void release() {
-        if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
-            RotationPolicy.unregisterRotationPolicyListener(mContext,
-                    mRotationPolicyListener);
-        }
+        RotationPolicy.unregisterRotationPolicyListener(mContext, mRotationPolicyListener);
     }
 
     private void notifyChanged() {

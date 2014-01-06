@@ -464,6 +464,10 @@
     <string name="quick_settings_rotation_unlocked_label">Auto Rotate</string>
     <!-- QuickSettings: Rotation Locked [CHAR LIMIT=NONE] -->
     <string name="quick_settings_rotation_locked_label">Rotation Locked</string>
+    <!-- QuickSettings: Locked to Portrait [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_rotation_locked_portrait_label">Locked to Portrait</string>
+    <!-- QuickSettings: Locked to Landscape [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_rotation_locked_landscape_label">Locked to Landscape</string>
     <!-- QuickSettings: IME [CHAR LIMIT=NONE] -->
     <string name="quick_settings_ime_label">Input Method</string>
     <!-- QuickSettings: Location [CHAR LIMIT=NONE] -->

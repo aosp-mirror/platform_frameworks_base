@@ -50,7 +50,7 @@
     <!-- When true, show 1/2G networks as 3G. -->
     <bool name="config_showMin3G">false</bool>
 
-    <!-- Show rotation lock button in phone-style notification panel. -->
+    <!-- Show rotation lock toggle in System UI-->
     <bool name="config_showRotationLock">true</bool>
 
     <!-- Amount of time to hold off before showing the search panel when the user presses home -->
@@ -83,9 +83,6 @@
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
-
-    <!-- Whether rotation lock shows up in quick settings or not -->
-    <bool name="quick_settings_show_rotation_lock">false</bool>
 
     <!-- Whether or not the RSSI tile is capitalized or not. -->
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>

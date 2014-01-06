@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
@@ -409,6 +410,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private State mSslCaCertWarningState = new State();
 
     private RotationLockController mRotationLockController;
+    private int mRotationLockedLabel;
 
     public QuickSettingsModel(Context context) {
         mContext = context;
@@ -919,6 +921,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRotationLockTile = view;
         mRotationLockCallback = cb;
         mRotationLockController = rotationLockController;
+        final int lockOrientation = mRotationLockController.getRotationLockOrientation();
+        mRotationLockedLabel = lockOrientation == Configuration.ORIENTATION_PORTRAIT
+                    ? R.string.quick_settings_rotation_locked_portrait_label
+                    : lockOrientation == Configuration.ORIENTATION_LANDSCAPE
+                    ? R.string.quick_settings_rotation_locked_landscape_label
+                    : R.string.quick_settings_rotation_locked_label;
         onRotationLockChanged();
     }
     void onRotationLockChanged() {
@@ -933,7 +941,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 ? R.drawable.ic_qs_rotation_locked
                 : R.drawable.ic_qs_auto_rotate;
         mRotationLockState.label = rotationLocked
-                ? mContext.getString(R.string.quick_settings_rotation_locked_label)
+                ? mContext.getString(mRotationLockedLabel)
                 : mContext.getString(R.string.quick_settings_rotation_unlocked_label);
         mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
     }
