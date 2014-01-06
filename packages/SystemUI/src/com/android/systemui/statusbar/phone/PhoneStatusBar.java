@@ -534,7 +534,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mBatteryController = new BatteryController(mContext);
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
-        mRotationLockController = new RotationLockController(mContext);
+        if (mContext.getResources().getBoolean(R.bool.config_showRotationLock)
+                || QuickSettings.DEBUG_GONE_TILES) {
+            mRotationLockController = new RotationLockController(mContext);
+        }
         final SignalClusterView signalCluster =
                 (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
 

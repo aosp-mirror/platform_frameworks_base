@@ -176,7 +176,9 @@ class QuickSettings {
         bluetoothController.addStateChangedCallback(mModel);
         batteryController.addStateChangedCallback(mModel);
         locationController.addSettingsChangedCallback(mModel);
-        rotationLockController.addRotationLockControllerCallback(mModel);
+        if (rotationLockController != null) {
+            rotationLockController.addRotationLockControllerCallback(mModel);
+        }
     }
 
     private void queryForSslCaCerts() {
@@ -503,8 +505,7 @@ class QuickSettings {
         }
 
         // Rotation Lock
-        if (mContext.getResources().getBoolean(R.bool.quick_settings_show_rotation_lock)
-                || DEBUG_GONE_TILES) {
+        if (mRotationLockController != null) {
             final QuickSettingsBasicTile rotationLockTile
                     = new QuickSettingsBasicTile(mContext);
             rotationLockTile.setOnClickListener(new View.OnClickListener() {
