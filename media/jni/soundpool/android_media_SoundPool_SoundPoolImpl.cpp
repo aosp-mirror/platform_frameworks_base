@@ -34,11 +34,11 @@ static struct fields_t {
 } fields;
 
 static inline SoundPool* MusterSoundPool(JNIEnv *env, jobject thiz) {
-    return (SoundPool*)env->GetIntField(thiz, fields.mNativeContext);
+    return (SoundPool*)env->GetLongField(thiz, fields.mNativeContext);
 }
 
 // ----------------------------------------------------------------------------
-static int
+static jint
 android_media_SoundPool_SoundPoolImpl_load_URL(JNIEnv *env, jobject thiz, jstring path, jint priority)
 {
     ALOGV("android_media_SoundPool_SoundPoolImpl_load_URL");
@@ -50,29 +50,29 @@ android_media_SoundPool_SoundPoolImpl_load_URL(JNIEnv *env, jobject thiz, jstrin
     const char* s = env->GetStringUTFChars(path, NULL);
     int id = ap->load(s, priority);
     env->ReleaseStringUTFChars(path, s);
-    return id;
+    return (jint) id;
 }
 
-static int
+static jint
 android_media_SoundPool_SoundPoolImpl_load_FD(JNIEnv *env, jobject thiz, jobject fileDescriptor,
         jlong offset, jlong length, jint priority)
 {
     ALOGV("android_media_SoundPool_SoundPoolImpl_load_FD");
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap == NULL) return 0;
-    return ap->load(jniGetFDFromFileDescriptor(env, fileDescriptor),
+    return (jint) ap->load(jniGetFDFromFileDescriptor(env, fileDescriptor),
             int64_t(offset), int64_t(length), int(priority));
 }
 
-static bool
+static jboolean
 android_media_SoundPool_SoundPoolImpl_unload(JNIEnv *env, jobject thiz, jint sampleID) {
     ALOGV("android_media_SoundPool_SoundPoolImpl_unload\n");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return 0;
-    return ap->unload(sampleID);
+    if (ap == NULL) return JNI_FALSE;
+    return ap->unload(sampleID) ? JNI_TRUE : JNI_FALSE;
 }
 
-static int
+static jint
 android_media_SoundPool_SoundPoolImpl_play(JNIEnv *env, jobject thiz, jint sampleID,
         jfloat leftVolume, jfloat rightVolume, jint priority, jint loop,
         jfloat rate)
@@ -80,7 +80,7 @@ android_media_SoundPool_SoundPoolImpl_play(JNIEnv *env, jobject thiz, jint sampl
     ALOGV("android_media_SoundPool_SoundPoolImpl_play\n");
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap == NULL) return 0;
-    return ap->play(sampleID, leftVolume, rightVolume, priority, loop, rate);
+    return (jint) ap->play(sampleID, leftVolume, rightVolume, priority, loop, rate);
 }
 
 static void
@@ -130,22 +130,22 @@ android_media_SoundPool_SoundPoolImpl_stop(JNIEnv *env, jobject thiz, jint chann
 
 static void
 android_media_SoundPool_SoundPoolImpl_setVolume(JNIEnv *env, jobject thiz, jint channelID,
-        float leftVolume, float rightVolume)
+        jfloat leftVolume, jfloat rightVolume)
 {
     ALOGV("android_media_SoundPool_SoundPoolImpl_setVolume");
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap == NULL) return;
-    ap->setVolume(channelID, leftVolume, rightVolume);
+    ap->setVolume(channelID, (float) leftVolume, (float) rightVolume);
 }
 
 static void
 android_media_SoundPool_SoundPoolImpl_setPriority(JNIEnv *env, jobject thiz, jint channelID,
-        int priority)
+        jint priority)
 {
     ALOGV("android_media_SoundPool_SoundPoolImpl_setPriority");
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap == NULL) return;
-    ap->setPriority(channelID, priority);
+    ap->setPriority(channelID, (int) priority);
 }
 
 static void
@@ -160,12 +160,12 @@ android_media_SoundPool_SoundPoolImpl_setLoop(JNIEnv *env, jobject thiz, jint ch
 
 static void
 android_media_SoundPool_SoundPoolImpl_setRate(JNIEnv *env, jobject thiz, jint channelID,
-        float rate)
+       jfloat rate)
 {
     ALOGV("android_media_SoundPool_SoundPoolImpl_setRate");
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap == NULL) return;
-    ap->setRate(channelID, rate);
+    ap->setRate(channelID, (float) rate);
 }
 
 static void android_media_callback(SoundPoolEvent event, SoundPool* soundPool, void* user)
@@ -185,7 +185,7 @@ android_media_SoundPool_SoundPoolImpl_native_setup(JNIEnv *env, jobject thiz, jo
     }
 
     // save pointer to SoundPool C++ object in opaque field in Java object
-    env->SetIntField(thiz, fields.mNativeContext, (int)ap);
+    env->SetLongField(thiz, fields.mNativeContext, (jlong) ap);
 
     // set callback with weak reference
     jobject globalWeakRef = env->NewGlobalRef(weakRef);
@@ -208,7 +208,7 @@ android_media_SoundPool_SoundPoolImpl_release(JNIEnv *env, jobject thiz)
 
         // clear callback and native context
         ap->setCallback(NULL, NULL);
-        env->SetIntField(thiz, fields.mNativeContext, 0);
+        env->SetLongField(thiz, fields.mNativeContext, 0);
         delete ap;
     }
 }
@@ -299,7 +299,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
         goto bail;
     }
 
-    fields.mNativeContext = env->GetFieldID(clazz, "mNativeContext", "I");
+    fields.mNativeContext = env->GetFieldID(clazz, "mNativeContext", "J");
     if (fields.mNativeContext == NULL) {
         ALOGE("Can't find SoundPoolImpl.mNativeContext");
         goto bail;

@@ -88,7 +88,7 @@ class JavaDataSourceBridge : public DataSource {
         env->GetByteArrayRegion(byteArrayObj, 0, size, (jbyte*) buffer);
         env->DeleteLocalRef(byteArrayObj);
         if (env->ExceptionCheck()) {
-            ALOGW("Exception occurred while reading %d at %lld", size, offset);
+            ALOGW("Exception occurred while reading %zu at %lld", size, offset);
             LOGW_EX(env);
             env->ExceptionClear();
             return -1;
@@ -198,7 +198,7 @@ status_t JMediaExtractor::readSampleData(
 
     void *dst = env->GetDirectBufferAddress(byteBuf);
 
-    jlong dstSize;
+    size_t dstSize;
     jbyteArray byteArray = NULL;
 
     if (dst == NULL) {
@@ -219,9 +219,9 @@ status_t JMediaExtractor::readSampleData(
         jboolean isCopy;
         dst = env->GetByteArrayElements(byteArray, &isCopy);
 
-        dstSize = env->GetArrayLength(byteArray);
+        dstSize = (size_t) env->GetArrayLength(byteArray);
     } else {
-        dstSize = env->GetDirectBufferCapacity(byteBuf);
+        dstSize = (size_t) env->GetDirectBufferCapacity(byteBuf);
     }
 
     if (dstSize < offset) {
@@ -299,7 +299,7 @@ using namespace android;
 static sp<JMediaExtractor> setMediaExtractor(
         JNIEnv *env, jobject thiz, const sp<JMediaExtractor> &extractor) {
     sp<JMediaExtractor> old =
-        (JMediaExtractor *)env->GetIntField(thiz, gFields.context);
+        (JMediaExtractor *)env->GetLongField(thiz, gFields.context);
 
     if (extractor != NULL) {
         extractor->incStrong(thiz);
@@ -307,13 +307,13 @@ static sp<JMediaExtractor> setMediaExtractor(
     if (old != NULL) {
         old->decStrong(thiz);
     }
-    env->SetIntField(thiz, gFields.context, (int)extractor.get());
+    env->SetLongField(thiz, gFields.context, (jlong)extractor.get());
 
     return old;
 }
 
 static sp<JMediaExtractor> getMediaExtractor(JNIEnv *env, jobject thiz) {
-    return (JMediaExtractor *)env->GetIntField(thiz, gFields.context);
+    return (JMediaExtractor *)env->GetLongField(thiz, gFields.context);
 }
 
 static void android_media_MediaExtractor_release(JNIEnv *env, jobject thiz) {
@@ -329,7 +329,7 @@ static jint android_media_MediaExtractor_getTrackCount(
         return -1;
     }
 
-    return extractor->countTracks();
+    return (jint) extractor->countTracks();
 }
 
 static jobject android_media_MediaExtractor_getTrackFormatNative(
@@ -430,19 +430,19 @@ static jboolean android_media_MediaExtractor_advance(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return false;
+        return JNI_FALSE;
     }
 
     status_t err = extractor->advance();
 
     if (err == ERROR_END_OF_STREAM) {
-        return false;
+        return JNI_FALSE;
     } else if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return false;
+        return JNI_FALSE;
     }
 
-    return true;
+    return JNI_TRUE;
 }
 
 static jint android_media_MediaExtractor_readSampleData(
@@ -461,10 +461,10 @@ static jint android_media_MediaExtractor_readSampleData(
         return -1;
     } else if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return false;
+        return -1;
     }
 
-    return sampleSize;
+    return (jint) sampleSize;
 }
 
 static jint android_media_MediaExtractor_getSampleTrackIndex(
@@ -483,10 +483,10 @@ static jint android_media_MediaExtractor_getSampleTrackIndex(
         return -1;
     } else if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return false;
+        return -1;
     }
 
-    return trackIndex;
+    return (jint) trackIndex;
 }
 
 static jlong android_media_MediaExtractor_getSampleTime(
@@ -505,10 +505,10 @@ static jlong android_media_MediaExtractor_getSampleTime(
         return -1ll;
     } else if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return false;
+        return -1ll;
     }
 
-    return sampleTimeUs;
+    return (jlong) sampleTimeUs;
 }
 
 static jint android_media_MediaExtractor_getSampleFlags(
@@ -517,20 +517,20 @@ static jint android_media_MediaExtractor_getSampleFlags(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return -1ll;
+        return -1;
     }
 
     uint32_t sampleFlags;
     status_t err = extractor->getSampleFlags(&sampleFlags);
 
     if (err == ERROR_END_OF_STREAM) {
-        return -1ll;
+        return -1;
     } else if (err != OK) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return false;
+        return -1;
     }
 
-    return sampleFlags;
+    return (jint) sampleFlags;
 }
 
 static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
@@ -539,27 +539,27 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return -1ll;
+        return JNI_FALSE;
     }
 
     sp<MetaData> meta;
     status_t err = extractor->getSampleMeta(&meta);
 
     if (err != OK) {
-        return false;
+        return JNI_FALSE;
     }
 
     uint32_t type;
     const void *data;
     size_t size;
     if (!meta->findData(kKeyEncryptedSizes, &type, &data, &size)) {
-        return false;
+        return JNI_FALSE;
     }
 
     size_t numSubSamples = size / sizeof(size_t);
 
     if (numSubSamples == 0) {
-        return false;
+        return JNI_FALSE;
     }
 
     jintArray numBytesOfEncryptedDataObj = env->NewIntArray(numSubSamples);
@@ -576,7 +576,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
     if (meta->findData(kKeyPlainSizes, &type, &data, &size)) {
         if (size != encSize) {
             // The two must be of the same length.
-            return false;
+            return JNI_FALSE;
         }
 
         numBytesOfPlainDataObj = env->NewIntArray(numSubSamples);
@@ -593,7 +593,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
     if (meta->findData(kKeyCryptoKey, &type, &data, &size)) {
         if (size != 16) {
             // Keys must be 16 bytes in length.
-            return false;
+            return JNI_FALSE;
         }
 
         keyObj = env->NewByteArray(size);
@@ -608,7 +608,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
     if (meta->findData(kKeyCryptoIV, &type, &data, &size)) {
         if (size != 16) {
             // IVs must be 16 bytes in length.
-            return false;
+            return JNI_FALSE;
         }
 
         ivObj = env->NewByteArray(size);
@@ -634,14 +634,14 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
             ivObj,
             mode);
 
-    return true;
+    return JNI_TRUE;
 }
 
 static void android_media_MediaExtractor_native_init(JNIEnv *env) {
     jclass clazz = env->FindClass("android/media/MediaExtractor");
     CHECK(clazz != NULL);
 
-    gFields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    gFields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     CHECK(gFields.context != NULL);
 
     clazz = env->FindClass("android/media/MediaCodec$CryptoInfo");
@@ -770,7 +770,7 @@ static jlong android_media_MediaExtractor_getCachedDurationUs(
         return -1ll;
     }
 
-    return cachedDurationUs;
+    return (jlong) cachedDurationUs;
 }
 
 static jboolean android_media_MediaExtractor_hasCacheReachedEOS(
@@ -779,16 +779,16 @@ static jboolean android_media_MediaExtractor_hasCacheReachedEOS(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return true;
+        return JNI_TRUE;
     }
 
     int64_t cachedDurationUs;
     bool eos;
     if (!extractor->getCachedDuration(&cachedDurationUs, &eos)) {
-        return true;
+        return JNI_TRUE;
     }
 
-    return eos;
+    return eos ? JNI_TRUE : JNI_FALSE;
 }
 
 static void android_media_MediaExtractor_native_finalize(

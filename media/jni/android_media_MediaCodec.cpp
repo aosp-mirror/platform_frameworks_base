@@ -328,20 +328,20 @@ using namespace android;
 
 static sp<JMediaCodec> setMediaCodec(
         JNIEnv *env, jobject thiz, const sp<JMediaCodec> &codec) {
-    sp<JMediaCodec> old = (JMediaCodec *)env->GetIntField(thiz, gFields.context);
+    sp<JMediaCodec> old = (JMediaCodec *)env->GetLongField(thiz, gFields.context);
     if (codec != NULL) {
         codec->incStrong(thiz);
     }
     if (old != NULL) {
         old->decStrong(thiz);
     }
-    env->SetIntField(thiz, gFields.context, (int)codec.get());
+    env->SetLongField(thiz, gFields.context, (jlong)codec.get());
 
     return old;
 }
 
 static sp<JMediaCodec> getMediaCodec(JNIEnv *env, jobject thiz) {
-    return (JMediaCodec *)env->GetIntField(thiz, gFields.context);
+    return (JMediaCodec *)env->GetLongField(thiz, gFields.context);
 }
 
 static void android_media_MediaCodec_release(JNIEnv *env, jobject thiz) {
@@ -710,7 +710,7 @@ static jint android_media_MediaCodec_dequeueInputBuffer(
     status_t err = codec->dequeueInputBuffer(&index, timeoutUs);
 
     if (err == OK) {
-        return index;
+        return (jint) index;
     }
 
     return throwExceptionAsNecessary(env, err);
@@ -732,7 +732,7 @@ static jint android_media_MediaCodec_dequeueOutputBuffer(
             env, bufferInfo, &index, timeoutUs);
 
     if (err == OK) {
-        return index;
+        return (jint) index;
     }
 
     return throwExceptionAsNecessary(env, err);
@@ -885,7 +885,7 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
             env, env->FindClass("android/media/MediaCodec"));
     CHECK(clazz.get() != NULL);
 
-    gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "I");
+    gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "J");
     CHECK(gFields.context != NULL);
 
     clazz.reset(env->FindClass("android/media/MediaCodec$CryptoInfo"));

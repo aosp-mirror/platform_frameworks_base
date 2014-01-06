@@ -191,9 +191,9 @@ public class FaceDetector {
     native private void fft_get_face(Face face, int i);
     native private void fft_destroy();
 
-    private int     mFD;
-    private int     mSDK;
-    private int     mDCR;
+    private long    mFD;
+    private long    mSDK;
+    private long    mDCR;
     private int     mWidth;
     private int     mHeight;
     private int     mMaxFaces;    
