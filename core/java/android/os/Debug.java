@@ -578,7 +578,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * tracing.
      */
     public static void startMethodTracing() {
-        VMDebug.startMethodTracing(DEFAULT_TRACE_FILE_PATH, 0, 0);
+        VMDebug.startMethodTracing(DEFAULT_TRACE_FILE_PATH, 0, 0, false, 0);
     }
 
     /**
@@ -589,7 +589,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * information about reading trace files.
      *
      * @param traceName Name for the trace log file to create.
-     * If no name argument is given, this value defaults to "/sdcard/dmtrace.trace".
+     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
      * If the files already exist, they will be truncated.
      * If the trace file given does not end in ".trace", it will be appended for you.
      */
@@ -604,7 +604,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
        href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
      * information about reading trace files.
      * @param traceName    Name for the trace log file to create.
-     * If no name argument is given, this value defaults to "/sdcard/dmtrace.trace".
+     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
      * If the files already exist, they will be truncated.
      * If the trace file given does not end in ".trace", it will be appended for you.
      *
@@ -627,26 +627,54 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * in relative terms (e.g. was run #1 faster than run #2).  The times
      * for native methods will not change, so don't try to use this to
      * compare the performance of interpreted and native implementations of the
-     * same method.  As an alternative, consider using "native" tracing
-     * in the emulator via {@link #startNativeTracing()}.
+     * same method.  As an alternative, consider using sampling-based method
+     * tracing via {@link #startMethodTracingSampling(String, int, int)} or
+     * "native" tracing in the emulator via {@link #startNativeTracing()}.
      * </p>
      *
      * @param traceName    Name for the trace log file to create.
-     * If no name argument is given, this value defaults to "/sdcard/dmtrace.trace".
+     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
      * If the files already exist, they will be truncated.
      * If the trace file given does not end in ".trace", it will be appended for you.
      * @param bufferSize    The maximum amount of trace data we gather. If not given, it defaults to 8MB.
+     * @param flags    Flags to control method tracing. The only one that is currently defined is {@link #TRACE_COUNT_ALLOCS}.
      */
     public static void startMethodTracing(String traceName, int bufferSize,
         int flags) {
+        VMDebug.startMethodTracing(fixTraceName(traceName), bufferSize, flags, false, 0);
+    }
 
-        String pathName = traceName;
-        if (pathName.charAt(0) != '/')
-            pathName = DEFAULT_TRACE_PATH_PREFIX + pathName;
-        if (!pathName.endsWith(DEFAULT_TRACE_EXTENSION))
-            pathName = pathName + DEFAULT_TRACE_EXTENSION;
+    /**
+     * Start sampling-based method tracing, specifying the trace log file name,
+     * the buffer size, and the sampling interval. The trace files will be put
+     * under "/sdcard" unless an absolute path is given. See <a
+       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a>
+     * for information about reading trace files.
+     *
+     * @param traceName    Name for the trace log file to create.
+     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
+     * If the files already exist, they will be truncated.
+     * If the trace file given does not end in ".trace", it will be appended for you.
+     * @param bufferSize    The maximum amount of trace data we gather. If not given, it defaults to 8MB.
+     * @param intervalUs    The amount of time between each sample in microseconds.
+     */
+    public static void startMethodTracingSampling(String traceName,
+        int bufferSize, int intervalUs) {
+        VMDebug.startMethodTracing(fixTraceName(traceName), bufferSize, 0, true, intervalUs);
+    }
 
-        VMDebug.startMethodTracing(pathName, bufferSize, flags);
+    /**
+     * Formats name of trace log file for method tracing.
+     */
+    private static String fixTraceName(String traceName) {
+        if (traceName == null)
+            traceName = DEFAULT_TRACE_FILE_PATH;
+        if (traceName.charAt(0) != '/')
+            traceName = DEFAULT_TRACE_PATH_PREFIX + traceName;
+        if (!traceName.endsWith(DEFAULT_TRACE_EXTENSION))
+            traceName = traceName + DEFAULT_TRACE_EXTENSION;
+
+        return traceName;
     }
 
     /**
@@ -660,7 +688,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      */
     public static void startMethodTracing(String traceName, FileDescriptor fd,
         int bufferSize, int flags) {
-        VMDebug.startMethodTracing(traceName, fd, bufferSize, flags);
+        VMDebug.startMethodTracing(traceName, fd, bufferSize, flags, false, 0);
     }
 
     /**
