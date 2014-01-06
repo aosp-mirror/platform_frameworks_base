@@ -363,8 +363,6 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     @Override
     public Parcelable onSaveInstanceState() {
-        // Force our ancestor class to save its state
-        setFreezesText(true);
         Parcelable superState = super.onSaveInstanceState();
 
         SavedState ss = new SavedState(superState);
