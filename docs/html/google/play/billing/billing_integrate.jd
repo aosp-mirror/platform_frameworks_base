@@ -174,7 +174,7 @@ Products</a> training class and associated sample.</p>
 <h3 id="QueryDetails">Querying for Items Available for Purchase</h3>
 <p>In your application, you can query the item details from Google Play using the In-app Billing Version 3 API. To pass a request to the In-app Billing service, first create a {@link android.os.Bundle}  that contains a String {@link java.util.ArrayList} of product IDs with key "ITEM_ID_LIST", where each string is a product ID for an purchasable item.</p>
 <pre>
-ArrayList<String> skuList = new ArrayList<String>();
+ArrayList&lt;String&gt; skuList = new ArrayList&lt;String&gt; ();
 skuList.add("premiumUpgrade");
 skuList.add("gas");
 Bundle querySkus = new Bundle();
@@ -196,7 +196,7 @@ Bundle skuDetails = mService.getSkuDetails(3,
 <pre>
 int response = skuDetails.getInt("RESPONSE_CODE");
 if (response == 0) {
-   ArrayList<String> responseList 
+   ArrayList&lt;String&gt; responseList
       = skuDetails.getStringArrayList("DETAILS_LIST");
    
    for (String thisResponse : responseList) {
@@ -282,11 +282,11 @@ Bundle ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
 <pre>
 int response = ownedItems.getInt("RESPONSE_CODE");
 if (response == 0) {
-   ArrayList<String> ownedSkus = 
+   ArrayList&lt;String&gt; ownedSkus =
       ownedItems.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
-   ArrayList<String> purchaseDataList = 
+   ArrayList&lt;String&gt;  purchaseDataList =
       ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
-   ArrayList<String> signatureList = 
+   ArrayList&lt;String&gt;  signatureList =
       ownedItems.getStringArrayList("INAPP_DATA_SIGNATURE");
    String continuationToken = 
       ownedItems.getString("INAPP_CONTINUATION_TOKEN");
