@@ -17,14 +17,11 @@
 package android.graphics.drawable;
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.Shader.TileMode;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -70,15 +67,11 @@ public class RevealDrawable extends LayerDrawable {
     /** Target density, used to scale density-independent pixels. */
     private float mDensity = 1.0f;
 
-    // Masking layer.
-    private Bitmap mMaskBitmap;
-    private Canvas mMaskCanvas;
-    private Paint mMaskPaint;
+    /** Paint used to control appearance of ripples. */
+    private Paint mRipplePaint;
 
-    // Reveal layer.
-    private Bitmap mRevealBitmap;
-    private Canvas mRevealCanvas;
-    private Paint mRevealPaint;
+    /** Paint used to control reveal layer masking. */
+    private Paint mMaskingPaint;
 
     /**
      * Create a new reveal drawable with the specified list of layers. At least
@@ -232,61 +225,61 @@ public class RevealDrawable extends LayerDrawable {
 
     @Override
     public void draw(Canvas canvas) {
-        final Drawable lower = getDrawable(0);
-        lower.draw(canvas);
-
-        // No ripples? No problem.
-        if (mActiveRipples == null || mActiveRipples.isEmpty()) {
+        final int layerCount = getNumberOfLayers();
+        if (layerCount == 0) {
             return;
         }
 
-        // Ensure we have a mask buffer.
+        getDrawable(0).draw(canvas);
+
+        final ArrayList<Ripple> activeRipples = mActiveRipples;
+        if (layerCount == 1 || activeRipples == null || activeRipples.isEmpty()) {
+            // Nothing to reveal, we're done here.
+            return;
+        }
+
         final Rect bounds = getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
-        if (mMaskBitmap == null) {
-            mMaskBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8);
-            mMaskCanvas = new Canvas(mMaskBitmap);
-            mMaskPaint = new Paint();
-            mMaskPaint.setAntiAlias(true);
-        } else if (mMaskBitmap.getHeight() < height || mMaskBitmap.getWidth() < width) {
-            mMaskBitmap.recycle();
-            mMaskBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8);
+
+        if (mRipplePaint == null) {
+            mRipplePaint = new Paint();
+            mRipplePaint.setAntiAlias(true);
         }
 
-        // Ensure we have a reveal buffer.
-        if (mRevealBitmap == null) {
-            mRevealBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            mRevealCanvas = new Canvas(mRevealBitmap);
-            mRevealPaint = new Paint();
-            mRevealPaint.setAntiAlias(true);
-            mRevealPaint.setShader(new BitmapShader(mRevealBitmap, TileMode.CLAMP, TileMode.CLAMP));
-        } else if (mRevealBitmap.getHeight() < height || mRevealBitmap.getWidth() < width) {
-            mRevealBitmap.recycle();
-            mRevealBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        }
-
-        // Draw ripples into the mask buffer.
-        mMaskCanvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
-        int n = mActiveRipples.size();
+        // Draw ripple mask into a buffer that merges using SRC_OVER.
+        int layerSaveCount = -1;
+        int n = activeRipples.size();
         for (int i = 0; i < n; i++) {
-            final Ripple ripple = mActiveRipples.get(i);
+            final Ripple ripple = activeRipples.get(i);
             if (!ripple.active()) {
-                mActiveRipples.remove(i);
+                activeRipples.remove(i);
                 i--;
                 n--;
             } else {
-                ripple.draw(mMaskCanvas, mMaskPaint);
+                if (layerSaveCount < 0) {
+                    layerSaveCount = canvas.saveLayer(0, 0, width, height, null, 0);
+                }
+
+                ripple.draw(canvas, mRipplePaint);
             }
         }
 
-        // Draw upper layer into the reveal buffer.
-        mRevealCanvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
-        final Drawable upper = getDrawable(1);
-        upper.draw(mRevealCanvas);
+        // If a layer was saved, it contains the ripple mask. Draw the reveal
+        // into another layer and composite using SRC_IN, then composite onto
+        // the original canvas.
+        if (layerSaveCount >= 0) {
+            if (mMaskingPaint == null) {
+                mMaskingPaint = new Paint();
+                mMaskingPaint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+            }
 
-        // Draw mask buffer onto the canvas using the reveal shader.
-        canvas.drawBitmap(mMaskBitmap, 0, 0, mRevealPaint);
+            // TODO: When Drawable.setXfermode() is supported by all drawables,
+            // we won't need an extra layer.
+            canvas.saveLayer(0, 0, width, height, mMaskingPaint, 0);
+            getDrawable(1).draw(canvas);
+            canvas.restoreToCount(layerSaveCount);
+        }
     }
 
     private static class RevealState extends LayerState {
