@@ -315,7 +315,7 @@ public class Editor {
 
                 mErrorPopup = null;
             }
-
+            mShowErrorAfterAttach = false;
         } else {
             setErrorIcon(icon);
             if (mTextView.isFocused()) {
