@@ -29,7 +29,7 @@
     <item quantity="one" msgid="5854176083865845541">"1 seneste app"</item>
     <item quantity="other" msgid="1040784359794890744">"%d seneste apps"</item>
   </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen meddelelser"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen underretninger"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"I gang"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Underretninger"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"Tilslut oplader"</string>
@@ -166,7 +166,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Søger efter GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Placeringen er angivet ved hjælp af GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktive placeringsanmodninger"</string>
-    <string name="accessibility_clear_all" msgid="5235938559247164925">"Ryd alle meddelelser."</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Ryd alle underretninger."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Oplysninger om appen"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
