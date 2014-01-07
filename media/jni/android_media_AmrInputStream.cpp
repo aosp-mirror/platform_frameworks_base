@@ -49,17 +49,17 @@ struct GsmAmrEncoderState {
     int32_t mLastModeUsed;
 };
 
-static jint android_media_AmrInputStream_GsmAmrEncoderNew
+static jlong android_media_AmrInputStream_GsmAmrEncoderNew
         (JNIEnv *env, jclass clazz) {
     GsmAmrEncoderState* gae = new GsmAmrEncoderState();
     if (gae == NULL) {
         jniThrowRuntimeException(env, "Out of memory");
     }
-    return (jint)gae;
+    return (jlong)gae;
 }
 
 static void android_media_AmrInputStream_GsmAmrEncoderInitialize
-        (JNIEnv *env, jclass clazz, jint gae) {
+        (JNIEnv *env, jclass clazz, jlong gae) {
     GsmAmrEncoderState *state = (GsmAmrEncoderState *) gae;
     int32_t nResult = AMREncodeInit(&state->mEncState, &state->mSidState, false);
     if (nResult != OK) {
@@ -70,7 +70,7 @@ static void android_media_AmrInputStream_GsmAmrEncoderInitialize
 
 static jint android_media_AmrInputStream_GsmAmrEncoderEncode
         (JNIEnv *env, jclass clazz,
-         jint gae, jbyteArray pcm, jint pcmOffset, jbyteArray amr, jint amrOffset) {
+         jlong gae, jbyteArray pcm, jint pcmOffset, jbyteArray amr, jint amrOffset) {
 
     jbyte inBuf[BYTES_PER_FRAME];
     jbyte outBuf[MAX_OUTPUT_BUFFER_SIZE];
@@ -86,7 +86,7 @@ static jint android_media_AmrInputStream_GsmAmrEncoderEncode
     if (length < 0) {
         jniThrowExceptionFmt(env, "java/io/IOException",
                 "Failed to encode a frame with error code: %d", length);
-        return -1;
+        return (jint)-1;
     }
 
     // The 1st byte of PV AMR frames are WMF (Wireless Multimedia Forum)
@@ -101,30 +101,30 @@ static jint android_media_AmrInputStream_GsmAmrEncoderEncode
 
     env->SetByteArrayRegion(amr, amrOffset, length, outBuf);
 
-    return length;
+    return (jint)length;
 }
 
 static void android_media_AmrInputStream_GsmAmrEncoderCleanup
-        (JNIEnv *env, jclass clazz, jint gae) {
-    GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
+        (JNIEnv *env, jclass clazz, jlong gae) {
+    GsmAmrEncoderState *state = (GsmAmrEncoderState *) gae;
     AMREncodeExit(&state->mEncState, &state->mSidState);
     state->mEncState = NULL;
     state->mSidState = NULL;
 }
 
 static void android_media_AmrInputStream_GsmAmrEncoderDelete
-        (JNIEnv *env, jclass clazz, jint gae) {
+        (JNIEnv *env, jclass clazz, jlong gae) {
     delete (GsmAmrEncoderState*)gae;
 }
 
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"GsmAmrEncoderNew",        "()I",        (void*)android_media_AmrInputStream_GsmAmrEncoderNew},
-    {"GsmAmrEncoderInitialize", "(I)V",       (void*)android_media_AmrInputStream_GsmAmrEncoderInitialize},
-    {"GsmAmrEncoderEncode",     "(I[BI[BI)I", (void*)android_media_AmrInputStream_GsmAmrEncoderEncode},
-    {"GsmAmrEncoderCleanup",    "(I)V",       (void*)android_media_AmrInputStream_GsmAmrEncoderCleanup},
-    {"GsmAmrEncoderDelete",     "(I)V",       (void*)android_media_AmrInputStream_GsmAmrEncoderDelete},
+    {"GsmAmrEncoderNew",        "()J",        (void*)android_media_AmrInputStream_GsmAmrEncoderNew},
+    {"GsmAmrEncoderInitialize", "(J)V",       (void*)android_media_AmrInputStream_GsmAmrEncoderInitialize},
+    {"GsmAmrEncoderEncode",     "(J[BI[BI)I", (void*)android_media_AmrInputStream_GsmAmrEncoderEncode},
+    {"GsmAmrEncoderCleanup",    "(J)V",       (void*)android_media_AmrInputStream_GsmAmrEncoderCleanup},
+    {"GsmAmrEncoderDelete",     "(J)V",       (void*)android_media_AmrInputStream_GsmAmrEncoderDelete},
 };
 
 
