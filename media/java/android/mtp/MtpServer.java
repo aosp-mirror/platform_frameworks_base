@@ -22,7 +22,7 @@ package android.mtp;
  */
 public class MtpServer implements Runnable {
 
-    private int mNativeContext; // accessed by native methods
+    private long mNativeContext; // accessed by native methods
 
     static {
         System.loadLibrary("media_jni");

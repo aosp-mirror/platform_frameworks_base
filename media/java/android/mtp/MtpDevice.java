@@ -235,7 +235,7 @@ public final class MtpDevice {
     }
 
     // used by the JNI code
-    private int mNativeContext;
+    private long mNativeContext;
 
     private native boolean native_open(String deviceName, int fd);
     private native void native_close();

@@ -77,7 +77,7 @@ static jfieldID field_mStringValues;
 
 
 MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database) {
-    return (MtpDatabase *)env->GetIntField(database, field_context);
+    return (MtpDatabase *)env->GetLongField(database, field_context);
 }
 
 // ----------------------------------------------------------------------------
@@ -1075,17 +1075,17 @@ static void
 android_mtp_MtpDatabase_setup(JNIEnv *env, jobject thiz)
 {
     MyMtpDatabase* database = new MyMtpDatabase(env, thiz);
-    env->SetIntField(thiz, field_context, (int)database);
+    env->SetLongField(thiz, field_context, (jlong)database);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 static void
 android_mtp_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 {
-    MyMtpDatabase* database = (MyMtpDatabase *)env->GetIntField(thiz, field_context);
+    MyMtpDatabase* database = (MyMtpDatabase *)env->GetLongField(thiz, field_context);
     database->cleanup(env);
     delete database;
-    env->SetIntField(thiz, field_context, 0);
+    env->SetLongField(thiz, field_context, 0);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
@@ -1217,7 +1217,7 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
         return -1;
     }
 
-    field_context = env->GetFieldID(clazz, "mNativeContext", "I");
+    field_context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (field_context == NULL) {
         ALOGE("Can't find MtpDatabase.mNativeContext");
         return -1;

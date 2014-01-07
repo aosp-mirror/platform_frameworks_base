@@ -53,7 +53,7 @@ static Mutex sMutex;
 extern MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database);
 
 static inline MtpServer* getMtpServer(JNIEnv *env, jobject thiz) {
-    return (MtpServer*)env->GetIntField(thiz, field_MtpServer_nativeContext);
+    return (MtpServer*)env->GetLongField(thiz, field_MtpServer_nativeContext);
 }
 
 static void
@@ -63,7 +63,7 @@ android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jbo
     if (fd >= 0) {
         MtpServer* server = new MtpServer(fd, getMtpDatabase(env, javaDatabase),
                 usePtp, AID_MEDIA_RW, 0664, 0775);
-        env->SetIntField(thiz, field_MtpServer_nativeContext, (int)server);
+        env->SetLongField(thiz, field_MtpServer_nativeContext, (jlong)server);
     } else {
         ALOGE("could not open MTP driver, errno: %d", errno);
     }
@@ -87,7 +87,7 @@ android_mtp_MtpServer_cleanup(JNIEnv *env, jobject thiz)
     MtpServer* server = getMtpServer(env, thiz);
     if (server) {
         delete server;
-        env->SetIntField(thiz, field_MtpServer_nativeContext, 0);
+        env->SetLongField(thiz, field_MtpServer_nativeContext, 0);
     } else {
         ALOGE("server is null in cleanup");
     }
@@ -226,7 +226,7 @@ int register_android_mtp_MtpServer(JNIEnv *env)
         ALOGE("Can't find android/mtp/MtpServer");
         return -1;
     }
-    field_MtpServer_nativeContext = env->GetFieldID(clazz, "mNativeContext", "I");
+    field_MtpServer_nativeContext = env->GetFieldID(clazz, "mNativeContext", "J");
     if (field_MtpServer_nativeContext == NULL) {
         ALOGE("Can't find MtpServer.mNativeContext");
         return -1;
