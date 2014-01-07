@@ -39,7 +39,7 @@ public final class AmrInputStream extends InputStream
     private InputStream mInputStream;
     
     // native handle
-    private int mGae;
+    private long mGae;
     
     // result amr stream
     private final byte[] mBuf = new byte[SAMPLES_PER_FRAME * 2];
@@ -128,11 +128,11 @@ public final class AmrInputStream extends InputStream
     //
     // AudioRecord JNI interface
     //
-    private static native int GsmAmrEncoderNew();
-    private static native void GsmAmrEncoderInitialize(int gae);
-    private static native int GsmAmrEncoderEncode(int gae,
+    private static native long GsmAmrEncoderNew();
+    private static native void GsmAmrEncoderInitialize(long gae);
+    private static native int GsmAmrEncoderEncode(long gae,
             byte[] pcm, int pcmOffset, byte[] amr, int amrOffset) throws IOException;
-    private static native void GsmAmrEncoderCleanup(int gae);
-    private static native void GsmAmrEncoderDelete(int gae);
+    private static native void GsmAmrEncoderCleanup(long gae);
+    private static native void GsmAmrEncoderDelete(long gae);
 
 }
