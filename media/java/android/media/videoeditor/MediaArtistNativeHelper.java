@@ -117,7 +117,7 @@ class MediaArtistNativeHelper {
     private boolean mErrorFlagSet = false;
 
     @SuppressWarnings("unused")
-    private int mManualEditContext;
+    private long mManualEditContext;
 
     /* Listeners */
 
