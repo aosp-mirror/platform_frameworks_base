@@ -16,8 +16,8 @@
 package com.android.internal.widget;
 
 import com.android.internal.R;
-import com.android.internal.view.menu.ActionMenuPresenter;
-import com.android.internal.view.menu.ActionMenuView;
+import android.widget.ActionMenuPresenter;
+import android.widget.ActionMenuView;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -100,9 +100,6 @@ public abstract class AbsActionBarView extends ViewGroup {
 
     public void setContentHeight(int height) {
         mContentHeight = height;
-        if (mMenuView != null) {
-            mMenuView.setMaxItemHeight(mContentHeight);
-        }
         requestLayout();
     }
 

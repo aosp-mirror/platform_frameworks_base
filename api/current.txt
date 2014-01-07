@@ -31404,6 +31404,21 @@ package android.widget {
     field public int y;
   }
 
+  public class ActionMenuView extends android.widget.LinearLayout {
+    ctor public ActionMenuView(android.content.Context);
+    ctor public ActionMenuView(android.content.Context, android.util.AttributeSet);
+    method public android.view.Menu getMenu();
+    method public void onConfigurationChanged(android.content.res.Configuration);
+    method public void onDetachedFromWindow();
+  }
+
+  public static class ActionMenuView.LayoutParams extends android.widget.LinearLayout.LayoutParams {
+    ctor public ActionMenuView.LayoutParams(android.content.Context, android.util.AttributeSet);
+    ctor public ActionMenuView.LayoutParams(android.view.ViewGroup.LayoutParams);
+    ctor public ActionMenuView.LayoutParams(android.widget.ActionMenuView.LayoutParams);
+    ctor public ActionMenuView.LayoutParams(int, int);
+  }
+
   public abstract interface Adapter {
     method public abstract int getCount();
     method public abstract java.lang.Object getItem(int);
