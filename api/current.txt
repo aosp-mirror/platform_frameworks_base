@@ -377,6 +377,8 @@ package android {
     field public static final int colorActivatedHighlight = 16843664; // 0x1010390
     field public static final int colorBackground = 16842801; // 0x1010031
     field public static final int colorBackgroundCacheHint = 16843435; // 0x10102ab
+    field public static final int colorFilterColor = 16843767; // 0x10103f7
+    field public static final int colorFilterMode = 16843768; // 0x10103f8
     field public static final int colorFocusedHighlight = 16843663; // 0x101038f
     field public static final int colorForeground = 16842800; // 0x1010030
     field public static final int colorForegroundInverse = 16843270; // 0x1010206

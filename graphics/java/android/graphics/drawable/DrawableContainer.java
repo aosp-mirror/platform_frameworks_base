@@ -49,7 +49,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private DrawableContainerState mDrawableContainerState;
     private Drawable mCurrDrawable;
     private int mAlpha = 0xFF;
-    private ColorFilter mColorFilter;
 
     private int mCurIndex = -1;
     private boolean mMutated;
@@ -147,8 +146,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setColorFilter(ColorFilter cf) {
-        if (mColorFilter != cf) {
-            mColorFilter = cf;
+        if (mDrawableContainerState.mColorFilter != cf) {
+            mDrawableContainerState.mColorFilter = cf;
             if (mCurrDrawable != null) {
                 mCurrDrawable.mutate().setColorFilter(cf);
             }
@@ -359,7 +358,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 }
                 d.setVisible(isVisible(), true);
                 d.setDither(mDrawableContainerState.mDither);
-                d.setColorFilter(mColorFilter);
+                d.setColorFilter(mDrawableContainerState.mColorFilter);
                 d.setState(getState());
                 d.setLevel(getLevel());
                 d.setBounds(getBounds());
@@ -507,6 +506,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
         boolean mAutoMirrored;
 
+        ColorFilter mColorFilter;
+
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
@@ -527,6 +528,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mEnterFadeDuration = orig.mEnterFadeDuration;
                 mExitFadeDuration = orig.mExitFadeDuration;
                 mAutoMirrored = orig.mAutoMirrored;
+                mColorFilter = orig.mColorFilter;
 
                 // Cloning the following values may require creating futures.
                 mConstantPadding = orig.getConstantPadding();
