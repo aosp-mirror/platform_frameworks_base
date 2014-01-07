@@ -472,7 +472,7 @@ hierarchy.</p>
         <span class="sympad"><a href="#resourceIdMatches(java.lang.String)">resourceIdMatches</a></span>(String regex)</nobr>
 
         <div class="jd-descrdiv">Set the search criteria to match the resource ID
- of the widget, using a regular expression.http://blog.bettersoftwaretesting.com/</div>
+ of the widget, using a regular expression.</div>
 
   </td></tr>
 
