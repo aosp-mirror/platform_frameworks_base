@@ -88,7 +88,7 @@ static jfieldID field_objectInfo_keywords;
 
 MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
 {
-    return (MtpDevice*)env->GetIntField(javaDevice, field_context);
+    return (MtpDevice*)env->GetLongField(javaDevice, field_context);
 }
 
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -106,15 +106,15 @@ android_mtp_MtpDevice_open(JNIEnv *env, jobject thiz, jstring deviceName, jint f
 {
     const char *deviceNameStr = env->GetStringUTFChars(deviceName, NULL);
     if (deviceNameStr == NULL) {
-        return false;
+        return JNI_FALSE;
     }
 
     MtpDevice* device = MtpDevice::open(deviceNameStr, fd);
     env->ReleaseStringUTFChars(deviceName, deviceNameStr);
 
     if (device)
-        env->SetIntField(thiz, field_context, (int)device);
-    return (device != NULL);
+        env->SetLongField(thiz, field_context,  (jlong)device);
+    return (jboolean)(device != NULL);
 }
 
 static void
@@ -124,7 +124,7 @@ android_mtp_MtpDevice_close(JNIEnv *env, jobject thiz)
     if (device) {
         device->close();
         delete device;
-        env->SetIntField(thiz, field_context, 0);
+        env->SetLongField(thiz, field_context, 0);
     }
 }
 
@@ -356,10 +356,11 @@ static jboolean
 android_mtp_MtpDevice_delete_object(JNIEnv *env, jobject thiz, jint object_id)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
-    if (device)
-        return device->deleteObject(object_id);
-    else
-        return NULL;
+    if (device && device->deleteObject(object_id)) {
+        return JNI_TRUE;
+    } else {
+        return JNI_FALSE;
+    }
 }
 
 static jlong
@@ -367,7 +368,7 @@ android_mtp_MtpDevice_get_parent(JNIEnv *env, jobject thiz, jint object_id)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device)
-        return device->getParent(object_id);
+        return (jlong)device->getParent(object_id);
     else
         return -1;
 }
@@ -377,7 +378,7 @@ android_mtp_MtpDevice_get_storage_id(JNIEnv *env, jobject thiz, jint object_id)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device)
-        return device->getStorageID(object_id);
+        return (jlong)device->getStorageID(object_id);
     else
         return -1;
 }
@@ -389,15 +390,15 @@ android_mtp_MtpDevice_import_file(JNIEnv *env, jobject thiz, jint object_id, jst
     if (device) {
         const char *destPathStr = env->GetStringUTFChars(dest_path, NULL);
         if (destPathStr == NULL) {
-            return false;
+            return JNI_FALSE;
         }
 
-        bool result = device->readObject(object_id, destPathStr, AID_SDCARD_RW, 0664);
+        jboolean result = device->readObject(object_id, destPathStr, AID_SDCARD_RW, 0664);
         env->ReleaseStringUTFChars(dest_path, destPathStr);
         return result;
     }
 
-    return false;
+    return JNI_FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -618,7 +619,7 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
         ALOGE("Can't find android/mtp/MtpDevice");
         return -1;
     }
-    field_context = env->GetFieldID(clazz, "mNativeContext", "I");
+    field_context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (field_context == NULL) {
         ALOGE("Can't find MtpDevice.mNativeContext");
         return -1;
