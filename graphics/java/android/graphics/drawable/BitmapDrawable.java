@@ -26,6 +26,8 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Xfermode;
@@ -33,6 +35,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
 import android.view.Gravity;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -579,6 +582,18 @@ public class BitmapDrawable extends Drawable {
         setAutoMirrored(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_autoMirrored,
                 false));
 
+        if (a.hasValue(com.android.internal.R.styleable.BitmapDrawable_colorFilterColor)) {
+            final int colorFilterColor = a.getColor(
+                    com.android.internal.R.styleable.BitmapDrawable_colorFilterColor, 0);
+            final int modeValue = a.getInt(
+                    com.android.internal.R.styleable.BitmapDrawable_colorFilterMode,
+                    Mode.MULTIPLY.ordinal());
+            final Mode mode = Drawable.parseColorFilterMode(modeValue);
+            if (mode != null) {
+                setColorFilter(colorFilterColor, mode);
+            }
+        }
+
         final Paint paint = mBitmapState.mPaint;
         paint.setAntiAlias(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_antialias,
                 paint.isAntiAlias()));
@@ -647,7 +662,7 @@ public class BitmapDrawable extends Drawable {
         }
 
         BitmapState(BitmapState bitmapState) {
-            this(bitmapState.mBitmap);
+            mBitmap = bitmapState.mBitmap;
             mChangingConfigurations = bitmapState.mChangingConfigurations;
             mGravity = bitmapState.mGravity;
             mTileModeX = bitmapState.mTileModeX;
