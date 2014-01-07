@@ -97,8 +97,8 @@ number of in-app items.</p>
 
 <ol>
   <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
-  <li>In the <strong>All Google Play listings</strong> panel, under the application name, click
-  <strong>In-app Products</strong>.</li>
+  <li>In the <strong>All Applications</strong> panel, click on the
+  app name, then select <strong>In-app Products</strong>.</li>
   <li>Click <strong>Add new product</strong> (see figure 2) and provide details about the item you are
   selling and then click <strong>Save</strong> or <strong>Publish</strong>.</li>
 </ol>
@@ -363,10 +363,11 @@ with the <em>locale</em> field.</p>
 
 <ol>
   <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
-  <li>In the <strong>All Google Play listings</strong> panel, under the application name, click
-  <strong>In-app Products</strong>.</li>
-  <li>On the In-app Products List page, click <strong>Choose File</strong> and select your CSV
-file.
+  <li>In the <strong>All Applications</strong> panel, click on the app
+  name, then select <strong>In-app Products</strong>.</li>
+  <li>On the In-app Products List page, click <strong>Import/Export</strong>
+  &gt; <strong>Import in-app products from CSV file</strong>, then select your
+  CSV file.
     <p>The CSV file must be on your local computer or on a local disk that is connected to your
     computer.</p>
   </li>
@@ -377,7 +378,6 @@ file.
     Overwriting does not delete items that are on a product list but not present in the CSV
     file.</p>
   </li>
-  <li>On the In-app Products List page, click <strong>Import from CSV</strong>.</li>
 </ol>
 
 <p>You can also export an existing product list to a CSV file by clicking <strong>Export to CSV
@@ -471,9 +471,8 @@ accounts yourself and distribute the credentials to your developers or testers.<
 
 <ol>
   <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
-  <li>Click the <strong>Settings</strong> icon. (If you are using the old Developer Console UI, click
-  <strong>Edit profile</strong> in the upper left part of the page, under your name,)</li>
-  <li>Locate the License Testing panel. (In the old UI, scroll down to the Licensing &amp; In-app Billing panel.)</li>
+  <li>Click the <strong>Settings</strong> icon.</li>
+  <li>Locate the License Testing panel.</li>
   <li>Add the email addresses for the test accounts you want to register,
   separating each account with a comma.</li>
   <li>Click <strong>Save</strong> to save your profile changes.</li>
@@ -481,18 +480,24 @@ accounts yourself and distribute the credentials to your developers or testers.<
 
 <h3 id="license_key">Getting an app's license key</h3>
 
-<p>The Google Play Developer Console provides a public licensing key for each app. To get the key for an app,
-load the app's publishing details in the Developer Console and click the <strong>Settings</strong> icon. The key
-for the app is available for copy/paste in License Key for this Application field, as shown in the figure below.</p>
-
-<p>Previously, the Developer Console provided a single public key per developer account. To transition apps to the
-new per-app public key, the Developer Console set the app-specific key as the former developer key. This ensures
-compatibility for apps that depend on the (former) developer key. </p>
+<p>The Google Play Developer Console provides a public licensing key for each
+app. To get the key for an app, follow these steps:</p>
+<ol>
+  <li>Open the <strong>All Applications</strong> panel.</li>
+  <li>Click on the app name, then select <strong>Services &amp; APIs</strong>.</li>
+  <li>Scroll down to the <strong>Your License Key for this Application</strong>
+field to locate the key for the app, as shown in the figure below.</li>
+</ol>
+<p>Previously, the Developer Console provided a single public key per developer
+account. To transition apps to the new per-app public key, the Developer Console
+set the app-specific key as the former developer key. This ensures compatibility
+for apps that depend on the (former) developer key. </p>
 
 <div style="margin:1em;">
 <img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_app_key.png" xheight="510" id="figure4" />
 <p class="img-caption" style="padding-left:.5em;">
-  <strong>Figure 4.</strong> You can find the license key for each app in the <strong>Services &amp; APIs</strong> panel.
+  <strong>Figure 4.</strong> You can find the license key for each app in the
+  <strong>Services &amp; APIs</strong> panel.
 </p>
 </div>
 
