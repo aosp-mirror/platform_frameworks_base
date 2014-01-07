@@ -1036,7 +1036,7 @@ public class MtpDatabase {
     }
 
     // used by the JNI code
-    private int mNativeContext;
+    private long mNativeContext;
 
     private native final void native_setup();
     private native final void native_finalize();
