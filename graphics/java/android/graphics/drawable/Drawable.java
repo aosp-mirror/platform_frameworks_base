@@ -83,7 +83,7 @@ import java.util.Arrays;
  *     through the {@link Callback} interface.  All clients should support this
  *     interface (via {@link #setCallback}) so that animations will work.  A
  *     simple way to do this is through the system facilities such as
- *     {@link android.view.View#setBackgroundDrawable(Drawable)} and
+ *     {@link android.view.View#setBackground(Drawable)} and
  *     {@link android.widget.ImageView}.
  * </ul>
  *
@@ -438,9 +438,9 @@ public abstract class Drawable {
     }
 
     /**
-     * Specify an optional colorFilter for the drawable. Pass null to remove
-     * any filters.
-    */
+     * Specify an optional color filter for the drawable. Pass null to remove
+     * any existing color filter.
+     */
     public abstract void setColorFilter(ColorFilter cf);
 
     /**
@@ -453,13 +453,16 @@ public abstract class Drawable {
     }
 
     /**
-     * Specify a color and porterduff mode to be the colorfilter for this
+     * Specify a color and Porter-Duff mode to be the color filter for this
      * drawable.
      */
     public void setColorFilter(int color, PorterDuff.Mode mode) {
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
 
+    /**
+     * Removes the color filter for this drawable.
+     */
     public void clearColorFilter() {
         setColorFilter(null);
     }
@@ -1089,7 +1092,7 @@ public abstract class Drawable {
 
     /**
      * Return a {@link ConstantState} instance that holds the shared state of this Drawable.
-     *q
+     *
      * @return The ConstantState associated to that Drawable.
      * @see ConstantState
      * @see Drawable#mutate()
@@ -1106,6 +1109,18 @@ public abstract class Drawable {
         }
 
         return new BitmapDrawable(res, bm);
+    }
+
+    /**
+     * Parses a {@link android.graphics.PorterDuff.Mode} from a colorFilterMode
+     * attribute's enum value.
+     */
+    static PorterDuff.Mode parseColorFilterMode(int value) {
+        final PorterDuff.Mode[] modes = PorterDuff.Mode.values();
+        if (value >= 0 && value < modes.length) {
+            return modes[value];
+        }
+        return null;
     }
 }
 

@@ -26,12 +26,15 @@ import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.PorterDuff.Mode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
 import android.util.TypedValue;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -132,6 +135,9 @@ public class NinePatchDrawable extends Drawable {
             // avoid calling the setter unless we need to, since it does a
             // lazy allocation of a paint
             setDither(state.mDither);
+        }
+        if (state.mColorFilter != null) {
+            setColorFilter(state.mColorFilter);
         }
         setAutoMirrored(state.mAutoMirrored);
         if (mNinePatch != null) {
@@ -366,9 +372,25 @@ public class NinePatchDrawable extends Drawable {
 
         final boolean automirrored = a.getBoolean(
                 com.android.internal.R.styleable.NinePatchDrawable_autoMirrored, false);
+        final NinePatchState ninePatchState = new NinePatchState(
+                new NinePatch(bitmap, bitmap.getNinePatchChunk()), padding, opticalInsets, dither,
+                automirrored);
 
-        setNinePatchState(new NinePatchState(new NinePatch(bitmap, bitmap.getNinePatchChunk()),
-                padding, opticalInsets, dither, automirrored), r);
+        if (a.hasValue(com.android.internal.R.styleable.NinePatchDrawable_colorFilterColor)) {
+            final int colorFilterColor = a.getColor(
+                    com.android.internal.R.styleable.NinePatchDrawable_colorFilterColor, 0);
+            final int modeValue = a.getInt(
+                    com.android.internal.R.styleable.NinePatchDrawable_colorFilterMode,
+                    Mode.MULTIPLY.ordinal());
+            final Mode mode = Drawable.parseColorFilterMode(modeValue);
+            if (mode != null) {
+                // This will be applied to the paint by setNinePatchState().
+                ninePatchState.mColorFilter = new PorterDuffColorFilter(colorFilterColor, mode);
+            }
+        }
+
+        setNinePatchState(ninePatchState, r);
+
         mNinePatchState.mTargetDensity = mTargetDensity;
 
         a.recycle();
@@ -447,6 +469,7 @@ public class NinePatchDrawable extends Drawable {
         int mChangingConfigurations;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
         boolean mAutoMirrored;
+        ColorFilter mColorFilter;
 
         NinePatchState(NinePatch ninePatch, Rect padding) {
             this(ninePatch, padding, new Rect(), DEFAULT_DITHER, false);
@@ -477,6 +500,7 @@ public class NinePatchDrawable extends Drawable {
             mChangingConfigurations = state.mChangingConfigurations;
             mTargetDensity = state.mTargetDensity;
             mAutoMirrored = state.mAutoMirrored;
+            mColorFilter = state.mColorFilter;
         }
 
         @Override
