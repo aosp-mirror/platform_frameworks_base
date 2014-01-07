@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "GLRenderer"
+#define LOG_TAG "ThreadedRenderer"
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>

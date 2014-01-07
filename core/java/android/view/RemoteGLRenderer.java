@@ -16,40 +16,11 @@
 
 package android.view;
 
-import static javax.microedition.khronos.egl.EGL10.EGL_ALPHA_SIZE;
-import static javax.microedition.khronos.egl.EGL10.EGL_BAD_NATIVE_WINDOW;
-import static javax.microedition.khronos.egl.EGL10.EGL_BLUE_SIZE;
-import static javax.microedition.khronos.egl.EGL10.EGL_CONFIG_CAVEAT;
-import static javax.microedition.khronos.egl.EGL10.EGL_DEFAULT_DISPLAY;
-import static javax.microedition.khronos.egl.EGL10.EGL_DEPTH_SIZE;
-import static javax.microedition.khronos.egl.EGL10.EGL_DRAW;
-import static javax.microedition.khronos.egl.EGL10.EGL_GREEN_SIZE;
-import static javax.microedition.khronos.egl.EGL10.EGL_HEIGHT;
-import static javax.microedition.khronos.egl.EGL10.EGL_NONE;
-import static javax.microedition.khronos.egl.EGL10.EGL_NO_CONTEXT;
-import static javax.microedition.khronos.egl.EGL10.EGL_NO_DISPLAY;
-import static javax.microedition.khronos.egl.EGL10.EGL_NO_SURFACE;
-import static javax.microedition.khronos.egl.EGL10.EGL_RED_SIZE;
-import static javax.microedition.khronos.egl.EGL10.EGL_RENDERABLE_TYPE;
-import static javax.microedition.khronos.egl.EGL10.EGL_SAMPLES;
-import static javax.microedition.khronos.egl.EGL10.EGL_SAMPLE_BUFFERS;
-import static javax.microedition.khronos.egl.EGL10.EGL_STENCIL_SIZE;
-import static javax.microedition.khronos.egl.EGL10.EGL_SUCCESS;
-import static javax.microedition.khronos.egl.EGL10.EGL_SURFACE_TYPE;
-import static javax.microedition.khronos.egl.EGL10.EGL_WIDTH;
-import static javax.microedition.khronos.egl.EGL10.EGL_WINDOW_BIT;
-
-import android.content.ComponentCallbacks2;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.opengl.EGL14;
-import android.opengl.GLUtils;
-import android.opengl.ManagedEGLContext;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -58,18 +29,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 
-import com.google.android.gles_jni.EGLImpl;
-
 import java.io.PrintWriter;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGL11;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
-import javax.microedition.khronos.opengles.GL;
 
 /**
  * Hardware renderer using OpenGL that's used as the remote endpoint
@@ -119,21 +80,8 @@ public class RemoteGLRenderer extends HardwareRenderer {
     private static final int OVERDRAW_TYPE_COUNT = 1;
     private static final int GL_VERSION = 2;
 
-    static EGL10 sEgl;
-    static EGLDisplay sEglDisplay;
-    static EGLConfig sEglConfig;
-    static final Object[] sEglLock = new Object[0];
     int mWidth = -1, mHeight = -1;
 
-    static final ThreadLocal<ManagedEGLContext> sEglContextStorage
-            = new ThreadLocal<ManagedEGLContext>();
-
-    EGLContext mEglContext;
-    Thread mEglThread;
-
-    EGLSurface mEglSurface;
-
-    GL mGl;
     HardwareCanvas mCanvas;
 
     String mName;
@@ -141,17 +89,8 @@ public class RemoteGLRenderer extends HardwareRenderer {
     long mFrameCount;
     Paint mDebugPaint;
 
-    static boolean sDirtyRegions;
-    static final boolean sDirtyRegionsRequested;
-    static {
-        String dirtyProperty = SystemProperties.get(RENDER_DIRTY_REGIONS_PROPERTY, "true");
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        sDirtyRegions = "true".equalsIgnoreCase(dirtyProperty);
-        sDirtyRegionsRequested = sDirtyRegions;
-    }
-
     boolean mDirtyRegionsEnabled;
-    boolean mUpdateDirtyRegions;
+    boolean mSurfaceUpdated;
 
     boolean mProfileEnabled;
     int mProfileVisualizerType = -1;
@@ -170,8 +109,6 @@ public class RemoteGLRenderer extends HardwareRenderer {
 
     final boolean mTranslucent;
 
-    private boolean mDestroyed;
-
     private final Rect mRedrawClip = new Rect();
 
     private final int[] mSurfaceSize = new int[2];
@@ -183,82 +120,10 @@ public class RemoteGLRenderer extends HardwareRenderer {
 
     private DisplayMetrics mDisplayMetrics;
     private ThreadedRenderer mOwningRenderer;
-
-    private static EGLSurface sPbuffer;
-    private static final Object[] sPbufferLock = new Object[0];
-
-    private static class GLRendererEglContext extends ManagedEGLContext {
-        final Handler mHandler = new Handler();
-
-        public GLRendererEglContext(EGLContext context) {
-            super(context);
-        }
-
-        @Override
-        public void onTerminate(final EGLContext eglContext) {
-            // Make sure we do this on the correct thread.
-            if (mHandler.getLooper() != Looper.myLooper()) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onTerminate(eglContext);
-                    }
-                });
-                return;
-            }
-
-            synchronized (sEglLock) {
-                if (sEgl == null) return;
-
-                if (EGLImpl.getInitCount(sEglDisplay) == 1) {
-                    usePbufferSurface(eglContext);
-                    GLES20Canvas.terminateCaches();
-
-                    sEgl.eglDestroyContext(sEglDisplay, eglContext);
-                    sEglContextStorage.set(null);
-                    sEglContextStorage.remove();
-
-                    sEgl.eglDestroySurface(sEglDisplay, sPbuffer);
-                    sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
-                            EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-                    sEgl.eglReleaseThread();
-                    sEgl.eglTerminate(sEglDisplay);
-
-                    sEgl = null;
-                    sEglDisplay = null;
-                    sEglConfig = null;
-                    sPbuffer = null;
-                }
-            }
-        }
-    }
+    private long mNativeCanvasContext;
 
     HardwareCanvas createCanvas() {
         return mGlCanvas = new GLES20Canvas(mTranslucent);
-    }
-
-    ManagedEGLContext createManagedContext(EGLContext eglContext) {
-        return new GLRendererEglContext(mEglContext);
-    }
-
-    int[] getConfig(boolean dirtyRegions) {
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        final int stencilSize = GLES20Canvas.getStencilSize();
-        final int swapBehavior = dirtyRegions ? EGL14.EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
-
-        return new int[] {
-                EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
-                EGL_RED_SIZE, 8,
-                EGL_GREEN_SIZE, 8,
-                EGL_BLUE_SIZE, 8,
-                EGL_ALPHA_SIZE, 8,
-                EGL_DEPTH_SIZE, 0,
-                EGL_CONFIG_CAVEAT, EGL_NONE,
-                EGL_STENCIL_SIZE, stencilSize,
-                EGL_SURFACE_TYPE, EGL_WINDOW_BIT | swapBehavior,
-                EGL_NONE
-        };
     }
 
     void initCaches() {
@@ -295,7 +160,7 @@ public class RemoteGLRenderer extends HardwareRenderer {
     }
 
     boolean canDraw() {
-        return mGl != null && mCanvas != null && mGlCanvas != null;
+        return mCanvas != null && mGlCanvas != null;
     }
 
     int onPreDraw(Rect dirty) {
@@ -458,17 +323,11 @@ public class RemoteGLRenderer extends HardwareRenderer {
             if (full && mCanvas != null) {
                 mCanvas = null;
             }
-
-            if (!isEnabled() || mDestroyed) {
-                setEnabled(false);
-                return;
+            if (mNativeCanvasContext != 0) {
+                destroyContext(mNativeCanvasContext);
+                mNativeCanvasContext = 0;
             }
-
-            destroySurface();
             setEnabled(false);
-
-            mDestroyed = true;
-            mGl = null;
         } finally {
             if (full && mGlCanvas != null) {
                 mGlCanvas = null;
@@ -524,20 +383,12 @@ public class RemoteGLRenderer extends HardwareRenderer {
         boolean needsContext = !isEnabled() || checkRenderContext() == SURFACE_STATE_ERROR;
 
         if (needsContext) {
-            GLRendererEglContext managedContext =
-                    (GLRendererEglContext) sEglContextStorage.get();
-            if (managedContext == null) return false;
-            usePbufferSurface(managedContext.getContext());
-        }
-
-        try {
-            action.run();
-        } finally {
-            if (needsContext) {
-                sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
-                        EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            if (!usePBufferSurface()) {
+                return false;
             }
         }
+
+        action.run();
 
         return true;
     }
@@ -598,44 +449,6 @@ public class RemoteGLRenderer extends HardwareRenderer {
                 destroyResources(group.getChildAt(i));
             }
         }
-    }
-
-    static void startTrimMemory(int level) {
-        if (sEgl == null || sEglConfig == null) return;
-
-        GLRendererEglContext managedContext =
-                (GLRendererEglContext) sEglContextStorage.get();
-        // We do not have OpenGL objects
-        if (managedContext == null) {
-            return;
-        } else {
-            usePbufferSurface(managedContext.getContext());
-        }
-
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-            GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
-        } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-            GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
-        }
-    }
-
-    static void endTrimMemory() {
-        if (sEgl != null && sEglDisplay != null) {
-            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        }
-    }
-
-    private static void usePbufferSurface(EGLContext eglContext) {
-        synchronized (sPbufferLock) {
-            // Create a temporary 1x1 pbuffer so we have a context
-            // to clear our OpenGL objects
-            if (sPbuffer == null) {
-                sPbuffer = sEgl.eglCreatePbufferSurface(sEglDisplay, sEglConfig, new int[] {
-                        EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE
-                });
-            }
-        }
-        sEgl.eglMakeCurrent(sEglDisplay, sPbuffer, sPbuffer, eglContext);
     }
 
     RemoteGLRenderer(ThreadedRenderer owningRenderer, boolean translucent) {
@@ -771,62 +584,31 @@ public class RemoteGLRenderer extends HardwareRenderer {
         return mDirtyRegionsEnabled;
     }
 
-    /**
-     * Checks for OpenGL errors. If an error has occured, {@link #destroy(boolean)}
-     * is invoked and the requested flag is turned off. The error code is
-     * also logged as a warning.
-     */
-    void checkEglErrors() {
-        if (isEnabled()) {
-            checkEglErrorsForced();
-        }
-    }
-
-    private void checkEglErrorsForced() {
-        int error = sEgl.eglGetError();
-        if (error != EGL_SUCCESS) {
-            // something bad has happened revert to
-            // normal rendering.
-            Log.w(LOG_TAG, "EGL error: " + GLUtils.getEGLErrorString(error));
-            fallback(error != EGL11.EGL_CONTEXT_LOST);
-        }
-    }
-
-    private void fallback(boolean fallback) {
+    private void triggerSoftwareFallback() {
         destroy(true);
-        if (fallback) {
-            // we'll try again if it was context lost
-            setRequested(false);
-            Log.w(LOG_TAG, "Mountain View, we've had a problem here. "
-                    + "Switching back to software rendering.");
-        }
+        // we'll try again if it was context lost
+        setRequested(false);
+        Log.w(LOG_TAG, "Mountain View, we've had a problem here. "
+                + "Switching back to software rendering.");
     }
 
     @Override
     boolean initialize(Surface surface) throws OutOfResourcesException {
         if (isRequested() && !isEnabled()) {
-            boolean contextCreated = initializeEgl();
-            mGl = createEglSurface(surface);
-            mDestroyed = false;
+            mNativeCanvasContext = createContext();
+            boolean surfaceCreated = createEglSurface(surface);
 
-            if (mGl != null) {
-                int err = sEgl.eglGetError();
-                if (err != EGL_SUCCESS) {
-                    destroy(true);
-                    setRequested(false);
-                } else {
-                    if (mCanvas == null) {
-                        mCanvas = createCanvas();
-                        mCanvas.setName(mName);
-                    }
-                    setEnabled(true);
-
-                    if (contextCreated) {
-                        initAtlas();
-                    }
+            if (surfaceCreated) {
+                if (mCanvas == null) {
+                    mCanvas = createCanvas();
+                    mCanvas.setName(mName);
                 }
-
-                return mCanvas != null;
+                setEnabled(true);
+                initAtlas();
+                return true;
+            } else {
+                destroy(true);
+                setRequested(false);
             }
         }
         return false;
@@ -839,249 +621,28 @@ public class RemoteGLRenderer extends HardwareRenderer {
         }
     }
 
-    boolean initializeEgl() {
-        synchronized (sEglLock) {
-            if (sEgl == null && sEglConfig == null) {
-                sEgl = (EGL10) EGLContext.getEGL();
-
-                // Get to the default display.
-                sEglDisplay = sEgl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-                if (sEglDisplay == EGL_NO_DISPLAY) {
-                    throw new RuntimeException("eglGetDisplay failed "
-                            + GLUtils.getEGLErrorString(sEgl.eglGetError()));
-                }
-
-                // We can now initialize EGL for that display
-                int[] version = new int[2];
-                if (!sEgl.eglInitialize(sEglDisplay, version)) {
-                    throw new RuntimeException("eglInitialize failed " +
-                            GLUtils.getEGLErrorString(sEgl.eglGetError()));
-                }
-
-                checkEglErrorsForced();
-
-                sEglConfig = loadEglConfig();
-            }
-        }
-
-        ManagedEGLContext managedContext = sEglContextStorage.get();
-        mEglContext = managedContext != null ? managedContext.getContext() : null;
-        mEglThread = Thread.currentThread();
-
-        if (mEglContext == null) {
-            mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
-            sEglContextStorage.set(createManagedContext(mEglContext));
-            return true;
-        }
-
-        return false;
-    }
-
-    private EGLConfig loadEglConfig() {
-        EGLConfig eglConfig = chooseEglConfig();
-        if (eglConfig == null) {
-            // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
-            if (sDirtyRegions) {
-                sDirtyRegions = false;
-                eglConfig = chooseEglConfig();
-                if (eglConfig == null) {
-                    throw new RuntimeException("eglConfig not initialized");
-                }
-            } else {
-                throw new RuntimeException("eglConfig not initialized");
-            }
-        }
-        return eglConfig;
-    }
-
-    private EGLConfig chooseEglConfig() {
-        EGLConfig[] configs = new EGLConfig[1];
-        int[] configsCount = new int[1];
-        int[] configSpec = getConfig(sDirtyRegions);
-
-        // Debug
-        final String debug = SystemProperties.get(PRINT_CONFIG_PROPERTY, "");
-        if ("all".equalsIgnoreCase(debug)) {
-            sEgl.eglChooseConfig(sEglDisplay, configSpec, null, 0, configsCount);
-
-            EGLConfig[] debugConfigs = new EGLConfig[configsCount[0]];
-            sEgl.eglChooseConfig(sEglDisplay, configSpec, debugConfigs,
-                    configsCount[0], configsCount);
-
-            for (EGLConfig config : debugConfigs) {
-                printConfig(config);
-            }
-        }
-
-        if (!sEgl.eglChooseConfig(sEglDisplay, configSpec, configs, 1, configsCount)) {
-            throw new IllegalArgumentException("eglChooseConfig failed " +
-                    GLUtils.getEGLErrorString(sEgl.eglGetError()));
-        } else if (configsCount[0] > 0) {
-            if ("choice".equalsIgnoreCase(debug)) {
-                printConfig(configs[0]);
-            }
-            return configs[0];
-        }
-
-        return null;
-    }
-
-    private static void printConfig(EGLConfig config) {
-        int[] value = new int[1];
-
-        Log.d(LOG_TAG, "EGL configuration " + config + ":");
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_RED_SIZE, value);
-        Log.d(LOG_TAG, "  RED_SIZE = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_GREEN_SIZE, value);
-        Log.d(LOG_TAG, "  GREEN_SIZE = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_BLUE_SIZE, value);
-        Log.d(LOG_TAG, "  BLUE_SIZE = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_ALPHA_SIZE, value);
-        Log.d(LOG_TAG, "  ALPHA_SIZE = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_DEPTH_SIZE, value);
-        Log.d(LOG_TAG, "  DEPTH_SIZE = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_STENCIL_SIZE, value);
-        Log.d(LOG_TAG, "  STENCIL_SIZE = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SAMPLE_BUFFERS, value);
-        Log.d(LOG_TAG, "  SAMPLE_BUFFERS = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SAMPLES, value);
-        Log.d(LOG_TAG, "  SAMPLES = " + value[0]);
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SURFACE_TYPE, value);
-        Log.d(LOG_TAG, "  SURFACE_TYPE = 0x" + Integer.toHexString(value[0]));
-
-        sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_CONFIG_CAVEAT, value);
-        Log.d(LOG_TAG, "  CONFIG_CAVEAT = 0x" + Integer.toHexString(value[0]));
-    }
-
-    GL createEglSurface(Surface surface) throws OutOfResourcesException {
-        // Check preconditions.
-        if (sEgl == null) {
-            throw new RuntimeException("egl not initialized");
-        }
-        if (sEglDisplay == null) {
-            throw new RuntimeException("eglDisplay not initialized");
-        }
-        if (sEglConfig == null) {
-            throw new RuntimeException("eglConfig not initialized");
-        }
-        if (Thread.currentThread() != mEglThread) {
-            throw new IllegalStateException("HardwareRenderer cannot be used "
-                    + "from multiple threads");
-        }
-
-        // In case we need to destroy an existing surface
-        destroySurface();
-
+    boolean createEglSurface(Surface surface) throws OutOfResourcesException {
         // Create an EGL surface we can render into.
-        if (!createSurface(surface)) {
-            return null;
+        if (!setSurface(mNativeCanvasContext, surface)) {
+            return false;
         }
+        makeCurrent(mNativeCanvasContext);
+        mSurfaceUpdated = true;
 
         initCaches();
-
-        return mEglContext.getGL();
-    }
-
-    private void enableDirtyRegions() {
-        // If mDirtyRegions is set, this means we have an EGL configuration
-        // with EGL_SWAP_BEHAVIOR_PRESERVED_BIT set
-        if (sDirtyRegions) {
-            if (!(mDirtyRegionsEnabled = GLRenderer.preserveBackBuffer())) {
-                Log.w(LOG_TAG, "Backbuffer cannot be preserved");
-            }
-        } else if (sDirtyRegionsRequested) {
-            // If mDirtyRegions is not set, our EGL configuration does not
-            // have EGL_SWAP_BEHAVIOR_PRESERVED_BIT; however, the default
-            // swap behavior might be EGL_BUFFER_PRESERVED, which means we
-            // want to set mDirtyRegions. We try to do this only if dirty
-            // regions were initially requested as part of the device
-            // configuration (see RENDER_DIRTY_REGIONS)
-            mDirtyRegionsEnabled = GLRenderer.isBackBufferPreserved();
-        }
-    }
-
-    EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
-        final int[] attribs = { EGL14.EGL_CONTEXT_CLIENT_VERSION, GL_VERSION, EGL_NONE };
-
-        EGLContext context = egl.eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT,
-                attribs);
-        if (context == null || context == EGL_NO_CONTEXT) {
-            //noinspection ConstantConditions
-            throw new IllegalStateException(
-                    "Could not create an EGL context. eglCreateContext failed with error: " +
-                    GLUtils.getEGLErrorString(sEgl.eglGetError()));
-        }
-
-        return context;
-    }
-
-    void destroySurface() {
-        if (mEglSurface != null && mEglSurface != EGL_NO_SURFACE) {
-            if (mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW))) {
-                sEgl.eglMakeCurrent(sEglDisplay,
-                        EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-            }
-            sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
-            mEglSurface = null;
-        }
+        return true;
     }
 
     @Override
     void invalidate(Surface surface) {
-        // Cancels any existing buffer to ensure we'll get a buffer
-        // of the right size before we call eglSwapBuffers
-        sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-        if (mEglSurface != null && mEglSurface != EGL_NO_SURFACE) {
-            sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
-            mEglSurface = null;
-            setEnabled(false);
-        }
+        setSurface(mNativeCanvasContext, null);
+        setEnabled(false);
 
         if (surface.isValid()) {
-            if (!createSurface(surface)) {
-                return;
-            }
-
-            mUpdateDirtyRegions = true;
-
-            if (mCanvas != null) {
+            if (createEglSurface(surface) && mCanvas != null) {
                 setEnabled(true);
             }
         }
-    }
-
-    private boolean createSurface(Surface surface) {
-        mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, surface, null);
-
-        if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
-            int error = sEgl.eglGetError();
-            if (error == EGL_BAD_NATIVE_WINDOW) {
-                Log.e(LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
-                return false;
-            }
-            throw new RuntimeException("createWindowSurface failed "
-                    + GLUtils.getEGLErrorString(error));
-        }
-
-        if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-            throw new IllegalStateException("eglMakeCurrent failed " +
-                    GLUtils.getEGLErrorString(sEgl.eglGetError()));
-        }
-
-        enableDirtyRegions();
-
-        return true;
     }
 
     @Override
@@ -1153,8 +714,7 @@ public class RemoteGLRenderer extends HardwareRenderer {
                 dirty = null;
             }
 
-            // We are already on the correct thread
-            final int surfaceState = checkRenderContextUnsafe();
+            final int surfaceState = checkRenderContext();
             if (surfaceState != SURFACE_STATE_ERROR) {
                 HardwareCanvas canvas = mCanvas;
 
@@ -1328,15 +888,16 @@ public class RemoteGLRenderer extends HardwareRenderer {
                 eglSwapBuffersStartTime = System.nanoTime();
             }
 
-            sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
+            if (!swapBuffers(mNativeCanvasContext)) {
+                triggerSoftwareFallback();
+            }
+            mSurfaceUpdated = false;
 
             if (mProfileEnabled) {
                 long now = System.nanoTime();
                 float total = (now - eglSwapBuffersStartTime) * 0.000001f;
                 mProfileData[mProfileCurrentFrame + 2] = total;
             }
-
-            checkEglErrors();
         }
     }
 
@@ -1408,42 +969,11 @@ public class RemoteGLRenderer extends HardwareRenderer {
      * @see #checkRenderContextUnsafe()
      */
     int checkRenderContext() {
-        if (mEglThread != Thread.currentThread()) {
-            throw new IllegalStateException("Hardware acceleration can only be used with a " +
-                    "single UI thread.\nOriginal thread: " + mEglThread + "\n" +
-                    "Current thread: " + Thread.currentThread());
+        if (!makeCurrent(mNativeCanvasContext)) {
+            triggerSoftwareFallback();
+            return SURFACE_STATE_ERROR;
         }
-
-        return checkRenderContextUnsafe();
-    }
-
-    /**
-     * Ensures the current EGL context and surface are the ones we expect.
-     * This method does not check the current thread.
-     *
-     * @return {@link #SURFACE_STATE_ERROR} if the correct EGL context cannot be made current,
-     *         {@link #SURFACE_STATE_UPDATED} if the EGL context was changed or
-     *         {@link #SURFACE_STATE_SUCCESS} if the EGL context was the correct one
-     *
-     * @see #checkRenderContext()
-     */
-    private int checkRenderContextUnsafe() {
-        if (!mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW)) ||
-                !mEglContext.equals(sEgl.eglGetCurrentContext())) {
-            if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                Log.e(LOG_TAG, "eglMakeCurrent failed " +
-                        GLUtils.getEGLErrorString(sEgl.eglGetError()));
-                fallback(true);
-                return SURFACE_STATE_ERROR;
-            } else {
-                if (mUpdateDirtyRegions) {
-                    enableDirtyRegions();
-                    mUpdateDirtyRegions = false;
-                }
-                return SURFACE_STATE_UPDATED;
-            }
-        }
-        return SURFACE_STATE_SUCCESS;
+        return mSurfaceUpdated ? SURFACE_STATE_UPDATED : SURFACE_STATE_SUCCESS;
     }
 
     private static int dpToPx(int dp, float density) {
@@ -1535,4 +1065,11 @@ public class RemoteGLRenderer extends HardwareRenderer {
             if (mGraphType == GRAPH_TYPE_LINES) paint.setStrokeWidth(mThresholdStroke);
         }
     }
+
+    static native long createContext();
+    static native boolean usePBufferSurface();
+    static native boolean setSurface(long nativeCanvasContext, Surface surface);
+    static native boolean swapBuffers(long nativeCanvasContext);
+    static native boolean makeCurrent(long nativeCanvasContext);
+    static native void destroyContext(long nativeCanvasContext);
 }
