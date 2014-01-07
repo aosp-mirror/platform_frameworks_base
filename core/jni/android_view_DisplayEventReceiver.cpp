@@ -207,7 +207,7 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, int32_t id, 
 }
 
 
-static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
+static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
         jobject messageQueueObj) {
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
     if (messageQueue == NULL) {
@@ -226,17 +226,17 @@ static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
     }
 
     receiver->incStrong(gDisplayEventReceiverClassInfo.clazz); // retain a reference for the object
-    return reinterpret_cast<jint>(receiver.get());
+    return reinterpret_cast<jlong>(receiver.get());
 }
 
-static void nativeDispose(JNIEnv* env, jclass clazz, jint receiverPtr) {
+static void nativeDispose(JNIEnv* env, jclass clazz, jlong receiverPtr) {
     sp<NativeDisplayEventReceiver> receiver =
             reinterpret_cast<NativeDisplayEventReceiver*>(receiverPtr);
     receiver->dispose();
     receiver->decStrong(gDisplayEventReceiverClassInfo.clazz); // drop reference held by the object
 }
 
-static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jint receiverPtr) {
+static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jlong receiverPtr) {
     sp<NativeDisplayEventReceiver> receiver =
             reinterpret_cast<NativeDisplayEventReceiver*>(receiverPtr);
     status_t status = receiver->scheduleVsync();
@@ -251,12 +251,12 @@ static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jint receiverPtr) {
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
-            "(Landroid/view/DisplayEventReceiver;Landroid/os/MessageQueue;)I",
+            "(Landroid/view/DisplayEventReceiver;Landroid/os/MessageQueue;)J",
             (void*)nativeInit },
     { "nativeDispose",
-            "(I)V",
+            "(J)V",
             (void*)nativeDispose },
-    { "nativeScheduleVsync", "(I)V",
+    { "nativeScheduleVsync", "(J)V",
             (void*)nativeScheduleVsync }
 };
 
