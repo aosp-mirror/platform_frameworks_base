@@ -36,6 +36,10 @@ struct Vector2 {
         x(px), y(py) {
     }
 
+    float lengthSquared() const {
+        return x * x + y * y;
+    }
+
     float length() const {
         return sqrt(x * x + y * y);
     }
