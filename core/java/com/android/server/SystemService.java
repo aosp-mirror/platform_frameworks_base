@@ -21,7 +21,28 @@ import android.os.IBinder;
 import android.os.ServiceManager;
 
 /**
- * System services respond to lifecycle events that help the services know what
+ * The base class for services running in the system process. Override and implement
+ * the lifecycle event callback methods as needed.
+ *
+ * The lifecycle of a SystemService:
+ *
+ * {@link #onCreate(android.content.Context)} is called to initialize the
+ * service.
+ *
+ * {@link #onStart()} is called to get the service running. It is common
+ * for services to publish their Binder interface at this point. All required
+ * dependencies are also assumed to be ready to use.
+ *
+ * Then {@link #onBootPhase(int)} is called as many times as there are boot phases
+ * until {@link #PHASE_BOOT_COMPLETE} is sent, which is the last boot phase. Each phase
+ * is an opportunity to do special work, like acquiring optional service dependencies,
+ * waiting to see if SafeMode is enabled, or registering with a service that gets
+ * started after this one.
+ *
+ * NOTE: All lifecycle methods are called from the same thread that created the
+ * SystemService.
+ *
+ * {@hide}
  */
 public abstract class SystemService {
     /*

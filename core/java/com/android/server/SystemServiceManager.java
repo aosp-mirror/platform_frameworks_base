@@ -23,7 +23,10 @@ import android.util.Slog;
 import java.util.ArrayList;
 
 /**
- * Manages creating, starting, and other lifecycle events of system services.
+ * Manages creating, starting, and other lifecycle events of
+ * {@link com.android.server.SystemService}s.
+ *
+ * {@hide}
  */
 public class SystemServiceManager {
     private static final String TAG = "SystemServiceManager";
