@@ -183,8 +183,8 @@ public class Visualizer {
     private OnServerDiedListener mServerDiedListener = null;
 
     // accessed by native methods
-    private int mNativeVisualizer;
-    private int mJniData;
+    private long mNativeVisualizer;
+    private long mJniData;
 
     //--------------------------------------------------------------------------
     // Constructor, Finalize
