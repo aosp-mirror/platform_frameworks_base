@@ -100,6 +100,8 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.google.android.collect.Lists;
 
+import dalvik.system.VMRuntime;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -747,6 +749,9 @@ public final class ActivityThread {
             }
 
             setCoreSettings(coreSettings);
+
+            // Tell the VMRuntime about the application.
+            VMRuntime.registerAppInfo(appInfo.dataDir, appInfo.processName);
 
             AppBindData data = new AppBindData();
             data.processName = processName;
