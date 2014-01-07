@@ -36,16 +36,16 @@ public abstract class DisplayEventReceiver {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private int mReceiverPtr;
+    private long mReceiverPtr;
 
     // We keep a reference message queue object here so that it is not
     // GC'd while the native peer of the receiver is using them.
     private MessageQueue mMessageQueue;
 
-    private static native int nativeInit(DisplayEventReceiver receiver,
+    private static native long nativeInit(DisplayEventReceiver receiver,
             MessageQueue messageQueue);
-    private static native void nativeDispose(int receiverPtr);
-    private static native void nativeScheduleVsync(int receiverPtr);
+    private static native void nativeDispose(long receiverPtr);
+    private static native void nativeScheduleVsync(long receiverPtr);
 
     /**
      * Creates a display event receiver.
