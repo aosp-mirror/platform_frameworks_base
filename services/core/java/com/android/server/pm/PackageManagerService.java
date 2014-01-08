@@ -4997,8 +4997,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // discard the previous declaration and consider the system's to be
                             // canonical.
                             if (isSystemApp(p.owner)) {
-                                Slog.i(TAG, "New decl " + p.owner + " of permission  "
-                                        + p.info.name + " is system");
+                                String msg = "New decl " + p.owner + " of permission  "
+                                        + p.info.name + " is system";
+                                reportSettingsProblem(Log.WARN, msg);
                                 bp.sourcePackage = null;
                             }
                         }
