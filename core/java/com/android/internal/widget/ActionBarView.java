@@ -41,6 +41,8 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.ActionMenuPresenter;
+import android.widget.ActionMenuView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -52,8 +54,6 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.transition.ActionBarTransition;
 import com.android.internal.view.menu.ActionMenuItem;
-import com.android.internal.view.menu.ActionMenuPresenter;
-import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
 import com.android.internal.view.menu.MenuPresenter;
@@ -430,6 +430,7 @@ public class ActionBarView extends AbsActionBarView {
             mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
+            layoutParams.height = mContentHeight;
             configPresenters(builder);
             menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             if (mSplitView != null) {

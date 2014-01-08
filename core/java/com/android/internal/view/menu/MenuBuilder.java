@@ -919,7 +919,7 @@ public class MenuBuilder implements Menu {
      *            sub menu is about to be shown, <var>allMenusAreClosing</var>
      *            is false.
      */
-    final void close(boolean allMenusAreClosing) {
+    public final void close(boolean allMenusAreClosing) {
         if (mIsClosing) return;
 
         mIsClosing = true;
@@ -946,7 +946,7 @@ public class MenuBuilder implements Menu {
      *                         false if only item properties changed.
      *                         (Visibility is a structural property since it affects layout.)
      */
-    void onItemsChanged(boolean structureChanged) {
+    public void onItemsChanged(boolean structureChanged) {
         if (!mPreventDispatchingItemsChanged) {
             if (structureChanged) {
                 mIsVisibleItemsStale = true;
@@ -1000,7 +1000,7 @@ public class MenuBuilder implements Menu {
         onItemsChanged(true);
     }
     
-    ArrayList<MenuItemImpl> getVisibleItems() {
+    public ArrayList<MenuItemImpl> getVisibleItems() {
         if (!mIsVisibleItemsStale) return mVisibleItems;
         
         // Refresh the visible items
@@ -1085,12 +1085,12 @@ public class MenuBuilder implements Menu {
         mIsActionItemsStale = false;
     }
     
-    ArrayList<MenuItemImpl> getActionItems() {
+    public ArrayList<MenuItemImpl> getActionItems() {
         flagActionItems();
         return mActionItems;
     }
     
-    ArrayList<MenuItemImpl> getNonActionItems() {
+    public ArrayList<MenuItemImpl> getNonActionItems() {
         flagActionItems();
         return mNonActionItems;
     }
