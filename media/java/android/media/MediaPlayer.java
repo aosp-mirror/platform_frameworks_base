@@ -3077,6 +3077,23 @@ public class MediaPlayer implements SubtitleController.Listener
                 mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
     }
 
+    /** @hide
+    */
+    public boolean suspend() {
+        stayAwake(false);
+        return _suspend();
+    }
+
+    private native boolean _suspend();
+
+    /** @hide
+    */
+    public boolean resume() {
+        return _resume();
+    }
+
+    private native boolean _resume();
+
     /** @hide */
     static class TimeProvider implements MediaPlayer.OnSeekCompleteListener,
             MediaTimeProvider {
