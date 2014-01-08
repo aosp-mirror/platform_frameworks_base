@@ -241,10 +241,10 @@ static int mainWorkCallback(int fd, int events, void* data) {
 
 // ------------------------------------------------------------------------
 
-static jint
+static jlong
 loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName,
         jobject messageQueue, jstring internalDataDir, jstring obbDir,
-        jstring externalDataDir, int sdkVersion,
+        jstring externalDataDir, jint sdkVersion,
         jobject jAssetMgr, jbyteArray savedState)
 {
     LOG_TRACE("loadNativeCode_native");
@@ -338,11 +338,11 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
         }
     }
     
-    return (jint)code;
+    return (jlong)code;
 }
 
 static void
-unloadNativeCode_native(JNIEnv* env, jobject clazz, jint handle)
+unloadNativeCode_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("unloadNativeCode_native");
     if (handle != 0) {
@@ -352,7 +352,7 @@ unloadNativeCode_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onStart_native(JNIEnv* env, jobject clazz, jint handle)
+onStart_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onStart_native");
     if (handle != 0) {
@@ -364,7 +364,7 @@ onStart_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onResume_native(JNIEnv* env, jobject clazz, jint handle)
+onResume_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onResume_native");
     if (handle != 0) {
@@ -376,7 +376,7 @@ onResume_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static jbyteArray
-onSaveInstanceState_native(JNIEnv* env, jobject clazz, jint handle)
+onSaveInstanceState_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onSaveInstanceState_native");
 
@@ -403,7 +403,7 @@ onSaveInstanceState_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onPause_native(JNIEnv* env, jobject clazz, jint handle)
+onPause_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onPause_native");
     if (handle != 0) {
@@ -415,7 +415,7 @@ onPause_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onStop_native(JNIEnv* env, jobject clazz, jint handle)
+onStop_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onStop_native");
     if (handle != 0) {
@@ -427,7 +427,7 @@ onStop_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onConfigurationChanged_native(JNIEnv* env, jobject clazz, jint handle)
+onConfigurationChanged_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onConfigurationChanged_native");
     if (handle != 0) {
@@ -439,7 +439,7 @@ onConfigurationChanged_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onLowMemory_native(JNIEnv* env, jobject clazz, jint handle)
+onLowMemory_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onLowMemory_native");
     if (handle != 0) {
@@ -451,7 +451,7 @@ onLowMemory_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onWindowFocusChanged_native(JNIEnv* env, jobject clazz, jint handle, jboolean focused)
+onWindowFocusChanged_native(JNIEnv* env, jobject clazz, jlong handle, jboolean focused)
 {
     LOG_TRACE("onWindowFocusChanged_native");
     if (handle != 0) {
@@ -463,7 +463,7 @@ onWindowFocusChanged_native(JNIEnv* env, jobject clazz, jint handle, jboolean fo
 }
 
 static void
-onSurfaceCreated_native(JNIEnv* env, jobject clazz, jint handle, jobject surface)
+onSurfaceCreated_native(JNIEnv* env, jobject clazz, jlong handle, jobject surface)
 {
     LOG_TRACE("onSurfaceCreated_native");
     if (handle != 0) {
@@ -483,7 +483,7 @@ static int32_t getWindowProp(ANativeWindow* window, int what) {
 }
 
 static void
-onSurfaceChanged_native(JNIEnv* env, jobject clazz, jint handle, jobject surface,
+onSurfaceChanged_native(JNIEnv* env, jobject clazz, jlong handle, jobject surface,
         jint format, jint width, jint height)
 {
     LOG_TRACE("onSurfaceChanged_native");
@@ -524,7 +524,7 @@ onSurfaceChanged_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
 }
 
 static void
-onSurfaceRedrawNeeded_native(JNIEnv* env, jobject clazz, jint handle)
+onSurfaceRedrawNeeded_native(JNIEnv* env, jobject clazz, jlong handle)
 {
     LOG_TRACE("onSurfaceRedrawNeeded_native");
     if (handle != 0) {
@@ -536,7 +536,7 @@ onSurfaceRedrawNeeded_native(JNIEnv* env, jobject clazz, jint handle)
 }
 
 static void
-onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject surface)
+onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jlong handle, jobject surface)
 {
     LOG_TRACE("onSurfaceDestroyed_native");
     if (handle != 0) {
@@ -550,7 +550,7 @@ onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject surfa
 }
 
 static void
-onInputQueueCreated_native(JNIEnv* env, jobject clazz, jint handle, jint queuePtr)
+onInputQueueCreated_native(JNIEnv* env, jobject clazz, jlong handle, jlong queuePtr)
 {
     LOG_TRACE("onInputChannelCreated_native");
     if (handle != 0) {
@@ -563,7 +563,7 @@ onInputQueueCreated_native(JNIEnv* env, jobject clazz, jint handle, jint queuePt
 }
 
 static void
-onInputQueueDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jint queuePtr)
+onInputQueueDestroyed_native(JNIEnv* env, jobject clazz, jlong handle, jlong queuePtr)
 {
     LOG_TRACE("onInputChannelDestroyed_native");
     if (handle != 0) {
@@ -576,7 +576,7 @@ onInputQueueDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jint queue
 }
 
 static void
-onContentRectChanged_native(JNIEnv* env, jobject clazz, jint handle,
+onContentRectChanged_native(JNIEnv* env, jobject clazz, jlong handle,
         jint x, jint y, jint w, jint h)
 {
     LOG_TRACE("onContentRectChanged_native");
@@ -594,26 +594,26 @@ onContentRectChanged_native(JNIEnv* env, jobject clazz, jint handle,
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "loadNativeCode", "(Ljava/lang/String;Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[B)I",
+    { "loadNativeCode", "(Ljava/lang/String;Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[B)J",
             (void*)loadNativeCode_native },
-    { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
-    { "onStartNative", "(I)V", (void*)onStart_native },
-    { "onResumeNative", "(I)V", (void*)onResume_native },
-    { "onSaveInstanceStateNative", "(I)[B", (void*)onSaveInstanceState_native },
-    { "onPauseNative", "(I)V", (void*)onPause_native },
-    { "onStopNative", "(I)V", (void*)onStop_native },
-    { "onConfigurationChangedNative", "(I)V", (void*)onConfigurationChanged_native },
-    { "onLowMemoryNative", "(I)V", (void*)onLowMemory_native },
-    { "onWindowFocusChangedNative", "(IZ)V", (void*)onWindowFocusChanged_native },
-    { "onSurfaceCreatedNative", "(ILandroid/view/Surface;)V", (void*)onSurfaceCreated_native },
-    { "onSurfaceChangedNative", "(ILandroid/view/Surface;III)V", (void*)onSurfaceChanged_native },
-    { "onSurfaceRedrawNeededNative", "(ILandroid/view/Surface;)V", (void*)onSurfaceRedrawNeeded_native },
-    { "onSurfaceDestroyedNative", "(I)V", (void*)onSurfaceDestroyed_native },
-    { "onInputQueueCreatedNative", "(II)V",
+    { "unloadNativeCode", "(J)V", (void*)unloadNativeCode_native },
+    { "onStartNative", "(J)V", (void*)onStart_native },
+    { "onResumeNative", "(J)V", (void*)onResume_native },
+    { "onSaveInstanceStateNative", "(J)[B", (void*)onSaveInstanceState_native },
+    { "onPauseNative", "(J)V", (void*)onPause_native },
+    { "onStopNative", "(J)V", (void*)onStop_native },
+    { "onConfigurationChangedNative", "(J)V", (void*)onConfigurationChanged_native },
+    { "onLowMemoryNative", "(J)V", (void*)onLowMemory_native },
+    { "onWindowFocusChangedNative", "(JZ)V", (void*)onWindowFocusChanged_native },
+    { "onSurfaceCreatedNative", "(JLandroid/view/Surface;)V", (void*)onSurfaceCreated_native },
+    { "onSurfaceChangedNative", "(JLandroid/view/Surface;III)V", (void*)onSurfaceChanged_native },
+    { "onSurfaceRedrawNeededNative", "(JLandroid/view/Surface;)V", (void*)onSurfaceRedrawNeeded_native },
+    { "onSurfaceDestroyedNative", "(J)V", (void*)onSurfaceDestroyed_native },
+    { "onInputQueueCreatedNative", "(JJ)V",
         (void*)onInputQueueCreated_native },
-    { "onInputQueueDestroyedNative", "(II)V",
+    { "onInputQueueDestroyedNative", "(JJ)V",
         (void*)onInputQueueDestroyed_native },
-    { "onContentRectChangedNative", "(IIIII)V", (void*)onContentRectChanged_native },
+    { "onContentRectChangedNative", "(JIIII)V", (void*)onContentRectChanged_native },
 };
 
 static const char* const kNativeActivityPathName = "android/app/NativeActivity";
