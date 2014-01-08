@@ -60,7 +60,7 @@ static light_device_t* get_device(hw_module_t* module, char const* name)
     }
 }
 
-static jint init_native(JNIEnv *env, jobject clazz)
+static jlong init_native(JNIEnv *env, jobject clazz)
 {
     int err;
     hw_module_t* module;
@@ -90,10 +90,10 @@ static jint init_native(JNIEnv *env, jobject clazz)
         memset(devices, 0, sizeof(Devices));
     }
 
-    return (jint)devices;
+    return (jlong)devices;
 }
 
-static void finalize_native(JNIEnv *env, jobject clazz, int ptr)
+static void finalize_native(JNIEnv *env, jobject clazz, jlong ptr)
 {
     Devices* devices = (Devices*)ptr;
     if (devices == NULL) {
@@ -103,8 +103,8 @@ static void finalize_native(JNIEnv *env, jobject clazz, int ptr)
     free(devices);
 }
 
-static void setLight_native(JNIEnv *env, jobject clazz, int ptr,
-        int light, int colorARGB, int flashMode, int onMS, int offMS, int brightnessMode)
+static void setLight_native(JNIEnv *env, jobject clazz, jlong ptr,
+        jint light, jint colorARGB, jint flashMode, jint onMS, jint offMS, jint brightnessMode)
 {
     Devices* devices = (Devices*)ptr;
     light_state_t state;
@@ -127,9 +127,9 @@ static void setLight_native(JNIEnv *env, jobject clazz, int ptr,
 }
 
 static JNINativeMethod method_table[] = {
-    { "init_native", "()I", (void*)init_native },
-    { "finalize_native", "(I)V", (void*)finalize_native },
-    { "setLight_native", "(IIIIIII)V", (void*)setLight_native },
+    { "init_native", "()J", (void*)init_native },
+    { "finalize_native", "(J)V", (void*)finalize_native },
+    { "setLight_native", "(JIIIIII)V", (void*)setLight_native },
 };
 
 int register_android_server_LightsService(JNIEnv *env)

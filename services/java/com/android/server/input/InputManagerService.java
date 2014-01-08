@@ -107,7 +107,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_RELOAD_DEVICE_ALIASES = 5;
 
     // Pointer to native input manager service object.
-    private final int mPtr;
+    private final long mPtr;
 
     private final Context mContext;
     private final InputManagerHandler mHandler;
@@ -146,46 +146,46 @@ public class InputManagerService extends IInputManager.Stub
     IInputFilter mInputFilter; // guarded by mInputFilterLock
     InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
 
-    private static native int nativeInit(InputManagerService service,
+    private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
-    private static native void nativeStart(int ptr);
-    private static native void nativeSetDisplayViewport(int ptr, boolean external,
+    private static native void nativeStart(long ptr);
+    private static native void nativeSetDisplayViewport(long ptr, boolean external,
             int displayId, int rotation,
             int logicalLeft, int logicalTop, int logicalRight, int logicalBottom,
             int physicalLeft, int physicalTop, int physicalRight, int physicalBottom,
             int deviceWidth, int deviceHeight);
 
-    private static native int nativeGetScanCodeState(int ptr,
+    private static native int nativeGetScanCodeState(long ptr,
             int deviceId, int sourceMask, int scanCode);
-    private static native int nativeGetKeyCodeState(int ptr,
+    private static native int nativeGetKeyCodeState(long ptr,
             int deviceId, int sourceMask, int keyCode);
-    private static native int nativeGetSwitchState(int ptr,
+    private static native int nativeGetSwitchState(long ptr,
             int deviceId, int sourceMask, int sw);
-    private static native boolean nativeHasKeys(int ptr,
+    private static native boolean nativeHasKeys(long ptr,
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
-    private static native void nativeRegisterInputChannel(int ptr, InputChannel inputChannel,
+    private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel,
             InputWindowHandle inputWindowHandle, boolean monitor);
-    private static native void nativeUnregisterInputChannel(int ptr, InputChannel inputChannel);
-    private static native void nativeSetInputFilterEnabled(int ptr, boolean enable);
-    private static native int nativeInjectInputEvent(int ptr, InputEvent event,
+    private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
+    private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
+    private static native int nativeInjectInputEvent(long ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
-    private static native void nativeSetInputWindows(int ptr, InputWindowHandle[] windowHandles);
-    private static native void nativeSetInputDispatchMode(int ptr, boolean enabled, boolean frozen);
-    private static native void nativeSetSystemUiVisibility(int ptr, int visibility);
-    private static native void nativeSetFocusedApplication(int ptr,
+    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles);
+    private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
+    private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
+    private static native void nativeSetFocusedApplication(long ptr,
             InputApplicationHandle application);
-    private static native boolean nativeTransferTouchFocus(int ptr,
+    private static native boolean nativeTransferTouchFocus(long ptr,
             InputChannel fromChannel, InputChannel toChannel);
-    private static native void nativeSetPointerSpeed(int ptr, int speed);
-    private static native void nativeSetShowTouches(int ptr, boolean enabled);
-    private static native void nativeVibrate(int ptr, int deviceId, long[] pattern,
+    private static native void nativeSetPointerSpeed(long ptr, int speed);
+    private static native void nativeSetShowTouches(long ptr, boolean enabled);
+    private static native void nativeVibrate(long ptr, int deviceId, long[] pattern,
             int repeat, int token);
-    private static native void nativeCancelVibrate(int ptr, int deviceId, int token);
-    private static native void nativeReloadKeyboardLayouts(int ptr);
-    private static native void nativeReloadDeviceAliases(int ptr);
-    private static native String nativeDump(int ptr);
-    private static native void nativeMonitor(int ptr);
+    private static native void nativeCancelVibrate(long ptr, int deviceId, int token);
+    private static native void nativeReloadKeyboardLayouts(long ptr);
+    private static native void nativeReloadDeviceAliases(long ptr);
+    private static native String nativeDump(long ptr);
+    private static native void nativeMonitor(long ptr);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
