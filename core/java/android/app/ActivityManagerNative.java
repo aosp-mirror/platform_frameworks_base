@@ -2031,6 +2031,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_ACTIVITY_CONTAINER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder activityToken = data.readStrongBinder();
+            IActivityContainer activityContainer = getEnclosingActivityContainer(activityToken);
+            reply.writeNoException();
+            reply.writeStrongBinder(activityContainer.asBinder());
+            return true;
+        }
+
         case GET_HOME_ACTIVITY_TOKEN_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder homeActivityToken = getHomeActivityToken();
@@ -4660,6 +4669,21 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(parentActivityToken);
         data.writeStrongBinder((IBinder)callback);
         mRemote.transact(CREATE_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        IActivityContainer res =
+                IActivityContainer.Stub.asInterface(reply.readStrongBinder());
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(activityToken);
+        mRemote.transact(GET_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
         reply.readException();
         IActivityContainer res =
                 IActivityContainer.Stub.asInterface(reply.readStrongBinder());

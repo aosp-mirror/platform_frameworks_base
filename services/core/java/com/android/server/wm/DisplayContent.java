@@ -191,6 +191,9 @@ class DisplayContent {
     }
 
     TaskStack getHomeStack() {
+        if (mHomeStack == null) {
+            Slog.e(TAG, "getHomeStack: Returning null from this=" + this);
+        }
         return mHomeStack;
     }
 
@@ -429,5 +432,10 @@ class DisplayContent {
             }
         }
         pw.println();
+    }
+
+    @Override
+    public String toString() {
+        return "Display " + mDisplayId + " info=" + mDisplayInfo + " stacks=" + mStacks;
     }
 }
