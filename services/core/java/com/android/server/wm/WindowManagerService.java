@@ -4781,11 +4781,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 final TaskStack stack = task.mStack;
                 final DisplayContent displayContent = task.getDisplayContent();
                 displayContent.moveStack(stack, true);
-                final TaskStack homeStack = displayContent.getHomeStack();
-                if (homeStack != stack) {
-                    // When a non-home stack moves to the top, the home stack moves to the
-                    // bottom.
-                    displayContent.moveStack(homeStack, false);
+                if (displayContent.isDefaultDisplay) {
+                    final TaskStack homeStack = displayContent.getHomeStack();
+                    if (homeStack != stack) {
+                        // When a non-home stack moves to the top, the home stack moves to the
+                        // bottom.
+                        displayContent.moveStack(homeStack, false);
+                    }
                 }
                 stack.moveTaskToTop(task);
             }
@@ -8981,6 +8983,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int N = windows.size();
                 for (i=N-1; i>=0; i--) {
                     WindowState w = windows.get(i);
+                    final TaskStack stack = w.getStack();
+                    if (stack == null) {
+                        continue;
+                    }
 
                     final boolean obscuredChanged = w.mObscured != mInnerFields.mObscured;
 
@@ -8990,7 +8996,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         handleNotObscuredLocked(w, currentTime, innerDw, innerDh);
                     }
 
-                    if (!w.getStack().testDimmingTag()) {
+                    if (!stack.testDimmingTag()) {
                         handleFlagDimBehind(w, innerDw, innerDh);
                     }
 

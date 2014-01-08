@@ -2229,15 +2229,26 @@ public final class ActivityThread {
         ContextImpl appContext = new ContextImpl();
         appContext.init(r.packageInfo, r.token, this);
         appContext.setOuterContext(activity);
+        Context baseContext = appContext;
+
+        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+        try {
+            IActivityContainer container =
+                    ActivityManagerNative.getDefault().getEnclosingActivityContainer(r.token);
+            final int displayId = container.getDisplayId();
+            if (displayId > Display.DEFAULT_DISPLAY) {
+                Display display = dm.getRealDisplay(displayId, r.token);
+                baseContext = appContext.createDisplayContext(display);
+            }
+        } catch (RemoteException e) {
+        }
 
         // For debugging purposes, if the activity's package name contains the value of
         // the "debug.use-second-display" system property as a substring, then show
         // its content on a secondary display if there is one.
-        Context baseContext = appContext;
         String pkgName = SystemProperties.get("debug.second-display.pkg");
         if (pkgName != null && !pkgName.isEmpty()
                 && r.packageInfo.mPackageName.contains(pkgName)) {
-            DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
             for (int displayId : dm.getDisplayIds()) {
                 if (displayId != Display.DEFAULT_DISPLAY) {
                     Display display = dm.getRealDisplay(displayId, r.token);

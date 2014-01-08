@@ -109,7 +109,7 @@ public class Am extends BaseCommand {
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
-                "       am stack create <TASK_ID> <DISPLAY_ID>\n" +
+                "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack list\n" +
@@ -207,7 +207,7 @@ public class Am extends BaseCommand {
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit switch to it.\n" +
                 "\n" +
-                "am stack create: create a new stack containing <TASK_ID> which must exist\n" +
+                "am stack start: start a new activity on <DISPLAY_ID> using <INTENT>.\n" +
                 "\n" +
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
@@ -1541,8 +1541,8 @@ public class Am extends BaseCommand {
 
     private void runStack() throws Exception {
         String op = nextArgRequired();
-        if (op.equals("create")) {
-            runStackCreate();
+        if (op.equals("start")) {
+            runStackStart();
         } else if (op.equals("movetask")) {
             runStackMoveTask();
         } else if (op.equals("resize")) {
@@ -1557,19 +1557,16 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runStackCreate() throws Exception {
-        String taskIdStr = nextArgRequired();
-        int taskId = Integer.valueOf(taskIdStr);
+    private void runStackStart() throws Exception {
         String displayIdStr = nextArgRequired();
         int displayId = Integer.valueOf(displayIdStr);
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
 
         try {
             IBinder homeActivityToken = mAm.getHomeActivityToken();
             IActivityContainer container = mAm.createActivityContainer(homeActivityToken, null);
-            final int stackId = container.getStackId();
-            System.out.println("createStack returned new stackId=" + stackId + "\n");
             container.attachToDisplay(displayId);
-            mAm.moveTaskToStack(taskId, stackId, true);
+            container.startActivity(intent);
         } catch (RemoteException e) {
         }
     }

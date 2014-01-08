@@ -60,7 +60,8 @@ final class TaskRecord extends ThumbnailHolder {
     /** Takes on same set of values as ActivityRecord.mActivityType */
     private int mTaskType;
 
-    /** Launch the home activity when leaving this task. */
+    /** Launch the home activity when leaving this task. Will be false for tasks that are not on
+     * Display.DEFAULT_DISPLAY. */
     boolean mOnTopOfHome = false;
 
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {

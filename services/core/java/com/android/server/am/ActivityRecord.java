@@ -146,6 +146,7 @@ final class ActivityRecord {
     private boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
     boolean mStartingWindowShown = false;
+    ActivityContainer mInitialActivityContainer;
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -350,7 +351,8 @@ final class ActivityRecord {
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
-            boolean _componentSpecified, ActivityStackSupervisor supervisor) {
+            boolean _componentSpecified, ActivityStackSupervisor supervisor,
+            ActivityContainer container) {
         service = _service;
         appToken = new Token(this);
         info = aInfo;
@@ -381,6 +383,7 @@ final class ActivityRecord {
         idle = false;
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
+        mInitialActivityContainer = container;
 
         // This starts out true, since the initial state of an activity
         // is that we have everything, and we shouldn't never consider it
