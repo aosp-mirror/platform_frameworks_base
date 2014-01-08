@@ -115,6 +115,7 @@ public final class DisplayManager {
       * </p>
      *
      * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
      */
     public static final int VIRTUAL_DISPLAY_FLAG_PUBLIC = 1 << 0;
 
@@ -170,6 +171,22 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      */
     public static final int VIRTUAL_DISPLAY_FLAG_SECURE = 1 << 2;
+
+    /**
+     * Virtual display flag: Only show this display's own content; do not mirror
+     * the content of another display.
+     *
+     * <p>
+     * This flag is used in conjunction with {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}.
+     * Ordinarily public virtual displays will automatically mirror the content of the
+     * default display if they have no windows of their own.  When this flag is
+     * specified, the virtual display will only ever show its own content and
+     * will be blanked instead if it has no windows.
+     * </p>
+     *
+     * @see #createVirtualDisplay
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 1 << 3;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -429,8 +446,8 @@ public final class DisplayManager {
      * @param surface The surface to which the content of the virtual display should
      * be rendered, must be non-null.
      * @param flags A combination of virtual display flags:
-     * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION}
-     * or {@link #VIRTUAL_DISPLAY_FLAG_SECURE}.
+     * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION},
+     * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, or {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
      * @return The newly created virtual display, or null if the application could
      * not create the virtual display.
      *

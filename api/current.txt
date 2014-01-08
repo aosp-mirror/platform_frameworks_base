@@ -10870,6 +10870,7 @@ package android.hardware.display {
     method public void registerDisplayListener(android.hardware.display.DisplayManager.DisplayListener, android.os.Handler);
     method public void unregisterDisplayListener(android.hardware.display.DisplayManager.DisplayListener);
     field public static final java.lang.String DISPLAY_CATEGORY_PRESENTATION = "android.hardware.display.category.PRESENTATION";
+    field public static final int VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 8; // 0x8
     field public static final int VIRTUAL_DISPLAY_FLAG_PRESENTATION = 2; // 0x2
     field public static final int VIRTUAL_DISPLAY_FLAG_PUBLIC = 1; // 0x1
     field public static final int VIRTUAL_DISPLAY_FLAG_SECURE = 4; // 0x4
