@@ -21,19 +21,26 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 
 import android.telecomm.ICallServiceProvider;
+import android.telecomm.ICallServiceLookupResponse;
+import android.util.Log;
 
 /**
- * Base implementation of CallServiceProvider service which implements ICallServiceProvider.
- * Its primary function is to provide implementations of {@link ICallService} which itself
- * can be used to provide calls for the framework's telecomm component.
+ * Base implementation of {@link ICallServiceProvider} which extends {@link Service}. This class
+ * should be extended by an app that wants to supply phone calls to be handled and managed by
+ * the device's in-call interface. All method-calls from the framework to
+ * {@link ICallServiceProvider} are passed through to the main thread for before executing the
+ * overriden methods of CallServiceProvider.
  *
  * TODO(santoscordon): Improve paragraph above once the final design is in place. Needs more
  * about how this can be used.
  * @hide
  */
 public abstract class CallServiceProvider extends Service {
+    /** Used to identify log entries by this class. */
+    private static final String TAG = CallServiceProvider.class.getSimpleName();
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -42,8 +49,8 @@ public abstract class CallServiceProvider extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SET_CALL_SERVICE_PROVIDER_ADAPTER:
-                    setCallServiceProviderAdapter((ICallServiceProviderAdapter) msg.obj);
+                case MSG_LOOKUP_CALL_SERVICES:
+                    lookupCallServices((ICallServiceLookupResponse) msg.obj);
                     break;
                 default:
                     break;
@@ -55,15 +62,13 @@ public abstract class CallServiceProvider extends Service {
      * Default ICallServiceProvider implementation provided to CallsManager via {@link #onBind}.
      */
     private final class CallServiceProviderWrapper extends ICallServiceProvider.Stub {
+        /** {@inheritDoc} */
         @Override
-        public void setCallServiceProviderAdapter(
-                ICallServiceProviderAdapter CallServiceProviderAdapter) {
-            mMessageHandler.obtainMessage(MSG_SET_CALL_SERVICE_PROVIDER_ADAPTER,
-                    CallServiceProviderAdapter).sendToTarget();
+        public void lookupCallServices(ICallServiceLookupResponse callServiceLookupResponse) {
+            Message message = mMessageHandler.obtainMessage(
+                    MSG_LOOKUP_CALL_SERVICES, callServiceLookupResponse);
+            message.sendToTarget();
         }
-
-        @Override
-        public void initiateDiscoveryProtocol() {}
     }
 
     // Only used internally by this class.
@@ -71,7 +76,7 @@ public abstract class CallServiceProvider extends Service {
     // in conjunction with {@link #mMessageHandler} to ensure that all callbacks are handled on a
     // single thread.  Keeping it on a single thread allows CallService implementations to avoid
     // needing multi-threaded code in their own callback routines.
-    private static final int MSG_SET_CALL_SERVICE_PROVIDER_ADAPTER = 1;
+    private static final int MSG_LOOKUP_CALL_SERVICES = 1;
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
@@ -99,12 +104,10 @@ public abstract class CallServiceProvider extends Service {
     }
 
     /**
-     * Sets an implementation of ICallServiceProviderAdapter for adding providing instances of
-     * ICallService.
-     * TODO(santoscordon): Should we not reference ICallServiceProviderAdapter directly from here?
-     * Should we wrap that in a wrapper like we do for CallServiceProvider/ICallServiceProvider?
-     * @param callServiceAdapter Adapter object for communicating call to CallsManager
+     * Initiates the process to retrieve the list of {@link ICallService}s implemented by
+     * this provider.
+     *
+     * @param response The response object through which the list of call services is sent.
      */
-    public abstract void setCallServiceProviderAdapter(
-            ICallServiceProviderAdapter CallServiceProviderAdapter);
+    public abstract void lookupCallServices(ICallServiceLookupResponse response);
 }

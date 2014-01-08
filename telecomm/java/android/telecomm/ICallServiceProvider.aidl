@@ -16,7 +16,7 @@
 
 package android.telecomm;
 
-import android.telecomm.ICallServiceProviderAdapter;
+import android.telecomm.ICallServiceLookupResponse;
 
 /**
  * Interface for applications interested in providing call-service implementations.  Only used in
@@ -24,9 +24,8 @@ import android.telecomm.ICallServiceProviderAdapter;
  * decided dynamically (unlike incoming call scenario where the call-service is known).
  *
  * Intended usage at time of writing is: Call intent received by the CallsManager, which in turn
- * gathers and binds all ICallServiceProvider implementations (using the framework).  The actual
- * bind is between each CallServiceProvider and the CallServiceProviderAdapter.  Once bound, the
- * CallsManager invokes the initiateDiscoveryProtocol API of each bound provider and waits until
+ * gathers and binds all ICallServiceProvider implementations (using the framework). Once bound, the
+ * CallsManager invokes the lookupCallServices API of each bound provider and waits until
  * either all providers reply (asynchronously) or some timeout is met. The resulted list is then
  * processed by the CallsManager and its helpers (potentially requesting input from the user) to
  * identify the best CallService.  The user should obviously be notified upon zero candidates as
@@ -36,17 +35,12 @@ import android.telecomm.ICallServiceProviderAdapter;
 oneway interface ICallServiceProvider {
 
     /**
-     * Sets an implementation of ICallServiceProviderAdapter to allow call-service providers to
-     * communicate with the CallsManager.
+     * Initiates the process to retrieve the list of {@link ICallService}s implemented by
+     * this provider.
+     * TODO(santoscordon): Needs comments on how to populate the list within
+     * ICallServiceLookupResponse and how to handle error conditions.
      *
-     * @param callServiceProviderAdapter The interface through which {@link ICallService}
-     *     implementations are passed to CallsManager.
+     * @param response The response object through which the list of call services is sent.
      */
-    void setCallServiceProviderAdapter(in ICallServiceProviderAdapter callServiceProviderAdapter);
-
-    /**
-     * Provides the application with the opportunity to "register" ICallServiceProvider
-     * implementations with the CallsManager for the purpose of issuing outgoing calls.
-     */
-    void initiateDiscoveryProtocol();
+    void lookupCallServices(in ICallServiceLookupResponse response);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
 
 package android.telecomm;
 
-import android.telecomm.ICallService;
+import android.os.IBinder;
+import java.util.List;
 
 /**
- * Provides ICallServiceProvider implementations with the relevant CallsManager APIs.
+ * Used by {@link ICallServiceProvider} to return a list of {@link ICallService} implementations.
  * @hide
  */
-oneway interface ICallServiceProviderAdapter {
-
+oneway interface ICallServiceLookupResponse {
     /**
-     * Provides the CallsManager with the services made available by this application.
+     * Receives the list of {@link ICallService}s as a list of {@link IBinder}s.
      *
-     * @param callServices The relevant services to make the CallsManager aware of. Parameter is
-     *     a list of IBinder which can be cast to ICallService.
-     *     NOTE: IBinder is required by AIDL processor when passing a list of interfaces.
+     * @param bundle Container for the list of call services.
      */
-    void registerCallServices(in List<IBinder> callServices);
+    void onResult(in List<IBinder> callServices);
 }
