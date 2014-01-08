@@ -868,12 +868,10 @@ public class LockPatternView extends View {
 
         // TODO: the path should be created and cached every time we hit-detect a cell
         // only the last segment of the path should be computed here
-        // draw the path of the pattern (unless the user is in progress, and
-        // we are in stealth mode)
-        final boolean drawPath = (!mInStealthMode || mPatternDisplayMode == DisplayMode.Wrong);
+        // draw the path of the pattern (unless we are in stealth mode)
+        final boolean drawPath = !mInStealthMode;
 
-        // draw the arrows associated with the path (unless the user is in progress, and
-        // we are in stealth mode)
+        // draw the arrows associated with the path (unless we are in stealth mode)
         boolean oldFlag = (mPaint.getFlags() & Paint.FILTER_BITMAP_FLAG) != 0;
         mPaint.setFilterBitmap(true); // draw with higher quality since we render with transforms
         if (drawPath) {
@@ -974,7 +972,7 @@ public class LockPatternView extends View {
         Bitmap outerCircle;
         Bitmap innerCircle;
 
-        if (!partOfPattern || (mInStealthMode && mPatternDisplayMode != DisplayMode.Wrong)) {
+        if (!partOfPattern || mInStealthMode) {
             // unselected circle
             outerCircle = mBitmapCircleDefault;
             innerCircle = mBitmapBtnDefault;
