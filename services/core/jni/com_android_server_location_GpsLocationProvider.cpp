@@ -417,7 +417,7 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
     if (sGpsGeofencingInterface)
         sGpsGeofencingInterface->init(&sGpsGeofenceCallbacks);
 
-    return JNI_FALSE;
+    return JNI_TRUE;
 }
 
 static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject obj)
