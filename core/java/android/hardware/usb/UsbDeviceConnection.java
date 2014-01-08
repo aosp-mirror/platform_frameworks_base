@@ -32,7 +32,7 @@ public class UsbDeviceConnection {
     private final UsbDevice mDevice;
 
     // used by the JNI code
-    private int mNativeContext;
+    private long mNativeContext;
 
     /**
      * UsbDevice should only be instantiated by UsbService implementation
