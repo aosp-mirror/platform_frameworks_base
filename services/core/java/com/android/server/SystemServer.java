@@ -77,8 +77,6 @@ import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
-import com.android.server.wifi.WifiService;
-import com.android.server.wifi.p2p.WifiP2pService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -161,8 +159,6 @@ class ServerThread {
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
-        WifiP2pService wifiP2p = null;
-        WifiService wifi = null;
         NsdService serviceDiscovery= null;
         IPackageManager pm = null;
         Context context = null;
@@ -513,18 +509,16 @@ class ServerThread {
                     reportWtf("starting NetworkPolicy Service", e);
                 }
 
-               try {
+                try {
                     Slog.i(TAG, "Wi-Fi P2pService");
-                    wifiP2p = new WifiP2pService(context);
-                    ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
+                    systemServiceManager.startService("com.android.server.wifi.p2p.WifiP2pService");
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi P2pService", e);
                 }
 
-               try {
+                try {
                     Slog.i(TAG, "Wi-Fi Service");
-                    wifi = new WifiService(context);
-                    ServiceManager.addService(Context.WIFI_SERVICE, wifi);
+                    systemServiceManager.startService("com.android.server.wifi.WifiService");
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi Service", e);
                 }
@@ -536,9 +530,6 @@ class ServerThread {
                     ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
                     networkStats.bindConnectivityManager(connectivity);
                     networkPolicy.bindConnectivityManager(connectivity);
-
-                    wifiP2p.connectivityServiceReady();
-                    wifi.checkAndStartWifi();
                 } catch (Throwable e) {
                     reportWtf("starting Connectivity Service", e);
                 }
