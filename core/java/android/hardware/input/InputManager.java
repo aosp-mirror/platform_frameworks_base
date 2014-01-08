@@ -26,6 +26,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Vibrator;
@@ -373,20 +375,17 @@ public final class InputManager {
     }
 
     /**
-     * Gets the current keyboard layout descriptor for the specified input device.
+     * Gets the current keyboard layout descriptor for the specified input
+     * device.
      *
-     * @param inputDeviceDescriptor The input device descriptor.
-     * @return The keyboard layout descriptor, or null if no keyboard layout has been set.
-     *
+     * @param identifier Identifier for the input device
+     * @return The keyboard layout descriptor, or null if no keyboard layout has
+     *         been set.
      * @hide
      */
-    public String getCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor) {
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-
+    public String getCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier) {
         try {
-            return mIm.getCurrentKeyboardLayoutForInputDevice(inputDeviceDescriptor);
+            return mIm.getCurrentKeyboardLayoutForInputDevice(identifier);
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not get current keyboard layout for input device.", ex);
             return null;
@@ -394,28 +393,29 @@ public final class InputManager {
     }
 
     /**
-     * Sets the current keyboard layout descriptor for the specified input device.
+     * Sets the current keyboard layout descriptor for the specified input
+     * device.
      * <p>
-     * This method may have the side-effect of causing the input device in question
-     * to be reconfigured.
+     * This method may have the side-effect of causing the input device in
+     * question to be reconfigured.
      * </p>
      *
-     * @param inputDeviceDescriptor The input device descriptor.
-     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use, must not be null.
-     *
+     * @param identifier The identifier for the input device.
+     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use,
+     *            must not be null.
      * @hide
      */
-    public void setCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    public void setCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
-        if (inputDeviceDescriptor == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        if (identifier == null) {
+            throw new IllegalArgumentException("identifier must not be null");
         }
         if (keyboardLayoutDescriptor == null) {
             throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
         }
 
         try {
-            mIm.setCurrentKeyboardLayoutForInputDevice(inputDeviceDescriptor,
+            mIm.setCurrentKeyboardLayoutForInputDevice(identifier,
                     keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not set current keyboard layout for input device.", ex);
@@ -423,20 +423,20 @@ public final class InputManager {
     }
 
     /**
-     * Gets all keyboard layout descriptors that are enabled for the specified input device.
+     * Gets all keyboard layout descriptors that are enabled for the specified
+     * input device.
      *
-     * @param inputDeviceDescriptor The input device descriptor.
+     * @param identifier The identifier for the input device.
      * @return The keyboard layout descriptors.
-     *
      * @hide
      */
-    public String[] getKeyboardLayoutsForInputDevice(String inputDeviceDescriptor) {
-        if (inputDeviceDescriptor == null) {
+    public String[] getKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
+        if (identifier == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
 
         try {
-            return mIm.getKeyboardLayoutsForInputDevice(inputDeviceDescriptor);
+            return mIm.getKeyboardLayoutsForInputDevice(identifier);
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not get keyboard layouts for input device.", ex);
             return ArrayUtils.emptyArray(String.class);
@@ -446,18 +446,18 @@ public final class InputManager {
     /**
      * Adds the keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in question
-     * to be reconfigured.
+     * This method may have the side-effect of causing the input device in
+     * question to be reconfigured.
      * </p>
      *
-     * @param inputDeviceDescriptor The input device descriptor.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to add.
-     *
+     * @param identifier The identifier for the input device.
+     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to
+     *            add.
      * @hide
      */
-    public void addKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
-        if (inputDeviceDescriptor == null) {
+        if (identifier == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
         if (keyboardLayoutDescriptor == null) {
@@ -465,7 +465,7 @@ public final class InputManager {
         }
 
         try {
-            mIm.addKeyboardLayoutForInputDevice(inputDeviceDescriptor, keyboardLayoutDescriptor);
+            mIm.addKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not add keyboard layout for input device.", ex);
         }
@@ -474,18 +474,18 @@ public final class InputManager {
     /**
      * Removes the keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in question
-     * to be reconfigured.
+     * This method may have the side-effect of causing the input device in
+     * question to be reconfigured.
      * </p>
      *
-     * @param inputDeviceDescriptor The input device descriptor.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to remove.
-     *
+     * @param identifier The identifier for the input device.
+     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to
+     *            remove.
      * @hide
      */
-    public void removeKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    public void removeKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
-        if (inputDeviceDescriptor == null) {
+        if (identifier == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
         if (keyboardLayoutDescriptor == null) {
@@ -493,7 +493,7 @@ public final class InputManager {
         }
 
         try {
-            mIm.removeKeyboardLayoutForInputDevice(inputDeviceDescriptor, keyboardLayoutDescriptor);
+            mIm.removeKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not remove keyboard layout for input device.", ex);
         }
