@@ -35,7 +35,7 @@ static jfieldID field_context;
 
 struct usb_device* get_device_from_object(JNIEnv* env, jobject connection)
 {
-    return (struct usb_device*)env->GetIntField(connection, field_context);
+    return (struct usb_device*)env->GetLongField(connection, field_context);
 }
 
 static jboolean
@@ -46,19 +46,19 @@ android_hardware_UsbDeviceConnection_open(JNIEnv *env, jobject thiz, jstring dev
     // duplicate the file descriptor, since ParcelFileDescriptor will eventually close its copy
     fd = dup(fd);
     if (fd < 0)
-        return false;
+        return JNI_FALSE;
 
     const char *deviceNameStr = env->GetStringUTFChars(deviceName, NULL);
     struct usb_device* device = usb_device_new(deviceNameStr, fd);
     if (device) {
-        env->SetIntField(thiz, field_context, (int)device);
+        env->SetLongField(thiz, field_context, (jlong)device);
     } else {
         ALOGE("usb_device_open failed for %s", deviceNameStr);
         close(fd);
     }
 
     env->ReleaseStringUTFChars(deviceName, deviceNameStr);
-    return (device != NULL);
+    return (device != NULL) ? JNI_TRUE : JNI_FALSE;
 }
 
 static void
@@ -68,7 +68,7 @@ android_hardware_UsbDeviceConnection_close(JNIEnv *env, jobject thiz)
     struct usb_device* device = get_device_from_object(env, thiz);
     if (device) {
         usb_device_close(device);
-        env->SetIntField(thiz, field_context, 0);
+        env->SetLongField(thiz, field_context, 0);
     }
 }
 
@@ -106,12 +106,12 @@ android_hardware_UsbDeviceConnection_get_desc(JNIEnv *env, jobject thiz)
 
 static jboolean
 android_hardware_UsbDeviceConnection_claim_interface(JNIEnv *env, jobject thiz,
-        int interfaceID, jboolean force)
+        jint interfaceID, jboolean force)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
         ALOGE("device is closed in native_claim_interface");
-        return -1;
+        return JNI_FALSE;
     }
 
     int ret = usb_device_claim_interface(device, interfaceID);
@@ -120,11 +120,11 @@ android_hardware_UsbDeviceConnection_claim_interface(JNIEnv *env, jobject thiz,
         usb_device_connect_kernel_driver(device, interfaceID, false);
         ret = usb_device_claim_interface(device, interfaceID);
     }
-    return ret == 0;
+    return (ret == 0) ? JNI_TRUE : JNI_FALSE;
 }
 
 static jint
-android_hardware_UsbDeviceConnection_release_interface(JNIEnv *env, jobject thiz, int interfaceID)
+android_hardware_UsbDeviceConnection_release_interface(JNIEnv *env, jobject thiz, jint interfaceID)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
@@ -246,7 +246,7 @@ int register_android_hardware_UsbDeviceConnection(JNIEnv *env)
         ALOGE("Can't find android/hardware/usb/UsbDeviceConnection");
         return -1;
     }
-    field_context = env->GetFieldID(clazz, "mNativeContext", "I");
+    field_context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (field_context == NULL) {
         ALOGE("Can't find UsbDeviceConnection.mNativeContext");
         return -1;
