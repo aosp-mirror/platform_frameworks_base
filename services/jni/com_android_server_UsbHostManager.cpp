@@ -73,6 +73,9 @@ static int usb_device_added(const char *devname, void* client_data) {
     uint8_t deviceClass = deviceDesc->bDeviceClass;
     uint8_t deviceSubClass = deviceDesc->bDeviceSubClass;
     uint8_t protocol = deviceDesc->bDeviceProtocol;
+    char *manufacturer = usb_device_get_manufacturer_name(device);
+    char *product = usb_device_get_product_name(device);
+    char *serial = usb_device_get_serial(device);
 
     usb_descriptor_iter_init(device, &iter);
 
@@ -109,12 +112,19 @@ static int usb_device_added(const char *devname, void* client_data) {
     env->SetIntArrayRegion(endpointArray, 0, length, endpointValues.array());
 
     jstring deviceName = env->NewStringUTF(devname);
+    jstring manufacturerName = env->NewStringUTF(manufacturer);
+    jstring productName = env->NewStringUTF(product);
+    jstring serialNumber = env->NewStringUTF(serial);
     env->CallVoidMethod(thiz, method_usbDeviceAdded,
             deviceName, vendorId, productId, deviceClass,
-            deviceSubClass, protocol, interfaceArray, endpointArray);
+            deviceSubClass, protocol, manufacturerName,
+            productName, serialNumber, interfaceArray, endpointArray);
 
     env->DeleteLocalRef(interfaceArray);
     env->DeleteLocalRef(endpointArray);
+    env->DeleteLocalRef(serialNumber);
+    env->DeleteLocalRef(productName);
+    env->DeleteLocalRef(manufacturerName);
     env->DeleteLocalRef(deviceName);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 
@@ -179,7 +189,7 @@ int register_android_server_UsbHostManager(JNIEnv *env)
         ALOGE("Can't find com/android/server/usb/UsbHostManager");
         return -1;
     }
-    method_usbDeviceAdded = env->GetMethodID(clazz, "usbDeviceAdded", "(Ljava/lang/String;IIIII[I[I)V");
+    method_usbDeviceAdded = env->GetMethodID(clazz, "usbDeviceAdded", "(Ljava/lang/String;IIIIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[I[I)V");
     if (method_usbDeviceAdded == NULL) {
         ALOGE("Can't find usbDeviceAdded");
         return -1;
