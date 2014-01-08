@@ -498,7 +498,7 @@ public class Content {
                                     columnValue = String.valueOf(cursor.getFloat(columnIndex));
                                     break;
                                 case Cursor.FIELD_TYPE_INTEGER:
-                                    columnValue = String.valueOf(cursor.getInt(columnIndex));
+                                    columnValue = String.valueOf(cursor.getLong(columnIndex));
                                     break;
                                 case Cursor.FIELD_TYPE_STRING:
                                     columnValue = cursor.getString(columnIndex);
