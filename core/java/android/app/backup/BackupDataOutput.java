@@ -62,7 +62,7 @@ import java.io.IOException;
  * @see BackupAgent
  */
 public class BackupDataOutput {
-    int mBackupWriter;
+    long mBackupWriter;
 
     /** @hide */
     public BackupDataOutput(FileDescriptor fd) {
@@ -121,11 +121,11 @@ public class BackupDataOutput {
         }
     }
 
-    private native static int ctor(FileDescriptor fd);
-    private native static void dtor(int mBackupWriter);
+    private native static long ctor(FileDescriptor fd);
+    private native static void dtor(long mBackupWriter);
 
-    private native static int writeEntityHeader_native(int mBackupWriter, String key, int dataSize);
-    private native static int writeEntityData_native(int mBackupWriter, byte[] data, int size);
-    private native static void setKeyPrefix_native(int mBackupWriter, String keyPrefix);
+    private native static int writeEntityHeader_native(long mBackupWriter, String key, int dataSize);
+    private native static int writeEntityData_native(long mBackupWriter, byte[] data, int size);
+    private native static void setKeyPrefix_native(long mBackupWriter, String keyPrefix);
 }
 

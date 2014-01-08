@@ -29,25 +29,25 @@ namespace android
 static jfieldID s_keyField = 0;
 static jfieldID s_dataSizeField = 0;
 
-static int
+static jlong
 ctor_native(JNIEnv* env, jobject clazz, jobject fileDescriptor)
 {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (fd == -1) {
-        return NULL;
+        return (jlong)NULL;
     }
 
-    return (int)new BackupDataReader(fd);
+    return (jlong)new BackupDataReader(fd);
 }
 
 static void
-dtor_native(JNIEnv* env, jobject clazz, int r)
+dtor_native(JNIEnv* env, jobject clazz, jlong r)
 {
     delete (BackupDataReader*)r;
 }
 
 static jint
-readNextHeader_native(JNIEnv* env, jobject clazz, int r, jobject entity)
+readNextHeader_native(JNIEnv* env, jobject clazz, jlong r, jobject entity)
 {
     int err;
     bool done;
@@ -89,7 +89,7 @@ readNextHeader_native(JNIEnv* env, jobject clazz, int r, jobject entity)
 }
 
 static jint
-readEntityData_native(JNIEnv* env, jobject clazz, int r, jbyteArray data, int offset, int size)
+readEntityData_native(JNIEnv* env, jobject clazz, jlong r, jbyteArray data, jint offset, jint size)
 {
     int err;
     BackupDataReader* reader = (BackupDataReader*)r;
@@ -112,7 +112,7 @@ readEntityData_native(JNIEnv* env, jobject clazz, int r, jbyteArray data, int of
 }
 
 static jint
-skipEntityData_native(JNIEnv* env, jobject clazz, int r)
+skipEntityData_native(JNIEnv* env, jobject clazz, jlong r)
 {
     int err;
     BackupDataReader* reader = (BackupDataReader*)r;
@@ -123,12 +123,12 @@ skipEntityData_native(JNIEnv* env, jobject clazz, int r)
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "ctor", "(Ljava/io/FileDescriptor;)I", (void*)ctor_native },
-    { "dtor", "(I)V", (void*)dtor_native },
-    { "readNextHeader_native", "(ILandroid/app/backup/BackupDataInput$EntityHeader;)I",
+    { "ctor", "(Ljava/io/FileDescriptor;)J", (void*)ctor_native },
+    { "dtor", "(J)V", (void*)dtor_native },
+    { "readNextHeader_native", "(JLandroid/app/backup/BackupDataInput$EntityHeader;)I",
             (void*)readNextHeader_native },
-    { "readEntityData_native", "(I[BII)I", (void*)readEntityData_native },
-    { "skipEntityData_native", "(I)I", (void*)skipEntityData_native },
+    { "readEntityData_native", "(J[BII)I", (void*)readEntityData_native },
+    { "skipEntityData_native", "(J)I", (void*)skipEntityData_native },
 };
 
 int register_android_backup_BackupDataInput(JNIEnv* env)
