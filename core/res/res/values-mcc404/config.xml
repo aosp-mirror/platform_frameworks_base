@@ -20,6 +20,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Show roaming icon though same named operators. -->
     <string-array translatable="false" name="config_sameNamedOperatorConsideredRoaming">
-        <item>40491</item>
+        <item>404</item>
+        <item>405</item>
     </string-array>
 </resources>
