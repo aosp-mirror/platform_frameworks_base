@@ -26,7 +26,7 @@ public final class InputApplicationHandle {
     // Pointer to the native input application handle.
     // This field is lazily initialized via JNI.
     @SuppressWarnings("unused")
-    private int ptr;
+    private long ptr;
 
     // The window manager's application window token.
     public final Object appWindowToken;
