@@ -195,11 +195,11 @@ public class LightsService extends SystemService {
         }
     };
 
-    private static native int init_native();
-    private static native void finalize_native(int ptr);
+    private static native long init_native();
+    private static native void finalize_native(long ptr);
 
-    static native void setLight_native(int ptr, int light, int color, int mode,
+    static native void setLight_native(long ptr, int light, int color, int mode,
             int onMS, int offMS, int brightnessMode);
 
-    int mNativePointer;
+    private long mNativePointer;
 }
