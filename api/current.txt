@@ -11027,7 +11027,10 @@ package android.hardware.usb {
     method public int getDeviceSubclass();
     method public android.hardware.usb.UsbInterface getInterface(int);
     method public int getInterfaceCount();
+    method public java.lang.String getManufacturerName();
     method public int getProductId();
+    method public java.lang.String getProductName();
+    method public java.lang.String getSerialNumber();
     method public int getVendorId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
