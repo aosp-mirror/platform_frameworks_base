@@ -46,7 +46,7 @@ public final class InputChannel implements Parcelable {
     };
     
     @SuppressWarnings("unused")
-    private int mPtr; // used by native code
+    private long mPtr; // used by native code
     
     private static native InputChannel[] nativeOpenInputChannelPair(String name);
     
