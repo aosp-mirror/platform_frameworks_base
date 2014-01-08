@@ -40,7 +40,7 @@ struct chunk_header_v1 {
 static jfieldID s_chunkSizeField = 0;
 static jfieldID s_keyPrefixField = 0;
 
-static int
+static jint
 readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
 {
     chunk_header_v1 flattenedHeader;
@@ -52,7 +52,7 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
 
     amt = read(fd, &flattenedHeader.headerSize, sizeof(flattenedHeader.headerSize));
     if (amt != sizeof(flattenedHeader.headerSize)) {
-        return -1;
+        return (jint) -1;
     }
 
     int remainingHeader = flattenedHeader.headerSize - sizeof(flattenedHeader.headerSize);
@@ -62,7 +62,7 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
         if (remainingHeader > 0) {
             lseek(fd, remainingHeader, SEEK_CUR);
             // >0 means skip this chunk
-            return 1;
+            return (jint) 1;
         }
     }
 
@@ -70,7 +70,7 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
             sizeof(chunk_header_v1)-sizeof(flattenedHeader.headerSize));
     if (amt <= 0) {
         ALOGW("Failed reading chunk header");
-        return -1;
+        return (jint) -1;
     }
     remainingHeader -= sizeof(chunk_header_v1)-sizeof(flattenedHeader.headerSize);
 
@@ -80,7 +80,7 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
         if (remainingHeader > 0) {
             lseek(fd, remainingHeader, SEEK_CUR);
             // >0 means skip this chunk
-            return 1;
+            return (jint) 1;
         }
     }
 
@@ -96,13 +96,13 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
             remainingHeader < flattenedHeader.nameLength) {
         ALOGW("Malformed V1 header remainingHeader=%d dataSize=%d nameLength=%d", remainingHeader,
                 flattenedHeader.dataSize, flattenedHeader.nameLength);
-        return -1;
+        return (jint) -1;
     }
 
     buf = keyPrefix.lockBuffer(flattenedHeader.nameLength);
     if (buf == NULL) {
         ALOGW("unable to allocate %d bytes", flattenedHeader.nameLength);
-        return -1;
+        return (jint) -1;
     }
 
     amt = read(fd, buf, flattenedHeader.nameLength);
@@ -119,17 +119,17 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
     env->SetIntField(headerObj, s_chunkSizeField, flattenedHeader.dataSize);
     env->SetObjectField(headerObj, s_keyPrefixField, env->NewStringUTF(keyPrefix.string()));
 
-    return 0;
+    return (jint) 0;
 }
 
-static int
+static jint
 skipChunk_native(JNIEnv* env, jobject clazz, jobject fdObj, jint bytesToSkip)
 {
     int fd = jniGetFDFromFileDescriptor(env, fdObj);
 
     lseek(fd, bytesToSkip, SEEK_CUR);
 
-    return 0;
+    return (jint) 0;
 }
 
 static int
@@ -139,7 +139,7 @@ padding_len(int len)
     return len == 0 ? len : 4 - len;
 }
 
-static int
+static jint
 allocateHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
 {
     int pos;
@@ -161,10 +161,10 @@ allocateHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdO
 
     lseek(fd, headerSize, SEEK_CUR);
 
-    return pos;
+    return (jint) pos;
 }
 
-static int
+static jint
 writeHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj, jint pos)
 {
     int err;
@@ -188,26 +188,26 @@ writeHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj,
     lseek(fd, pos, SEEK_SET);
     err = write(fd, &header, sizeof(chunk_header_v1));
     if (err != sizeof(chunk_header_v1)) {
-        return errno;
+        return (jint) errno;
     }
 
     buf = env->GetStringUTFChars(nameObj, NULL);
     err = write(fd, buf, header.nameLength);
     env->ReleaseStringUTFChars(nameObj, buf);
     if (err != header.nameLength) {
-        return errno;
+        return (jint) errno;
     }
 
     if (namePadding != 0) {
         int zero = 0;
         err = write(fd, &zero, namePadding);
         if (err != namePadding) {
-            return errno;
+            return (jint) errno;
         }
     }
 
     lseek(fd, prevPos, SEEK_SET);
-    return 0;
+    return (jint) 0;
 }
 
 static const JNINativeMethod g_methods[] = {

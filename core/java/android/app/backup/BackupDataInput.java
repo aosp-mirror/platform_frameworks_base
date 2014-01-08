@@ -59,7 +59,7 @@ import java.io.IOException;
  * }</pre>
  */
 public class BackupDataInput {
-    int mBackupReader;
+    long mBackupReader;
 
     private EntityHeader mHeader = new EntityHeader();
     private boolean mHeaderReady;
@@ -185,10 +185,10 @@ public class BackupDataInput {
         }
     }
 
-    private native static int ctor(FileDescriptor fd);
-    private native static void dtor(int mBackupReader);
+    private native static long ctor(FileDescriptor fd);
+    private native static void dtor(long mBackupReader);
 
-    private native int readNextHeader_native(int mBackupReader, EntityHeader entity);
-    private native int readEntityData_native(int mBackupReader, byte[] data, int offset, int size);
-    private native int skipEntityData_native(int mBackupReader);
+    private native int readNextHeader_native(long mBackupReader, EntityHeader entity);
+    private native int readEntityData_native(long mBackupReader, byte[] data, int offset, int size);
+    private native int skipEntityData_native(long mBackupReader);
 }
