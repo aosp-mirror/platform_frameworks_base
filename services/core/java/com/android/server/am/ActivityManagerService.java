@@ -2948,7 +2948,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
                     mStackSupervisor.startActivityLocked(null, intent, null, ri.activityInfo,
-                            null, null, 0, 0, 0, null, 0, null, false, null);
+                            null, null, 0, 0, 0, null, 0, null, false, null, null);
                 }
             }
         }
@@ -3106,7 +3106,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
-                null, null, options, userId);
+                null, null, options, userId, null);
     }
 
     @Override
@@ -3121,7 +3121,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
-                res, null, options, UserHandle.getCallingUserId());
+                res, null, options, UserHandle.getCallingUserId(), null);
         return res;
     }
 
@@ -3136,7 +3136,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, resultTo, resultWho, requestCode, startFlags,
-                null, null, null, config, options, userId);
+                null, null, null, config, options, userId, null);
         return ret;
     }
 
@@ -3267,7 +3267,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int res = mStackSupervisor.startActivityLocked(r.app.thread, intent,
                     r.resolvedType, aInfo, resultTo != null ? resultTo.appToken : null,
                     resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage, 0,
-                    options, false, null);
+                    options, false, null, null);
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;
@@ -3288,7 +3288,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
-                null, null, null, null, options, userId);
+                null, null, null, null, options, userId, null);
         return ret;
     }
 
@@ -7122,6 +7122,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return null;
             }
             return mStackSupervisor.createActivityContainer(r, callback);
+        }
+    }
+
+    @Override
+    public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
+            throws RemoteException {
+        synchronized (this) {
+            ActivityStack stack = ActivityRecord.getStackLocked(activityToken);
+            if (stack != null) {
+                return stack.mActivityContainer;
+            }
+            return null;
         }
     }
 

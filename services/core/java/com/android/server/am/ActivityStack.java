@@ -227,8 +227,11 @@ final class ActivityStack {
     int mCurrentUser;
 
     final int mStackId;
-
     final ActivityContainer mActivityContainer;
+    /** The other stacks, in order, on the attached display. Updated at attach/detach time. */
+    ArrayList<ActivityStack> mStacks;
+    /** The attached Display's unique identifier, or -1 if detached */
+    int mDisplayId;
 
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
@@ -446,11 +449,23 @@ final class ActivityStack {
         return mStackId == HOME_STACK_ID;
     }
 
-    ArrayList<ActivityStack> getStacksLocked() {
-        if (mActivityContainer.isAttached()) {
-            return mActivityContainer.mActivityDisplayInfo.stacks;
+    final boolean isOnHomeDisplay() {
+        return isAttached() &&
+                mActivityContainer.mActivityDisplay.mDisplayId == Display.DEFAULT_DISPLAY;
+    }
+
+    final void moveToFront() {
+        if (isAttached()) {
+            mStacks.remove(this);
+            mStacks.add(this);
+            if (isOnHomeDisplay()) {
+                mStackSupervisor.moveHomeStack(isHomeStack());
+            }
         }
-        return null;
+    }
+
+    final boolean isAttached() {
+        return mStacks != null;
     }
 
     /**
@@ -1252,7 +1267,8 @@ final class ActivityStack {
             ActivityOptions.abort(options);
             if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: No more activities go home");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-            return mStackSupervisor.resumeHomeActivity(prev);
+            // Only resume home if on home display
+            return isOnHomeDisplay() && mStackSupervisor.resumeHomeActivity(prev);
         }
 
         next.delayedResume = false;
@@ -1282,8 +1298,10 @@ final class ActivityStack {
                 final int taskNdx = mTaskHistory.indexOf(prevTask) + 1;
                 mTaskHistory.get(taskNdx).mOnTopOfHome = true;
             } else {
-                if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Launching home next");
-                return mStackSupervisor.resumeHomeActivity(prev);
+                if (DEBUG_STATES && isOnHomeDisplay()) Slog.d(TAG,
+                        "resumeTopActivityLocked: Launching home next");
+                // Only resume home if on home display
+                return isOnHomeDisplay() && mStackSupervisor.resumeHomeActivity(prev);
             }
         }
 
@@ -1645,10 +1663,14 @@ final class ActivityStack {
     private void insertTaskAtTop(TaskRecord task) {
         // If this is being moved to the top by another activity or being launched from the home
         // activity, set mOnTopOfHome accordingly.
-        ActivityStack lastStack = mStackSupervisor.getLastStack();
-        final boolean fromHome = lastStack == null ? true : lastStack.isHomeStack();
-        if (!isHomeStack() && (fromHome || topTask() != task)) {
-            task.mOnTopOfHome = fromHome;
+        if (isOnHomeDisplay()) {
+            ActivityStack lastStack = mStackSupervisor.getLastStack();
+            final boolean fromHome = lastStack.isHomeStack();
+            if (!isHomeStack() && (fromHome || topTask() != task)) {
+                task.mOnTopOfHome = fromHome;
+            }
+        } else {
+            task.mOnTopOfHome = false;
         }
 
         mTaskHistory.remove(task);
@@ -2574,7 +2596,7 @@ final class ActivityStack {
                     int res = mStackSupervisor.startActivityLocked(srec.app.thread, destIntent,
                             null, aInfo, parent.appToken, null,
                             0, -1, parent.launchedFromUid, parent.launchedFromPackage,
-                            0, null, true, null);
+                            0, null, true, null, null);
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
                 } catch (RemoteException e) {
                     foundParentInTask = false;
@@ -3026,7 +3048,7 @@ final class ActivityStack {
             return;
         }
 
-        mStackSupervisor.moveHomeStack(isHomeStack());
+        moveToFront();
 
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
@@ -3135,7 +3157,7 @@ final class ActivityStack {
         }
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
-        if (task == tr && task.mOnTopOfHome || numTasks <= 1) {
+        if (task == tr && tr.mOnTopOfHome || numTasks <= 1 && isOnHomeDisplay()) {
             tr.mOnTopOfHome = false;
             return mStackSupervisor.resumeHomeActivity(null);
         }
