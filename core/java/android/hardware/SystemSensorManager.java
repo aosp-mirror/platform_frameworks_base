@@ -222,14 +222,14 @@ public class SystemSensorManager extends SensorManager {
      * the queues and the listeners.
      */
     private static abstract class BaseEventQueue {
-        private native int nativeInitBaseEventQueue(BaseEventQueue eventQ, MessageQueue msgQ,
+        private native long nativeInitBaseEventQueue(BaseEventQueue eventQ, MessageQueue msgQ,
                 float[] scratch);
-        private static native int nativeEnableSensor(int eventQ, int handle, int rateUs,
+        private static native int nativeEnableSensor(long eventQ, int handle, int rateUs,
                 int maxBatchReportLatencyUs, int reservedFlags);
-        private static native int nativeDisableSensor(int eventQ, int handle);
-        private static native void nativeDestroySensorEventQueue(int eventQ);
-        private static native int nativeFlushSensor(int eventQ);
-        private int nSensorEventQueue;
+        private static native int nativeDisableSensor(long eventQ, int handle);
+        private static native void nativeDestroySensorEventQueue(long eventQ);
+        private static native int nativeFlushSensor(long eventQ);
+        private long nSensorEventQueue;
         private final SparseBooleanArray mActiveSensors = new SparseBooleanArray();
         protected final SparseIntArray mSensorAccuracies = new SparseIntArray();
         protected final SparseBooleanArray mFirstEvent = new SparseBooleanArray();

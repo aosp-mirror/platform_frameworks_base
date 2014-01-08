@@ -37,7 +37,7 @@ public class UsbRequest {
     private static final String TAG = "UsbRequest";
 
     // used by the JNI code
-    private int mNativeContext;
+    private long mNativeContext;
 
     private UsbEndpoint mEndpoint;
 
