@@ -90,7 +90,7 @@ sp<InputApplicationHandle> android_server_InputApplicationHandle_getHandle(
 
     AutoMutex _l(gHandleMutex);
 
-    int ptr = env->GetIntField(inputApplicationHandleObj, gInputApplicationHandleClassInfo.ptr);
+    jlong ptr = env->GetLongField(inputApplicationHandleObj, gInputApplicationHandleClassInfo.ptr);
     NativeInputApplicationHandle* handle;
     if (ptr) {
         handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
@@ -98,8 +98,8 @@ sp<InputApplicationHandle> android_server_InputApplicationHandle_getHandle(
         jweak objWeak = env->NewWeakGlobalRef(inputApplicationHandleObj);
         handle = new NativeInputApplicationHandle(objWeak);
         handle->incStrong((void*)android_server_InputApplicationHandle_getHandle);
-        env->SetIntField(inputApplicationHandleObj, gInputApplicationHandleClassInfo.ptr,
-                reinterpret_cast<int>(handle));
+        env->SetLongField(inputApplicationHandleObj, gInputApplicationHandleClassInfo.ptr,
+                reinterpret_cast<jlong>(handle));
     }
     return handle;
 }
@@ -110,9 +110,9 @@ sp<InputApplicationHandle> android_server_InputApplicationHandle_getHandle(
 static void android_server_InputApplicationHandle_nativeDispose(JNIEnv* env, jobject obj) {
     AutoMutex _l(gHandleMutex);
 
-    int ptr = env->GetIntField(obj, gInputApplicationHandleClassInfo.ptr);
+    jlong ptr = env->GetLongField(obj, gInputApplicationHandleClassInfo.ptr);
     if (ptr) {
-        env->SetIntField(obj, gInputApplicationHandleClassInfo.ptr, 0);
+        env->SetLongField(obj, gInputApplicationHandleClassInfo.ptr, 0);
 
         NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
         handle->decStrong((void*)android_server_InputApplicationHandle_getHandle);
@@ -143,7 +143,7 @@ int register_android_server_InputApplicationHandle(JNIEnv* env) {
     FIND_CLASS(clazz, "com/android/server/input/InputApplicationHandle");
 
     GET_FIELD_ID(gInputApplicationHandleClassInfo.ptr, clazz,
-            "ptr", "I");
+            "ptr", "J");
 
     GET_FIELD_ID(gInputApplicationHandleClassInfo.name, clazz,
             "name", "Ljava/lang/String;");

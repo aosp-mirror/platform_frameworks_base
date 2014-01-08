@@ -173,7 +173,7 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
 
     AutoMutex _l(gHandleMutex);
 
-    int ptr = env->GetIntField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr);
+    jlong ptr = env->GetLongField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr);
     NativeInputWindowHandle* handle;
     if (ptr) {
         handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
@@ -187,8 +187,8 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
         jweak objWeak = env->NewWeakGlobalRef(inputWindowHandleObj);
         handle = new NativeInputWindowHandle(inputApplicationHandle, objWeak);
         handle->incStrong((void*)android_server_InputWindowHandle_getHandle);
-        env->SetIntField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr,
-                reinterpret_cast<int>(handle));
+        env->SetLongField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr,
+                reinterpret_cast<jlong>(handle));
     }
     return handle;
 }
@@ -199,9 +199,9 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
 static void android_server_InputWindowHandle_nativeDispose(JNIEnv* env, jobject obj) {
     AutoMutex _l(gHandleMutex);
 
-    int ptr = env->GetIntField(obj, gInputWindowHandleClassInfo.ptr);
+    jlong ptr = env->GetLongField(obj, gInputWindowHandleClassInfo.ptr);
     if (ptr) {
-        env->SetIntField(obj, gInputWindowHandleClassInfo.ptr, 0);
+        env->SetLongField(obj, gInputWindowHandleClassInfo.ptr, 0);
 
         NativeInputWindowHandle* handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
         handle->decStrong((void*)android_server_InputWindowHandle_getHandle);
@@ -232,7 +232,7 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
     FIND_CLASS(clazz, "com/android/server/input/InputWindowHandle");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, clazz,
-            "ptr", "I");
+            "ptr", "J");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputApplicationHandle,
             clazz,

@@ -201,13 +201,13 @@ public class LightsService {
         }
     };
 
-    private static native int init_native();
-    private static native void finalize_native(int ptr);
+    private static native long init_native();
+    private static native void finalize_native(long ptr);
 
-    private static native void setLight_native(int ptr, int light, int color, int mode,
+    private static native void setLight_native(long ptr, int light, int color, int mode,
             int onMS, int offMS, int brightnessMode);
 
     private final Context mContext;
 
-    private int mNativePointer;
+    private long mNativePointer;
 }
