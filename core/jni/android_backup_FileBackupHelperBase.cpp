@@ -25,20 +25,20 @@
 namespace android
 {
 
-static int
+static jlong
 ctor(JNIEnv* env, jobject clazz)
 {
-    return (int)new RestoreHelperBase();
+    return (jlong)new RestoreHelperBase();
 }
 
 static void
-dtor(JNIEnv* env, jobject clazz, jint ptr)
+dtor(JNIEnv* env, jobject clazz, jlong ptr)
 {
     delete (RestoreHelperBase*)ptr;
 }
 
-static int
-performBackup_native(JNIEnv* env, jobject clazz, jobject oldState, int data,
+static jint
+performBackup_native(JNIEnv* env, jobject clazz, jobject oldState, jlong data,
         jobject newState, jobjectArray files, jobjectArray keys)
 {
     int err;
@@ -72,12 +72,12 @@ performBackup_native(JNIEnv* env, jobject clazz, jobject oldState, int data,
     }
     free(keysUTF);
 
-    return err;
+    return (jint) err;
 }
 
 
-static int
-writeFile_native(JNIEnv* env, jobject clazz, jint ptr, jstring filenameObj, int backupReaderPtr)
+static jint
+writeFile_native(JNIEnv* env, jobject clazz, jlong ptr, jstring filenameObj, jlong backupReaderPtr)
 {
     int err;
     RestoreHelperBase* restore = (RestoreHelperBase*)ptr;
@@ -90,11 +90,11 @@ writeFile_native(JNIEnv* env, jobject clazz, jint ptr, jstring filenameObj, int 
 
     env->ReleaseStringUTFChars(filenameObj, filename);
 
-    return err;
+    return (jint) err;
 }
 
-static int
-writeSnapshot_native(JNIEnv* env, jobject clazz, jint ptr, jobject fileDescriptor)
+static jint
+writeSnapshot_native(JNIEnv* env, jobject clazz, jlong ptr, jobject fileDescriptor)
 {
     int err;
 
@@ -103,17 +103,17 @@ writeSnapshot_native(JNIEnv* env, jobject clazz, jint ptr, jobject fileDescripto
 
     err = restore->WriteSnapshot(fd);
 
-    return err;
+    return (jint) err;
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "ctor", "()I", (void*)ctor },
-    { "dtor", "(I)V", (void*)dtor },
+    { "ctor", "()J", (void*)ctor },
+    { "dtor", "(J)V", (void*)dtor },
     { "performBackup_native",
-       "(Ljava/io/FileDescriptor;ILjava/io/FileDescriptor;[Ljava/lang/String;[Ljava/lang/String;)I",
+       "(Ljava/io/FileDescriptor;JLjava/io/FileDescriptor;[Ljava/lang/String;[Ljava/lang/String;)I",
        (void*)performBackup_native },
-    { "writeFile_native", "(ILjava/lang/String;I)I", (void*)writeFile_native },
-    { "writeSnapshot_native", "(ILjava/io/FileDescriptor;)I", (void*)writeSnapshot_native },
+    { "writeFile_native", "(JLjava/lang/String;J)I", (void*)writeFile_native },
+    { "writeSnapshot_native", "(JLjava/io/FileDescriptor;)I", (void*)writeSnapshot_native },
 };
 
 int register_android_backup_FileBackupHelperBase(JNIEnv* env)

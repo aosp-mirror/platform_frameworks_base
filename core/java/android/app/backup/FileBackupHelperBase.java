@@ -29,7 +29,7 @@ import java.io.FileDescriptor;
 class FileBackupHelperBase {
     private static final String TAG = "FileBackupHelperBase";
 
-    int mPtr;
+    long mPtr;
     Context mContext;
     boolean mExceptionLogged;
     
@@ -115,14 +115,13 @@ class FileBackupHelperBase {
         return false;
     }
 
-    private static native int ctor();
-    private static native void dtor(int ptr);
+    private static native long ctor();
+    private static native void dtor(long ptr);
 
     native private static int performBackup_native(FileDescriptor oldState,
-            int data, FileDescriptor newState, String[] files, String[] keys);
-    
-    private static native int writeFile_native(int ptr, String filename, int backupReader);
-    private static native int writeSnapshot_native(int ptr, FileDescriptor fd);
+            long data, FileDescriptor newState, String[] files, String[] keys);
+    private static native int writeFile_native(long ptr, String filename, long backupReader);
+    private static native int writeSnapshot_native(long ptr, FileDescriptor fd);
 }
 
 

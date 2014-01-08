@@ -70,7 +70,7 @@ static struct {
  * path:        absolute path to the file to be saved
  * dataOutput:  the BackupDataOutput object that we're saving into
  */
-static int backupToTar(JNIEnv* env, jobject clazz, jstring packageNameObj,
+static jint backupToTar(JNIEnv* env, jobject clazz, jstring packageNameObj,
         jstring domainObj, jstring linkdomain,
         jstring rootpathObj, jstring pathObj, jobject dataOutputObj) {
     int ret;
@@ -92,22 +92,22 @@ static int backupToTar(JNIEnv* env, jobject clazz, jstring packageNameObj,
     if (packagenamechars) env->ReleaseStringUTFChars(packageNameObj, packagenamechars);
 
     // Extract the data output fd
-    BackupDataWriter* writer = (BackupDataWriter*) env->GetIntField(dataOutputObj,
+    BackupDataWriter* writer = (BackupDataWriter*) env->GetLongField(dataOutputObj,
             sBackupDataOutput.mBackupWriter);
 
     // Validate
     if (!writer) {
         ALOGE("No output stream provided [%s]", path.string());
-        return -1;
+        return (jint) -1;
     }
 
     if (path.length() < rootpath.length()) {
         ALOGE("file path [%s] shorter than root path [%s]",
                 path.string(), rootpath.string());
-        return -1;
+        return (jint) -1;
     }
 
-    return write_tarfile(packageName, domain, rootpath, path, writer);
+    return (jint) write_tarfile(packageName, domain, rootpath, path, writer);
 }
 
 static const JNINativeMethod g_methods[] = {
@@ -121,7 +121,7 @@ int register_android_app_backup_FullBackup(JNIEnv* env)
     jclass clazz = env->FindClass("android/app/backup/BackupDataOutput");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.app.backup.BackupDataOutput");
 
-    sBackupDataOutput.mBackupWriter = env->GetFieldID(clazz, "mBackupWriter", "I");
+    sBackupDataOutput.mBackupWriter = env->GetFieldID(clazz, "mBackupWriter", "J");
     LOG_FATAL_IF(sBackupDataOutput.mBackupwriter == NULL,
             "Unable to find mBackupWriter field in android.app.backup.BackupDataOutput");
 

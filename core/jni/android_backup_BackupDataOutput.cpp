@@ -25,25 +25,25 @@
 namespace android
 {
 
-static int
+static jlong
 ctor_native(JNIEnv* env, jobject clazz, jobject fileDescriptor)
 {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (fd == -1) {
-        return NULL;
+        return (jlong)NULL;
     }
 
-    return (int)new BackupDataWriter(fd);
+    return (jlong)new BackupDataWriter(fd);
 }
 
 static void
-dtor_native(JNIEnv* env, jobject clazz, int w)
+dtor_native(JNIEnv* env, jobject clazz, jlong w)
 {
     delete (BackupDataWriter*)w;
 }
 
 static jint
-writeEntityHeader_native(JNIEnv* env, jobject clazz, int w, jstring key, int dataSize)
+writeEntityHeader_native(JNIEnv* env, jobject clazz, jlong w, jstring key, jint dataSize)
 {
     int err;
     BackupDataWriter* writer = (BackupDataWriter*)w;
@@ -56,11 +56,11 @@ writeEntityHeader_native(JNIEnv* env, jobject clazz, int w, jstring key, int dat
 
     env->ReleaseStringUTFChars(key, keyUTF);
 
-    return err;
+    return (jint)err;
 }
 
 static jint
-writeEntityData_native(JNIEnv* env, jobject clazz, int w, jbyteArray data, int size)
+writeEntityData_native(JNIEnv* env, jobject clazz, jlong w, jbyteArray data, jint size)
 {
     int err;
     BackupDataWriter* writer = (BackupDataWriter*)w;
@@ -79,11 +79,11 @@ writeEntityData_native(JNIEnv* env, jobject clazz, int w, jbyteArray data, int s
 
     env->ReleaseByteArrayElements(data, dataBytes, JNI_ABORT);
 
-    return err;
+    return (jint)err;
 }
 
 static void
-setKeyPrefix_native(JNIEnv* env, jobject clazz, int w, jstring keyPrefixObj)
+setKeyPrefix_native(JNIEnv* env, jobject clazz, jlong w, jstring keyPrefixObj)
 {
     int err;
     BackupDataWriter* writer = (BackupDataWriter*)w;
@@ -97,11 +97,11 @@ setKeyPrefix_native(JNIEnv* env, jobject clazz, int w, jstring keyPrefixObj)
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "ctor", "(Ljava/io/FileDescriptor;)I", (void*)ctor_native },
-    { "dtor", "(I)V", (void*)dtor_native },
-    { "writeEntityHeader_native", "(ILjava/lang/String;I)I", (void*)writeEntityHeader_native },
-    { "writeEntityData_native", "(I[BI)I", (void*)writeEntityData_native },
-    { "setKeyPrefix_native", "(ILjava/lang/String;)V", (void*)setKeyPrefix_native },
+    { "ctor", "(Ljava/io/FileDescriptor;)J", (void*)ctor_native },
+    { "dtor", "(J)V", (void*)dtor_native },
+    { "writeEntityHeader_native", "(JLjava/lang/String;I)I", (void*)writeEntityHeader_native },
+    { "writeEntityData_native", "(J[BI)I", (void*)writeEntityData_native },
+    { "setKeyPrefix_native", "(JLjava/lang/String;)V", (void*)setKeyPrefix_native },
 };
 
 int register_android_backup_BackupDataOutput(JNIEnv* env)
