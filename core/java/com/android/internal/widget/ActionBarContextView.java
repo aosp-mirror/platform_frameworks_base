@@ -16,8 +16,8 @@
 package com.android.internal.widget;
 
 import com.android.internal.R;
-import com.android.internal.view.menu.ActionMenuPresenter;
-import com.android.internal.view.menu.ActionMenuView;
+import android.widget.ActionMenuPresenter;
+import android.widget.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
 import android.animation.Animator;

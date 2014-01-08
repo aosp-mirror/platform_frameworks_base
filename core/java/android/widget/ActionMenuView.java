@@ -13,22 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.view.menu;
+package android.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.LinearLayout;
-import com.android.internal.R;
+import com.android.internal.view.menu.ActionMenuItemView;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuItemImpl;
+import com.android.internal.view.menu.MenuView;
 
 /**
- * @hide
+ * ActionMenuView is a presentation of a series of menu options as a View. It provides
+ * several top level options as action buttons while spilling remaining options over as
+ * items in an overflow menu. This allows applications to present packs of actions inline with
+ * specific or repeating content.
  */
 public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvoker, MenuView {
     private static final String TAG = "ActionMenuView";
@@ -44,8 +49,6 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private int mFormatItemsWidth;
     private int mMinCellSize;
     private int mGeneratedItemPadding;
-    private int mMeasuredExtraWidth;
-    private int mMaxItemHeight;
 
     public ActionMenuView(Context context) {
         this(context, null);
@@ -57,24 +60,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final float density = context.getResources().getDisplayMetrics().density;
         mMinCellSize = (int) (MIN_CELL_SIZE * density);
         mGeneratedItemPadding = (int) (GENERATED_ITEM_PADDING * density);
-
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar,
-                R.attr.actionBarStyle, 0);
-        mMaxItemHeight = a.getDimensionPixelSize(R.styleable.ActionBar_height, 0);
-        a.recycle();
     }
 
+    /** @hide */
     public void setPresenter(ActionMenuPresenter presenter) {
         mPresenter = presenter;
-    }
-
-    public boolean isExpandedFormat() {
-        return mFormatItems;
-    }
-
-    public void setMaxItemHeight(int maxItemHeight) {
-        mMaxItemHeight = maxItemHeight;
-        requestLayout();
     }
 
     @Override
@@ -129,10 +119,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final int widthPadding = getPaddingLeft() + getPaddingRight();
         final int heightPadding = getPaddingTop() + getPaddingBottom();
 
-        final int itemHeightSpec = heightMode == MeasureSpec.EXACTLY
-                ? MeasureSpec.makeMeasureSpec(heightSize - heightPadding, MeasureSpec.EXACTLY)
-                : MeasureSpec.makeMeasureSpec(
-                    Math.min(mMaxItemHeight, heightSize - heightPadding), MeasureSpec.AT_MOST);
+        final int itemHeightSpec = getChildMeasureSpec(heightMeasureSpec, heightPadding,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
 
         widthSize -= widthPadding;
 
@@ -333,7 +321,6 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         }
 
         setMeasuredDimension(widthSize, heightSize);
-        mMeasuredExtraWidth = cellsRemaining * cellSize;
     }
 
     /**
@@ -496,10 +483,12 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         mPresenter.dismissPopupMenus();
     }
 
+    /** @hide */
     public boolean isOverflowReserved() {
         return mReserveOverflow;
     }
-    
+
+    /** @hide */
     public void setOverflowReserved(boolean reserveOverflow) {
         mReserveOverflow = reserveOverflow;
     }
@@ -536,24 +525,51 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         return p != null && p instanceof LayoutParams;
     }
 
+    /** @hide */
     public LayoutParams generateOverflowButtonLayoutParams() {
         LayoutParams result = generateDefaultLayoutParams();
         result.isOverflowButton = true;
         return result;
     }
 
+    /** @hide */
     public boolean invokeItem(MenuItemImpl item) {
         return mMenu.performItemAction(item, 0);
     }
 
+    /** @hide */
     public int getWindowAnimations() {
         return 0;
     }
 
+    /** @hide */
     public void initialize(MenuBuilder menu) {
         mMenu = menu;
     }
 
+    /**
+     * Returns the Menu object that this ActionMenuView is currently presenting.
+     *
+     * <p>Applications should use this method to obtain the ActionMenuView's Menu object
+     * and inflate or add content to it as necessary.</p>
+     *
+     * @return the Menu presented by this view
+     */
+    public Menu getMenu() {
+        if (mMenu == null) {
+            final Context context = getContext();
+            mMenu = new MenuBuilder(context);
+            mPresenter = new ActionMenuPresenter(context);
+            mPresenter.initForMenu(context, mMenu);
+            mPresenter.setMenuView(this);
+        }
+
+        return mMenu;
+    }
+
+    /**
+     * @hide Private LinearLayout (superclass) API. Un-hide if LinearLayout API is made public.
+     */
     @Override
     protected boolean hasDividerBeforeChildAt(int childIndex) {
         if (childIndex == 0) {
@@ -575,23 +591,34 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         return false;
     }
 
+    /** @hide */
     public interface ActionMenuChildView {
         public boolean needsDividerBefore();
         public boolean needsDividerAfter();
     }
 
     public static class LayoutParams extends LinearLayout.LayoutParams {
+        /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
         public boolean isOverflowButton;
+
+        /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
         public int cellsUsed;
+
+        /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
         public int extraPixels;
+
+        /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
         public boolean expandable;
+
+        /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
         public boolean preventEdgeOffset;
 
+        /** @hide */
         public boolean expanded;
 
         public LayoutParams(Context c, AttributeSet attrs) {
@@ -612,6 +639,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             isOverflowButton = false;
         }
 
+        /** @hide */
         public LayoutParams(int width, int height, boolean isOverflowButton) {
             super(width, height);
             this.isOverflowButton = isOverflowButton;

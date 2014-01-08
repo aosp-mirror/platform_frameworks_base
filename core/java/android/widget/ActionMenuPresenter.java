@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view.menu;
+package android.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -30,17 +30,23 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.ImageButton;
-import android.widget.ListPopupWindow;
 import android.widget.ListPopupWindow.ForwardingListener;
 import com.android.internal.transition.ActionBarTransition;
 import com.android.internal.view.ActionBarPolicy;
-import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
+import com.android.internal.view.menu.ActionMenuItemView;
+import com.android.internal.view.menu.BaseMenuPresenter;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuItemImpl;
+import com.android.internal.view.menu.MenuPopupHelper;
+import com.android.internal.view.menu.MenuView;
+import com.android.internal.view.menu.SubMenuBuilder;
 
 import java.util.ArrayList;
 
 /**
  * MenuPresenter for building action menus as seen in the action bar and action modes.
+ *
+ * @hide
  */
 public class ActionMenuPresenter extends BaseMenuPresenter
         implements ActionProvider.SubUiVisibilityListener {
@@ -551,6 +557,10 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
     }
 
+    public void setMenuView(ActionMenuView menuView) {
+        mMenuView = menuView;
+    }
+
     private static class SavedState implements Parcelable {
         public int openSubMenuId;
 
@@ -583,7 +593,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         };
     }
 
-    private class OverflowMenuButton extends ImageButton implements ActionMenuChildView {
+    private class OverflowMenuButton extends ImageButton implements ActionMenuView.ActionMenuChildView {
         public OverflowMenuButton(Context context) {
             super(context, null, com.android.internal.R.attr.actionOverflowButtonStyle);
 
@@ -712,14 +722,14 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
     }
 
-    private class PopupPresenterCallback implements MenuPresenter.Callback {
+    private class PopupPresenterCallback implements Callback {
 
         @Override
         public boolean onOpenSubMenu(MenuBuilder subMenu) {
             if (subMenu == null) return false;
 
             mOpenSubMenuId = ((SubMenuBuilder) subMenu).getItem().getItemId();
-            final MenuPresenter.Callback cb = getCallback();
+            final Callback cb = getCallback();
             return cb != null ? cb.onOpenSubMenu(subMenu) : false;
         }
 
@@ -728,7 +738,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             if (menu instanceof SubMenuBuilder) {
                 ((SubMenuBuilder) menu).getRootMenu().close(false);
             }
-            final MenuPresenter.Callback cb = getCallback();
+            final Callback cb = getCallback();
             if (cb != null) {
                 cb.onCloseMenu(menu, allMenusAreClosing);
             }
