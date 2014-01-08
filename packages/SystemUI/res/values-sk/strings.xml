@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odstrániť zo zoznamu"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informácie o aplikácii"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Žiadne nedávne aplikácie"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Odmietnuť nové aplikácie"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zatvoriť nedávne aplikácie"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 nová aplikácia"</item>
     <item quantity="other" msgid="1040784359794890744">"Počet nových aplikácií: %d"</item>
@@ -185,6 +185,10 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Jas"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automatické otáčanie"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Otáčanie uzamknuté"</string>
+    <!-- no translation found for quick_settings_rotation_locked_portrait_label (1553131290066230775) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_landscape_label (7216265671276086593) -->
+    <skip />
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Metóda vstupu"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Poloha"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Poloha vypnutá"</string>
