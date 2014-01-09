@@ -43662,6 +43662,35 @@ package java.util.concurrent {
     method public V replace(K, V);
   }
 
+  public class ConcurrentLinkedDeque extends java.util.AbstractCollection implements java.util.Deque java.io.Serializable {
+    ctor public ConcurrentLinkedDeque();
+    ctor public ConcurrentLinkedDeque(java.util.Collection<? extends E>);
+    method public void addFirst(E);
+    method public void addLast(E);
+    method public java.util.Iterator<E> descendingIterator();
+    method public E element();
+    method public E getFirst();
+    method public E getLast();
+    method public java.util.Iterator<E> iterator();
+    method public boolean offer(E);
+    method public boolean offerFirst(E);
+    method public boolean offerLast(E);
+    method public E peek();
+    method public E peekFirst();
+    method public E peekLast();
+    method public E poll();
+    method public E pollFirst();
+    method public E pollLast();
+    method public E pop();
+    method public void push(E);
+    method public E remove();
+    method public E removeFirst();
+    method public boolean removeFirstOccurrence(java.lang.Object);
+    method public E removeLast();
+    method public boolean removeLastOccurrence(java.lang.Object);
+    method public int size();
+  }
+
   public class ConcurrentLinkedQueue extends java.util.AbstractQueue implements java.util.Queue java.io.Serializable {
     ctor public ConcurrentLinkedQueue();
     ctor public ConcurrentLinkedQueue(java.util.Collection<? extends E>);
@@ -43902,6 +43931,94 @@ package java.util.concurrent {
     method public static java.util.concurrent.ScheduledExecutorService unconfigurableScheduledExecutorService(java.util.concurrent.ScheduledExecutorService);
   }
 
+  public class ForkJoinPool extends java.util.concurrent.AbstractExecutorService {
+    ctor public ForkJoinPool();
+    ctor public ForkJoinPool(int);
+    ctor public ForkJoinPool(int, java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory, java.lang.Thread.UncaughtExceptionHandler, boolean);
+    method public boolean awaitQuiescence(long, java.util.concurrent.TimeUnit);
+    method public boolean awaitTermination(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+    method protected int drainTasksTo(java.util.Collection<? super java.util.concurrent.ForkJoinTask<?>>);
+    method public void execute(java.util.concurrent.ForkJoinTask<?>);
+    method public void execute(java.lang.Runnable);
+    method public int getActiveThreadCount();
+    method public boolean getAsyncMode();
+    method public java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory getFactory();
+    method public int getParallelism();
+    method public int getPoolSize();
+    method public int getQueuedSubmissionCount();
+    method public long getQueuedTaskCount();
+    method public int getRunningThreadCount();
+    method public long getStealCount();
+    method public java.lang.Thread.UncaughtExceptionHandler getUncaughtExceptionHandler();
+    method public boolean hasQueuedSubmissions();
+    method public T invoke(java.util.concurrent.ForkJoinTask<T>);
+    method public boolean isQuiescent();
+    method public boolean isShutdown();
+    method public boolean isTerminated();
+    method public boolean isTerminating();
+    method public static void managedBlock(java.util.concurrent.ForkJoinPool.ManagedBlocker) throws java.lang.InterruptedException;
+    method protected java.util.concurrent.ForkJoinTask<?> pollSubmission();
+    method public void shutdown();
+    method public java.util.List<java.lang.Runnable> shutdownNow();
+    method public java.util.concurrent.ForkJoinTask<T> submit(java.util.concurrent.ForkJoinTask<T>);
+    field public static final java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory defaultForkJoinWorkerThreadFactory;
+  }
+
+  public static abstract interface ForkJoinPool.ForkJoinWorkerThreadFactory {
+    method public abstract java.util.concurrent.ForkJoinWorkerThread newThread(java.util.concurrent.ForkJoinPool);
+  }
+
+  public static abstract interface ForkJoinPool.ManagedBlocker {
+    method public abstract boolean block() throws java.lang.InterruptedException;
+    method public abstract boolean isReleasable();
+  }
+
+  public abstract class ForkJoinTask implements java.util.concurrent.Future java.io.Serializable {
+    ctor public ForkJoinTask();
+    method public static java.util.concurrent.ForkJoinTask<?> adapt(java.lang.Runnable);
+    method public static java.util.concurrent.ForkJoinTask<T> adapt(java.lang.Runnable, T);
+    method public static java.util.concurrent.ForkJoinTask<T> adapt(java.util.concurrent.Callable<? extends T>);
+    method public boolean cancel(boolean);
+    method public void complete(V);
+    method public void completeExceptionally(java.lang.Throwable);
+    method protected abstract boolean exec();
+    method public final java.util.concurrent.ForkJoinTask<V> fork();
+    method public final V get() throws java.util.concurrent.ExecutionException, java.lang.InterruptedException;
+    method public final V get(long, java.util.concurrent.TimeUnit) throws java.util.concurrent.ExecutionException, java.lang.InterruptedException, java.util.concurrent.TimeoutException;
+    method public final java.lang.Throwable getException();
+    method public static java.util.concurrent.ForkJoinPool getPool();
+    method public static int getQueuedTaskCount();
+    method public abstract V getRawResult();
+    method public static int getSurplusQueuedTaskCount();
+    method public static void helpQuiesce();
+    method public static boolean inForkJoinPool();
+    method public final V invoke();
+    method public static void invokeAll(java.util.concurrent.ForkJoinTask<?>, java.util.concurrent.ForkJoinTask<?>);
+    method public static void invokeAll(java.util.concurrent.ForkJoinTask<?>...);
+    method public static java.util.Collection<T> invokeAll(java.util.Collection<T>);
+    method public final boolean isCancelled();
+    method public final boolean isCompletedAbnormally();
+    method public final boolean isCompletedNormally();
+    method public final boolean isDone();
+    method public final V join();
+    method protected static java.util.concurrent.ForkJoinTask<?> peekNextLocalTask();
+    method protected static java.util.concurrent.ForkJoinTask<?> pollNextLocalTask();
+    method protected static java.util.concurrent.ForkJoinTask<?> pollTask();
+    method public final void quietlyInvoke();
+    method public final void quietlyJoin();
+    method public void reinitialize();
+    method protected abstract void setRawResult(V);
+    method public boolean tryUnfork();
+  }
+
+  public class ForkJoinWorkerThread extends java.lang.Thread {
+    ctor protected ForkJoinWorkerThread(java.util.concurrent.ForkJoinPool);
+    method public java.util.concurrent.ForkJoinPool getPool();
+    method public int getPoolIndex();
+    method protected void onStart();
+    method protected void onTermination(java.lang.Throwable);
+  }
+
   public abstract interface Future {
     method public abstract boolean cancel(boolean);
     method public abstract V get() throws java.util.concurrent.ExecutionException, java.lang.InterruptedException;
@@ -43986,6 +44103,52 @@ package java.util.concurrent {
     method public E take() throws java.lang.InterruptedException;
   }
 
+  public class LinkedTransferQueue extends java.util.AbstractQueue implements java.io.Serializable java.util.concurrent.TransferQueue {
+    ctor public LinkedTransferQueue();
+    ctor public LinkedTransferQueue(java.util.Collection<? extends E>);
+    method public int drainTo(java.util.Collection<? super E>);
+    method public int drainTo(java.util.Collection<? super E>, int);
+    method public int getWaitingConsumerCount();
+    method public boolean hasWaitingConsumer();
+    method public java.util.Iterator<E> iterator();
+    method public boolean offer(E, long, java.util.concurrent.TimeUnit);
+    method public boolean offer(E);
+    method public E peek();
+    method public E poll(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+    method public E poll();
+    method public void put(E);
+    method public int remainingCapacity();
+    method public int size();
+    method public E take() throws java.lang.InterruptedException;
+    method public void transfer(E) throws java.lang.InterruptedException;
+    method public boolean tryTransfer(E);
+    method public boolean tryTransfer(E, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+  }
+
+  public class Phaser {
+    ctor public Phaser();
+    ctor public Phaser(int);
+    ctor public Phaser(java.util.concurrent.Phaser);
+    ctor public Phaser(java.util.concurrent.Phaser, int);
+    method public int arrive();
+    method public int arriveAndAwaitAdvance();
+    method public int arriveAndDeregister();
+    method public int awaitAdvance(int);
+    method public int awaitAdvanceInterruptibly(int) throws java.lang.InterruptedException;
+    method public int awaitAdvanceInterruptibly(int, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException;
+    method public int bulkRegister(int);
+    method public void forceTermination();
+    method public int getArrivedParties();
+    method public java.util.concurrent.Phaser getParent();
+    method public final int getPhase();
+    method public int getRegisteredParties();
+    method public java.util.concurrent.Phaser getRoot();
+    method public int getUnarrivedParties();
+    method public boolean isTerminated();
+    method protected boolean onAdvance(int, int);
+    method public int register();
+  }
+
   public class PriorityBlockingQueue extends java.util.AbstractQueue implements java.util.concurrent.BlockingQueue java.io.Serializable {
     ctor public PriorityBlockingQueue();
     ctor public PriorityBlockingQueue(int);
@@ -44004,6 +44167,22 @@ package java.util.concurrent {
     method public int remainingCapacity();
     method public int size();
     method public E take() throws java.lang.InterruptedException;
+  }
+
+  public abstract class RecursiveAction extends java.util.concurrent.ForkJoinTask {
+    ctor public RecursiveAction();
+    method protected abstract void compute();
+    method protected final boolean exec();
+    method public final java.lang.Void getRawResult();
+    method protected final void setRawResult(java.lang.Void);
+  }
+
+  public abstract class RecursiveTask extends java.util.concurrent.ForkJoinTask {
+    ctor public RecursiveTask();
+    method protected abstract V compute();
+    method protected final boolean exec();
+    method public final V getRawResult();
+    method protected final void setRawResult(V);
   }
 
   public class RejectedExecutionException extends java.lang.RuntimeException {
@@ -44044,12 +44223,14 @@ package java.util.concurrent {
     method protected java.util.concurrent.RunnableScheduledFuture<V> decorateTask(java.util.concurrent.Callable<V>, java.util.concurrent.RunnableScheduledFuture<V>);
     method public boolean getContinueExistingPeriodicTasksAfterShutdownPolicy();
     method public boolean getExecuteExistingDelayedTasksAfterShutdownPolicy();
+    method public boolean getRemoveOnCancelPolicy();
     method public java.util.concurrent.ScheduledFuture<?> schedule(java.lang.Runnable, long, java.util.concurrent.TimeUnit);
     method public java.util.concurrent.ScheduledFuture<V> schedule(java.util.concurrent.Callable<V>, long, java.util.concurrent.TimeUnit);
     method public java.util.concurrent.ScheduledFuture<?> scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit);
     method public java.util.concurrent.ScheduledFuture<?> scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit);
     method public void setContinueExistingPeriodicTasksAfterShutdownPolicy(boolean);
     method public void setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean);
+    method public void setRemoveOnCancelPolicy(boolean);
   }
 
   public class Semaphore implements java.io.Serializable {
@@ -44093,6 +44274,15 @@ package java.util.concurrent {
 
   public abstract interface ThreadFactory {
     method public abstract java.lang.Thread newThread(java.lang.Runnable);
+  }
+
+  public class ThreadLocalRandom extends java.util.Random {
+    method public static java.util.concurrent.ThreadLocalRandom current();
+    method public double nextDouble(double);
+    method public double nextDouble(double, double);
+    method public int nextInt(int, int);
+    method public long nextLong(long);
+    method public long nextLong(long, long);
   }
 
   public class ThreadPoolExecutor extends java.util.concurrent.AbstractExecutorService {
@@ -44180,6 +44370,14 @@ package java.util.concurrent {
   public class TimeoutException extends java.lang.Exception {
     ctor public TimeoutException();
     ctor public TimeoutException(java.lang.String);
+  }
+
+  public abstract interface TransferQueue implements java.util.concurrent.BlockingQueue {
+    method public abstract int getWaitingConsumerCount();
+    method public abstract boolean hasWaitingConsumer();
+    method public abstract void transfer(E) throws java.lang.InterruptedException;
+    method public abstract boolean tryTransfer(E);
+    method public abstract boolean tryTransfer(E, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
   }
 
 }
@@ -44437,6 +44635,7 @@ package java.util.concurrent.locks {
     method public final int getWaitQueueLength(java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject);
     method public final java.util.Collection<java.lang.Thread> getWaitingThreads(java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject);
     method public final boolean hasContended();
+    method public final boolean hasQueuedPredecessors();
     method public final boolean hasQueuedThreads();
     method public final boolean hasWaiters(java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject);
     method protected boolean isHeldExclusively();
