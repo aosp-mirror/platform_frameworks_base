@@ -1135,14 +1135,14 @@
     <string name="noApplications" msgid="2991814273936504689">"គ្មាន​កម្មវិធី​អាច​អនុវត្ត​សកម្មភាព​នេះ។"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"ដោយ​បរាជ័យ <xliff:g id="APPLICATION">%1$s</xliff:g> បាន​បញ្ឈប់។"</string>
-    <string name="aerr_process" msgid="4507058997035697579">"ជា​អកុសល ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> បាន​បញ្ឈប់។"</string>
+    <string name="aerr_process" msgid="4507058997035697579">"ដោយ​បរាជ័យ ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> បាន​បញ្ឈប់។"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> មិន​ឆ្លើយតប។\n\nតើ​អ្នក​ចង់​បិទ​វា​ឬ?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"សកម្មភាព <xliff:g id="ACTIVITY">%1$s</xliff:g> មិន​ឆ្លើយតប។\n\nតើ​អ្នក​ចង់​បិទ​វា?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> មិន​ឆ្លើយតប។ តើ​អ្នក​ចង់​បិទ​វា?"</string>
     <string name="anr_process" msgid="6513209874880517125">"ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> មិន​ឆ្លើយតប។ \n\nតើ​អ្នក​ចង់​បិទ​វា​ឬ?"</string>
     <string name="force_close" msgid="8346072094521265605">"យល់​ព្រម"</string>
-    <string name="report" msgid="4060218260984795706">"របាយការណ៍"</string>
+    <string name="report" msgid="4060218260984795706">"រាយការណ៍"</string>
     <string name="wait" msgid="7147118217226317732">"រង់ចាំ"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"ទំព័រ​ក្លាយ​ជា​មិន​ឆ្លើយតប។\n\nតើ​អ្នក​​ចង់​បិទ​វា?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"បាន​ប្ដូរ​ទិស​កម្មវិធី"</string>

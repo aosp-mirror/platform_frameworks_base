@@ -842,7 +842,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Erneut versuchen"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Erneut versuchen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Die maximal zulässige Anzahl an Face Unlock-Versuchen wurde überschritten."</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Wird geladen... (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Wird aufgeladen... (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"Aufgeladen"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Ladegerät anschließen"</string>
