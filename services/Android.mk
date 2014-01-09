@@ -43,3 +43,4 @@ LOCAL_MODULE:= libandroid_servers
 
 include $(BUILD_SHARED_LIBRARY)
 
+include $(call all-makefiles-under, $(LOCAL_PATH))
