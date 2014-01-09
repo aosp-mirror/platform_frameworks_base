@@ -126,12 +126,36 @@ public final class CameraCharacteristics extends CameraMetadata {
      * modify the comment blocks at the start or end.
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
+
     /**
-     * <p>Which set of antibanding modes are
-     * supported</p>
+     * <p>The set of auto-exposure antibanding modes that are
+     * supported by this camera device.</p>
+     * <p>Not all of the auto-exposure anti-banding modes may be
+     * supported by a given camera device. This field lists the
+     * valid anti-banding modes that the application may request
+     * for this camera device; they must include AUTO.</p>
      */
     public static final Key<byte[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
             new Key<byte[]>("android.control.aeAvailableAntibandingModes", byte[].class);
+
+    /**
+     * <p>The set of auto-exposure modes that are supported by this
+     * camera device.</p>
+     * <p>Not all the auto-exposure modes may be supported by a
+     * given camera device, especially if no flash unit is
+     * available. This entry lists the valid modes for
+     * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} for this camera device.</p>
+     * <p>All camera devices support ON, and all camera devices with
+     * flash units support ON_AUTO_FLASH and
+     * ON_ALWAYS_FLASH.</p>
+     * <p>Full-capability camera devices always support OFF mode,
+     * which enables application control of camera exposure time,
+     * sensitivity, and frame duration.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    public static final Key<byte[]> CONTROL_AE_AVAILABLE_MODES =
+            new Key<byte[]>("android.control.aeAvailableModes", byte[].class);
 
     /**
      * <p>List of frame rate ranges supported by the
@@ -211,14 +235,16 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <li>The sizes must be sorted by increasing pixel area (width x height).
      * If several resolutions have the same area, they must be sorted by increasing width.</li>
      * <li>The aspect ratio of the largest thumbnail size must be same as the
-     * aspect ratio of largest size in android.scaler.availableJpegSizes.
+     * aspect ratio of largest size in {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES android.scaler.availableJpegSizes}.
      * The largest size is defined as the size that has the largest pixel area
      * in a given size list.</li>
-     * <li>Each size in android.scaler.availableJpegSizes must have at least
+     * <li>Each size in {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES android.scaler.availableJpegSizes} must have at least
      * one corresponding size that has the same aspect ratio in availableThumbnailSizes,
      * and vice versa.</li>
      * <li>All non (0, 0) sizes must have non-zero widths and heights.</li>
      * </ul>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES
      */
     public static final Key<android.hardware.camera2.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.jpeg.availableThumbnailSizes", android.hardware.camera2.Size[].class);
@@ -304,9 +330,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * future versions of camera service. This quirk will stop
      * working at that point; DO NOT USE without careful
      * consideration of future support.</p>
-     *
-     * <b>Optional</b> - This value may be null on some devices.
-     *
+     * <p><b>Optional</b> - This value may be null on some devices.</p>
      * @hide
      */
     public static final Key<Byte> QUIRKS_USE_PARTIAL_RESULT =
@@ -429,12 +453,6 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>Gain factor from electrons to raw units when
      * ISO=100</p>
-     *
-     * <b>Optional</b> - This value may be null on some devices.
-     *
-     * <b>{@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL}</b> -
-     * Present on all devices that report being FULL level hardware devices in the
-     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL HARDWARE_LEVEL} key.
      */
     public static final Key<Rational> SENSOR_BASE_GAIN_FACTOR =
             new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
@@ -442,16 +460,17 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>Maximum sensitivity that is implemented
      * purely through analog gain</p>
-     * <p>For android.sensor.sensitivity values less than or
+     * <p>For {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} values less than or
      * equal to this, all applied gain must be analog. For
      * values above this, it can be a mix of analog and
      * digital</p>
+     * <p><b>Optional</b> - This value may be null on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
-     * <b>Optional</b> - This value may be null on some devices.
-     *
-     * <b>{@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL}</b> -
-     * Present on all devices that report being FULL level hardware devices in the
-     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL HARDWARE_LEVEL} key.
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final Key<Integer> SENSOR_MAX_ANALOG_SENSITIVITY =
             new Key<Integer>("android.sensor.maxAnalogSensitivity", int.class);
@@ -498,7 +517,6 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>A list of camera LEDs that are available on this system.</p>
      * @see #LED_AVAILABLE_LEDS_TRANSMIT
-     *
      * @hide
      */
     public static final Key<int[]> LED_AVAILABLE_LEDS =

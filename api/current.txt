@@ -11199,6 +11199,7 @@ package android.hardware.camera2 {
     method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureRequestKeys();
     method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureResultKeys();
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_RANGE;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_STEP;
@@ -11504,6 +11505,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key BLACK_LEVEL_LOCK;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_GAINS;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_TRANSFORM;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_REGIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_STATE;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_MODE;
