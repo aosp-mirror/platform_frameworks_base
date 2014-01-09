@@ -541,7 +541,9 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jint native_asset,
     } else {
         // since we know we'll be done with the asset when we return, we can
         // just use a simple wrapper
-        stream = new AssetStreamAdaptor(asset);
+        stream = new AssetStreamAdaptor(asset,
+                                        AssetStreamAdaptor::kNo_OwnAsset,
+                                        AssetStreamAdaptor::kNo_HasMemoryBase);
     }
     SkAutoUnref aur(stream);
     return doDecode(env, stream, padding, options, forcePurgeable, forcePurgeable);
