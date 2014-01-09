@@ -1024,13 +1024,13 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     private void configureDisplayInTransactionLocked(DisplayDevice device) {
-        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        boolean isPrivate = (info.flags & DisplayDeviceInfo.FLAG_PRIVATE) != 0;
+        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        final boolean ownContent = (info.flags & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
 
         // Find the logical display that the display device is showing.
-        // Private displays never mirror other displays.
+        // Certain displays only ever show their own content.
         LogicalDisplay display = findLogicalDisplayForDeviceLocked(device);
-        if (!isPrivate) {
+        if (!ownContent) {
             if (display != null && !display.hasContentLocked()) {
                 // If the display does not have any content of its own, then
                 // automatically mirror the default logical display contents.

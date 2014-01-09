@@ -157,8 +157,11 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.yDpi = mDensityDpi;
                 mInfo.flags = 0;
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE |
-                            DisplayDeviceInfo.FLAG_NEVER_BLANK;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE
+                            | DisplayDeviceInfo.FLAG_NEVER_BLANK
+                            | DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
+                } else if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                 }
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
