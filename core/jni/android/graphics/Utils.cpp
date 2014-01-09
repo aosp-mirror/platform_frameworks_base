@@ -19,6 +19,21 @@
 
 using namespace android;
 
+AssetStreamAdaptor::AssetStreamAdaptor(Asset* asset, OwnAsset ownAsset,
+                                       HasMemoryBase hasMemoryBase)
+    : fAsset(asset)
+    , fMemoryBase(kYes_HasMemoryBase == hasMemoryBase ?
+                  asset->getBuffer(false) : NULL)
+    , fOwnAsset(ownAsset)
+{
+}
+
+AssetStreamAdaptor::~AssetStreamAdaptor() {
+    if (kYes_OwnAsset == fOwnAsset) {
+        delete fAsset;
+    }
+}
+
 bool AssetStreamAdaptor::rewind() {
     off64_t pos = fAsset->seek(0, SEEK_SET);
     if (pos == (off64_t)-1) {
