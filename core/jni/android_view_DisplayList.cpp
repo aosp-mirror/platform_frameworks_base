@@ -114,7 +114,7 @@ static void android_view_DisplayList_setIsContainedVolume(JNIEnv* env,
 static void android_view_DisplayList_setProjectToContainedVolume(JNIEnv* env,
         jobject clazz, jint displayListPtr, jboolean shouldProject) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    displayList->setProjectToContainedVolume(projectToContainedVolume);
+    displayList->setProjectToContainedVolume(shouldProject);
 }
 
 static void android_view_DisplayList_setAlpha(JNIEnv* env,
