@@ -4771,6 +4771,7 @@ package android.app.admin {
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
     method public boolean isDeviceOwnerApp(java.lang.String);
+    method public boolean isProfileOwnerApp(java.lang.String);
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);

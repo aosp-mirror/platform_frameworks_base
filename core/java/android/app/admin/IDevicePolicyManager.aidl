@@ -103,6 +103,10 @@ interface IDevicePolicyManager {
     String getDeviceOwner();
     String getDeviceOwnerName();
 
+    boolean setProfileOwner(String packageName, String ownerName, int userHandle);
+    String getProfileOwner(int userHandle);
+    String getProfileOwnerName(int userHandle);
+
     boolean installCaCert(in byte[] certBuffer);
     void uninstallCaCert(in byte[] certBuffer);
 }

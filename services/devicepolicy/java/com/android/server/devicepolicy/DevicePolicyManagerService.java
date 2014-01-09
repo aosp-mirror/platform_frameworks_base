@@ -26,10 +26,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -49,9 +45,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ProxyProperties;
@@ -75,7 +69,6 @@ import android.security.Credentials;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
-import android.util.AtomicFile;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -83,6 +76,10 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 import android.view.IWindowManager;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -132,6 +129,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     IWindowManager mIWindowManager;
     NotificationManager mNotificationManager;
 
+    // Stores and loads state on device and profile owners.
     private DeviceOwner mDeviceOwner;
 
     /**
@@ -601,6 +599,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slog.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
                 return;
             }
+
+            mDeviceOwner.removeProfileOwner(userHandle);
+            mDeviceOwner.writeOwnerFile();
+
             DevicePolicyData policy = mUserData.get(userHandle);
             if (policy != null) {
                 mUserData.remove(userHandle);
@@ -614,9 +616,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void loadDeviceOwner() {
         synchronized (this) {
-            if (DeviceOwner.isRegistered()) {
-                mDeviceOwner = new DeviceOwner();
-            }
+            mDeviceOwner = DeviceOwner.load();
         }
     }
 
@@ -1294,7 +1294,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (admin.getUid() != Binder.getCallingUid()) {
                 // If trying to remove device owner, refuse when the caller is not the owner.
                 if (mDeviceOwner != null
-                        && adminReceiver.getPackageName().equals(mDeviceOwner.getPackageName())) {
+                        && adminReceiver.getPackageName().equals(
+                        mDeviceOwner.getDeviceOwnerPackageName())) {
                     return;
                 }
                 mContext.enforceCallingOrSelfPermission(
@@ -2739,14 +2740,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + " for device owner");
         }
         synchronized (this) {
-            if (mDeviceOwner == null && !isDeviceProvisioned()) {
-                mDeviceOwner = new DeviceOwner(packageName, ownerName);
+            if (isDeviceProvisioned()) {
+                throw new IllegalStateException(
+                        "Trying to set device owner but device is already provisioned.");
+            }
+
+            if (mDeviceOwner != null && mDeviceOwner.hasDeviceOwner()) {
+                throw new IllegalStateException(
+                        "Trying to set device owner but device owner is already set.");
+            }
+
+            if (mDeviceOwner == null) {
+                // Device owner is not set and does not exist, set it.
+                mDeviceOwner = DeviceOwner.createWithDeviceOwner(packageName, ownerName);
                 mDeviceOwner.writeOwnerFile();
                 return true;
             } else {
-                throw new IllegalStateException("Trying to set device owner to " + packageName
-                        + ", owner=" + mDeviceOwner.getPackageName()
-                        + ", device_provisioned=" + isDeviceProvisioned());
+                // Device owner is not set but a profile owner exists, update Device owner state.
+                mDeviceOwner.setDeviceOwner(packageName, ownerName);
+                mDeviceOwner.writeOwnerFile();
+                return true;
             }
         }
     }
@@ -2758,7 +2771,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             return mDeviceOwner != null
-                    && mDeviceOwner.getPackageName().equals(packageName);
+                    && mDeviceOwner.getDeviceOwnerPackageName().equals(packageName);
         }
     }
 
@@ -2769,7 +2782,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             if (mDeviceOwner != null) {
-                return mDeviceOwner.getPackageName();
+                return mDeviceOwner.getDeviceOwnerPackageName();
             }
         }
         return null;
@@ -2783,7 +2796,67 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         synchronized (this) {
             if (mDeviceOwner != null) {
-                return mDeviceOwner.getName();
+                return mDeviceOwner.getDeviceOwnerName();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean setProfileOwner(String packageName, String ownerName, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        if (packageName == null
+                || !DeviceOwner.isInstalledForUser(packageName, userHandle)) {
+            throw new IllegalArgumentException("Package name " + packageName
+                    + " not installed for userId:" + userHandle);
+        }
+        synchronized (this) {
+            if (isUserSetupComplete(userHandle)) {
+                throw new IllegalStateException(
+                        "Trying to set profile owner but user is already set-up.");
+            }
+            if (mDeviceOwner == null) {
+                // Device owner state does not exist, create it.
+                mDeviceOwner = DeviceOwner.createWithProfileOwner(packageName, ownerName,
+                        userHandle);
+                mDeviceOwner.writeOwnerFile();
+                return true;
+            } else {
+                // Device owner already exists, update it.
+                mDeviceOwner.setProfileOwner(packageName, ownerName, userHandle);
+                mDeviceOwner.writeOwnerFile();
+                return true;
+            }
+        }
+    }
+
+    @Override
+    public String getProfileOwner(int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
+
+        synchronized (this) {
+            if (mDeviceOwner != null) {
+                return mDeviceOwner.getProfileOwnerPackageName(userHandle);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getProfileOwnerName(int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+
+        synchronized (this) {
+            if (mDeviceOwner != null) {
+                return mDeviceOwner.getProfileOwnerName(userHandle);
             }
         }
         return null;
@@ -2792,6 +2865,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean isDeviceProvisioned() {
         return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.DEVICE_PROVISIONED, 0) > 0;
+    }
+
+    private boolean isUserSetupComplete(int userId) {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0, userId) > 0;
     }
 
     private void enforceCrossUserPermission(int userHandle) {
@@ -2855,105 +2933,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                 pw.println(" ");
                 pw.print("  mPasswordOwner="); pw.println(policy.mPasswordOwner);
-            }
-        }
-    }
-
-    static class DeviceOwner {
-        private static final String DEVICE_OWNER_XML = "device_owner.xml";
-        private static final String TAG_DEVICE_OWNER = "device-owner";
-        private static final String ATTR_NAME = "name";
-        private static final String ATTR_PACKAGE = "package";
-        private String mPackageName;
-        private String mOwnerName;
-
-        DeviceOwner() {
-            readOwnerFile();
-        }
-
-        DeviceOwner(String packageName, String ownerName) {
-            this.mPackageName = packageName;
-            this.mOwnerName = ownerName;
-        }
-
-        static boolean isRegistered() {
-            return new File(Environment.getSystemSecureDirectory(),
-                    DEVICE_OWNER_XML).exists();
-        }
-
-        String getPackageName() {
-            return mPackageName;
-        }
-
-        String getName() {
-            return mOwnerName;
-        }
-
-        static boolean isInstalled(String packageName, PackageManager pm) {
-            try {
-                PackageInfo pi;
-                if ((pi = pm.getPackageInfo(packageName, 0)) != null) {
-                    if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        return true;
-                    }
-                }
-            } catch (NameNotFoundException nnfe) {
-                Slog.w(LOG_TAG, "Device Owner package " + packageName + " not installed.");
-            }
-            return false;
-        }
-
-        void readOwnerFile() {
-            AtomicFile file = new AtomicFile(new File(Environment.getSystemSecureDirectory(),
-                    DEVICE_OWNER_XML));
-            try {
-                FileInputStream input = file.openRead();
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(input, null);
-                int type;
-                while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                        && type != XmlPullParser.START_TAG) {
-                }
-                String tag = parser.getName();
-                if (!TAG_DEVICE_OWNER.equals(tag)) {
-                    throw new XmlPullParserException(
-                            "Device Owner file does not start with device-owner tag: found " + tag);
-                }
-                mPackageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-                mOwnerName = parser.getAttributeValue(null, ATTR_NAME);
-                input.close();
-            } catch (XmlPullParserException xppe) {
-                Slog.e(LOG_TAG, "Error parsing device-owner file\n" + xppe);
-            } catch (IOException ioe) {
-                Slog.e(LOG_TAG, "IO Exception when reading device-owner file\n" + ioe);
-            }
-        }
-
-        void writeOwnerFile() {
-            synchronized (this) {
-                writeOwnerFileLocked();
-            }
-        }
-
-        private void writeOwnerFileLocked() {
-            AtomicFile file = new AtomicFile(new File(Environment.getSystemSecureDirectory(),
-                    DEVICE_OWNER_XML));
-            try {
-                FileOutputStream output = file.startWrite();
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(output, "utf-8");
-                out.startDocument(null, true);
-                out.startTag(null, TAG_DEVICE_OWNER);
-                out.attribute(null, ATTR_PACKAGE, mPackageName);
-                if (mOwnerName != null) {
-                    out.attribute(null, ATTR_NAME, mOwnerName);
-                }
-                out.endTag(null, TAG_DEVICE_OWNER);
-                out.endDocument();
-                out.flush();
-                file.finishWrite(output);
-            } catch (IOException ioe) {
-                Slog.e(LOG_TAG, "IO Exception when writing device-owner file\n" + ioe);
             }
         }
     }
