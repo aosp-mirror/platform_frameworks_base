@@ -238,6 +238,7 @@ void DisplayList::init() {
     mBottom = 0;
     mClipToBounds = true;
     mIsContainedVolume = true;
+    mProjectToContainedVolume = false;
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
