@@ -23,7 +23,7 @@
     <string name="label_destination" msgid="9132510997381599275">"印刷先"</string>
     <string name="label_copies" msgid="3634531042822968308">"部数"</string>
     <string name="label_paper_size" msgid="8681895607876809323">"用紙サイズ"</string>
-    <string name="label_color" msgid="1108690305218188969">"色"</string>
+    <string name="label_color" msgid="1108690305218188969">"カラー"</string>
     <string name="label_orientation" msgid="2853142581990496477">"方向"</string>
     <string name="label_pages" msgid="6300874667546617333">"ページ（<xliff:g id="PAGE_COUNT">%1$s</xliff:g>）"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"例: 1-5,8,11-13"</string>
@@ -59,7 +59,7 @@
     <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>の印刷ジョブ"</item>
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"キャンセル"</string>
-    <string name="restart" msgid="2472034227037808749">"再起動"</string>
+    <string name="restart" msgid="2472034227037808749">"再試行"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"プリンタに接続されていません"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"不明"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>–使用不可"</string>
