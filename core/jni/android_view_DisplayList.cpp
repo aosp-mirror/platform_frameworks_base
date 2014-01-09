@@ -111,6 +111,12 @@ static void android_view_DisplayList_setIsContainedVolume(JNIEnv* env,
     displayList->setIsContainedVolume(isContainedVolume);
 }
 
+static void android_view_DisplayList_setProjectToContainedVolume(JNIEnv* env,
+        jobject clazz, jint displayListPtr, jboolean shouldProject) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    displayList->setProjectToContainedVolume(projectToContainedVolume);
+}
+
 static void android_view_DisplayList_setAlpha(JNIEnv* env,
         jobject clazz, jint displayListPtr, float alpha) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
@@ -378,6 +384,8 @@ static JNINativeMethod gMethods[] = {
     { "nSetAnimationMatrix",   "(II)V",  (void*) android_view_DisplayList_setAnimationMatrix },
     { "nSetClipToBounds",      "(IZ)V",  (void*) android_view_DisplayList_setClipToBounds },
     { "nSetIsContainedVolume", "(IZ)V",  (void*) android_view_DisplayList_setIsContainedVolume },
+    { "nSetProjectToContainedVolume", "(IZ)V",
+            (void*) android_view_DisplayList_setProjectToContainedVolume },
     { "nSetAlpha",             "(IF)V",  (void*) android_view_DisplayList_setAlpha },
     { "nSetHasOverlappingRendering", "(IZ)V",
             (void*) android_view_DisplayList_setHasOverlappingRendering },

@@ -415,6 +415,21 @@ public class DisplayList {
     }
 
     /**
+     * Sets whether the display list should be drawn immediately after the
+     * closest ancestor display list where isContainedVolume is true. If the
+     * display list itself satisfies this constraint, changing this attribute
+     * has no effect on drawing order.
+     *
+     * @param shouldProject true if the display list should be projected onto a
+     *            containing volume.
+     */
+    public void setProjectToContainedVolume(boolean shouldProject) {
+        if (hasNativeDisplayList()) {
+            nSetProjectToContainedVolume(mFinalizer.mNativeDisplayList, shouldProject);
+        }
+    }
+
+    /**
      * Set the static matrix on the display list. The specified matrix is combined with other
      * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
      *
@@ -1034,6 +1049,7 @@ public class DisplayList {
     private static native void nSetPivotX(int displayList, float pivotX);
     private static native void nSetCaching(int displayList, boolean caching);
     private static native void nSetClipToBounds(int displayList, boolean clipToBounds);
+    private static native void nSetProjectToContainedVolume(int displayList, boolean shouldProject);
     private static native void nSetIsContainedVolume(int displayList, boolean isContainedVolume);
     private static native void nSetAlpha(int displayList, float alpha);
     private static native void nSetHasOverlappingRendering(int displayList,
