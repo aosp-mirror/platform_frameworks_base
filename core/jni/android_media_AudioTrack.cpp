@@ -829,9 +829,12 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
 static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thiz,
     jint sampleRateInHertz, jint nbChannels, jint audioFormat) {
 
-    size_t frameCount = 0;
-    if (AudioTrack::getMinFrameCount(&frameCount, AUDIO_STREAM_DEFAULT,
-            sampleRateInHertz) != NO_ERROR) {
+    size_t frameCount;
+    const status_t status = AudioTrack::getMinFrameCount(&frameCount, AUDIO_STREAM_DEFAULT,
+            sampleRateInHertz);
+    if (status != NO_ERROR) {
+        ALOGE("AudioTrack::getMinFrameCount() for sample rate %d failed with status %d",
+                sampleRateInHertz, status);
         return -1;
     }
     return frameCount * nbChannels * (audioFormat == ENCODING_PCM_16BIT ? 2 : 1);
