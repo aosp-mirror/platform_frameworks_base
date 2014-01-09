@@ -63,6 +63,7 @@ final class DisplayDeviceInfo {
     /**
      * Flag: Indicates that the display device is owned by a particular application
      * and that no other application should be able to interact with it.
+     * Should typically be used together with {@link #FLAG_OWN_CONTENT_ONLY}.
      */
     public static final int FLAG_PRIVATE = 1 << 4;
 
@@ -76,6 +77,12 @@ final class DisplayDeviceInfo {
      * Flag: Indicates that the display is suitable for presentations.
      */
     public static final int FLAG_PRESENTATION = 1 << 6;
+
+    /**
+     * Flag: Only show this display's own content; do not mirror
+     * the content of another display.
+     */
+    public static final int FLAG_OWN_CONTENT_ONLY = 1 << 7;
 
     /**
      * Touch attachment: Display does not receive touch.
@@ -296,6 +303,9 @@ final class DisplayDeviceInfo {
         }
         if ((flags & FLAG_PRESENTATION) != 0) {
             msg.append(", FLAG_PRESENTATION");
+        }
+        if ((flags & FLAG_OWN_CONTENT_ONLY) != 0) {
+            msg.append(", FLAG_OWN_CONTENT_ONLY");
         }
         return msg.toString();
     }
