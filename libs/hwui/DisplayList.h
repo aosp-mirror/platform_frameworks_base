@@ -189,6 +189,10 @@ public:
         mIsContainedVolume = isContainedVolume;
     }
 
+    void setProjectToContainedVolume(bool shouldProject) {
+        mProjectToContainedVolume = shouldProject;
+    }
+
     void setStaticMatrix(SkMatrix* matrix) {
         delete mStaticMatrix;
         mStaticMatrix = new SkMatrix(*matrix);
@@ -572,9 +576,10 @@ private:
     String8 mName;
     bool mDestroyed; // used for debugging crash, TODO: remove once invalid state crash fixed
 
-    // View properties
+    // Rendering properties
     bool mClipToBounds;
     bool mIsContainedVolume;
+    bool mProjectToContainedVolume;
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;
