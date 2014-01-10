@@ -345,6 +345,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         childDrawable.mInsetT = t;
         childDrawable.mInsetR = r;
         childDrawable.mInsetB = b;
+        invalidatePadding();
     }
 
     /**
