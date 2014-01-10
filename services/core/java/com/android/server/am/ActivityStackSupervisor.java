@@ -1677,15 +1677,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 // We don't need to start a new activity, and
                                 // the client said not to do anything if that
                                 // is the case, so this is it!
-                                if (r.task == null)  Slog.v(TAG,
-                                    "startActivityUncheckedLocked: task left null",
-                                    new RuntimeException("here").fillInStackTrace());
                                 return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                             }
                             top.deliverNewIntentLocked(callingUid, r.intent);
-                            if (r.task == null)  Slog.v(TAG,
-                                "startActivityUncheckedLocked: task left null",
-                                new RuntimeException("here").fillInStackTrace());
                             return ActivityManager.START_DELIVERED_TO_TOP;
                         }
                     }
@@ -1698,9 +1692,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         r.requestCode, Activity.RESULT_CANCELED, null);
             }
             ActivityOptions.abort(options);
-            if (r.task == null)  Slog.v(TAG,
-                "startActivityUncheckedLocked: task left null",
-                new RuntimeException("here").fillInStackTrace());
             return ActivityManager.START_CLASS_NOT_FOUND;
         }
 
