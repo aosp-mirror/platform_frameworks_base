@@ -229,18 +229,15 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Looks for a layer with the given ID and returns its {@link Drawable}.
-     * <p>
-     * If multiple layers are found for the given ID, returns the
-     * {@link Drawable} for the matching layer at the highest index.
+     * Look for a layer with the given id, and returns its {@link Drawable}.
      *
      * @param id The layer ID to search for.
-     * @return The {@link Drawable} for the highest-indexed layer that has the
-     *         given ID, or null if not found.
+     * @return The {@link Drawable} of the layer that has the given id in the hierarchy or null.
      */
     public Drawable findDrawableByLayerId(int id) {
         final ChildDrawable[] layers = mLayerState.mChildren;
-        for (int i = mLayerState.mNum - 1; i >= 0; i--) {
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
             if (layers[i].mId == id) {
                 return layers[i].mDrawable;
             }
@@ -374,7 +371,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Invalidates cached padding and recomputes child bounds.
+     * Invalidates cached padding.
      */
     private void invalidatePadding() {
         mHasCachedPadding = false;
@@ -383,9 +380,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void invalidateDrawable(Drawable who) {
-        // Something changed, maybe it was the child drawable's padding.
-        invalidatePadding();
-        invalidateSelf();
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.invalidateDrawable(this);
+        }
     }
 
     @Override
