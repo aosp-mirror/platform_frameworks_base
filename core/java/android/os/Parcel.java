@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -2061,7 +2062,7 @@ public final class Parcel {
             return readByte();
 
         case VAL_SERIALIZABLE:
-            return readSerializable();
+            return readSerializable(loader);
 
         case VAL_PARCELABLEARRAY:
             return readParcelableArray(loader);
@@ -2198,6 +2199,10 @@ public final class Parcel {
      * wasn't found in the parcel.
      */
     public final Serializable readSerializable() {
+        return readSerializable(null);
+    }
+
+    private final Serializable readSerializable(final ClassLoader loader) {
         String name = readString();
         if (name == null) {
             // For some reason we were unable to read the name of the Serializable (either there
@@ -2209,14 +2214,27 @@ public final class Parcel {
         byte[] serializedData = createByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(serializedData);
         try {
-            ObjectInputStream ois = new ObjectInputStream(bais);
+            ObjectInputStream ois = new ObjectInputStream(bais) {
+                @Override
+                protected Class<?> resolveClass(ObjectStreamClass osClass)
+                        throws IOException, ClassNotFoundException {
+                    // try the custom classloader if provided
+                    if (loader != null) {
+                        Class<?> c = Class.forName(osClass.getName(), false, loader);
+                        if (c != null) {
+                            return c;
+                        }
+                    }
+                    return super.resolveClass(osClass);
+                }
+            };
             return (Serializable) ois.readObject();
         } catch (IOException ioe) {
             throw new RuntimeException("Parcelable encountered " +
                 "IOException reading a Serializable object (name = " + name +
                 ")", ioe);
         } catch (ClassNotFoundException cnfe) {
-            throw new RuntimeException("Parcelable encountered" +
+            throw new RuntimeException("Parcelable encountered " +
                 "ClassNotFoundException reading a Serializable object (name = "
                 + name + ")", cnfe);
         }
