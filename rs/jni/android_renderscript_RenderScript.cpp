@@ -224,28 +224,28 @@ nDeviceCreate(JNIEnv *_env, jobject _this)
 }
 
 static void
-nDeviceDestroy(JNIEnv *_env, jobject _this, jint dev)
+nDeviceDestroy(JNIEnv *_env, jobject _this, jlong dev)
 {
     LOG_API("nDeviceDestroy");
     return rsDeviceDestroy((RsDevice)dev);
 }
 
 static void
-nDeviceSetConfig(JNIEnv *_env, jobject _this, jint dev, jint p, jint value)
+nDeviceSetConfig(JNIEnv *_env, jobject _this, jlong dev, jint p, jint value)
 {
     LOG_API("nDeviceSetConfig  dev(%p), param(%i), value(%i)", (void *)dev, p, value);
     return rsDeviceSetConfig((RsDevice)dev, (RsDeviceParam)p, value);
 }
 
 static jlong
-nContextCreate(JNIEnv *_env, jobject _this, jint dev, jint ver, jint sdkVer, jint ct)
+nContextCreate(JNIEnv *_env, jobject _this, jlong dev, jint ver, jint sdkVer, jint ct)
 {
     LOG_API("nContextCreate");
     return (jint)rsContextCreate((RsDevice)dev, ver, sdkVer, (RsContextType)ct, 0);
 }
 
 static jlong
-nContextCreateGL(JNIEnv *_env, jobject _this, jint dev, jint ver, jint sdkVer,
+nContextCreateGL(JNIEnv *_env, jobject _this, jlong dev, jint ver, jint sdkVer,
                  int colorMin, int colorPref,
                  int alphaMin, int alphaPref,
                  int depthMin, int depthPref,
