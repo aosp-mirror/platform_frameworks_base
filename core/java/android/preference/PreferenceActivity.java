@@ -33,7 +33,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
@@ -1173,7 +1172,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         }
     }
 
-    private void switchToHeaderInner(String fragmentName, Bundle args, int direction) {
+    private void switchToHeaderInner(String fragmentName, Bundle args) {
         getFragmentManager().popBackStack(BACK_STACK_PREFS,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
         if (!isValidFragment(fragmentName)) {
@@ -1196,7 +1195,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void switchToHeader(String fragmentName, Bundle args) {
         setSelectedHeader(null);
-        switchToHeaderInner(fragmentName, args, 0);
+        switchToHeaderInner(fragmentName, args);
     }
 
     /**
@@ -1215,8 +1214,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (header.fragment == null) {
                 throw new IllegalStateException("can't switch to header that has no fragment");
             }
-            int direction = mHeaders.indexOf(header) - mHeaders.indexOf(mCurHeader);
-            switchToHeaderInner(header.fragment, header.fragmentArguments, direction);
+            switchToHeaderInner(header.fragment, header.fragmentArguments);
             setSelectedHeader(header);
         }
     }
