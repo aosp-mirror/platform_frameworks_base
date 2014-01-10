@@ -138,16 +138,16 @@ public class PathMeasure {
         native_destroy(native_instance);
     }
 
-    private static native int native_create(int native_path, boolean forceClosed);
-    private static native void native_setPath(int native_instance, int native_path, boolean forceClosed);
-    private static native float native_getLength(int native_instance);
-    private static native boolean native_getPosTan(int native_instance, float distance, float pos[], float tan[]);
-    private static native boolean native_getMatrix(int native_instance, float distance, int native_matrix, int flags);
-    private static native boolean native_getSegment(int native_instance, float startD, float stopD, int native_path, boolean startWithMoveTo);
-    private static native boolean native_isClosed(int native_instance);
-    private static native boolean native_nextContour(int native_instance);
-    private static native void native_destroy(int native_instance);
+    private static native long native_create(long native_path, boolean forceClosed);
+    private static native void native_setPath(long native_instance, long native_path, boolean forceClosed);
+    private static native float native_getLength(long native_instance);
+    private static native boolean native_getPosTan(long native_instance, float distance, float pos[], float tan[]);
+    private static native boolean native_getMatrix(long native_instance, float distance, long native_matrix, int flags);
+    private static native boolean native_getSegment(long native_instance, float startD, float stopD, long native_path, boolean startWithMoveTo);
+    private static native boolean native_isClosed(long native_instance);
+    private static native boolean native_nextContour(long native_instance);
+    private static native void native_destroy(long native_instance);
 
-    /* package */private final int native_instance;
+    /* package */private final long native_instance;
 }
 
