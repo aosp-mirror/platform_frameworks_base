@@ -456,11 +456,11 @@ final class ActivityStack {
 
     final void moveToFront() {
         if (isAttached()) {
-            mStacks.remove(this);
-            mStacks.add(this);
             if (isOnHomeDisplay()) {
                 mStackSupervisor.moveHomeStack(isHomeStack());
             }
+            mStacks.remove(this);
+            mStacks.add(this);
         }
     }
 
