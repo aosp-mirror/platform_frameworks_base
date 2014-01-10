@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -675,7 +676,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (surface == null) {
             throw new IllegalArgumentException("surface must not be null");
         }
-        if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+        if (callingUid != Process.SYSTEM_UID &&
+                (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
             if (mContext.checkCallingPermission(android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
                     != PackageManager.PERMISSION_GRANTED
                     && mContext.checkCallingPermission(
