@@ -2027,7 +2027,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IActivityContainer activityContainer =
                     createActivityContainer(parentActivityToken, callback);
             reply.writeNoException();
-            reply.writeStrongBinder(activityContainer.asBinder());
+            if (activityContainer != null) {
+                reply.writeInt(1);
+                reply.writeStrongBinder(activityContainer.asBinder());
+            } else {
+                reply.writeInt(0);
+            }
             return true;
         }
 
@@ -2036,7 +2041,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IBinder activityToken = data.readStrongBinder();
             IActivityContainer activityContainer = getEnclosingActivityContainer(activityToken);
             reply.writeNoException();
-            reply.writeStrongBinder(activityContainer.asBinder());
+            if (activityContainer != null) {
+                reply.writeInt(1);
+                reply.writeStrongBinder(activityContainer.asBinder());
+            } else {
+                reply.writeInt(0);
+            }
             return true;
         }
 
@@ -4670,8 +4680,13 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder((IBinder)callback);
         mRemote.transact(CREATE_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
         reply.readException();
-        IActivityContainer res =
-                IActivityContainer.Stub.asInterface(reply.readStrongBinder());
+        final int result = reply.readInt();
+        final IActivityContainer res;
+        if (result == 1) {
+            res = IActivityContainer.Stub.asInterface(reply.readStrongBinder());
+        } else {
+            res = null;
+        }
         data.recycle();
         reply.recycle();
         return res;
@@ -4685,8 +4700,13 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(activityToken);
         mRemote.transact(GET_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
         reply.readException();
-        IActivityContainer res =
-                IActivityContainer.Stub.asInterface(reply.readStrongBinder());
+        final int result = reply.readInt();
+        final IActivityContainer res;
+        if (result == 1) {
+            res = IActivityContainer.Stub.asInterface(reply.readStrongBinder());
+        } else {
+            res = null;
+        }
         data.recycle();
         reply.recycle();
         return res;
