@@ -37,17 +37,14 @@ LOCAL_SHARED_LIBRARIES := \
     libcamera_client \
     libmtp \
     libusbhost \
-    libjhead \
+    libexif \
     libstagefright_amrnb_common \
-
-LOCAL_REQUIRED_MODULES := \
-    libjhead_jni
 
 LOCAL_STATIC_LIBRARIES := \
     libstagefright_amrnbenc
 
 LOCAL_C_INCLUDES += \
-    external/jhead \
+    external/libexif/ \
     external/tremor/Tremor \
     frameworks/base/core/jni \
     frameworks/av/media/libmedia \
