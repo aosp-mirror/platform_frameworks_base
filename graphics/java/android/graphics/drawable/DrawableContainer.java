@@ -50,6 +50,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private Drawable mCurrDrawable;
     private int mAlpha = 0xFF;
 
+    /** Whether setAlpha() has been called at least once. */
+    private boolean mHasAlpha;
+
     private int mCurIndex = -1;
     private boolean mMutated;
 
@@ -117,6 +120,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setAlpha(int alpha) {
+        mHasAlpha = true;
+
         if (mAlpha != alpha) {
             mAlpha = alpha;
             if (mCurrDrawable != null) {
@@ -146,8 +151,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setColorFilter(ColorFilter cf) {
+        mDrawableContainerState.mHasColorFilter = true;
+
         if (mDrawableContainerState.mColorFilter != cf) {
             mDrawableContainerState.mColorFilter = cf;
+
             if (mCurrDrawable != null) {
                 mCurrDrawable.mutate().setColorFilter(cf);
             }
@@ -189,9 +197,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setAutoMirrored(boolean mirrored) {
-        mDrawableContainerState.mAutoMirrored = mirrored;
-        if (mCurrDrawable != null) {
-            mCurrDrawable.mutate().setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+        if (mDrawableContainerState.mAutoMirrored != mirrored) {
+            mDrawableContainerState.mAutoMirrored = mirrored;
+            if (mCurrDrawable != null) {
+                mCurrDrawable.mutate().setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+            }
         }
     }
 
@@ -210,7 +220,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         if (mCurrDrawable != null) {
             mCurrDrawable.jumpToCurrentState();
-            mCurrDrawable.mutate().setAlpha(mAlpha);
+            if (mHasAlpha) {
+                mCurrDrawable.mutate().setAlpha(mAlpha);
+            }
         }
         if (mExitAnimationEnd != 0) {
             mExitAnimationEnd = 0;
@@ -353,12 +365,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.mutate();
                 if (mDrawableContainerState.mEnterFadeDuration > 0) {
                     mEnterAnimationEnd = now + mDrawableContainerState.mEnterFadeDuration;
-                } else {
+                } else if (mHasAlpha) {
                     d.setAlpha(mAlpha);
+                }
+                if (mDrawableContainerState.mHasColorFilter) {
+                    d.setColorFilter(mDrawableContainerState.mColorFilter);
                 }
                 d.setVisible(isVisible(), true);
                 d.setDither(mDrawableContainerState.mDither);
-                d.setColorFilter(mDrawableContainerState.mColorFilter);
                 d.setState(getState());
                 d.setLevel(getLevel());
                 d.setBounds(getBounds());
@@ -394,6 +408,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     void animate(boolean schedule) {
+        mHasAlpha = true;
+
         final long now = SystemClock.uptimeMillis();
         boolean animating = false;
         if (mCurrDrawable != null) {
@@ -507,6 +523,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         boolean mAutoMirrored;
 
         ColorFilter mColorFilter;
+        boolean mHasColorFilter;
 
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
@@ -529,6 +546,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mExitFadeDuration = orig.mExitFadeDuration;
                 mAutoMirrored = orig.mAutoMirrored;
                 mColorFilter = orig.mColorFilter;
+                mHasColorFilter = orig.mHasColorFilter;
 
                 // Cloning the following values may require creating futures.
                 mConstantPadding = orig.getConstantPadding();
