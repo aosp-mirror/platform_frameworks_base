@@ -21,11 +21,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.RemoteException;
 
 import android.telecomm.ICallServiceProvider;
-import android.telecomm.ICallServiceLookupResponse;
-import android.util.Log;
 
 /**
  * Base implementation of CallServiceProvider service which implements ICallServiceProvider.
@@ -36,9 +33,7 @@ import android.util.Log;
  * about how this can be used.
  * @hide
  */
-public abstract class CallServiceProvider extends Service implements ICallServiceProvider {
-    /** Used to identify log entries by this class. */
-    private static final String TAG = CallServiceProvider.class.getSimpleName();
+public abstract class CallServiceProvider extends Service {
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -47,12 +42,8 @@ public abstract class CallServiceProvider extends Service implements ICallServic
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_GET_CALL_SERVICES:
-                    try {
-                        lookupCallServices((ICallServiceLookupResponse) msg.obj);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Remote exception on lookupCallServices().", e);
-                    }
+                case MSG_SET_CALL_SERVICE_PROVIDER_ADAPTER:
+                    setCallServiceProviderAdapter((ICallServiceProviderAdapter) msg.obj);
                     break;
                 default:
                     break;
@@ -64,13 +55,15 @@ public abstract class CallServiceProvider extends Service implements ICallServic
      * Default ICallServiceProvider implementation provided to CallsManager via {@link #onBind}.
      */
     private final class CallServiceProviderWrapper extends ICallServiceProvider.Stub {
-
-        /** {@inheritDoc} */
         @Override
-        public void lookupCallServices(ICallServiceLookupResponse callServiceLookupResponse) {
-            mMessageHandler.obtainMessage(MSG_GET_CALL_SERVICES, callServiceLookupResponse)
-                    .sendToTarget();
+        public void setCallServiceProviderAdapter(
+                ICallServiceProviderAdapter CallServiceProviderAdapter) {
+            mMessageHandler.obtainMessage(MSG_SET_CALL_SERVICE_PROVIDER_ADAPTER,
+                    CallServiceProviderAdapter).sendToTarget();
         }
+
+        @Override
+        public void initiateDiscoveryProtocol() {}
     }
 
     // Only used internally by this class.
@@ -78,7 +71,7 @@ public abstract class CallServiceProvider extends Service implements ICallServic
     // in conjunction with {@link #mMessageHandler} to ensure that all callbacks are handled on a
     // single thread.  Keeping it on a single thread allows CallService implementations to avoid
     // needing multi-threaded code in their own callback routines.
-    private static final int MSG_GET_CALL_SERVICES = 1;
+    private static final int MSG_SET_CALL_SERVICE_PROVIDER_ADAPTER = 1;
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
@@ -104,4 +97,14 @@ public abstract class CallServiceProvider extends Service implements ICallServic
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
+
+    /**
+     * Sets an implementation of ICallServiceProviderAdapter for adding providing instances of
+     * ICallService.
+     * TODO(santoscordon): Should we not reference ICallServiceProviderAdapter directly from here?
+     * Should we wrap that in a wrapper like we do for CallServiceProvider/ICallServiceProvider?
+     * @param callServiceAdapter Adapter object for communicating call to CallsManager
+     */
+    public abstract void setCallServiceProviderAdapter(
+            ICallServiceProviderAdapter CallServiceProviderAdapter);
 }

@@ -279,8 +279,8 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRingtonePlayer.aidl \
 	telecomm/java/android/telecomm/ICallService.aidl \
 	telecomm/java/android/telecomm/ICallServiceAdapter.aidl \
-	telecomm/java/android/telecomm/ICallServiceLookupResponse.aidl \
 	telecomm/java/android/telecomm/ICallServiceProvider.aidl \
+	telecomm/java/android/telecomm/ICallServiceProviderAdapter.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
