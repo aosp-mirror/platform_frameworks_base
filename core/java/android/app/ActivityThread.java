@@ -2225,7 +2225,8 @@ public final class ActivityThread {
         try {
             IActivityContainer container =
                     ActivityManagerNative.getDefault().getEnclosingActivityContainer(r.token);
-            final int displayId = container.getDisplayId();
+            final int displayId =
+                    container == null ? Display.DEFAULT_DISPLAY : container.getDisplayId();
             if (displayId > Display.DEFAULT_DISPLAY) {
                 Display display = dm.getRealDisplay(displayId, r.token);
                 baseContext = appContext.createDisplayContext(display);
