@@ -355,4 +355,26 @@ public class FileUtils {
             }
         }
     }
+
+    /**
+     * Test if a file lives under the given directory, either as a direct child
+     * or a distant grandchild.
+     * <p>
+     * Both files <em>must</em> have been resolved using
+     * {@link File#getCanonicalFile()} to avoid symlink or path traversal
+     * attacks.
+     */
+    public static boolean contains(File dir, File file) {
+        String dirPath = dir.getPath();
+        String filePath = file.getPath();
+
+        if (dirPath.equals(filePath)) {
+            return true;
+        }
+
+        if (!dirPath.endsWith("/")) {
+            dirPath += "/";
+        }
+        return filePath.startsWith(dirPath);
+    }
 }

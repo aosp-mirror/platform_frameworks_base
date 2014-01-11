@@ -728,7 +728,7 @@ public abstract class Context {
      * Returned paths may be {@code null} if a storage device is unavailable.
      *
      * @see #getExternalFilesDir(String)
-     * @see Environment#getStorageState(File)
+     * @see Environment#getExternalStorageState(File)
      */
     public abstract File[] getExternalFilesDirs(String type);
 
@@ -792,7 +792,7 @@ public abstract class Context {
      * Returned paths may be {@code null} if a storage device is unavailable.
      *
      * @see #getObbDir()
-     * @see Environment#getStorageState(File)
+     * @see Environment#getExternalStorageState(File)
      */
     public abstract File[] getObbDirs();
 
@@ -895,7 +895,7 @@ public abstract class Context {
      * Returned paths may be {@code null} if a storage device is unavailable.
      *
      * @see #getExternalCacheDir()
-     * @see Environment#getStorageState(File)
+     * @see Environment#getExternalStorageState(File)
      */
     public abstract File[] getExternalCacheDirs();
 

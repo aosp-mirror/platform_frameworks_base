@@ -18453,10 +18453,13 @@ package android.os {
     method public static java.io.File getExternalStorageDirectory();
     method public static java.io.File getExternalStoragePublicDirectory(java.lang.String);
     method public static java.lang.String getExternalStorageState();
+    method public static java.lang.String getExternalStorageState(java.io.File);
     method public static java.io.File getRootDirectory();
-    method public static java.lang.String getStorageState(java.io.File);
+    method public static deprecated java.lang.String getStorageState(java.io.File);
     method public static boolean isExternalStorageEmulated();
+    method public static boolean isExternalStorageEmulated(java.io.File);
     method public static boolean isExternalStorageRemovable();
+    method public static boolean isExternalStorageRemovable(java.io.File);
     field public static java.lang.String DIRECTORY_ALARMS;
     field public static java.lang.String DIRECTORY_DCIM;
     field public static java.lang.String DIRECTORY_DOCUMENTS;
