@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -67,9 +69,15 @@ public class BrightnessDialog extends Dialog implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Window window = getWindow();
-        window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-        window.getAttributes().privateFlags |=
+        window.setGravity(Gravity.TOP);
+        WindowManager.LayoutParams lp = window.getAttributes();
+        // Offset from the top
+        lp.y = getContext().getResources().getDimensionPixelOffset(
+                com.android.internal.R.dimen.volume_panel_top);
+        lp.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+        lp.privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        window.setAttributes(lp);
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.requestFeature(Window.FEATURE_NO_TITLE);
 
@@ -108,4 +116,13 @@ public class BrightnessDialog extends Dialog implements
         mHandler.removeCallbacks(mDismissDialogRunnable);
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+                keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
+                keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            dismiss();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }
