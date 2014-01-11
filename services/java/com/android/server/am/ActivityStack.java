@@ -1144,7 +1144,7 @@ final class ActivityStack {
                     } else if (isActivityOverHome(r)) {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
                         showHomeBehindStack = true;
-                        behindFullscreen = !isHomeStack();
+                        behindFullscreen = !isHomeStack() && r.frontOfTask && task.mOnTopOfHome;
                     }
                 } else {
                     if (DEBUG_VISBILITY) Slog.v(
