@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import com.google.android.collect.Lists;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +29,8 @@ import android.util.Slog;
 import android.view.MotionEvent;
 
 import com.android.internal.policy.IKeyguardService;
+
+import java.util.List;
 
 
 /**
@@ -40,6 +44,8 @@ public class KeyguardTouchDelegate {
     static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
 
     private static KeyguardTouchDelegate sInstance;
+    private static final List<OnKeyguardConnectionListener> sConnectionListeners =
+            Lists.newArrayList();
 
     private volatile IKeyguardService mService;
 
@@ -52,6 +58,10 @@ public class KeyguardTouchDelegate {
             Slog.v(TAG, "Connected to keyguard");
             mService = IKeyguardService.Stub.asInterface(service);
 
+            for (int i = 0; i < sConnectionListeners.size(); i++) {
+                OnKeyguardConnectionListener listener = sConnectionListeners.get(i);
+                listener.onKeyguardServiceConnected(KeyguardTouchDelegate.this);
+            }
         }
 
         @Override
@@ -59,6 +69,11 @@ public class KeyguardTouchDelegate {
             Slog.v(TAG, "Disconnected from keyguard");
             mService = null;
             sInstance = null; // force reconnection if this goes away
+
+            for (int i = 0; i < sConnectionListeners.size(); i++) {
+                OnKeyguardConnectionListener listener = sConnectionListeners.get(i);
+                listener.onKeyguardServiceDisconnected(KeyguardTouchDelegate.this);
+            }
         }
 
     };
@@ -182,4 +197,13 @@ public class KeyguardTouchDelegate {
         }
     }
 
+    public static void addListener(OnKeyguardConnectionListener listener) {
+        sConnectionListeners.add(listener);
+    }
+
+    public interface OnKeyguardConnectionListener {
+
+        void onKeyguardServiceConnected(KeyguardTouchDelegate keyguardTouchDelegate);
+        void onKeyguardServiceDisconnected(KeyguardTouchDelegate keyguardTouchDelegate);
+    }
 }

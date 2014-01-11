@@ -57,6 +57,8 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import static com.android.systemui.statusbar.phone.KeyguardTouchDelegate.OnKeyguardConnectionListener;
+
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
@@ -172,6 +174,25 @@ public class NavigationBarView extends LinearLayout {
         }
     };
 
+    private final OnKeyguardConnectionListener mKeyguardConnectionListener =
+            new OnKeyguardConnectionListener() {
+                @Override
+                public void onKeyguardServiceConnected(
+                        KeyguardTouchDelegate keyguardTouchDelegate) {
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCameraDisabledByDpm = isCameraDisabledByDpm();
+                        }
+                    });
+                }
+
+                @Override
+                public void onKeyguardServiceDisconnected(
+                        KeyguardTouchDelegate keyguardTouchDelegate) {
+                }
+            };
+
     private class H extends Handler {
         public void handleMessage(Message m) {
             switch (m.what) {
@@ -211,6 +232,7 @@ public class NavigationBarView extends LinearLayout {
 
         mBarTransitions = new NavigationBarTransitions(this);
 
+        KeyguardTouchDelegate.addListener(mKeyguardConnectionListener);
         mCameraDisabledByDpm = isCameraDisabledByDpm();
         watchForDevicePolicyChanges();
     }
