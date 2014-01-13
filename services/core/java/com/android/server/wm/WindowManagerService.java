@@ -4863,7 +4863,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final TaskStack stack = task.mStack;
             EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
             stack.removeTask(task);
-            stack.getDisplayContent().layoutNeeded = true;
         }
     }
 
@@ -7445,9 +7444,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case DO_DISPLAY_ADDED:
-                    synchronized (mWindowMap) {
-                        handleDisplayAddedLocked(msg.arg1);
-                    }
+                    handleDisplayAdded(msg.arg1);
                     break;
 
                 case DO_DISPLAY_REMOVED:
@@ -10790,11 +10787,13 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_ADDED, displayId, 0));
     }
 
-    private void handleDisplayAddedLocked(int displayId) {
-        final Display display = mDisplayManager.getDisplay(displayId);
-        if (display != null) {
-            createDisplayContentLocked(display);
-            displayReady(displayId);
+    public void handleDisplayAdded(int displayId) {
+        synchronized (mWindowMap) {
+            final Display display = mDisplayManager.getDisplay(displayId);
+            if (display != null) {
+                createDisplayContentLocked(display);
+                displayReady(displayId);
+            }
         }
     }
 
