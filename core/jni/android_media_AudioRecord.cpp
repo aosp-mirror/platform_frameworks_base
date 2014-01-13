@@ -25,7 +25,7 @@
 #include <utils/Log.h>
 #include <media/AudioRecord.h>
 
-#include <system/audio.h>
+#include "android_media_AudioFormat.h"
 
 // ----------------------------------------------------------------------------
 
@@ -48,10 +48,6 @@ struct audiorecord_callback_cookie {
     bool        busy;
     Condition   cond;
 };
-
-// keep these values in sync with AudioFormat.java
-#define ENCODING_PCM_16BIT 2
-#define ENCODING_PCM_8BIT  3
 
 static Mutex sLock;
 static SortedVector <audiorecord_callback_cookie *> sAudioRecordCallBackCookies;
@@ -78,18 +74,6 @@ jint android_media_translateRecorderErrorCode(int code) {
         return AUDIORECORD_ERROR_INVALID_OPERATION;
     default:
         return AUDIORECORD_ERROR;
-    }
-}
-
-static audio_format_t audioFormatToNative(int audioFormat)
-{
-    switch (audioFormat) {
-    case ENCODING_PCM_16BIT:
-        return AUDIO_FORMAT_PCM_16_BIT;
-    case ENCODING_PCM_8BIT:
-        return AUDIO_FORMAT_PCM_8_BIT;
-    default:
-        return AUDIO_FORMAT_INVALID;
     }
 }
 
