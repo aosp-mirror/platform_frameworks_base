@@ -2986,8 +2986,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final Display display = virtualDisplay.getDisplay();
             final int displayId = display.getDisplayId();
 
-            // Do WindowManager operation first so that it is ahead of CREATE_STACK in the H queue.
-            mWindowManager.onDisplayAdded(displayId);
+            mWindowManager.handleDisplayAdded(displayId);
 
             synchronized (mService) {
                 ActivityDisplay activityDisplay = new ActivityDisplay(display);
