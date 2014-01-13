@@ -29,8 +29,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ActionMenuView;
+import android.widget.ListPopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ListPopupWindow.ForwardingListener;
 
 /**
  * @hide
@@ -44,6 +46,8 @@ public class ActionMenuItemView extends TextView
     private CharSequence mTitle;
     private Drawable mIcon;
     private MenuBuilder.ItemInvoker mItemInvoker;
+    private ForwardingListener mForwardingListener;
+    private PopupCallback mPopupCallback;
 
     private boolean mAllowTextWithIcon;
     private boolean mExpandedFormat;
@@ -104,6 +108,7 @@ public class ActionMenuItemView extends TextView
         return mItemData;
     }
 
+    @Override
     public void initialize(MenuItemImpl itemData, int menuType) {
         mItemData = itemData;
 
@@ -113,8 +118,24 @@ public class ActionMenuItemView extends TextView
 
         setVisibility(itemData.isVisible() ? View.VISIBLE : View.GONE);
         setEnabled(itemData.isEnabled());
+
+        if (itemData.hasSubMenu()) {
+            if (mForwardingListener == null) {
+                mForwardingListener = new ActionMenuItemForwardingListener();
+            }
+        }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        if (mItemData.hasSubMenu() && mForwardingListener != null
+                && mForwardingListener.onTouch(this, e)) {
+            return true;
+        }
+        return super.onTouchEvent(e);
+    }
+
+    @Override
     public void onClick(View v) {
         if (mItemInvoker != null) {
             mItemInvoker.invokeItem(mItemData);
@@ -123,6 +144,10 @@ public class ActionMenuItemView extends TextView
 
     public void setItemInvoker(MenuBuilder.ItemInvoker invoker) {
         mItemInvoker = invoker;
+    }
+
+    public void setPopupCallback(PopupCallback popupCallback) {
+        mPopupCallback = popupCallback;
     }
 
     public boolean prefersCondensedTitle() {
@@ -289,5 +314,43 @@ public class ActionMenuItemView extends TextView
             final int dw = mIcon.getBounds().width();
             super.setPadding((w - dw) / 2, getPaddingTop(), getPaddingRight(), getPaddingBottom());
         }
+    }
+
+    private class ActionMenuItemForwardingListener extends ForwardingListener {
+        public ActionMenuItemForwardingListener() {
+            super(ActionMenuItemView.this);
+        }
+
+        @Override
+        public ListPopupWindow getPopup() {
+            if (mPopupCallback != null) {
+                return mPopupCallback.getPopup();
+            }
+            return null;
+        }
+
+        @Override
+        protected boolean onForwardingStarted() {
+            // Call the invoker, then check if the expected popup is showing.
+            if (mItemInvoker != null && mItemInvoker.invokeItem(mItemData)) {
+                final ListPopupWindow popup = getPopup();
+                return popup != null && popup.isShowing();
+            }
+            return false;
+        }
+
+        @Override
+        protected boolean onForwardingStopped() {
+            final ListPopupWindow popup = getPopup();
+            if (popup != null) {
+                popup.dismiss();
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public static abstract class PopupCallback {
+        public abstract ListPopupWindow getPopup();
     }
 }
