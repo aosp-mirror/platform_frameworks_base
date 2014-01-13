@@ -417,11 +417,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                if (!isFrontStack(stack)) {
+                if (!isFrontStack(stack) || stack.numActivities() == 0) {
                     continue;
                 }
                 final ActivityRecord resumedActivity = stack.mResumedActivity;
                 if (resumedActivity == null || !resumedActivity.idle) {
+                    if (DEBUG_STATES) Slog.d(TAG, "allResumedActivitiesIdle: stack="
+                             + stack.mStackId + " " + resumedActivity + " not idle");
                     return false;
                 }
             }
@@ -2130,6 +2132,28 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return createActivityContainer(parentActivity, getNextStackId(), callback);
     }
 
+    void removeChildActivityContainers(ActivityRecord parentActivity) {
+        for (int ndx = mActivityContainers.size() - 1; ndx >= 0; --ndx) {
+            final ActivityContainer container = mActivityContainers.valueAt(ndx).get();
+            if (container == null) {
+                mActivityContainers.removeAt(ndx);
+                continue;
+            }
+            if (container.mParentActivity != parentActivity) {
+                continue;
+            }
+
+            ActivityStack stack = container.mStack;
+            ActivityRecord top = stack.topRunningNonDelayedActivityLocked(null);
+            if (top != null) {
+                // TODO: Make sure the next activity doesn't start up when top is destroyed.
+                stack.destroyActivityLocked(top, true, true, "stack removal");
+            }
+            mActivityContainers.removeAt(ndx);
+            container.detachLocked();
+        }
+    }
+
     private int createStackOnDisplay(ActivityRecord parentActivity, int stackId, int displayId) {
         ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
         if (activityDisplay == null) {
@@ -2683,7 +2707,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     final void scheduleResumeTopActivities() {
-        mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
+        if (!mHandler.hasMessages(RESUME_TOP_ACTIVITY_MSG)) {
+            mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
+        }
     }
 
     void removeSleepTimeouts() {
@@ -2731,7 +2757,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (activityDisplay != null) {
                 ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    activityDisplay.detachActivitiesLocked(stacks.get(stackNdx));
+                    stacks.get(stackNdx).mActivityContainer.detachLocked();
                 }
                 mActivityDisplays.remove(displayId);
             }
@@ -2872,6 +2898,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final IActivityContainerCallback mCallback;
         final ActivityStack mStack;
         final ActivityRecord mParentActivity;
+        final String mIdString;
 
         /** Display this ActivityStack is currently on. Null if not attached to a Display. */
         ActivityDisplay mActivityDisplay;
@@ -2883,10 +2910,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mStack = new ActivityStack(this);
                 mParentActivity = parentActivity;
                 mCallback = callback;
+                mIdString = "ActivtyContainer{" + mStackId + ", parent=" + mParentActivity + "}";
+                if (DEBUG_STACK) Slog.d(TAG, "Creating " + this);
             }
         }
 
         void attachToDisplayLocked(ActivityDisplay activityDisplay) {
+            if (DEBUG_STACK) Slog.d(TAG, "attachToDisplayLocked: " + this
+                    + " to display=" + activityDisplay);
             mActivityDisplay = activityDisplay;
             mStack.mDisplayId = activityDisplay.mDisplayId;
             mStack.mStacks = activityDisplay.mStacks;
@@ -2914,7 +2945,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return -1;
         }
 
-        void detachLocked() {
+        private void detachLocked() {
+            if (DEBUG_STACK) Slog.d(TAG, "detachLocked: " + this + " from display="
+                    + mActivityDisplay + " Callers=" + Debug.getCallers(2));
             if (mActivityDisplay != null) {
                 mActivityDisplay.detachActivitiesLocked(mStack);
                 mActivityDisplay = null;
@@ -2951,45 +2984,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         @Override
-        public void createActivityView(Surface surface, int width, int height, int density) {
-            DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            VirtualDisplay virtualDisplay;
-            long ident = Binder.clearCallingIdentity();
-            try {
-                virtualDisplay = dm.createVirtualDisplay(mService.mContext,
-                        VIRTUAL_DISPLAY_BASE_NAME, width, height, density, surface,
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-
-            final Display display = virtualDisplay.getDisplay();
-            final int displayId = display.getDisplayId();
-
-            mWindowManager.handleDisplayAdded(displayId);
-
+        public void attachToSurface(Surface surface, int width, int height, int density) {
             synchronized (mService) {
-                ActivityDisplay activityDisplay = new ActivityDisplay(display);
-                mActivityDisplays.put(displayId, activityDisplay);
+                ActivityDisplay activityDisplay =
+                        new ActivityDisplay(surface, width, height, density);
+                mActivityDisplays.put(activityDisplay.mDisplayId, activityDisplay);
                 attachToDisplayLocked(activityDisplay);
-                activityDisplay.mVirtualDisplay = virtualDisplay;
             }
-        }
-
-        @Override
-        public void deleteActivityView() {
-            synchronized (mService) {
-                if (!isAttached()) {
-                    return;
-                }
-                VirtualDisplay virtualDisplay = mActivityDisplay.mVirtualDisplay;
-                if (virtualDisplay != null) {
-                    virtualDisplay.release();
-                    mActivityDisplay.mVirtualDisplay = null;
-                }
-                detachLocked();
-            }
+            if (DEBUG_STACK) Slog.d(TAG, "attachToSurface: " + this + " to display="
+                    + mActivityDisplay);
         }
 
         ActivityStackSupervisor getOuter() {
@@ -3007,15 +3010,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 outBounds.set(0, 0);
             }
         }
+
+        @Override
+        public String toString() {
+            return mIdString + (mActivityDisplay == null ? "N" : "A");
+        }
     }
 
     /** Exactly one of these classes per Display in the system. Capable of holding zero or more
      * attached {@link ActivityStack}s */
     final class ActivityDisplay {
         /** Actual Display this object tracks. */
-        final int mDisplayId;
-        final Display mDisplay;
-        final DisplayInfo mDisplayInfo = new DisplayInfo();
+        int mDisplayId;
+        Display mDisplay;
+        DisplayInfo mDisplayInfo = new DisplayInfo();
+        Surface mSurface;
 
         /** All of the stacks on this display. Order matters, topmost stack is in front of all other
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
@@ -3026,10 +3035,32 @@ public final class ActivityStackSupervisor implements DisplayListener {
         VirtualDisplay mVirtualDisplay;
 
         ActivityDisplay(int displayId) {
-            this(mDisplayManager.getDisplay(displayId));
+            init(mDisplayManager.getDisplay(displayId));
         }
 
         ActivityDisplay(Display display) {
+            init(display);
+        }
+
+        ActivityDisplay(Surface surface, int width, int height, int density) {
+            DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mVirtualDisplay = dm.createVirtualDisplay(mService.mContext,
+                        VIRTUAL_DISPLAY_BASE_NAME, width, height, density, surface,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+
+            init(mVirtualDisplay.getDisplay());
+            mSurface = surface;
+
+            mWindowManager.handleDisplayAdded(mDisplayId);
+        }
+
+        private void init(Display display) {
             mDisplay = display;
             mDisplayId = display.getDisplayId();
             mDisplay.getDisplayInfo(mDisplayInfo);
@@ -3042,15 +3073,26 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         void detachActivitiesLocked(ActivityStack stack) {
-            if (DEBUG_STACK) Slog.v(TAG, "attachActivities: detaching " + stack
+            if (DEBUG_STACK) Slog.v(TAG, "detachActivitiesLocked: detaching " + stack
                     + " from displayId=" + mDisplayId);
             mStacks.remove(stack);
+            if (mStacks.isEmpty() && mVirtualDisplay != null) {
+                mVirtualDisplay.release();
+                mVirtualDisplay = null;
+            }
+            mSurface.release();
         }
 
         void getBounds(Point bounds) {
             mDisplay.getDisplayInfo(mDisplayInfo);
             bounds.x = mDisplayInfo.appWidth;
             bounds.y = mDisplayInfo.appHeight;
+        }
+
+        @Override
+        public String toString() {
+            return "ActivityDisplay={" + mDisplayId + (mVirtualDisplay == null ? "" : "V")
+                    + " numStacks=" + mStacks.size() + "}";
         }
     }
 }
