@@ -122,16 +122,19 @@ public final class CaptureResult extends CameraMetadata {
      * modify the comment blocks at the start or end.
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
+
     /**
      * <p>A color transform matrix to use to transform
      * from sensor RGB color space to output linear sRGB color space</p>
      * <p>This matrix is either set by HAL when the request
-     * android.colorCorrection.mode is not TRANSFORM_MATRIX, or
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
-     * android.colorCorrection.mode is TRANSFORM_MATRIX.</p>
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
      * <p>In the latter case, the HAL may round the matrix to account
      * for precision issues; the final rounded matrix should be
      * reported back in this matrix result metadata.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final Key<Rational[]> COLOR_CORRECTION_TRANSFORM =
             new Key<Rational[]>("android.colorCorrection.transform", Rational[].class);
@@ -147,11 +150,13 @@ public final class CaptureResult extends CameraMetadata {
      * it should use the G_even value,and write G_odd equal to
      * G_even in the output result metadata.</p>
      * <p>This array is either set by HAL when the request
-     * android.colorCorrection.mode is not TRANSFORM_MATRIX, or
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
-     * android.colorCorrection.mode is TRANSFORM_MATRIX.</p>
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
      * <p>The ouput should be the gains actually applied by the HAL to
      * the current frame.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final Key<float[]> COLOR_CORRECTION_GAINS =
             new Key<float[]>("android.colorCorrection.gains", float[].class);
@@ -163,11 +168,47 @@ public final class CaptureResult extends CameraMetadata {
      * CAMERA2_TRIGGER_PRECAPTURE_METERING trigger received yet
      * by HAL. Always updated even if AE algorithm ignores the
      * trigger</p>
-     *
      * @hide
      */
     public static final Key<Integer> CONTROL_AE_PRECAPTURE_ID =
             new Key<Integer>("android.control.aePrecaptureId", int.class);
+
+    /**
+     * <p>The desired mode for the camera device's
+     * auto-exposure routine.</p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is
+     * AUTO.</p>
+     * <p>When set to any of the ON modes, the camera device's
+     * auto-exposure routine is enabled, overriding the
+     * application's selected exposure time, sensor sensitivity,
+     * and frame duration ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
+     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). If one of the FLASH modes
+     * is selected, the camera device's flash unit controls are
+     * also overridden.</p>
+     * <p>The FLASH modes are only available if the camera device
+     * has a flash unit ({@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} is <code>true</code>).</p>
+     * <p>If flash TORCH mode is desired, this field must be set to
+     * ON or OFF, and {@link CaptureRequest#FLASH_MODE android.flash.mode} set to TORCH.</p>
+     * <p>When set to any of the ON modes, the values chosen by the
+     * camera device auto-exposure routine for the overridden
+     * fields for a given capture will be available in its
+     * CaptureResult.</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CaptureRequest#FLASH_MODE
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see #CONTROL_AE_MODE_OFF
+     * @see #CONTROL_AE_MODE_ON
+     * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
+     * @see #CONTROL_AE_MODE_ON_ALWAYS_FLASH
+     * @see #CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
+     */
+    public static final Key<Integer> CONTROL_AE_MODE =
+            new Key<Integer>("android.control.aeMode", int.class);
 
     /**
      * <p>List of areas to use for
@@ -177,15 +218,18 @@ public final class CaptureResult extends CameraMetadata {
      * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
-     * (android.sensor.info.activeArraySize.width - 1,
-     * android.sensor.info.activeArraySize.height - 1) being the
+     * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific metering area
      * needs to be used by the HAL. If the metering region is
-     * outside the current android.scaler.cropRegion, the HAL
+     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CaptureRequest#SCALER_CROP_REGION
      */
     public static final Key<int[]> CONTROL_AE_REGIONS =
             new Key<int[]>("android.control.aeRegions", int[].class);
@@ -208,10 +252,13 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>Whether AF is currently enabled, and what
      * mode it is set to</p>
-     * <p>Only effective if android.control.mode = AUTO.</p>
+     * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO.</p>
      * <p>If lens is controlled by HAL auto-focus algorithm, the HAL should
-     * report the current AF status in android.control.afState in
+     * report the current AF status in {@link CaptureResult#CONTROL_AF_STATE android.control.afState} in
      * result metadata.</p>
+     *
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureResult#CONTROL_AF_STATE
      * @see #CONTROL_AF_MODE_OFF
      * @see #CONTROL_AF_MODE_AUTO
      * @see #CONTROL_AF_MODE_MACRO
@@ -230,15 +277,18 @@ public final class CaptureResult extends CameraMetadata {
      * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
-     * (android.sensor.info.activeArraySize.width - 1,
-     * android.sensor.info.activeArraySize.height - 1) being the
+     * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific focus area
      * needs to be used by the HAL. If the focusing region is
-     * outside the current android.scaler.cropRegion, the HAL
+     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CaptureRequest#SCALER_CROP_REGION
      */
     public static final Key<int[]> CONTROL_AF_REGIONS =
             new Key<int[]>("android.control.afRegions", int[].class);
@@ -265,7 +315,6 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Must be 0 if no CAMERA2_TRIGGER_AUTOFOCUS trigger
      * received yet by HAL. Always updated even if AF algorithm
      * ignores the trigger</p>
-     *
      * @hide
      */
     public static final Key<Integer> CONTROL_AF_TRIGGER_ID =
@@ -276,7 +325,9 @@ public final class CaptureResult extends CameraMetadata {
      * transform fields, and what its illumination target
      * is</p>
      * <p>[BC - AWB lock,AWB modes]</p>
-     * <p>Only effective if android.control.mode = AUTO.</p>
+     * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO.</p>
+     *
+     * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
      * @see #CONTROL_AWB_MODE_INCANDESCENT
@@ -299,15 +350,18 @@ public final class CaptureResult extends CameraMetadata {
      * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
-     * (android.sensor.info.activeArraySize.width - 1,
-     * android.sensor.info.activeArraySize.height - 1) being the
+     * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.height - 1) being the
      * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.</p>
      * <p>If all regions have 0 weight, then no specific metering area
      * needs to be used by the HAL. If the metering region is
-     * outside the current android.scaler.cropRegion, the HAL
+     * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CaptureRequest#SCALER_CROP_REGION
      */
     public static final Key<int[]> CONTROL_AWB_REGIONS =
             new Key<int[]>("android.control.awbRegions", int[].class);
@@ -332,12 +386,14 @@ public final class CaptureResult extends CameraMetadata {
      * by the HAL is disabled. The application must set the fields for
      * capture parameters itself.</p>
      * <p>When set to AUTO, the individual algorithm controls in
-     * android.control.* are in effect, such as android.control.afMode.</p>
+     * android.control.* are in effect, such as {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}.</p>
      * <p>When set to USE_SCENE_MODE, the individual controls in
      * android.control.* are mostly disabled, and the HAL implements
      * one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
      * as it wishes. The HAL scene mode 3A settings are provided by
      * android.control.sceneModeOverrides.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_MODE
      * @see #CONTROL_MODE_OFF
      * @see #CONTROL_MODE_AUTO
      * @see #CONTROL_MODE_USE_SCENE_MODE
@@ -525,9 +581,7 @@ public final class CaptureResult extends CameraMetadata {
      * in any order relative to other frames, but all PARTIAL buffers for a given
      * capture must arrive before the FINAL buffer for that capture. This entry may
      * only be used by the HAL if quirks.usePartialResult is set to 1.</p>
-     *
-     * <b>Optional</b> - This value may be null on some devices.
-     *
+     * <p><b>Optional</b> - This value may be null on some devices.</p>
      * @hide
      */
     public static final Key<Boolean> QUIRKS_PARTIAL_RESULT =
@@ -546,7 +600,6 @@ public final class CaptureResult extends CameraMetadata {
      * <p>An application-specified ID for the current
      * request. Must be maintained unchanged in output
      * frame</p>
-     *
      * @hide
      */
     public static final Key<Integer> REQUEST_ID =
@@ -630,12 +683,6 @@ public final class CaptureResult extends CameraMetadata {
      * exposure began for this frame.</p>
      * <p>The thermal diode being queried should be inside the sensor PCB, or
      * somewhere close to it.</p>
-     *
-     * <b>Optional</b> - This value may be null on some devices.
-     *
-     * <b>{@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL}</b> -
-     * Present on all devices that report being FULL level hardware devices in the
-     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL HARDWARE_LEVEL} key.
      */
     public static final Key<Float> SENSOR_TEMPERATURE =
             new Key<Float>("android.sensor.temperature", float.class);
@@ -646,7 +693,9 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Whether face detection is enabled, and whether it
      * should output just the basic fields or the full set of
      * fields. Value must be one of the
-     * android.statistics.info.availableFaceDetectModes.</p>
+     * {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES android.statistics.info.availableFaceDetectModes}.</p>
+     *
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES
      * @see #STATISTICS_FACE_DETECT_MODE_OFF
      * @see #STATISTICS_FACE_DETECT_MODE_SIMPLE
      * @see #STATISTICS_FACE_DETECT_MODE_FULL
@@ -658,7 +707,6 @@ public final class CaptureResult extends CameraMetadata {
      * <p>List of unique IDs for detected
      * faces</p>
      * <p>Only available if faceDetectMode == FULL</p>
-     *
      * @hide
      */
     public static final Key<int[]> STATISTICS_FACE_IDS =
@@ -668,7 +716,6 @@ public final class CaptureResult extends CameraMetadata {
      * <p>List of landmarks for detected
      * faces</p>
      * <p>Only available if faceDetectMode == FULL</p>
-     *
      * @hide
      */
     public static final Key<int[]> STATISTICS_FACE_LANDMARKS =
@@ -678,7 +725,6 @@ public final class CaptureResult extends CameraMetadata {
      * <p>List of the bounding rectangles for detected
      * faces</p>
      * <p>Only available if faceDetectMode != OFF</p>
-     *
      * @hide
      */
     public static final Key<android.graphics.Rect[]> STATISTICS_FACE_RECTANGLES =
@@ -689,7 +735,6 @@ public final class CaptureResult extends CameraMetadata {
      * detected faces</p>
      * <p>Only available if faceDetectMode != OFF. The value should be
      * meaningful (for example, setting 100 at all times is illegal).</p>
-     *
      * @hide
      */
     public static final Key<byte[]> STATISTICS_FACE_SCORES =
@@ -701,7 +746,7 @@ public final class CaptureResult extends CameraMetadata {
      * Bayer color channel.</p>
      * <p>The least shaded section of the image should have a gain factor
      * of 1; all other sections should have gains above 1.</p>
-     * <p>When android.colorCorrection.mode = TRANSFORM_MATRIX, the map
+     * <p>When {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} = TRANSFORM_MATRIX, the map
      * must take into account the colorCorrection settings.</p>
      * <p>The shading map is for the entire active pixel array, and is not
      * affected by the crop region specified in the request. Each shading map
@@ -714,18 +759,18 @@ public final class CaptureResult extends CameraMetadata {
      * <p>The channel order is [R, Geven, Godd, B], where Geven is the green
      * channel for the even rows of a Bayer pattern, and Godd is the odd rows.
      * The shading map is stored in a fully interleaved format, and its size
-     * is provided in the camera static metadata by android.lens.info.shadingMapSize.</p>
+     * is provided in the camera static metadata by {@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}.</p>
      * <p>The shading map should have on the order of 30-40 rows and columns,
      * and must be smaller than 64x64.</p>
      * <p>As an example, given a very small map defined as:</p>
-     * <pre><code>android.lens.info.shadingMapSize = [ 4, 3 ]
-     * android.statistics.lensShadingMap =
+     * <pre><code>{@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize} = [ 4, 3 ]
+     * {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} =
      * [ 1.3, 1.2, 1.15, 1.2,  1.2, 1.2, 1.15, 1.2,
-     *     1.1, 1.2, 1.2, 1.2,  1.3, 1.2, 1.3, 1.3,
-     *   1.2, 1.2, 1.25, 1.1,  1.1, 1.1, 1.1, 1.0,
-     *     1.0, 1.0, 1.0, 1.0,  1.2, 1.3, 1.25, 1.2,
-     *   1.3, 1.2, 1.2, 1.3,   1.2, 1.15, 1.1, 1.2,
-     *     1.2, 1.1, 1.0, 1.2,  1.3, 1.15, 1.2, 1.3 ]
+     * 1.1, 1.2, 1.2, 1.2,  1.3, 1.2, 1.3, 1.3,
+     * 1.2, 1.2, 1.25, 1.1,  1.1, 1.1, 1.1, 1.0,
+     * 1.0, 1.0, 1.0, 1.0,  1.2, 1.3, 1.25, 1.2,
+     * 1.3, 1.2, 1.2, 1.3,   1.2, 1.15, 1.1, 1.2,
+     * 1.2, 1.1, 1.0, 1.2,  1.3, 1.15, 1.2, 1.3 ]
      * </code></pre>
      * <p>The low-resolution scaling map images for each channel are
      * (displayed using nearest-neighbor interpolation):</p>
@@ -736,6 +781,10 @@ public final class CaptureResult extends CameraMetadata {
      * <p>As a visualization only, inverting the full-color map to recover an
      * image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
+     * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
      */
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
             new Key<float[]>("android.statistics.lensShadingMap", float[].class);
@@ -748,9 +797,11 @@ public final class CaptureResult extends CameraMetadata {
      * typically completes after the transform has already been
      * applied to that frame.</p>
      * <p>The 4 channel gains are defined in Bayer domain,
-     * see android.colorCorrection.gains for details.</p>
+     * see {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} for details.</p>
      * <p>This value should always be calculated by the AWB block,
      * regardless of the android.control.* current values.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
      */
     public static final Key<float[]> STATISTICS_PREDICTED_COLOR_GAINS =
             new Key<float[]>("android.statistics.predictedColorGains", float[].class);
@@ -791,8 +842,11 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Table mapping blue input values to output
      * values</p>
      * <p>Tonemapping / contrast / gamma curve for the blue
-     * channel, to use when android.tonemap.mode is CONTRAST_CURVE.</p>
-     * <p>See android.tonemap.curveRed for more details.</p>
+     * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
+     * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
+     *
+     * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      */
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
@@ -801,8 +855,11 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Table mapping green input values to output
      * values</p>
      * <p>Tonemapping / contrast / gamma curve for the green
-     * channel, to use when android.tonemap.mode is CONTRAST_CURVE.</p>
-     * <p>See android.tonemap.curveRed for more details.</p>
+     * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
+     * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
+     *
+     * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      */
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);
@@ -811,7 +868,7 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Table mapping red input values to output
      * values</p>
      * <p>Tonemapping / contrast / gamma curve for the red
-     * channel, to use when android.tonemap.mode is CONTRAST_CURVE.</p>
+     * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>Since the input and output ranges may vary depending on
      * the camera pipeline, the input and output pixel values
      * are represented by normalized floating-point values
@@ -822,6 +879,8 @@ public final class CaptureResult extends CameraMetadata {
      * 0.3, 0.5, 1.0, 1.0], then the input-&gt;output mapping
      * for a few sample points would be: 0 -&gt; 0, 0.15 -&gt;
      * 0.25, 0.3 -&gt; 0.5, 0.5 -&gt; 0.64</p>
+     *
+     * @see CaptureRequest#TONEMAP_MODE
      */
     public static final Key<float[]> TONEMAP_CURVE_RED =
             new Key<float[]>("android.tonemap.curveRed", float[].class);
@@ -845,7 +904,6 @@ public final class CaptureResult extends CameraMetadata {
      * data is stored locally on the device.</p>
      * <p>The LED <em>may</em> be off if a trusted application is using the data that
      * doesn't violate the above rules.</p>
-     *
      * @hide
      */
     public static final Key<Boolean> LED_TRANSMIT =
@@ -855,9 +913,11 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Whether black-level compensation is locked
      * to its current values, or is free to vary.</p>
      * <p>Whether the black level offset was locked for this frame.  Should be
-     * ON if android.blackLevel.lock was ON in the capture request, unless
+     * ON if {@link CaptureRequest#BLACK_LEVEL_LOCK android.blackLevel.lock} was ON in the capture request, unless
      * a change in other capture settings forced the camera device to
      * perform a black level reset.</p>
+     *
+     * @see CaptureRequest#BLACK_LEVEL_LOCK
      */
     public static final Key<Boolean> BLACK_LEVEL_LOCK =
             new Key<Boolean>("android.blackLevel.lock", boolean.class);
