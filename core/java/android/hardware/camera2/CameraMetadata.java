@@ -249,8 +249,11 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>Use the android.colorCorrection.transform matrix
-     * and android.colorCorrection.gains to do color conversion</p>
+     * <p>Use the {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} matrix
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} to do color conversion</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0;
@@ -274,21 +277,31 @@ public abstract class CameraMetadata {
     //
 
     /**
+     * <p>The camera device will not adjust exposure duration to
+     * avoid banding problems.</p>
      * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
      */
     public static final int CONTROL_AE_ANTIBANDING_MODE_OFF = 0;
 
     /**
+     * <p>The camera device will adjust exposure duration to
+     * avoid banding problems with 50Hz illumination sources.</p>
      * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
      */
     public static final int CONTROL_AE_ANTIBANDING_MODE_50HZ = 1;
 
     /**
+     * <p>The camera device will adjust exposure duration to
+     * avoid banding problems with 60Hz illumination
+     * sources.</p>
      * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
      */
     public static final int CONTROL_AE_ANTIBANDING_MODE_60HZ = 2;
 
     /**
+     * <p>The camera device will automatically adapt its
+     * antibanding routine to the current illumination
+     * conditions. This is the default.</p>
      * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
      */
     public static final int CONTROL_AE_ANTIBANDING_MODE_AUTO = 3;
@@ -298,42 +311,73 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>Autoexposure is disabled; sensor.exposureTime,
-     * sensor.sensitivity and sensor.frameDuration are used</p>
+     * <p>The camera device's autoexposure routine is disabled;
+     * the application-selected {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
+     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are used by the camera
+     * device, along with android.flash.* fields, if there's
+     * a flash unit for this camera device.</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_OFF = 0;
 
     /**
-     * <p>Autoexposure is active, no flash
-     * control</p>
+     * <p>The camera device's autoexposure routine is active,
+     * with no flash control. The application's values for
+     * {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
+     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are ignored. The
+     * application has control over the various
+     * android.flash.* fields.</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON = 1;
 
     /**
-     * <p>If autoexposure is active and flash exists, auto
-     * flash control; flash may be fired when precapture
-     * trigger is activated, and for captures for which
-     * captureIntent = STILL_CAPTURE</p>
+     * <p>Like ON, except that the camera device also controls
+     * the camera's flash unit, firing it in low-light
+     * conditions. The flash may be fired during a
+     * precapture sequence (triggered by
+     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}) and may be fired
+     * for captures for which the
+     * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
+     * STILL_CAPTURE</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2;
 
     /**
-     * <p>If autoexposure is active and flash exists, auto
-     * flash control for precapture trigger and always flash
-     * when captureIntent = STILL_CAPTURE</p>
+     * <p>Like ON, except that the camera device also controls
+     * the camera's flash unit, always firing it for still
+     * captures. The flash may be fired during a precapture
+     * sequence (triggered by
+     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}) and will always
+     * be fired for captures for which the
+     * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
+     * STILL_CAPTURE</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3;
 
     /**
-     * <p>Optional. Automatic red eye reduction with flash.
-     * If deemed necessary, red eye reduction sequence should
-     * fire when precapture trigger is activated, and final
-     * flash should fire when captureIntent =
-     * STILL_CAPTURE</p>
+     * <p>Like ON_AUTO_FLASH, but with automatic red eye
+     * reduction. If deemed necessary by the camera device,
+     * a red eye reduction flash will fire during the
+     * precapture sequence.</p>
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE = 4;
@@ -363,21 +407,25 @@ public abstract class CameraMetadata {
 
     /**
      * <p>The auto-focus routine does not control the lens;
-     * android.lens.focusDistance is controlled by the
+     * {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} is controlled by the
      * application</p>
+     *
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_OFF = 0;
 
     /**
      * <p>If lens is not fixed focus.</p>
-     * <p>Use android.lens.info.minimumFocusDistance to determine if lens
+     * <p>Use {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} to determine if lens
      * is fixed-focus. In this mode, the lens does not move unless
      * the autofocus trigger action is called. When that trigger
      * is activated, AF must transition to ACTIVE_SCAN, then to
      * the outcome of the scan (FOCUSED or NOT_FOCUSED).</p>
      * <p>Triggering AF_CANCEL resets the lens position to default,
      * and sets the AF state to INACTIVE.</p>
+     *
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      * @see CaptureRequest#CONTROL_AF_MODE
      */
     public static final int CONTROL_AF_MODE_AUTO = 1;
