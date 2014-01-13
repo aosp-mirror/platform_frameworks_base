@@ -4817,27 +4817,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void createStack(int stackId, int displayId) {
-        mH.sendMessage(mH.obtainMessage(H.CREATE_STACK, stackId, displayId));
-    }
-
     /**
-     * Create a new TaskStack and place it next to an existing stack.
+     * Create a new TaskStack and place it on a DisplayContent.
      * @param stackId The unique identifier of the new stack.
+     * @param displayId The unique identifier of the DisplayContent.
      */
-    private void createStackLocked(int stackId, int displayId) {
+    public void createStack(int stackId, int displayId) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
-                final int numDisplays = mDisplayContents.size();
-                for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                    final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-                    if (displayContent.getDisplayId() == displayId) {
-                        TaskStack stack = displayContent.createStack(stackId);
-                        mStackIdToStack.put(stackId, stack);
-                        performLayoutAndPlaceSurfacesLocked();
-                        return;
-                    }
+                final DisplayContent displayContent = mDisplayContents.get(displayId);
+                if (displayContent != null) {
+                    TaskStack stack = displayContent.createStack(stackId);
+                    mStackIdToStack.put(stackId, stack);
+                    performLayoutAndPlaceSurfacesLocked();
                 }
             }
         } finally {
@@ -4872,7 +4865,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final TaskStack stack = task.mStack;
             EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
             stack.removeTask(task);
-            stack.getDisplayContent().layoutNeeded = true;
         }
     }
 
@@ -7047,8 +7039,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int REMOVE_STARTING_TIMEOUT = 33;
 
-        public static final int CREATE_STACK = 34;
-
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7456,9 +7446,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case DO_DISPLAY_ADDED:
-                    synchronized (mWindowMap) {
-                        handleDisplayAddedLocked(msg.arg1);
-                    }
+                    handleDisplayAdded(msg.arg1);
                     break;
 
                 case DO_DISPLAY_REMOVED:
@@ -7490,11 +7478,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     try {
                         mActivityManager.notifyActivityDrawn((IBinder) msg.obj);
                     } catch (RemoteException e) {
-                    }
-                    break;
-                case CREATE_STACK:
-                    synchronized (mWindowMap) {
-                        createStackLocked(msg.arg1, msg.arg2);
                     }
                     break;
             }
@@ -10800,11 +10783,13 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_ADDED, displayId, 0));
     }
 
-    private void handleDisplayAddedLocked(int displayId) {
-        final Display display = mDisplayManager.getDisplay(displayId);
-        if (display != null) {
-            createDisplayContentLocked(display);
-            displayReady(displayId);
+    public void handleDisplayAdded(int displayId) {
+        synchronized (mWindowMap) {
+            final Display display = mDisplayManager.getDisplay(displayId);
+            if (display != null) {
+                createDisplayContentLocked(display);
+                displayReady(displayId);
+            }
         }
     }
 
