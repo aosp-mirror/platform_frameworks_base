@@ -119,7 +119,7 @@ public class StatusBarIconView extends AnimatedImageView {
         }
 
         if (!numberEquals) {
-            if (icon.number > 0 && mContext.getResources().getBoolean(
+            if (icon.number > 0 && getContext().getResources().getBoolean(
                         R.bool.config_statusBarShowNumber)) {
                 if (mNumberBackground == null) {
                     mNumberBackground = getContext().getResources().getDrawable(
@@ -240,10 +240,10 @@ public class StatusBarIconView extends AnimatedImageView {
 
     void placeNumber() {
         final String str;
-        final int tooBig = mContext.getResources().getInteger(
+        final int tooBig = getContext().getResources().getInteger(
                 android.R.integer.status_bar_notification_info_maxnum);
         if (mIcon.number > tooBig) {
-            str = mContext.getResources().getString(
+            str = getContext().getResources().getString(
                         android.R.string.status_bar_notification_info_overflow);
         } else {
             NumberFormat f = NumberFormat.getIntegerInstance();

@@ -42,7 +42,7 @@ public class QuickSettingsScrollView extends ScrollView {
         if (getChildCount() > 0) {
             View child = getChildAt(0);
             scrollRange = Math.max(0,
-                    child.getHeight() - (getHeight() - mPaddingBottom - mPaddingTop));
+                    child.getHeight() - (getHeight() - getPaddingBottom() - getPaddingTop()));
         }
         return scrollRange;
     }
