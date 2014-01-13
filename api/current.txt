@@ -22405,7 +22405,7 @@ package android.renderscript {
   }
 
   public class BaseObj {
-    method public synchronized void destroy();
+    method public void destroy();
     method public java.lang.String getName();
     method public void setName(java.lang.String);
   }
@@ -22997,6 +22997,7 @@ package android.renderscript {
   public final class ScriptIntrinsic3DLUT extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsic3DLUT create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.KernelID getKernelID();
     method public void setLUT(android.renderscript.Allocation);
   }
@@ -23004,20 +23005,35 @@ package android.renderscript {
   public class ScriptIntrinsicBlend extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicBlend create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachClear(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachClear(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachDst(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDst(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachDstAtop(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstAtop(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachDstIn(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstIn(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachDstOut(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstOut(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachDstOver(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstOver(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachMultiply(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachMultiply(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachSrc(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrc(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachSrcAtop(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcAtop(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachSrcIn(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcIn(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachSrcOut(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcOut(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachSrcOver(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcOver(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachSubtract(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSubtract(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEachXor(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachXor(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.KernelID getKernelIDAdd();
     method public android.renderscript.Script.KernelID getKernelIDClear();
     method public android.renderscript.Script.KernelID getKernelIDDst();
@@ -23038,6 +23054,7 @@ package android.renderscript {
   public final class ScriptIntrinsicBlur extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicBlur create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.FieldID getFieldID_Input();
     method public android.renderscript.Script.KernelID getKernelID();
     method public void setInput(android.renderscript.Allocation);
@@ -23048,6 +23065,7 @@ package android.renderscript {
     method public static deprecated android.renderscript.ScriptIntrinsicColorMatrix create(android.renderscript.RenderScript, android.renderscript.Element);
     method public static android.renderscript.ScriptIntrinsicColorMatrix create(android.renderscript.RenderScript);
     method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.KernelID getKernelID();
     method public void setAdd(android.renderscript.Float4);
     method public void setAdd(float, float, float, float);
@@ -23061,6 +23079,7 @@ package android.renderscript {
   public final class ScriptIntrinsicConvolve3x3 extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicConvolve3x3 create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.FieldID getFieldID_Input();
     method public android.renderscript.Script.KernelID getKernelID();
     method public void setCoefficients(float[]);
@@ -23070,6 +23089,7 @@ package android.renderscript {
   public final class ScriptIntrinsicConvolve5x5 extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicConvolve5x5 create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.FieldID getFieldID_Input();
     method public android.renderscript.Script.KernelID getKernelID();
     method public void setCoefficients(float[]);
@@ -23079,7 +23099,9 @@ package android.renderscript {
   public final class ScriptIntrinsicHistogram extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicHistogram create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void forEach_Dot(android.renderscript.Allocation);
+    method public void forEach_Dot(android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.FieldID getFieldID_Input();
     method public android.renderscript.Script.KernelID getKernelID_Separate();
     method public void setDotCoefficients(float, float, float, float);
@@ -23089,6 +23111,7 @@ package android.renderscript {
   public final class ScriptIntrinsicLUT extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicLUT create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public android.renderscript.Script.KernelID getKernelID();
     method public void setAlpha(int, int);
     method public void setBlue(int, int);

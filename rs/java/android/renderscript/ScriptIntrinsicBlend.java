@@ -40,14 +40,14 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
 
     }
 
-    private void blend(int id, Allocation ain, Allocation aout) {
+    private void blend(int id, Allocation ain, Allocation aout, Script.LaunchOptions opt) {
         if (!ain.getElement().isCompatible(Element.U8_4(mRS))) {
             throw new RSIllegalArgumentException("Input is not of expected format.");
         }
         if (!aout.getElement().isCompatible(Element.U8_4(mRS))) {
             throw new RSIllegalArgumentException("Output is not of expected format.");
         }
-        forEach(id, ain, aout, null);
+        forEach(id, ain, aout, null, opt);
     }
 
     /**
@@ -57,7 +57,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachClear(Allocation ain, Allocation aout) {
-        blend(0, ain, aout);
+        forEachClear(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = {0, 0, 0, 0}
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachClear(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(0, ain, aout, opt);
     }
 
     /**
@@ -77,7 +88,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachSrc(Allocation ain, Allocation aout) {
-        blend(1, ain, aout);
+        forEachSrc(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = src
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachSrc(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        forEachDst(ain, aout, null);
     }
 
     /**
@@ -102,6 +124,19 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
     }
 
     /**
+     * Sets dst = dst
+     *
+     * This is a NOP.
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachDst(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        // N, optOP
+    }
+
+    /**
      * Get a KernelID for the Dst kernel.
      *
      * @return Script.KernelID The KernelID object.
@@ -117,7 +152,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachSrcOver(Allocation ain, Allocation aout) {
-        blend(3, ain, aout);
+        forEachSrcOver(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = src + dst * (1.0 - src.a)
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachSrcOver(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(3, ain, aout, opt);
     }
 
     /**
@@ -136,7 +182,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachDstOver(Allocation ain, Allocation aout) {
-        blend(4, ain, aout);
+        forEachDstOver(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = dst + src * (1.0 - dst.a)
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachDstOver(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(4, ain, aout, opt);
     }
 
     /**
@@ -155,7 +212,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachSrcIn(Allocation ain, Allocation aout) {
-        blend(5, ain, aout);
+        forEachSrcIn(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = src * dst.a
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachSrcIn(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(5, ain, aout, opt);
     }
 
     /**
@@ -174,7 +242,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachDstIn(Allocation ain, Allocation aout) {
-        blend(6, ain, aout);
+        forEachDstIn(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = dst * src.a
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachDstIn(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(6, ain, aout, opt);
     }
 
     /**
@@ -193,7 +272,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachSrcOut(Allocation ain, Allocation aout) {
-        blend(7, ain, aout);
+        forEachSrcOut(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = src * (1.0 - dst.a)
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachSrcOut(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(7, ain, aout, opt);
     }
 
     /**
@@ -212,7 +302,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachDstOut(Allocation ain, Allocation aout) {
-        blend(8, ain, aout);
+        forEachDstOut(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = dst * (1.0 - src.a)
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachDstOut(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(8, ain, aout, opt);
     }
 
     /**
@@ -232,7 +333,19 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachSrcAtop(Allocation ain, Allocation aout) {
-        blend(9, ain, aout);
+        forEachSrcAtop(ain, aout, null);
+    }
+
+    /**
+     * dst.rgb = src.rgb * dst.a + (1.0 - src.a) * dst.rgb
+     * dst.a = dst.a
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachSrcAtop(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(9, ain, aout, opt);
     }
 
     /**
@@ -252,7 +365,19 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachDstAtop(Allocation ain, Allocation aout) {
-        blend(10, ain, aout);
+        forEachDstAtop(ain, aout, null);
+    }
+
+    /**
+     * dst = dst.rgb * src.a + (1.0 - dst.a) * src.rgb
+     * dst.a = src.a
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachDstAtop(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(10, ain, aout, opt);
     }
 
     /**
@@ -271,7 +396,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachXor(Allocation ain, Allocation aout) {
-        blend(11, ain, aout);
+        forEachXor(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = {src.r ^ dst.r, src.g ^ dst.g, src.b ^ dst.b, src.a ^ dst.a}
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachXor(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(11, ain, aout, opt);
     }
 
     /**
@@ -300,7 +436,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachMultiply(Allocation ain, Allocation aout) {
-        blend(14, ain, aout);
+        forEachMultiply(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = src * dst
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachMultiply(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(14, ain, aout, opt);
     }
 
     /**
@@ -396,7 +543,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachAdd(Allocation ain, Allocation aout) {
-        blend(34, ain, aout);
+        forEachAdd(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = min(src + dst, 1.0)
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachAdd(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(34, ain, aout, opt);
     }
 
     /**
@@ -415,7 +573,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param aout The destination buffer
      */
     public void forEachSubtract(Allocation ain, Allocation aout) {
-        blend(35, ain, aout);
+        forEachSubtract(ain, aout, null);
+    }
+
+    /**
+     * Sets dst = max(dst - src, 0.0)
+     *
+     * @param ain The source buffer
+     * @param aout The destination buffer
+     * @param opt LaunchOptions for clipping
+     */
+    public void forEachSubtract(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
+        blend(35, ain, aout, opt);
     }
 
     /**
