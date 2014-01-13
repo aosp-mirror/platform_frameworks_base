@@ -136,7 +136,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemindstillinger."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Underretninger."</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd meddelelse."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd underretning."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS aktiveret."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS samler data."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter aktiveret."</string>
