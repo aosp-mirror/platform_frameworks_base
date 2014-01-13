@@ -330,7 +330,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     private void showImpl(boolean show) {
-        sendCloseSystemWindows(mContext, BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
+        sendCloseSystemWindows(getContext(), BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
 
         mShowing = show;
 
@@ -372,11 +372,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void dismiss() {
-        ((RecentsActivity) mContext).dismissAndGoHome();
+        ((RecentsActivity) getContext()).dismissAndGoHome();
     }
 
     public void dismissAndGoBack() {
-        ((RecentsActivity) mContext).dismissAndGoBack();
+        ((RecentsActivity) getContext()).dismissAndGoBack();
     }
 
     public void onAnimationCancel(Animator animation) {
@@ -424,7 +424,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void updateValuesFromResources() {
-        final Resources res = mContext.getResources();
+        final Resources res = getContext().getResources();
         mThumbnailWidth = Math.round(res.getDimension(R.dimen.status_bar_recents_thumbnail_width));
         mFitThumbnailToXY = res.getBoolean(R.bool.config_recents_thumbnail_image_fits_to_xy);
     }
@@ -440,7 +440,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 invalidate();
             }
         });
-        mListAdapter = new TaskDescriptionAdapter(mContext);
+        mListAdapter = new TaskDescriptionAdapter(getContext());
         mRecentsContainer.setAdapter(mListAdapter);
         mRecentsContainer.setCallback(this);
 
@@ -474,7 +474,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             if (show && h.iconView.getVisibility() != View.VISIBLE) {
                 if (anim) {
                     h.iconView.setAnimation(
-                            AnimationUtils.loadAnimation(mContext, R.anim.recent_appear));
+                            AnimationUtils.loadAnimation(getContext(), R.anim.recent_appear));
                 }
                 h.iconView.setVisibility(View.VISIBLE);
             }
@@ -506,7 +506,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             if (show && h.thumbnailView.getVisibility() != View.VISIBLE) {
                 if (anim) {
                     h.thumbnailView.setAnimation(
-                            AnimationUtils.loadAnimation(mContext, R.anim.recent_appear));
+                            AnimationUtils.loadAnimation(getContext(), R.anim.recent_appear));
                 }
                 h.thumbnailView.setVisibility(View.VISIBLE);
             }
@@ -617,7 +617,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         } else {
             mRecentTaskDescriptions.addAll(tasks);
         }
-        if (((RecentsActivity) mContext).isActivityShowing()) {
+        if (((RecentsActivity) getContext()).isActivityShowing()) {
             refreshViews();
         }
     }
@@ -726,13 +726,13 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         // Currently, either direction means the same thing, so ignore direction and remove
         // the task.
         final ActivityManager am = (ActivityManager)
-                mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                getContext().getSystemService(Context.ACTIVITY_SERVICE);
         if (am != null) {
             am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
 
             // Accessibility feedback
             setContentDescription(
-                    mContext.getString(R.string.accessibility_recents_item_dismissed, ad.getLabel()));
+                    getContext().getString(R.string.accessibility_recents_item_dismissed, ad.getLabel()));
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
             setContentDescription(null);
         }
@@ -741,7 +741,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private void startApplicationDetailsActivity(String packageName) {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.fromParts("package", packageName, null));
-        intent.setComponent(intent.resolveActivity(mContext.getPackageManager()));
+        intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
         TaskStackBuilder.create(getContext())
                 .addNextIntentWithParentStack(intent).startActivities();
     }
@@ -758,7 +758,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             final View selectedView, final View anchorView, final View thumbnailView) {
         thumbnailView.setSelected(true);
         final PopupMenu popup =
-            new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
+            new PopupMenu(getContext(), anchorView == null ? selectedView : anchorView);
         mPopup = popup;
         popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -793,15 +793,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
-        int paddingLeft = mPaddingLeft;
+        int paddingLeft = getPaddingLeft();
         final boolean offsetRequired = isPaddingOffsetRequired();
         if (offsetRequired) {
             paddingLeft += getLeftPaddingOffset();
         }
 
-        int left = mScrollX + paddingLeft;
-        int right = left + mRight - mLeft - mPaddingRight - paddingLeft;
-        int top = mScrollY + getFadeTop(offsetRequired);
+        int left = getScrollX() + paddingLeft;
+        int right = left + getRight() - getLeft() - getPaddingRight() - paddingLeft;
+        int top = getScrollY() + getFadeTop(offsetRequired);
         int bottom = top + getFadeHeight(offsetRequired);
 
         if (offsetRequired) {

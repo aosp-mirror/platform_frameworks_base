@@ -70,7 +70,7 @@ public class DateView extends TextView {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        mContext.registerReceiver(mIntentReceiver, filter, null, null);
+        getContext().registerReceiver(mIntentReceiver, filter, null, null);
 
         updateClock();
     }
@@ -80,7 +80,7 @@ public class DateView extends TextView {
         super.onDetachedFromWindow();
 
         mDateFormat = null; // reload the locale next time
-        mContext.unregisterReceiver(mIntentReceiver);
+        getContext().unregisterReceiver(mIntentReceiver);
     }
 
     protected void updateClock() {
