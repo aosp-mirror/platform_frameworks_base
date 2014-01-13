@@ -82,7 +82,7 @@ import android.util.StringBuilderPrinter;
 import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
-import com.android.internal.backup.LocalTransport;
+import com.android.server.EventLogTags;
 import com.android.server.PackageManagerBackupAgent.Metadata;
 
 import java.io.BufferedInputStream;
@@ -140,11 +140,16 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final boolean DEBUG = true;
     private static final boolean MORE_DEBUG = false;
 
+    // Historical and current algorithm names
+    static final String PBKDF_CURRENT = "PBKDF2WithHmacSHA1";
+    static final String PBKDF_FALLBACK = "PBKDF2WithHmacSHA1And8bit";
+
     // Name and current contents version of the full-backup manifest file
     static final String BACKUP_MANIFEST_FILENAME = "_manifest";
     static final int BACKUP_MANIFEST_VERSION = 1;
     static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
-    static final int BACKUP_FILE_VERSION = 1;
+    static final int BACKUP_FILE_VERSION = 2;
+    static final int BACKUP_PW_FILE_VERSION = 2;
     static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
     static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
@@ -450,6 +455,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private final SecureRandom mRng = new SecureRandom();
     private String mPasswordHash;
     private File mPasswordHashFile;
+    private int mPasswordVersion;
+    private File mPasswordVersionFile;
     private byte[] mPasswordSalt;
 
     // Configuration of PBKDF2 that we use for generating pw hashes and intermediate keys
@@ -810,6 +817,27 @@ class BackupManagerService extends IBackupManager.Stub {
         }
         mDataDir = Environment.getDownloadCacheDirectory();
 
+        mPasswordVersion = 1;       // unless we hear otherwise
+        mPasswordVersionFile = new File(mBaseStateDir, "pwversion");
+        if (mPasswordVersionFile.exists()) {
+            FileInputStream fin = null;
+            DataInputStream in = null;
+            try {
+                fin = new FileInputStream(mPasswordVersionFile);
+                in = new DataInputStream(fin);
+                mPasswordVersion = in.readInt();
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to read backup pw version");
+            } finally {
+                try {
+                    if (in != null) in.close();
+                    if (fin != null) fin.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Error closing pw version files");
+                }
+            }
+        }
+
         mPasswordHashFile = new File(mBaseStateDir, "pwhash");
         if (mPasswordHashFile.exists()) {
             FileInputStream fin = null;
@@ -1110,13 +1138,13 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    private SecretKey buildPasswordKey(String pw, byte[] salt, int rounds) {
-        return buildCharArrayKey(pw.toCharArray(), salt, rounds);
+    private SecretKey buildPasswordKey(String algorithm, String pw, byte[] salt, int rounds) {
+        return buildCharArrayKey(algorithm, pw.toCharArray(), salt, rounds);
     }
 
-    private SecretKey buildCharArrayKey(char[] pwArray, byte[] salt, int rounds) {
+    private SecretKey buildCharArrayKey(String algorithm, char[] pwArray, byte[] salt, int rounds) {
         try {
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(algorithm);
             KeySpec ks = new PBEKeySpec(pwArray, salt, rounds, PBKDF2_KEY_SIZE);
             return keyFactory.generateSecret(ks);
         } catch (InvalidKeySpecException e) {
@@ -1127,8 +1155,8 @@ class BackupManagerService extends IBackupManager.Stub {
         return null;
     }
 
-    private String buildPasswordHash(String pw, byte[] salt, int rounds) {
-        SecretKey key = buildPasswordKey(pw, salt, rounds);
+    private String buildPasswordHash(String algorithm, String pw, byte[] salt, int rounds) {
+        SecretKey key = buildPasswordKey(algorithm, pw, salt, rounds);
         if (key != null) {
             return byteArrayToHex(key.getEncoded());
         }
@@ -1156,13 +1184,13 @@ class BackupManagerService extends IBackupManager.Stub {
         return result;
     }
 
-    private byte[] makeKeyChecksum(byte[] pwBytes, byte[] salt, int rounds) {
+    private byte[] makeKeyChecksum(String algorithm, byte[] pwBytes, byte[] salt, int rounds) {
         char[] mkAsChar = new char[pwBytes.length];
         for (int i = 0; i < pwBytes.length; i++) {
             mkAsChar[i] = (char) pwBytes[i];
         }
 
-        Key checksum = buildCharArrayKey(mkAsChar, salt, rounds);
+        Key checksum = buildCharArrayKey(algorithm, mkAsChar, salt, rounds);
         return checksum.getEncoded();
     }
 
@@ -1174,7 +1202,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Backup password management
-    boolean passwordMatchesSaved(String candidatePw, int rounds) {
+    boolean passwordMatchesSaved(String algorithm, String candidatePw, int rounds) {
         // First, on an encrypted device we require matching the device pw
         final boolean isEncrypted;
         try {
@@ -1217,7 +1245,7 @@ class BackupManagerService extends IBackupManager.Stub {
         } else {
             // hash the stated current pw and compare to the stored one
             if (candidatePw != null && candidatePw.length() > 0) {
-                String currentPwHash = buildPasswordHash(candidatePw, mPasswordSalt, rounds);
+                String currentPwHash = buildPasswordHash(algorithm, candidatePw, mPasswordSalt, rounds);
                 if (mPasswordHash.equalsIgnoreCase(currentPwHash)) {
                     // candidate hash matches the stored hash -- the password matches
                     return true;
@@ -1232,9 +1260,35 @@ class BackupManagerService extends IBackupManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupPassword");
 
-        // If the supplied pw doesn't hash to the the saved one, fail
-        if (!passwordMatchesSaved(currentPw, PBKDF2_HASH_ROUNDS)) {
+        // When processing v1 passwords we may need to try two different PBKDF2 checksum regimes
+        final boolean pbkdf2Fallback = (mPasswordVersion < BACKUP_PW_FILE_VERSION);
+
+        // If the supplied pw doesn't hash to the the saved one, fail.  The password
+        // might be caught in the legacy crypto mismatch; verify that too.
+        if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PBKDF2_HASH_ROUNDS)
+                && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
+                        currentPw, PBKDF2_HASH_ROUNDS))) {
             return false;
+        }
+
+        // Snap up to current on the pw file version
+        mPasswordVersion = BACKUP_PW_FILE_VERSION;
+        FileOutputStream pwFout = null;
+        DataOutputStream pwOut = null;
+        try {
+            pwFout = new FileOutputStream(mPasswordVersionFile);
+            pwOut = new DataOutputStream(pwFout);
+            pwOut.writeInt(mPasswordVersion);
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to write backup pw version; password not changed");
+            return false;
+        } finally {
+            try {
+                if (pwOut != null) pwOut.close();
+                if (pwFout != null) pwFout.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Unable to close pw version record");
+            }
         }
 
         // Clearing the password is okay
@@ -1254,7 +1308,7 @@ class BackupManagerService extends IBackupManager.Stub {
         try {
             // Okay, build the hash of the new backup password
             byte[] salt = randomBytes(PBKDF2_SALT_SIZE);
-            String newPwHash = buildPasswordHash(newPw, salt, PBKDF2_HASH_ROUNDS);
+            String newPwHash = buildPasswordHash(PBKDF_CURRENT, newPw, salt, PBKDF2_HASH_ROUNDS);
 
             OutputStream pwf = null, buffer = null;
             DataOutputStream out = null;
@@ -1295,6 +1349,19 @@ class BackupManagerService extends IBackupManager.Stub {
             // "secure" i.e. assuming that we require a password
             return true;
         }
+    }
+
+    private boolean backupPasswordMatches(String currentPw) {
+        if (hasBackupPassword()) {
+            final boolean pbkdf2Fallback = (mPasswordVersion < BACKUP_PW_FILE_VERSION);
+            if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PBKDF2_HASH_ROUNDS)
+                    && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
+                            currentPw, PBKDF2_HASH_ROUNDS))) {
+                if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                return false;
+            }
+        }
+        return true;
     }
 
     // Maintain persistent state around whether need to do an initialize operation.
@@ -2717,11 +2784,9 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // Verify that the given password matches the currently-active
                 // backup password, if any
-                if (hasBackupPassword()) {
-                    if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
-                        if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
-                        return;
-                    }
+                if (!backupPasswordMatches(mCurrentPassword)) {
+                    if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                    return;
                 }
 
                 // Write the global file header.  All strings are UTF-8 encoded; lines end
@@ -2729,7 +2794,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // final '\n'.
                 //
                 // line 1: "ANDROID BACKUP"
-                // line 2: backup file format version, currently "1"
+                // line 2: backup file format version, currently "2"
                 // line 3: compressed?  "0" if not compressed, "1" if compressed.
                 // line 4: name of encryption algorithm [currently only "none" or "AES-256"]
                 //
@@ -2837,7 +2902,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 OutputStream ofstream) throws Exception {
             // User key will be used to encrypt the master key.
             byte[] newUserSalt = randomBytes(PBKDF2_SALT_SIZE);
-            SecretKey userKey = buildPasswordKey(mEncryptPassword, newUserSalt,
+            SecretKey userKey = buildPasswordKey(PBKDF_CURRENT, mEncryptPassword, newUserSalt,
                     PBKDF2_HASH_ROUNDS);
 
             // the master key is random for each backup
@@ -2884,7 +2949,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // stated number of PBKDF2 rounds
             IV = c.getIV();
             byte[] mk = masterKeySpec.getEncoded();
-            byte[] checksum = makeKeyChecksum(masterKeySpec.getEncoded(),
+            byte[] checksum = makeKeyChecksum(PBKDF_CURRENT, masterKeySpec.getEncoded(),
                     checksumSalt, PBKDF2_HASH_ROUNDS);
 
             ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
@@ -3227,11 +3292,9 @@ class BackupManagerService extends IBackupManager.Stub {
             FileInputStream rawInStream = null;
             DataInputStream rawDataIn = null;
             try {
-                if (hasBackupPassword()) {
-                    if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
-                        if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
-                        return;
-                    }
+                if (!backupPasswordMatches(mCurrentPassword)) {
+                    if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                    return;
                 }
 
                 mBytes = 0;
@@ -3252,8 +3315,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (Arrays.equals(magicBytes, streamHeader)) {
                     // okay, header looks good.  now parse out the rest of the fields.
                     String s = readHeaderLine(rawInStream);
-                    if (Integer.parseInt(s) == BACKUP_FILE_VERSION) {
-                        // okay, it's a version we recognize
+                    final int archiveVersion = Integer.parseInt(s);
+                    if (archiveVersion <= BACKUP_FILE_VERSION) {
+                        // okay, it's a version we recognize.  if it's version 1, we may need
+                        // to try two different PBKDF2 regimes to compare checksums.
+                        final boolean pbkdf2Fallback = (archiveVersion == 1);
+
                         s = readHeaderLine(rawInStream);
                         compressed = (Integer.parseInt(s) != 0);
                         s = readHeaderLine(rawInStream);
@@ -3261,7 +3328,8 @@ class BackupManagerService extends IBackupManager.Stub {
                             // no more header to parse; we're good to go
                             okay = true;
                         } else if (mDecryptPassword != null && mDecryptPassword.length() > 0) {
-                            preCompressStream = decodeAesHeaderAndInitialize(s, rawInStream);
+                            preCompressStream = decodeAesHeaderAndInitialize(s, pbkdf2Fallback,
+                                    rawInStream);
                             if (preCompressStream != null) {
                                 okay = true;
                             }
@@ -3321,7 +3389,71 @@ class BackupManagerService extends IBackupManager.Stub {
             return buffer.toString();
         }
 
-        InputStream decodeAesHeaderAndInitialize(String encryptionName, InputStream rawInStream) {
+        InputStream attemptMasterKeyDecryption(String algorithm, byte[] userSalt, byte[] ckSalt,
+                int rounds, String userIvHex, String masterKeyBlobHex, InputStream rawInStream,
+                boolean doLog) {
+            InputStream result = null;
+
+            try {
+                Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                SecretKey userKey = buildPasswordKey(algorithm, mDecryptPassword, userSalt,
+                        rounds);
+                byte[] IV = hexToByteArray(userIvHex);
+                IvParameterSpec ivSpec = new IvParameterSpec(IV);
+                c.init(Cipher.DECRYPT_MODE,
+                        new SecretKeySpec(userKey.getEncoded(), "AES"),
+                        ivSpec);
+                byte[] mkCipher = hexToByteArray(masterKeyBlobHex);
+                byte[] mkBlob = c.doFinal(mkCipher);
+
+                // first, the master key IV
+                int offset = 0;
+                int len = mkBlob[offset++];
+                IV = Arrays.copyOfRange(mkBlob, offset, offset + len);
+                offset += len;
+                // then the master key itself
+                len = mkBlob[offset++];
+                byte[] mk = Arrays.copyOfRange(mkBlob,
+                        offset, offset + len);
+                offset += len;
+                // and finally the master key checksum hash
+                len = mkBlob[offset++];
+                byte[] mkChecksum = Arrays.copyOfRange(mkBlob,
+                        offset, offset + len);
+
+                // now validate the decrypted master key against the checksum
+                byte[] calculatedCk = makeKeyChecksum(algorithm, mk, ckSalt, rounds);
+                if (Arrays.equals(calculatedCk, mkChecksum)) {
+                    ivSpec = new IvParameterSpec(IV);
+                    c.init(Cipher.DECRYPT_MODE,
+                            new SecretKeySpec(mk, "AES"),
+                            ivSpec);
+                    // Only if all of the above worked properly will 'result' be assigned
+                    result = new CipherInputStream(rawInStream, c);
+                } else if (doLog) Slog.w(TAG, "Incorrect password");
+            } catch (InvalidAlgorithmParameterException e) {
+                if (doLog) Slog.e(TAG, "Needed parameter spec unavailable!", e);
+            } catch (BadPaddingException e) {
+                // This case frequently occurs when the wrong password is used to decrypt
+                // the master key.  Use the identical "incorrect password" log text as is
+                // used in the checksum failure log in order to avoid providing additional
+                // information to an attacker.
+                if (doLog) Slog.w(TAG, "Incorrect password");
+            } catch (IllegalBlockSizeException e) {
+                if (doLog) Slog.w(TAG, "Invalid block size in master key");
+            } catch (NoSuchAlgorithmException e) {
+                if (doLog) Slog.e(TAG, "Needed decryption algorithm unavailable!");
+            } catch (NoSuchPaddingException e) {
+                if (doLog) Slog.e(TAG, "Needed padding mechanism unavailable!");
+            } catch (InvalidKeyException e) {
+                if (doLog) Slog.w(TAG, "Illegal password; aborting");
+            }
+
+            return result;
+        }
+
+        InputStream decodeAesHeaderAndInitialize(String encryptionName, boolean pbkdf2Fallback,
+                InputStream rawInStream) {
             InputStream result = null;
             try {
                 if (encryptionName.equals(ENCRYPTION_ALGORITHM_NAME)) {
@@ -3338,59 +3470,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     String masterKeyBlobHex = readHeaderLine(rawInStream); // 9
 
                     // decrypt the master key blob
-                    Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                    SecretKey userKey = buildPasswordKey(mDecryptPassword, userSalt,
-                            rounds);
-                    byte[] IV = hexToByteArray(userIvHex);
-                    IvParameterSpec ivSpec = new IvParameterSpec(IV);
-                    c.init(Cipher.DECRYPT_MODE,
-                            new SecretKeySpec(userKey.getEncoded(), "AES"),
-                            ivSpec);
-                    byte[] mkCipher = hexToByteArray(masterKeyBlobHex);
-                    byte[] mkBlob = c.doFinal(mkCipher);
-
-                    // first, the master key IV
-                    int offset = 0;
-                    int len = mkBlob[offset++];
-                    IV = Arrays.copyOfRange(mkBlob, offset, offset + len);
-                    offset += len;
-                    // then the master key itself
-                    len = mkBlob[offset++];
-                    byte[] mk = Arrays.copyOfRange(mkBlob,
-                            offset, offset + len);
-                    offset += len;
-                    // and finally the master key checksum hash
-                    len = mkBlob[offset++];
-                    byte[] mkChecksum = Arrays.copyOfRange(mkBlob,
-                            offset, offset + len);
-
-                    // now validate the decrypted master key against the checksum
-                    byte[] calculatedCk = makeKeyChecksum(mk, ckSalt, rounds);
-                    if (Arrays.equals(calculatedCk, mkChecksum)) {
-                        ivSpec = new IvParameterSpec(IV);
-                        c.init(Cipher.DECRYPT_MODE,
-                                new SecretKeySpec(mk, "AES"),
-                                ivSpec);
-                        // Only if all of the above worked properly will 'result' be assigned
-                        result = new CipherInputStream(rawInStream, c);
-                    } else Slog.w(TAG, "Incorrect password");
+                    result = attemptMasterKeyDecryption(PBKDF_CURRENT, userSalt, ckSalt,
+                            rounds, userIvHex, masterKeyBlobHex, rawInStream, false);
+                    if (result == null && pbkdf2Fallback) {
+                        result = attemptMasterKeyDecryption(PBKDF_FALLBACK, userSalt, ckSalt,
+                                rounds, userIvHex, masterKeyBlobHex, rawInStream, true);
+                    }
                 } else Slog.w(TAG, "Unsupported encryption method: " + encryptionName);
-            } catch (InvalidAlgorithmParameterException e) {
-                Slog.e(TAG, "Needed parameter spec unavailable!", e);
-            } catch (BadPaddingException e) {
-                // This case frequently occurs when the wrong password is used to decrypt
-                // the master key.  Use the identical "incorrect password" log text as is
-                // used in the checksum failure log in order to avoid providing additional
-                // information to an attacker.
-                Slog.w(TAG, "Incorrect password");
-            } catch (IllegalBlockSizeException e) {
-                Slog.w(TAG, "Invalid block size in master key");
-            } catch (NoSuchAlgorithmException e) {
-                Slog.e(TAG, "Needed decryption algorithm unavailable!");
-            } catch (NoSuchPaddingException e) {
-                Slog.e(TAG, "Needed padding mechanism unavailable!");
-            } catch (InvalidKeyException e) {
-                Slog.w(TAG, "Illegal password; aborting");
             } catch (NumberFormatException e) {
                 Slog.w(TAG, "Can't parse restore data header");
             } catch (IOException e) {
