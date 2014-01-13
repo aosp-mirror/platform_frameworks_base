@@ -28,7 +28,7 @@
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
 
-#include <system/audio.h>
+#include "android_media_AudioFormat.h"
 
 // ----------------------------------------------------------------------------
 
@@ -55,9 +55,6 @@ struct audiotrack_callback_cookie {
 // keep these values in sync with AudioTrack.java
 #define MODE_STATIC 0
 #define MODE_STREAM 1
-// keep these values in sync with AudioFormat.java
-#define ENCODING_PCM_16BIT 2
-#define ENCODING_PCM_8BIT  3
 
 // ----------------------------------------------------------------------------
 class AudioTrackJniStorage {
@@ -244,7 +241,8 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     // check the format.
     // This function was called from Java, so we compare the format against the Java constants
-    if ((audioFormat != ENCODING_PCM_16BIT) && (audioFormat != ENCODING_PCM_8BIT)) {
+    audio_format_t format = audioFormatToNative(audioFormat);
+    if (format == AUDIO_FORMAT_INVALID) {
 
         ALOGE("Error creating AudioTrack: unsupported audio format.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
@@ -253,20 +251,18 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     // for the moment 8bitPCM in MODE_STATIC is not supported natively in the AudioTrack C++ class
     // so we declare everything as 16bitPCM, the 8->16bit conversion for MODE_STATIC will be handled
     // in android_media_AudioTrack_native_write_byte()
-    if ((audioFormat == ENCODING_PCM_8BIT)
+    if ((format == AUDIO_FORMAT_PCM_8_BIT)
         && (memoryMode == MODE_STATIC)) {
         ALOGV("android_media_AudioTrack_native_setup(): requesting MODE_STATIC for 8bit \
             buff size of %dbytes, switching to 16bit, buff size of %dbytes",
             buffSizeInBytes, 2*buffSizeInBytes);
-        audioFormat = ENCODING_PCM_16BIT;
+        format = AUDIO_FORMAT_PCM_16_BIT;
         // we will need twice the memory to store the data
         buffSizeInBytes *= 2;
     }
 
     // compute the frame count
-    int bytesPerSample = audioFormat == ENCODING_PCM_16BIT ? 2 : 1;
-    audio_format_t format = audioFormat == ENCODING_PCM_16BIT ?
-            AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
+    const size_t bytesPerSample = audio_bytes_per_sample(format);
     int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
 
     jclass clazz = env->GetObjectClass(thiz);
@@ -519,14 +515,26 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
             written = 0;
         }
     } else {
-        if (audioFormat == ENCODING_PCM_16BIT) {
+        const audio_format_t format = audioFormatToNative(audioFormat);
+        switch (format) {
+
+        default:
+            // TODO Currently the only possible values for format are AUDIO_FORMAT_PCM_16_BIT
+            // and AUDIO_FORMAT_PCM_8_BIT, due to the limited set of values for audioFormat.
+            // The next section of the switch will probably work for more formats, but it has only
+            // been tested for AUDIO_FORMAT_PCM_16_BIT, so that's why the "default" case fails.
+            break;
+
+        case AUDIO_FORMAT_PCM_16_BIT: {
             // writing to shared memory, check for capacity
             if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
                 sizeInBytes = track->sharedBuffer()->size();
             }
             memcpy(track->sharedBuffer()->pointer(), data + offsetInBytes, sizeInBytes);
             written = sizeInBytes;
-        } else if (audioFormat == ENCODING_PCM_8BIT) {
+            } break;
+
+        case AUDIO_FORMAT_PCM_8_BIT: {
             // data contains 8bit data we need to expand to 16bit before copying
             // to the shared memory
             // writing to shared memory, check for capacity,
@@ -543,6 +551,8 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
             // even though we wrote 2*sizeInBytes, we only report sizeInBytes as written to hide
             // the 8bit mixer restriction from the user of this function
             written = sizeInBytes;
+            } break;
+
         }
     }
     return written;
@@ -837,7 +847,9 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
                 sampleRateInHertz, status);
         return -1;
     }
-    return frameCount * nbChannels * (audioFormat == ENCODING_PCM_16BIT ? 2 : 1);
+    const audio_format_t format = audioFormatToNative(audioFormat);
+    const size_t bytesPerSample = audio_bytes_per_sample(format);
+    return frameCount * nbChannels * bytesPerSample;
 }
 
 // ----------------------------------------------------------------------------
