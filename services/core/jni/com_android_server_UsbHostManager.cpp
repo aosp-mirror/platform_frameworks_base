@@ -41,7 +41,11 @@ static struct parcel_file_descriptor_offsets_t
     jmethodID mConstructor;
 } gParcelFileDescriptorOffsets;
 
-static jmethodID method_usbDeviceAdded;
+static jmethodID method_beginUsbDeviceAdded;
+static jmethodID method_addUsbConfiguration;
+static jmethodID method_addUsbInterface;
+static jmethodID method_addUsbEndpoint;
+static jmethodID method_endUsbDeviceAdded;
 static jmethodID method_usbDeviceRemoved;
 
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -68,64 +72,69 @@ static int usb_device_added(const char *devname, void* client_data) {
     Vector<int> endpointValues;
     const usb_device_descriptor* deviceDesc = usb_device_get_device_descriptor(device);
 
-    uint16_t vendorId = usb_device_get_vendor_id(device);
-    uint16_t productId = usb_device_get_product_id(device);
-    uint8_t deviceClass = deviceDesc->bDeviceClass;
-    uint8_t deviceSubClass = deviceDesc->bDeviceSubClass;
-    uint8_t protocol = deviceDesc->bDeviceProtocol;
     char *manufacturer = usb_device_get_manufacturer_name(device);
     char *product = usb_device_get_product_name(device);
     char *serial = usb_device_get_serial(device);
-
-    usb_descriptor_iter_init(device, &iter);
-
-    while ((desc = usb_descriptor_iter_next(&iter)) != NULL) {
-        if (desc->bDescriptorType == USB_DT_INTERFACE) {
-            struct usb_interface_descriptor *interface = (struct usb_interface_descriptor *)desc;
-
-            // push class, subclass, protocol and number of endpoints into interfaceValues vector
-            interfaceValues.add(interface->bInterfaceNumber);
-            interfaceValues.add(interface->bInterfaceClass);
-            interfaceValues.add(interface->bInterfaceSubClass);
-            interfaceValues.add(interface->bInterfaceProtocol);
-            interfaceValues.add(interface->bNumEndpoints);
-        } else if (desc->bDescriptorType == USB_DT_ENDPOINT) {
-            struct usb_endpoint_descriptor *endpoint = (struct usb_endpoint_descriptor *)desc;
-
-            // push address, attributes, max packet size and interval into endpointValues vector
-            endpointValues.add(endpoint->bEndpointAddress);
-            endpointValues.add(endpoint->bmAttributes);
-            endpointValues.add(__le16_to_cpu(endpoint->wMaxPacketSize));
-            endpointValues.add(endpoint->bInterval);
-        }
-    }
-
-    usb_device_close(device);
-
-    // handle generic device notification
-    int length = interfaceValues.size();
-    jintArray interfaceArray = env->NewIntArray(length);
-    env->SetIntArrayRegion(interfaceArray, 0, length, interfaceValues.array());
-
-    length = endpointValues.size();
-    jintArray endpointArray = env->NewIntArray(length);
-    env->SetIntArrayRegion(endpointArray, 0, length, endpointValues.array());
 
     jstring deviceName = env->NewStringUTF(devname);
     jstring manufacturerName = env->NewStringUTF(manufacturer);
     jstring productName = env->NewStringUTF(product);
     jstring serialNumber = env->NewStringUTF(serial);
-    env->CallVoidMethod(thiz, method_usbDeviceAdded,
-            deviceName, vendorId, productId, deviceClass,
-            deviceSubClass, protocol, manufacturerName,
-            productName, serialNumber, interfaceArray, endpointArray);
 
-    env->DeleteLocalRef(interfaceArray);
-    env->DeleteLocalRef(endpointArray);
+    jboolean result = env->CallBooleanMethod(thiz, method_beginUsbDeviceAdded,
+            deviceName, usb_device_get_vendor_id(device), usb_device_get_product_id(device),
+            deviceDesc->bDeviceClass, deviceDesc->bDeviceSubClass, deviceDesc->bDeviceProtocol,
+            manufacturerName, productName, serialNumber);
+
     env->DeleteLocalRef(serialNumber);
     env->DeleteLocalRef(productName);
     env->DeleteLocalRef(manufacturerName);
     env->DeleteLocalRef(deviceName);
+    free(manufacturer);
+    free(product);
+    free(serial);
+
+    if (!result) goto fail;
+
+    usb_descriptor_iter_init(device, &iter);
+
+    while ((desc = usb_descriptor_iter_next(&iter)) != NULL) {
+        if (desc->bDescriptorType == USB_DT_CONFIG) {
+            struct usb_config_descriptor *config = (struct usb_config_descriptor *)desc;
+            char *name = usb_device_get_string(device, config->iConfiguration);
+            jstring configName = env->NewStringUTF(name);
+
+            env->CallVoidMethod(thiz, method_addUsbConfiguration,
+                    config->bConfigurationValue, configName, config->bmAttributes,
+                    config->bMaxPower);
+
+            env->DeleteLocalRef(configName);
+            free(name);
+        } else if (desc->bDescriptorType == USB_DT_INTERFACE) {
+            struct usb_interface_descriptor *interface = (struct usb_interface_descriptor *)desc;
+            char *name = usb_device_get_string(device, interface->iInterface);
+            jstring interfaceName = env->NewStringUTF(name);
+
+            env->CallVoidMethod(thiz, method_addUsbInterface,
+                    interface->bInterfaceNumber, interfaceName, interface->bAlternateSetting,
+                    interface->bInterfaceClass, interface->bInterfaceSubClass,
+                    interface->bInterfaceProtocol);
+
+            env->DeleteLocalRef(interfaceName);
+            free(name);
+        } else if (desc->bDescriptorType == USB_DT_ENDPOINT) {
+            struct usb_endpoint_descriptor *endpoint = (struct usb_endpoint_descriptor *)desc;
+
+            env->CallVoidMethod(thiz, method_addUsbEndpoint,
+                    endpoint->bEndpointAddress, endpoint->bmAttributes,
+                    __le16_to_cpu(endpoint->wMaxPacketSize), endpoint->bInterval);
+        }
+    }
+
+    env->CallVoidMethod(thiz, method_endUsbDeviceAdded);
+
+fail:
+    usb_device_close(device);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 
     return 0;
@@ -191,12 +200,36 @@ int register_android_server_UsbHostManager(JNIEnv *env)
         ALOGE("Can't find com/android/server/usb/UsbHostManager");
         return -1;
     }
-    method_usbDeviceAdded = env->GetMethodID(clazz, "usbDeviceAdded", "(Ljava/lang/String;IIIIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[I[I)V");
-    if (method_usbDeviceAdded == NULL) {
-        ALOGE("Can't find usbDeviceAdded");
+    method_beginUsbDeviceAdded = env->GetMethodID(clazz, "beginUsbDeviceAdded",
+            "(Ljava/lang/String;IIIIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z");
+    if (method_beginUsbDeviceAdded == NULL) {
+        ALOGE("Can't find beginUsbDeviceAdded");
         return -1;
     }
-    method_usbDeviceRemoved = env->GetMethodID(clazz, "usbDeviceRemoved", "(Ljava/lang/String;)V");
+    method_addUsbConfiguration = env->GetMethodID(clazz, "addUsbConfiguration",
+            "(ILjava/lang/String;II)V");
+    if (method_addUsbConfiguration == NULL) {
+        ALOGE("Can't find addUsbConfiguration");
+        return -1;
+    }
+    method_addUsbInterface = env->GetMethodID(clazz, "addUsbInterface",
+            "(ILjava/lang/String;IIII)V");
+    if (method_addUsbInterface == NULL) {
+        ALOGE("Can't find addUsbInterface");
+        return -1;
+    }
+    method_addUsbEndpoint = env->GetMethodID(clazz, "addUsbEndpoint", "(IIII)V");
+    if (method_addUsbEndpoint == NULL) {
+        ALOGE("Can't find addUsbEndpoint");
+        return -1;
+    }
+    method_endUsbDeviceAdded = env->GetMethodID(clazz, "endUsbDeviceAdded", "()V");
+    if (method_endUsbDeviceAdded == NULL) {
+        ALOGE("Can't find endUsbDeviceAdded");
+        return -1;
+    }
+    method_usbDeviceRemoved = env->GetMethodID(clazz, "usbDeviceRemoved",
+            "(Ljava/lang/String;)V");
     if (method_usbDeviceRemoved == NULL) {
         ALOGE("Can't find usbDeviceRemoved");
         return -1;
@@ -205,7 +238,8 @@ int register_android_server_UsbHostManager(JNIEnv *env)
     clazz = env->FindClass("android/os/ParcelFileDescriptor");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.ParcelFileDescriptor");
     gParcelFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    gParcelFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "(Ljava/io/FileDescriptor;)V");
+    gParcelFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>",
+            "(Ljava/io/FileDescriptor;)V");
     LOG_FATAL_IF(gParcelFileDescriptorOffsets.mConstructor == NULL,
                  "Unable to find constructor for android.os.ParcelFileDescriptor");
 
