@@ -60,7 +60,7 @@ public class StatusBarWindowView extends FrameLayout
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
-        mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
+        mExpandHelper = new ExpandHelper(getContext(), latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollView(mScrollView);
 

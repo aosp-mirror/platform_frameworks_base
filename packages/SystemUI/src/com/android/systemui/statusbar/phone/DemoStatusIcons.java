@@ -143,7 +143,7 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
             }
         }
         StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.CURRENT, iconId, 0, 0, "Demo");
-        StatusBarIconView v = new StatusBarIconView(mContext, null);
+        StatusBarIconView v = new StatusBarIconView(getContext(), null);
         v.setTag(slot);
         v.set(icon);
         addView(v, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));

@@ -222,7 +222,7 @@ public class NavigationBarView extends LinearLayout {
         mDisplay = ((WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
 
-        final Resources res = mContext.getResources();
+        final Resources res = getContext().getResources();
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
         mShowMenu = false;
@@ -240,7 +240,7 @@ public class NavigationBarView extends LinearLayout {
     private void watchForDevicePolicyChanges() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        mContext.registerReceiver(new BroadcastReceiver() {
+        getContext().registerReceiver(new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 post(new Runnable() {
                     @Override
@@ -324,7 +324,7 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public void setLayoutDirection(int layoutDirection) {
-        getIcons(mContext.getResources());
+        getIcons(getContext().getResources());
 
         super.setLayoutDirection(layoutDirection);
     }
@@ -345,7 +345,7 @@ public class NavigationBarView extends LinearLayout {
             mTransitionListener.onBackAltCleared();
         }
         if (DEBUG) {
-            android.widget.Toast.makeText(mContext,
+            android.widget.Toast.makeText(getContext(),
                 "Navigation icon hints = " + hints,
                 500).show();
         }
@@ -417,7 +417,7 @@ public class NavigationBarView extends LinearLayout {
 
     private boolean isCameraDisabledByDpm() {
         final DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                (DevicePolicyManager) getContext().getSystemService(Context.DEVICE_POLICY_SERVICE);
         if (dpm != null) {
             try {
                 final int userId = ActivityManagerNative.getDefault().getCurrentUser().id;
@@ -479,7 +479,7 @@ public class NavigationBarView extends LinearLayout {
 
     private void watchForAccessibilityChanges() {
         final AccessibilityManager am =
-                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+                (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         // Set the initial state
         enableAccessibility(am.isTouchExplorationEnabled());
@@ -516,7 +516,7 @@ public class NavigationBarView extends LinearLayout {
         if (hasCamera) {
             // Warm up KeyguardTouchDelegate so it's ready by the time the camera button is touched.
             // This will connect to KeyguardService so that touch events are processed.
-            KeyguardTouchDelegate.getInstance(mContext);
+            KeyguardTouchDelegate.getInstance(getContext());
         }
     }
 
@@ -592,7 +592,7 @@ public class NavigationBarView extends LinearLayout {
 
     private String getResourceName(int resId) {
         if (resId != 0) {
-            final android.content.res.Resources res = mContext.getResources();
+            final android.content.res.Resources res = getContext().getResources();
             try {
                 return res.getResourceName(resId);
             } catch (android.content.res.Resources.NotFoundException ex) {
