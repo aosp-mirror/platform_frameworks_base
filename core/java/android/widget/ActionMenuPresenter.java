@@ -74,6 +74,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     private ActionButtonSubmenu mActionButtonPopup;
 
     private OpenOverflowRunnable mPostedOpenRunnable;
+    private ActionMenuPopupCallback mPopupCallback;
 
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
@@ -177,33 +178,17 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     @Override
-    public void bindItemView(final MenuItemImpl item, MenuView.ItemView itemView) {
+    public void bindItemView(MenuItemImpl item, MenuView.ItemView itemView) {
         itemView.initialize(item, 0);
 
         final ActionMenuView menuView = (ActionMenuView) mMenuView;
         final ActionMenuItemView actionItemView = (ActionMenuItemView) itemView;
         actionItemView.setItemInvoker(menuView);
 
-        if (item.hasSubMenu()) {
-            actionItemView.setOnTouchListener(new ForwardingListener(actionItemView) {
-                @Override
-                public ListPopupWindow getPopup() {
-                    return mActionButtonPopup != null ? mActionButtonPopup.getPopup() : null;
-                }
-
-                @Override
-                protected boolean onForwardingStarted() {
-                    return onSubMenuSelected((SubMenuBuilder) item.getSubMenu());
-                }
-
-                @Override
-                protected boolean onForwardingStopped() {
-                    return dismissPopupMenus();
-                }
-            });
-        } else {
-            actionItemView.setOnTouchListener(null);
+        if (mPopupCallback == null) {
+            mPopupCallback = new ActionMenuPopupCallback();
         }
+        actionItemView.setPopupCallback(mPopupCallback);
     }
 
     @Override
@@ -759,6 +744,13 @@ public class ActionMenuPresenter extends BaseMenuPresenter
                 mOverflowPopup = mPopup;
             }
             mPostedOpenRunnable = null;
+        }
+    }
+
+    private class ActionMenuPopupCallback extends ActionMenuItemView.PopupCallback {
+        @Override
+        public ListPopupWindow getPopup() {
+            return mActionButtonPopup != null ? mActionButtonPopup.getPopup() : null;
         }
     }
 }
