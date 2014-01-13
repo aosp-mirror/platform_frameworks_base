@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.google.android.collect.Lists;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +28,7 @@ import android.view.MotionEvent;
 
 import com.android.internal.policy.IKeyguardService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -45,7 +44,7 @@ public class KeyguardTouchDelegate {
 
     private static KeyguardTouchDelegate sInstance;
     private static final List<OnKeyguardConnectionListener> sConnectionListeners =
-            Lists.newArrayList();
+            new ArrayList<OnKeyguardConnectionListener>();
 
     private volatile IKeyguardService mService;
 
