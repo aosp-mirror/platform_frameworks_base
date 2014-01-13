@@ -191,14 +191,18 @@ public class TaskStack {
     }
 
     /**
-     * Delete a Task from this stack. If it is the last Task in the stack, remove this stack from
-     * its parent StackBox and merge the parent.
+     * Delete a Task from this stack. If it is the last Task in the stack, move this stack to the
+     * back.
      * @param task The Task to delete.
      */
     void removeTask(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
         mTasks.remove(task);
         mDisplayContent.removeTask(task);
+        if (mTasks.isEmpty()) {
+            mDisplayContent.moveStack(this, false);
+        }
+        mDisplayContent.layoutNeeded = true;
     }
 
     int remove() {
