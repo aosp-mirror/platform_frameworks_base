@@ -108,6 +108,9 @@ public class KeyguardServiceDelegate {
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
             if (DEBUG) Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
+            mKeyguardState.showing = false;
+            mKeyguardState.showingAndNotHidden = false;
+            mKeyguardState.secure = false;
         } else {
             if (DEBUG) Log.v(TAG, "*** Keyguard started");
         }
