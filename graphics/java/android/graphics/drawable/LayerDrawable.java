@@ -64,10 +64,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     private int[] mPaddingR;
     private int[] mPaddingB;
 
-    private final Rect mCachedPadding = new Rect();
     private final Rect mTmpRect = new Rect();
     private boolean mMutated;
-    private boolean mHasCachedPadding;
 
     /**
      * Create a new layer drawable with the list of specified layers.
@@ -229,15 +227,18 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Look for a layer with the given id, and returns its {@link Drawable}.
+     * Looks for a layer with the given ID and returns its {@link Drawable}.
+     * <p>
+     * If multiple layers are found for the given ID, returns the
+     * {@link Drawable} for the matching layer at the highest index.
      *
      * @param id The layer ID to search for.
-     * @return The {@link Drawable} of the layer that has the given id in the hierarchy or null.
+     * @return The {@link Drawable} for the highest-indexed layer that has the
+     *         given ID, or null if not found.
      */
     public Drawable findDrawableByLayerId(int id) {
         final ChildDrawable[] layers = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
+        for (int i = mLayerState.mNum - 1; i >= 0; i--) {
             if (layers[i].mId == id) {
                 return layers[i].mDrawable;
             }
@@ -314,11 +315,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 }
 
                 childDrawable.mDrawable = drawable;
-
-                if (refreshChildPadding(i, childDrawable)) {
-                    invalidatePadding();
-                }
-
                 return true;
             }
         }
@@ -328,7 +324,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * Specifies the insets in pixels for the drawable at the specified index.
-     * Insets are used to adjust the drawable bounds.
      *
      * @param index the index of the drawable to adjust
      * @param l number of pixels to add to the left bound
@@ -342,7 +337,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         childDrawable.mInsetT = t;
         childDrawable.mInsetR = r;
         childDrawable.mInsetB = b;
-        invalidatePadding();
     }
 
     /**
@@ -351,14 +345,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      *
      * @param mode padding mode, one of:
      *            <ul>
-     *            <li>{@link #PADDING_MODE_NEST}
-     *            <li>{@link #PADDING_MODE_STACK}
+     *            <li>{@link #PADDING_MODE_NEST} <li>{@link #PADDING_MODE_STACK}
      *            </ul>
      */
     public void setPaddingMode(int mode) {
         if (mLayerState.mPaddingMode != mode) {
             mLayerState.mPaddingMode = mode;
-            invalidatePadding();
         }
     }
 
@@ -370,36 +362,19 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
       return mLayerState.mPaddingMode;
     }
 
-    /**
-     * Invalidates cached padding.
-     */
-    private void invalidatePadding() {
-        mHasCachedPadding = false;
-        onBoundsChange(getBounds());
-    }
-
     @Override
     public void invalidateDrawable(Drawable who) {
-        final Callback callback = getCallback();
-        if (callback != null) {
-            callback.invalidateDrawable(this);
-        }
+        invalidateSelf();
     }
 
     @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
-        final Callback callback = getCallback();
-        if (callback != null) {
-            callback.scheduleDrawable(this, what, when);
-        }
+        scheduleSelf(what, when);
     }
 
     @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
-        final Callback callback = getCallback();
-        if (callback != null) {
-            callback.unscheduleDrawable(this, what);
-        }
+        unscheduleSelf(what);
     }
 
     @Override
@@ -420,18 +395,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public boolean getPadding(Rect padding) {
-        final Rect cachedPadding = mCachedPadding;
-        if (!mHasCachedPadding) {
-            if (mLayerState.mPaddingMode == PADDING_MODE_NEST) {
-                computeNestedPadding(cachedPadding);
-            } else {
-                computeStackedPadding(cachedPadding);
-            }
-
-            mHasCachedPadding = true;
+        if (mLayerState.mPaddingMode == PADDING_MODE_NEST) {
+            computeNestedPadding(padding);
+        } else {
+            computeStackedPadding(padding);
         }
-
-        padding.set(cachedPadding);
 
         return padding.left != 0 || padding.top != 0 || padding.right != 0 || padding.bottom != 0;
     }
@@ -588,7 +556,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
 
         if (paddingChanged) {
-            invalidatePadding();
+            onBoundsChange(getBounds());
         }
 
         return changed;
@@ -613,7 +581,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
 
         if (paddingChanged) {
-            invalidatePadding();
+            onBoundsChange(getBounds());
         }
 
         return changed;
