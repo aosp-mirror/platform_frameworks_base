@@ -3194,10 +3194,18 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     paint.setColor(mCaches.propertyShadowStrength << 24);
     paint.setAntiAlias(true); // want to use AlphaVertex
 
-    VertexBuffer shadowVertexBuffer;
+    VertexBuffer ambientShadowVertexBuffer;
     ShadowTessellator::tessellateAmbientShadow(width, height, casterTransform,
-            shadowVertexBuffer);
-    return drawVertexBuffer(shadowVertexBuffer, &paint);
+            ambientShadowVertexBuffer);
+    drawVertexBuffer(ambientShadowVertexBuffer, &paint);
+
+    VertexBuffer spotShadowVertexBuffer;
+    ShadowTessellator::tessellateSpotShadow(width, height,
+            getWidth(), getHeight(), casterTransform,
+            spotShadowVertexBuffer);
+    drawVertexBuffer(spotShadowVertexBuffer, &paint);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,
