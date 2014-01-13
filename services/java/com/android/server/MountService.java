@@ -1411,7 +1411,7 @@ class MountService extends IMountService.Stub
     public void unregisterListener(IMountServiceListener listener) {
         synchronized (mListeners) {
             for(MountServiceBinderListener bl : mListeners) {
-                if (bl.mListener == listener) {
+                if (bl.mListener.asBinder() == listener.asBinder()) {
                     mListeners.remove(mListeners.indexOf(bl));
                     listener.asBinder().unlinkToDeath(bl, 0);
                     return;
