@@ -29,6 +29,14 @@ public:
     static void tessellateAmbientShadow(float width, float height,
             const mat4& casterTransform, VertexBuffer& shadowVertexBuffer);
 
+    static void tessellateSpotShadow(float width, float height,
+            int screenWidth, int screenHeight,
+            const mat4& casterTransform, VertexBuffer& shadowVertexBuffer);
+
+private:
+    static void generateCasterPolygon(float width, float height,
+            const mat4& casterTransform, int vertexCount, Vector3* polygon);
+
 }; // ShadowTessellator
 
 }; // namespace uirenderer

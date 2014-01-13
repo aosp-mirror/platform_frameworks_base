@@ -21,14 +21,30 @@
 
 #include "AmbientShadow.h"
 #include "ShadowTessellator.h"
+#include "SpotShadow.h"
 
 namespace android {
 namespace uirenderer {
 
+template<typename T>
+static inline T max(T a, T b) {
+    return a > b ? a : b;
+}
+
 // TODO: Support path as the input of the polygon instead of the rect's width
-// and height.
-void ShadowTessellator::tessellateAmbientShadow(float width, float height,
-        const mat4& casterTransform, VertexBuffer& shadowVertexBuffer) {
+// and height. And the z values need to be computed according to the
+// transformation for each vertex.
+/**
+ * Generate the polygon for the caster.
+ *
+ * @param width the width of the caster
+ * @param height the height of the caster
+ * @param casterTransform transformation info of the caster
+ * @param polygon return the caster's polygon
+ *
+ */
+void ShadowTessellator::generateCasterPolygon(float width, float height,
+        const mat4& casterTransform, int vertexCount, Vector3* polygon) {
 
     Vector3 pivot(width / 2, height / 2, 0.0f);
     casterTransform.mapPoint3d(pivot);
@@ -39,10 +55,6 @@ void ShadowTessellator::tessellateAmbientShadow(float width, float height,
             pivot.x + width * zScaleFactor, pivot.y + height * zScaleFactor);
 
     // Generate the caster's polygon from the rect.
-    // TODO: support arbitrary polygon, and the z value need to be computed
-    // according to the transformation for each vertex.
-    const int vertexCount = 4;
-    Vector3 polygon[vertexCount];
     polygon[0].x = blockRect.left;
     polygon[0].y = blockRect.top;
     polygon[0].z = pivot.z;
@@ -55,19 +67,51 @@ void ShadowTessellator::tessellateAmbientShadow(float width, float height,
     polygon[3].x = blockRect.left;
     polygon[3].y = blockRect.bottom;
     polygon[3].z = pivot.z;
+}
+
+void ShadowTessellator::tessellateAmbientShadow(float width, float height,
+        const mat4& casterTransform, VertexBuffer& shadowVertexBuffer) {
+
+    const int vertexCount = 4;
+    Vector3 polygon[vertexCount];
+    generateCasterPolygon(width, height, casterTransform, vertexCount, polygon);
 
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
-    const int rays = 120;
+    const int rays = 128;
     const int layers = 2;
     const float strength = 0.5;
-    const float heightFactor = 120;
-    const float geomFactor = 60;
+    const float heightFactor = 128;
+    const float geomFactor = 64;
 
     AmbientShadow::createAmbientShadow(polygon, vertexCount, rays, layers, strength,
             heightFactor, geomFactor, shadowVertexBuffer);
 
 }
 
+void ShadowTessellator::tessellateSpotShadow(float width, float height,
+        int screenWidth, int screenHeight,
+        const mat4& casterTransform, VertexBuffer& shadowVertexBuffer) {
+    const int vertexCount = 4;
+    Vector3 polygon[vertexCount];
+    generateCasterPolygon(width, height, casterTransform, vertexCount, polygon);
+
+    // A bunch of parameters to tweak the shadow.
+    // TODO: Allow some of these changable by debug settings or APIs.
+    const int rays = 256;
+    const int layers = 2;
+    const float strength = 0.5;
+    int maximal = max(screenWidth, screenHeight);
+    Vector3 lightCenter(screenWidth / 2, 0, maximal);
+#if DEBUG_SHADOW
+    ALOGD("light center %f %f %f", lightCenter.x, lightCenter.y, lightCenter.z);
+#endif
+    const float lightSize = maximal / 8;
+    const int lightVertexCount = 16;
+
+    SpotShadow::createSpotShadow(polygon, vertexCount, lightCenter, lightSize,
+            lightVertexCount, rays, layers, strength, shadowVertexBuffer);
+
+}
 }; // namespace uirenderer
 }; // namespace android
