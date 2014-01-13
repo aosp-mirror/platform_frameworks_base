@@ -1148,6 +1148,11 @@ public class LocationManagerService extends ILocationManager.Stub {
             boolean shouldBeEnabled = isAllowedByCurrentUserSettingsLocked(name);
             if (isEnabled && !shouldBeEnabled) {
                 updateProviderListenersLocked(name, false, mCurrentUserId);
+                // If any provider has been disabled, clear all last locations for all providers.
+                // This is to be on the safe side in case a provider has location derived from
+                // this disabled provider.
+                mLastLocation.clear();
+                mLastLocationCoarseInterval.clear();
                 changesMade = true;
             } else if (!isEnabled && shouldBeEnabled) {
                 updateProviderListenersLocked(name, true, mCurrentUserId);
