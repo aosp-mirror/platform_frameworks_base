@@ -11,7 +11,7 @@ header.hide=1
   <div class="copy" style="position:relative;left:480px;width:360;">
     <h1 style="margin-bottom:10px;">Your Apps on Google Play</h1>
     <p>The most visited store in the world for Android apps.  Cloud-connected and always synced,
-    it's never been easierfor users to find and download your apps.</p>
+    it's never been easier for users to find and download your apps.</p>
     <p><a class="button" href="https://play.google.com/apps/publish/"
       >Go to Developer Console &raquo;</a></p>
   </div>
