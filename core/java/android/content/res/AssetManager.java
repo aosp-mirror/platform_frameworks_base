@@ -536,9 +536,6 @@ public final class AssetManager {
     }
     
     public final class AssetInputStream extends InputStream {
-        /**
-         * @hide
-         */
         public final int getAssetInt() {
             return mAsset;
         }
