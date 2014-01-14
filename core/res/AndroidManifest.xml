@@ -1719,6 +1719,14 @@
         android:label="@string/permlab_manageCaCertificates"
         android:description="@string/permdesc_manageCaCertificates" />
 
+    <!-- Allows an application to do certain operations needed for
+         interacting with the recovery (system update) system. -->
+    <permission android:name="android.permission.RECOVERY"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature|system"
+        android:label="@string/permlab_recovery"
+        android:description="@string/permdesc_recovery" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
