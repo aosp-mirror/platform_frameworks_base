@@ -88,16 +88,12 @@ Agreement</a>, <a
 href="http://www.android.com/us/developer-content-policy.html#showlanguages">Developer Program
 Policies</a></p></dd>
 
-  <dt>Google Maps API</dt>
-    <dd>The Android Maps APIs are a collection of services (including, but not limited to, the
-MapView and MapActivity classes) that allow you to include
-maps, geocoding, geolocation, and other content from Google and its content providers in your
-Android
-apps. If you want to develop an Android app that displays Google Maps data, you must agree
-to the terms of service, register, and get an API Key. Registration is free.    
+  <dt>Google Maps Android API</dt>
+    <dd>The Google Maps Android API is a collection of services that allow you
+      to include maps, geocoding, geolocation, and other content from Google and its content providers in your Android apps. If you want to develop an Android app that makes use of this API you must agree to the terms of service and obtain an API Key.
       <p><a
-href="https://developers.google.com/maps/documentation/android/maps-api-signup"
->Google Maps Android API Key Signup</a>, <a href="http://m.google.com/legalnotices">Mobile Legal
+href="https://developers.google.com/maps/documentation/android/start"
+>Google Maps Android API Getting Started</a>, <a href="http://m.google.com/legalnotices">Mobile Legal
 Notices</a></p>
     </dd>
 
