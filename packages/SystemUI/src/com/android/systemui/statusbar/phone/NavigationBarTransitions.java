@@ -91,7 +91,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     }
 
     private float alphaForMode(int mode) {
-        final boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT || !HIGH_END;
+        final boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT;
         return isOpaque ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
     }
 
