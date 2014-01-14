@@ -38,10 +38,10 @@ easier.
          to a device’s native theme with all device customizations intact.</p>
          <p>For example, when you set your app's {@code targetSdkVersion} to 20 or higher, this
          theme is applied to your application by default. As such, your app might appear with the
-         {@link #Theme_Quantum.Light Quantum.Light} styles on one device, but with a different set of styles on
+         {@link #Theme_Quantum_Light Quantum.Light} styles on one device, but with a different set of styles on
          another device. This is great if you want your app to fit with the device's native look and
          feel. If, however, you prefer to keep your UI style the same across all devices, you should
-         apply a specific theme such as {@link #Theme_Quantum.Light Quantum.Light} or one of your own design.
+         apply a specific theme such as {@link #Theme_Quantum_Light Quantum.Light} or one of your own design.
          For more information, read <a
          href="http://android-developers.blogspot.com/20XX/XX/quantum-everywhere.html">Quantum.Light
          Everywhere</a>.</p>
