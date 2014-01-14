@@ -12621,6 +12621,7 @@ package android.media {
     method public int setPositionNotificationPeriod(int);
     method protected deprecated void setState(int);
     method public int setStereoVolume(float, float);
+    method public int setVolume(float);
     method public void stop() throws java.lang.IllegalStateException;
     method public int write(byte[], int, int);
     method public int write(short[], int, int);
