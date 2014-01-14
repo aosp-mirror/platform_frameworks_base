@@ -31,4 +31,5 @@ public interface DemoMode {
     public static final String COMMAND_NETWORK = "network";
     public static final String COMMAND_BARS = "bars";
     public static final String COMMAND_STATUS = "status";
+    public static final String COMMAND_NOTIFICATIONS = "notifications";
 }
