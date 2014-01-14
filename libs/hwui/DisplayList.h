@@ -90,7 +90,8 @@ public:
 class DeferStateStruct : public PlaybackStateStruct {
 public:
     DeferStateStruct(DeferredDisplayList& deferredList, OpenGLRenderer& renderer, int replayFlags)
-            : PlaybackStateStruct(renderer, replayFlags, &(deferredList.mAllocator)), mDeferredList(deferredList) {}
+            : PlaybackStateStruct(renderer, replayFlags, &(deferredList.mAllocator)),
+            mDeferredList(deferredList) {}
 
     DeferredDisplayList& mDeferredList;
 };
@@ -142,7 +143,6 @@ public:
     enum ReplayFlag {
         kReplayFlag_ClipChildren = 0x1
     };
-
 
     ANDROID_API size_t getSize();
     ANDROID_API static void destroyDisplayListDeferred(DisplayList* displayList);
@@ -501,6 +501,8 @@ public:
     }
 
 private:
+    typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
+
     enum ChildrenSelectMode {
         kNegativeZChildren,
         kPositiveZChildren
@@ -520,7 +522,7 @@ private:
     void applyViewPropertyTransforms(mat4& matrix);
 
     void computeOrderingImpl(DrawDisplayListOp* opState,
-            KeyedVector<float, Vector<DrawDisplayListOp*> >* compositedChildrenOf3dRoot,
+            Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
             const mat4* transformFromRoot);
 
     template <class T>
@@ -607,7 +609,7 @@ private:
      */
 
     // for 3d roots, contains a z sorted list of all children items
-    KeyedVector<float, Vector<DrawDisplayListOp*> > m3dNodes; // TODO: good data structure
+    Vector<ZDrawDisplayListOpPair> m3dNodes;
 }; // class DisplayList
 
 }; // namespace uirenderer
