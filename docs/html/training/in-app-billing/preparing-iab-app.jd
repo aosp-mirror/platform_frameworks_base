@@ -30,7 +30,7 @@ next.link=list-iab-products.html
 </div>
 </div>
 
-<p>Before you can start using the In-app Billing service, you'll need to add the library that contains the In-app Billing Version 3 API to your Android project. You also need to setting the permissions for your application to communicate with Google Play. In addition, you'll need to establish a connection between your application and  Google Play. You should also verify that the In-app Billing API version that you are using in your application is supported by Google Play.</p>
+<p>Before you can start using the In-app Billing service, you'll need to add the library that contains the In-app Billing Version 3 API to your Android project. You also need to set the permissions for your application to communicate with Google Play. In addition, you'll need to establish a connection between your application and  Google Play. You should also verify that the In-app Billing API version that you are using in your application is supported by Google Play.</p>
 
 <h2 id="GetSample">Download the Sample Application</h2>
 <p>In this training class, you will use a reference implementation for the In-app Billing Version 3 API called the {@code TrivialDrive} sample application. The sample includes convenience classes to quickly set up the In-app Billing service, marshal and unmarshal data types, and handle In-app Billing requests from the main thread of your application.</p>
