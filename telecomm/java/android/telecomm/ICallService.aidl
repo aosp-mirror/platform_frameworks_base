@@ -43,26 +43,34 @@ oneway interface ICallService {
     void setCallServiceAdapter(in ICallServiceAdapter callServiceAdapter);
 
     /**
-     * Determines if the CallService can make calls to the handle.
-     * TODO(santoscordon): Move this method into its own service interface long term.
-     * TODO(santoscordon): Add response callback parameter.
+     * Determines if the ICallService can make calls to the handle. Response is sent via
+     * {@link ICallServiceAdapter#setCompatibleWith}.  When responding, the correct call ID must be
+     * specified along with the handle. It is expected that the call service respond within 500
+     * milliseconds. Any response that takes longer than 500 milliseconds will be treated as being
+     * incompatible.
+     * TODO(santoscordon): 500 ms was arbitrarily chosen and must be confirmed before this
+     * API is made public.
+     * TODO(santoscordon): Switch from specific parameters to CallInfo/Call.
      *
-     * @param handle The destination handle to test against. Method should return true via the
-     * response callback if it can make a call to this handle.
+     * @param handle The destination handle to test against.
+     * @param callId The call identifier associated with this compatibility request.
      */
-    void isCompatibleWith(String handle);
+    void isCompatibleWith(String handle, String callId);
 
     /**
      * Attempts to call the relevant party using the specified handle, be it a phone number,
      * SIP address, or some other kind of user ID.  Note that the set of handle types is
      * dynamically extensible since call providers should be able to implement arbitrary
-     * handle-calling systems.  See {@link #isCompatibleWith}.
-     * TODO(santoscordon): Should this have a response attached to it to ensure that the call
-     * service actually plans to make the call?
+     * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
+     * call service respond via {@link ICallServiceAdapter#newOutgoingCall} if it can successfully
+     * make the call.
+     * TODO(santoscordon): Figure out how a calls service can short-circuit a failure to
+     * the adapter.
      *
      * @param handle The destination handle to call.
+     * @param callId Unique identifier for the call.
      */
-    void call(String handle);
+    void call(String handle, String callId);
 
     /**
      * Disconnects the call identified by callId.

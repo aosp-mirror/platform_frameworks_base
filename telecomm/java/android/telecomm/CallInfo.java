@@ -19,10 +19,13 @@ package android.telecomm;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 /**
- *  A parcelable holder class of Call information data.
- *  TODO(santoscordon): Need final public-facing comments in this file.
- *  @hide
+ * A parcelable holder class of Call information data. This class is intended for transfering call
+ * information from Telecomm to call services and thus is read-only.
+ * TODO(santoscordon): Need final public-facing comments in this file.
+ * @hide
  */
 public final class CallInfo implements Parcelable {
 
@@ -30,14 +33,29 @@ public final class CallInfo implements Parcelable {
      * Endpoint to which the call is connected.
      * This could be the dialed value for outgoing calls or the caller id of incoming calls.
      */
-    private String handle;
+    private final String mHandle;
 
+    // There are 4 timestamps that are important to a call:
+    // 1) Created timestamp - The time at which the user explicitly chose to make the call.
+    // 2) Connected timestamp - The time at which a call service confirms that it has connected
+    //    this call. This happens through a method-call to either newOutgoingCall or newIncomingCall
+    //    on CallServiceAdapter. Generally this should coincide roughly to the user physically
+    //    hearing/seeing a ring.
+    //    TODO(santoscordon): Consider renaming Call-active to better match the others.
+    // 3) Call-active timestamp - The time at which the call switches to the active state. This
+    //    happens when the user answers an incoming call or an outgoing call was answered by the
+    //    other party.
+    // 4) Disconnected timestamp - The time at which the call was disconnected.
+
+    /**
+     * Persists handle of the other party of this call.
+     */
     public CallInfo(String handle) {
-        this.handle = handle;
+        mHandle = handle;
     }
 
     public String getHandle() {
-        return handle;
+        return mHandle;
     }
 
     //
@@ -47,8 +65,8 @@ public final class CallInfo implements Parcelable {
     /**
      * Responsible for creating CallInfo objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<CallInfo> CREATOR
-            = new Parcelable.Creator<CallInfo> () {
+    public static final Parcelable.Creator<CallInfo> CREATOR =
+            new Parcelable.Creator<CallInfo> () {
 
         @Override
         public CallInfo createFromParcel(Parcel source) {
@@ -74,6 +92,6 @@ public final class CallInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel destination, int flags) {
-        destination.writeString(handle);
+        destination.writeString(mHandle);
     }
 }

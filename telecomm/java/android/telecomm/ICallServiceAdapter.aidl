@@ -26,30 +26,35 @@ import android.telecomm.CallInfo;
 oneway interface ICallServiceAdapter {
 
     /**
-     * Retrieves a new unique call ID for use with newOutgoingCall and newIncomingCall.
+     * Retrieves a new unique call ID for use with newIncomingCall.
      */
     void getNextCallId(/* TODO(santoscordon): Needs response object */);
 
     /**
+     * Receives confirmation of the call service's ability to make a call to the specified handle.
+     *
+     * @param handle The handle to call.
+     * @param callId The identifier of the call for which compatibility is being received.
+     * @param isCompatible True if the call service can place a call to the handle.
+     */
+    void setCompatibleWith(String handle, String callId, boolean isCompatible);
+
+    /**
      * Tells CallsManager of a new incoming call.
      *
+     * @param handle The handle to the other party or null if no such handle is available (as with
+     *     blocked caller ID).
      * @param callId The unique ID (via {@link #getNextCallId}) of the new incoming call.
-     * @param info Information about the new call including but not limited to the start time of the
-     *     call and information about the caller's handle.
      */
-    void newIncomingCall(String callId, in CallInfo info);
+    void newIncomingCall(String handle, String callId);
 
     /**
      * Tells CallsManager of a new outgoing call. Use of this method should always follow
      * {@link ICallService#call}.
      *
-     * @param callId The unique ID (via {@link #getNextCallId}) of the new outgoing call.
-     *     TODO(santoscordon): May be easier to have ICallService#call provide an ID instead of
-     *     requiring a separate call to getNextCallId().
-     * @param info Information about the new call including but not limited to the start time of the
-     *     call and information about the caller's handle.
+     * @param callId The unique ID (via {@link ICallService#call}) of the new outgoing call.
      */
-    void newOutgoingCall(String callId, in CallInfo info);
+    void newOutgoingCall(String callId);
 
     /**
      * Sets a call's state to active (e.g., an ongoing call where two parties can actively

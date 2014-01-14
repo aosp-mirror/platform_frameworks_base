@@ -24,6 +24,8 @@ import android.os.Message;
 
 import android.telecomm.ICallService;
 import android.telecomm.ICallServiceAdapter;
+import android.util.Log;
+import android.util.Pair;
 
 /**
  * Base implementation of CallService which can be used to provide calls for the system
@@ -44,6 +46,7 @@ import android.telecomm.ICallServiceAdapter;
  * @hide
  */
 public abstract class CallService extends Service {
+    private static final String TAG = CallService.class.getSimpleName();
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -56,10 +59,25 @@ public abstract class CallService extends Service {
                     setCallServiceAdapter((ICallServiceAdapter) msg.obj);
                     break;
                 case MSG_IS_COMPATIBLE_WITH:
-                    isCompatibleWith((String) msg.obj);
+                    // See {@link CallServiceWrapper#isCompatibleWith} for dataObject definition.
+                    try {
+                        // TODO(santoscordon): Switch to using a custom class here instead.  When we
+                        // switch to using Call objects instead of handles directly, this may not even be
+                        // necessary.
+                        Pair<String, String> dataObject = (Pair<String, String>) msg.obj;
+                        isCompatibleWith(dataObject.first, dataObject.second);
+                    } catch (ClassCastException e) {
+                        Log.e(TAG, "Unexpected object type for MSG_IS_COMPATIBLE_WITH.", e);
+                    }
                     break;
                 case MSG_CALL:
-                    call((String) msg.obj);
+                    // See {@link CallServiceWrapper#call} for dataObject definition.
+                    try {
+                        Pair<String, String> dataObject = (Pair<String, String>) msg.obj;
+                        call(dataObject.first, dataObject.second);
+                    } catch (ClassCastException e) {
+                        Log.e(TAG, "Unexpected object type for MSG_CALL.", e);
+                    }
                     break;
                 case MSG_DISCONNECT:
                     disconnect((String) msg.obj);
@@ -81,13 +99,15 @@ public abstract class CallService extends Service {
         }
 
         @Override
-        public void isCompatibleWith(String handle) {
-            mMessageHandler.obtainMessage(MSG_IS_COMPATIBLE_WITH, handle).sendToTarget();
+        public void isCompatibleWith(String handle, String callId) {
+            Pair<String, String> dataObject = new Pair<String, String>(handle, callId);
+            mMessageHandler.obtainMessage(MSG_IS_COMPATIBLE_WITH, dataObject).sendToTarget();
         }
 
         @Override
-        public void call(String handle) {
-            mMessageHandler.obtainMessage(MSG_CALL, handle).sendToTarget();
+        public void call(String handle, String callId) {
+            Pair<String, String> dataObject = new Pair<String, String>(handle, callId);
+            mMessageHandler.obtainMessage(MSG_CALL, dataObject).sendToTarget();
         }
 
         @Override
@@ -129,6 +149,13 @@ public abstract class CallService extends Service {
 
     /** {@inheritDoc} */
     public IBinder onBind(Intent intent) {
+        return getBinder();
+    }
+
+    /**
+     * Returns binder object which can be used across IPC methods.
+     */
+    public IBinder getBinder() {
         return mBinder;
     }
 
@@ -137,27 +164,37 @@ public abstract class CallService extends Service {
      * changes of existing calls.
      * TODO(santoscordon): Should we not reference ICallServiceAdapter directly from here? Should we
      * wrap that in a wrapper like we do for CallService/ICallService?
+     *
      * @param callServiceAdapter Adapter object for communicating call to CallsManager
      */
     public abstract void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter);
 
     /**
-     * Determines if the CallService can make calls to the handle.
-     * @param handle The handle to test for compatibility.
-     * TODO(santoscordon): Need response parameter.
+     * Determines if the CallService can make calls to the handle. Response is sent via
+     * ICallServiceAdapter. When responding, the correct call ID must be specified along with
+     * the handle.
+     *
+     * @param handle The destination handle to test against.
+     * @param callId The call identifier associated with this compatibility request.
      */
-    public abstract void isCompatibleWith(String handle);
+    public abstract void isCompatibleWith(String handle, String callId);
 
     /**
-     * Calls the specified handle. Handle type is dynamically extensible and can be a phone number,
-     * a SIP address, or other types. Only called if {@link #isCompatibleWith} returns true for the
-     * same handle and this service is selected by the switchboard to handle the call.
-     * @param handle The handle to call.
+     * Attempts to call the relevant party using the specified handle, be it a phone number,
+     * SIP address, or some other kind of user ID.  Note that the set of handle types is
+     * dynamically extensible since call providers should be able to implement arbitrary
+     * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
+     * call service respond via {@link ICallServiceAdapter#newOutgoingCall} if it can successfully
+     * make the call.
+     *
+     * @param handle The destination handle to call.
+     * @param callId Unique identifier for the call.
      */
-    public abstract void call(String handle);
+    public abstract void call(String handle, String callId);
 
     /**
      * Disconnects the specified call.
+     *
      * @param callId The ID of the call to disconnect.
      */
     public abstract void disconnect(String callId);

@@ -25,10 +25,11 @@ import java.util.List;
  */
 oneway interface ICallServiceLookupResponse {
     /**
-     * Receives the list of {@link ICallService}s as a list of {@link IBinder}s.
+     * Forwards the list of {@link ICallService}s as a list of {@link IBinder}s to be processed by
+     * Telecomm which will choose which call service, among potentially many, to place a call.
      *
      * @param callServices List of call services from {@link ICallServiceProvider}.
      * TODO(gilad): Rename to callServiceBinders.
      */
-    void onResult(in List<IBinder> callServices);
+    void setCallServices(in List<IBinder> callServices);
 }
