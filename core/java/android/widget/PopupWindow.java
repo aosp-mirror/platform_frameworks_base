@@ -1329,7 +1329,7 @@ public class PopupWindow {
     
     /**
      * Updates the state of the popup window, if it is currently being displayed,
-     * from the currently set state.  This include:
+     * from the currently set state.  This includes:
      * {@link #setClippingEnabled(boolean)}, {@link #setFocusable(boolean)},
      * {@link #setIgnoreCheekPress()}, {@link #setInputMethodMode(int)},
      * {@link #setTouchable(boolean)}, and {@link #setAnimationStyle(int)}.
