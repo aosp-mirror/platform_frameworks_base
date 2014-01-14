@@ -17,6 +17,7 @@
 #define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <SkCanvas.h>
+#include <algorithm>
 
 #include <utils/Trace.h>
 
@@ -504,7 +505,7 @@ void DisplayList::computeOrdering() {
 
 void DisplayList::computeOrderingImpl(
         DrawDisplayListOp* opState,
-        KeyedVector<float, Vector<DrawDisplayListOp*> >* compositedChildrenOf3dRoot,
+        Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
         const mat4* transformFrom3dRoot) {
 
     // TODO: should avoid this calculation in most cases
@@ -512,19 +513,15 @@ void DisplayList::computeOrderingImpl(
     opState->mTransformFrom3dRoot.multiply(opState->mTransformFromParent);
 
     if (mTranslationZ != 0.0f) { // TODO: other signals, such as custom 4x4 matrix
-        // composited layer, insert into current 3d root and flag for out of order draw
+        // composited layer, flag for out of order draw...
         opState->mSkipInOrderDraw = true;
 
+        // ... and insert into current 3d root, keyed with pivot z for later sorting
         Vector3 pivot(mPivotX, mPivotY, 0.0f);
         mat4 totalTransform(opState->mTransformFrom3dRoot);
         applyViewPropertyTransforms(totalTransform);
         totalTransform.mapPoint3d(pivot);
-        const float key = pivot.z;
-
-        if (compositedChildrenOf3dRoot->indexOfKey(key) < 0) {
-            compositedChildrenOf3dRoot->add(key, Vector<DrawDisplayListOp*>());
-        }
-        compositedChildrenOf3dRoot->editValueFor(key).push(opState);
+        compositedChildrenOf3dRoot->add(ZDrawDisplayListOpPair(pivot.z, opState));
     } else {
         // standard in order draw
         opState->mSkipInOrderDraw = false;
@@ -599,8 +596,8 @@ template <class T>
 void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& renderer,
         T& handler, const int level) {
     if (m3dNodes.size() == 0 ||
-            (mode == kNegativeZChildren && m3dNodes.keyAt(0) > 0.0f) ||
-            (mode == kPositiveZChildren && m3dNodes.keyAt(m3dNodes.size() - 1) < 0.0f)) {
+            (mode == kNegativeZChildren && m3dNodes[0].key > 0.0f) ||
+            (mode == kPositiveZChildren && m3dNodes[m3dNodes.size() - 1].key < 0.0f)) {
         // nothing to draw
         return;
     }
@@ -612,34 +609,32 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
     for (size_t i = 0; i < m3dNodes.size(); i++) {
-        const float zValue = m3dNodes.keyAt(i);
+        const float zValue = m3dNodes[i].key;
+        DrawDisplayListOp* op = m3dNodes[i].value;
 
         if (mode == kPositiveZChildren && zValue < 0.0f) continue;
         if (mode == kNegativeZChildren && zValue > 0.0f) break;
 
-        const Vector<DrawDisplayListOp*>& nodesAtZ = m3dNodes[i];
-        for (size_t j = 0; j < nodesAtZ.size(); j++) {
-            DrawDisplayListOp* op = nodesAtZ[j];
-            if (mode == kPositiveZChildren) {
-                /* draw shadow on renderer with parent matrix applied, passing in the child's total matrix
-                 *
-                 * TODO:
-                 * -determine and pass background shape (and possibly drawable alpha)
-                 * -view must opt-in to shadows
-                 * -consider shadows for other content
-                 */
-                mat4 shadowMatrix(op->mTransformFrom3dRoot);
-                op->mDisplayList->applyViewPropertyTransforms(shadowMatrix);
-                DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix, op->mDisplayList->mAlpha,
-                        op->mDisplayList->getWidth(), op->mDisplayList->getHeight());
-                handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
-            }
-
-            renderer.concatMatrix(op->mTransformFrom3dRoot);
-            op->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
-            handler(op, renderer.getSaveCount() - 1, mClipToBounds);
-            op->mSkipInOrderDraw = true;
+        if (mode == kPositiveZChildren && zValue > 0.0f) {
+            /* draw shadow with parent matrix applied, passing in the child's total matrix
+             *
+             * TODO:
+             * -determine and pass background shape (and possibly drawable alpha)
+             * -view must opt-in to shadows
+             * -consider shadows for other content
+             */
+            mat4 shadowMatrix(op->mTransformFrom3dRoot);
+            op->mDisplayList->applyViewPropertyTransforms(shadowMatrix);
+            DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix,
+                    op->mDisplayList->mAlpha,
+                    op->mDisplayList->getWidth(), op->mDisplayList->getHeight());
+            handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
         }
+
+        renderer.concatMatrix(op->mTransformFrom3dRoot);
+        op->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
+        handler(op, renderer.getSaveCount() - 1, mClipToBounds);
+        op->mSkipInOrderDraw = true;
     }
     handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
 }
@@ -683,6 +678,9 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
 
     bool quickRejected = mClipToBounds && renderer.quickRejectConservative(0, 0, mWidth, mHeight);
     if (!quickRejected) {
+        // Z sort 3d children (stable-ness makes z compare fall back to standard drawing order)
+        std::stable_sort(m3dNodes.begin(), m3dNodes.end());
+
         // for 3d root, draw children with negative z values
         iterate3dChildren(kNegativeZChildren, renderer, handler, level);
 
