@@ -182,10 +182,10 @@ the camera.</p>
 
 <h3 id="RequestingPermissions">Requesting Permissions</h3>
 
-<p>We recommend minimizing the number of permissions that your app requests
+<p>We recommend minimizing the number of permissions that your app requests.
 Not having access to sensitive permissions reduces the risk of
 inadvertently misusing those permissions, can improve user adoption, and makes
-your app less for attackers. Generally,
+your app less vulnerable for attackers. Generally,
 if a permission is not required for your app to function, do not request it.</p>
 
 <p>If it's possible to design your application in a way that does not require
