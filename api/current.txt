@@ -7836,7 +7836,6 @@ package android.content.res {
   public final class AssetManager.AssetInputStream extends java.io.InputStream {
     method public final int available() throws java.io.IOException;
     method public final void close() throws java.io.IOException;
-    method public final int getAssetInt();
     method public final void mark(int);
     method public final boolean markSupported();
     method public final int read() throws java.io.IOException;
