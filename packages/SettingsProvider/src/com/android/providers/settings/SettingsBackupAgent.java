@@ -422,7 +422,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         // If we have wifi data to restore, post a runnable to perform the
         // bounce-and-update operation a little ways in the future.
         if (mWifiRestore != null) {
-            new Handler(getMainLooper()).postDelayed(mWifiRestore, WIFI_BOUNCE_DELAY_MILLIS);
+            long wifiBounceDelayMillis = Settings.Global.getLong(
+                    getContentResolver(),
+                    Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
+                    WIFI_BOUNCE_DELAY_MILLIS);
+            new Handler(getMainLooper()).postDelayed(mWifiRestore, wifiBounceDelayMillis);
         }
     }
 
