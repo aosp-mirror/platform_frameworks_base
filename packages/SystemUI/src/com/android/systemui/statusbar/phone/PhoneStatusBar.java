@@ -2769,6 +2769,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mNetworkController != null && (modeChange || command.equals(COMMAND_NETWORK))) {
             mNetworkController.dispatchDemoCommand(command, args);
         }
+        if (modeChange || command.equals(COMMAND_NOTIFICATIONS)) {
+            View notifications = mStatusBarView == null ? null
+                    : mStatusBarView.findViewById(R.id.notification_icon_area);
+            if (notifications != null) {
+                String visible = args.getString("visible");
+                int vis = mDemoMode && "false".equals(visible) ? View.INVISIBLE : View.VISIBLE;
+                notifications.setVisibility(vis);
+            }
+        }
         if (command.equals(COMMAND_BARS)) {
             String mode = args.getString("mode");
             int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
