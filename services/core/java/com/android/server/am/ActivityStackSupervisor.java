@@ -2978,8 +2978,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             try {
                 virtualDisplay = dm.createVirtualDisplay(mService.mContext,
                         VIRTUAL_DISPLAY_BASE_NAME, width, height, density, surface,
-                        // TODO: Add VIRTUAL_DISPLAY_FLAG_DISABLE_MIRRORING when it is available.
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC);
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
