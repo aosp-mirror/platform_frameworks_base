@@ -847,7 +847,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, then these flags will also be
      * set in the returned chooser intent, with its ClipData set appropriately:
      * either a direct reflection of {@link #getClipData()} if that is non-null,
-     * or a new ClipData build from {@link #getData()}.
+     * or a new ClipData built from {@link #getData()}.
      *
      * @param target The Intent that the user will be selecting an activity
      * to perform.
@@ -5440,7 +5440,7 @@ public class Intent implements Parcelable, Cloneable {
      * directly used by Intent.  Applications should generally rely on the
      * MIME type of the Intent itself, not what it may find in the ClipData.
      * A common practice is to construct a ClipData for use with an Intent
-     * with a MIME type of "*\/*".
+     * with a MIME type of "*&#47;*".
      *
      * @param clip The new clip to set.  May be null to clear the current clip.
      */
