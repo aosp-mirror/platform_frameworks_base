@@ -20,15 +20,19 @@ import android.os.IBinder;
 import java.util.List;
 
 /**
- * Used by {@link ICallServiceProvider} to return a list of {@link ICallService} implementations.
+ * Used by {@link ICallServiceSelector} to return the preferred list of {@link ICallService}
+ * implementations with which to connect the corresponding outgoing call.
  * @hide
  */
-oneway interface ICallServiceLookupResponse {
+oneway interface ICallServiceSelectionResponse {
     /**
-     * Receives the list of {@link ICallService}s as a list of {@link IBinder}s.
+     * Records the sorted set of call services that are preferred by the corresponding
+     * call-service selector.
      *
-     * @param callServices List of call services from {@link ICallServiceProvider}.
-     * TODO(gilad): Rename to callServiceBinders.
+     * @param callServiceBinders The relevant call-service binders ordered by priority (most
+     *         desired first).
+     * TODO(gilad): Move to use call-service IDs or (reduced-visibility) call-service wrappers
+     * instead, see isSwitchable/callId in ICallServiceSelector.aidl for more details.
      */
-    void onResult(in List<IBinder> callServices);
+    void setPreferredCallServices(in List<IBinder> callServiceBinders);
 }
