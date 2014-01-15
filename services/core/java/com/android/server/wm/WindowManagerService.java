@@ -4836,23 +4836,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public int removeStack(int stackId) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack != null) {
-                mStackIdToStack.delete(stackId);
-                int nextStackId = stack.remove();
-                stack.getDisplayContent().layoutNeeded = true;
-                requestTraversalLocked();
-                if (nextStackId > HOME_STACK_ID) {
-                    return nextStackId;
-                }
-            }
-            if (DEBUG_STACK) Slog.i(TAG, "removeStack: could not find stackId=" + stackId);
-        }
-        return HOME_STACK_ID;
-    }
-
     public void removeTask(int taskId) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
