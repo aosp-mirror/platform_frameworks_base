@@ -49,12 +49,13 @@ header.hide=1
     class="external-link" href="https://developers.google.com/games/services/android/cloudsave">Save
     game data to the cloud</a></p>
 
-    <h4>Create real-time multiplayer games</h4>
-    <p>Make your game more dynamic by letting multiple players compete or cooperate simultaneously.
-    You can use Google Play game services to invite game participants or auto-match players
-    anonymously, and exchange data between game clients. <br /><a class="external-link"
-    href="https://developers.google.com/games/services/android/multiplayer">Develop real-time
-    multiplayer games</a></p>
+    <h4>Create real-time and turn-based multiplayer games</h4>
+    <p>Make your game more dynamic with simultaneous or asynchronous gameplay.
+    Use the multiplayer APIs to send match invitations, auto-match players
+    anonymously, and exchange data between game clients. <br />Develop <a class="external-link"
+    href="https://developers.google.com/games/services/android/multiplayer">real-time
+    multiplayer</a> and <a class="external-link"
+    href="https://developers.google.com/games/services/android/turnbasedMultiplayer">turn-based multiplayer</a> games</p>
   </div>
 
 
