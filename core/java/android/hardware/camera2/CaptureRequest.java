@@ -399,8 +399,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * issues. The {@link CaptureResult#STATISTICS_SCENE_FLICKER android.statistics.sceneFlicker} key can assist
      * the application in this.</p>
      *
-     * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES
+     * @see CaptureRequest#CONTROL_MODE
      * @see CaptureResult#STATISTICS_SCENE_FLICKER
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see #CONTROL_AE_ANTIBANDING_MODE_OFF
@@ -453,12 +453,12 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * fields for a given capture will be available in its
      * CaptureResult.</p>
      *
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#FLASH_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -605,9 +605,9 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * routine is disabled. The camera device uses each particular illumination
      * target for white balance adjustment.</p>
      *
-     * @see CaptureRequest#CONTROL_MODE
-     * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
@@ -839,9 +839,9 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * auto-exposure algorithm, the overridden values are then provided
      * back to the user in the corresponding result.</p>
      *
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
-     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final Key<Float> LENS_APERTURE =
@@ -1009,8 +1009,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      */
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
@@ -1022,8 +1022,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      */
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);
@@ -1050,6 +1050,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<float[]>("android.tonemap.curveRed", float[].class);
 
     /**
+     *
      * @see #TONEMAP_MODE_CONTRAST_CURVE
      * @see #TONEMAP_MODE_FAST
      * @see #TONEMAP_MODE_HIGH_QUALITY
