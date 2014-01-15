@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -781,7 +783,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html#onImageLoaded(android.net.Uri, android.graphics.drawable.Drawable)">onImageLoaded</a></span>(Uri uri, Drawable drawable)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html#onImageLoaded(android.net.Uri, android.graphics.drawable.Drawable, boolean)">onImageLoaded</a></span>(Uri uri, Drawable drawable, boolean isRequestedDrawable)</nobr>
         
         <div class="jd-descrdiv">Listener method invoked when an image has been loaded.</div>
   
@@ -836,7 +838,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-<A NAME="onImageLoaded(android.net.Uri, android.graphics.drawable.Drawable)"></A>
+<A NAME="onImageLoaded(android.net.Uri, android.graphics.drawable.Drawable, boolean)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -849,7 +851,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onImageLoaded</span>
-      <span class="normal">(Uri uri, Drawable drawable)</span>
+      <span class="normal">(Uri uri, Drawable drawable, boolean isRequestedDrawable)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -865,11 +867,16 @@ onkeyup="return search_changed(event, false, '/')" />
       <table class="jd-tagtable">
         <tr>
           <th>uri</td>
-          <td>The URI of the loaded image.</td>
+          <td>The URI of the requested image.</td>
         </tr>
         <tr>
           <th>drawable</td>
-          <td>Drawable containing the image.
+          <td>Drawable containing the image.</td>
+        </tr>
+        <tr>
+          <th>isRequestedDrawable</td>
+          <td>True if this drawable was loaded from the provided URI,
+            or false if this drawable is a placeholder image instead.
 </td>
         </tr>
       </table>
