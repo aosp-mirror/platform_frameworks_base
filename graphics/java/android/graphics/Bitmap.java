@@ -1052,7 +1052,7 @@ public final class Bitmap implements Parcelable {
      * <p>This method will not affect the behavior of a bitmap without an alpha
      * channel, or if {@link #hasAlpha()} returns false.</p>
      *
-     * <p>Calling {@link createBitmap()} or {@link createScaledBitmap()} with a source
+     * <p>Calling createBitmap() or createScaledBitmap() with a source
      * Bitmap whose colors are not pre-multiplied may result in a RuntimeException,
      * since those functions require drawing the source, which is not supported for
      * un-pre-multiplied Bitmaps.</p>
