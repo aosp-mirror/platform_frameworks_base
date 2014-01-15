@@ -113,9 +113,15 @@ public class PathMeasure {
      * segment(s). If the segment is zero-length, return false, else return
      * true. startD and stopD are pinned to legal values (0..getLength()).
      * If startD <= stopD then return false (and leave dst untouched).
-     * Begin the segment with a moveTo if startWithMoveTo is true
+     * Begin the segment with a moveTo if startWithMoveTo is true.
+     *
+     * <p>On {@link android.os.Build.VERSION_CODES#KITKAT} and earlier
+     * releases, the resulting path may not display on a hardware-accelerated
+     * Canvas. A simple workaround is to add a single operation to this path,
+     * such as <code>dst.rLineTo(0, 0)</code>.</p>
      */
     public boolean getSegment(float startD, float stopD, Path dst, boolean startWithMoveTo) {
+        dst.isSimplePath = false;
         return native_getSegment(native_instance, startD, stopD, dst.ni(), startWithMoveTo);
     }
 
