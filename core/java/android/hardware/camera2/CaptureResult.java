@@ -253,12 +253,11 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Whether AF is currently enabled, and what
      * mode it is set to</p>
      * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO.</p>
-     * <p>If lens is controlled by HAL auto-focus algorithm, the HAL should
-     * report the current AF status in {@link CaptureResult#CONTROL_AF_STATE android.control.afState} in
-     * result metadata.</p>
+     * <p>If the lens is controlled by the camera device auto-focus algorithm,
+     * the camera device will report the current AF status in android.control.afState
+     * in result metadata.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
-     * @see CaptureResult#CONTROL_AF_STATE
      * @see #CONTROL_AF_MODE_OFF
      * @see #CONTROL_AF_MODE_AUTO
      * @see #CONTROL_AF_MODE_MACRO
