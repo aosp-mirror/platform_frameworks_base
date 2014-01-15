@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -711,7 +713,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">Provides a Socket-like interface for a real-time data connection to a participant in a real-time
- room. Use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getRealTimeSocketForParticipant(java.lang.String, java.lang.String)">getRealTimeSocketForParticipant(String, String)</a></code> to get an instance.
+ room. Use getSocketForParticipant(GoogleApiClient, String, String) to get an instance.
  <p>
  Use <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code> to get a file descriptor for read/write, or
  use <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html#getInputStream()">getInputStream()</a></code> / <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html#getOutputStream()">getOutputStream()</a></code> to get
@@ -724,7 +726,7 @@ onkeyup="return search_changed(event, false, '/')" />
  The Socket-like interface provided is currently modeled on connection-based byte streams, rather
  than preserving packet semantics. That is, multiple writes may be coalesced or individual writes
  divided. Clients should avoid calling <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> with more than
- <code><a href="/reference/com/google/android/gms/games/GamesClient.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes at a time.
+ MAX_UNRELIABLE_MESSAGE_LEN bytes at a time.
 </p>
 
 
@@ -1028,18 +1030,18 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to.
- Calling close() on the OutputStream will close the socket.
+  <div class="jd-tagdata jd-tagdescr"><p>Instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to. Calling
+ <code><a href="/reference/java/io/OutputStream.html#close()">close()</a></code> on the OutputStream will close the socket.
  <p>
  Note: The maximum (unfragmented) packet size supported through this API is
- <code><a href="/reference/com/google/android/gms/games/GamesClient.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes (excluding internal protocol headers).
- Thus, the byte[] data passed to <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> should honor this limit or the
- packet will be dropped and an error message will be sent to the log.
+ MAX_UNRELIABLE_MESSAGE_LEN bytes (excluding internal protocol headers).
+ Make sure that the byte[] data passed to <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> honors this limit -
+ otherwise the packet will be dropped and an error message will be sent to the log.
  <p>
- Do not call <code>flush()</code> on the <code>OutputStream</code> instance that you
- obtained from this routine. To send each message as a single datagram, implement your own
- message parsing logic to distinguish message boundaries. This allows partial messages and
- a non-integral number of messages to be delivered using <code>RealTimeSocket</code>.</p></div>
+ Do not call <code>flush()</code> on the <code>OutputStream</code> instance that you obtained
+ from this routine. To send each message as a single datagram, implement your own message
+ parsing logic to distinguish message boundaries. This allows partial messages and a
+ non-integral number of messages to be delivered using <code>RealTimeSocket</code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>An instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>.</li></ul>

@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -770,7 +772,7 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Main public API entry point for the games client.
+<p itemprop="articleBody">Main public entry point for Games APIs.
 </p>
 
 
@@ -873,11 +875,25 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_PLAYER_SEARCH_RESULTS">EXTRA_PLAYER_SEARCH_RESULTS</a></td>
+        <td class="jd-descrcol" width="100%">Used by the Player Search UI to return a list of parceled Player objects.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_ROOM">EXTRA_ROOM</a></td>
         <td class="jd-descrcol" width="100%">Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></code>.</td>
     </tr>
     
     
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_TURN_BASED_MATCH">EXTRA_TURN_BASED_MATCH</a></td>
+        <td class="jd-descrcol" width="100%">Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a></code>.</td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#MAX_RELIABLE_MESSAGE_LEN">MAX_RELIABLE_MESSAGE_LEN</a></td>
@@ -917,20 +933,27 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#NOTIFICATION_TYPE_MATCH_UPDATE">NOTIFICATION_TYPE_MATCH_UPDATE</a></td>
+        <td class="jd-descrcol" width="100%">Notification type for updates to match information.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_ACHIEVEMENT_NOT_INCREMENTAL">STATUS_ACHIEVEMENT_NOT_INCREMENTAL</a></td>
         <td class="jd-descrcol" width="100%">Indicates that the call to increment achievement failed since the achievement is not an
  incremental achievement.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_ACHIEVEMENT_UNKNOWN">STATUS_ACHIEVEMENT_UNKNOWN</a></td>
         <td class="jd-descrcol" width="100%">Could not find the achievement, so the operation to update the achievement failed.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_ACHIEVEMENT_UNLOCKED">STATUS_ACHIEVEMENT_UNLOCKED</a></td>
         <td class="jd-descrcol" width="100%">Indicates that the incremental achievement was also unlocked when the call was made to
@@ -938,7 +961,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_ACHIEVEMENT_UNLOCK_FAILURE">STATUS_ACHIEVEMENT_UNLOCK_FAILURE</a></td>
         <td class="jd-descrcol" width="100%">An incremental achievement cannot be unlocked directly, so the call to unlock achievement
@@ -946,14 +969,14 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_APP_MISCONFIGURED">STATUS_APP_MISCONFIGURED</a></td>
         <td class="jd-descrcol" width="100%">The developer has misconfigured their application in some way.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">The GamesClient is in an inconsistent state and must reconnect to the service to resolve the
@@ -961,6 +984,13 @@ Summary:
     </tr>
     
     
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_GAME_NOT_FOUND">STATUS_GAME_NOT_FOUND</a></td>
+        <td class="jd-descrcol" width="100%">The specified game ID was not recognized by the server.</td>
+    </tr>
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></td>
@@ -985,19 +1015,96 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_ERROR_ALREADY_REMATCHED">STATUS_MATCH_ERROR_ALREADY_REMATCHED</a></td>
+        <td class="jd-descrcol" width="100%">The specified match has already had a rematch created.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_ERROR_INACTIVE_MATCH">STATUS_MATCH_ERROR_INACTIVE_MATCH</a></td>
+        <td class="jd-descrcol" width="100%">The match is not currently active.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_ERROR_INVALID_MATCH_RESULTS">STATUS_MATCH_ERROR_INVALID_MATCH_RESULTS</a></td>
+        <td class="jd-descrcol" width="100%">The match results provided in this API call are invalid.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_ERROR_INVALID_MATCH_STATE">STATUS_MATCH_ERROR_INVALID_MATCH_STATE</a></td>
+        <td class="jd-descrcol" width="100%">The match is not in the correct state to perform the specified action.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_ERROR_INVALID_PARTICIPANT_STATE">STATUS_MATCH_ERROR_INVALID_PARTICIPANT_STATE</a></td>
+        <td class="jd-descrcol" width="100%">One or more participants in this match are not in valid states.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_ERROR_LOCALLY_MODIFIED">STATUS_MATCH_ERROR_LOCALLY_MODIFIED</a></td>
+        <td class="jd-descrcol" width="100%">The specified match has already been modified locally.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_ERROR_OUT_OF_DATE_VERSION">STATUS_MATCH_ERROR_OUT_OF_DATE_VERSION</a></td>
+        <td class="jd-descrcol" width="100%">The match data is out of date.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MATCH_NOT_FOUND">STATUS_MATCH_NOT_FOUND</a></td>
+        <td class="jd-descrcol" width="100%">The specified match cannot be found.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MULTIPLAYER_DISABLED">STATUS_MULTIPLAYER_DISABLED</a></td>
+        <td class="jd-descrcol" width="100%">This game does not support multiplayer.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MULTIPLAYER_ERROR_CREATION_NOT_ALLOWED">STATUS_MULTIPLAYER_ERROR_CREATION_NOT_ALLOWED</a></td>
         <td class="jd-descrcol" width="100%">The user is not allowed to create a new multiplayer game at this time.</td>
     </tr>
     
     
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MULTIPLAYER_ERROR_INVALID_MULTIPLAYER_TYPE">STATUS_MULTIPLAYER_ERROR_INVALID_MULTIPLAYER_TYPE</a></td>
+        <td class="jd-descrcol" width="100%">The match is not the right type to perform this action on.</td>
+    </tr>
+
+
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION">STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION</a></td>
+        <td class="jd-descrcol" width="100%">This multiplayer operation is not valid, and the server rejected it.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER">STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER</a></td>
         <td class="jd-descrcol" width="100%">The user attempted to invite another user who was not authorized to see the game.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to retrieve fresh data, and no data was available
@@ -1005,7 +1112,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_OPERATION_DEFERRED">STATUS_NETWORK_ERROR_OPERATION_DEFERRED</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to modify data, but the data was successfully
@@ -1014,7 +1121,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_OPERATION_FAILED">STATUS_NETWORK_ERROR_OPERATION_FAILED</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to perform an operation that requires network
@@ -1022,7 +1129,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_STALE_DATA">STATUS_NETWORK_ERROR_STALE_DATA</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to retrieve fresh data, but some locally cached
@@ -1030,13 +1137,20 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></td>
         <td class="jd-descrcol" width="100%">The operation was successful.</td>
     </tr>
     
     
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OPERATION_IN_FLIGHT">STATUS_OPERATION_IN_FLIGHT</a></td>
+        <td class="jd-descrcol" width="100%">Trying to start a join/create operation while another is already in flight.</td>
+    </tr>
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_PARTICIPANT_NOT_CONNECTED">STATUS_PARTICIPANT_NOT_CONNECTED</a></td>
@@ -1117,6 +1231,60 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#acceptTurnBasedInvitation(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, java.lang.String)">acceptTurnBasedInvitation</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchInitiatedListener.html">OnTurnBasedMatchInitiatedListener</a> listener, String invitationId)</nobr>
+        
+        <div class="jd-descrdiv">Accept an invitation for a turn-based match.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#cancelTurnBasedMatch(java.lang.String)">cancelTurnBasedMatch</a></span>(String matchId)</nobr>
+        
+        <div class="jd-descrdiv">Cancels a turn-based match.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#cancelTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchCanceledListener, java.lang.String)">cancelTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchCanceledListener.html">OnTurnBasedMatchCanceledListener</a> listener, String matchId)</nobr>
+        
+        <div class="jd-descrdiv">Cancels a turn-based match.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#clearAllNotifications()">clearAllNotifications</a></span>()</nobr>
         
         <div class="jd-descrdiv">Clear all notifications for the current game and signed-in player.</div>
@@ -1125,7 +1293,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1143,7 +1311,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1161,7 +1329,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1174,6 +1342,24 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#createRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">createRoom</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomConfig.html">RoomConfig</a> config)</nobr>
         
         <div class="jd-descrdiv">Create a real-time room for the current game.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#createTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig)">createTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchInitiatedListener.html">OnTurnBasedMatchInitiatedListener</a> listener, <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchConfig.html">TurnBasedMatchConfig</a> config)</nobr>
+        
+        <div class="jd-descrdiv">Create a turn-based match for the current game.</div>
   
   </td></tr>
 
@@ -1207,9 +1393,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#declineTurnBasedInvitation(java.lang.String)">declineTurnBasedInvitation</a></span>(String invitationId)</nobr>
         
-        <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
+        <div class="jd-descrdiv">Decline an invitation for a turn-based match.</div>
   
   </td></tr>
 
@@ -1225,9 +1411,117 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#dismissRoomInvitation(java.lang.String)">dismissRoomInvitation</a></span>(String invitationId)</nobr>
         
         <div class="jd-descrdiv">Dismiss an invitation to a real-time room.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#dismissTurnBasedInvitation(java.lang.String)">dismissTurnBasedInvitation</a></span>(String invitationId)</nobr>
+        
+        <div class="jd-descrdiv">Dismiss an invitation to a turn-based match.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#dismissTurnBasedMatch(java.lang.String)">dismissTurnBasedMatch</a></span>(String matchId)</nobr>
+        
+        <div class="jd-descrdiv">Delete a match from the server and local storage.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)">finishTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, List&lt;<a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a>&gt; results)</nobr>
+        
+        <div class="jd-descrdiv">Mark a match as finished.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String)">finishTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId)</nobr>
+        
+        <div class="jd-descrdiv">Indicate that a participant is finished with a match.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], com.google.android.gms.games.multiplayer.ParticipantResult...)">finishTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult...</a> results)</nobr>
+        
+        <div class="jd-descrdiv">Mark a match as finished.</div>
   
   </td></tr>
 
@@ -1396,6 +1690,62 @@ Summary:
             
             
             
+            Intent</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getMatchInboxIntent()">getMatchInboxIntent</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns an intent that will let the user see and manage any outstanding invitations and
+ matches.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getMaxTurnBasedMatchDataSize()">getMaxTurnBasedMatchDataSize</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Gets the maximum data size per match in bytes.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Intent</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getPlayerSearchIntent()">getPlayerSearchIntent</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns an intent that will display a screen where the user can search for people
+ on Google+.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html">RealTimeSocket</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1407,7 +1757,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1426,7 +1776,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1437,6 +1787,24 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getSelectPlayersIntent(int, int)">getSelectPlayersIntent</a></span>(int minPlayers, int maxPlayers)</nobr>
+        
+        <div class="jd-descrdiv">Returns an intent that will let the user select players to send an invitation to.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Intent</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getSelectPlayersIntent(int, int, boolean)">getSelectPlayersIntent</a></span>(int minPlayers, int maxPlayers, boolean allowAutomatch)</nobr>
         
         <div class="jd-descrdiv">Returns an intent that will let the user select players to send an invitation to.</div>
   
@@ -1473,6 +1841,24 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLoadedListener, java.lang.String)">getTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchLoadedListener.html">OnTurnBasedMatchLoadedListener</a> listener, String matchId)</nobr>
+        
+        <div class="jd-descrdiv">Load a specified turn-based match.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#incrementAchievement(java.lang.String, int)">incrementAchievement</a></span>(String id, int numSteps)</nobr>
         
         <div class="jd-descrdiv">Increments an achievement by the given number of steps.</div>
@@ -1481,7 +1867,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1499,7 +1885,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1518,7 +1904,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1536,7 +1922,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1555,7 +1941,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1574,7 +1960,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1592,7 +1978,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1610,7 +1996,43 @@ Summary:
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String)">leaveTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchLeftListener.html">OnTurnBasedMatchLeftListener</a> listener, String matchId)</nobr>
+        
+        <div class="jd-descrdiv">Leave the specified match when it is not the current player's turn.</div>
+  
+  </td></tr>
+
+
+	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveTurnBasedMatchDuringTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String, java.lang.String)">leaveTurnBasedMatchDuringTurn</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchLeftListener.html">OnTurnBasedMatchLeftListener</a> listener, String matchId, String pendingParticipantId)</nobr>
+        
+        <div class="jd-descrdiv">Leave the specified match during the current player's turn.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1623,6 +2045,24 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener, boolean)">loadAchievements</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load achievement data for the currently signed in player.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadCurrentPlayerLeaderboardScore(com.google.android.gms.games.leaderboard.OnPlayerLeaderboardScoreLoadedListener, java.lang.String, int, int)">loadCurrentPlayerLeaderboardScore</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnPlayerLeaderboardScoreLoadedListener.html">OnPlayerLeaderboardScoreLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection)</nobr>
+        
+        <div class="jd-descrdiv">Asynchronously load the currently signed in player's score for a given leaderboard.</div>
   
   </td></tr>
 
@@ -1694,42 +2134,6 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, boolean forceReload)</nobr>
-        
-        <div class="jd-descrdiv">Asynchronously load the list of leaderboard metadata for this game.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId)</nobr>
-        
-        <div class="jd-descrdiv">Asynchronously load a specific leaderboard's metadata for this game.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load the list of leaderboard metadata for this game.</div>
   
@@ -1891,6 +2295,24 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadTurnBasedMatches(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchesLoadedListener, int...)">loadTurnBasedMatches</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchesLoadedListener.html">OnTurnBasedMatchesLoadedListener</a> listener, int... matchTurnStatuses)</nobr>
+        
+        <div class="jd-descrdiv">Asynchronously load turn-based matches for the current game.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#reconnect()">reconnect</a></span>()</nobr>
         
         <div class="jd-descrdiv">Closes the current connection to Google Play services and creates a new connection.</div>
@@ -1899,7 +2321,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1917,7 +2339,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1936,7 +2358,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1954,7 +2376,43 @@ Summary:
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#registerMatchUpdateListener(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdateReceivedListener)">registerMatchUpdateListener</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdateReceivedListener.html">OnTurnBasedMatchUpdateReceivedListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">Register a listener to intercept incoming match updates for the currently signed-in user.</div>
+  
+  </td></tr>
+
+
+	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#rematchTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, java.lang.String)">rematchTurnBasedMatch</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchInitiatedListener.html">OnTurnBasedMatchInitiatedListener</a> listener, String matchId)</nobr>
+        
+        <div class="jd-descrdiv">Create a rematch of a previously completed turn-based match.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1972,7 +2430,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1990,7 +2448,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2007,26 +2465,26 @@ Summary:
   </td></tr>
 
 
-	 
-    <tr class="alt-color api apilevel-" >
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.util.List<java.lang.String>)">sendUnreliableRealTimeMessage</a></span>(byte[] messageData, String roomId, List&lt;String&gt; recipientParticipantIds)</nobr>
-        
+
         <div class="jd-descrdiv">Send a message to one or more participants in a real-time room.</div>
-  
+
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2039,12 +2497,12 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.lang.String)">sendUnreliableRealTimeMessage</a></span>(byte[] messageData, String roomId, String recipientParticipantId)</nobr>
         
         <div class="jd-descrdiv">Send a message to a participant in a real-time room.</div>
-  
+
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2057,25 +2515,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessageToAll(byte[], java.lang.String)">sendUnreliableRealTimeMessageToAll</a></span>(byte[] messageData, String roomId)</nobr>
         
         <div class="jd-descrdiv">Send a message to all participants in a real-time room.</div>
-  
-  </td></tr>
 
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setAchievementSteps(java.lang.String, int)">setAchievementSteps</a></span>(String id, int numSteps)</nobr>
-        
-        <div class="jd-descrdiv">Set an achievement to have at least the given number of steps completed.</div>
-  
   </td></tr>
 
 
@@ -2090,15 +2530,33 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setAchievementStepsImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String, int)">setAchievementStepsImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id, int numSteps)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setAchievementSteps(java.lang.String, int)">setAchievementSteps</a></span>(String id, int numSteps)</nobr>
         
         <div class="jd-descrdiv">Set an achievement to have at least the given number of steps completed.</div>
-  
+
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setAchievementStepsImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String, int)">setAchievementStepsImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id, int numSteps)</nobr>
+        
+        <div class="jd-descrdiv">Set an achievement to have at least the given number of steps completed.</div>
+
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2112,26 +2570,7 @@ Summary:
         
         <div class="jd-descrdiv">Specifies the part of the screen at which games service popups (for example, "welcome back"
  or "achievement unlocked" popups) will be displayed using gravity.</div>
-  
-  </td></tr>
 
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setUseNewPlayerNotificationsFirstParty(boolean)">setUseNewPlayerNotificationsFirstParty</a></span>(boolean newPlayerStyle)</nobr>
-        
-        <div class="jd-descrdiv">Set whether or not to use the "new player" style notifications for the invitation inbox or
- destination app.</div>
-  
   </td></tr>
 
 
@@ -2140,7 +2579,7 @@ Summary:
         <td class="jd-typecol"><nobr>
             
             
-            
+
             
             
             void</nobr>
@@ -2149,7 +2588,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setViewForPopups(android.view.View)">setViewForPopups</a></span>(View gamesContentView)</nobr>
         
         <div class="jd-descrdiv">Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.</div>
-  
+
   </td></tr>
 
 
@@ -2158,7 +2597,7 @@ Summary:
         <td class="jd-typecol"><nobr>
             
             
-            
+
             
             
             void</nobr>
@@ -2167,7 +2606,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#signOut(com.google.android.gms.games.OnSignOutCompleteListener)">signOut</a></span>(<a href="/reference/com/google/android/gms/games/OnSignOutCompleteListener.html">OnSignOutCompleteListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">Asynchronously signs the current user out.</div>
-  
+
   </td></tr>
 
 
@@ -2185,7 +2624,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#signOut()">signOut</a></span>()</nobr>
         
         <div class="jd-descrdiv">Asynchronously signs the current user out.</div>
-  
+
   </td></tr>
 
 
@@ -2194,7 +2633,7 @@ Summary:
         <td class="jd-typecol"><nobr>
             
             
-            
+
             
             
             void</nobr>
@@ -2203,7 +2642,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScore(java.lang.String, long, java.lang.String)">submitScore</a></span>(String leaderboardId, long score, String scoreTag)</nobr>
         
         <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
-  
+
   </td></tr>
 
 
@@ -2212,7 +2651,7 @@ Summary:
         <td class="jd-typecol"><nobr>
             
             
-            
+
             
             
             void</nobr>
@@ -2221,7 +2660,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScore(java.lang.String, long)">submitScore</a></span>(String leaderboardId, long score)</nobr>
         
         <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
-  
+
   </td></tr>
 
 
@@ -2230,7 +2669,7 @@ Summary:
         <td class="jd-typecol"><nobr>
             
             
-            
+
             
             
             void</nobr>
@@ -2239,14 +2678,14 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScoreImmediate(com.google.android.gms.games.leaderboard.OnScoreSubmittedListener, java.lang.String, long, java.lang.String)">submitScoreImmediate</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a> listener, String leaderboardId, long score, String scoreTag)</nobr>
         
         <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
-  
+
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+
             
             
             
@@ -2264,7 +2703,7 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+
             
             
             
@@ -2272,9 +2711,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unlockAchievement(java.lang.String)">unlockAchievement</a></span>(String id)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String)">takeTurn</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, String pendingParticipantId)</nobr>
         
-        <div class="jd-descrdiv">Unlock an achievement for the currently signed in player.</div>
+        <div class="jd-descrdiv">Update a match with new turn data.</div>
   
   </td></tr>
 
@@ -2286,7 +2725,61 @@ Summary:
             
             
             
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String, com.google.android.gms.games.multiplayer.ParticipantResult...)">takeTurn</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, String pendingParticipantId, <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult...</a> results)</nobr>
+        
+        <div class="jd-descrdiv">Update a match with new turn data.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
             
+            
+            
+            
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String, java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)">takeTurn</a></span>(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, String pendingParticipantId, List&lt;<a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a>&gt; results)</nobr>
+        
+        <div class="jd-descrdiv">Update a match with new turn data.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unlockAchievement(java.lang.String)">unlockAchievement</a></span>(String id)</nobr>
+        
+        <div class="jd-descrdiv">Unlock an achievement for the currently signed in player.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -2298,9 +2791,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+
             
             
             
@@ -2316,9 +2809,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+
             
             
             
@@ -2334,9 +2827,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+
             
             
             
@@ -2347,6 +2840,24 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unregisterInvitationListener()">unregisterInvitationListener</a></span>()</nobr>
         
         <div class="jd-descrdiv">Unregisters this client's invitation listener, if any.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#unregisterMatchUpdateListener()">unregisterMatchUpdateListener</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Unregisters this client's match update listener, if any.</div>
   
   </td></tr>
 
@@ -2382,182 +2893,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
+
+
             final
-            
-            
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-        
+
   </td></tr>
 
 
@@ -2584,190 +3095,190 @@ From interface
   </div>
   <div id="inherited-methods-com.google.android.gms.common.GooglePlayServicesClient-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Connects the client to Google Play services.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#disconnect()">disconnect</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnected()">isConnected</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Checks if the client is currently connected to the service, so that
  requests to other methods will succeed.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnecting()">isConnecting</a></span>()</nobr>
-        
+
         <div class="jd-descrdiv">Checks if the client is attempting to connect to the service.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
+
         <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
  receive connection events.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
+
         <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
  receive connection failed events.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
+
         <div class="jd-descrdiv">Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
+
         <div class="jd-descrdiv">Registers a listener to receive connection failed events from this
  <code>GooglePlayServicesClient</code>.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
+
         <div class="jd-descrdiv">Removes a connection listener from this <code>GooglePlayServicesClient</code>.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-            
-            
-            
-            
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
+
         <div class="jd-descrdiv">Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.</div>
-  
+
   </td></tr>
 
 
@@ -2808,37 +3319,37 @@ From interface
 
 <A NAME="EXTRA_EXCLUSIVE_BIT_MASK"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         String
       </span>
         EXTRA_EXCLUSIVE_BIT_MASK
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Used to bundle the exclusive bit mask of the player for auto-match criteria.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 "exclusive_bit_mask"
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2846,38 +3357,38 @@ From interface
 
 <A NAME="EXTRA_INVITATION"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         String
       </span>
         EXTRA_INVITATION
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Used to return an <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>. Retrieve with <code><a href="/reference/android/content/Intent.html#getParcelableExtra(java.lang.String)">getParcelableExtra(String)</a></code>
  or <code><a href="/reference/android/os/Bundle.html#getParcelable(java.lang.String)">getParcelable(String)</a></code>.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 "invitation"
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2885,24 +3396,24 @@ From interface
 
 <A NAME="EXTRA_MAX_AUTOMATCH_PLAYERS"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         String
       </span>
         EXTRA_MAX_AUTOMATCH_PLAYERS
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Used to return the maximum number of players that should be added to a room by auto-matching.
  Retrieve with <code><a href="/reference/android/content/Intent.html#getIntExtra(java.lang.String, int)">getIntExtra(String, int)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2911,16 +3422,16 @@ From interface
       </ul>
   </div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 "max_automatch_players"
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2928,24 +3439,24 @@ From interface
 
 <A NAME="EXTRA_MIN_AUTOMATCH_PLAYERS"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         String
       </span>
         EXTRA_MIN_AUTOMATCH_PLAYERS
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Used to return the minimum number of players that should be added to a room by auto-matching.
  Retrieve with <code><a href="/reference/android/content/Intent.html#getIntExtra(java.lang.String, int)">getIntExtra(String, int)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2954,16 +3465,16 @@ From interface
       </ul>
   </div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 "min_automatch_players"
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -2971,24 +3482,24 @@ From interface
 
 <A NAME="EXTRA_PLAYERS"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         String
       </span>
         EXTRA_PLAYERS
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Used to return a list of player IDs. Retrieve with
  <code><a href="/reference/android/content/Intent.html#getStringArrayListExtra(java.lang.String)">getStringArrayListExtra(String)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2997,16 +3508,59 @@ From interface
       </ul>
   </div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 "players"
-            
+
         </span>
         </div>
-    
+
+    </div>
+</div>
+
+
+
+<A NAME="EXTRA_PLAYER_SEARCH_RESULTS"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        EXTRA_PLAYER_SEARCH_RESULTS
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Used by the Player Search UI to return a list of parceled Player objects.
+ Retrieve with <code><a href="/reference/android/content/Intent.html#getParcelableArrayListExtra(java.lang.String)">getParcelableArrayListExtra(String)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#getPlayerSearchIntent()">getPlayerSearchIntent()</a></code></li>
+      </ul>
+  </div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "player_search_results"
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -3014,37 +3568,76 @@ From interface
 
 <A NAME="EXTRA_ROOM"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         String
       </span>
         EXTRA_ROOM
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></code>. Retrieve with <code><a href="/reference/android/content/Intent.html#getParcelableExtra(java.lang.String)">getParcelableExtra(String)</a></code>.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 "room"
-            
+
         </span>
         </div>
-    
+
+    </div>
+</div>
+
+
+
+<A NAME="EXTRA_TURN_BASED_MATCH"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        EXTRA_TURN_BASED_MATCH
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a></code>. Retrieve with
+ <code><a href="/reference/android/content/Intent.html#getParcelableExtra(java.lang.String)">getParcelableExtra(String)</a></code> or <code><a href="/reference/android/os/Bundle.html#getParcelable(java.lang.String)">getParcelable(String)</a></code>.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "turn_based_match"
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -3052,39 +3645,39 @@ From interface
 
 <A NAME="MAX_RELIABLE_MESSAGE_LEN"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MAX_RELIABLE_MESSAGE_LEN
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>This gives the maximum message size supported via the <code><a href="/reference/com/google/android/gms/games/GamesClient.html#sendReliableRealTimeMessage(com.google.android.gms.games.multiplayer.realtime.RealTimeReliableMessageSentListener, byte[], java.lang.String, java.lang.String)">sendReliableRealTimeMessage(RealTimeReliableMessageSentListener, byte[], String, String)</a></code>
  methods (excluding protocol headers).
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 1400
                 (0x00000578)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3092,39 +3685,39 @@ From interface
 
 <A NAME="MAX_UNRELIABLE_MESSAGE_LEN"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         MAX_UNRELIABLE_MESSAGE_LEN
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>This gives the maximum (unfragmented) message size supported via the
  <code><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.lang.String)">sendUnreliableRealTimeMessage(byte[], String, String)</a></code> methods (excluding protocol headers).
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 1168
                 (0x00000490)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3132,37 +3725,37 @@ From interface
 
 <A NAME="NOTIFICATION_TYPES_ALL"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         NOTIFICATION_TYPES_ALL
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Notification types for any notification. </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 -1
                 (0xffffffff)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3170,37 +3763,37 @@ From interface
 
 <A NAME="NOTIFICATION_TYPES_MULTIPLAYER"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         NOTIFICATION_TYPES_MULTIPLAYER
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Notification types for multiplayer notifications. </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
-                1
-                (0x00000001)
-            
+
+                3
+                (0x00000003)
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3208,37 +3801,75 @@ From interface
 
 <A NAME="NOTIFICATION_TYPE_INVITATION"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         NOTIFICATION_TYPE_INVITATION
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Notification type for invites to multiplayer games. </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 1
                 (0x00000001)
-            
+
         </span>
         </div>
-    
+
+    </div>
+</div>
+
+
+
+<A NAME="NOTIFICATION_TYPE_MATCH_UPDATE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        NOTIFICATION_TYPE_MATCH_UPDATE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Notification type for updates to match information. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                2
+                (0x00000002)
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -3246,39 +3877,39 @@ From interface
 
 <A NAME="STATUS_ACHIEVEMENT_NOT_INCREMENTAL"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_ACHIEVEMENT_NOT_INCREMENTAL
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that the call to increment achievement failed since the achievement is not an
  incremental achievement.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 3002
                 (0x00000bba)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3286,38 +3917,38 @@ From interface
 
 <A NAME="STATUS_ACHIEVEMENT_UNKNOWN"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_ACHIEVEMENT_UNKNOWN
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Could not find the achievement, so the operation to update the achievement failed.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 3001
                 (0x00000bb9)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3325,39 +3956,39 @@ From interface
 
 <A NAME="STATUS_ACHIEVEMENT_UNLOCKED"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_ACHIEVEMENT_UNLOCKED
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that the incremental achievement was also unlocked when the call was made to
  increment the achievement.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 3003
                 (0x00000bbb)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3365,39 +3996,39 @@ From interface
 
 <A NAME="STATUS_ACHIEVEMENT_UNLOCK_FAILURE"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_ACHIEVEMENT_UNLOCK_FAILURE
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>An incremental achievement cannot be unlocked directly, so the call to unlock achievement
  failed.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 3000
                 (0x00000bb8)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3405,39 +4036,39 @@ From interface
 
 <A NAME="STATUS_APP_MISCONFIGURED"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_APP_MISCONFIGURED
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>The developer has misconfigured their application in some way. The logs will contain more
  data about the error and the appropriate resolution.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 8
                 (0x00000008)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3445,39 +4076,78 @@ From interface
 
 <A NAME="STATUS_CLIENT_RECONNECT_REQUIRED"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_CLIENT_RECONNECT_REQUIRED
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>The GamesClient is in an inconsistent state and must reconnect to the service to resolve the
  issue. Further calls to the service using the current connection are unlikely to succeed.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 2
                 (0x00000002)
-            
+
         </span>
         </div>
-    
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_GAME_NOT_FOUND"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_GAME_NOT_FOUND
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The specified game ID was not recognized by the server.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                9
+                (0x00000009)
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -3485,39 +4155,39 @@ From interface
 
 <A NAME="STATUS_INTERNAL_ERROR"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_INTERNAL_ERROR
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>An unspecified error occurred; no more specific information is available. The device logs may
  provide additional data.
 </p></div>
 
-    
+
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-            
+
                 1
                 (0x00000001)
-            
+
         </span>
         </div>
-    
+
     </div>
 </div>
 
@@ -3525,26 +4195,264 @@ From interface
 
 <A NAME="STATUS_INVALID_REAL_TIME_ROOM_ID"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-        static 
-        final 
+        public
+        static
+        final
         int
       </span>
         STATUS_INVALID_REAL_TIME_ROOM_ID
     </h4>
       <div class="api-level">
-        
-        
-  
+
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the real-time room ID provided to the operation was not valid, or
  does not correspond to the currently active real-time room.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                7002
+                (0x00001b5a)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_LICENSE_CHECK_FAILED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_LICENSE_CHECK_FAILED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The game is not licensed to the user. Further calls will return the same code.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                7
+                (0x00000007)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MATCH_ERROR_ALREADY_REMATCHED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_MATCH_ERROR_ALREADY_REMATCHED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The specified match has already had a rematch created. Only one rematch may be created for
+ any initial match.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                6505
+                (0x00001969)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MATCH_ERROR_INACTIVE_MATCH"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_MATCH_ERROR_INACTIVE_MATCH
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The match is not currently active. This action cannot be performed on an inactive match.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                6501
+                (0x00001965)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MATCH_ERROR_INVALID_MATCH_RESULTS"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_MATCH_ERROR_INVALID_MATCH_RESULTS
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The match results provided in this API call are invalid. This covers cases of duplicate
+ results, results for players who are not in the match, etc.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                6504
+                (0x00001968)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MATCH_ERROR_INVALID_MATCH_STATE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_MATCH_ERROR_INVALID_MATCH_STATE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>The match is not in the correct state to perform the specified action.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                6502
+                (0x00001966)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MATCH_ERROR_INVALID_PARTICIPANT_STATE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_MATCH_ERROR_INVALID_PARTICIPANT_STATE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>One or more participants in this match are not in valid states. This could occur if a
+ specified participant is not actually a participant of the match, or is invalid, or is in an
+ incorrect state to make the API call. Check the logs for more detailed information.
 </p></div>
 
     
@@ -3552,8 +4460,8 @@ From interface
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                7002
-                (0x00001b5a)
+                6500
+                (0x00001964)
             
         </span>
         </div>
@@ -3563,7 +4471,7 @@ From interface
 
 
 
-<A NAME="STATUS_LICENSE_CHECK_FAILED"></A>
+<A NAME="STATUS_MATCH_ERROR_LOCALLY_MODIFIED"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -3573,7 +4481,7 @@ From interface
         final 
         int
       </span>
-        STATUS_LICENSE_CHECK_FAILED
+        STATUS_MATCH_ERROR_LOCALLY_MODIFIED
     </h4>
       <div class="api-level">
         
@@ -3583,7 +4491,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The game is not licensed to the user. Further calls will return the same code.
+  <div class="jd-tagdata jd-tagdescr"><p>The specified match has already been modified locally. This operation cannot be performed
+ until the match has been sent to the server.
 </p></div>
 
     
@@ -3591,8 +4500,128 @@ From interface
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                7
-                (0x00000007)
+                6507
+                (0x0000196b)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MATCH_ERROR_OUT_OF_DATE_VERSION"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        STATUS_MATCH_ERROR_OUT_OF_DATE_VERSION
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The match data is out of date. Someone else has modified the data on the server, so the
+ request could not be completed safely.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                6503
+                (0x00001967)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MATCH_NOT_FOUND"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        STATUS_MATCH_NOT_FOUND
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The specified match cannot be found. The provided match ID does not correspond to any known
+ match.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                6506
+                (0x0000196a)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MULTIPLAYER_DISABLED"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        STATUS_MULTIPLAYER_DISABLED
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This game does not support multiplayer. This could occur if the linked app is not configured
+ appropriately in the developer console.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                6003
+                (0x00001773)
             
         </span>
         </div>
@@ -3633,6 +4662,86 @@ From interface
             
                 6000
                 (0x00001770)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MULTIPLAYER_ERROR_INVALID_MULTIPLAYER_TYPE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        STATUS_MULTIPLAYER_ERROR_INVALID_MULTIPLAYER_TYPE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The match is not the right type to perform this action on. For example, this error will be
+ returned when trying to take a turn in a real-time match.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                6002
+                (0x00001772)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This multiplayer operation is not valid, and the server rejected it. Check the logs for more
+ information.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                6004
+                (0x00001774)
             
         </span>
         </div>
@@ -3874,6 +4983,45 @@ From interface
             
                 0
                 (0x00000000)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_OPERATION_IN_FLIGHT"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        STATUS_OPERATION_IN_FLIGHT
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Trying to start a join/create operation while another is already in flight.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                7007
+                (0x00001b5f)
             
         </span>
         </div>
@@ -4141,16 +5289,149 @@ From interface
 
 
 
-<A NAME="clearAllNotifications()"></A>
+<A NAME="acceptTurnBasedInvitation(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-         
-         
-         
-         
+
+
+
+
+        void
+      </span>
+      <span class="sympad">acceptTurnBasedInvitation</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchInitiatedListener.html">OnTurnBasedMatchInitiatedListener</a> listener, String invitationId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Accept an invitation for a turn-based match.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been accepted. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>invitationId</td>
+          <td>The ID of the invitation to be accepted.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="cancelTurnBasedMatch(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+
+
+
+
+        void
+      </span>
+      <span class="sympad">cancelTurnBasedMatch</span>
+      <span class="normal">(String matchId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Cancels a turn-based match. Once this call succeeds, the match will be removed from local
+ storage. Note that this will cancel the match completely, forcing it to end for all players
+ involved. See <code><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String)">leaveTurnBasedMatch(OnTurnBasedMatchLeftListener, String)</a></code> for a
+ different alternative.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>matchId</td>
+          <td>The ID of the match to cancel.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="cancelTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchCanceledListener, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+
+
+
+
+        void
+      </span>
+      <span class="sympad">cancelTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchCanceledListener.html">OnTurnBasedMatchCanceledListener</a> listener, String matchId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Cancels a turn-based match. Once this call succeeds, the match will be removed from local
+ storage. Note that this will cancel the match completely, forcing it to end for all players
+ involved. See <code><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String)">leaveTurnBasedMatch(OnTurnBasedMatchLeftListener, String)</a></code> for a
+ different alternative.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called after the match has been canceled. The listener
+            is called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>The ID of the match to cancel.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="clearAllNotifications()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
         void
       </span>
       <span class="sympad">clearAllNotifications</span>
@@ -4163,7 +5444,7 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Clear all notifications for the current game and signed-in player.
 </p></div>
 
@@ -4177,10 +5458,10 @@ From interface
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-         
-         
-         
-         
+
+
+
+
         void
       </span>
       <span class="sympad">clearNotifications</span>
@@ -4219,10 +5500,10 @@ From interface
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-         
-         
-         
-         
+
+
+
+
         void
       </span>
       <span class="sympad">connect</span>
@@ -4251,6 +5532,9 @@ From interface
  <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_INVITATION">EXTRA_INVITATION</a></code> if the user wanted to accept an invitation to a multiplayer
  game. The value contained here is an <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code> which can be accessed with
  <code><a href="/reference/android/os/Bundle.html#getParcelable(java.lang.String)">getParcelable(String)</a></code>.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_TURN_BASED_MATCH">EXTRA_TURN_BASED_MATCH</a></code> if the user wanted to take action in a turn-based match.
+ The value contained here is a <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a></code> which can be accessed with
+ <code><a href="/reference/android/os/Bundle.html#getParcelable(java.lang.String)">getParcelable(String)</a></code>.</li>
  </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
@@ -4268,10 +5552,10 @@ From interface
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-         
-         
-         
-         
+
+
+
+
         void
       </span>
       <span class="sympad">createRoom</span>
@@ -4306,16 +5590,64 @@ From interface
 </div>
 
 
+<A NAME="createTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+
+
+
+
+        void
+      </span>
+      <span class="sympad">createTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchInitiatedListener.html">OnTurnBasedMatchInitiatedListener</a> listener, <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchConfig.html">TurnBasedMatchConfig</a> config)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Create a turn-based match for the current game.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been created. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>config</td>
+          <td>The configuration parameters for the match to create.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchConfig.html">TurnBasedMatchConfig</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="declineRoomInvitation(java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-         
-         
-         
-         
+
+
+
+
         void
       </span>
       <span class="sympad">declineRoomInvitation</span>
@@ -4330,6 +5662,45 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Decline an invitation for a real-time room.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>invitationId</td>
+          <td>The ID of the invitation to decline.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="declineTurnBasedInvitation(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">declineTurnBasedInvitation</span>
+      <span class="normal">(String invitationId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Decline an invitation for a turn-based match.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -4409,6 +5780,260 @@ From interface
 </td>
         </tr>
       </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="dismissTurnBasedInvitation(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">dismissTurnBasedInvitation</span>
+      <span class="normal">(String invitationId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Dismiss an invitation to a turn-based match. Dismissing an invitation will not change the
+ state of the match for the other participants.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>invitationId</td>
+          <td>The ID of the invitation to dismiss.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="dismissTurnBasedMatch(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">dismissTurnBasedMatch</span>
+      <span class="normal">(String matchId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Delete a match from the server and local storage. Dismissing a match will not change the
+ state of the match for the other participants, but dismissed matches will never be shown to
+ the dismissing player again.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>matchId</td>
+          <td>The ID of the match to dismiss.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">finishTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, List&lt;<a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a>&gt; results)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Mark a match as finished. This should be called when the match is over and all participants
+ have results to be reported (if appropriate). Note that the last client to update a match is
+ responsible for calling finish on that match.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been updated. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to finish.</td>
+        </tr>
+        <tr>
+          <th>matchData</td>
+          <td>Data representing the new state of the match after this update. Limited to a
+            maximum of <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getMaxTurnBasedMatchDataSize()">getMaxTurnBasedMatchDataSize()</a></code> bytes.</td>
+        </tr>
+        <tr>
+          <th>results</td>
+          <td>List of <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> objects for this match. The client which
+            calls <code>finishMatch</code> is responsible for reporting the results for all
+            appropriate participants in the match. Not every participant is required to have a
+            result, but providing results for participants who are not in the match is an
+            error.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">finishTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Indicate that a participant is finished with a match. This will not change the data of the
+ match, but it will transition the match into state
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_COMPLETE">MATCH_STATUS_COMPLETE</a></code> if the match is not already in that state. This
+ method is most commonly used to report that a participant has finished any post-processing
+ steps the game might have and has seen their results in the match.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been updated. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to finish.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], com.google.android.gms.games.multiplayer.ParticipantResult...)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">finishTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult...</a> results)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Mark a match as finished. This should be called when the match is over and all participants
+ have results to be reported (if appropriate). Note that the last client to update a match is
+ responsible for calling finish on that match.
+ <p>
+ On the last turn of the match, the client should call this method instead of
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String)">takeTurn(OnTurnBasedMatchUpdatedListener, String, byte[], String)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been updated. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to finish.</td>
+        </tr>
+        <tr>
+          <th>matchData</td>
+          <td>Data representing the new state of the match after this update. Limited to a
+            maximum of <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getMaxTurnBasedMatchDataSize()">getMaxTurnBasedMatchDataSize()</a></code> bytes.</td>
+        </tr>
+        <tr>
+          <th>results</td>
+          <td>List of <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> objects for this match. The client which
+            calls <code>finishMatch</code> is responsible for reporting the results for all
+            appropriate participants in the match. Not every participant is required to have a
+            result, but providing results for participants who are not in the match is an
+            error.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String)">takeTurn(OnTurnBasedMatchUpdatedListener, String, byte[], String)</a></code></li>
+      </ul>
   </div>
 
     </div>
@@ -4667,12 +6292,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -4687,14 +6312,14 @@ From interface
 
 <A NAME="getInvitationInboxIntent()"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         Intent
       </span>
       <span class="sympad">getInvitationInboxIntent</span>
@@ -4702,12 +6327,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user see and manage any outstanding invitations. Note
  that this must be invoked using <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that
  the identity of the calling package can be established.
@@ -4728,14 +6353,14 @@ From interface
 
 <A NAME="getLeaderboardIntent(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         Intent
       </span>
       <span class="sympad">getLeaderboardIntent</span>
@@ -4743,12 +6368,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets an intent to show a leaderboard for a game. Note that this must be invoked with
  <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling
  package can be established.
@@ -4768,6 +6393,135 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to view the specified leaderboard.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getMatchInboxIntent()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        Intent
+      </span>
+      <span class="sympad">getMatchInboxIntent</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user see and manage any outstanding invitations and
+ matches. Note that this must be invoked using
+ <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that the identity of the calling
+ package can be established.
+ <p>
+ If the user canceled the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
+ selected an invitation or a match to accept, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>
+ and the data intent will contain the selected invitation/match as a parcelable extra in the
+ extras. Based on the type of the match, the result will include either
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_TURN_BASED_MATCH">EXTRA_TURN_BASED_MATCH</a></code> or <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_INVITATION">EXTRA_INVITATION</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to view the match inbox.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getMaxTurnBasedMatchDataSize()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">getMaxTurnBasedMatchDataSize</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum data size per match in bytes. Guaranteed to be at least 128 KB. May increase
+ in the future.
+ <p>
+ If the service cannot be reached for some reason, this will return
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code>. In this case, no further operations should be
+ attempted until after the client has reconnected.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The maximum data size per match in bytes.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getPlayerSearchIntent()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        Intent
+      </span>
+      <span class="sympad">getPlayerSearchIntent</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will display a screen where the user can search for people
+ on Google+. Note that this must be invoked with
+ <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the
+ calling package can be established.
+ <p>
+ If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the
+ user selected any players from the search results list, the result will be
+ <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will contain a list of parceled
+ Player objects in <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_PLAYER_SEARCH_RESULTS">EXTRA_PLAYER_SEARCH_RESULTS</a></code>.
+ <p>
+ Note that the current Player Search UI only allows a single selection, so the
+ returned list of parceled Player objects will currently contain at most one
+ Player. The Player Search UI may allow multiple selections in a future release,
+ though.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to display the player selector.
 </li></ul>
   </div>
 
@@ -4949,7 +6703,10 @@ From interface
  contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> and the minimum and maximum numbers
  of additional auto-match players in <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
  <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code>
- will include only the other players selected, not the current player.</p></div>
+ will include only the other players selected, not the current player.
+ <p>
+ This method is the equivalent of calling <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getSelectPlayersIntent(int, int, boolean)">getSelectPlayersIntent(int, int, boolean)</a></code>
+ with the <code>allowAutomatch</code> parameter set to true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -4969,7 +6726,79 @@ From interface
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#createRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">createRoom(RoomConfig)</a></code></li>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#createTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig)">createTurnBasedMatch(OnTurnBasedMatchInitiatedListener, TurnBasedMatchConfig)</a></code></li><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#createRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">createRoom(RoomConfig)</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getSelectPlayersIntent(int, int, boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        Intent
+      </span>
+      <span class="sympad">getSelectPlayersIntent</span>
+      <span class="normal">(int minPlayers, int maxPlayers, boolean allowAutomatch)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user select players to send an invitation to. Note that
+ this must be invoked with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the
+ identity of the calling package can be established.
+ <p>
+ The number of players passed in should be the desired number of additional players to select,
+ not including the current player. So, for a game that can handle between 2 and 4 players,
+ <code>minPlayers</code> would be 1 and <code>maxPlayers</code> would be 3.
+ <p>
+ If the user canceled, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_CANCELED">RESULT_CANCELED</a></code>. If the user
+ selected players, the result will be <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, and the data intent will
+ contain the selected player IDs in <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code> and the minimum and maximum numbers
+ of additional auto-match players in <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></code> and
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></code> respectively. The player IDs in <code><a href="/reference/com/google/android/gms/games/GamesClient.html#EXTRA_PLAYERS">EXTRA_PLAYERS</a></code>
+ will include only the other players selected, not the current player.
+ <p>
+ If the <code>allowAutomatch</code> parameter is set to false, the UI will not display an option
+ for selecting automatch players. Set this to false if your game does not support
+ automatching.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>minPlayers</td>
+          <td>The minimum number of players to select (not including the current player).</td>
+        </tr>
+        <tr>
+          <th>maxPlayers</td>
+          <td>The maximum number of players to select (not including the current player).</td>
+        </tr>
+        <tr>
+          <th>allowAutomatch</td>
+          <td>Whether or not to display an option for selecting automatch players.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to display the player selector.</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#createTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig)">createTurnBasedMatch(OnTurnBasedMatchInitiatedListener, TurnBasedMatchConfig)</a></code></li><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#createRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">createRoom(RoomConfig)</a></code></li>
       </ul>
   </div>
 
@@ -5016,6 +6845,50 @@ From interface
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to view the GamesClient Settings UI.
 </li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLoadedListener, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">getTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchLoadedListener.html">OnTurnBasedMatchLoadedListener</a> listener, String matchId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Load a specified turn-based match.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the load is complete. The listener is called
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>The ID of the match to retreive.
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>
@@ -5382,6 +7255,112 @@ From interface
 </div>
 
 
+<A NAME="leaveTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">leaveTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchLeftListener.html">OnTurnBasedMatchLeftListener</a> listener, String matchId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Leave the specified match when it is not the current player's turn. If this takes the match
+ to fewer than two participants, the match will be canceled.
+ <p>
+ See <code><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveTurnBasedMatchDuringTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String, java.lang.String)">leaveTurnBasedMatchDuringTurn(OnTurnBasedMatchLeftListener, String, String)</a></code> for
+ the form of the API to call during the current player's turn.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called after the match has been left. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to leave.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="leaveTurnBasedMatchDuringTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">leaveTurnBasedMatchDuringTurn</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchLeftListener.html">OnTurnBasedMatchLeftListener</a> listener, String matchId, String pendingParticipantId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Leave the specified match during the current player's turn. If this takes the match to fewer
+ than two participants, the match will be canceled. The provided <code>pendingParticipantId</code>
+ will be used to determine which participant should act next. If no pending participant is
+ provided and the match has available auto-match slots, the match will wait for additional
+ players to be found. If there are no auto-match slots available for this match, a pending
+ participant ID is required.
+ <p>
+ See <code><a href="/reference/com/google/android/gms/games/GamesClient.html#leaveTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchLeftListener, java.lang.String)">leaveTurnBasedMatch(OnTurnBasedMatchLeftListener, String)</a></code> for the form of the
+ API to call when it is not the current player's turn.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called after the match has been left. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to leave.</td>
+        </tr>
+        <tr>
+          <th>pendingParticipantId</td>
+          <td>ID of the participant who will be set to pending after this
+            update succeeds, or <code>null</code> to wait for additional automatched players (if
+            possible).
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener, boolean)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -5423,6 +7402,63 @@ From interface
             the latest data from the server. This would commonly be used for something like a
             user-initiated refresh. Normally, this should be set to false to gain advantages
             of data caching.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadCurrentPlayerLeaderboardScore(com.google.android.gms.games.leaderboard.OnPlayerLeaderboardScoreLoadedListener, java.lang.String, int, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadCurrentPlayerLeaderboardScore</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnPlayerLeaderboardScoreLoadedListener.html">OnPlayerLeaderboardScoreLoadedListener</a> listener, String leaderboardId, int span, int leaderboardCollection)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the currently signed in player's score for a given leaderboard.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the load is complete. The listener is called
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>leaderboardId</td>
+          <td>ID of the leaderboard to load the score from.</td>
+        </tr>
+        <tr>
+          <th>span</td>
+          <td>Time span to retrieve data for. Valid values are
+            <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_DAILY">TIME_SPAN_DAILY</a></code>,
+            <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_WEEKLY">TIME_SPAN_WEEKLY</a></code>, or
+            <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_ALL_TIME">TIME_SPAN_ALL_TIME</a></code>.</td>
+        </tr>
+        <tr>
+          <th>leaderboardCollection</td>
+          <td>The leaderboard collection to retrieve scores for. Valid values
+            are either <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#COLLECTION_PUBLIC">COLLECTION_PUBLIC</a></code> or
+            <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#COLLECTION_SOCIAL">COLLECTION_SOCIAL</a></code>.
 </td>
         </tr>
       </table>
@@ -5614,103 +7650,6 @@ From interface
             the latest data from the server. This would commonly be used for something like a
             user-initiated refresh. Normally, this should be set to false to gain advantages
             of data caching.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">loadLeaderboardMetadata</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load a specific leaderboard's metadata for this game.
- <p>
- The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
- called before the result is ready it will not be delivered.
- <p>
- This form of the API is deprecated and will be removed in a future release. Please use
- <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
- instead.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The listener that is called when the load is complete. The listener is called
-            on the main thread.</td>
-        </tr>
-        <tr>
-          <th>leaderboardId</td>
-          <td>ID of the leaderboard to load metadata for.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">loadLeaderboardMetadata</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of leaderboard metadata for this game.
- <p>
- The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
- called before the result is ready it will not be delivered.
- <p>
- This form of the API is deprecated and will be removed in a future release. Please use
- <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The listener that is called when the load is complete. The listener is called
-            on the main thread.
 </td>
         </tr>
       </table>
@@ -6200,6 +8139,62 @@ From interface
 </div>
 
 
+<A NAME="loadTurnBasedMatches(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchesLoadedListener, int...)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">loadTurnBasedMatches</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchesLoadedListener.html">OnTurnBasedMatchesLoadedListener</a> listener, int... matchTurnStatuses)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load turn-based matches for the current game. Matches with any specified turn
+ status codes will be returned to the provided listener.
+ <p>
+ Valid turn status values are <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_INVITED">MATCH_TURN_STATUS_INVITED</a></code>,
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_MY_TURN">MATCH_TURN_STATUS_MY_TURN</a></code>,
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_THEIR_TURN">MATCH_TURN_STATUS_THEIR_TURN</a></code>, or
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_COMPLETE">MATCH_TURN_STATUS_COMPLETE</a></code>. Note that if your game implements both
+ turn-based and real-time multiplayer, requesting
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_INVITED">MATCH_TURN_STATUS_INVITED</a></code> will return invitations for both turn-based
+ matches and real-time matches.
+ <p>
+ The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
+ called before the result is ready it will not be delivered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the load is complete. The listener is called
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchTurnStatuses</td>
+          <td>List of turn statuses to request.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="reconnect()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -6228,10 +8223,10 @@ From interface
  This method closes the current connection then returns immediately and reconnects to the
  service in the background.
  <p>
- This method will call <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onDisconnected()">onDisconnected()</a></code>
- followed by either <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
- if the connection is successful or
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code> on a failure.</p></div>
+ As with a regular <code><a href="/reference/com/google/android/gms/games/GamesClient.html#connect()">connect()</a></code> call, a call to this method will be followed by either
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> if the connection is
+ successful or <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code>
+ on a failure.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
       <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#connect()">connect()</a></code></li><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code></li><li><code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect()</a></code></li>
@@ -6244,14 +8239,14 @@ From interface
 
 <A NAME="registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         void
       </span>
       <span class="sympad">registerConnectionCallbacks</span>
@@ -6259,12 +8254,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
  If the service is already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
  method will be called immediately.  Applications should balance calls to this method with
@@ -6296,14 +8291,14 @@ From interface
 
 <A NAME="registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         void
       </span>
       <span class="sympad">registerConnectionFailedListener</span>
@@ -6311,12 +8306,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection failed events from this
  <code>GooglePlayServicesClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(GooglePlayServicesClient.ConnectionCallbacks)</a></code>, if the service
  is not already connected, the listener's
@@ -6373,8 +8368,9 @@ From interface
  listener is registered by this method, the incoming invitation will not generate a status bar
  notification as long as this client remains connected.
  <p>
- Note that only one listener may be active at a time. Calling this method while another
- listener was previously registered will replace the original listener with the new one.</p></div>
+ Note that only one invitation listener may be active at a time. Calling this method while
+ another invitation listener was previously registered will replace the original listener with
+ the new one.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -6382,6 +8378,98 @@ From interface
           <th>listener</td>
           <td>The listener that is called when a new invitation is received. The listener
             is called on the main thread.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="registerMatchUpdateListener(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdateReceivedListener)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">registerMatchUpdateListener</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdateReceivedListener.html">OnTurnBasedMatchUpdateReceivedListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Register a listener to intercept incoming match updates for the currently signed-in user. If
+ a listener is registered by this method, the incoming match update will not generate a status
+ bar notification as long as this client remains connected.
+ <p>
+ Note that only one match update listener may be active at a time. Calling this method while
+ another match update listener was previously registered will replace the original listener
+ with the new one.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when a match update is received. The listener is
+            called on the main thread.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="rematchTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchInitiatedListener, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">rematchTurnBasedMatch</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchInitiatedListener.html">OnTurnBasedMatchInitiatedListener</a> listener, String matchId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Create a rematch of a previously completed turn-based match. The new match will have the same
+ participants as the previous match. Note that only one rematch may be created from any single
+ completed match.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been created. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>The ID of the previous match to re-create.
 </td>
         </tr>
       </table>
@@ -6878,46 +8966,6 @@ From interface
 </div>
 
 
-<A NAME="setUseNewPlayerNotificationsFirstParty(boolean)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">setUseNewPlayerNotificationsFirstParty</span>
-      <span class="normal">(boolean newPlayerStyle)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Set whether or not to use the "new player" style notifications for the invitation inbox or
- destination app.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>newPlayerStyle</td>
-          <td>Whether or not to use "new player" notifications.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 <A NAME="setViewForPopups(android.view.View)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -7330,6 +9378,224 @@ From interface
 </div>
 
 
+<A NAME="takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">takeTurn</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, String pendingParticipantId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Update a match with new turn data. The participant that is passed in as the pending
+ participant will be notified that it is their turn to take action. If no pending participant
+ is provided and the match has available auto-match slots, the match will wait for additional
+ players to be found. If there are no auto-match slots available for this match, a pending
+ participant ID is required.
+ <p>
+ For the final turn of the match, there is no need to call this method. Instead, call
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String)">finishTurnBasedMatch(OnTurnBasedMatchUpdatedListener, String)</a></code> directly.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been updated. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to update.</td>
+        </tr>
+        <tr>
+          <th>matchData</td>
+          <td>Data representing the new state of the match after this update. Limited to a
+            maximum of <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getMaxTurnBasedMatchDataSize()">getMaxTurnBasedMatchDataSize()</a></code> bytes.</td>
+        </tr>
+        <tr>
+          <th>pendingParticipantId</td>
+          <td>ID of the participant who will be set to pending after this
+            update succeeds, or <code>null</code> to wait for additional automatched players (if
+            possible).</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)">finishTurnBasedMatch(OnTurnBasedMatchUpdatedListener, String, byte[], List)</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String, com.google.android.gms.games.multiplayer.ParticipantResult...)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">takeTurn</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, String pendingParticipantId, <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult...</a> results)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Update a match with new turn data. The participant that is passed in as the pending
+ participant will be notified that it is their turn to take action. If no pending participant
+ is provided and the match has available auto-match slots, the match will wait for additional
+ players to be found. If there are no auto-match slots available for this match, a pending
+ participant ID is required.
+ <p>
+ For the final turn of the match, there is no need to call this method. Instead, call
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String)">finishTurnBasedMatch(OnTurnBasedMatchUpdatedListener, String)</a></code> directly.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been updated. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to update.</td>
+        </tr>
+        <tr>
+          <th>matchData</td>
+          <td>Data representing the new state of the match after this update. Limited to a
+            maximum of <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getMaxTurnBasedMatchDataSize()">getMaxTurnBasedMatchDataSize()</a></code> bytes.</td>
+        </tr>
+        <tr>
+          <th>pendingParticipantId</td>
+          <td>ID of the participant who will be set to pending after this
+            update succeeds, or <code>null</code> to wait for additional automatched players (if
+            possible).</td>
+        </tr>
+        <tr>
+          <th>results</td>
+          <td>Optional list of <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> objects for this match. Note that
+            the results reported here should be final - if results reported later conflict
+            with these values, the returned value will indicate a conflicted result by
+            returning <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html#MATCH_RESULT_DISAGREED">MATCH_RESULT_DISAGREED</a></code>. This is most useful
+            for cases where a participant knows their results early. For example, a single
+            elimination game where participants are eliminated as the game continues might
+            wish to specify results for the eliminated participants here.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)">finishTurnBasedMatch(OnTurnBasedMatchUpdatedListener, String, byte[], List)</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="takeTurn(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.lang.String, java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">takeTurn</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdatedListener.html">OnTurnBasedMatchUpdatedListener</a> listener, String matchId, byte[] matchData, String pendingParticipantId, List&lt;<a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a>&gt; results)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Update a match with new turn data. The participant that is passed in as the pending
+ participant will be notified that it is their turn to take action. If no pending participant
+ is provided and the match has available auto-match slots, the match will wait for additional
+ players to be found. If there are no auto-match slots available for this match, a pending
+ participant ID is required.
+ <p>
+ For the final turn of the match, there is no need to call this method. Instead, call
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String)">finishTurnBasedMatch(OnTurnBasedMatchUpdatedListener, String)</a></code> directly.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the match has been updated. The listener is
+            called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>matchId</td>
+          <td>ID of the match to update.</td>
+        </tr>
+        <tr>
+          <th>matchData</td>
+          <td>Data representing the new state of the match after this update. Limited to a
+            maximum of <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getMaxTurnBasedMatchDataSize()">getMaxTurnBasedMatchDataSize()</a></code> bytes.</td>
+        </tr>
+        <tr>
+          <th>pendingParticipantId</td>
+          <td>ID of the participant who will be set to pending after this
+            update succeeds, or <code>null</code> to wait for additional automatched players (if
+            possible).</td>
+        </tr>
+        <tr>
+          <th>results</td>
+          <td>Optional list of <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> objects for this match. Note that
+            the results reported here should be final - if results reported later conflict
+            with these values, the returned value will indicate a conflicted result by
+            returning <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html#MATCH_RESULT_DISAGREED">MATCH_RESULT_DISAGREED</a></code>. This is most useful
+            for cases where a participant knows their results early. For example, a single
+            elimination game where participants are eliminated as the game continues might
+            wish to specify results for the eliminated participants here.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#finishTurnBasedMatch(com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdatedListener, java.lang.String, byte[], java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)">finishTurnBasedMatch(OnTurnBasedMatchUpdatedListener, String, byte[], List)</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="unlockAchievement(java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -7547,6 +9813,37 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Unregisters this client's invitation listener, if any. Any new invitations will generate
+ status bar notifications as normal.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="unregisterMatchUpdateListener()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">unregisterMatchUpdateListener</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Unregisters this client's match update listener, if any. Any new match updates will generate
  status bar notifications as normal.
 </p></div>
 

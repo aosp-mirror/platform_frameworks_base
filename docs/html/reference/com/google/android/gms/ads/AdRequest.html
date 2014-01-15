@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -763,6 +765,10 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">An <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code> contains targeting information used to fetch an ad. Ad requests are created
  using <code><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></code>.
+ <p>
+ Publishers using DoubleClick for Publishers or Search Ads for Apps should use
+ <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html">PublisherAdRequest</a></code> or
+ <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html">SearchAdRequest</a></code>, respectively.
 </p>
 
 
@@ -899,7 +905,8 @@ Summary:
           final
           String</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#DEVICE_ID_EMULATOR">DEVICE_ID_EMULATOR</a></td>
-          <td class="jd-descrcol" width="100%">The <code>deviceId</code> for emulators to be used with <code><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.</td>
+          <td class="jd-descrcol" width="100%">The <code>deviceId</code> for emulators to be used with
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.</td>
       </tr>
       
     
@@ -982,6 +989,24 @@ Summary:
             
             
             
+
+            Location</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.html#getLocation()">getLocation</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the user's location targeting information.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
             &lt;T&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/ads/mediation/NetworkExtras.html">NetworkExtras</a>&gt;
             T</nobr>
         </td>
@@ -994,7 +1019,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1557,7 +1582,8 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The <code>deviceId</code> for emulators to be used with <code><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>The <code>deviceId</code> for emulators to be used with
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.
 </p></div>
 
     
@@ -1670,6 +1696,37 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns targeting information keywords. Returns an empty <code><a href="/reference/java/util/Set.html">Set</a></code> if no
  keywords were added.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getLocation()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        Location
+      </span>
+      <span class="sympad">getLocation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the user's location targeting information. Returns <code>null</code> if the location was
+ not set.
 </p></div>
 
     </div>

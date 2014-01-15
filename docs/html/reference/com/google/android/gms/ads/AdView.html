@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -854,6 +856,10 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">The <code><a href="/reference/android/view/View.html">View</a></code> to display banner ads. The ad size and ad unit ID must be set
  prior to calling <code><a href="/reference/com/google/android/gms/ads/AdView.html#loadAd(com.google.android.gms.ads.AdRequest)">loadAd(AdRequest)</a></code>.
+ <p>
+ Publishers using DoubleClick for Publishers or Search Ads for Apps should use
+ <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdView.html">PublisherAdView</a></code> or
+ <code><a href="/reference/com/google/android/gms/ads/search/SearchAdView.html">SearchAdView</a></code>, respectively.
  <p>
  Sample code:
  <pre>
@@ -1482,145 +1488,152 @@ android.view.View
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN</td>
+        <td class="jd-linkcol">SYSTEM_UI_FLAG_IMMERSIVE_STICKY</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol">SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN</td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_LAYOUT_STABLE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_LOW_PROFILE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_VISIBLE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_LAYOUT_FLAGS</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_CENTER</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_GRAVITY</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_INHERIT</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_TEXT_END</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_TEXT_START</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_VIEW_END</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_VIEW_START</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_ANY_RTL</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_FIRST_STRONG</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_INHERIT</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_LOCALE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_LTR</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_RTL</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
-    
-    
-    <tr class=" api apilevel-" >
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">VIEW_LOG_TAG</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">VISIBLE</td>
         <td class="jd-descrcol" width="100%"></td>
@@ -2320,7 +2333,7 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdView.html#loadAd(com.google.android.gms.ads.AdRequest)">loadAd</a></span>(<a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a> adRequest)</nobr>
         
-        <div class="jd-descrdiv">Start loading the ad on a background thread.</div>
+        <div class="jd-descrdiv">Starts loading the ad on a background thread.</div>
   
   </td></tr>
 
@@ -2338,7 +2351,7 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdView.html#pause()">pause</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Pause any extra processing associated with this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>.</div>
+        <div class="jd-descrdiv">Pauses any extra processing associated with this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>.</div>
   
   </td></tr>
 
@@ -2356,7 +2369,7 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdView.html#resume()">resume</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Resume an <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code> after a previous call to <code><a href="/reference/com/google/android/gms/ads/AdView.html#pause()">pause()</a></code>.</div>
+        <div class="jd-descrdiv">Resumes an <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code> after a previous call to <code><a href="/reference/com/google/android/gms/ads/AdView.html#pause()">pause()</a></code>.</div>
   
   </td></tr>
 
@@ -2374,7 +2387,7 @@ android.view.View
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdView.html#setAdListener(com.google.android.gms.ads.AdListener)">setAdListener</a></span>(<a href="/reference/com/google/android/gms/ads/AdListener.html">AdListener</a> adListener)</nobr>
         
-        <div class="jd-descrdiv">Set an <code><a href="/reference/com/google/android/gms/ads/AdListener.html">AdListener</a></code> for this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>.</div>
+        <div class="jd-descrdiv">Sets an <code><a href="/reference/com/google/android/gms/ads/AdListener.html">AdListener</a></code> for this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>.</div>
   
   </td></tr>
 
@@ -13285,8 +13298,14 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the size of the banner ad.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the size of the banner ad. Returns <code>null</code> if <code><a href="/reference/com/google/android/gms/ads/AdView.html#setAdSize(com.google.android.gms.ads.AdSize)">setAdSize(AdSize)</a></code> hasn't been
+ called yet.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Related XML Attributes</h5>
+      <ul class="nolist">
+            <li><a href="/reference/com/google/android/gms/ads/AdView.html#attr_com.google.android.gms:adSize">com.google.android.gms:adSize</a></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -13315,8 +13334,13 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the ad unit ID.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the ad unit ID.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Related XML Attributes</h5>
+      <ul class="nolist">
+            <li><a href="/reference/com/google/android/gms/ads/AdView.html#attr_com.google.android.gms:adUnitId">com.google.android.gms:adUnitId</a></li>
+      </ul>
+  </div>
 
     </div>
 </div>
@@ -13345,12 +13369,12 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Start loading the ad on a background thread.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Starts loading the ad on a background thread.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalArgumentException</td>
+            <th>IllegalStateException</td>
             <td>If the size of the banner ad or the ad unit ID have not been
          set.
 </td>
@@ -13385,7 +13409,7 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Pause any extra processing associated with this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>. This method should be called
+  <div class="jd-tagdata jd-tagdescr"><p>Pauses any extra processing associated with this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>. This method should be called
  in the parent Activity's <code><a href="/reference/android/app/Activity.html#onPause()">onPause()</a></code> method.
 </p></div>
 
@@ -13416,7 +13440,7 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Resume an <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code> after a previous call to <code><a href="/reference/com/google/android/gms/ads/AdView.html#pause()">pause()</a></code>. This method should be
+  <div class="jd-tagdata jd-tagdescr"><p>Resumes an <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code> after a previous call to <code><a href="/reference/com/google/android/gms/ads/AdView.html#pause()">pause()</a></code>. This method should be
  called in the parent Activity's <code><a href="/reference/android/app/Activity.html#onResume()">onResume()</a></code> method.
 </p></div>
 
@@ -13447,7 +13471,7 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Set an <code><a href="/reference/com/google/android/gms/ads/AdListener.html">AdListener</a></code> for this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Sets an <code><a href="/reference/com/google/android/gms/ads/AdListener.html">AdListener</a></code> for this <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code>.
 </p></div>
 
     </div>
@@ -13488,7 +13512,7 @@ containing a value of this type.
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalArgumentException</td>
+            <th>IllegalStateException</td>
             <td>If the size of the banner ad was already set.
 </td>
         </tr>
@@ -13533,7 +13557,7 @@ containing a value of this type.
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalArgumentException</td>
+            <th>IllegalStateException</td>
             <td>If the ad unit ID was already set.
 </td>
         </tr>
