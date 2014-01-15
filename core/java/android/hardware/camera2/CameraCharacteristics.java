@@ -181,7 +181,18 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>List of AF modes that can be
-     * selected</p>
+     * selected with {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * <p>Not all the auto-focus modes may be supported by a
+     * given camera device. This entry lists the valid modes for
+     * {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} for this camera device.</p>
+     * <p>All camera devices will support OFF mode, and all camera devices with
+     * adjustable focuser units (<code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>)
+     * will support AUTO mode.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      */
     public static final Key<byte[]> CONTROL_AF_AVAILABLE_MODES =
             new Key<byte[]>("android.control.afAvailableModes", byte[].class);
