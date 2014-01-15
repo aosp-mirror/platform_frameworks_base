@@ -1432,6 +1432,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void releaseFocus() {
+        if (mStatusBarWindow == null) return;
         WindowManager.LayoutParams lp =
                 (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -1463,8 +1464,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
         }
 
-        mStatusBarWindow.cancelExpandHelper();
-        mStatusBarView.collapseAllPanels(true);
+        if (mStatusBarWindow != null) {
+            mStatusBarWindow.cancelExpandHelper();
+            mStatusBarView.collapseAllPanels(true);
+        }
     }
 
     public ViewPropertyAnimator setVisibilityWhenDone(
@@ -1673,7 +1676,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (SPEW) Log.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
                 + " mExpandedVisible=" + mExpandedVisible);
 
-        if (!mExpandedVisible) {
+        if (!mExpandedVisible || mStatusBarWindow == null) {
             return;
         }
 
@@ -2076,7 +2079,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
         // run a ticker without being attached will crash!
-        if (n.getNotification().tickerText != null && mStatusBarWindow.getWindowToken() != null) {
+        if (n.getNotification().tickerText != null && mStatusBarWindow != null
+                && mStatusBarWindow.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.addEntry(n);
@@ -2726,9 +2730,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         super.destroy();
         if (mStatusBarWindow != null) {
             mWindowManager.removeViewImmediate(mStatusBarWindow);
+            mStatusBarWindow = null;
         }
         if (mNavigationBarView != null) {
             mWindowManager.removeViewImmediate(mNavigationBarView);
+            mNavigationBarView = null;
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
     }
