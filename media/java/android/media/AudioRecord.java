@@ -179,7 +179,7 @@ public class AudioRecord
     /**
      * Audio session ID
      */
-    private int mSessionId = 0;
+    private int mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
 
     //---------------------------------------------------------
     // Constructor, Finalize
@@ -224,7 +224,7 @@ public class AudioRecord
 
         // native initialization
         int[] session = new int[1];
-        session[0] = 0;
+        session[0] = AudioSystem.AUDIO_SESSION_ALLOCATE;
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
         int initResult = native_setup( new WeakReference<AudioRecord>(this),

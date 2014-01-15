@@ -103,6 +103,9 @@ public class AudioSystem
     /** @deprecated */
     @Deprecated public static final int ROUTE_ALL               = 0xFFFFFFFF;
 
+    // Keep in sync with system/core/include/system/audio.h
+    public static final int AUDIO_SESSION_ALLOCATE = 0;
+
     /*
      * Checks whether the specified stream type is active.
      *
