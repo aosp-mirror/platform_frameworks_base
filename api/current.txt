@@ -11532,8 +11532,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_PREDICTED_COLOR_GAINS;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_PREDICTED_COLOR_TRANSFORM;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_SCENE_FLICKER;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_GREEN;
