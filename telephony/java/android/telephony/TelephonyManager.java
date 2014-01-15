@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.telephony.Rlog;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
@@ -433,7 +432,7 @@ public class TelephonyManager {
         case RILConstants.NETWORK_MODE_GSM_UMTS:
         case RILConstants.NETWORK_MODE_LTE_GSM_WCDMA:
         case RILConstants.NETWORK_MODE_LTE_WCDMA:
-        case RILConstants.NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
             return PhoneConstants.PHONE_TYPE_GSM;
 
         // Use CDMA Phone for the global mode including CDMA
@@ -1258,7 +1257,7 @@ public class TelephonyManager {
      * At registration, and when a specified telephony state
      * changes, the telephony manager invokes the appropriate
      * callback method on the listener object and passes the
-     * current (udpated) values.
+     * current (updated) values.
      * <p>
      * To unregister a listener, pass the listener object and set the
      * events argument to
@@ -1480,7 +1479,7 @@ public class TelephonyManager {
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
-     * @param channel is the channel id to be closed as retruned by a successful
+     * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @param cla Class of the APDU command.
      * @param instruction Instruction of the APDU command.
@@ -1501,5 +1500,103 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
         }
         return "";
+    }
+
+    /**
+     * Read one of the NV items defined in {@link com.android.internal.telephony.RadioNVItems}.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param itemID the ID of the item to read.
+     * @return the NV item as a String, or null on any failure.
+     * @hide
+     */
+    public String nvReadItem(int itemID) {
+        try {
+            return getITelephony().nvReadItem(itemID);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "nvReadItem RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "nvReadItem NPE", ex);
+        }
+        return "";
+    }
+
+
+    /**
+     * Write one of the NV items defined in {@link com.android.internal.telephony.RadioNVItems}.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param itemID the ID of the item to read.
+     * @param itemValue the value to write, as a String.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    public boolean nvWriteItem(int itemID, String itemValue) {
+        try {
+            return getITelephony().nvWriteItem(itemID, itemValue);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "nvWriteItem RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "nvWriteItem NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Update the CDMA Preferred Roaming List (PRL) in the radio NV storage.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param preferredRoamingList byte array containing the new PRL.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    public boolean nvWriteCdmaPrl(byte[] preferredRoamingList) {
+        try {
+            return getITelephony().nvWriteCdmaPrl(preferredRoamingList);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "nvWriteCdmaPrl RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "nvWriteCdmaPrl NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Perform the specified type of NV config reset.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param resetType the type of reset to perform (1 == factory reset; 2 == NV-only reset).
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    public boolean nvResetConfig(int resetType) {
+        try {
+            return getITelephony().nvResetConfig(resetType);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "nvResetConfig RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "nvResetConfig NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Change the radio to the specified mode.
+     * Used for device configuration by some operators.
+     *
+     * @param radioMode is 0 for offline mode, 1 for online mode, 2 for low-power mode,
+     *                  or 3 to reset the radio.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    public boolean setRadioMode(int radioMode) {
+        try {
+            return getITelephony().setRadioMode(radioMode);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setRadioMode RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setRadioMode NPE", ex);
+        }
+        return false;
     }
 }

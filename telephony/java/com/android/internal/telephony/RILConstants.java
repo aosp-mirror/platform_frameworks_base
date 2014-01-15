@@ -72,7 +72,7 @@ public interface RILConstants {
                                             AVAILABLE Application Settings menu*/
     int NETWORK_MODE_LTE_CDMA_EVDO  = 8; /* LTE, CDMA and EvDo */
     int NETWORK_MODE_LTE_GSM_WCDMA  = 9; /* LTE, GSM/WCDMA */
-    int NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA = 10; /* LTE, CDMA, EvDo, GSM/WCDMA */
+    int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA = 10; /* LTE, CDMA, EvDo, GSM/WCDMA */
     int NETWORK_MODE_LTE_ONLY       = 11; /* LTE Only mode. */
     int NETWORK_MODE_LTE_WCDMA      = 12; /* LTE/WCDMA */
     int PREFERRED_NETWORK_MODE      = NETWORK_MODE_WCDMA_PREF;
@@ -113,6 +113,10 @@ public interface RILConstants {
     int DEACTIVATE_REASON_NONE = 0;
     int DEACTIVATE_REASON_RADIO_OFF = 1;
     int DEACTIVATE_REASON_PDP_RESET = 2;
+
+    /* NV config radio reset types. */
+    int NV_CONFIG_RESET_FACTORY = 1;
+    int NV_CONFIG_RESET_NV_ONLY = 2;
 
 /*
 cat include/telephony/ril.h | \
@@ -271,6 +275,12 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_SIM_OPEN_CHANNEL = 115;
     int RIL_REQUEST_SIM_CLOSE_CHANNEL = 116;
     int RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL = 117;
+    int RIL_REQUEST_NV_READ_ITEM = 118;
+    int RIL_REQUEST_NV_WRITE_ITEM = 119;
+    int RIL_REQUEST_NV_WRITE_CDMA_PRL = 120;
+    int RIL_REQUEST_NV_RESET_CONFIG = 121;
+    int RIL_REQUEST_SET_RADIO_MODE = 122;
+
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
     int RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED = 1001;
