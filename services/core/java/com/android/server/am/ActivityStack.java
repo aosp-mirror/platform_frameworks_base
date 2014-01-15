@@ -2674,7 +2674,7 @@ final class ActivityStack {
         r.finishLaunchTickingLocked();
     }
 
-    final void removeActivityFromHistoryLocked(ActivityRecord r) {
+    private void removeActivityFromHistoryLocked(ActivityRecord r) {
         finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
         r.makeFinishing();
         if (DEBUG_ADD_REMOVE) {
@@ -2689,7 +2689,7 @@ final class ActivityStack {
             if (mStackSupervisor.isFrontStack(this) && task == topTask() && task.mOnTopOfHome) {
                 mStackSupervisor.moveHomeToTop();
             }
-            mStackSupervisor.removeTask(task);
+            removeTask(task);
         }
         r.takeFromHistory();
         removeTimeoutsForActivityLocked(r);
@@ -3596,14 +3596,28 @@ final class ActivityStack {
         return starting;
     }
 
-    boolean removeTask(TaskRecord task) {
+    void removeTask(TaskRecord task) {
+        mWindowManager.removeTask(task.taskId);
+        final ActivityRecord r = mResumedActivity;
+        if (r != null && r.task == task) {
+            mResumedActivity = null;
+        }
+
         final int taskNdx = mTaskHistory.indexOf(task);
         final int topTaskNdx = mTaskHistory.size() - 1;
         if (task.mOnTopOfHome && taskNdx < topTaskNdx) {
             mTaskHistory.get(taskNdx + 1).mOnTopOfHome = true;
         }
         mTaskHistory.remove(task);
-        return mTaskHistory.isEmpty();
+
+        if (mTaskHistory.isEmpty()) {
+            if (DEBUG_STACK) Slog.i(TAG, "removeTask: moving to back stack=" + this);
+            if (isOnHomeDisplay()) {
+                mStackSupervisor.moveHomeStack(!isHomeStack());
+            }
+            mStacks.remove(this);
+            mStacks.add(0, this);
+        }
     }
 
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent, boolean toTop) {

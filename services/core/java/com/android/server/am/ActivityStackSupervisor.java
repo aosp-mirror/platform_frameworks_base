@@ -364,25 +364,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return mCurTaskId;
     }
 
-    void removeTask(TaskRecord task) {
-        mWindowManager.removeTask(task.taskId);
-        final ActivityStack stack = task.stack;
-        final ActivityRecord r = stack.mResumedActivity;
-        if (r != null && r.task == task) {
-            stack.mResumedActivity = null;
-        }
-        if (stack.removeTask(task) && !stack.isHomeStack()) {
-            if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing stack " + stack);
-            stack.mActivityContainer.detachLocked();
-            final int stackId = stack.mStackId;
-            final int nextStackId = mWindowManager.removeStack(stackId);
-            // TODO: Perhaps we need to let the ActivityManager determine the next focus...
-            if (stack.isOnHomeDisplay()) {
-                mFocusedStack = getStack(nextStackId);
-            }
-        }
-    }
-
     ActivityRecord resumedAppLocked() {
         ActivityStack stack = getFocusedStack();
         if (stack == null) {
@@ -2183,7 +2164,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
             return;
         }
-        removeTask(task);
+        task.stack.removeTask(task);
         stack.addTask(task, toTop);
         mWindowManager.addTask(taskId, stackId, toTop);
         resumeTopActivitiesLocked();
