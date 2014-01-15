@@ -82,6 +82,7 @@ APK. </p>
 <ul>
   <li>Support different OpenGL texture compression formats with each APK.</li>
   <li>Support different screen sizes and densities with each APK.</li>
+  <li>Support different device feature sets with each APK.</li>
   <li>Support different platform versions with each APK.</li>
   <li>Support different CPU architectures with each APK (such as for ARM, x86, and MIPS, when your
   app uses the <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>).</li>
@@ -245,6 +246,17 @@ that you'll introduce an error due to conflicts between them. For help deciding 
 <a href="{@docRoot}guide/practices/screens-distribution.html">Distributing to Specific Screens</a>.
 If you can't avoid using both, be aware that for any conflicts in agreement between a given size,
 "false" will win.</p>
+  <br/>
+  </li>
+
+  <li><strong>Device feature sets</strong>
+    <p>This is based on your manifest file's <a 
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 
+element(s).</p>
+    <p>For example, you can provide one APK for devices that support multitouch and another
+APK for devices that do not support multitouch. See 
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#features-reference">Features
+Reference</a> for a list of features supported by the platform.</p>
   <br/>
   </li>
 
