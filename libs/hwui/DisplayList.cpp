@@ -472,6 +472,7 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
         matrix.multiply(anim);
     }
     if (mMatrixFlags != 0) {
+        updateMatrix();
         if (mMatrixFlags == TRANSLATION) {
             matrix.translate(mTranslationX, mTranslationY, mTranslationZ);
         } else {
@@ -499,29 +500,42 @@ void DisplayList::computeOrdering() {
 
     for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children[i];
-        childOp->mDisplayList->computeOrderingImpl(childOp, &m3dNodes, &mat4::identity());
+        childOp->mDisplayList->computeOrderingImpl(childOp,
+                &m3dNodes, &mat4::identity(),
+                &mProjectedNodes, &mat4::identity());
     }
 }
 
 void DisplayList::computeOrderingImpl(
         DrawDisplayListOp* opState,
         Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
-        const mat4* transformFrom3dRoot) {
+        const mat4* transformFrom3dRoot,
+        Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
+        const mat4* transformFromProjectionSurface) {
 
     // TODO: should avoid this calculation in most cases
-    opState->mTransformFrom3dRoot.load(*transformFrom3dRoot);
-    opState->mTransformFrom3dRoot.multiply(opState->mTransformFromParent);
+    // TODO: just calculate single matrix, down to all leaf composited elements
+    Matrix4 localTransformFrom3dRoot(*transformFrom3dRoot);
+    localTransformFrom3dRoot.multiply(opState->mTransformFromParent);
+    Matrix4 localTransformFromProjectionSurface(*transformFromProjectionSurface);
+    localTransformFromProjectionSurface.multiply(opState->mTransformFromParent);
 
-    if (mTranslationZ != 0.0f) { // TODO: other signals, such as custom 4x4 matrix
-        // composited layer, flag for out of order draw...
+    if (mTranslationZ != 0.0f) { // TODO: other signals for 3d compositing, such as custom matrix4
+        // composited 3d layer, flag for out of order draw and save matrix...
         opState->mSkipInOrderDraw = true;
+        opState->mTransformFromCompositingAncestor.load(localTransformFrom3dRoot);
 
         // ... and insert into current 3d root, keyed with pivot z for later sorting
         Vector3 pivot(mPivotX, mPivotY, 0.0f);
-        mat4 totalTransform(opState->mTransformFrom3dRoot);
+        mat4 totalTransform(localTransformFrom3dRoot);
         applyViewPropertyTransforms(totalTransform);
         totalTransform.mapPoint3d(pivot);
         compositedChildrenOf3dRoot->add(ZDrawDisplayListOpPair(pivot.z, opState));
+    } else if (mProjectToContainedVolume) {
+        // composited projectee, flag for out of order draw, save matrix, and store in proj surface
+        opState->mSkipInOrderDraw = true;
+        opState->mTransformFromCompositingAncestor.load(localTransformFromProjectionSurface);
+        compositedChildrenOfProjectionSurface->add(opState);
     } else {
         // standard in order draw
         opState->mSkipInOrderDraw = false;
@@ -529,18 +543,30 @@ void DisplayList::computeOrderingImpl(
 
     m3dNodes.clear();
     if (mIsContainedVolume) {
-        // create a new 3d space for children by separating their ordering
+        // create a new 3d space for descendents by collecting them
         compositedChildrenOf3dRoot = &m3dNodes;
         transformFrom3dRoot = &mat4::identity();
     } else {
-        transformFrom3dRoot = &(opState->mTransformFrom3dRoot);
+        applyViewPropertyTransforms(localTransformFrom3dRoot);
+        transformFrom3dRoot = &localTransformFrom3dRoot;
+    }
+
+    mProjectedNodes.clear();
+    if (mDisplayListData != NULL && mDisplayListData->projectionIndex >= 0) {
+        // create a new projection surface for descendents by collecting them
+        compositedChildrenOfProjectionSurface = &mProjectedNodes;
+        transformFromProjectionSurface = &mat4::identity();
+    } else {
+        applyViewPropertyTransforms(localTransformFromProjectionSurface);
+        transformFromProjectionSurface = &localTransformFromProjectionSurface;
     }
 
     if (mDisplayListData != NULL && mDisplayListData->children.size() > 0) {
         for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
             DrawDisplayListOp* childOp = mDisplayListData->children[i];
             childOp->mDisplayList->computeOrderingImpl(childOp,
-                    compositedChildrenOf3dRoot, transformFrom3dRoot);
+                    compositedChildrenOf3dRoot, transformFrom3dRoot,
+                    compositedChildrenOfProjectionSurface, transformFromProjectionSurface);
         }
     }
 }
@@ -598,19 +624,19 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
     if (m3dNodes.size() == 0 ||
             (mode == kNegativeZChildren && m3dNodes[0].key > 0.0f) ||
             (mode == kPositiveZChildren && m3dNodes[m3dNodes.size() - 1].key < 0.0f)) {
-        // nothing to draw
+        // no 3d children to draw
         return;
     }
 
     LinearAllocator& alloc = handler.allocator();
-    ClipRectOp* op = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
+    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
             SkRegion::kIntersect_Op); // clip to 3d root bounds for now
-    handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
+    handler(clipOp, PROPERTY_SAVECOUNT, mClipToBounds);
     int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
     for (size_t i = 0; i < m3dNodes.size(); i++) {
         const float zValue = m3dNodes[i].key;
-        DrawDisplayListOp* op = m3dNodes[i].value;
+        DrawDisplayListOp* childOp = m3dNodes[i].value;
 
         if (mode == kPositiveZChildren && zValue < 0.0f) continue;
         if (mode == kNegativeZChildren && zValue > 0.0f) break;
@@ -622,19 +648,38 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
              * -determine and pass background shape (and possibly drawable alpha)
              * -view must opt-in to shadows
              * -consider shadows for other content
+             * -inform shadow system of ancestor transform (for use in lighting)
              */
-            mat4 shadowMatrix(op->mTransformFrom3dRoot);
-            op->mDisplayList->applyViewPropertyTransforms(shadowMatrix);
+            mat4 shadowMatrix(childOp->mTransformFromCompositingAncestor);
+            childOp->mDisplayList->applyViewPropertyTransforms(shadowMatrix);
             DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix,
-                    op->mDisplayList->mAlpha,
-                    op->mDisplayList->getWidth(), op->mDisplayList->getHeight());
+                    childOp->mDisplayList->mAlpha,
+                    childOp->mDisplayList->getWidth(), childOp->mDisplayList->getHeight());
             handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
         }
 
-        renderer.concatMatrix(op->mTransformFrom3dRoot);
-        op->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
-        handler(op, renderer.getSaveCount() - 1, mClipToBounds);
-        op->mSkipInOrderDraw = true;
+        renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
+        childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
+        handler(childOp, renderer.getSaveCount() - 1, mClipToBounds);
+        childOp->mSkipInOrderDraw = true;
+    }
+    handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
+}
+
+template <class T>
+void DisplayList::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level) {
+    LinearAllocator& alloc = handler.allocator();
+    ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
+            SkRegion::kReplace_Op); // clip to projection surface root bounds
+    handler(clipOp, PROPERTY_SAVECOUNT, mClipToBounds);
+    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+
+    for (size_t i = 0; i < mProjectedNodes.size(); i++) {
+        DrawDisplayListOp* childOp = mProjectedNodes[i];
+        renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
+        childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
+        handler(childOp, renderer.getSaveCount() - 1, mClipToBounds);
+        childOp->mSkipInOrderDraw = true;
     }
     handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
 }
@@ -686,6 +731,7 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
 
         DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
         const int saveCountOffset = renderer.getSaveCount() - 1;
+        const int projectionIndex = mDisplayListData->projectionIndex;
         for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
             DisplayListOp *op = mDisplayListData->displayListOps[i];
 
@@ -695,6 +741,10 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
 
             logBuffer.writeCommand(level, op->name());
             handler(op, saveCountOffset, mClipToBounds);
+
+            if (CC_UNLIKELY(i == projectionIndex && mProjectedNodes.size() > 0)) {
+                iterateProjectedChildren(renderer, handler, level);
+            }
         }
 
         // for 3d root, draw children with positive z values
