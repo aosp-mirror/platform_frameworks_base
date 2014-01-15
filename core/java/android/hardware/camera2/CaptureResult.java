@@ -195,12 +195,12 @@ public final class CaptureResult extends CameraMetadata {
      * fields for a given capture will be available in its
      * CaptureResult.</p>
      *
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#FLASH_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -336,9 +336,9 @@ public final class CaptureResult extends CameraMetadata {
      * routine is disabled. The camera device uses each particular illumination
      * target for white balance adjustment.</p>
      *
-     * @see CaptureRequest#CONTROL_MODE
-     * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
@@ -521,9 +521,9 @@ public final class CaptureResult extends CameraMetadata {
      * auto-exposure algorithm, the overridden values are then provided
      * back to the user in the corresponding result.</p>
      *
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
-     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final Key<Float> LENS_APERTURE =
@@ -611,7 +611,7 @@ public final class CaptureResult extends CameraMetadata {
      * in any order relative to other frames, but all PARTIAL buffers for a given
      * capture must arrive before the FINAL buffer for that capture. This entry may
      * only be used by the HAL if quirks.usePartialResult is set to 1.</p>
-     * <p><b>Optional</b> - This value may be null on some devices.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
     public static final Key<Boolean> QUIRKS_PARTIAL_RESULT =
@@ -713,6 +713,12 @@ public final class CaptureResult extends CameraMetadata {
      * exposure began for this frame.</p>
      * <p>The thermal diode being queried should be inside the sensor PCB, or
      * somewhere close to it.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final Key<Float> SENSOR_TEMPERATURE =
             new Key<Float>("android.sensor.temperature", float.class);
@@ -812,8 +818,8 @@ public final class CaptureResult extends CameraMetadata {
      * image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
      *
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
      */
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
@@ -875,8 +881,8 @@ public final class CaptureResult extends CameraMetadata {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      */
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
@@ -888,8 +894,8 @@ public final class CaptureResult extends CameraMetadata {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      */
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);
@@ -916,6 +922,7 @@ public final class CaptureResult extends CameraMetadata {
             new Key<float[]>("android.tonemap.curveRed", float[].class);
 
     /**
+     *
      * @see #TONEMAP_MODE_CONTRAST_CURVE
      * @see #TONEMAP_MODE_FAST
      * @see #TONEMAP_MODE_HIGH_QUALITY

@@ -182,8 +182,6 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>List of AF modes that can be
      * selected with {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}.</p>
-     *
-     * @see CaptureRequest#CONTROL_AF_MODE
      * <p>Not all the auto-focus modes may be supported by a
      * given camera device. This entry lists the valid modes for
      * {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} for this camera device.</p>
@@ -221,8 +219,6 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>The set of auto-white-balance modes ({@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode})
      * that are supported by this camera device.</p>
-     *
-     * @see CaptureRequest#CONTROL_AWB_MODE
      * <p>Not all the auto-white-balance modes may be supported by a
      * given camera device. This entry lists the valid modes for
      * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} for this camera device.</p>
@@ -231,9 +227,9 @@ public final class CameraCharacteristics extends CameraMetadata {
      * which enables application control of white balance, by using
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}({@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} must be set to TRANSFORM_MATRIX).</p>
      *
-     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
-     * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      */
     public static final Key<byte[]> CONTROL_AWB_AVAILABLE_MODES =
@@ -359,7 +355,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * future versions of camera service. This quirk will stop
      * working at that point; DO NOT USE without careful
      * consideration of future support.</p>
-     * <p><b>Optional</b> - This value may be null on some devices.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
     public static final Key<Byte> QUIRKS_USE_PARTIAL_RESULT =
@@ -482,6 +478,12 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>Gain factor from electrons to raw units when
      * ISO=100</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Full capability</b> -
+     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final Key<Rational> SENSOR_BASE_GAIN_FACTOR =
             new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
@@ -493,7 +495,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * equal to this, all applied gain must be analog. For
      * values above this, it can be a mix of analog and
      * digital</p>
-     * <p><b>Optional</b> - This value may be null on some devices.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
