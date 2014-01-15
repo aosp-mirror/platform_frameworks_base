@@ -251,9 +251,11 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>List of supported aperture
-     * values</p>
-     * <p>If variable aperture not available, only setting
-     * should be for the fixed aperture</p>
+     * values.</p>
+     * <p>If the camera device doesn't support variable apertures,
+     * listed value will be the fixed aperture.</p>
+     * <p>If the camera device supports variable apertures, the aperture value
+     * in this list will be sorted in ascending order.</p>
      */
     public static final Key<float[]> LENS_INFO_AVAILABLE_APERTURES =
             new Key<float[]>("android.lens.info.availableApertures", float[].class);
