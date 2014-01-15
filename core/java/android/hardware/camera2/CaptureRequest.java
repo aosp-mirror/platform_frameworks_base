@@ -399,9 +399,9 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * issues. The {@link CaptureResult#STATISTICS_SCENE_FLICKER android.statistics.sceneFlicker} key can assist
      * the application in this.</p>
      *
-     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES
      * @see CaptureResult#STATISTICS_SCENE_FLICKER
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AE_ANTIBANDING_MODE_OFF
      * @see #CONTROL_AE_ANTIBANDING_MODE_50HZ
@@ -453,12 +453,12 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * fields for a given capture will be available in its
      * CaptureResult.</p>
      *
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
-     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#FLASH_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -810,9 +810,27 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<android.hardware.camera2.Size>("android.jpeg.thumbnailSize", android.hardware.camera2.Size.class);
 
     /**
-     * <p>Size of the lens aperture</p>
-     * <p>Will not be supported on most devices. Can only
-     * pick from supported list</p>
+     * <p>The ratio of lens focal length to the effective
+     * aperture diameter.</p>
+     * <p>This will only be supported on the camera devices that
+     * have variable aperture lens. The aperture value can only be
+     * one of the values listed in {@link CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES android.lens.info.availableApertures}.</p>
+     * <p>When this is supported and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is OFF,
+     * this can be set along with {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
+     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and android.sensor.frameDuration
+     * to achieve manual exposure control.</p>
+     * <p>The requested aperture value may take several frames to reach the
+     * requested value; the camera device will report the current (intermediate)
+     * aperture size in capture result metadata while the aperture is changing.</p>
+     * <p>When this is supported and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is one of
+     * the ON modes, this will be overridden by the camera device
+     * auto-exposure algorithm, the overridden values are then provided
+     * back to the user in the corresponding result.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
     public static final Key<Float> LENS_APERTURE =
             new Key<Float>("android.lens.aperture", float.class);
@@ -979,8 +997,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_MODE
      */
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
@@ -992,8 +1010,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_MODE
      */
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);
