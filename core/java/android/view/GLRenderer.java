@@ -810,7 +810,6 @@ public class GLRenderer extends HardwareRenderer {
                 } else {
                     if (mCanvas == null) {
                         mCanvas = createCanvas();
-                        mCanvas.setName(mName);
                     }
                     setEnabled(true);
 

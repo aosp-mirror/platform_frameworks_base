@@ -179,18 +179,6 @@ static jint android_view_GLES20Canvas_getStencilSize(JNIEnv* env, jobject clazz)
     return Stencil::getStencilSize();
 }
 
-static void android_view_GLES20Canvas_setName(JNIEnv* env,
-        jobject clazz, jint rendererPtr, jstring name) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    if (name != NULL) {
-        const char* textArray = env->GetStringUTFChars(name, NULL);
-        renderer->setName(textArray);
-        env->ReleaseStringUTFChars(name, textArray);
-    } else {
-        renderer->setName(NULL);
-    }
-}
-
 static void android_view_GLES20Canvas_setProperty(JNIEnv* env,
         jobject clazz, jstring name, jstring value) {
     if (!Caches::hasInstance()) {
@@ -1177,8 +1165,6 @@ static JNINativeMethod gMethods[] = {
     { "nPrepare",           "(IZ)I",           (void*) android_view_GLES20Canvas_prepare },
     { "nPrepareDirty",      "(IIIIIZ)I",       (void*) android_view_GLES20Canvas_prepareDirty },
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
-    { "nSetName",           "(ILjava/lang/String;)V",
-            (void*) android_view_GLES20Canvas_setName },
     { "nSetProperty",           "(Ljava/lang/String;Ljava/lang/String;)V",
             (void*) android_view_GLES20Canvas_setProperty },
 

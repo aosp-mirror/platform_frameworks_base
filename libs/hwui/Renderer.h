@@ -57,26 +57,6 @@ public:
     virtual ~Renderer() {}
 
     /**
-     * Sets the name of this renderer. The name is optional and empty by default, for debugging
-     * purposes only. If the pointer is null the name is set to the empty string.
-     */
-    void setName(const char * name) {
-        if (name) {
-            mName.setTo(name);
-        } else {
-            mName.clear();
-        }
-    }
-
-    /**
-     * Returns the name of this renderer as UTF8 string.
-     * The returned pointer is never null.
-     */
-    const char* getName() const {
-        return mName.string();
-    }
-
-    /**
      * Indicates whether this renderer is recording drawing commands for later playback.
      * If this method returns true, the drawing commands are deferred.
      */
@@ -269,8 +249,6 @@ public:
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty) = 0;
 
 private:
-    // Optional name of the renderer
-    String8 mName;
 }; // class Renderer
 
 }; // namespace uirenderer
