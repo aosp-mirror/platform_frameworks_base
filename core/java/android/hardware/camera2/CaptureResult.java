@@ -195,12 +195,12 @@ public final class CaptureResult extends CameraMetadata {
      * fields for a given capture will be available in its
      * CaptureResult.</p>
      *
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#FLASH_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
-     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -323,10 +323,23 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Whether AWB is currently setting the color
      * transform fields, and what its illumination target
      * is</p>
-     * <p>[BC - AWB lock,AWB modes]</p>
-     * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO.</p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is AUTO.</p>
+     * <p>When set to the ON mode, the camera device's auto white balance
+     * routine is enabled, overriding the application's selected
+     * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
+     * <p>When set to the OFF mode, the camera device's auto white balance
+     * routine is disabled. The applicantion manually controls the white
+     * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, android.colorCorrection.gains
+     * and {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
+     * <p>When set to any other modes, the camera device's auto white balance
+     * routine is disabled. The camera device uses each particular illumination
+     * target for white balance adjustment.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
      * @see #CONTROL_AWB_MODE_INCANDESCENT
@@ -508,10 +521,10 @@ public final class CaptureResult extends CameraMetadata {
      * auto-exposure algorithm, the overridden values are then provided
      * back to the user in the corresponding result.</p>
      *
-     * @see CaptureRequest#CONTROL_AE_MODE
-     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
-     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
+     * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final Key<Float> LENS_APERTURE =
             new Key<Float>("android.lens.aperture", float.class);
