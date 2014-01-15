@@ -19,8 +19,7 @@ previous.link=purchase-iab-products.html
 
 <h2>You should also read</h2>
 <ul>
-<li><a href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
-    Overview</a></li>
+<li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app Billing</a></li>
 </ul>
 
 </div>
@@ -50,7 +49,11 @@ Test your In-app Billing application with static responses by using Google Playâ
    <li>Your application is signed with the same certificate that you used for the APK that you uploaded to the Developer Console, before installing it on your device.</li>
    </ul>
 </li>
-<li>Login to the test device by using a tester account. Test your In-app Billing application by purchasing a few items, and fix any issues that you encounter. Remember to refund the purchases if you donâ€™t want your testers to be actually charged!</li>
+<li>Login to the test device by using a tester account. Test your In-app
+Billing application by purchasing a few items, and fix any issues that you
+encounter. To learn more about how you can perform large-scale testing of your
+In-app Billing app, see <a href="{@docRoot}google/play/billing/billing_testing.html#test-purchases}">Test Purchases (In-app Billing Sandbox)</a>.
+</li>
 </ol>
 </p>
 
