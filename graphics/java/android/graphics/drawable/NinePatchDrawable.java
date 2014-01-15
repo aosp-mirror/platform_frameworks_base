@@ -223,7 +223,7 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    protected void onDraw(Canvas canvas) {
         final Rect bounds = getBounds();
         final boolean needsMirroring = needsMirroring();
         if (needsMirroring) {

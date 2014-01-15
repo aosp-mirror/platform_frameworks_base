@@ -60,7 +60,7 @@ public class PictureDrawable extends Drawable {
     }
     
     @Override
-    public void draw(Canvas canvas) {
+    protected void onDraw(Canvas canvas) {
         if (mPicture != null) {
             Rect bounds = getBounds();
             canvas.save();
