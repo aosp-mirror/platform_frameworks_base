@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -2458,7 +2460,12 @@ From interface
  <p>By default locations are continuously updated until the request is explicitly removed,
  however you can optionally request a set number of updates. For example, if your
  application only needs a single fresh location, then call this method with a value of 1
- before passing the request to the location client.</p></div>
+ before passing the request to the location client.
+
+ <p>When using this option care must be taken to either explicitly remove the request
+ when no longer needed or to set an expiration with (<code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setExpirationDuration(long)">setExpirationDuration(long)</a></code> or
+ <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setExpirationTime(long)">setExpirationTime(long)</a></code>.  Otherwise in some cases if a location can't be computed, this
+ request could stay active indefinitely consuming power.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

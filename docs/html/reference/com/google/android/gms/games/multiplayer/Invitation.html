@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -686,8 +688,11 @@ Summary:
 
 
 
+  <a href="#constants">Constants</a>
 
-  <a href="#inhconstants">Inherited Constants</a>
+
+
+  &#124; <a href="#inhconstants">Inherited Constants</a>
   
 
 
@@ -838,6 +843,29 @@ Summary:
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#INVITATION_TYPE_REAL_TIME">INVITATION_TYPE_REAL_TIME</a></td>
+        <td class="jd-descrcol" width="100%">Constant indicating that this invitation is for a real-time room.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#INVITATION_TYPE_TURN_BASED">INVITATION_TYPE_TURN_BASED</a></td>
+        <td class="jd-descrcol" width="100%">Constant indicating that this invitation is for a turn-based match.</td>
+    </tr>
+
+
+
+</table>
+
+
 
 
 
@@ -969,6 +997,24 @@ android.os.Parcelable
             
             
             
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#getInvitationType()">getInvitationType</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Retrieve the type of this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -980,7 +1026,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1198,6 +1244,91 @@ From interface
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="INVITATION_TYPE_REAL_TIME"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        INVITATION_TYPE_REAL_TIME
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this invitation is for a real-time room.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="INVITATION_TYPE_TURN_BASED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        INVITATION_TYPE_TURN_BASED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this invitation is for a turn-based match.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1
+                (0x00000001)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -1319,6 +1450,41 @@ From interface
 </div>
 
 
+<A NAME="getInvitationType()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        int
+      </span>
+      <span class="sympad">getInvitationType</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the type of this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>. May be either
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#INVITATION_TYPE_REAL_TIME">INVITATION_TYPE_REAL_TIME</a></code> or <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#INVITATION_TYPE_TURN_BASED">INVITATION_TYPE_TURN_BASED</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The type of the <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getInviter()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1379,7 +1545,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p>Retrieve the variant specified for this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>, if any. A variant is an optional
  developer-controlled parameter describing the type of game to play. If specified, this value
  will be a positive integer. If this invitation had no variant specified, returns
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_ANY">ROOM_VARIANT_ANY</a></code>.</p></div>
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_ANY">ROOM_VARIANT_ANY</a></code> or <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_VARIANT_ANY">MATCH_VARIANT_ANY</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Variant specified for this invitation, if any.

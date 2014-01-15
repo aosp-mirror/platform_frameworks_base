@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -856,7 +858,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(android.app.Activity, com.google.android.gms.plus.PlusClient)">PlusShare.Builder</a></span>(Activity launchingActivity, <a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a> plusClient)</nobr>
         
-        <div class="jd-descrdiv">Create a new Builder for launching a sharing action from launchingActivity.</div>
+        <div class="jd-descrdiv"><em>
+      This constructor is deprecated.
+    Please migrate to <code><a href="/">ERROR(/#Builder(Activity))</a></code>, the PlusClient is optional.
+</em></div>
   
   </td></tr>
 
@@ -995,7 +1000,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setRecipients(java.util.List<com.google.android.gms.plus.model.people.Person>)">setRecipients</a></span>(List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>&gt; recipientList)</nobr>
         
-        <div class="jd-descrdiv">Sets a list of people to send the interactive post to.</div>
+        <div class="jd-descrdiv">Deprecated, use the constructor <code><a href="/">ERROR(/#Builder(Activity))</a></code> and call
+ <code><a href="/">ERROR(/#setRecipients(Person, List<Person>))</a></code>.</div>
   
   </td></tr>
 
@@ -1011,6 +1017,24 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setRecipients(com.google.android.gms.plus.model.people.Person, java.util.List<com.google.android.gms.plus.model.people.Person>)">setRecipients</a></span>(<a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a> user, List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>&gt; recipientList)</nobr>
+
+        <div class="jd-descrdiv">Sets a list of people to send the interactive post to.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setStream(android.net.Uri)">setStream</a></span>(Uri streamUri)</nobr>
         
         <div class="jd-descrdiv">Set a stream URI to the data that should be shared.</div>
@@ -1019,7 +1043,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1037,7 +1061,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1404,24 +1428,13 @@ From class
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action from launchingActivity.  You
- must provide a connected <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> that has the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> scope
- when creating an interactive post with a call-to-action button.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>launchingActivity</td>
-          <td>Activity that the share will be launched from</td>
-        </tr>
-        <tr>
-          <th>plusClient</td>
-          <td>The connected <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This constructor is deprecated.</strong><br/>
+    Please migrate to <code><a href="/">ERROR(/#Builder(Activity))</a></code>, the PlusClient is optional.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1750,6 +1763,55 @@ From class
       </div>
     <div class="jd-details-descr">
       
+  <div class="jd-tagdata jd-tagdescr"><p>Deprecated, use the constructor <code><a href="/">ERROR(/#Builder(Activity))</a></code> and call
+ <code><a href="/">ERROR(/#setRecipients(Person, List<Person>))</a></code>. Sets a list of people
+ to send the interactive post to.
+
+ <p>This sets the initial people to share with, but the user can change who the post
+ is shared with before posting.  A maximum of ten recipients are allowed.</p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>recipientList</td>
+          <td>A list of recipients.  See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> and
+         <code><a href="/reference/com/google/android/gms/plus/PlusShare.html#createPerson(java.lang.String, java.lang.String)">createPerson(String, String)</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>This Builder for method chaining.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setRecipients(com.google.android.gms.plus.model.people.Person, java.util.List<com.google.android.gms.plus.model.people.Person>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a>
+      </span>
+      <span class="sympad">setRecipients</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a> user, List&lt;<a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>&gt; recipientList)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets a list of people to send the interactive post to.
 
  <p>This sets the initial people to share with, but the user can change who the post
@@ -1757,6 +1819,11 @@ From class
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
+        <tr>
+          <th>user</td>
+          <td>The user to send the post as, see
+         <code><a href="/">ERROR(/People#getCurrentPerson(com.google.android.gms.GoogleApiClient))</a></code>.</td>
+        </tr>
         <tr>
           <th>recipientList</td>
           <td>A list of recipients.  See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> and

@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -864,8 +866,8 @@ onkeyup="return search_changed(event, false, '/')" />
  <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_OK">STATUS_OK</a></code> if data was successfully deleted from the server.</li>
  <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_NETWORK_ERROR_OPERATION_FAILED">STATUS_NETWORK_ERROR_OPERATION_FAILED</a></code> if the device was unable to
  communicate with the network. In this case, the operation is not retried automatically.</li>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the <code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html">AppStateClient</a></code>
- needs to reconnect to the service to access this data.</li>
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect
+ to the service to access this data.</li>
  <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
  service.</li>
  </ul></p></div>
