@@ -304,7 +304,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         int currentUserId = mLockPatternUtils.getCurrentUser();
         if (authenticatedUserId == currentUserId) {
             if (DEBUG) Log.d(TAG, "Unlocking for user " + authenticatedUserId);
-            mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
+            mKeyguardScreenCallback.reportUnlockAttempt(true);
             mKeyguardScreenCallback.dismiss(true);
         } else {
             Log.d(TAG, "Ignoring unlock for authenticated user (" + authenticatedUserId +
@@ -335,7 +335,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         // next time the user visits keyguard.
         KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(false);
 
-        mKeyguardScreenCallback.reportFailedUnlockAttempt();
+        mKeyguardScreenCallback.reportUnlockAttempt(false);
     }
 
     /**

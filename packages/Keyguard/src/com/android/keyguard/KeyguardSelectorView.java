@@ -58,23 +58,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
             final int resId = mGlowPadView.getResourceIdForTarget(target);
 
             switch (resId) {
-                case R.drawable.ic_action_assist_generic:
-                    Intent assistIntent =
-                            ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                            .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
-                    if (assistIntent != null) {
-                        mActivityLauncher.launchActivity(assistIntent, false, true, null, null);
-                    } else {
-                        Log.w(TAG, "Failed to get intent for assist activity");
-                    }
-                    mCallback.userActivity(0);
-                    break;
-
-                case R.drawable.ic_lockscreen_camera:
-                    mActivityLauncher.launchCamera(null, null);
-                    mCallback.userActivity(0);
-                    break;
-
                 case R.drawable.ic_lockscreen_unlock_phantom:
                 case R.drawable.ic_lockscreen_unlock:
                     mCallback.userActivity(0);
@@ -116,23 +99,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
             updateTargets();
         }
     };
-
-    private final KeyguardActivityLauncher mActivityLauncher = new KeyguardActivityLauncher() {
-
-        @Override
-        KeyguardSecurityCallback getCallback() {
-            return mCallback;
-        }
-
-        @Override
-        LockPatternUtils getLockPatternUtils() {
-            return mLockPatternUtils;
-        }
-
-        @Override
-        Context getContext() {
-            return mContext;
-        }};
 
     public KeyguardSelectorView(Context context) {
         this(context, null);
