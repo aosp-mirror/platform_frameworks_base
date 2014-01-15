@@ -18,6 +18,7 @@ package android.telecomm;
 
 import android.telecomm.ICallService;
 import android.telecomm.ICallServiceSelectionResponse;
+import android.telecomm.ICallSwitchabilityResponse;
 
 import java.util.List;
 
@@ -83,13 +84,10 @@ oneway interface ICallServiceSelector {
     /**
      * Determines if the specified ongoing call can/should be switched from the currently-used
      * call service to another.
-     * TODO(gilad): Do we want to add a dedicated response type, introduce a generic one (and use
-     * it across the board), or eliminate this altogether (i.e. relying on "select" to return the
-     * empty set in the cases this would have returned false)?
+     * TODO(gilad): Pass a CallInfo instead that contains (among other fields) the callId.
      *
      * @param callId The identifier of the call to disconnect.
-     * TODO(gilad): Consider passing a reduced-visibility call object, e.g. using Call externally
-     * and PackagePrivateCall within Telecomm (where the latter can be wrapped by the former).
+     * @param response The response object to be populated and returned to switchboard.
      */
-    void isSwitchable(String callId);
+    void isSwitchable(String callId, in ICallSwitchabilityResponse response);
 }
