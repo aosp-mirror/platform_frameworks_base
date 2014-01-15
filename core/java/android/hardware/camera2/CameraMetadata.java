@@ -351,8 +351,8 @@ public abstract class CameraMetadata {
      * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
      * STILL_CAPTURE</p>
      *
-     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2;
@@ -367,8 +367,8 @@ public abstract class CameraMetadata {
      * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
      * STILL_CAPTURE</p>
      *
-     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3;
@@ -521,46 +521,88 @@ public abstract class CameraMetadata {
     //
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the application-selected color transform matrix
+     * ({@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}) and gains
+     * ({@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}) are used by the camera
+     * device for manual white balance control.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_OFF = 0;
 
     /**
+     * <p>The camera device's auto white balance routine is active;
+     * the application's values for android.colorCorrection.transform
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_AUTO = 1;
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the camera device uses incandescent light as the assumed scene
+     * illumination for white balance. While the exact white balance
+     * transforms are up to the camera device, they will approximately
+     * match the CIE standard illuminant A.</p>
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_INCANDESCENT = 2;
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the camera device uses fluorescent light as the assumed scene
+     * illumination for white balance. While the exact white balance
+     * transforms are up to the camera device, they will approximately
+     * match the CIE standard illuminant F2.</p>
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_FLUORESCENT = 3;
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the camera device uses warm fluorescent light as the assumed scene
+     * illumination for white balance. While the exact white balance
+     * transforms are up to the camera device, they will approximately
+     * match the CIE standard illuminant F4.</p>
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_WARM_FLUORESCENT = 4;
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the camera device uses daylight light as the assumed scene
+     * illumination for white balance. While the exact white balance
+     * transforms are up to the camera device, they will approximately
+     * match the CIE standard illuminant D65.</p>
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_DAYLIGHT = 5;
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the camera device uses cloudy daylight light as the assumed scene
+     * illumination for white balance.</p>
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_CLOUDY_DAYLIGHT = 6;
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the camera device uses twilight light as the assumed scene
+     * illumination for white balance.</p>
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_TWILIGHT = 7;
 
     /**
+     * <p>The camera device's auto white balance routine is disabled;
+     * the camera device uses shade light as the assumed scene
+     * illumination for white balance.</p>
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_SHADE = 8;
