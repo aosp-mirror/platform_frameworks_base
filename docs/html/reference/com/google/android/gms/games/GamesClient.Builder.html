@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -927,6 +929,44 @@ Summary:
             <a href="/reference/com/google/android/gms/games/GamesClient.Builder.html">GamesClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.Builder.html#setShowConnectingPopup(boolean)">setShowConnectingPopup</a></span>(boolean showConnectingPopup)</nobr>
+
+        <div class="jd-descrdiv">Sets whether a "connecting" popup should be displayed automatically at the start of the
+ sign-in flow.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/games/GamesClient.Builder.html">GamesClient.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.Builder.html#setShowConnectingPopup(boolean, int)">setShowConnectingPopup</a></span>(boolean showConnectingPopup, int gravity)</nobr>
+
+        <div class="jd-descrdiv">Sets whether a "connecting" popup should be displayed automatically at the start of the
+ sign-in flow.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/games/GamesClient.Builder.html">GamesClient.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.Builder.html#setViewForPopups(android.view.View)">setViewForPopups</a></span>(View gamesContentView)</nobr>
         
         <div class="jd-descrdiv">Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.</div>
@@ -1421,6 +1461,106 @@ From class
           <th>scopes</td>
           <td>The OAuth scopes that your application is requesting access to (see
             <code><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></code> for details).</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>This Builder.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setShowConnectingPopup(boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/games/GamesClient.Builder.html">GamesClient.Builder</a>
+      </span>
+      <span class="sympad">setShowConnectingPopup</span>
+      <span class="normal">(boolean showConnectingPopup)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets whether a "connecting" popup should be displayed automatically at the start of the
+ sign-in flow. By default this is enabled.
+ <p>
+ Note that this call will use the default gravity for the "connecting" popup, which will
+ display the popup at the center of the screen. If you prefer that the popup appear in a
+ different section of the screen, you can use
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.Builder.html#setShowConnectingPopup(boolean, int)">setShowConnectingPopup(boolean, int)</a></code>, and provide a <code>Gravity</code> value.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>showConnectingPopup</td>
+          <td>Whether or not to show a "connecting" popup at the beginning
+            of the sign-in flow. Default behavior is for this to be true.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>This Builder.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setShowConnectingPopup(boolean, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/games/GamesClient.Builder.html">GamesClient.Builder</a>
+      </span>
+      <span class="sympad">setShowConnectingPopup</span>
+      <span class="normal">(boolean showConnectingPopup, int gravity)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets whether a "connecting" popup should be displayed automatically at the start of the
+ sign-in flow. By default this is enabled.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>showConnectingPopup</td>
+          <td>Whether or not to show a "connecting" popup at the beginning
+            of the sign-in flow. Default behavior is for this to be true.</td>
+        </tr>
+        <tr>
+          <th>gravity</td>
+          <td>The <code><a href="/reference/android/view/Gravity.html">Gravity</a></code> which controls where the "connecting" popup should be
+            displayed during sign-in.</td>
         </tr>
       </table>
   </div>
