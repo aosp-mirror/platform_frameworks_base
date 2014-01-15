@@ -601,7 +601,6 @@ public class RemoteGLRenderer extends HardwareRenderer {
             if (surfaceCreated) {
                 if (mCanvas == null) {
                     mCanvas = createCanvas();
-                    mCanvas.setName(mName);
                 }
                 setEnabled(true);
                 initAtlas();

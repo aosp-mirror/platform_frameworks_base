@@ -27,7 +27,6 @@ import android.graphics.Rect;
  * @hide
  */
 public abstract class HardwareCanvas extends Canvas {
-    private String mName;
 
     @Override
     public boolean isHardwareAccelerated() {
@@ -37,33 +36,6 @@ public abstract class HardwareCanvas extends Canvas {
     @Override
     public void setBitmap(Bitmap bitmap) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Specifies the name of this canvas. Naming the canvas is entirely
-     * optional but can be useful for debugging purposes.
-     *
-     * @param name The name of the canvas, can be null
-     *
-     * @see #getName()
-     *
-     * @hide
-     */
-    public void setName(String name) {
-        mName = name;
-    }
-
-    /**
-     * Returns the name of this canvas.
-     *
-     * @return The name of the canvas or null
-     *
-     * @see #setName(String)
-     *
-     * @hide
-     */
-    public String getName() {
-        return mName;
     }
 
     /**
