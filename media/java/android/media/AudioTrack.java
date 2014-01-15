@@ -839,8 +839,12 @@ public class AudioTrack
 
 
     /**
-     * Similar, except set volume of all channels to same value.
-     * @hide
+     * Sets the specified output volume values on all channels of this track.  The value is clamped
+     * to the ({@link #getMinVolume()}, {@link #getMaxVolume()}) interval if outside this range.
+     * @param volume output attenuation for all channels. A value of 0.0f is silence,
+     *      a value of 1.0f is no attenuation.
+     * @return error code or success, see {@link #SUCCESS},
+     *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setVolume(float volume) {
         return setStereoVolume(volume, volume);
