@@ -20,5 +20,5 @@
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Fejlrapporten er registreret"</string>
     <string name="bugreport_finished_text" msgid="3559904746859400732">"Tryk for at dele din fejlrapport"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Fejlrapporter indeholder data fra systemets forskellige logfiler, f.eks. personlige og private oplysninger. Del kun fejlrapporter med apps og personer, du har tillid til."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Vis denne meddelelse næste gang"</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Vis denne underretning næste gang"</string>
 </resources>
