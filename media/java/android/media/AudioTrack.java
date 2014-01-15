@@ -211,7 +211,7 @@ public class AudioTrack
     /**
      * Audio session ID
      */
-    private int mSessionId = 0;
+    private int mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
 
 
     //--------------------------------
@@ -263,7 +263,7 @@ public class AudioTrack
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
         this(streamType, sampleRateInHz, channelConfig, audioFormat,
-                bufferSizeInBytes, mode, 0 /*session*/);
+                bufferSizeInBytes, mode, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
