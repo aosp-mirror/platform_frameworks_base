@@ -120,9 +120,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setAlpha(int alpha) {
-        mHasAlpha = true;
-
-        if (mAlpha != alpha) {
+        if (!mHasAlpha || mAlpha != alpha) {
+            mHasAlpha = true;
             mAlpha = alpha;
             if (mCurrDrawable != null) {
                 if (mEnterAnimationEnd == 0) {
