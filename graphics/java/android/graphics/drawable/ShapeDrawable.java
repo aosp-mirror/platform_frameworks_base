@@ -210,7 +210,7 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    protected void onDraw(Canvas canvas) {
         Rect r = getBounds();
         Paint paint = mShapeState.mPaint;
 
