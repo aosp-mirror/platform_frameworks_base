@@ -150,7 +150,8 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
 static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
     /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
         we can map to SkBitmap::kARGB_8888_Config, and optionally call
-        bitmap.setIsOpaque(true) on the resulting SkBitmap (as an accelerator)
+        bitmap.setAlphaType(kOpaque_SkAlphaType) on the resulting SkBitmap
+        (as an accelerator)
     */
     switch (format) {
     case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
@@ -183,7 +184,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
     SkBitmap* bitmap = new SkBitmap();
     bitmap->setConfig(convertPixelFormat(f), w, h, bpr);
     if (f == PIXEL_FORMAT_RGBX_8888) {
-        bitmap->setIsOpaque(true);
+        bitmap->setAlphaType(kOpaque_SkAlphaType);
     }
 
     if (w > 0 && h > 0) {

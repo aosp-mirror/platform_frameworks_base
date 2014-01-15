@@ -442,9 +442,15 @@ static jboolean Bitmap_hasAlpha(JNIEnv* env, jobject, SkBitmap* bitmap) {
     return !bitmap->isOpaque();
 }
 
-static void Bitmap_setHasAlpha(JNIEnv* env, jobject, SkBitmap* bitmap,
-                               jboolean hasAlpha) {
-    bitmap->setIsOpaque(!hasAlpha);
+static void Bitmap_setAlphaAndPremultiplied(JNIEnv* env, jobject, SkBitmap* bitmap,
+                                            jboolean hasAlpha, jboolean isPremul) {
+    if (!hasAlpha) {
+        bitmap->setAlphaType(kOpaque_SkAlphaType);
+    } else if (isPremul) {
+        bitmap->setAlphaType(kPremul_SkAlphaType);
+    } else {
+        bitmap->setAlphaType(kUnpremul_SkAlphaType);
+    }
 }
 
 static jboolean Bitmap_hasMipMap(JNIEnv* env, jobject, SkBitmap* bitmap) {
@@ -770,7 +776,7 @@ static JNINativeMethod gBitmapMethods[] = {
     {   "nativeRowBytes",           "(I)I", (void*)Bitmap_rowBytes },
     {   "nativeConfig",             "(I)I", (void*)Bitmap_config },
     {   "nativeHasAlpha",           "(I)Z", (void*)Bitmap_hasAlpha },
-    {   "nativeSetHasAlpha",        "(IZ)V", (void*)Bitmap_setHasAlpha },
+    {   "nativeSetAlphaAndPremultiplied", "(IZZ)V", (void*)Bitmap_setAlphaAndPremultiplied},
     {   "nativeHasMipMap",          "(I)Z", (void*)Bitmap_hasMipMap },
     {   "nativeSetHasMipMap",       "(IZ)V", (void*)Bitmap_setHasMipMap },
     {   "nativeCreateFromParcel",
