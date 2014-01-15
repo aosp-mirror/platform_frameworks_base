@@ -188,6 +188,13 @@ public class Script extends BaseObj {
     public void bindAllocation(Allocation va, int slot) {
         mRS.validate();
         if (va != null) {
+            if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 20) {
+                final Type t = va.mType;
+                if (t.hasMipmaps() || t.hasFaces() || (t.getY() != 0) || (t.getZ() != 0)) {
+                    throw new RSIllegalArgumentException(
+                        "API 20+ only allows simple 1D allocations to be used with bind.");
+                }
+            }
             mRS.nScriptBindAllocation(getID(mRS), va.getID(mRS), slot);
         } else {
             mRS.nScriptBindAllocation(getID(mRS), 0, slot);
