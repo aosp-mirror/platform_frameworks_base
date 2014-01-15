@@ -400,8 +400,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * the application in this.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES
-     * @see CaptureRequest#CONTROL_MODE
      * @see CaptureResult#STATISTICS_SCENE_FLICKER
+     * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see #CONTROL_AE_ANTIBANDING_MODE_OFF
      * @see #CONTROL_AE_ANTIBANDING_MODE_50HZ
@@ -453,12 +453,12 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * fields for a given capture will be available in its
      * CaptureResult.</p>
      *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#FLASH_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#CONTROL_MODE
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH

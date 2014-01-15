@@ -195,12 +195,12 @@ public final class CaptureResult extends CameraMetadata {
      * fields for a given capture will be available in its
      * CaptureResult.</p>
      *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#FLASH_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#CONTROL_MODE
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -522,8 +522,8 @@ public final class CaptureResult extends CameraMetadata {
      * back to the user in the corresponding result.</p>
      *
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final Key<Float> LENS_APERTURE =
@@ -836,8 +836,10 @@ public final class CaptureResult extends CameraMetadata {
      * see {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} for details.</p>
      * <p>This value should always be calculated by the AWB block,
      * regardless of the android.control.* current values.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @hide
      */
     public static final Key<float[]> STATISTICS_PREDICTED_COLOR_GAINS =
             new Key<float[]>("android.statistics.predictedColorGains", float[].class);
@@ -858,6 +860,8 @@ public final class CaptureResult extends CameraMetadata {
      * capture settings and color transforms are set by the application.</p>
      * <p>This value should always be calculated by the AWB block,
      * regardless of the android.control.* current values.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @hide
      */
     public static final Key<Rational[]> STATISTICS_PREDICTED_COLOR_TRANSFORM =
             new Key<Rational[]>("android.statistics.predictedColorTransform", Rational[].class);
