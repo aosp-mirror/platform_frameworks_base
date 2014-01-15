@@ -26,6 +26,7 @@ import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
@@ -69,6 +70,7 @@ import android.net.NetworkState;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
+import android.net.ProxyDataTracker;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
 import android.net.SamplingDataTracker;
@@ -729,6 +731,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     return makeWimaxStateTracker(mContext, mTrackerHandler);
                 case TYPE_ETHERNET:
                     return EthernetDataTracker.getInstance();
+                case TYPE_PROXY:
+                    return new ProxyDataTracker();
                 default:
                     throw new IllegalArgumentException(
                             "Trying to create a NetworkStateTracker for an unknown radio type: "
