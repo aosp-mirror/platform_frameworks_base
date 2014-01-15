@@ -27,7 +27,7 @@ oneway interface ICallServiceLookupResponse {
     /**
      * Receives the list of {@link ICallService}s as a list of {@link IBinder}s.
      *
-     * @param bundle Container for the list of call services.
+     * @param callServices List of call services from {@link ICallServiceProvider}.
      */
     void onResult(in List<IBinder> callServices);
 }
