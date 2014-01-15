@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -864,10 +866,13 @@ onkeyup="return search_changed(event, false, '/')" />
  Possible status codes include:
  <ul>
  <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></code> if the device was unable to retrieve any
+ data from the network and has no data cached locally.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_STALE_DATA">STATUS_NETWORK_ERROR_STALE_DATA</a></code> if the device was unable to retrieve
- the latest data from the network.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the <code><a href="/reference/com/google/android/gms/games/GamesClient.html">GamesClient</a></code> needs to
- reconnect to the service to access this data.</li>
+ the latest data from the network, but has some data cached locally.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect to
+ the service to access this data.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_GAME_NOT_FOUND">STATUS_GAME_NOT_FOUND</a></code> if the game could not be found.</li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_LICENSE_CHECK_FAILED">STATUS_LICENSE_CHECK_FAILED</a></code> if the game is not licensed to the user.
  </li>
  <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the service.

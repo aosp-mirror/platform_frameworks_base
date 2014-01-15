@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -1150,6 +1152,42 @@ android.os.Parcelable
 
 
 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#isRealTimeMultiplayerEnabled()">isRealTimeMultiplayerEnabled</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Indicates whether or not this game supports real-time multiplayer.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#isTurnBasedMultiplayerEnabled()">isTurnBasedMultiplayerEnabled</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Indicates whether or not this game supports turn-based multiplayer.</div>
+
+  </td></tr>
+
+
+
 </table>
 
 
@@ -1820,6 +1858,74 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>The secondary category of the game, or null if not provided.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="isRealTimeMultiplayerEnabled()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        boolean
+      </span>
+      <span class="sympad">isRealTimeMultiplayerEnabled</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether or not this game supports real-time multiplayer.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Whether or not this game supports real-time mulitplayer.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="isTurnBasedMultiplayerEnabled()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        boolean
+      </span>
+      <span class="sympad">isTurnBasedMultiplayerEnabled</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether or not this game supports turn-based multiplayer.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Whether or not this game supports turn-based mulitplayer.
 </li></ul>
   </div>
 

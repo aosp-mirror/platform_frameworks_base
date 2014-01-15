@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -846,25 +848,46 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_FINISHED">STATUS_FINISHED</a></td>
+        <td class="jd-descrcol" width="100%">Constant indicating that this participant is finished with this match.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_INVITED">STATUS_INVITED</a></td>
         <td class="jd-descrcol" width="100%">Constant indicating that this participant has been sent an invitation.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_JOINED">STATUS_JOINED</a></td>
         <td class="jd-descrcol" width="100%">Constant indicating that this participant has accepted the invitation and is joined.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_LEFT">STATUS_LEFT</a></td>
         <td class="jd-descrcol" width="100%">Constant indicating that this participant joined a multiplayer game and subsequently left.</td>
     </tr>
     
     
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_NOT_INVITED_YET">STATUS_NOT_INVITED_YET</a></td>
+        <td class="jd-descrcol" width="100%">Constant indicating that this participant has not yet been sent an invitation.</td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_UNRESPONSIVE">STATUS_UNRESPONSIVE</a></td>
+        <td class="jd-descrcol" width="100%">Constant indicating that this participant did not respond to the match in the alloted time.</td>
+    </tr>
+
+
 
 </table>
 
@@ -1052,6 +1075,24 @@ android.os.Parcelable
             
             
             
+            <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getResult()">getResult</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> associated with this participant, if any.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1063,7 +1104,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1282,6 +1323,45 @@ From interface
 
 
 
+<A NAME="STATUS_FINISHED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_FINISHED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant is finished with this match. Only applies to turn-based match participants.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                5
+                (0x00000005)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="STATUS_INVITED"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1394,6 +1474,84 @@ From interface
         </span>
         </div>
     
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_NOT_INVITED_YET"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_NOT_INVITED_YET
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant has not yet been sent an invitation. Only applies to turn-based match participants.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_UNRESPONSIVE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        STATUS_UNRESPONSIVE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant did not respond to the match in the alloted time. Only applies to turn-based match participants.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                6
+                (0x00000006)
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -1592,7 +1750,8 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the ID of this participant. Note that this is only valid for use in the current
- multiplayer room: a participant will not have the same ID across multiple rooms.</p></div>
+ multiplayer room or match: a participant will not have the same ID across multiple rooms or
+ matches.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>The ID of this participant.
@@ -1639,6 +1798,40 @@ From interface
 </div>
 
 
+<A NAME="getResult()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a>
+      </span>
+      <span class="sympad">getResult</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> associated with this participant, if any. Only applies to turn-based match participants.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> for this participant, or null if not applicable.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getStatus()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1663,7 +1856,7 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Retrieve the status of this participant. Possible values are <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_INVITED">STATUS_INVITED</a></code>,
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_JOINED">STATUS_JOINED</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_DECLINED">STATUS_DECLINED</a></code>, or <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_LEFT">STATUS_LEFT</a></code>.</p></div>
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_JOINED">STATUS_JOINED</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_DECLINED">STATUS_DECLINED</a></code>, or <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_LEFT">STATUS_LEFT</a></code>.< Possible status values for turn-based match participants are all of the above, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_NOT_INVITED_YET">STATUS_NOT_INVITED_YET</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_FINISHED">STATUS_FINISHED</a></code>, and <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_UNRESPONSIVE">STATUS_UNRESPONSIVE</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Status of this participant.
@@ -1698,7 +1891,7 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the connected status of the participant. If true indicates that participant is in
- the connected set of the room.</p></div>
+ the connected set of the room. Only applies to room participants.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Connected status of the participant.
