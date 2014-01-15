@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -689,9 +691,6 @@ Summary:
 
 
 
-  &#124; <a href="#pubctors">Ctors</a>
-  
-
 
 
   &#124; <a href="#pubmethods">Methods</a>
@@ -718,7 +717,7 @@ Summary:
 <div id="jd-header">
     public
      
-     
+    final
     
     class
 <h1 itemprop="name">LoyaltyWalletObject</h1>
@@ -775,9 +774,8 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Parcelable representing a loyalty wallet object. A LoyaltyWalletObject has a buyerId used to
- identify the user. An example of this could be a rewards program with a membership number that
- would map to the buyerId.
+<p itemprop="articleBody">Parcelable representing a loyalty wallet object. An example loyalty wallet object could be a
+ rewards membership where the membership id is placed in the accountId.
 </p>
 
 
@@ -896,31 +894,6 @@ android.os.Parcelable
 
 
 
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#LoyaltyWalletObject()">LoyaltyWalletObject</a></span>()</nobr>
-        
-  </td></tr>
-
-
-
-</table>
-
-
 
 
 
@@ -946,19 +919,19 @@ android.os.Parcelable
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#getAccountId()">getAccountId</a></span>()</nobr>
-        
+
   </td></tr>
 
 
@@ -989,13 +962,61 @@ android.os.Parcelable
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#getId()">getId</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#getBarcodeAlternateText()">getBarcodeAlternateText</a></span>()</nobr>
         
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#getBarcodeType()">getBarcodeType</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#getBarcodeValue()">getBarcodeValue</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#getId()">getId</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1011,7 +1032,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1022,18 +1043,18 @@ android.os.Parcelable
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/LoyaltyWalletObject.html#getProgramName()">getProgramName</a></span>()</nobr>
-        
+
   </td></tr>
 
 
-	 
-    <tr class="alt-color api apilevel-" >
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1043,7 +1064,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1396,42 +1417,6 @@ From interface
 <!-- Public ctors -->
 
 
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<A NAME="LoyaltyWalletObject()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">LoyaltyWalletObject</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-
-
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -1476,14 +1461,14 @@ From interface
 
 <A NAME="getAccountId()"></A>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         String
       </span>
       <span class="sympad">getAccountId</span>
@@ -1491,17 +1476,16 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-        
-  
+
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The buyer's id, as defined by the merchant. This identifies the user in the
- merchant's loyalty program.
+      <ul class="nolist"><li>Loyalty account identifier to be displayed to the user (ex: "12345678").
 </li></ul>
   </div>
 
@@ -1511,6 +1495,40 @@ From interface
 
 <A NAME="getAccountName()"></A>
 
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getAccountName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Loyalty account holder name (ex: "John Smith").
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getBarcodeAlternateText()"></A>
+
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
@@ -1521,7 +1539,7 @@ From interface
          
         String
       </span>
-      <span class="sympad">getAccountName</span>
+      <span class="sympad">getBarcodeAlternateText</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1535,7 +1553,76 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The buyer's name in the loyalty program
+      <ul class="nolist"><li>Human-readable text to display to the user in addition to the encoded barcode value
+         (ex: "3492013").
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getBarcodeType()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getBarcodeType</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Barcode type. Possible values include "codabar", "qrCode", "textOnly", etc...
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getBarcodeValue()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getBarcodeValue</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Encoded barcode value.
 </li></ul>
   </div>
 
@@ -1603,7 +1690,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The name of who issued this loyalty object
+      <ul class="nolist"><li>The name of who issued this loyalty object.
 </li></ul>
   </div>
 
@@ -1637,7 +1724,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The name of the loyalty program associated to this object
+      <ul class="nolist"><li>The name of the loyalty program associated to this object.
 </li></ul>
   </div>
 

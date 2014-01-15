@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -979,7 +981,23 @@ From class
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
-            synchronized
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">addSuppressed</span>(Throwable arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
             
             
             
@@ -992,7 +1010,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1008,7 +1026,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1024,7 +1042,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1040,7 +1058,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1056,10 +1074,26 @@ From class
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            Throwable[]</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getSuppressed</span>()</nobr>
+
+  </td></tr>
+
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
-            synchronized
+
             
             
             
@@ -1082,7 +1116,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">printStackTrace</span>(PrintWriter arg0)</nobr>
+        <span class="sympad">printStackTrace</span>(PrintStream arg0)</nobr>
         
   </td></tr>
 
@@ -1098,7 +1132,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">printStackTrace</span>(PrintStream arg0)</nobr>
+        <span class="sympad">printStackTrace</span>(PrintWriter arg0)</nobr>
         
   </td></tr>
 

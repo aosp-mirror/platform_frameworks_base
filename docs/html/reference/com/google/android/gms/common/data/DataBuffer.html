@@ -242,6 +242,8 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
       <div class="child-card training no-display">
       </div>
+      <div class="child-card samples no-display">
+      </div>
     </div>
     <div class="suggest-card design no-display">
       <ul class="search_filtered">
@@ -280,7 +282,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ja-lang="トレーニング"
                           es-lang="Capacitación"               
                           >Training</a></li>
-                        <li><a href="/guide/components/index.html"
+                        <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
                           zh-cn-lang="API 指南"
                           ru-lang="Руководства по API"
@@ -351,7 +353,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ja-lang="トレーニング"
                   es-lang="Capacitación"               
                   >Training</a></li>
-                <li class="guide"><a href="/guide/components/index.html"
+                <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
                   zh-cn-lang="API 指南"
                   ru-lang="Руководства по API"
@@ -775,6 +777,8 @@ Summary:
             
               <a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a>,
             
+              <a href="/reference/com/google/android/gms/common/data/FilteredDataBuffer.html">FilteredDataBuffer</a>&lt;T&gt;,
+
               <a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a>,
             
               <a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a>,
@@ -783,13 +787,17 @@ Summary:
             
               <a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a>,
             
+              <a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a>,
+
               <a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a>,
             
               <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a>,
             
               <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a>,
             
-              <a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a>
+              <a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a>,
+
+              <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a>
             
           
       </div>
@@ -806,20 +814,28 @@ Summary:
               <td class="jd-descrcol" width="100%">Data structure providing access to a list of app states.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/data/FilteredDataBuffer.html">FilteredDataBuffer</a>&lt;T&gt;</td>
+              <td class="jd-descrcol" width="100%">Base class for filtered buffers of typed data.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a></td>
               <td class="jd-descrcol" width="100%">Data structure providing access to a list of games.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a></td>
               <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Invitation data.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
               <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing Leaderboard data.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
               <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></td>
+              <td class="jd-descrcol" width="100%">A data buffer that points to Metadata entries.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></td>
@@ -836,6 +852,10 @@ Summary:
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a></td>
               <td class="jd-descrcol" width="100%">Data structure providing access to a list of players.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a></td>
+              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing TurnBasedMatch details.&nbsp;</td>
           </tr>
   </table>
       </div>
