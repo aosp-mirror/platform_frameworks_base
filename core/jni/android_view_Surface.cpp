@@ -39,6 +39,7 @@
 
 #include <SkCanvas.h>
 #include <SkBitmap.h>
+#include <SkImage.h>
 #include <SkRegion.h>
 
 #include <utils/misc.h>
@@ -178,7 +179,8 @@ static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jint na
 static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
     /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
         we can map to SkBitmap::kARGB_8888_Config, and optionally call
-        bitmap.setIsOpaque(true) on the resulting SkBitmap (as an accelerator)
+        bitmap.setAlphaType(kOpaque_SkAlphaType) on the resulting SkBitmap
+        (as an accelerator)
     */
     switch (format) {
     case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
@@ -234,7 +236,7 @@ static jint nativeLockCanvas(JNIEnv* env, jclass clazz,
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
     bitmap.setConfig(convertPixelFormat(outBuffer.format), outBuffer.width, outBuffer.height, bpr);
     if (outBuffer.format == PIXEL_FORMAT_RGBX_8888) {
-        bitmap.setIsOpaque(true);
+        bitmap.setAlphaType(kOpaque_SkAlphaType);
     }
     if (outBuffer.width > 0 && outBuffer.height > 0) {
         bitmap.setPixels(outBuffer.bits);
