@@ -21,11 +21,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.RemoteException;
 
 import android.telecomm.ICallServiceProvider;
 import android.telecomm.ICallServiceLookupResponse;
-import android.util.Log;
 
 /**
  * Base implementation of {@link ICallServiceProvider} which extends {@link Service}. This class
@@ -39,8 +37,6 @@ import android.util.Log;
  * @hide
  */
 public abstract class CallServiceProvider extends Service {
-    /** Used to identify log entries by this class. */
-    private static final String TAG = CallServiceProvider.class.getSimpleName();
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -80,7 +76,7 @@ public abstract class CallServiceProvider extends Service {
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
-     * See {@link #CallServiceProviderMessageHandler}.
+     * See {@link CallServiceProviderMessageHandler}.
      */
     private final CallServiceProviderMessageHandler mMessageHandler;
 
@@ -99,6 +95,7 @@ public abstract class CallServiceProvider extends Service {
     }
 
     /** {@inheritDoc} */
+    @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
