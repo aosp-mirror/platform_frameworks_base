@@ -49,7 +49,9 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
+import com.android.server.ServiceThread;
 import com.android.server.SystemServer;
+import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
@@ -135,6 +137,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.Environment;
+import android.os.FactoryTest;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -746,7 +749,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private static ThreadLocal<Identity> sCallerIdentity = new ThreadLocal<Identity>();
+    private static final ThreadLocal<Identity> sCallerIdentity = new ThreadLocal<Identity>();
 
     /**
      * All information we have collected about the runtime performance of
@@ -995,8 +998,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     WindowManagerService mWindowManager;
 
-    static ActivityManagerService mSelf;
-    static ActivityThread mSystemThread;
+    static ActivityManagerService sSelf;
+    static ActivityThread sSystemThread;
 
     int mCurrentUserId = 0;
     private UserManagerService mUserManager;
@@ -1073,10 +1076,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     private boolean mUserIsMonkey;
 
-    final Handler mHandler = new Handler() {
-        //public Handler() {
-        //    if (localLOGV) Slog.v(TAG, "Handler started!");
-        //}
+    final ServiceThread mHandlerThread;
+    final MainHandler mHandler;
+
+    final class MainHandler extends Handler {
+        public MainHandler(Looper looper) {
+            super(looper, null, true);
+        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -1731,7 +1737,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public static void setSystemProcess() {
         try {
-            ActivityManagerService m = mSelf;
+            ActivityManagerService m = sSelf;
 
             ServiceManager.addService(Context.ACTIVITY_SERVICE, m, true);
             ServiceManager.addService(ProcessStats.SERVICE_NAME, m.mProcessStats);
@@ -1744,23 +1750,23 @@ public final class ActivityManagerService extends ActivityManagerNative
             ServiceManager.addService("permission", new PermissionController(m));
 
             ApplicationInfo info =
-                mSelf.mContext.getPackageManager().getApplicationInfo(
+                sSelf.mContext.getPackageManager().getApplicationInfo(
                             "android", STOCK_PM_FLAGS);
-            mSystemThread.installSystemApplicationInfo(info);
+            sSystemThread.installSystemApplicationInfo(info);
 
-            synchronized (mSelf) {
-                ProcessRecord app = mSelf.newProcessRecordLocked(info,
+            synchronized (sSelf) {
+                ProcessRecord app = sSelf.newProcessRecordLocked(info,
                         info.processName, false);
                 app.persistent = true;
                 app.pid = MY_PID;
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
-                app.makeActive(mSystemThread.getApplicationThread(), mSelf.mProcessStats);
-                mSelf.mProcessNames.put(app.processName, app.uid, app);
-                synchronized (mSelf.mPidsSelfLocked) {
-                    mSelf.mPidsSelfLocked.put(app.pid, app);
+                app.makeActive(sSystemThread.getApplicationThread(), sSelf.mProcessStats);
+                sSelf.mProcessNames.put(app.processName, app.uid, app);
+                synchronized (sSelf.mPidsSelfLocked) {
+                    sSelf.mPidsSelfLocked.put(app.pid, app);
                 }
-                mSelf.updateLruProcessLocked(app, false, null);
-                mSelf.updateOomAdjLocked();
+                sSelf.updateLruProcessLocked(app, false, null);
+                sSelf.updateOomAdjLocked();
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(
@@ -1778,95 +1784,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         ncl.start();
     }
 
-    public static final Context main(int factoryTest) {
-        AThread thr = new AThread();
-        thr.start();
-
-        synchronized (thr) {
-            while (thr.mService == null) {
-                try {
-                    thr.wait();
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-
-        ActivityManagerService m = thr.mService;
-        mSelf = m;
-        ActivityThread at = ActivityThread.systemMain();
-        mSystemThread = at;
-        Context context = at.getSystemContext();
-        context.setTheme(android.R.style.Theme_Holo);
-        m.mContext = context;
-        m.mFactoryTest = factoryTest;
-        m.mIntentFirewall = new IntentFirewall(m.new IntentFirewallInterface());
-
-        m.mStackSupervisor = new ActivityStackSupervisor(m);
-
-        m.mBatteryStatsService.publish(context);
-        m.mUsageStatsService.publish(context);
-        m.mAppOpsService.publish(context);
-
-        synchronized (thr) {
-            thr.mReady = true;
-            thr.notifyAll();
-        }
-
-        m.startRunning(null, null, null, null);
-
-        return context;
-    }
-
     public static ActivityManagerService self() {
-        return mSelf;
+        return sSelf;
     }
 
     public IAppOpsService getAppOpsService() {
         return mAppOpsService;
-    }
-
-    static class AThread extends Thread {
-        ActivityManagerService mService;
-        Looper mLooper;
-        boolean mReady = false;
-
-        public AThread() {
-            super("ActivityManager");
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-
-            android.os.Process.setThreadPriority(
-                    android.os.Process.THREAD_PRIORITY_FOREGROUND);
-            android.os.Process.setCanSelfBackground(false);
-
-            ActivityManagerService m = new ActivityManagerService();
-
-            synchronized (this) {
-                mService = m;
-                mLooper = Looper.myLooper();
-                Watchdog.getInstance().addThread(new Handler(mLooper), getName());
-                notifyAll();
-            }
-
-            synchronized (this) {
-                while (!mReady) {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-
-            // For debug builds, log event loop stalls to dropbox for analysis.
-            if (StrictMode.conditionallyEnableDebugLogging()) {
-                Slog.i(TAG, "Enabled StrictMode logging for AThread's Looper");
-            }
-
-            Looper.loop();
-        }
     }
 
     static class MemBinder extends Binder {
@@ -1953,22 +1876,51 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private ActivityManagerService() {
+    public static class Lifecycle extends SystemService {
+        private ActivityManagerService mService;
+
+        @Override
+        public void onCreate(Context context) {
+            mService = new ActivityManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            mService.start();
+        }
+    }
+
+    // Note: This method is invoked on the main thread but may need to attach various
+    // handlers to other threads.  So take care to be explicit about the looper.
+    public ActivityManagerService(Context systemContext) {
+        sSelf = this;
+        sSystemThread = ActivityThread.currentActivityThread();
+
+        mContext = systemContext;
+        mFactoryTest = FactoryTest.getMode();
+
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
 
-        mFgBroadcastQueue = new BroadcastQueue(this, "foreground", BROADCAST_FG_TIMEOUT, false);
-        mBgBroadcastQueue = new BroadcastQueue(this, "background", BROADCAST_BG_TIMEOUT, true);
+        mHandlerThread = new ServiceThread(TAG, android.os.Process.THREAD_PRIORITY_FOREGROUND);
+        mHandlerThread.start();
+        mHandler = new MainHandler(mHandlerThread.getLooper());
+
+        mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
+                "foreground", BROADCAST_FG_TIMEOUT, false);
+        mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
+                "background", BROADCAST_BG_TIMEOUT, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
 
         mServices = new ActiveServices(this);
         mProviderMap = new ProviderMap(this);
 
+        // TODO: Move creation of battery stats service outside of activity manager service.
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
         systemDir.mkdirs();
         mBatteryStatsService = new BatteryStatsService(new File(
-                systemDir, "batterystats.bin").toString());
+                systemDir, "batterystats.bin").toString(), mHandler);
         mBatteryStatsService.getActiveStatistics().readLocked();
         mBatteryStatsService.getActiveStatistics().writeAsyncLocked();
         mOnBattery = DEBUG_POWER ? true
@@ -1978,7 +1930,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
         mUsageStatsService = new UsageStatsService(new File(systemDir, "usagestats").toString());
-        mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"));
+        mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"), mHandler);
 
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
 
@@ -1996,10 +1948,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessCpuTracker.init();
 
-        mCompatModePackages = new CompatModePackages(this, systemDir);
-
-        // Add ourself to the Watchdog monitors.
-        Watchdog.getInstance().addMonitor(this);
+        mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
+        mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
+        mStackSupervisor = new ActivityStackSupervisor(this);
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -2030,7 +1981,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         };
+
+        Watchdog.getInstance().addMonitor(this);
+        Watchdog.getInstance().addThread(mHandler);
+    }
+
+    private void start() {
         mProcessCpuThread.start();
+
+        mBatteryStatsService.publish(mContext);
+        mUsageStatsService.publish(mContext);
+        mAppOpsService.publish(mContext);
+        startRunning(null, null, null, null);
     }
 
     @Override
@@ -2726,13 +2688,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
             }
-            if (mFactoryTest != SystemServer.FACTORY_TEST_OFF) {
-                if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
+            if (mFactoryTest != FactoryTest.FACTORY_TEST_OFF) {
+                if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                         && mTopComponent != null
                         && app.processName.equals(mTopComponent.getPackageName())) {
                     uid = 0;
                 }
-                if (mFactoryTest == SystemServer.FACTORY_TEST_HIGH_LEVEL
+                if (mFactoryTest == FactoryTest.FACTORY_TEST_HIGH_LEVEL
                         && (app.info.flags&ApplicationInfo.FLAG_FACTORY_TEST) != 0) {
                     uid = 0;
                 }
@@ -2842,14 +2804,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     Intent getHomeIntent() {
         Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
         intent.setComponent(mTopComponent);
-        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+        if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             intent.addCategory(Intent.CATEGORY_HOME);
         }
         return intent;
     }
 
     boolean startHomeActivityLocked(int userId) {
-        if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
+        if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                 && mTopAction == null) {
             // We are running in factory test mode, but unable to find
             // the factory test app, so just sit around displaying the
@@ -2913,14 +2875,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         // version than the last one shown, and we are not running in
         // low-level factory test mode.
         final ContentResolver resolver = mContext.getContentResolver();
-        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL &&
+        if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL &&
                 Settings.Global.getInt(resolver,
                         Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
             mCheckedForSetup = true;
 
             // See if we should be showing the platform update setup UI.
             Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
-            List<ResolveInfo> ris = mSelf.mContext.getPackageManager()
+            List<ResolveInfo> ris = sSelf.mContext.getPackageManager()
                     .queryIntentActivities(intent, PackageManager.GET_META_DATA);
 
             // We don't allow third party apps to replace this.
@@ -5150,7 +5112,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             
-            if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 // Start looking for apps that are abusing wake locks.
                 Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
                 mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
@@ -8014,9 +7976,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public static final void installSystemProviders() {
         List<ProviderInfo> providers;
-        synchronized (mSelf) {
-            ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
-            providers = mSelf.generateApplicationProvidersLocked(app);
+        synchronized (sSelf) {
+            ProcessRecord app = sSelf.mProcessNames.get("system", Process.SYSTEM_UID);
+            providers = sSelf.generateApplicationProvidersLocked(app);
             if (providers != null) {
                 for (int i=providers.size()-1; i>=0; i--) {
                     ProviderInfo pi = (ProviderInfo)providers.get(i);
@@ -8029,12 +7991,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (providers != null) {
-            mSystemThread.installSystemProviders(providers);
+            sSystemThread.installSystemProviders(providers);
         }
 
-        mSelf.mCoreSettingsObserver = new CoreSettingsObserver(mSelf);
+        sSelf.mCoreSettingsObserver = new CoreSettingsObserver(sSelf);
 
-        mSelf.mUsageStatsService.monitorPackages();
+        sSelf.mUsageStatsService.monitorPackages();
     }
 
     /**
@@ -9272,7 +9234,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             // Make sure we have no pre-ready processes sitting around.
             
-            if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 ResolveInfo ri = mContext.getPackageManager()
                         .resolveActivity(new Intent(Intent.ACTION_FACTORY_TEST),
                                 STOCK_PM_FLAGS);
@@ -9314,7 +9276,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (goingCallback != null) goingCallback.run();
         
         synchronized (this) {
-            if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 try {
                     List apps = AppGlobals.getPackageManager().
                         getPersistentApplications(STOCK_PM_FLAGS);
@@ -14037,7 +13999,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // boot, where the first config change needs to guarantee
                 // all resources have that config before following boot
                 // code is executed.
-                mSystemThread.applyConfigurationToResources(configCopy);
+                sSystemThread.applyConfigurationToResources(configCopy);
 
                 if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
                     Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);

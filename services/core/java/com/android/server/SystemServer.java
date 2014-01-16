@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.IAlarmManager;
 import android.app.INotificationManager;
 import android.bluetooth.BluetoothAdapter;
@@ -29,9 +30,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioService;
 import android.os.Environment;
+import android.os.FactoryTest;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -86,12 +88,17 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class ServerThread {
+public final class SystemServer {
     private static final String TAG = "SystemServer";
+
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
 
-    ContentResolver mContentResolver;
+    private static final long SNAPSHOT_INTERVAL = 60 * 60 * 1000; // 1hr
+
+    // The earliest supported time.  We pick one day into 1970, to
+    // give any timezone code room without going into negative time.
+    private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
 
     /*
      * Implementation class names. TODO: Move them to a codegen class or load
@@ -106,50 +113,177 @@ class ServerThread {
     private static final String PRINT_MANAGER_SERVICE_CLASS =
             "com.android.server.print.PrintManagerService";
 
-    void reportWtf(String msg, Throwable e) {
+    private final int mFactoryTestMode;
+    private Timer mProfilerSnapshotTimer;
+
+    private Context mSystemContext;
+    private SystemServiceManager mSystemServiceManager;
+
+    private Installer mInstaller; // TODO: remove this
+    private PowerManagerService mPowerManagerService; // TODO: remove this
+    private ContentResolver mContentResolver;
+
+    /**
+     * Called to initialize native system services.
+     */
+    private static native void nativeInit();
+
+    /**
+     * The main entry point from zygote.
+     */
+    public static void main(String[] args) {
+        new SystemServer().run();
+    }
+
+    public SystemServer() {
+        mFactoryTestMode = FactoryTest.getMode();
+    }
+
+    private void run() {
+        // If a device's clock is before 1970 (before 0), a lot of
+        // APIs crash dealing with negative numbers, notably
+        // java.io.File#setLastModified, so instead we fake it and
+        // hope that time from cell towers or NTP fixes it shortly.
+        if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
+            Slog.w(TAG, "System clock is before 1970; setting to 1970.");
+            SystemClock.setCurrentTimeMillis(EARLIEST_SUPPORTED_TIME);
+        }
+
+        // Here we go!
+        Slog.i(TAG, "Entered the Android system server!");
+        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, SystemClock.uptimeMillis());
+
+        // In case the runtime switched since last boot (such as when
+        // the old runtime was removed in an OTA), set the system
+        // property so that it is in sync. We can't do this in
+        // libnativehelper's JniInvocation::Init code where we already
+        // had to fallback to a different runtime because it is
+        // running as root and we need to be the system user to set
+        // the property. http://b/11463182
+        SystemProperties.set("persist.sys.dalvik.vm.lib", VMRuntime.getRuntime().vmLibrary());
+
+        // Enable the sampling profiler.
+        if (SamplingProfilerIntegration.isEnabled()) {
+            SamplingProfilerIntegration.start();
+            mProfilerSnapshotTimer = new Timer();
+            mProfilerSnapshotTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    SamplingProfilerIntegration.writeSnapshot("system_server", null);
+                }
+            }, SNAPSHOT_INTERVAL, SNAPSHOT_INTERVAL);
+        }
+
+        // Mmmmmm... more memory!
+        VMRuntime.getRuntime().clearGrowthLimit();
+
+        // The system server has to run all of the time, so it needs to be
+        // as efficient as possible with its memory usage.
+        VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
+
+        // Within the system server, it is an error to access Environment paths without
+        // explicitly specifying a user.
+        Environment.setUserRequired(true);
+
+        // Ensure binder calls into the system always run at foreground priority.
+        BinderInternal.disableBackgroundScheduling(true);
+
+        // Prepare the main looper thread (this thread).
+        android.os.Process.setThreadPriority(
+                android.os.Process.THREAD_PRIORITY_FOREGROUND);
+        android.os.Process.setCanSelfBackground(false);
+        Looper.prepareMainLooper();
+
+        // Initialize native services.
+        System.loadLibrary("android_servers");
+        nativeInit();
+
+        // Check whether we failed to shut down last time we tried.
+        // This call may not return.
+        performPendingShutdown();
+
+        // Initialize the system context.
+        createSystemContext();
+
+        // Create the system service manager.
+        mSystemServiceManager = new SystemServiceManager(mSystemContext);
+
+        // Start services.
+        try {
+            startBootstrapServices();
+            startOtherServices();
+        } catch (RuntimeException ex) {
+            Slog.e("System", "******************************************");
+            Slog.e("System", "************ Failure starting system services", ex);
+            throw ex;
+        }
+
+        // For debug builds, log event loop stalls to dropbox for analysis.
+        if (StrictMode.conditionallyEnableDebugLogging()) {
+            Slog.i(TAG, "Enabled StrictMode for system server main thread.");
+        }
+
+        // Loop forever.
+        Looper.loop();
+        throw new RuntimeException("Main thread loop unexpectedly exited");
+    }
+
+    private void reportWtf(String msg, Throwable e) {
         Slog.w(TAG, "***********************************************");
         Log.wtf(TAG, "BOOT FAILURE " + msg, e);
     }
 
-    public void initAndLoop() {
-        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN,
-            SystemClock.uptimeMillis());
+    private void performPendingShutdown() {
+        final String shutdownAction = SystemProperties.get(
+                ShutdownThread.SHUTDOWN_ACTION_PROPERTY, "");
+        if (shutdownAction != null && shutdownAction.length() > 0) {
+            boolean reboot = (shutdownAction.charAt(0) == '1');
 
-        Looper.prepareMainLooper();
-
-        android.os.Process.setThreadPriority(
-                android.os.Process.THREAD_PRIORITY_FOREGROUND);
-
-        BinderInternal.disableBackgroundScheduling(true);
-        android.os.Process.setCanSelfBackground(false);
-
-        // Check whether we failed to shut down last time we tried.
-        {
-            final String shutdownAction = SystemProperties.get(
-                    ShutdownThread.SHUTDOWN_ACTION_PROPERTY, "");
-            if (shutdownAction != null && shutdownAction.length() > 0) {
-                boolean reboot = (shutdownAction.charAt(0) == '1');
-
-                final String reason;
-                if (shutdownAction.length() > 1) {
-                    reason = shutdownAction.substring(1, shutdownAction.length());
-                } else {
-                    reason = null;
-                }
-
-                ShutdownThread.rebootOrShutdown(reboot, reason);
+            final String reason;
+            if (shutdownAction.length() > 1) {
+                reason = shutdownAction.substring(1, shutdownAction.length());
+            } else {
+                reason = null;
             }
+
+            ShutdownThread.rebootOrShutdown(reboot, reason);
         }
+    }
 
-        String factoryTestStr = SystemProperties.get("ro.factorytest");
-        int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
-                : Integer.parseInt(factoryTestStr);
+    private void createSystemContext() {
+        ActivityThread activityThread = ActivityThread.systemMain();
+        mSystemContext = activityThread.getSystemContext();
+        mSystemContext.setTheme(android.R.style.Theme_Holo);
+    }
 
-        Installer installer = null;
+    private void startBootstrapServices() {
+        // Wait for installd to finish starting up so that it has a chance to
+        // create critical directories such as /data/user with the appropriate
+        // permissions.  We need this to complete before we initialize other services.
+        mInstaller = mSystemServiceManager.startService(Installer.class);
+
+        // Power manager needs to be started early because other services need it.
+        // TODO: The conversion to the new pattern is incomplete.  We need to switch
+        // the power manager's dependencies over then we can use boot phases to arrange
+        // initialization order and remove the mPowerManagerService field.
+        mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
+
+        // Activity manager runs the show.
+        mSystemServiceManager.startService(ActivityManagerService.Lifecycle.class);
+    }
+
+    private void startOtherServices() {
+        // Create a handler thread that window manager will use.
+        final ServiceThread windowManagerThread = new ServiceThread("WindowManager",
+                android.os.Process.THREAD_PRIORITY_DISPLAY);
+        windowManagerThread.start();
+        final Handler windowManagerHandler = new Handler(windowManagerThread.getLooper());
+        Watchdog.getInstance().addThread(windowManagerHandler);
+
+        final Context context = mSystemContext;
         AccountManagerService accountManager = null;
         ContentService contentService = null;
         LightsManager lights = null;
-        PowerManagerService power = null;
         DisplayManagerService display = null;
         BatteryService battery = null;
         VibratorService vibrator = null;
@@ -161,7 +295,6 @@ class ServerThread {
         ConnectivityService connectivity = null;
         NsdService serviceDiscovery= null;
         IPackageManager pm = null;
-        Context context = null;
         WindowManagerService wm = null;
         BluetoothManagerService bluetooth = null;
         DockObserver dock = null;
@@ -175,50 +308,8 @@ class ServerThread {
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
 
-        // Create a handler thread just for the window manager to enjoy.
-        HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
-        wmHandlerThread.start();
-        Handler wmHandler = new Handler(wmHandlerThread.getLooper());
-        wmHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                //Looper.myLooper().setMessageLogging(new LogPrinter(
-                //        android.util.Log.DEBUG, TAG, android.util.Log.LOG_ID_SYSTEM));
-                android.os.Process.setThreadPriority(
-                        android.os.Process.THREAD_PRIORITY_DISPLAY);
-                android.os.Process.setCanSelfBackground(false);
-
-                // For debug builds, log event loop stalls to dropbox for analysis.
-                if (StrictMode.conditionallyEnableDebugLogging()) {
-                    Slog.i(TAG, "Enabled StrictMode logging for WM Looper");
-                }
-            }
-        });
-
-        // bootstrap services
         boolean onlyCore = false;
         boolean firstBoot = false;
-        try {
-            // Wait for installd to finished starting up so that it has a chance to
-            // create critical directories such as /data/user with the appropriate
-            // permissions.  We need this to complete before we initialize other services.
-            Slog.i(TAG, "Waiting for installd to be ready.");
-            installer = new Installer();
-            installer.ping();
-
-            Slog.i(TAG, "Power Manager");
-            power = new PowerManagerService();
-            ServiceManager.addService(Context.POWER_SERVICE, power);
-
-            Slog.i(TAG, "Activity Manager");
-            context = ActivityManagerService.main(factoryTest);
-        } catch (RuntimeException e) {
-            Slog.e("System", "******************************************");
-            Slog.e("System", "************ Failure starting bootstrap service", e);
-        }
-
-        final SystemServiceManager systemServiceManager = new SystemServiceManager(context);
-
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
         boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
@@ -230,7 +321,7 @@ class ServerThread {
 
         try {
             Slog.i(TAG, "Display Manager");
-            display = new DisplayManagerService(context, wmHandler);
+            display = new DisplayManagerService(context, windowManagerHandler);
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
@@ -258,8 +349,8 @@ class ServerThread {
                 onlyCore = true;
             }
 
-            pm = PackageManagerService.main(context, installer,
-                    factoryTest != SystemServer.FACTORY_TEST_OFF,
+            pm = PackageManagerService.main(context, mInstaller,
+                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF,
                     onlyCore);
             try {
                 firstBoot = pm.isFirstBoot();
@@ -289,12 +380,12 @@ class ServerThread {
 
             Slog.i(TAG, "Content Manager");
             contentService = ContentService.main(context,
-                    factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL);
+                    mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL);
 
             Slog.i(TAG, "System Content Providers");
             ActivityManagerService.installSystemProviders();
 
-            systemServiceManager.startService(LightsService.class);
+            mSystemServiceManager.startService(LightsService.class);
             lights = LocalServices.getService(LightsManager.class);
 
             Slog.i(TAG, "Battery Service");
@@ -305,30 +396,32 @@ class ServerThread {
             vibrator = new VibratorService(context);
             ServiceManager.addService("vibrator", vibrator);
 
+            // TODO: use boot phase
+            // only initialize the power service after we have started the
+            // lights service, content providers and the battery service.
+            mPowerManagerService.init(lights, battery,
+                    BatteryStatsService.getService(),
+                    ActivityManagerService.self().getAppOpsService(), display);
+
             Slog.i(TAG, "Consumer IR Service");
             consumerIr = new ConsumerIrService(context);
             ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
 
-            // only initialize the power service after we have started the
-            // lights service, content providers and the battery service.
-            power.init(context, lights, battery,
-                    BatteryStatsService.getService(),
-                    ActivityManagerService.self().getAppOpsService(), display);
-
-            systemServiceManager.startService(AlarmManagerService.class);
+            mSystemServiceManager.startService(AlarmManagerService.class);
             alarm = IAlarmManager.Stub.asInterface(
                     ServiceManager.getService(Context.ALARM_SERVICE));
 
             Slog.i(TAG, "Init Watchdog");
-            Watchdog.getInstance().init(context, ActivityManagerService.self());
-            Watchdog.getInstance().addThread(wmHandler, "WindowManager thread");
+            final Watchdog watchdog = Watchdog.getInstance();
+            watchdog.init(context, ActivityManagerService.self());
 
             Slog.i(TAG, "Input Manager");
-            inputManager = new InputManagerService(context, wmHandler);
+            inputManager = new InputManagerService(context, windowManagerHandler);
 
             Slog.i(TAG, "Window Manager");
-            wm = WindowManagerService.main(context, power, display, inputManager,
-                    wmHandler, factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
+            wm = WindowManagerService.main(context, display, inputManager,
+                    windowManagerHandler,
+                    mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
@@ -346,7 +439,7 @@ class ServerThread {
             // support Bluetooth - see bug 988521
             if (SystemProperties.get("ro.kernel.qemu").equals("1")) {
                 Slog.i(TAG, "No Bluetooh Service (emulator)");
-            } else if (factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            } else if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 Slog.i(TAG, "No Bluetooth Service (factory test)");
             } else if (!context.getPackageManager().hasSystemFeature
                        (PackageManager.FEATURE_BLUETOOTH)) {
@@ -376,7 +469,7 @@ class ServerThread {
         MediaRouterService mediaRouter = null;
 
         // Bring up services needed for UI.
-        if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+        if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             //if (!disableNonCoreServices) { // TODO: View depends on these; mock them?
             if (true) {
                 try {
@@ -417,7 +510,7 @@ class ServerThread {
         } catch (RemoteException e) {
         }
 
-        if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+        if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             if (!disableStorage &&
                 !"0".equals(SystemProperties.get("system_init.startmountservice"))) {
                 try {
@@ -444,7 +537,7 @@ class ServerThread {
 
                 try {
                     Slog.i(TAG, "Device Policy");
-                    systemServiceManager.startService(DEVICE_POLICY_MANAGER_SERVICE_CLASS);
+                    mSystemServiceManager.startServiceIfExists(DEVICE_POLICY_MANAGER_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting DevicePolicyService", e);
                 }
@@ -502,7 +595,8 @@ class ServerThread {
                 try {
                     Slog.i(TAG, "NetworkPolicy Service");
                     networkPolicy = new NetworkPolicyManagerService(
-                            context, ActivityManagerService.self(), power,
+                            context, ActivityManagerService.self(),
+                            (IPowerManager)ServiceManager.getService(Context.POWER_SERVICE),
                             networkStats, networkManagement);
                     ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
                 } catch (Throwable e) {
@@ -577,12 +671,12 @@ class ServerThread {
                 reportWtf("making Content Service ready", e);
             }
 
-            systemServiceManager.startService(NotificationManagerService.class);
+            mSystemServiceManager.startService(NotificationManagerService.class);
             notification = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             networkPolicy.bindNotificationManager(notification);
 
-            systemServiceManager.startService(DeviceStorageMonitorService.class);
+            mSystemServiceManager.startService(DeviceStorageMonitorService.class);
 
             if (!disableLocation) {
                 try {
@@ -681,22 +775,22 @@ class ServerThread {
                 }
             }
 
-            systemServiceManager.startService(TwilightService.class);
+            mSystemServiceManager.startService(TwilightService.class);
             twilight = LocalServices.getService(TwilightManager.class);
 
-            systemServiceManager.startService(UiModeManagerService.class);
+            mSystemServiceManager.startService(UiModeManagerService.class);
 
             if (!disableNonCoreServices) {
                 try {
                     Slog.i(TAG, "Backup Service");
-                    systemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
+                    mSystemServiceManager.startServiceIfExists(BACKUP_MANAGER_SERVICE_CLASS);
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting Backup Service", e);
                 }
 
                 try {
                     Slog.i(TAG, "AppWidget Service");
-                    systemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
+                    mSystemServiceManager.startServiceIfExists(APPWIDGET_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting AppWidget Service", e);
                 }
@@ -761,7 +855,7 @@ class ServerThread {
                 try {
                     Slog.i(TAG, "Dreams Service");
                     // Dreams (interactive idle-time views, a/k/a screen savers)
-                    dreamy = new DreamManagerService(context, wmHandler);
+                    dreamy = new DreamManagerService(context, windowManagerHandler);
                     ServiceManager.addService(DreamService.DREAM_SERVICE, dreamy);
                 } catch (Throwable e) {
                     reportWtf("starting DreamManagerService", e);
@@ -787,7 +881,7 @@ class ServerThread {
 
             try {
                 Slog.i(TAG, "Print Service");
-                systemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
+                mSystemServiceManager.startServiceIfExists(PRINT_MANAGER_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
             }
@@ -834,9 +928,9 @@ class ServerThread {
         }
 
         // Needed by DevicePolicyManager for initialization
-        systemServiceManager.startBootPhase(SystemService.PHASE_LOCK_SETTINGS_READY);
+        mSystemServiceManager.startBootPhase(SystemService.PHASE_LOCK_SETTINGS_READY);
 
-        systemServiceManager.startBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        mSystemServiceManager.startBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         try {
             wm.systemReady();
@@ -858,7 +952,8 @@ class ServerThread {
         context.getResources().updateConfiguration(config, metrics);
 
         try {
-            power.systemReady(twilight, dreamy);
+            // TODO: use boot phase
+            mPowerManagerService.systemReady(twilight, dreamy);
         } catch (Throwable e) {
             reportWtf("making Power Manager Service ready", e);
         }
@@ -968,7 +1063,7 @@ class ServerThread {
 
                 // It is now okay to let the various system services start their
                 // third party code...
-                systemServiceManager.startBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+                mSystemServiceManager.startBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
 
                 try {
                     if (wallpaperF != null) wallpaperF.systemRunning();
@@ -1035,17 +1130,9 @@ class ServerThread {
                     reportWtf("Notifying MediaRouterService running", e);
                 }
 
-                systemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
+                mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
             }
         });
-
-        // For debug builds, log event loop stalls to dropbox for analysis.
-        if (StrictMode.conditionallyEnableDebugLogging()) {
-            Slog.i(TAG, "Enabled StrictMode for system server main thread.");
-        }
-
-        Looper.loop();
-        Slog.d(TAG, "System ServerThread is exiting!");
     }
 
     static final void startSystemUi(Context context) {
@@ -1054,82 +1141,5 @@ class ServerThread {
                     "com.android.systemui.SystemUIService"));
         //Slog.d(TAG, "Starting service: " + intent);
         context.startServiceAsUser(intent, UserHandle.OWNER);
-    }
-}
-
-public class SystemServer {
-    private static final String TAG = "SystemServer";
-
-    public static final int FACTORY_TEST_OFF = 0;
-    public static final int FACTORY_TEST_LOW_LEVEL = 1;
-    public static final int FACTORY_TEST_HIGH_LEVEL = 2;
-
-    static Timer timer;
-    static final long SNAPSHOT_INTERVAL = 60 * 60 * 1000; // 1hr
-
-    // The earliest supported time.  We pick one day into 1970, to
-    // give any timezone code room without going into negative time.
-    private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
-
-    /**
-     * Called to initialize native system services.
-     */
-    private static native void nativeInit();
-
-    public static void main(String[] args) {
-
-        /*
-         * In case the runtime switched since last boot (such as when
-         * the old runtime was removed in an OTA), set the system
-         * property so that it is in sync. We can't do this in
-         * libnativehelper's JniInvocation::Init code where we already
-         * had to fallback to a different runtime because it is
-         * running as root and we need to be the system user to set
-         * the property. http://b/11463182
-         */
-        SystemProperties.set("persist.sys.dalvik.vm.lib",
-                             VMRuntime.getRuntime().vmLibrary());
-
-        if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
-            // If a device's clock is before 1970 (before 0), a lot of
-            // APIs crash dealing with negative numbers, notably
-            // java.io.File#setLastModified, so instead we fake it and
-            // hope that time from cell towers or NTP fixes it
-            // shortly.
-            Slog.w(TAG, "System clock is before 1970; setting to 1970.");
-            SystemClock.setCurrentTimeMillis(EARLIEST_SUPPORTED_TIME);
-        }
-
-        if (SamplingProfilerIntegration.isEnabled()) {
-            SamplingProfilerIntegration.start();
-            timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    SamplingProfilerIntegration.writeSnapshot("system_server", null);
-                }
-            }, SNAPSHOT_INTERVAL, SNAPSHOT_INTERVAL);
-        }
-
-        // Mmmmmm... more memory!
-        dalvik.system.VMRuntime.getRuntime().clearGrowthLimit();
-
-        // The system server has to run all of the time, so it needs to be
-        // as efficient as possible with its memory usage.
-        VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
-
-        Environment.setUserRequired(true);
-
-        System.loadLibrary("android_servers");
-
-        Slog.i(TAG, "Entered the Android system server!");
-
-        // Initialize native services.
-        nativeInit();
-
-        // This used to be its own separate thread, but now it is
-        // just the loop we run on the main thread.
-        ServerThread thr = new ServerThread();
-        thr.initAndLoop();
     }
 }

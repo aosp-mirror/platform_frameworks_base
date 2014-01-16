@@ -34,6 +34,8 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
@@ -77,6 +79,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -533,7 +536,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     AppWindowToken mFocusedApp = null;
 
-    PowerManagerService mPowerManager;
+    PowerManager mPowerManager;
+    PowerManagerInternal mPowerManagerInternal;
 
     float mWindowAnimationScale = 1.0f;
     float mTransitionAnimationScale = 1.0f;
@@ -693,7 +697,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mOnlyCore;
 
     public static WindowManagerService main(final Context context,
-            final PowerManagerService pm, final DisplayManagerService dm,
+            final DisplayManagerService dm,
             final InputManagerService im, final Handler wmHandler,
             final boolean haveInputMethods, final boolean showBootMsgs,
             final boolean onlyCore) {
@@ -701,7 +705,7 @@ public class WindowManagerService extends IWindowManager.Stub
         wmHandler.runWithScissors(new Runnable() {
             @Override
             public void run() {
-                holder[0] = new WindowManagerService(context, pm, dm, im,
+                holder[0] = new WindowManagerService(context, dm, im,
                         haveInputMethods, showBootMsgs, onlyCore);
             }
         }, 0);
@@ -722,7 +726,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }, 0);
     }
 
-    private WindowManagerService(Context context, PowerManagerService pm,
+    private WindowManagerService(Context context,
             DisplayManagerService displayManager, InputManagerService inputManager,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
@@ -748,10 +752,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mKeyguardDisableHandler = new KeyguardDisableHandler(mContext, mPolicy);
 
-        mPowerManager = pm;
-        mPowerManager.setPolicy(mPolicy);
-        PowerManager pmc = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mScreenFrozenLock = pmc.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
+        mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mPowerManagerInternal.setPolicy(mPolicy); // TODO: register as local service instead
+        mScreenFrozenLock = mPowerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
 
         mAppTransition = new AppTransition(context, mH);
@@ -781,8 +786,8 @@ public class WindowManagerService extends IWindowManager.Stub
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
-        mHoldingScreenWakeLock = pmc.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                | PowerManager.ON_AFTER_RELEASE, TAG);
+        mHoldingScreenWakeLock = mPowerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mAnimator = new WindowAnimator(this);
@@ -9342,18 +9347,18 @@ public class WindowManagerService extends IWindowManager.Stub
         setHoldScreenLocked(mInnerFields.mHoldScreen);
         if (!mDisplayFrozen) {
             if (mInnerFields.mScreenBrightness < 0 || mInnerFields.mScreenBrightness > 1.0f) {
-                mPowerManager.setScreenBrightnessOverrideFromWindowManager(-1);
+                mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(-1);
             } else {
-                mPowerManager.setScreenBrightnessOverrideFromWindowManager(
+                mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
                         toBrightnessOverride(mInnerFields.mScreenBrightness));
             }
             if (mInnerFields.mButtonBrightness < 0 || mInnerFields.mButtonBrightness > 1.0f) {
-                mPowerManager.setButtonBrightnessOverrideFromWindowManager(-1);
+                mPowerManagerInternal.setButtonBrightnessOverrideFromWindowManager(-1);
             } else {
-                mPowerManager.setButtonBrightnessOverrideFromWindowManager(
+                mPowerManagerInternal.setButtonBrightnessOverrideFromWindowManager(
                         toBrightnessOverride(mInnerFields.mButtonBrightness));
             }
-            mPowerManager.setUserActivityTimeoutOverrideFromWindowManager(
+            mPowerManagerInternal.setUserActivityTimeoutOverrideFromWindowManager(
                     mInnerFields.mUserActivityTimeout);
         }
 
