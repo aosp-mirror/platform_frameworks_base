@@ -48,7 +48,7 @@ static jint
 android_media_MediaProfiles_native_get_num_file_formats(JNIEnv *env, jobject thiz)
 {
     ALOGV("native_get_num_file_formats");
-    return sProfiles->getOutputFileFormats().size();
+    return (jint) sProfiles->getOutputFileFormats().size();
 }
 
 static jint
@@ -119,7 +119,7 @@ static jint
 android_media_MediaProfiles_native_get_num_audio_encoders(JNIEnv *env, jobject thiz)
 {
     ALOGV("native_get_num_audio_encoders");
-    return sProfiles->getAudioEncoders().size();
+    return (jint) sProfiles->getAudioEncoders().size();
 }
 
 static jobject
@@ -223,18 +223,18 @@ android_media_MediaProfiles_native_has_camcorder_profile(JNIEnv *env, jobject th
 {
     ALOGV("native_has_camcorder_profile: %d %d", id, quality);
     if (!isCamcorderQualityKnown(quality)) {
-        return false;
+        return JNI_FALSE;
     }
 
     camcorder_quality q = static_cast<camcorder_quality>(quality);
-    return sProfiles->hasCamcorderProfile(id, q);
+    return sProfiles->hasCamcorderProfile(id, q) ? JNI_TRUE : JNI_FALSE;
 }
 
 static jint
 android_media_MediaProfiles_native_get_num_video_decoders(JNIEnv *env, jobject thiz)
 {
     ALOGV("native_get_num_video_decoders");
-    return sProfiles->getVideoDecoders().size();
+    return (jint) sProfiles->getVideoDecoders().size();
 }
 
 static jint
@@ -255,7 +255,7 @@ static jint
 android_media_MediaProfiles_native_get_num_audio_decoders(JNIEnv *env, jobject thiz)
 {
     ALOGV("native_get_num_audio_decoders");
-    return sProfiles->getAudioDecoders().size();
+    return (jint) sProfiles->getAudioDecoders().size();
 }
 
 static jint
@@ -276,7 +276,7 @@ static jint
 android_media_MediaProfiles_native_get_num_image_encoding_quality_levels(JNIEnv *env, jobject thiz, jint cameraId)
 {
     ALOGV("native_get_num_image_encoding_quality_levels");
-    return sProfiles->getImageEncodingQualityLevels(cameraId).size();
+    return (jint) sProfiles->getImageEncodingQualityLevels(cameraId).size();
 }
 
 static jint
@@ -284,7 +284,7 @@ android_media_MediaProfiles_native_get_image_encoding_quality_level(JNIEnv *env,
 {
     ALOGV("native_get_image_encoding_quality_level");
     Vector<int> levels = sProfiles->getImageEncodingQualityLevels(cameraId);
-    if (index < 0 || index >= levels.size()) {
+    if (index < 0 || index >= (jint) levels.size()) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "out of array boundary");
         return -1;
     }
