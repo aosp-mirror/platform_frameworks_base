@@ -34,7 +34,7 @@ public final class MicrophoneInputStream extends InputStream {
     }
     
     private final static String TAG = "MicrophoneInputStream";
-    private int mAudioRecord = 0;
+    private long mAudioRecord = 0;
     private byte[] mOneByte = new byte[1];
     
     /**
@@ -102,9 +102,9 @@ public final class MicrophoneInputStream extends InputStream {
     //
     // AudioRecord JNI interface
     //
-    private static native int AudioRecordNew(int sampleRate, int fifoDepth);
-    private static native int AudioRecordStart(int audioRecord);
-    private static native int AudioRecordRead(int audioRecord, byte[] b, int offset, int length) throws IOException;
-    private static native void AudioRecordStop(int audioRecord) throws IOException;
-    private static native void AudioRecordDelete(int audioRecord) throws IOException;
+    private static native long AudioRecordNew(int sampleRate, int fifoDepth);
+    private static native int AudioRecordStart(long audioRecord);
+    private static native int AudioRecordRead(long audioRecord, byte[] b, int offset, int length) throws IOException;
+    private static native void AudioRecordStop(long audioRecord) throws IOException;
+    private static native void AudioRecordDelete(long audioRecord) throws IOException;
 }
