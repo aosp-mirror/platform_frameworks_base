@@ -87,12 +87,12 @@ android_media_JetPlayer_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     if (result==EAS_SUCCESS) {
         // save our newly created C++ JetPlayer in the "nativePlayerInJavaObj" field
         // of the Java object (in mNativePlayerInJavaObj)
-        env->SetIntField(thiz, javaJetPlayerFields.nativePlayerInJavaObj, (int)lpJet);
+        env->SetLongField(thiz, javaJetPlayerFields.nativePlayerInJavaObj, (jlong)lpJet);
         return JNI_TRUE;
     } else {
         ALOGE("android_media_JetPlayer_setup(): initialization failed with EAS error code %d", (int)result);
         delete lpJet;
-        env->SetIntField(weak_this, javaJetPlayerFields.nativePlayerInJavaObj, 0);
+        env->SetLongField(weak_this, javaJetPlayerFields.nativePlayerInJavaObj, 0);
         return JNI_FALSE;
     }
 }
@@ -103,7 +103,7 @@ static void
 android_media_JetPlayer_finalize(JNIEnv *env, jobject thiz)
 {
     ALOGV("android_media_JetPlayer_finalize(): entering.");
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet != NULL) {
         lpJet->release();
@@ -119,7 +119,7 @@ static void
 android_media_JetPlayer_release(JNIEnv *env, jobject thiz)
 {
     android_media_JetPlayer_finalize(env, thiz);
-    env->SetIntField(thiz, javaJetPlayerFields.nativePlayerInJavaObj, 0);
+    env->SetLongField(thiz, javaJetPlayerFields.nativePlayerInJavaObj, 0);
     ALOGV("android_media_JetPlayer_release() done");
 }
 
@@ -128,7 +128,7 @@ android_media_JetPlayer_release(JNIEnv *env, jobject thiz)
 static jboolean
 android_media_JetPlayer_loadFromFile(JNIEnv *env, jobject thiz, jstring path)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -165,7 +165,7 @@ static jboolean
 android_media_JetPlayer_loadFromFileD(JNIEnv *env, jobject thiz,
     jobject fileDescriptor, jlong offset, jlong length)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -195,7 +195,7 @@ android_media_JetPlayer_loadFromFileD(JNIEnv *env, jobject thiz,
 static jboolean
 android_media_JetPlayer_closeFile(JNIEnv *env, jobject thiz)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -217,7 +217,7 @@ android_media_JetPlayer_closeFile(JNIEnv *env, jobject thiz)
 static jboolean
 android_media_JetPlayer_play(JNIEnv *env, jobject thiz)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -241,7 +241,7 @@ android_media_JetPlayer_play(JNIEnv *env, jobject thiz)
 static jboolean
 android_media_JetPlayer_pause(JNIEnv *env, jobject thiz)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -271,7 +271,7 @@ android_media_JetPlayer_queueSegment(JNIEnv *env, jobject thiz,
         jint segmentNum, jint libNum, jint repeatCount, jint transpose, jint muteFlags,
         jbyte userID)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -298,7 +298,7 @@ android_media_JetPlayer_queueSegmentMuteArray(JNIEnv *env, jobject thiz,
         jint segmentNum, jint libNum, jint repeatCount, jint transpose, jbooleanArray muteArray,
         jbyte userID)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -344,7 +344,7 @@ static jboolean
 android_media_JetPlayer_setMuteFlags(JNIEnv *env, jobject thiz,
          jint muteFlags /*unsigned?*/, jboolean bSync)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -369,7 +369,7 @@ static jboolean
 android_media_JetPlayer_setMuteArray(JNIEnv *env, jobject thiz,
         jbooleanArray muteArray, jboolean bSync)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -415,7 +415,7 @@ static jboolean
 android_media_JetPlayer_setMuteFlag(JNIEnv *env, jobject thiz,
          jint trackId, jboolean muteFlag, jboolean bSync)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -441,7 +441,7 @@ android_media_JetPlayer_setMuteFlag(JNIEnv *env, jobject thiz,
 static jboolean
 android_media_JetPlayer_triggerClip(JNIEnv *env, jobject thiz, jint clipId)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -466,7 +466,7 @@ android_media_JetPlayer_triggerClip(JNIEnv *env, jobject thiz, jint clipId)
 static jboolean
 android_media_JetPlayer_clearQueue(JNIEnv *env, jobject thiz)
 {
-    JetPlayer *lpJet = (JetPlayer *)env->GetIntField(
+    JetPlayer *lpJet = (JetPlayer *)env->GetLongField(
         thiz, javaJetPlayerFields.nativePlayerInJavaObj);
     if (lpJet == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -533,7 +533,7 @@ int register_android_media_JetPlayer(JNIEnv *env)
     // Get the mNativePlayerInJavaObj variable field
     javaJetPlayerFields.nativePlayerInJavaObj = env->GetFieldID(
             jetPlayerClass,
-            JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME, "I");
+            JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME, "J");
     if (javaJetPlayerFields.nativePlayerInJavaObj == NULL) {
         ALOGE("Can't find JetPlayer.%s", JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME);
         return -1;

@@ -38,12 +38,12 @@ public final class RemoteDisplay {
     private final Listener mListener;
     private final Handler mHandler;
 
-    private int mPtr;
+    private long mPtr;
 
-    private native int nativeListen(String iface);
-    private native void nativeDispose(int ptr);
-    private native void nativePause(int ptr);
-    private native void nativeResume(int ptr);
+    private native long nativeListen(String iface);
+    private native void nativeDispose(long ptr);
+    private native void nativePause(long ptr);
+    private native void nativeResume(long ptr);
 
     private RemoteDisplay(Listener listener, Handler handler) {
         mListener = listener;

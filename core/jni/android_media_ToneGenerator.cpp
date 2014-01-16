@@ -39,9 +39,9 @@ struct fields_t {
 static fields_t fields;
 
 static jboolean android_media_ToneGenerator_startTone(JNIEnv *env, jobject thiz, jint toneType, jint durationMs) {
-    ALOGV("android_media_ToneGenerator_startTone: %x", (int)thiz);
+    ALOGV("android_media_ToneGenerator_startTone: %p", thiz);
 
-    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
+    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetLongField(thiz,
             fields.context);
     if (lpToneGen == NULL) {
         jniThrowRuntimeException(env, "Method called after release()");
@@ -52,12 +52,12 @@ static jboolean android_media_ToneGenerator_startTone(JNIEnv *env, jobject thiz,
 }
 
 static void android_media_ToneGenerator_stopTone(JNIEnv *env, jobject thiz) {
-    ALOGV("android_media_ToneGenerator_stopTone: %x", (int)thiz);
+    ALOGV("android_media_ToneGenerator_stopTone: %p", thiz);
 
-    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
+    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetLongField(thiz,
             fields.context);
 
-    ALOGV("ToneGenerator lpToneGen: %x", (unsigned int)lpToneGen);
+    ALOGV("ToneGenerator lpToneGen: %p", lpToneGen);
     if (lpToneGen == NULL) {
         jniThrowRuntimeException(env, "Method called after release()");
         return;
@@ -66,7 +66,7 @@ static void android_media_ToneGenerator_stopTone(JNIEnv *env, jobject thiz) {
 }
 
 static jint android_media_ToneGenerator_getAudioSessionId(JNIEnv *env, jobject thiz) {
-    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
+    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetLongField(thiz,
             fields.context);
     if (lpToneGen == NULL) {
         jniThrowRuntimeException(env, "Method called after release()");
@@ -76,11 +76,11 @@ static jint android_media_ToneGenerator_getAudioSessionId(JNIEnv *env, jobject t
 }
 
 static void android_media_ToneGenerator_release(JNIEnv *env, jobject thiz) {
-    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
+    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetLongField(thiz,
             fields.context);
-    ALOGV("android_media_ToneGenerator_release lpToneGen: %x", (int)lpToneGen);
+    ALOGV("android_media_ToneGenerator_release lpToneGen: %p", lpToneGen);
 
-    env->SetIntField(thiz, fields.context, 0);
+    env->SetLongField(thiz, fields.context, 0);
 
     delete lpToneGen;
 }
@@ -89,11 +89,11 @@ static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
         jint streamType, jint volume) {
     ToneGenerator *lpToneGen = new ToneGenerator((audio_stream_type_t) streamType, AudioSystem::linearToLog(volume), true);
 
-    env->SetIntField(thiz, fields.context, 0);
+    env->SetLongField(thiz, fields.context, 0);
 
-    ALOGV("android_media_ToneGenerator_native_setup jobject: %x", (int)thiz);
+    ALOGV("android_media_ToneGenerator_native_setup jobject: %p", thiz);
 
-    ALOGV("ToneGenerator lpToneGen: %x", (unsigned int)lpToneGen);
+    ALOGV("ToneGenerator lpToneGen: %p", lpToneGen);
 
     if (!lpToneGen->isInited()) {
         ALOGE("ToneGenerator init failed");
@@ -103,16 +103,16 @@ static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
     }
 
     // Stow our new C++ ToneGenerator in an opaque field in the Java object.
-    env->SetIntField(thiz, fields.context, (int)lpToneGen);
+    env->SetLongField(thiz, fields.context, (jlong)lpToneGen);
 
-    ALOGV("ToneGenerator fields.context: %x", env->GetIntField(thiz, fields.context));
+    ALOGV("ToneGenerator fields.context: %p", (void*) env->GetLongField(thiz, fields.context));
 }
 
 static void android_media_ToneGenerator_native_finalize(JNIEnv *env,
         jobject thiz) {
-    ALOGV("android_media_ToneGenerator_native_finalize jobject: %x", (int)thiz);
+    ALOGV("android_media_ToneGenerator_native_finalize jobject: %p", thiz);
 
-    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
+    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetLongField(thiz,
             fields.context);
 
     if (lpToneGen != NULL) {
@@ -142,12 +142,12 @@ int register_android_media_ToneGenerator(JNIEnv *env) {
         return -1;
     }
 
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (fields.context == NULL) {
         ALOGE("Can't find ToneGenerator.mNativeContext");
         return -1;
     }
-    ALOGV("register_android_media_ToneGenerator ToneGenerator fields.context: %x", (unsigned int)fields.context);
+    ALOGV("register_android_media_ToneGenerator ToneGenerator fields.context: %p", fields.context);
 
     return AndroidRuntime::registerNativeMethods(env,
             "android/media/ToneGenerator", gMethods, NELEM(gMethods));
