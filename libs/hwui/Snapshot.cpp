@@ -70,6 +70,10 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
     } else {
         region = NULL;
     }
+
+    if (saveFlags & Snapshot::kFlagProjectionTarget) {
+        flags |= Snapshot::kFlagProjectionTarget;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

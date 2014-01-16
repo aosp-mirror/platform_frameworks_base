@@ -112,6 +112,7 @@ public:
  */
 class DisplayListData : public LightRefBase<DisplayListData> {
 public:
+    DisplayListData() : projectionIndex(-1) {}
     // allocator into which all ops were allocated
     LinearAllocator allocator;
 
@@ -120,6 +121,10 @@ public:
 
     // list of children display lists for quick, non-drawing traversal
     Vector<DrawDisplayListOp*> children;
+
+    // index of DisplayListOp restore, after which projected descendents should be drawn
+    int projectionIndex;
+    Matrix4 projectionTransform;
 };
 
 /**
@@ -522,8 +527,10 @@ private:
     void applyViewPropertyTransforms(mat4& matrix);
 
     void computeOrderingImpl(DrawDisplayListOp* opState,
-            Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
-            const mat4* transformFromRoot);
+        Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
+        const mat4* transformFrom3dRoot,
+        Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
+        const mat4* transformFromProjectionSurface);
 
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler, const int level);
@@ -531,6 +538,9 @@ private:
     template <class T>
     inline void iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& renderer,
         T& handler, const int level);
+
+    template <class T>
+    inline void iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level);
 
     template <class T>
     inline void iterate(OpenGLRenderer& renderer, T& handler, const int level);
@@ -610,6 +620,9 @@ private:
 
     // for 3d roots, contains a z sorted list of all children items
     Vector<ZDrawDisplayListOpPair> m3dNodes;
+
+    // for projection surfaces, contains a list of all children items
+    Vector<DrawDisplayListOp*> mProjectedNodes;
 }; // class DisplayList
 
 }; // namespace uirenderer

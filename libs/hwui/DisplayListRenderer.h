@@ -221,6 +221,8 @@ public:
     uint32_t getFunctorCount() const {
         return mFunctorCount;
     }
+protected:
+    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored);
 
 private:
     void insertRestoreToCount();

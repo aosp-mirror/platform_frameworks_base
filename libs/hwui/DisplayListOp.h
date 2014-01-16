@@ -1568,14 +1568,14 @@ private:
     const mat4 mTransformFromParent;
 
     /**
-     * Holds the transformation between the 3d root ViewGroup and this DisplayList drawing
-     * instance. Represents any translations / transformations done within the drawing of the 3d
-     * root ViewGroup's draw, before the draw of the View represented by this DisplayList draw
-     * instance.
+     * Holds the transformation between the 3d root OR projection surface ViewGroup and this
+     * DisplayList drawing instance. Represents any translations / transformations done within the
+     * drawing of the compositing ancestor ViewGroup's draw, before the draw of the View represented
+     * by this DisplayList draw instance.
      *
      * Note: doesn't include any transformation recorded within the DisplayList and its properties.
      */
-    mat4 mTransformFrom3dRoot;
+    mat4 mTransformFromCompositingAncestor;
     bool mSkipInOrderDraw;
 };
 
