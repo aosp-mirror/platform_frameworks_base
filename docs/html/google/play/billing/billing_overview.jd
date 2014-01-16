@@ -130,13 +130,6 @@ Google Play sends your application the purchase details, such as the order
 number, the order date and time, and the price paid. At no point does your 
 application have to handle any financial transactions; that role is provided by 
 Google Play.</p>
-<img src="{@docRoot}images/in-app-billing/v3/iab_v3_checkout_flow.png" height="382" id="figure1" />
-<p class="img-caption">
-  <strong>Figure 1.</strong> Applications initiate In-app Billing requests 
-through their own UI (first screen). Google Play responds to the request by 
-providing the checkout user interface (middle screen). When checkout is 
-complete, the application resumes.
-</p>
 
 <h2 id="samples">Sample Application</h2>
 <p>To help you integrate In-app Billing into your application, the Android SDK 
