@@ -43,17 +43,17 @@ static jobject android_os_MemoryFile_open(JNIEnv* env, jobject clazz, jstring na
     return jniCreateFileDescriptor(env, result);
 }
 
-static jint android_os_MemoryFile_mmap(JNIEnv* env, jobject clazz, jobject fileDescriptor,
+static jlong android_os_MemoryFile_mmap(JNIEnv* env, jobject clazz, jobject fileDescriptor,
         jint length, jint prot)
 {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    jint result = (jint)mmap(NULL, length, prot, MAP_SHARED, fd, 0);
+    jlong result = (jlong)mmap(NULL, length, prot, MAP_SHARED, fd, 0);
     if (!result)
         jniThrowException(env, "java/io/IOException", "mmap failed");
     return result;
 }
 
-static void android_os_MemoryFile_munmap(JNIEnv* env, jobject clazz, jint addr, jint length)
+static void android_os_MemoryFile_munmap(JNIEnv* env, jobject clazz, jlong addr, jint length)
 {
     int result = munmap((void *)addr, length);
     if (result < 0)
@@ -70,7 +70,7 @@ static void android_os_MemoryFile_close(JNIEnv* env, jobject clazz, jobject file
 }
 
 static jint android_os_MemoryFile_read(JNIEnv* env, jobject clazz,
-        jobject fileDescriptor, jint address, jbyteArray buffer, jint srcOffset, jint destOffset,
+        jobject fileDescriptor, jlong address, jbyteArray buffer, jint srcOffset, jint destOffset,
         jint count, jboolean unpinned)
 {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
@@ -89,7 +89,7 @@ static jint android_os_MemoryFile_read(JNIEnv* env, jobject clazz,
 }
 
 static jint android_os_MemoryFile_write(JNIEnv* env, jobject clazz,
-        jobject fileDescriptor, jint address, jbyteArray buffer, jint srcOffset, jint destOffset,
+        jobject fileDescriptor, jlong address, jbyteArray buffer, jint srcOffset, jint destOffset,
         jint count, jboolean unpinned)
 {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
@@ -138,11 +138,11 @@ static jint android_os_MemoryFile_get_size(JNIEnv* env, jobject clazz,
 
 static const JNINativeMethod methods[] = {
     {"native_open",  "(Ljava/lang/String;I)Ljava/io/FileDescriptor;", (void*)android_os_MemoryFile_open},
-    {"native_mmap",  "(Ljava/io/FileDescriptor;II)I", (void*)android_os_MemoryFile_mmap},
-    {"native_munmap", "(II)V", (void*)android_os_MemoryFile_munmap},
+    {"native_mmap",  "(Ljava/io/FileDescriptor;II)J", (void*)android_os_MemoryFile_mmap},
+    {"native_munmap", "(JI)V", (void*)android_os_MemoryFile_munmap},
     {"native_close", "(Ljava/io/FileDescriptor;)V", (void*)android_os_MemoryFile_close},
-    {"native_read",  "(Ljava/io/FileDescriptor;I[BIIIZ)I", (void*)android_os_MemoryFile_read},
-    {"native_write", "(Ljava/io/FileDescriptor;I[BIIIZ)V", (void*)android_os_MemoryFile_write},
+    {"native_read",  "(Ljava/io/FileDescriptor;J[BIIIZ)I", (void*)android_os_MemoryFile_read},
+    {"native_write", "(Ljava/io/FileDescriptor;J[BIIIZ)V", (void*)android_os_MemoryFile_write},
     {"native_pin",   "(Ljava/io/FileDescriptor;Z)V", (void*)android_os_MemoryFile_pin},
     {"native_get_size", "(Ljava/io/FileDescriptor;)I",
             (void*)android_os_MemoryFile_get_size}
