@@ -227,9 +227,9 @@ public final class CameraCharacteristics extends CameraMetadata {
      * which enables application control of white balance, by using
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}({@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} must be set to TRANSFORM_MATRIX).</p>
      *
-     * @see CaptureRequest#CONTROL_AWB_MODE
-     * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      */
     public static final Key<byte[]> CONTROL_AWB_AVAILABLE_MODES =
@@ -253,18 +253,18 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>Supported resolutions for the JPEG thumbnail</p>
-     * <p>Below condiditions must be satisfied for this size list:</p>
+     * <p>Below condiditions will be satisfied for this size list:</p>
      * <ul>
-     * <li>The sizes must be sorted by increasing pixel area (width x height).
-     * If several resolutions have the same area, they must be sorted by increasing width.</li>
-     * <li>The aspect ratio of the largest thumbnail size must be same as the
+     * <li>The sizes will be sorted by increasing pixel area (width x height).
+     * If several resolutions have the same area, they will be sorted by increasing width.</li>
+     * <li>The aspect ratio of the largest thumbnail size will be same as the
      * aspect ratio of largest size in {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES android.scaler.availableJpegSizes}.
      * The largest size is defined as the size that has the largest pixel area
      * in a given size list.</li>
-     * <li>Each size in {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES android.scaler.availableJpegSizes} must have at least
+     * <li>Each size in {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES android.scaler.availableJpegSizes} will have at least
      * one corresponding size that has the same aspect ratio in availableThumbnailSizes,
      * and vice versa.</li>
-     * <li>All non (0, 0) sizes must have non-zero widths and heights.</li>
+     * <li>All non (0, 0) sizes will have non-zero widths and heights.</li>
      * </ul>
      *
      * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES
