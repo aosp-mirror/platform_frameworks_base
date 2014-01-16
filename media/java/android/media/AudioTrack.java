@@ -221,13 +221,13 @@ public class AudioTrack
      * Accessed by native methods: provides access to C++ AudioTrack object.
      */
     @SuppressWarnings("unused")
-    private int mNativeTrackInJavaObj;
+    private long mNativeTrackInJavaObj;
     /**
      * Accessed by native methods: provides access to the JNI data (i.e. resources used by
      * the native AudioTrack object, but not stored in it).
      */
     @SuppressWarnings("unused")
-    private int mJniData;
+    private long mJniData;
 
 
     //--------------------------------------------------------------------------

@@ -128,21 +128,21 @@ static bool process_media_recorder_call(JNIEnv *env, status_t opStatus, const ch
 static sp<MediaRecorder> getMediaRecorder(JNIEnv* env, jobject thiz)
 {
     Mutex::Autolock l(sLock);
-    MediaRecorder* const p = (MediaRecorder*)env->GetIntField(thiz, fields.context);
+    MediaRecorder* const p = (MediaRecorder*)env->GetLongField(thiz, fields.context);
     return sp<MediaRecorder>(p);
 }
 
 static sp<MediaRecorder> setMediaRecorder(JNIEnv* env, jobject thiz, const sp<MediaRecorder>& recorder)
 {
     Mutex::Autolock l(sLock);
-    sp<MediaRecorder> old = (MediaRecorder*)env->GetIntField(thiz, fields.context);
+    sp<MediaRecorder> old = (MediaRecorder*)env->GetLongField(thiz, fields.context);
     if (recorder.get()) {
         recorder->incStrong(thiz);
     }
     if (old != 0) {
         old->decStrong(thiz);
     }
-    env->SetIntField(thiz, fields.context, (int)recorder.get());
+    env->SetLongField(thiz, fields.context, (jlong)recorder.get());
     return old;
 }
 
@@ -334,14 +334,14 @@ android_media_MediaRecorder_prepare(JNIEnv *env, jobject thiz)
     process_media_recorder_call(env, mr->prepare(), "java/io/IOException", "prepare failed.");
 }
 
-static int
+static jint
 android_media_MediaRecorder_native_getMaxAmplitude(JNIEnv *env, jobject thiz)
 {
     ALOGV("getMaxAmplitude");
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     int result = 0;
     process_media_recorder_call(env, mr->getMaxAmplitude(&result), "java/lang/RuntimeException", "getMaxAmplitude failed.");
-    return result;
+    return (jint) result;
 }
 
 static void
@@ -392,7 +392,7 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
         return;
     }
 
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (fields.context == NULL) {
         return;
     }

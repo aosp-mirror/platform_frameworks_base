@@ -301,7 +301,7 @@ public class MediaScanner
         // 148 and up don't seem to have been defined yet.
     };
 
-    private int mNativeContext;
+    private long mNativeContext;
     private Context mContext;
     private String mPackageName;
     private IContentProvider mMediaProvider;
