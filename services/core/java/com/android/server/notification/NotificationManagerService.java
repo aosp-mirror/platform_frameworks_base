@@ -1045,8 +1045,8 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
-                mInCall = (intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(
-                        TelephonyManager.EXTRA_STATE_OFFHOOK));
+                mInCall = TelephonyManager.EXTRA_STATE_OFFHOOK
+                        .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
                 updateNotificationPulse();
             } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
