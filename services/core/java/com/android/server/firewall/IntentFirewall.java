@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -106,8 +107,9 @@ public class IntentFirewall {
         }
     }
 
-    public IntentFirewall(AMSInterface ams) {
+    public IntentFirewall(AMSInterface ams, Handler handler) {
         mAms = ams;
+        mHandler = new FirewallHandler(handler.getLooper());
         File rulesDir = getRulesDir();
         rulesDir.mkdirs();
 
@@ -533,7 +535,13 @@ public class IntentFirewall {
                 new ArrayMap<ComponentName, Rule[]>(0);
     }
 
-    final Handler mHandler = new Handler() {
+    final FirewallHandler mHandler;
+
+    private final class FirewallHandler extends Handler {
+        public FirewallHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             readRulesDir(getRulesDir());

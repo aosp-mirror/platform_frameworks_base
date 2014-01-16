@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
@@ -54,8 +55,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     private boolean mBluetoothPendingStats;
     private BluetoothHeadset mBluetoothHeadset;
 
-    BatteryStatsService(String filename) {
-        mStats = new BatteryStatsImpl(filename);
+    BatteryStatsService(String filename, Handler handler) {
+        mStats = new BatteryStatsImpl(filename, handler);
     }
     
     public void publish(Context context) {

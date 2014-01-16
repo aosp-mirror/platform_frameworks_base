@@ -27,6 +27,7 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
@@ -114,6 +115,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     final class MyHandler extends Handler {
+        public MyHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             BatteryCallback cb = mCallback;
@@ -4688,9 +4693,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public BatteryStatsImpl(String filename) {
+    public BatteryStatsImpl(String filename, Handler handler) {
         mFile = new JournaledFile(new File(filename), new File(filename + ".tmp"));
-        mHandler = new MyHandler();
+        mHandler = new MyHandler(handler.getLooper());
         mStartCount++;
         mScreenOnTimer = new StopwatchTimer(null, -1, null, mUnpluggables);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {

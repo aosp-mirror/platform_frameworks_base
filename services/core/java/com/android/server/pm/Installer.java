@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import com.android.server.SystemService;
+
 import android.content.pm.PackageStats;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
@@ -25,20 +27,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public final class Installer {
+public final class Installer extends SystemService {
     private static final String TAG = "Installer";
 
     private static final boolean LOCAL_DEBUG = false;
 
     InputStream mIn;
-
     OutputStream mOut;
-
     LocalSocket mSocket;
 
     byte buf[] = new byte[1024];
-
     int buflen = 0;
+
+    @Override
+    public void onStart() {
+        Slog.i(TAG, "Waiting for installd to be ready.");
+        ping();
+    }
 
     private boolean connect() {
         if (mSocket != null) {

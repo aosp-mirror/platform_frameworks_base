@@ -20,6 +20,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
+import com.android.server.ServiceThread;
 import com.android.server.lights.LightsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
@@ -49,6 +50,7 @@ import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -73,7 +75,7 @@ import libcore.util.Objects;
  * The power manager service is responsible for coordinating power management
  * functions on the device.
  */
-public final class PowerManagerService extends IPowerManager.Stub
+public final class PowerManagerService extends com.android.server.SystemService
         implements Watchdog.Monitor {
     private static final String TAG = "PowerManagerService";
 
@@ -174,7 +176,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private DisplayManagerService mDisplayManagerService;
     private IBatteryStats mBatteryStats;
     private IAppOpsService mAppOps;
-    private HandlerThread mHandlerThread;
+    private ServiceThread mHandlerThread;
     private PowerManagerHandler mHandler;
     private WindowManagerPolicy mPolicy;
     private Notifier mNotifier;
@@ -390,25 +392,35 @@ public final class PowerManagerService extends IPowerManager.Stub
         nativeSetPowerState(true, true);
     }
 
+    @Override
+    public void onCreate(Context context) {
+        mContext = context;
+    }
+
+    @Override
+    public void onStart() {
+        publishBinderService(Context.POWER_SERVICE, new BinderService());
+        publishLocalService(PowerManagerInternal.class, new LocalService());
+    }
+
     /**
      * Initialize the power manager.
      * Must be called before any other functions within the power manager are called.
      */
-    public void init(Context context, LightsManager ls,
+    public void init(LightsManager ls,
             BatteryService bs, IBatteryStats bss,
             IAppOpsService appOps, DisplayManagerService dm) {
-        mContext = context;
         mLightsManager = ls;
         mBatteryService = bs;
         mBatteryStats = bss;
         mAppOps = appOps;
         mDisplayManagerService = dm;
-        mHandlerThread = new HandlerThread(TAG);
+        mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_DISPLAY);
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
 
         Watchdog.getInstance().addMonitor(this);
-        Watchdog.getInstance().addThread(mHandler, mHandlerThread.getName());
+        Watchdog.getInstance().addThread(mHandler);
 
         // Forcibly turn the screen on at boot so that it is in a known power state.
         // We do this in init() rather than in the constructor because setting the
@@ -419,7 +431,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         mDisplayBlanker.unblankAllDisplays();
     }
 
-    public void setPolicy(WindowManagerPolicy policy) {
+    void setPolicy(WindowManagerPolicy policy) {
         synchronized (mLock) {
             mPolicy = policy;
         }
@@ -577,41 +589,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         updatePowerStateLocked();
     }
 
-    @Override // Binder call
-    public void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
-            int uid) {
-        acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid));
-    }
-
-    @Override // Binder call
-    public void acquireWakeLock(IBinder lock, int flags, String tag, String packageName,
-            WorkSource ws) {
-        if (lock == null) {
-            throw new IllegalArgumentException("lock must not be null");
-        }
-        if (packageName == null) {
-            throw new IllegalArgumentException("packageName must not be null");
-        }
-        PowerManager.validateWakeLockParameters(flags, tag);
-
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-        if (ws != null && ws.size() != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.UPDATE_DEVICE_STATS, null);
-        } else {
-            ws = null;
-        }
-
-        final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            acquireWakeLockInternal(lock, flags, tag, packageName, ws, uid, pid);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void acquireWakeLockInternal(IBinder lock, int flags, String tag, String packageName,
             WorkSource ws, int uid, int pid) {
         synchronized (mLock) {
@@ -663,22 +640,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0
                 && isScreenLock(wakeLock)) {
             wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
-        }
-    }
-
-    @Override // Binder call
-    public void releaseWakeLock(IBinder lock, int flags) {
-        if (lock == null) {
-            throw new IllegalArgumentException("lock must not be null");
-        }
-
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            releaseWakeLockInternal(lock, flags);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -744,43 +705,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    @Override // Binder call
-    public void updateWakeLockUids(IBinder lock, int[] uids) {
-        WorkSource ws = null;
-
-        if (uids != null) {
-            ws = new WorkSource();
-            // XXX should WorkSource have a way to set uids as an int[] instead of adding them
-            // one at a time?
-            for (int i = 0; i < uids.length; i++) {
-                ws.add(uids[i]);
-            }
-        }
-        updateWakeLockWorkSource(lock, ws);
-    }
-
-    @Override // Binder call
-    public void updateWakeLockWorkSource(IBinder lock, WorkSource ws) {
-        if (lock == null) {
-            throw new IllegalArgumentException("lock must not be null");
-        }
-
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-        if (ws != null && ws.size() != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.UPDATE_DEVICE_STATS, null);
-        } else {
-            ws = null;
-        }
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            updateWakeLockWorkSourceInternal(lock, ws);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void updateWakeLockWorkSourceInternal(IBinder lock, WorkSource ws) {
         synchronized (mLock) {
             int index = findWakeLockIndexLocked(lock);
@@ -832,16 +756,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    @Override // Binder call
-    public boolean isWakeLockLevelSupported(int level) {
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            return isWakeLockLevelSupportedInternal(level);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     @SuppressWarnings("deprecation")
     private boolean isWakeLockLevelSupportedInternal(int level) {
         synchronized (mLock) {
@@ -858,40 +772,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 default:
                     return false;
             }
-        }
-    }
-
-    @Override // Binder call
-    public void userActivity(long eventTime, int event, int flags) {
-        final long now = SystemClock.uptimeMillis();
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Once upon a time applications could call userActivity().
-            // Now we require the DEVICE_POWER permission.  Log a warning and ignore the
-            // request instead of throwing a SecurityException so we don't break old apps.
-            synchronized (mLock) {
-                if (now >= mLastWarningAboutUserActivityPermission + (5 * 60 * 1000)) {
-                    mLastWarningAboutUserActivityPermission = now;
-                    Slog.w(TAG, "Ignoring call to PowerManager.userActivity() because the "
-                            + "caller does not have DEVICE_POWER permission.  "
-                            + "Please fix your app!  "
-                            + " pid=" + Binder.getCallingPid()
-                            + " uid=" + Binder.getCallingUid());
-                }
-            }
-            return;
-        }
-
-        if (eventTime > SystemClock.uptimeMillis()) {
-            throw new IllegalArgumentException("event time must not be in the future");
-        }
-
-        final int uid = Binder.getCallingUid();
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            userActivityInternal(eventTime, event, flags, uid);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -939,22 +819,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         return false;
     }
 
-    @Override // Binder call
-    public void wakeUp(long eventTime) {
-        if (eventTime > SystemClock.uptimeMillis()) {
-            throw new IllegalArgumentException("event time must not be in the future");
-        }
-
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            wakeUpInternal(eventTime);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     // Called from native code.
     private void wakeUpFromNative(long eventTime) {
         wakeUpInternal(eventTime);
@@ -1000,22 +864,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         userActivityNoUpdateLocked(
                 eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
         return true;
-    }
-
-    @Override // Binder call
-    public void goToSleep(long eventTime, int reason) {
-        if (eventTime > SystemClock.uptimeMillis()) {
-            throw new IllegalArgumentException("event time must not be in the future");
-        }
-
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            goToSleepInternal(eventTime, reason);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
     }
 
     // Called from native code.
@@ -1078,22 +926,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
         EventLog.writeEvent(EventLogTags.POWER_SLEEP_REQUESTED, numWakeLocksCleared);
         return true;
-    }
-
-    @Override // Binder call
-    public void nap(long eventTime) {
-        if (eventTime > SystemClock.uptimeMillis()) {
-            throw new IllegalArgumentException("event time must not be in the future");
-        }
-
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            napInternal(eventTime);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
     }
 
     private void napInternal(long eventTime) {
@@ -1820,16 +1652,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         return false;
     }
 
-    @Override // Binder call
-    public boolean isScreenOn() {
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            return isScreenOnInternal();
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private boolean isScreenOnInternal() {
         synchronized (mLock) {
             return !mSystemReady
@@ -1874,43 +1696,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         updatePowerStateLocked();
     }
 
-    /**
-     * Reboots the device.
-     *
-     * @param confirm If true, shows a reboot confirmation dialog.
-     * @param reason The reason for the reboot, or null if none.
-     * @param wait If true, this call waits for the reboot to complete and does not return.
-     */
-    @Override // Binder call
-    public void reboot(boolean confirm, String reason, boolean wait) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            shutdownOrRebootInternal(false, confirm, reason, wait);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    /**
-     * Shuts down the device.
-     *
-     * @param confirm If true, shows a shutdown confirmation dialog.
-     * @param wait If true, this call waits for the shutdown to complete and does not return.
-     */
-    @Override // Binder call
-    public void shutdown(boolean confirm, boolean wait) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            shutdownOrRebootInternal(true, confirm, null, wait);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void shutdownOrRebootInternal(final boolean shutdown, final boolean confirm,
             final String reason, boolean wait) {
         if (mHandler == null || !mSystemReady) {
@@ -1948,22 +1733,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    /**
-     * Crash the runtime (causing a complete restart of the Android framework).
-     * Requires REBOOT permission.  Mostly for testing.  Should not return.
-     */
-    @Override // Binder call
-    public void crash(String message) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            crashInternal(message);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void crashInternal(final String message) {
         Thread t = new Thread("PowerManagerService.crash()") {
             @Override
@@ -1979,49 +1748,9 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    /**
-     * Set the setting that determines whether the device stays on when plugged in.
-     * The argument is a bit string, with each bit specifying a power source that,
-     * when the device is connected to that source, causes the device to stay on.
-     * See {@link android.os.BatteryManager} for the list of power sources that
-     * can be specified. Current values include {@link android.os.BatteryManager#BATTERY_PLUGGED_AC}
-     * and {@link android.os.BatteryManager#BATTERY_PLUGGED_USB}
-     *
-     * Used by "adb shell svc power stayon ..."
-     *
-     * @param val an {@code int} containing the bits that specify which power sources
-     * should cause the device to stay on.
-     */
-    @Override // Binder call
-    public void setStayOnSetting(int val) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            setStayOnSettingInternal(val);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void setStayOnSettingInternal(int val) {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, val);
-    }
-
-    /**
-     * Used by device administration to set the maximum screen off timeout.
-     *
-     * This method must only be called by the device administration policy manager.
-     */
-    @Override // Binder call
-    public void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs) {
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            setMaximumScreenOffTimeoutFromDeviceAdminInternal(timeMs);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
     }
 
     private void setMaximumScreenOffTimeoutFromDeviceAdminInternal(int timeMs) {
@@ -2037,21 +1766,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 && mMaximumScreenOffTimeoutFromDeviceAdmin < Integer.MAX_VALUE;
     }
 
-    /**
-     * Used by the phone application to make the attention LED flash when ringing.
-     */
-    @Override // Binder call
-    public void setAttentionLight(boolean on, int color) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            setAttentionLightInternal(on, color);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void setAttentionLightInternal(boolean on, int color) {
         Light light;
         synchronized (mLock) {
@@ -2065,25 +1779,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         light.setFlashing(color, Light.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
     }
 
-    /**
-     * Used by the window manager to override the screen brightness based on the
-     * current foreground activity.
-     *
-     * This method must only be called by the window manager.
-     *
-     * @param brightness The overridden brightness, or -1 to disable the override.
-     */
-    public void setScreenBrightnessOverrideFromWindowManager(int brightness) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            setScreenBrightnessOverrideFromWindowManagerInternal(brightness);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void setScreenBrightnessOverrideFromWindowManagerInternal(int brightness) {
         synchronized (mLock) {
             if (mScreenBrightnessOverrideFromWindowManager != brightness) {
@@ -2091,40 +1786,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }
-        }
-    }
-
-    /**
-     * Used by the window manager to override the button brightness based on the
-     * current foreground activity.
-     *
-     * This method must only be called by the window manager.
-     *
-     * @param brightness The overridden brightness, or -1 to disable the override.
-     */
-    public void setButtonBrightnessOverrideFromWindowManager(int brightness) {
-        // Do nothing.
-        // Button lights are not currently supported in the new implementation.
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-    }
-
-    /**
-     * Used by the window manager to override the user activity timeout based on the
-     * current foreground activity.  It can only be used to make the timeout shorter
-     * than usual, not longer.
-     *
-     * This method must only be called by the window manager.
-     *
-     * @param timeoutMillis The overridden timeout, or -1 to disable the override.
-     */
-    public void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -2138,30 +1799,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    /**
-     * Used by the settings application and brightness control widgets to
-     * temporarily override the current screen brightness setting so that the
-     * user can observe the effect of an intended settings change without applying
-     * it immediately.
-     *
-     * The override will be canceled when the setting value is next updated.
-     *
-     * @param brightness The overridden brightness.
-     *
-     * @see android.provider.Settings.System#SCREEN_BRIGHTNESS
-     */
-    @Override // Binder call
-    public void setTemporaryScreenBrightnessSettingOverride(int brightness) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            setTemporaryScreenBrightnessSettingOverrideInternal(brightness);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void setTemporaryScreenBrightnessSettingOverrideInternal(int brightness) {
         synchronized (mLock) {
             if (mTemporaryScreenBrightnessSettingOverride != brightness) {
@@ -2169,30 +1806,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }
-        }
-    }
-
-    /**
-     * Used by the settings application and brightness control widgets to
-     * temporarily override the current screen auto-brightness adjustment setting so that the
-     * user can observe the effect of an intended settings change without applying
-     * it immediately.
-     *
-     * The override will be canceled when the setting value is next updated.
-     *
-     * @param adj The overridden brightness, or Float.NaN to disable the override.
-     *
-     * @see Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ
-     */
-    @Override // Binder call
-    public void setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(float adj) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            setTemporaryScreenAutoBrightnessAdjustmentSettingOverrideInternal(adj);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -2242,16 +1855,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    @Override // Binder call
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump PowerManager from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
-
+    private void dumpInternal(PrintWriter pw) {
         pw.println("POWER MANAGER (dumpsys power)\n");
 
         final DisplayPowerController dpc;
@@ -2713,6 +2317,446 @@ public final class PowerManagerService extends IPowerManager.Stub
             synchronized (this) {
                 return "blanked=" + mBlanked;
             }
+        }
+    }
+
+    private final class BinderService extends IPowerManager.Stub {
+        @Override // Binder call
+        public void acquireWakeLockWithUid(IBinder lock, int flags, String tag,
+                String packageName, int uid) {
+            acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid));
+        }
+
+        @Override // Binder call
+        public void acquireWakeLock(IBinder lock, int flags, String tag, String packageName,
+                WorkSource ws) {
+            if (lock == null) {
+                throw new IllegalArgumentException("lock must not be null");
+            }
+            if (packageName == null) {
+                throw new IllegalArgumentException("packageName must not be null");
+            }
+            PowerManager.validateWakeLockParameters(flags, tag);
+
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+            if (ws != null && ws.size() != 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.UPDATE_DEVICE_STATS, null);
+            } else {
+                ws = null;
+            }
+
+            final int uid = Binder.getCallingUid();
+            final int pid = Binder.getCallingPid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                acquireWakeLockInternal(lock, flags, tag, packageName, ws, uid, pid);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void releaseWakeLock(IBinder lock, int flags) {
+            if (lock == null) {
+                throw new IllegalArgumentException("lock must not be null");
+            }
+
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                releaseWakeLockInternal(lock, flags);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void updateWakeLockUids(IBinder lock, int[] uids) {
+            WorkSource ws = null;
+
+            if (uids != null) {
+                ws = new WorkSource();
+                // XXX should WorkSource have a way to set uids as an int[] instead of adding them
+                // one at a time?
+                for (int i = 0; i < uids.length; i++) {
+                    ws.add(uids[i]);
+                }
+            }
+            updateWakeLockWorkSource(lock, ws);
+        }
+
+        @Override // Binder call
+        public void updateWakeLockWorkSource(IBinder lock, WorkSource ws) {
+            if (lock == null) {
+                throw new IllegalArgumentException("lock must not be null");
+            }
+
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+            if (ws != null && ws.size() != 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.UPDATE_DEVICE_STATS, null);
+            } else {
+                ws = null;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                updateWakeLockWorkSourceInternal(lock, ws);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isWakeLockLevelSupported(int level) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isWakeLockLevelSupportedInternal(level);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void userActivity(long eventTime, int event, int flags) {
+            final long now = SystemClock.uptimeMillis();
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Once upon a time applications could call userActivity().
+                // Now we require the DEVICE_POWER permission.  Log a warning and ignore the
+                // request instead of throwing a SecurityException so we don't break old apps.
+                synchronized (mLock) {
+                    if (now >= mLastWarningAboutUserActivityPermission + (5 * 60 * 1000)) {
+                        mLastWarningAboutUserActivityPermission = now;
+                        Slog.w(TAG, "Ignoring call to PowerManager.userActivity() because the "
+                                + "caller does not have DEVICE_POWER permission.  "
+                                + "Please fix your app!  "
+                                + " pid=" + Binder.getCallingPid()
+                                + " uid=" + Binder.getCallingUid());
+                    }
+                }
+                return;
+            }
+
+            if (eventTime > SystemClock.uptimeMillis()) {
+                throw new IllegalArgumentException("event time must not be in the future");
+            }
+
+            final int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                userActivityInternal(eventTime, event, flags, uid);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void wakeUp(long eventTime) {
+            if (eventTime > SystemClock.uptimeMillis()) {
+                throw new IllegalArgumentException("event time must not be in the future");
+            }
+
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                wakeUpInternal(eventTime);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void goToSleep(long eventTime, int reason) {
+            if (eventTime > SystemClock.uptimeMillis()) {
+                throw new IllegalArgumentException("event time must not be in the future");
+            }
+
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                goToSleepInternal(eventTime, reason);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void nap(long eventTime) {
+            if (eventTime > SystemClock.uptimeMillis()) {
+                throw new IllegalArgumentException("event time must not be in the future");
+            }
+
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                napInternal(eventTime);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isScreenOn() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isScreenOnInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Reboots the device.
+         *
+         * @param confirm If true, shows a reboot confirmation dialog.
+         * @param reason The reason for the reboot, or null if none.
+         * @param wait If true, this call waits for the reboot to complete and does not return.
+         */
+        @Override // Binder call
+        public void reboot(boolean confirm, String reason, boolean wait) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                shutdownOrRebootInternal(false, confirm, reason, wait);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Shuts down the device.
+         *
+         * @param confirm If true, shows a shutdown confirmation dialog.
+         * @param wait If true, this call waits for the shutdown to complete and does not return.
+         */
+        @Override // Binder call
+        public void shutdown(boolean confirm, boolean wait) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                shutdownOrRebootInternal(true, confirm, null, wait);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Crash the runtime (causing a complete restart of the Android framework).
+         * Requires REBOOT permission.  Mostly for testing.  Should not return.
+         */
+        @Override // Binder call
+        public void crash(String message) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                crashInternal(message);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Set the setting that determines whether the device stays on when plugged in.
+         * The argument is a bit string, with each bit specifying a power source that,
+         * when the device is connected to that source, causes the device to stay on.
+         * See {@link android.os.BatteryManager} for the list of power sources that
+         * can be specified. Current values include
+         * {@link android.os.BatteryManager#BATTERY_PLUGGED_AC}
+         * and {@link android.os.BatteryManager#BATTERY_PLUGGED_USB}
+         *
+         * Used by "adb shell svc power stayon ..."
+         *
+         * @param val an {@code int} containing the bits that specify which power sources
+         * should cause the device to stay on.
+         */
+        @Override // Binder call
+        public void setStayOnSetting(int val) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SETTINGS, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setStayOnSettingInternal(val);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Used by device administration to set the maximum screen off timeout.
+         *
+         * This method must only be called by the device administration policy manager.
+         */
+        @Override // Binder call
+        public void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setMaximumScreenOffTimeoutFromDeviceAdminInternal(timeMs);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Used by the settings application and brightness control widgets to
+         * temporarily override the current screen brightness setting so that the
+         * user can observe the effect of an intended settings change without applying
+         * it immediately.
+         *
+         * The override will be canceled when the setting value is next updated.
+         *
+         * @param brightness The overridden brightness.
+         *
+         * @see android.provider.Settings.System#SCREEN_BRIGHTNESS
+         */
+        @Override // Binder call
+        public void setTemporaryScreenBrightnessSettingOverride(int brightness) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setTemporaryScreenBrightnessSettingOverrideInternal(brightness);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Used by the settings application and brightness control widgets to
+         * temporarily override the current screen auto-brightness adjustment setting so that the
+         * user can observe the effect of an intended settings change without applying
+         * it immediately.
+         *
+         * The override will be canceled when the setting value is next updated.
+         *
+         * @param adj The overridden brightness, or Float.NaN to disable the override.
+         *
+         * @see Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ
+         */
+        @Override // Binder call
+        public void setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(float adj) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setTemporaryScreenAutoBrightnessAdjustmentSettingOverrideInternal(adj);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Used by the phone application to make the attention LED flash when ringing.
+         */
+        @Override // Binder call
+        public void setAttentionLight(boolean on, int color) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setAttentionLightInternal(on, color);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump PowerManager from from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid());
+                return;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    private final class LocalService implements PowerManagerInternal {
+        /**
+         * Used by the window manager to override the screen brightness based on the
+         * current foreground activity.
+         *
+         * This method must only be called by the window manager.
+         *
+         * @param brightness The overridden brightness, or -1 to disable the override.
+         */
+        @Override
+        public void setScreenBrightnessOverrideFromWindowManager(int brightness) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setScreenBrightnessOverrideFromWindowManagerInternal(brightness);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Used by the window manager to override the button brightness based on the
+         * current foreground activity.
+         *
+         * This method must only be called by the window manager.
+         *
+         * @param brightness The overridden brightness, or -1 to disable the override.
+         */
+        @Override
+        public void setButtonBrightnessOverrideFromWindowManager(int brightness) {
+            // Do nothing.
+            // Button lights are not currently supported in the new implementation.
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+        }
+
+        /**
+         * Used by the window manager to override the user activity timeout based on the
+         * current foreground activity.  It can only be used to make the timeout shorter
+         * than usual, not longer.
+         *
+         * This method must only be called by the window manager.
+         *
+         * @param timeoutMillis The overridden timeout, or -1 to disable the override.
+         */
+        @Override
+        public void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public void setPolicy(WindowManagerPolicy policy) {
+            PowerManagerService.this.setPolicy(policy);
         }
     }
 }
