@@ -47,8 +47,8 @@ each service that let you implement the functionality you want easier and faster
   <div class="layout-content-col span-4">
 
 <h4>Automatic Updates</h4>
-<p>Devices running Android 2.2 and newer and that have the Google Play Store
-app automatically receive updates to Google Play services. Enhance
+<p>Devices running Android 2.3 or higher that have the Google Play Store
+app will automatically receive updates to Google Play services. Enhance
 your app with the most recent version of Google Play services without worrying
 about your users' Android version.</p>
 
@@ -97,9 +97,9 @@ about your users' Android version.</p>
     <p>
       The Google Play services APK is delivered through the Google Play Store, so
       updates to the services are not dependent on carrier or OEM system image updates. In general, devices
-      running Android 2.2 (Froyo) or later and have the Google Play Store app installed receive updates within a
+      running Android 2.3 (Gingerbread) or later and have the Google Play Store app installed receive updates within a
       few days. This allows you to use the newest APIs in Google Play services and reach most of the
-      devices in the Android ecosystem (devices older than Android 2.2 or devices without the Google
+      devices in the Android ecosystem (devices older than Android 2.3 or devices without the Google
       Play Store app are not supported).
     </p>
   </div>
