@@ -16,14 +16,13 @@
 
 package android.os;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.storage.IMountService;
-import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.google.android.collect.Lists;
 
 import java.io.File;
@@ -66,33 +65,6 @@ public class Environment {
     private static UserEnvironment sCurrentUser;
     private static boolean sUserRequired;
 
-    private static final Object sLock = new Object();
-
-    @GuardedBy("sLock")
-    private static volatile StorageVolume sPrimaryVolume;
-
-    private static StorageVolume getPrimaryVolume() {
-        if (SystemProperties.getBoolean("config.disable_storage", false)) {
-            return null;
-        }
-
-        if (sPrimaryVolume == null) {
-            synchronized (sLock) {
-                if (sPrimaryVolume == null) {
-                    try {
-                        IMountService mountService = IMountService.Stub.asInterface(ServiceManager
-                                .getService("mount"));
-                        final StorageVolume[] volumes = mountService.getVolumeList();
-                        sPrimaryVolume = StorageManager.getPrimaryVolume(volumes);
-                    } catch (Exception e) {
-                        Log.e(TAG, "couldn't talk to MountService", e);
-                    }
-                }
-            }
-        }
-        return sPrimaryVolume;
-    }
-
     static {
         initForCurrentUser();
     }
@@ -101,10 +73,6 @@ public class Environment {
     public static void initForCurrentUser() {
         final int userId = UserHandle.myUserId();
         sCurrentUser = new UserEnvironment(userId);
-
-        synchronized (sLock) {
-            sPrimaryVolume = null;
-        }
     }
 
     /** {@hide} */
@@ -603,28 +571,28 @@ public class Environment {
      * Unknown storage state, such as when a path isn't backed by known storage
      * media.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_UNKNOWN = "unknown";
 
     /**
      * Storage state if the media is not present.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_REMOVED = "removed";
 
     /**
      * Storage state if the media is present but not mounted.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_UNMOUNTED = "unmounted";
 
     /**
      * Storage state if the media is present and being disk-checked.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_CHECKING = "checking";
 
@@ -632,7 +600,7 @@ public class Environment {
      * Storage state if the media is present but is blank or is using an
      * unsupported filesystem.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_NOFS = "nofs";
 
@@ -640,7 +608,7 @@ public class Environment {
      * Storage state if the media is present and mounted at its mount point with
      * read/write access.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_MOUNTED = "mounted";
 
@@ -648,7 +616,7 @@ public class Environment {
      * Storage state if the media is present and mounted at its mount point with
      * read-only access.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_MOUNTED_READ_ONLY = "mounted_ro";
 
@@ -656,14 +624,14 @@ public class Environment {
      * Storage state if the media is present not mounted, and shared via USB
      * mass storage.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_SHARED = "shared";
 
     /**
      * Storage state if the media was removed before it was unmounted.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_BAD_REMOVAL = "bad_removal";
 
@@ -671,7 +639,7 @@ public class Environment {
      * Storage state if the media is present but cannot be mounted. Typically
      * this happens if the file system on the media is corrupted.
      *
-     * @see #getStorageState(File)
+     * @see #getExternalStorageState(File)
      */
     public static final String MEDIA_UNMOUNTABLE = "unmountable";
 
@@ -687,7 +655,15 @@ public class Environment {
      */
     public static String getExternalStorageState() {
         final File externalDir = sCurrentUser.getExternalDirsForApp()[0];
-        return getStorageState(externalDir);
+        return getExternalStorageState(externalDir);
+    }
+
+    /**
+     * @deprecated use {@link #getExternalStorageState(File)}
+     */
+    @Deprecated
+    public static String getStorageState(File path) {
+        return getExternalStorageState(path);
     }
 
     /**
@@ -700,59 +676,81 @@ public class Environment {
      *         {@link #MEDIA_MOUNTED_READ_ONLY}, {@link #MEDIA_SHARED},
      *         {@link #MEDIA_BAD_REMOVAL}, or {@link #MEDIA_UNMOUNTABLE}.
      */
-    public static String getStorageState(File path) {
-        final String rawPath;
-        try {
-            rawPath = path.getCanonicalPath();
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to resolve target path: " + e);
-            return Environment.MEDIA_UNKNOWN;
-        }
-
-        try {
+    public static String getExternalStorageState(File path) {
+        final StorageVolume volume = getStorageVolume(path);
+        if (volume != null) {
             final IMountService mountService = IMountService.Stub.asInterface(
                     ServiceManager.getService("mount"));
-            final StorageVolume[] volumes = mountService.getVolumeList();
-            for (StorageVolume volume : volumes) {
-                if (rawPath.startsWith(volume.getPath())) {
-                    return mountService.getVolumeState(volume.getPath());
-                }
+            try {
+                return mountService.getVolumeState(volume.getPath());
+            } catch (RemoteException e) {
             }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to find external storage state: " + e);
         }
+
         return Environment.MEDIA_UNKNOWN;
     }
 
     /**
      * Returns whether the primary "external" storage device is removable.
-     * If true is returned, this device is for example an SD card that the
-     * user can remove.  If false is returned, the storage is built into
-     * the device and can not be physically removed.
      *
-     * <p>See {@link #getExternalStorageDirectory()} for more information.
+     * @return true if the storage device can be removed (such as an SD card),
+     *         or false if the storage device is built in and cannot be
+     *         physically removed.
      */
     public static boolean isExternalStorageRemovable() {
-        final StorageVolume primary = getPrimaryVolume();
-        return (primary != null && primary.isRemovable());
+        if (isStorageDisabled()) return false;
+        final File externalDir = sCurrentUser.getExternalDirsForApp()[0];
+        return isExternalStorageRemovable(externalDir);
     }
 
     /**
-     * Returns whether the device has an external storage device which is
-     * emulated. If true, the device does not have real external storage, and the directory
-     * returned by {@link #getExternalStorageDirectory()} will be allocated using a portion of
-     * the internal storage system.
+     * Returns whether the storage device that provides the given path is
+     * removable.
      *
-     * <p>Certain system services, such as the package manager, use this
-     * to determine where to install an application.
+     * @return true if the storage device can be removed (such as an SD card),
+     *         or false if the storage device is built in and cannot be
+     *         physically removed.
+     * @throws IllegalArgumentException if the path is not a valid storage
+     *             device.
+     */
+    public static boolean isExternalStorageRemovable(File path) {
+        final StorageVolume volume = getStorageVolume(path);
+        if (volume != null) {
+            return volume.isRemovable();
+        } else {
+            throw new IllegalArgumentException("Failed to find storage device at " + path);
+        }
+    }
+
+    /**
+     * Returns whether the primary "external" storage device is emulated. If
+     * true, data stored on this device will be stored on a portion of the
+     * internal storage system.
      *
-     * <p>Emulated external storage may also be encrypted - see
-     * {@link android.app.admin.DevicePolicyManager#setStorageEncryption(
-     * android.content.ComponentName, boolean)} for additional details.
+     * @see DevicePolicyManager#setStorageEncryption(android.content.ComponentName,
+     *      boolean)
      */
     public static boolean isExternalStorageEmulated() {
-        final StorageVolume primary = getPrimaryVolume();
-        return (primary != null && primary.isEmulated());
+        if (isStorageDisabled()) return false;
+        final File externalDir = sCurrentUser.getExternalDirsForApp()[0];
+        return isExternalStorageEmulated(externalDir);
+    }
+
+    /**
+     * Returns whether the storage device that provides the given path is
+     * emulated. If true, data stored on this device will be stored on a portion
+     * of the internal storage system.
+     *
+     * @throws IllegalArgumentException if the path is not a valid storage
+     *             device.
+     */
+    public static boolean isExternalStorageEmulated(File path) {
+        final StorageVolume volume = getStorageVolume(path);
+        if (volume != null) {
+            return volume.isEmulated();
+        } else {
+            throw new IllegalArgumentException("Failed to find storage device at " + path);
+        }
     }
 
     static File getDirectory(String variableName, String defaultPath) {
@@ -813,6 +811,32 @@ public class Environment {
             }
         }
         return cur;
+    }
+
+    private static boolean isStorageDisabled() {
+        return SystemProperties.getBoolean("config.disable_storage", false);
+    }
+
+    private static StorageVolume getStorageVolume(File path) {
+        try {
+            path = path.getCanonicalFile();
+        } catch (IOException e) {
+            return null;
+        }
+
+        try {
+            final IMountService mountService = IMountService.Stub.asInterface(
+                    ServiceManager.getService("mount"));
+            final StorageVolume[] volumes = mountService.getVolumeList();
+            for (StorageVolume volume : volumes) {
+                if (FileUtils.contains(volume.getPathFile(), path)) {
+                    return volume;
+                }
+            }
+        } catch (RemoteException e) {
+        }
+
+        return null;
     }
 
     /**

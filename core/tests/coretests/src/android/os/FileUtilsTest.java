@@ -26,14 +26,14 @@ import android.test.suitebuilder.annotation.MediumTest;
 
 import com.google.android.collect.Sets;
 
+import libcore.io.IoUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.HashSet;
-
-import libcore.io.IoUtils;
 
 @MediumTest
 public class FileUtilsTest extends AndroidTestCase {
@@ -110,6 +110,23 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals("", FileUtils.readTextFile(mTestFile, 10, "<>"));
         assertEquals("", FileUtils.readTextFile(mTestFile, -1, "<>"));
         assertEquals("", FileUtils.readTextFile(mTestFile, -10, "<>"));
+    }
+
+    public void testContains() throws Exception {
+        assertTrue(FileUtils.contains(new File("/"), new File("/moo.txt")));
+        assertTrue(FileUtils.contains(new File("/"), new File("/")));
+
+        assertTrue(FileUtils.contains(new File("/sdcard"), new File("/sdcard")));
+        assertTrue(FileUtils.contains(new File("/sdcard/"), new File("/sdcard/")));
+
+        assertTrue(FileUtils.contains(new File("/sdcard"), new File("/sdcard/moo.txt")));
+        assertTrue(FileUtils.contains(new File("/sdcard/"), new File("/sdcard/moo.txt")));
+
+        assertFalse(FileUtils.contains(new File("/sdcard"), new File("/moo.txt")));
+        assertFalse(FileUtils.contains(new File("/sdcard/"), new File("/moo.txt")));
+
+        assertFalse(FileUtils.contains(new File("/sdcard"), new File("/sdcard.txt")));
+        assertFalse(FileUtils.contains(new File("/sdcard/"), new File("/sdcard.txt")));
     }
 
     public void testDeleteOlderEmptyDir() throws Exception {
