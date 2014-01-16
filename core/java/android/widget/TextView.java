@@ -8481,7 +8481,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        if (mText.length() > 0 && hasSelection()) {
+        if (mText.length() > 0 && hasSelection() && mEditor != null) {
             return true;
         }
 
