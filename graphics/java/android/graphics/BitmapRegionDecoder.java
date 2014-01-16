@@ -33,7 +33,7 @@ import java.io.InputStream;
  *
  */
 public final class BitmapRegionDecoder {
-    private int mNativeBitmapRegionDecoder;
+    private long mNativeBitmapRegionDecoder;
     private boolean mRecycled;
     // ensures that the native decoder object exists and that only one decode can
     // occur at a time.
@@ -114,7 +114,7 @@ public final class BitmapRegionDecoder {
             boolean isShareable) throws IOException {
         if (is instanceof AssetManager.AssetInputStream) {
             return nativeNewInstance(
-                    ((AssetManager.AssetInputStream) is).getAssetInt(),
+                    ((AssetManager.AssetInputStream) is).getNativeAsset(),
                     isShareable);
         } else {
             // pass some temp storage down to the native code. 1024 is made up,
@@ -165,7 +165,7 @@ public final class BitmapRegionDecoder {
 
         This can be called from JNI code.
     */
-    private BitmapRegionDecoder(int decoder) {
+    private BitmapRegionDecoder(long decoder) {
         mNativeBitmapRegionDecoder = decoder;
         mRecycled = false;
     }
@@ -254,12 +254,12 @@ public final class BitmapRegionDecoder {
         }
     }
 
-    private static native Bitmap nativeDecodeRegion(int lbm,
+    private static native Bitmap nativeDecodeRegion(long lbm,
             int start_x, int start_y, int width, int height,
             BitmapFactory.Options options);
-    private static native int nativeGetWidth(int lbm);
-    private static native int nativeGetHeight(int lbm);
-    private static native void nativeClean(int lbm);
+    private static native int nativeGetWidth(long lbm);
+    private static native int nativeGetHeight(long lbm);
+    private static native void nativeClean(long lbm);
 
     private static native BitmapRegionDecoder nativeNewInstance(
             byte[] data, int offset, int length, boolean isShareable);
@@ -268,5 +268,5 @@ public final class BitmapRegionDecoder {
     private static native BitmapRegionDecoder nativeNewInstance(
             InputStream is, byte[] storage, boolean isShareable);
     private static native BitmapRegionDecoder nativeNewInstance(
-            int asset, boolean isShareable);
+            long asset, boolean isShareable);
 }
