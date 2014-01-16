@@ -290,6 +290,18 @@ public final class PowerManager {
      */
     public static final int GO_TO_SLEEP_REASON_TIMEOUT = 2;
 
+    /**
+     * The value to pass as the 'reason' argument to reboot() to
+     * reboot into recovery mode (for applying system updates, doing
+     * factory resets, etc.).
+     * <p>
+     * Requires the {@link android.Manifest.permission#RECOVERY}
+     * permission (in addition to
+     * {@link android.Manifest.permission#REBOOT}).
+     * </p>
+     */
+    public static final String REBOOT_RECOVERY = "recovery";
+    
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;

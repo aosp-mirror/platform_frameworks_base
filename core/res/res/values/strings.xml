@@ -3644,6 +3644,11 @@
     <!-- Description of an application permission that lets it control keyguard. -->
     <string name="permdesc_control_keyguard">Allows an application to control keguard.</string>
 
+    <!-- Title of an application permission that lets it interact with recovery. -->
+    <string name="permlab_recovery">Interact with update and recovery system</string>
+    <!-- Description of an application permission that lets it control keyguard. -->
+    <string name="permdesc_recovery">Allows an application to interact with the recovery system and system updates.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 
