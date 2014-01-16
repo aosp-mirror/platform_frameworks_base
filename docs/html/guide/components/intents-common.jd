@@ -11,6 +11,18 @@ page.tags="IntentFilter"
         <span class="less" style="display:none">show less</span></a></h2>
 
 <ol id="tocIntents" class="hide-nested">
+  <li><a href="#Clock">Alarm Clock</a>
+    <ol>
+      <li><a href="#CreateAlarm">Create an alarm</a></li>
+      <li><a href="#CreateTimer">Create a timer</a></li>
+      <li><a href="#ShowAlarms">Show all alarms</a></li>
+    </ol>
+  </li>
+  <li><a href="#Calendar">Calendar</a>
+    <ol>
+      <li><a href="#AddEvent">Add a calendar event</a></li>
+    </ol>
+  </li>
   <li><a href="#Camera">Camera</a>
     <ol>
       <li><a href="#ImageCapture">Capture a picture or video and return it</a></li>
@@ -116,6 +128,292 @@ the intent.</p>
 
 
 
+
+
+
+
+<h2 id="Clock">Alarm Clock</h2>
+
+
+<h3 id="CreateAlarm">Create an alarm</h3>
+
+<p>To create a new alarm, use the {@link android.provider.AlarmClock#ACTION_SET_ALARM}
+action and specify alarm details such as the time and message using extras defined below.</p>
+
+<p class="note"><strong>Note:</strong> Only the hour, minutes, and message extras are available
+since Android 2.3 (API level 9). The other extras were added in later versions of the platform.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.AlarmClock#ACTION_SET_ALARM}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None
+</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt>{@link android.provider.AlarmClock#EXTRA_HOUR}</dt>
+      <dd>The hour for the alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_MINUTES}</dt>
+      <dd>The minutes for the alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_MESSAGE}</dt>
+      <dd>A custom message to identify the alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_DAYS}</dt>
+      <dd>An {@link java.util.ArrayList} including each week day on which this alarm should
+      be repeated. Each day must be declared with an integer from the {@link java.util.Calendar}
+      class such as {@link java.util.Calendar#MONDAY}.
+      <p>For a one-time alarm, do not specify this extra.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_RINGTONE}</dt>
+      <dd>A {@code content:} URI specifying a ringtone to use with the alarm, or {@link
+      android.provider.AlarmClock#VALUE_RINGTONE_SILENT} for no ringtone.
+      <p>To use the default ringtone, do not specify this extra.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_VIBRATE}</dt>
+      <dd>A boolean specifying whether to vibrate for this alarm.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_SKIP_UI}</dt>
+      <dd>A boolean specifying whether the responding app should skip its UI when setting the alarm.
+      If true, the app should bypass any confirmation UI and simply set the specified alarm.</dd>
+  </dl>
+</dd>
+
+
+</dl>
+
+<p><b>Example intent:</b></p>
+<pre>
+public void createAlarm(String message, int hour, int minutes) {
+    Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM)
+            .putExtra(AlarmClock.EXTRA_MESSAGE, message)
+            .putExtra(AlarmClock.EXTRA_HOUR, hour)
+            .putExtra(AlarmClock.EXTRA_MINUTES, minutes);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+<div class="note"><strong>Note:</strong>
+<p>In order to invoke the {@link
+android.provider.AlarmClock#ACTION_SET_ALARM} intent, your app must have the
+{@link android.Manifest.permission#SET_ALARM} permission:</p>
+<pre>
+&lt;uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+</pre>
+</div>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SET_ALARM" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+<h3 id="CreateTimer">Create a timer</h3>
+
+<p>To create a countdown timer, use the {@link android.provider.AlarmClock#ACTION_SET_TIMER}
+action and specify timer details such as the duration using extras defined below.</p>
+
+<p class="note"><strong>Note:</strong> This intent was added
+in Android 4.4 (API level 19).</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.AlarmClock#ACTION_SET_TIMER}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None
+</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt>{@link android.provider.AlarmClock#EXTRA_LENGTH}</dt>
+      <dd>The length of the timer in seconds.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_MESSAGE}</dt>
+      <dd>A custom message to identify the timer.</dd>
+    <dt>{@link android.provider.AlarmClock#EXTRA_SKIP_UI}</dt>
+      <dd>A boolean specifying whether the responding app should skip its UI when setting the timer.
+      If true, the app should bypass any confirmation UI and simply start the specified timer.</dd>
+  </dl>
+</dd>
+
+
+</dl>
+
+<p><b>Example intent:</b></p>
+<pre>
+public void startTimer(String message, int seconds) {
+    Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
+            .putExtra(AlarmClock.EXTRA_MESSAGE, message)
+            .putExtra(AlarmClock.EXTRA_LENGTH, seconds)
+            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+<div class="note"><strong>Note:</strong>
+<p>In order to invoke the {@link
+android.provider.AlarmClock#ACTION_SET_TIMER} intent, your app must have the
+{@link android.Manifest.permission#SET_ALARM} permission:</p>
+<pre>
+&lt;uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+</pre>
+</div>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SET_TIMER" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+<h3 id="ShowAlarms">Show all alarms</h3>
+
+<p>To show the list of alarms, use the {@link android.provider.AlarmClock#ACTION_SHOW_ALARMS}
+action.</p>
+
+<p>Although not many apps will invoke this intent (it's primarily used by system apps),
+any app that behaves as an alarm clock should implement
+this intent filter and respond by showing the list of current alarms.</p>
+
+<p class="note"><strong>Note:</strong> This intent was added
+in Android 4.4 (API level 19).</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.provider.AlarmClock#ACTION_SHOW_ALARMS}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>None</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>None
+</dd>
+</dl>
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SHOW_ALARMS" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+
+<h2 id="Calendar">Calendar</h2>
+
+
+<h3 id="AddEvent">Add a calendar event</h3>
+
+<p>To add a new event to the user's calendar, use the {@link android.content.Intent#ACTION_INSERT}
+action and specify the data URI with {@link android.provider.CalendarContract.Events#CONTENT_URI
+Events.CONTENT_URI}. You can then specify various event details using extras defined below.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>{@link android.content.Intent#ACTION_INSERT}</dd>
+
+<dt><b>Data URI</b></dt>
+<dd>{@link android.provider.CalendarContract.Events#CONTENT_URI
+Events.CONTENT_URI}</dd>
+
+<dt><b>MIME Type</b></dt>
+<dd>{@code "vnd.android.cursor.dir/event"}
+</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY}</dt>
+      <dd>A boolean specifying whether this is an all-day event.</dd>
+    <dt>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME}</dt>
+      <dd>The start time of the event (milliseconds since epoch).</dd>
+    <dt>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME}</dt>
+      <dd>The end time of the event (milliseconds since epoch).</dd>
+    <dt>{@link android.provider.CalendarContract.EventsColumns#TITLE}</dt>
+      <dd>The event title.</dd>
+    <dt>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION}</dt>
+      <dd>The event description.</dd>
+    <dt>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION}</dt>
+      <dd>The event location.</dd>
+    <dt>{@link android.content.Intent#EXTRA_EMAIL}</dt>
+      <dd>A comma-separated list of email addresses that specify the invitees.</dd>
+  </dl>
+  <p>Many more event details can be specified using the constants defined in the
+  {@link android.provider.CalendarContract.EventsColumns} class.</p>
+</dd>
+
+
+</dl>
+
+<p><b>Example intent:</b></p>
+<pre>
+public void addEvent(String title, String location, Calendar begin, Calendar end) {
+    Intent intent = new Intent(Intent.ACTION_INSERT)
+            .setData(Events.CONTENT_URI)
+            .putExtra(Events.TITLE, title)
+            .putExtra(Events.EVENT_LOCATION, location)
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin)
+            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity ...>
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.INSERT" />
+        &lt;data android:mimeType="vnd.android.cursor.dir/event" />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
 <h2 id="Camera">Camera</h2>
 
 
@@ -207,6 +505,7 @@ then save the captured image or video at the location specified by that extra an
 android.app.Activity#setResult(int,Intent) setResult()} with an
 {@link android.content.Intent} that includes a compressed thumbnail
 in an extra named <code>"data"</code>.</p>
+
 
 
 
@@ -427,7 +726,7 @@ constants in {@link android.provider.ContactsContract.Intents.Insert}.</p>
 <dd>The type is inferred from contact URI.
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>One or more of the extras defined in {@link android.provider.ContactsContract.Intents.Insert}
 so you can populate fields of the contact details.
 </dd>
@@ -469,7 +768,7 @@ constants in {@link android.provider.ContactsContract.Intents.Insert}.
 <dt><b>MIME Type</b></dt>
 <dd>{@link android.provider.ContactsContract.Contacts#CONTENT_TYPE Contacts.CONTENT_TYPE}</dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>One or more of the extras defined in {@link android.provider.ContactsContract.Intents.Insert}.
 </dd>
 </dl>
@@ -523,7 +822,7 @@ and include email details such as the recipient and subject using the extra keys
   </dl>
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt>{@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}</dt>
@@ -648,7 +947,7 @@ object returned by {@link android.content.Intent#getClipData()}.</p>
 <dd>The MIME type corresponding to the file type the user should select.
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt>{@link android.content.Intent#EXTRA_ALLOW_MULTIPLE}
@@ -768,7 +1067,7 @@ primary MIME type in {@link android.content.Intent#setType setType()} to {@code 
 <dd>The MIME type corresponding to the file type the user should select.
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt>{@link android.content.Intent#EXTRA_MIME_TYPES}
@@ -1135,7 +1434,7 @@ details such as the phone number, subject, and message body using the extra keys
   </dl>
 </dd>
 
-<dt><b>Extras</b> (optional)</dt>
+<dt><b>Extras</b></dt>
 <dd>
   <dl>
     <dt><code>"subject"</code></dt>
