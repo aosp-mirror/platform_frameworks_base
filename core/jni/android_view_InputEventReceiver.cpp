@@ -330,7 +330,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 }
 
 
-static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
+static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
@@ -356,17 +356,17 @@ static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
     }
 
     receiver->incStrong(gInputEventReceiverClassInfo.clazz); // retain a reference for the object
-    return reinterpret_cast<jint>(receiver.get());
+    return reinterpret_cast<jlong>(receiver.get());
 }
 
-static void nativeDispose(JNIEnv* env, jclass clazz, jint receiverPtr) {
+static void nativeDispose(JNIEnv* env, jclass clazz, jlong receiverPtr) {
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
     receiver->dispose();
     receiver->decStrong(gInputEventReceiverClassInfo.clazz); // drop reference held by the object
 }
 
-static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jint receiverPtr,
+static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jlong receiverPtr,
         jint seq, jboolean handled) {
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
@@ -378,7 +378,7 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jint receiverPtr,
     }
 }
 
-static bool nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jint receiverPtr,
+static jboolean nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jlong receiverPtr,
         jlong frameTimeNanos) {
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
@@ -389,22 +389,22 @@ static bool nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jint rece
         String8 message;
         message.appendFormat("Failed to consume batched input event.  status=%d", status);
         jniThrowRuntimeException(env, message.string());
-        return false;
+        return JNI_FALSE;
     }
-    return consumedBatch;
+    return consumedBatch ? JNI_TRUE : JNI_FALSE;
 }
 
 
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
-            "(Ljava/lang/ref/WeakReference;Landroid/view/InputChannel;Landroid/os/MessageQueue;)I",
+            "(Ljava/lang/ref/WeakReference;Landroid/view/InputChannel;Landroid/os/MessageQueue;)J",
             (void*)nativeInit },
-    { "nativeDispose", "(I)V",
+    { "nativeDispose", "(J)V",
             (void*)nativeDispose },
-    { "nativeFinishInputEvent", "(IIZ)V",
+    { "nativeFinishInputEvent", "(JIZ)V",
             (void*)nativeFinishInputEvent },
-    { "nativeConsumeBatchedInputEvents", "(IJ)Z",
+    { "nativeConsumeBatchedInputEvents", "(JJ)Z",
             (void*)nativeConsumeBatchedInputEvents },
 };
 
