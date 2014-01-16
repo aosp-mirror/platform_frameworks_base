@@ -953,17 +953,13 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                     // to keep event dispatch happy.
                     mCameraEventInProgress = true;
                     userActivity();
-                    startPageWarp(cameraPage);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     mCameraEventInProgress = false;
-                    endWarp = isWarping();
                     break;
             }
             dispatchTouchEvent(event);
-            // This has to happen after the event has been handled by the real widget pager
-            if (endWarp) stopPageWarp();
         }
         endCameraEvent();
     }
