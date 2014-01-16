@@ -35,7 +35,7 @@ public final class MessageQueue {
     private final boolean mQuitAllowed;
 
     @SuppressWarnings("unused")
-    private int mPtr; // used by native code
+    private long mPtr; // used by native code
 
     Message mMessages;
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
@@ -49,11 +49,11 @@ public final class MessageQueue {
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
     private int mNextBarrierToken;
 
-    private native static int nativeInit();
-    private native static void nativeDestroy(int ptr);
-    private native static void nativePollOnce(int ptr, int timeoutMillis);
-    private native static void nativeWake(int ptr);
-    private native static boolean nativeIsIdling(int ptr);
+    private native static long nativeInit();
+    private native static void nativeDestroy(long ptr);
+    private native static void nativePollOnce(long ptr, int timeoutMillis);
+    private native static void nativeWake(long ptr);
+    private native static boolean nativeIsIdling(long ptr);
 
     /**
      * Callback interface for discovering when a thread is going to block
