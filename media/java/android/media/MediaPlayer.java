@@ -569,8 +569,8 @@ public class MediaPlayer implements SubtitleController.Listener
     // macro invocation in IMediaPlayer.cpp
     private final static String IMEDIA_PLAYER = "android.media.IMediaPlayer";
 
-    private int mNativeContext; // accessed by native methods
-    private int mNativeSurfaceTexture;  // accessed by native methods
+    private long mNativeContext; // accessed by native methods
+    private long mNativeSurfaceTexture;  // accessed by native methods
     private int mListenerContext; // accessed by native methods
     private SurfaceHolder mSurfaceHolder;
     private EventHandler mEventHandler;

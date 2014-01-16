@@ -119,12 +119,12 @@ static sp<MediaRecorder> getMediaRecorder(JNIEnv* env, jobject jmediarecorder) {
         return NULL;
     }
 
-    jfieldID context = env->GetFieldID(clazz, "mNativeContext", "I");
+    jfieldID context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (context == NULL) {
         return NULL;
     }
 
-    MediaRecorder* const p = (MediaRecorder*)env->GetIntField(jmediarecorder, context);
+    MediaRecorder* const p = (MediaRecorder*)env->GetLongField(jmediarecorder, context);
     env->DeleteLocalRef(clazz);
     return sp<MediaRecorder>(p);
 }
