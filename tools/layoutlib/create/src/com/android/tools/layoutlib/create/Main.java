@@ -115,7 +115,10 @@ public class Main {
                         "android.database.ContentObserver", // for Digital clock
                         "com.android.i18n.phonenumbers.*",  // for TextView with autolink attribute
                     },
-                    excludeClasses);
+                    excludeClasses,
+                    new String[] {
+                        "com/android/i18n/phonenumbers/data/*",
+                    });
             aa.analyze();
             agen.generate();
 
