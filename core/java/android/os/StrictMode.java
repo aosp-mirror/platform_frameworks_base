@@ -1449,7 +1449,11 @@ public final class StrictMode {
         if (policy.classInstanceLimit.size() == 0) {
             return;
         }
-        Runtime.getRuntime().gc();
+
+        System.gc();
+        System.runFinalization();
+        System.gc();
+
         // Note: classInstanceLimit is immutable, so this is lock-free
         for (Map.Entry<Class, Integer> entry : policy.classInstanceLimit.entrySet()) {
             Class klass = entry.getKey();
@@ -2005,7 +2009,10 @@ public final class StrictMode {
         // noticeably less responsive during orientation changes when activities are
         // being restarted.  Granted, it is only a problem when StrictMode is enabled
         // but it is annoying.
-        Runtime.getRuntime().gc();
+
+        System.gc();
+        System.runFinalization();
+        System.gc();
 
         long instances = VMDebug.countInstancesOfClass(klass, false);
         if (instances > limit) {
