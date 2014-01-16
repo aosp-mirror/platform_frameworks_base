@@ -129,7 +129,7 @@ public final class MessageQueue {
         // Return here if the message loop has already quit and been disposed.
         // This can happen if the application tries to restart a looper after quit
         // which is not supported.
-        final int ptr = mPtr;
+        final long ptr = mPtr;
         if (ptr == 0) {
             return null;
         }
