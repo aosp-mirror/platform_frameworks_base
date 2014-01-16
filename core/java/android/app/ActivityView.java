@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
@@ -31,12 +32,15 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 public class ActivityView extends ViewGroup {
+    private final String TAG = "ActivityView";
+
     private final TextureView mTextureView;
     private IActivityContainer mActivityContainer;
     private Activity mActivity;
     private boolean mAttached;
     private int mWidth;
     private int mHeight;
+    private Surface mSurface;
 
     public ActivityView(Context context) {
         this(context, null);
@@ -83,20 +87,18 @@ public class ActivityView extends ViewGroup {
 
         final SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
         if (surfaceTexture != null) {
-            createActivityView(surfaceTexture);
+            attachToSurface(surfaceTexture);
         }
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        if (mActivityContainer != null) {
-            try {
-                mActivityContainer.deleteActivityView();
-            } catch (RemoteException e) {
-            }
-            mActivityContainer = null;
-        }
-        mAttached = false;
+        detachFromSurface();
+    }
+
+    @Override
+    public boolean isAttachedToWindow() {
+        return mAttached;
     }
 
     public void startActivity(Intent intent) {
@@ -110,20 +112,39 @@ public class ActivityView extends ViewGroup {
     }
 
     /** Call when both mActivityContainer and mTextureView's SurfaceTexture are not null */
-    private void createActivityView(SurfaceTexture surfaceTexture) {
+    private void attachToSurface(SurfaceTexture surfaceTexture) {
         WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics metrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(metrics);
 
+        mSurface = new Surface(surfaceTexture);
         try {
-            mActivityContainer.createActivityView(new Surface(surfaceTexture), mWidth, mHeight,
+            mActivityContainer.attachToSurface(mSurface, mWidth, mHeight,
                     metrics.densityDpi);
         } catch (RemoteException e) {
             mActivityContainer = null;
+            mSurface.release();
+            mSurface = null;
+            mAttached = false;
             throw new IllegalStateException(
                     "ActivityView: Unable to create ActivityContainer. " + e);
         }
         mAttached = true;
+    }
+
+    private void detachFromSurface() {
+        if (mActivityContainer != null) {
+            try {
+                mActivityContainer.detachFromDisplay();
+            } catch (RemoteException e) {
+            }
+            mActivityContainer = null;
+        }
+        if (mSurface != null) {
+            mSurface.release();
+            mSurface = null;
+        }
+        mAttached = false;
     }
 
     private class ActivityViewSurfaceTextureListener implements SurfaceTextureListener {
@@ -133,30 +154,26 @@ public class ActivityView extends ViewGroup {
             mWidth = width;
             mHeight = height;
             if (mActivityContainer != null) {
-                createActivityView(surfaceTexture);
+                attachToSurface(surfaceTexture);
             }
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width,
                 int height) {
+            Log.d(TAG, "onSurfaceTextureSizeChanged: w=" + width + " h=" + height);
         }
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-            try {
-                mActivityContainer.deleteActivityView();
-                // TODO: Add binderDied to handle this nullification.
-                mActivityContainer = null;
-            } catch (RemoteException r) {
-            }
-            mAttached = false;
-            return false;
+            Log.d(TAG, "onSurfaceTextureDestroyed");
+            detachFromSurface();
+            return true;
         }
 
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
+//            Log.d(TAG, "onSurfaceTextureUpdated");
         }
 
     }
