@@ -1884,6 +1884,7 @@ public abstract class BatteryStats implements Parcelable {
                         break;
                 }
             }
+            pw.println();
         }
 
         if (timers.size() > 0) {
