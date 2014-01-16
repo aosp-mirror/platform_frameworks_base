@@ -34,17 +34,17 @@ public final class VelocityTracker {
 
     private static final int ACTIVE_POINTER_ID = -1;
 
-    private int mPtr;
+    private long mPtr;
     private final String mStrategy;
 
-    private static native int nativeInitialize(String strategy);
-    private static native void nativeDispose(int ptr);
-    private static native void nativeClear(int ptr);
-    private static native void nativeAddMovement(int ptr, MotionEvent event);
-    private static native void nativeComputeCurrentVelocity(int ptr, int units, float maxVelocity);
-    private static native float nativeGetXVelocity(int ptr, int id);
-    private static native float nativeGetYVelocity(int ptr, int id);
-    private static native boolean nativeGetEstimator(int ptr, int id, Estimator outEstimator);
+    private static native long nativeInitialize(String strategy);
+    private static native void nativeDispose(long ptr);
+    private static native void nativeClear(long ptr);
+    private static native void nativeAddMovement(long ptr, MotionEvent event);
+    private static native void nativeComputeCurrentVelocity(long ptr, int units, float maxVelocity);
+    private static native float nativeGetXVelocity(long ptr, int id);
+    private static native float nativeGetYVelocity(long ptr, int id);
+    private static native boolean nativeGetEstimator(long ptr, int id, Estimator outEstimator);
 
     /**
      * Retrieve a new VelocityTracker object to watch the velocity of a
