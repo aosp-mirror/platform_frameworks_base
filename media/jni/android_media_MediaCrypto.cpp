@@ -38,7 +38,7 @@ struct fields_t {
 static fields_t gFields;
 
 static sp<JCrypto> getCrypto(JNIEnv *env, jobject thiz) {
-    return (JCrypto *)env->GetIntField(thiz, gFields.context);
+    return (JCrypto *)env->GetLongField(thiz, gFields.context);
 }
 
 JCrypto::JCrypto(
@@ -146,14 +146,14 @@ using namespace android;
 
 static sp<JCrypto> setCrypto(
         JNIEnv *env, jobject thiz, const sp<JCrypto> &crypto) {
-    sp<JCrypto> old = (JCrypto *)env->GetIntField(thiz, gFields.context);
+    sp<JCrypto> old = (JCrypto *)env->GetLongField(thiz, gFields.context);
     if (crypto != NULL) {
         crypto->incStrong(thiz);
     }
     if (old != NULL) {
         old->decStrong(thiz);
     }
-    env->SetIntField(thiz, gFields.context, (int)crypto.get());
+    env->SetLongField(thiz, gFields.context, (jlong)crypto.get());
 
     return old;
 }
@@ -166,7 +166,7 @@ static void android_media_MediaCrypto_native_init(JNIEnv *env) {
     jclass clazz = env->FindClass("android/media/MediaCrypto");
     CHECK(clazz != NULL);
 
-    gFields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    gFields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     CHECK(gFields.context != NULL);
 }
 
@@ -232,7 +232,7 @@ static jboolean android_media_MediaCrypto_isCryptoSchemeSupportedNative(
                 env,
                 "java/lang/IllegalArgumentException",
                 NULL);
-        return false;
+        return JNI_FALSE;
     }
 
     jboolean isCopy;
@@ -243,27 +243,27 @@ static jboolean android_media_MediaCrypto_isCryptoSchemeSupportedNative(
     env->ReleaseByteArrayElements(uuidObj, uuid, 0);
     uuid = NULL;
 
-    return result;
+    return result ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean android_media_MediaCrypto_requiresSecureDecoderComponent(
         JNIEnv *env, jobject thiz, jstring mimeObj) {
     if (mimeObj == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return false;
+        return JNI_FALSE;
     }
 
     sp<JCrypto> crypto = getCrypto(env, thiz);
 
     if (crypto == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return false;
+        return JNI_FALSE;
     }
 
     const char *mime = env->GetStringUTFChars(mimeObj, NULL);
 
     if (mime == NULL) {
-        return false;
+        return JNI_FALSE;
     }
 
     bool result = crypto->requiresSecureDecoderComponent(mime);
@@ -271,7 +271,7 @@ static jboolean android_media_MediaCrypto_requiresSecureDecoderComponent(
     env->ReleaseStringUTFChars(mimeObj, mime);
     mime = NULL;
 
-    return result;
+    return result ? JNI_TRUE : JNI_FALSE;
 }
 
 static JNINativeMethod gMethods[] = {

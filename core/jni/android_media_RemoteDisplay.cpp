@@ -134,7 +134,7 @@ private:
 
 // ----------------------------------------------------------------------------
 
-static jint nativeListen(JNIEnv* env, jobject remoteDisplayObj, jstring ifaceStr) {
+static jlong nativeListen(JNIEnv* env, jobject remoteDisplayObj, jstring ifaceStr) {
     ScopedUtfChars iface(env, ifaceStr);
 
     sp<IServiceManager> sm = defaultServiceManager();
@@ -155,20 +155,20 @@ static jint nativeListen(JNIEnv* env, jobject remoteDisplayObj, jstring ifaceStr
     }
 
     NativeRemoteDisplay* wrapper = new NativeRemoteDisplay(display, client);
-    return reinterpret_cast<jint>(wrapper);
+    return reinterpret_cast<jlong>(wrapper);
 }
 
-static void nativePause(JNIEnv* env, jobject remoteDisplayObj, jint ptr) {
+static void nativePause(JNIEnv* env, jobject remoteDisplayObj, jlong ptr) {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     wrapper->pause();
 }
 
-static void nativeResume(JNIEnv* env, jobject remoteDisplayObj, jint ptr) {
+static void nativeResume(JNIEnv* env, jobject remoteDisplayObj, jlong ptr) {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     wrapper->resume();
 }
 
-static void nativeDispose(JNIEnv* env, jobject remoteDisplayObj, jint ptr) {
+static void nativeDispose(JNIEnv* env, jobject remoteDisplayObj, jlong ptr) {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     delete wrapper;
 }
@@ -176,13 +176,13 @@ static void nativeDispose(JNIEnv* env, jobject remoteDisplayObj, jint ptr) {
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"nativeListen", "(Ljava/lang/String;)I",
+    {"nativeListen", "(Ljava/lang/String;)J",
             (void*)nativeListen },
-    {"nativeDispose", "(I)V",
+    {"nativeDispose", "(J)V",
             (void*)nativeDispose },
-    {"nativePause", "(I)V",
+    {"nativePause", "(J)V",
             (void*)nativePause },
-    {"nativeResume", "(I)V",
+    {"nativeResume", "(J)V",
             (void*)nativeResume },
 };
 
