@@ -33,6 +33,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -132,7 +133,14 @@ public final class BroadcastQueue {
     static final int BROADCAST_INTENT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG;
     static final int BROADCAST_TIMEOUT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 1;
 
-    final Handler mHandler = new Handler() {
+    final BroadcastHandler mHandler;
+
+    private final class BroadcastHandler extends Handler {
+        public BroadcastHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case BROADCAST_INTENT_MSG: {
@@ -164,9 +172,10 @@ public final class BroadcastQueue {
         }
     }
 
-    BroadcastQueue(ActivityManagerService service, String name, long timeoutPeriod,
-            boolean allowDelayBehindServices) {
+    BroadcastQueue(ActivityManagerService service, Handler handler,
+            String name, long timeoutPeriod, boolean allowDelayBehindServices) {
         mService = service;
+        mHandler = new BroadcastHandler(handler.getLooper());
         mQueueName = name;
         mTimeoutPeriod = timeoutPeriod;
         mDelayBehindServices = allowDelayBehindServices;

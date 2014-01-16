@@ -19,6 +19,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.res.CompatibilityInfo;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.AtomicFile;
@@ -41,22 +42,27 @@ public final class CompatModePackages {
 
     private static final int MSG_WRITE = ActivityManagerService.FIRST_COMPAT_MODE_MSG;
 
-    private final Handler mHandler = new Handler() {
-        @Override public void handleMessage(Message msg) {
+    private final CompatHandler mHandler;
+
+    private final class CompatHandler extends Handler {
+        public CompatHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_WRITE:
                     saveCompatModes();
-                    break;
-                default:
-                    super.handleMessage(msg);
                     break;
             }
         }
     };
 
-    public CompatModePackages(ActivityManagerService service, File systemDir) {
+    public CompatModePackages(ActivityManagerService service, File systemDir, Handler handler) {
         mService = service;
         mFile = new AtomicFile(new File(systemDir, "packages-compat.xml"));
+        mHandler = new CompatHandler(handler.getLooper());
 
         FileInputStream fis = null;
         try {

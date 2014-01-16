@@ -40,6 +40,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
+import com.android.server.ServiceThread;
 
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
@@ -260,8 +261,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     static final String mTempContainerPrefix = "smdl2tmp";
 
-    final HandlerThread mHandlerThread = new HandlerThread("PackageManager",
-            Process.THREAD_PRIORITY_BACKGROUND);
+    final ServiceThread mHandlerThread;
     final PackageHandler mHandler;
 
     final int mSdkVersion = Build.VERSION.SDK_INT;
@@ -1126,10 +1126,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
+            mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
             mHandlerThread.start();
             mHandler = new PackageHandler(mHandlerThread.getLooper());
-            Watchdog.getInstance().addThread(mHandler, mHandlerThread.getName(),
-                    WATCHDOG_TIMEOUT);
+            Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
 
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");

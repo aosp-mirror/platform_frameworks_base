@@ -43,11 +43,18 @@ public class SystemServiceManager {
         mContext = context;
     }
 
-    public void startService(String className) {
+    /**
+     * Starts a service by name if the class exists, otherwise ignores it.
+     *
+     * @return The service instance, or null if not found.
+     */
+    @SuppressWarnings("unchecked")
+    public SystemService startServiceIfExists(String className) {
         try {
-            startService(Class.forName(className));
+            return startService((Class<SystemService>)Class.forName(className));
         } catch (ClassNotFoundException cnfe) {
             Slog.i(TAG, className + " not available, ignoring.");
+            return null;
         }
     }
 
@@ -56,10 +63,12 @@ public class SystemServiceManager {
      * {@link com.android.server.SystemService}.
      *
      * @param serviceClass A Java class that implements the SystemService interface.
+     * @return The service instance, never null.
      * @throws RuntimeException if the service fails to start.
      */
-    public void startService(Class<?> serviceClass) {
-        final SystemService serviceInstance = createInstance(serviceClass);
+    @SuppressWarnings("unchecked")
+    public <T extends SystemService> T startService(Class<T> serviceClass) {
+        final T serviceInstance = (T)createInstance(serviceClass);
         try {
             Slog.i(TAG, "Creating " + serviceClass.getSimpleName());
             serviceInstance.init(mContext, this);
@@ -75,6 +84,8 @@ public class SystemServiceManager {
         } catch (Throwable e) {
             throw new RuntimeException("Failed to start service " + serviceClass.getName(), e);
         }
+
+        return serviceInstance;
     }
 
     /**

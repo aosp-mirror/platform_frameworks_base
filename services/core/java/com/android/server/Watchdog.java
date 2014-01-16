@@ -20,18 +20,15 @@ import android.app.IActivityController;
 import android.os.Binder;
 import android.os.RemoteException;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.power.PowerManagerService;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -45,7 +42,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
@@ -269,15 +265,16 @@ public class Watchdog extends Thread {
         }
     }
 
-    public void addThread(Handler thread, String name) {
-        addThread(thread, name, DEFAULT_TIMEOUT);
+    public void addThread(Handler thread) {
+        addThread(thread, DEFAULT_TIMEOUT);
     }
 
-    public void addThread(Handler thread, String name, long timeoutMillis) {
+    public void addThread(Handler thread, long timeoutMillis) {
         synchronized (this) {
             if (isAlive()) {
                 throw new RuntimeException("Threads can't be added once the Watchdog is running");
             }
+            final String name = thread.getLooper().getThread().getName();
             mHandlerCheckers.add(new HandlerChecker(thread, name, timeoutMillis));
         }
     }
@@ -287,8 +284,11 @@ public class Watchdog extends Thread {
      */
     void rebootSystem(String reason) {
         Slog.i(TAG, "Rebooting system because: " + reason);
-        PowerManagerService pms = (PowerManagerService) ServiceManager.getService("power");
-        pms.reboot(false, reason, false);
+        IPowerManager pms = (IPowerManager)ServiceManager.getService(Context.POWER_SERVICE);
+        try {
+            pms.reboot(false, reason, false);
+        } catch (RemoteException ex) {
+        }
     }
 
     private int evaluateCheckerCompletionLocked() {

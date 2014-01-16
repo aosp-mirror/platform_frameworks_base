@@ -186,9 +186,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    public AppOpsService(File storagePath) {
+    public AppOpsService(File storagePath, Handler handler) {
         mFile = new AtomicFile(storagePath);
-        mHandler = new Handler();
+        mHandler = handler;
         readState();
     }
 

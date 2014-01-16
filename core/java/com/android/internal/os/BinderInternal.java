@@ -16,18 +16,11 @@
 
 package com.android.internal.os;
 
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.EventLog;
-import android.util.Log;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Modifier;
 
 /**
  * Private and debugging Binder APIs.
