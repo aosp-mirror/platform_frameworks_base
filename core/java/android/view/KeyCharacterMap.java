@@ -282,20 +282,20 @@ public class KeyCharacterMap implements Parcelable {
         }
     };
 
-    private int mPtr;
+    private long mPtr;
 
-    private static native int nativeReadFromParcel(Parcel in);
-    private static native void nativeWriteToParcel(int ptr, Parcel out);
-    private static native void nativeDispose(int ptr);
+    private static native long nativeReadFromParcel(Parcel in);
+    private static native void nativeWriteToParcel(long ptr, Parcel out);
+    private static native void nativeDispose(long ptr);
 
-    private static native char nativeGetCharacter(int ptr, int keyCode, int metaState);
-    private static native boolean nativeGetFallbackAction(int ptr, int keyCode, int metaState,
+    private static native char nativeGetCharacter(long ptr, int keyCode, int metaState);
+    private static native boolean nativeGetFallbackAction(long ptr, int keyCode, int metaState,
             FallbackAction outFallbackAction);
-    private static native char nativeGetNumber(int ptr, int keyCode);
-    private static native char nativeGetMatch(int ptr, int keyCode, char[] chars, int metaState);
-    private static native char nativeGetDisplayLabel(int ptr, int keyCode);
-    private static native int nativeGetKeyboardType(int ptr);
-    private static native KeyEvent[] nativeGetEvents(int ptr, char[] chars);
+    private static native char nativeGetNumber(long ptr, int keyCode);
+    private static native char nativeGetMatch(long ptr, int keyCode, char[] chars, int metaState);
+    private static native char nativeGetDisplayLabel(long ptr, int keyCode);
+    private static native int nativeGetKeyboardType(long ptr);
+    private static native KeyEvent[] nativeGetEvents(long ptr, char[] chars);
 
     private KeyCharacterMap(Parcel in) {
         if (in == null) {
@@ -308,7 +308,7 @@ public class KeyCharacterMap implements Parcelable {
     }
 
     // Called from native
-    private KeyCharacterMap(int ptr) {
+    private KeyCharacterMap(long ptr) {
         mPtr = ptr;
     }
 
