@@ -30,7 +30,7 @@ public:
             const mat4& casterTransform, VertexBuffer& shadowVertexBuffer);
 
     static void tessellateSpotShadow(float width, float height,
-            int screenWidth, int screenHeight,
+            const mat4& receiverTransform, int screenWidth, int screenHeight,
             const mat4& casterTransform, VertexBuffer& shadowVertexBuffer);
 
 private:
