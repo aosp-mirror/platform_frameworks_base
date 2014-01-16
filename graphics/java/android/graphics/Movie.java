@@ -21,9 +21,9 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 
 public class Movie {
-    private final int mNativeMovie;
+    private final long mNativeMovie;
 
-    private Movie(int nativeMovie) {
+    private Movie(long nativeMovie) {
         if (nativeMovie == 0) {
             throw new RuntimeException("native movie creation failed");
         }
@@ -48,19 +48,19 @@ public class Movie {
             return null;
         }
         if (is instanceof AssetManager.AssetInputStream) {
-            final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+            final long asset = ((AssetManager.AssetInputStream) is).getNativeAsset();
             return nativeDecodeAsset(asset);
         }
 
         return nativeDecodeStream(is);
     }
 
-    private static native Movie nativeDecodeAsset(int asset);
+    private static native Movie nativeDecodeAsset(long asset);
     private static native Movie nativeDecodeStream(InputStream is);
     public static native Movie decodeByteArray(byte[] data, int offset,
                                                int length);
 
-    private static native void nativeDestructor(int nativeMovie);
+    private static native void nativeDestructor(long nativeMovie);
 
     public static Movie decodeFile(String pathName) {
         InputStream is;
