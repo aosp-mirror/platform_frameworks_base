@@ -1027,6 +1027,16 @@ public class GridView extends AbsListView {
     }
 
     @Override
+    public int getRowForPosition(int position) {
+        return position / mNumColumns;
+    }
+
+    @Override
+    public int getFirstPositionForRow(int row) {
+        return row * mNumColumns;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Sets up mListPadding
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
