@@ -81,14 +81,14 @@ void NativeInputChannel::invokeAndRemoveDisposeCallback(JNIEnv* env, jobject obj
 
 static NativeInputChannel* android_view_InputChannel_getNativeInputChannel(JNIEnv* env,
         jobject inputChannelObj) {
-    jint intPtr = env->GetIntField(inputChannelObj, gInputChannelClassInfo.mPtr);
-    return reinterpret_cast<NativeInputChannel*>(intPtr);
+    jlong longPtr = env->GetLongField(inputChannelObj, gInputChannelClassInfo.mPtr);
+    return reinterpret_cast<NativeInputChannel*>(longPtr);
 }
 
 static void android_view_InputChannel_setNativeInputChannel(JNIEnv* env, jobject inputChannelObj,
         NativeInputChannel* nativeInputChannel) {
-    env->SetIntField(inputChannelObj, gInputChannelClassInfo.mPtr,
-             reinterpret_cast<jint>(nativeInputChannel));
+    env->SetLongField(inputChannelObj, gInputChannelClassInfo.mPtr,
+             reinterpret_cast<jlong>(nativeInputChannel));
 }
 
 sp<InputChannel> android_view_InputChannel_getInputChannel(JNIEnv* env, jobject inputChannelObj) {
@@ -296,7 +296,7 @@ int register_android_view_InputChannel(JNIEnv* env) {
     FIND_CLASS(gInputChannelClassInfo.clazz, "android/view/InputChannel");
 
     GET_FIELD_ID(gInputChannelClassInfo.mPtr, gInputChannelClassInfo.clazz,
-            "mPtr", "I");
+            "mPtr", "J");
     
     GET_METHOD_ID(gInputChannelClassInfo.ctor, gInputChannelClassInfo.clazz,
             "<init>", "()V");
