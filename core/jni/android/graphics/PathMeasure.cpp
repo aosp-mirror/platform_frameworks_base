@@ -52,11 +52,24 @@ namespace android {
 class SkPathMeasureGlue {
 public:
 
-    static PathMeasurePair* create(JNIEnv* env, jobject clazz, const SkPath* path, jboolean forceClosed) {
-        return path ? new PathMeasurePair(*path, forceClosed) : new PathMeasurePair;
+    static jlong create(JNIEnv* env, jobject clazz, jlong pathHandle,
+                        jboolean forceClosedHandle) {
+        const SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
+        bool forceClosed = (forceClosedHandle == JNI_TRUE);
+        PathMeasurePair* pair;
+        if(path)
+            pair = new PathMeasurePair(*path, forceClosed);
+        else
+            pair = new PathMeasurePair;
+        return reinterpret_cast<jlong>(pair);
     }
- 
-    static void setPath(JNIEnv* env, jobject clazz, PathMeasurePair* pair, const SkPath* path, jboolean forceClosed) {
+
+    static void setPath(JNIEnv* env, jobject clazz, jlong pairHandle,
+                        jlong pathHandle, jboolean forceClosedHandle) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
+        const SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
+        bool forceClosed = (forceClosedHandle == JNI_TRUE);
+
         if (NULL == path) {
             pair->fPath.reset();
         } else {
@@ -64,11 +77,12 @@ public:
         }
         pair->fMeasure.setPath(&pair->fPath, forceClosed);
     }
- 
-    static jfloat getLength(JNIEnv* env, jobject clazz, PathMeasurePair* pair) {
-        return SkScalarToFloat(pair->fMeasure.getLength());
+
+    static jfloat getLength(JNIEnv* env, jobject clazz, jlong pairHandle) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
+        return static_cast<jfloat>(SkScalarToFloat(pair->fMeasure.getLength()));
     }
- 
+
     static void convertTwoElemFloatArray(JNIEnv* env, jfloatArray array, const SkScalar src[2]) {
         AutoJavaFloatArray autoArray(env, array, 2);
         jfloat* ptr = autoArray.ptr();
@@ -76,13 +90,14 @@ public:
         ptr[1] = SkScalarToFloat(src[1]);
     }
 
-    static jboolean getPosTan(JNIEnv* env, jobject clazz, PathMeasurePair* pair, jfloat dist, jfloatArray pos, jfloatArray tan) {
+    static jboolean getPosTan(JNIEnv* env, jobject clazz, jlong pairHandle, jfloat dist, jfloatArray pos, jfloatArray tan) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
         SkScalar    tmpPos[2], tmpTan[2];
         SkScalar*   posPtr = pos ? tmpPos : NULL;
         SkScalar*   tanPtr = tan ? tmpTan : NULL;
         
         if (!pair->fMeasure.getPosTan(SkFloatToScalar(dist), (SkPoint*)posPtr, (SkVector*)tanPtr)) {
-            return false;
+            return JNI_FALSE;
         }
     
         if (pos) {
@@ -91,42 +106,53 @@ public:
         if (tan) {
             convertTwoElemFloatArray(env, tan, tmpTan);
         }
-        return true;
+        return JNI_TRUE;
     }
- 
-    static jboolean getMatrix(JNIEnv* env, jobject clazz, PathMeasurePair* pair, jfloat dist,
-                          SkMatrix* matrix, int flags) {
-        return pair->fMeasure.getMatrix(SkFloatToScalar(dist), matrix, (SkPathMeasure::MatrixFlags)flags);
+
+    static jboolean getMatrix(JNIEnv* env, jobject clazz, jlong pairHandle, jfloat dist,
+                          jlong matrixHandle, jint flags) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
+        SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
+        bool result = pair->fMeasure.getMatrix(SkFloatToScalar(dist), matrix, (SkPathMeasure::MatrixFlags)flags);
+        return result ? JNI_TRUE : JNI_FALSE;
     }
- 
-    static jboolean getSegment(JNIEnv* env, jobject clazz, PathMeasurePair* pair, jfloat startF,
-                               jfloat stopF, SkPath* dst, jboolean startWithMoveTo) {
-        return pair->fMeasure.getSegment(SkFloatToScalar(startF), SkFloatToScalar(stopF), dst, startWithMoveTo);
+
+    static jboolean getSegment(JNIEnv* env, jobject clazz, jlong pairHandle, jfloat startF,
+                               jfloat stopF, jlong dstHandle, jboolean startWithMoveTo) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
+        SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
+        bool result = pair->fMeasure.getSegment(SkFloatToScalar(startF), SkFloatToScalar(stopF), dst, startWithMoveTo);
+        return result ? JNI_TRUE : JNI_FALSE;
     }
- 
-    static jboolean isClosed(JNIEnv* env, jobject clazz, PathMeasurePair* pair) {
-        return pair->fMeasure.isClosed();
+
+    static jboolean isClosed(JNIEnv* env, jobject clazz, jlong pairHandle) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
+        bool result = pair->fMeasure.isClosed();
+        return result ? JNI_TRUE : JNI_FALSE;
     }
- 
-    static jboolean nextContour(JNIEnv* env, jobject clazz, PathMeasurePair* pair) {
-        return pair->fMeasure.nextContour();
+
+    static jboolean nextContour(JNIEnv* env, jobject clazz, jlong pairHandle) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
+        bool result = pair->fMeasure.nextContour();
+        return result ? JNI_TRUE : JNI_FALSE;
     }
- 
-    static void destroy(JNIEnv* env, jobject clazz, PathMeasurePair* pair) {
+
+    static void destroy(JNIEnv* env, jobject clazz, jlong pairHandle) {
+        PathMeasurePair* pair = reinterpret_cast<PathMeasurePair*>(pairHandle);
         delete pair;
     } 
 };
 
 static JNINativeMethod methods[] = {
-    {"native_create",       "(IZ)I",        (void*) SkPathMeasureGlue::create      },
-    {"native_setPath",      "(IIZ)V",       (void*) SkPathMeasureGlue::setPath     },
-    {"native_getLength",    "(I)F",         (void*) SkPathMeasureGlue::getLength   },
-    {"native_getPosTan",    "(IF[F[F)Z",    (void*) SkPathMeasureGlue::getPosTan   },
-    {"native_getMatrix",    "(IFII)Z",      (void*) SkPathMeasureGlue::getMatrix   },
-    {"native_getSegment",   "(IFFIZ)Z",     (void*) SkPathMeasureGlue::getSegment  },
-    {"native_isClosed",     "(I)Z",         (void*) SkPathMeasureGlue::isClosed    },
-    {"native_nextContour",  "(I)Z",         (void*) SkPathMeasureGlue::nextContour },
-    {"native_destroy",      "(I)V",         (void*) SkPathMeasureGlue::destroy     }
+    {"native_create",       "(JZ)J",        (void*) SkPathMeasureGlue::create      },
+    {"native_setPath",      "(JJZ)V",       (void*) SkPathMeasureGlue::setPath     },
+    {"native_getLength",    "(J)F",         (void*) SkPathMeasureGlue::getLength   },
+    {"native_getPosTan",    "(JF[F[F)Z",    (void*) SkPathMeasureGlue::getPosTan   },
+    {"native_getMatrix",    "(JFJI)Z",      (void*) SkPathMeasureGlue::getMatrix   },
+    {"native_getSegment",   "(JFFJZ)Z",     (void*) SkPathMeasureGlue::getSegment  },
+    {"native_isClosed",     "(J)Z",         (void*) SkPathMeasureGlue::isClosed    },
+    {"native_nextContour",  "(J)Z",         (void*) SkPathMeasureGlue::nextContour },
+    {"native_destroy",      "(J)V",         (void*) SkPathMeasureGlue::destroy     }
 };
 
 int register_android_graphics_PathMeasure(JNIEnv* env) {
