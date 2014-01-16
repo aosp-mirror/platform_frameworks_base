@@ -323,7 +323,7 @@ final class ActivityStack {
         }
     }
 
-    private int numActivities() {
+    int numActivities() {
         int count = 0;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             count += mTaskHistory.get(taskNdx).mActivities.size();
@@ -2712,6 +2712,7 @@ final class ActivityStack {
     }
 
     private void removeActivityFromHistoryLocked(ActivityRecord r) {
+        mStackSupervisor.removeChildActivityContainers(r);
         finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
         r.makeFinishing();
         if (DEBUG_ADD_REMOVE) {
@@ -3355,6 +3356,8 @@ final class ActivityStack {
 
         r.startFreezingScreenLocked(r.app, 0);
 
+        mStackSupervisor.removeChildActivityContainers(r);
+
         try {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG,
                     (andResume ? "Relaunching to RESUMED " : "Relaunching to PAUSED ")
@@ -3387,14 +3390,20 @@ final class ActivityStack {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.appToken == token) {
-                        return true;
+                    return true;
                 }
                 if (r.fullscreen && !r.finishing) {
                     return false;
                 }
             }
         }
-        return true;
+        final ActivityRecord r = ActivityRecord.forToken(token);
+        if (r == null) {
+            return false;
+        }
+        if (r.finishing) Slog.e(TAG, "willActivityBeVisibleLocked: Returning false,"
+                + " would have returned true for r=" + r);
+        return !r.finishing;
     }
 
     void closeSystemDialogsLocked() {
