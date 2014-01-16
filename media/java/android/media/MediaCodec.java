@@ -644,5 +644,5 @@ final public class MediaCodec {
         native_init();
     }
 
-    private int mNativeContext;
+    private long mNativeContext;
 }

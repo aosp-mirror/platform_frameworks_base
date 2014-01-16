@@ -887,5 +887,5 @@ public class ToneGenerator
     protected void finalize() { native_finalize(); }
 
     @SuppressWarnings("unused")
-    private int mNativeContext; // accessed by native methods
+    private long mNativeContext; // accessed by native methods
 }

@@ -226,12 +226,12 @@ private:
 
 static MediaScanner *getNativeScanner_l(JNIEnv* env, jobject thiz)
 {
-    return (MediaScanner *) env->GetIntField(thiz, fields.context);
+    return (MediaScanner *) env->GetLongField(thiz, fields.context);
 }
 
 static void setNativeScanner_l(JNIEnv* env, jobject thiz, MediaScanner *s)
 {
-    env->SetIntField(thiz, fields.context, (int)s);
+    env->SetLongField(thiz, fields.context, (jlong)s);
 }
 
 static void
@@ -381,7 +381,7 @@ android_media_MediaScanner_native_init(JNIEnv *env)
         return;
     }
 
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (fields.context == NULL) {
         return;
     }
@@ -398,7 +398,7 @@ android_media_MediaScanner_native_setup(JNIEnv *env, jobject thiz)
         return;
     }
 
-    env->SetIntField(thiz, fields.context, (int)mp);
+    env->SetLongField(thiz, fields.context, (jlong)mp);
 }
 
 static void

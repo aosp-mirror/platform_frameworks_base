@@ -352,5 +352,5 @@ final public class MediaExtractor {
         native_init();
     }
 
-    private int mNativeContext;
+    private long mNativeContext;
 }

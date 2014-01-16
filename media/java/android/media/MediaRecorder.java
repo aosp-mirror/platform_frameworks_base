@@ -81,7 +81,7 @@ public class MediaRecorder
 
     // The two fields below are accessed by native methods
     @SuppressWarnings("unused")
-    private int mNativeContext;
+    private long mNativeContext;
 
     @SuppressWarnings("unused")
     private Surface mSurface;

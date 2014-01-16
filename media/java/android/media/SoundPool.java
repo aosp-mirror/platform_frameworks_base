@@ -442,7 +442,7 @@ public class SoundPool {
         private final static String TAG = "SoundPool";
         private final static boolean DEBUG = false;
 
-        private int mNativeContext; // accessed by native methods
+        private long mNativeContext; // accessed by native methods
 
         private EventHandler mEventHandler;
         private SoundPool.OnLoadCompleteListener mOnLoadCompleteListener;
