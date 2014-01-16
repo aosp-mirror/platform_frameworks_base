@@ -41,11 +41,16 @@ header.hide=1
       APK. </p>
 
       <h4>Monetize your apps</h4>
-      <p>Connect with over a million Google advertisers and show relevant ads in your
-      app. Users engage with the ads, you make money.
+      <p>Connect with over a million Google advertisers and show relevant ads in your app. Users
+      engage with the ads, you make money. The Google Mobile Ads SDK fully supports AdMob,
+      DoubleClick for Publishers, DoubleClick Ad Exchange, and Search Ads for Mobile Apps. 
       <br>
       <a href="http://www.google.com/ads/admob/monetize.html" class="external-link">Learn more
       and sign up</a>.</p>
+
+      <h4>Location-based ads</h4>
+      <p>You can use the publisher-provided location API to provide Google with the location when
+      requesting ads. Location-based ads can improve your app monetization.</p>
 
       <h4>Innovative ads</h4>
       <p>Choose from a range of ads across mobile devices and tablets, including interactive
@@ -79,7 +84,5 @@ header.hide=1
     <p>Detailed documentation for Google Mobile Ads for Android is available with the rest of the Google
     Mobile Ads developer documents at <a href="https://developers.google.com/mobile-ads-sdk"
     class="external-link">developers.google.com/mobile-ads-sdk</a>. </p>
-    <p class="note"><strong>Note</strong>: The SDK doesn’t currently support DFP, Ad Exchange or Search
-    Ads for Mobile Apps but support is coming soon.</p>
   </div>
 </div>

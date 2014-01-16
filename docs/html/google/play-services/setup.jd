@@ -190,7 +190,7 @@ to your <code>gradle.build</code> file's build types. For more information, see 
 
 <p>As described in the <a href="{@docRoot}google/play-services/index.html">Google Play services
 introduction</a>, Google Play delivers service updates for users on
-Android 2.2 through the Google Play Store app. However, updates might not reach
+Android 2.3 through the Google Play Store app. However, updates might not reach
 all users immediately.</p>
 
 <p class="caution">
