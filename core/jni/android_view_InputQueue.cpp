@@ -151,7 +151,7 @@ void InputQueue::handleMessage(const Message& message) {
                 mFinishedEvents.removeAt(0);
             }
             env->CallVoidMethod(inputQueueObj.get(), gInputQueueClassInfo.finishInputEvent,
-                    reinterpret_cast<jint>(event), handled);
+                    reinterpret_cast<jlong>(event), handled);
             recycleInputEvent(event);
         }
         break;
@@ -193,7 +193,7 @@ InputQueue* InputQueue::createQueue(jobject inputQueueObj, const sp<Looper>& loo
     return new InputQueue(inputQueueObj, looper, pipeFds[0], pipeFds[1]);
 }
 
-static jint nativeInit(JNIEnv* env, jobject clazz, jobject queueWeak, jobject jMsgQueue) {
+static jlong nativeInit(JNIEnv* env, jobject clazz, jobject queueWeak, jobject jMsgQueue) {
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, jMsgQueue);
     if (messageQueue == NULL) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
@@ -205,16 +205,16 @@ static jint nativeInit(JNIEnv* env, jobject clazz, jobject queueWeak, jobject jM
         return 0;
     }
     queue->incStrong(&gInputQueueClassInfo);
-    return reinterpret_cast<jint>(queue.get());
+    return reinterpret_cast<jlong>(queue.get());
 }
 
-static void nativeDispose(JNIEnv* env, jobject clazz, jint ptr) {
+static void nativeDispose(JNIEnv* env, jobject clazz, jlong ptr) {
     sp<InputQueue> queue = reinterpret_cast<InputQueue*>(ptr);
     queue->detachLooper();
     queue->decStrong(&gInputQueueClassInfo);
 }
 
-static jint nativeSendKeyEvent(JNIEnv* env, jobject clazz, jint ptr, jobject eventObj,
+static jlong nativeSendKeyEvent(JNIEnv* env, jobject clazz, jlong ptr, jobject eventObj,
         jboolean predispatch) {
     InputQueue* queue = reinterpret_cast<InputQueue*>(ptr);
     KeyEvent* event = queue->createKeyEvent();
@@ -230,10 +230,10 @@ static jint nativeSendKeyEvent(JNIEnv* env, jobject clazz, jint ptr, jobject eve
     }
 
     queue->enqueueEvent(event);
-    return reinterpret_cast<jint>(event);
+    return reinterpret_cast<jlong>(event);
 }
 
-static jint nativeSendMotionEvent(JNIEnv* env, jobject clazz, jint ptr, jobject eventObj) {
+static jlong nativeSendMotionEvent(JNIEnv* env, jobject clazz, jlong ptr, jobject eventObj) {
     sp<InputQueue> queue = reinterpret_cast<InputQueue*>(ptr);
     MotionEvent* originalEvent = android_view_MotionEvent_getNativePtr(env, eventObj);
     if (!originalEvent) {
@@ -243,15 +243,15 @@ static jint nativeSendMotionEvent(JNIEnv* env, jobject clazz, jint ptr, jobject 
     MotionEvent* event = queue->createMotionEvent();
     event->copyFrom(originalEvent, true /* keepHistory */);
     queue->enqueueEvent(event);
-    return reinterpret_cast<jint>(event);
+    return reinterpret_cast<jlong>(event);
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "nativeInit", "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;)I",
+    { "nativeInit", "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;)J",
         (void*) nativeInit },
-    { "nativeDispose", "(I)V", (void*) nativeDispose },
-    { "nativeSendKeyEvent", "(ILandroid/view/KeyEvent;Z)I", (void*) nativeSendKeyEvent },
-    { "nativeSendMotionEvent", "(ILandroid/view/MotionEvent;)I", (void*) nativeSendMotionEvent },
+    { "nativeDispose", "(J)V", (void*) nativeDispose },
+    { "nativeSendKeyEvent", "(JLandroid/view/KeyEvent;Z)J", (void*) nativeSendKeyEvent },
+    { "nativeSendMotionEvent", "(JLandroid/view/MotionEvent;)J", (void*) nativeSendMotionEvent },
 };
 
 static const char* const kInputQueuePathName = "android/view/InputQueue";
@@ -272,7 +272,7 @@ int register_android_view_InputQueue(JNIEnv* env)
 {
     jclass clazz;
     FIND_CLASS(clazz, kInputQueuePathName);
-    GET_METHOD_ID(gInputQueueClassInfo.finishInputEvent, clazz, "finishInputEvent", "(IZ)V");
+    GET_METHOD_ID(gInputQueueClassInfo.finishInputEvent, clazz, "finishInputEvent", "(JZ)V");
 
     return AndroidRuntime::registerNativeMethods(
         env, kInputQueuePathName,
