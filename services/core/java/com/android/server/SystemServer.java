@@ -605,14 +605,16 @@ public final class SystemServer {
 
                 try {
                     Slog.i(TAG, "Wi-Fi P2pService");
-                    systemServiceManager.startService("com.android.server.wifi.p2p.WifiP2pService");
+                    mSystemServiceManager.startServiceIfExists(
+                            "com.android.server.wifi.p2p.WifiP2pService");
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi P2pService", e);
                 }
 
                 try {
                     Slog.i(TAG, "Wi-Fi Service");
-                    systemServiceManager.startService("com.android.server.wifi.WifiService");
+                    mSystemServiceManager.startServiceIfExists(
+                            "com.android.server.wifi.WifiService");
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi Service", e);
                 }
