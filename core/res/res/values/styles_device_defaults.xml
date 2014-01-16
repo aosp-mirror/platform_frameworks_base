@@ -32,262 +32,731 @@ easier.
  -->
 <resources>
     <!-- Widget Styles -->
-    <style name="Widget.DeviceDefault" parent="Widget.Quantum"/>
-    <style name="Widget.DeviceDefault.Button" parent="Widget.Quantum.Button"/>
-    <style name="Widget.DeviceDefault.Button.Small" parent="Widget.Quantum.Button.Small"/>
-    <style name="Widget.DeviceDefault.Button.Inset" parent="Widget.Quantum.Button.Inset"/>
-    <style name="Widget.DeviceDefault.Button.Toggle" parent="Widget.Quantum.Button.Toggle"/>
-    <style name="Widget.DeviceDefault.TextView" parent="Widget.Quantum.TextView"/>
-    <style name="Widget.DeviceDefault.CheckedTextView" parent="Widget.Quantum.CheckedTextView"/>
-    <style name="Widget.DeviceDefault.AutoCompleteTextView" parent="Widget.Quantum.AutoCompleteTextView"/>
-    <style name="Widget.DeviceDefault.CompoundButton.CheckBox" parent="Widget.Quantum.CompoundButton.CheckBox"/>
-    <style name="Widget.DeviceDefault.ListView.DropDown" parent="Widget.Quantum.ListView.DropDown"/>
-    <style name="Widget.DeviceDefault.EditText" parent="Widget.Quantum.EditText"/>
-    <style name="Widget.DeviceDefault.ExpandableListView" parent="Widget.Quantum.ExpandableListView"/>
-    <style name="Widget.DeviceDefault.GridView" parent="Widget.Quantum.GridView"/>
-    <style name="Widget.DeviceDefault.ImageButton" parent="Widget.Quantum.ImageButton"/>
-    <style name="Widget.DeviceDefault.ListView" parent="Widget.Quantum.ListView"/>
-    <style name="Widget.DeviceDefault.PopupWindow" parent="Widget.Quantum.PopupWindow"/>
-    <style name="Widget.DeviceDefault.ProgressBar" parent="Widget.Quantum.ProgressBar"/>
-    <style name="Widget.DeviceDefault.ProgressBar.Horizontal" parent="Widget.Quantum.ProgressBar.Horizontal"/>
-    <style name="Widget.DeviceDefault.ProgressBar.Small" parent="Widget.Quantum.ProgressBar.Small"/>
-    <style name="Widget.DeviceDefault.ProgressBar.Small.Title" parent="Widget.Quantum.ProgressBar.Small.Title"/>
-    <style name="Widget.DeviceDefault.ProgressBar.Large" parent="Widget.Quantum.ProgressBar.Large"/>
-    <style name="Widget.DeviceDefault.SeekBar" parent="Widget.Quantum.SeekBar"/>
-    <style name="Widget.DeviceDefault.RatingBar" parent="Widget.Quantum.RatingBar"/>
-    <style name="Widget.DeviceDefault.RatingBar.Indicator" parent="Widget.Quantum.RatingBar.Indicator"/>
-    <style name="Widget.DeviceDefault.RatingBar.Small" parent="Widget.Quantum.RatingBar.Small"/>
-    <style name="Widget.DeviceDefault.CompoundButton.RadioButton" parent="Widget.Quantum.CompoundButton.RadioButton"/>
-    <style name="Widget.DeviceDefault.ScrollView" parent="Widget.Quantum.ScrollView"/>
-    <style name="Widget.DeviceDefault.HorizontalScrollView" parent="Widget.Quantum.HorizontalScrollView"/>
-    <style name="Widget.DeviceDefault.Spinner" parent="Widget.Quantum.Spinner"/>
-    <style name="Widget.DeviceDefault.CompoundButton.Star" parent="Widget.Quantum.CompoundButton.Star"/>
-    <style name="Widget.DeviceDefault.TabWidget" parent="Widget.Quantum.TabWidget"/>
-    <style name="Widget.DeviceDefault.WebTextView" parent="Widget.Quantum.WebTextView"/>
-    <style name="Widget.DeviceDefault.WebView" parent="Widget.Quantum.WebView"/>
-    <style name="Widget.DeviceDefault.DropDownItem" parent="Widget.Quantum.DropDownItem"/>
-    <style name="Widget.DeviceDefault.DropDownItem.Spinner" parent="Widget.Quantum.DropDownItem.Spinner"/>
-    <style name="Widget.DeviceDefault.TextView.SpinnerItem" parent="Widget.Quantum.TextView.SpinnerItem"/>
-    <style name="Widget.DeviceDefault.ListPopupWindow" parent="Widget.Quantum.ListPopupWindow"/>
-    <style name="Widget.DeviceDefault.PopupMenu" parent="Widget.Quantum.PopupMenu"/>
-    <style name="Widget.DeviceDefault.ActionButton" parent="Widget.Quantum.ActionButton"/>
-    <style name="Widget.DeviceDefault.ActionButton.Overflow" parent="Widget.Quantum.ActionButton.Overflow"/>
-    <style name="Widget.DeviceDefault.ActionButton.TextButton" parent="Widget.Quantum.ActionButton.TextButton"/>
-    <style name="Widget.DeviceDefault.ActionMode" parent="Widget.Quantum.ActionMode"/>
-    <style name="Widget.DeviceDefault.ActionButton.CloseMode" parent="Widget.Quantum.ActionButton.CloseMode"/>
-    <style name="Widget.DeviceDefault.ActionBar" parent="Widget.Quantum.ActionBar"/>
-    <style name="Widget.DeviceDefault.Button.Borderless" parent="Widget.Quantum.Button.Borderless"/>
-    <style name="Widget.DeviceDefault.Tab" parent="Widget.Quantum.Tab"/>
-    <style name="Widget.DeviceDefault.CalendarView" parent="Widget.Quantum.CalendarView"/>
-    <style name="Widget.DeviceDefault.DatePicker" parent="Widget.Quantum.DatePicker"/>
-    <style name="Widget.DeviceDefault.ActionBar.TabView" parent="Widget.Quantum.ActionBar.TabView"/>
-    <style name="Widget.DeviceDefault.ActionBar.TabText" parent="Widget.Quantum.ActionBar.TabText"/>
-    <style name="Widget.DeviceDefault.ActionBar.TabBar" parent="Widget.Quantum.ActionBar.TabBar"/>
-    <style name="Widget.DeviceDefault.ActionBar.Solid" parent="Widget.Quantum.ActionBar.Solid"/>
-    <style name="Widget.DeviceDefault.Button.Borderless.Small" parent="Widget.Quantum.Button.Borderless.Small"/>
-    <style name="Widget.DeviceDefault.AbsListView" parent="Widget.Quantum.AbsListView"/>
-    <style name="Widget.DeviceDefault.Spinner.DropDown.ActionBar" parent="Widget.Quantum.Spinner.DropDown.ActionBar"/>
-    <style name="Widget.DeviceDefault.PopupWindow.ActionMode" parent="Widget.Quantum.PopupWindow.ActionMode"/>
-    <style name="Widget.DeviceDefault.CompoundButton.Switch" parent="Widget.Quantum.CompoundButton.Switch"/>
-    <style name="Widget.DeviceDefault.ExpandableListView.White" parent="Widget.Quantum.ExpandableListView.White"/>
-    <style name="Widget.DeviceDefault.FastScroll" parent="Widget.Quantum.FastScroll"/>
-    <style name="Widget.DeviceDefault.FragmentBreadCrumbs" parent="Widget.Quantum.FragmentBreadCrumbs"/>
-    <style name="Widget.DeviceDefault.Gallery" parent="Widget.Quantum.Gallery"/>
-    <style name="Widget.DeviceDefault.GestureOverlayView" parent="Widget.Quantum.GestureOverlayView"/>
-    <style name="Widget.DeviceDefault.ImageWell" parent="Widget.Quantum.ImageWell"/>
-    <style name="Widget.DeviceDefault.KeyboardView" parent="Widget.Quantum.KeyboardView"/>
-    <style name="Widget.DeviceDefault.ListView.White" parent="Widget.Quantum.ListView.White"/>
-    <style name="Widget.DeviceDefault.NumberPicker" parent="Widget.Quantum.NumberPicker"/>
-    <style name="Widget.DeviceDefault.PreferenceFrameLayout" parent="Widget.Quantum.PreferenceFrameLayout"/>
-    <style name="Widget.DeviceDefault.ProgressBar.Inverse" parent="Widget.Quantum.ProgressBar.Inverse"/>
-    <style name="Widget.DeviceDefault.ProgressBar.Large.Inverse" parent="Widget.Quantum.ProgressBar.Large.Inverse"/>
-    <style name="Widget.DeviceDefault.ProgressBar.Small.Inverse" parent="Widget.Quantum.ProgressBar.Small.Inverse"/>
-    <style name="Widget.DeviceDefault.QuickContactBadge.WindowLarge" parent="Widget.Quantum.QuickContactBadge.WindowLarge"/>
-    <style name="Widget.DeviceDefault.QuickContactBadge.WindowMedium" parent="Widget.Quantum.QuickContactBadge.WindowMedium"/>
-    <style name="Widget.DeviceDefault.QuickContactBadge.WindowSmall" parent="Widget.Quantum.QuickContactBadge.WindowSmall"/>
-    <style name="Widget.DeviceDefault.QuickContactBadgeSmall.WindowLarge" parent="Widget.Quantum.QuickContactBadgeSmall.WindowLarge"/>
-    <style name="Widget.DeviceDefault.QuickContactBadgeSmall.WindowMedium" parent="Widget.Quantum.QuickContactBadgeSmall.WindowMedium"/>
-    <style name="Widget.DeviceDefault.QuickContactBadgeSmall.WindowSmall" parent="Widget.Quantum.QuickContactBadgeSmall.WindowSmall"/>
-    <style name="Widget.DeviceDefault.Spinner.DropDown" parent="Widget.Quantum.Spinner.DropDown"/>
-    <style name="Widget.DeviceDefault.StackView" parent="Widget.Quantum.StackView"/>
-    <style name="Widget.DeviceDefault.TextSelectHandle" parent="Widget.Quantum.TextSelectHandle"/>
-    <style name="Widget.DeviceDefault.TextSuggestionsPopupWindow" parent="Widget.Quantum.TextSuggestionsPopupWindow"/>
-    <style name="Widget.DeviceDefault.TextView.ListSeparator" parent="Widget.Quantum.TextView.ListSeparator"/>
-    <style name="Widget.DeviceDefault.TimePicker" parent="Widget.Quantum.TimePicker"/>
-    <style name="Widget.DeviceDefault.Light" parent="Widget.Quantum.Light"/>
-    <style name="Widget.DeviceDefault.Light.Button" parent="Widget.Quantum.Light.Button"/>
-    <style name="Widget.DeviceDefault.Light.Button.Small" parent="Widget.Quantum.Light.Button.Small"/>
-    <style name="Widget.DeviceDefault.Light.Button.Inset" parent="Widget.Quantum.Light.Button.Inset"/>
-    <style name="Widget.DeviceDefault.Light.Button.Toggle" parent="Widget.Quantum.Light.Button.Toggle"/>
-    <style name="Widget.DeviceDefault.Light.TextView" parent="Widget.Quantum.Light.TextView"/>
-    <style name="Widget.DeviceDefault.Light.CheckedTextView" parent="Widget.Quantum.Light.CheckedTextView"/>
-    <style name="Widget.DeviceDefault.Light.AutoCompleteTextView" parent="Widget.Quantum.Light.AutoCompleteTextView"/>
-    <style name="Widget.DeviceDefault.Light.CompoundButton.CheckBox" parent="Widget.Quantum.Light.CompoundButton.CheckBox"/>
-    <style name="Widget.DeviceDefault.Light.ListView.DropDown" parent="Widget.Quantum.Light.ListView.DropDown"/>
-    <style name="Widget.DeviceDefault.Light.EditText" parent="Widget.Quantum.Light.EditText"/>
-    <style name="Widget.DeviceDefault.Light.ExpandableListView" parent="Widget.Quantum.Light.ExpandableListView"/>
-    <style name="Widget.DeviceDefault.Light.FastScroll" parent="Widget.Quantum.Light.FastScroll"/>
-    <style name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" parent="Widget.Quantum.Light.FragmentBreadCrumbs"/>
-    <style name="Widget.DeviceDefault.Light.GridView" parent="Widget.Quantum.Light.GridView"/>
-    <style name="Widget.DeviceDefault.Light.ImageButton" parent="Widget.Quantum.Light.ImageButton"/>
-    <style name="Widget.DeviceDefault.Light.ListView" parent="Widget.Quantum.Light.ListView"/>
-    <style name="Widget.DeviceDefault.Light.PopupWindow" parent="Widget.Quantum.Light.PopupWindow"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar" parent="Widget.Quantum.Light.ProgressBar"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar.Horizontal" parent="Widget.Quantum.Light.ProgressBar.Horizontal"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar.Small" parent="Widget.Quantum.Light.ProgressBar.Small"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar.Small.Title" parent="Widget.Quantum.Light.ProgressBar.Small.Title"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar.Large" parent="Widget.Quantum.Light.ProgressBar.Large"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar.Inverse" parent="Widget.Quantum.Light.ProgressBar.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar.Small.Inverse" parent="Widget.Quantum.Light.ProgressBar.Small.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.ProgressBar.Large.Inverse" parent="Widget.Quantum.Light.ProgressBar.Large.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.SeekBar" parent="Widget.Quantum.Light.SeekBar"/>
-    <style name="Widget.DeviceDefault.Light.RatingBar" parent="Widget.Quantum.Light.RatingBar"/>
-    <style name="Widget.DeviceDefault.Light.RatingBar.Indicator" parent="Widget.Quantum.Light.RatingBar.Indicator"/>
-    <style name="Widget.DeviceDefault.Light.RatingBar.Small" parent="Widget.Quantum.Light.RatingBar.Small"/>
-    <style name="Widget.DeviceDefault.Light.CompoundButton.RadioButton" parent="Widget.Quantum.Light.CompoundButton.RadioButton"/>
-    <style name="Widget.DeviceDefault.Light.ScrollView" parent="Widget.Quantum.Light.ScrollView"/>
-    <style name="Widget.DeviceDefault.Light.HorizontalScrollView" parent="Widget.Quantum.Light.HorizontalScrollView"/>
-    <style name="Widget.DeviceDefault.Light.Spinner" parent="Widget.Quantum.Light.Spinner"/>
-    <style name="Widget.DeviceDefault.Light.CompoundButton.Star" parent="Widget.Quantum.Light.CompoundButton.Star"/>
-    <style name="Widget.DeviceDefault.Light.TabWidget" parent="Widget.Quantum.Light.TabWidget"/>
-    <style name="Widget.DeviceDefault.Light.WebTextView" parent="Widget.Quantum.Light.WebTextView"/>
-    <style name="Widget.DeviceDefault.Light.WebView" parent="Widget.Quantum.Light.WebView"/>
-    <style name="Widget.DeviceDefault.Light.DropDownItem" parent="Widget.Quantum.Light.DropDownItem"/>
-    <style name="Widget.DeviceDefault.Light.DropDownItem.Spinner" parent="Widget.Quantum.Light.DropDownItem.Spinner"/>
-    <style name="Widget.DeviceDefault.Light.TextView.SpinnerItem" parent="Widget.Quantum.Light.TextView.SpinnerItem"/>
-    <style name="Widget.DeviceDefault.Light.ListPopupWindow" parent="Widget.Quantum.Light.ListPopupWindow"/>
-    <style name="Widget.DeviceDefault.Light.PopupMenu" parent="Widget.Quantum.Light.PopupMenu"/>
-    <style name="Widget.DeviceDefault.Light.Tab" parent="Widget.Quantum.Light.Tab"/>
-    <style name="Widget.DeviceDefault.Light.CalendarView" parent="Widget.Quantum.Light.CalendarView"/>
-    <style name="Widget.DeviceDefault.Light.Button.Borderless.Small" parent="Widget.Quantum.Light.Button.Borderless.Small"/>
-    <style name="Widget.DeviceDefault.Light.ActionButton" parent="Widget.Quantum.Light.ActionButton"/>
-    <style name="Widget.DeviceDefault.Light.ActionButton.Overflow" parent="Widget.Quantum.Light.ActionButton.Overflow"/>
-    <style name="Widget.DeviceDefault.Light.ActionMode" parent="Widget.Quantum.Light.ActionMode"/>
-    <style name="Widget.DeviceDefault.Light.ActionButton.CloseMode" parent="Widget.Quantum.Light.ActionButton.CloseMode"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar" parent="Widget.Quantum.Light.ActionBar"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabView" parent="Widget.Quantum.Light.ActionBar.TabView"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabText" parent="Widget.Quantum.Light.ActionBar.TabText"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabBar" parent="Widget.Quantum.Light.ActionBar.TabBar"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.Quantum.Light.ActionBar.Solid"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.Solid.Inverse" parent="Widget.Quantum.Light.ActionBar.Solid.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabBar.Inverse" parent="Widget.Quantum.Light.ActionBar.TabBar.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabView.Inverse" parent="Widget.Quantum.Light.ActionBar.TabView.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabText.Inverse" parent="Widget.Quantum.Light.ActionBar.TabText.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.ActionMode.Inverse" parent="Widget.Quantum.Light.ActionMode.Inverse"/>
-    <style name="Widget.DeviceDefault.Light.AbsListView" parent="Widget.Quantum.Light.AbsListView"/>
-    <style name="Widget.DeviceDefault.Light.Spinner.DropDown.ActionBar" parent="Widget.Quantum.Light.Spinner.DropDown.ActionBar"/>
-    <style name="Widget.DeviceDefault.Light.PopupWindow.ActionMode" parent="Widget.Quantum.Light.PopupWindow.ActionMode"/>
-    <style name="Widget.DeviceDefault.Light.Button.Borderless" parent="Widget.Quantum.Light.Button.Borderless"/>
-    <style name="Widget.DeviceDefault.Light.DatePicker" parent="Widget.Quantum.Light.DatePicker"/>
-    <style name="Widget.DeviceDefault.Light.ExpandableListView.White" parent="Widget.Quantum.Light.ExpandableListView.White"/>
-    <style name="Widget.DeviceDefault.Light.Gallery" parent="Widget.Quantum.Light.Gallery"/>
-    <style name="Widget.DeviceDefault.Light.GestureOverlayView" parent="Widget.Quantum.Light.GestureOverlayView"/>
-    <style name="Widget.DeviceDefault.Light.ImageWell" parent="Widget.Quantum.Light.ImageWell"/>
-    <style name="Widget.DeviceDefault.Light.ListView.White" parent="Widget.Quantum.Light.ListView.White"/>
-    <style name="Widget.DeviceDefault.Light.NumberPicker" parent="Widget.Quantum.Light.NumberPicker"/>
-    <style name="Widget.DeviceDefault.Light.Spinner.DropDown" parent="Widget.Quantum.Light.Spinner.DropDown"/>
-    <style name="Widget.DeviceDefault.Light.TextView.ListSeparator" parent="Widget.Quantum.Light.TextView.ListSeparator"/>
-    <style name="Widget.DeviceDefault.Light.TimePicker" parent="Widget.Quantum.Light.TimePicker"/>
-    <style name="Widget.DeviceDefault.Light.TextSuggestionsPopupWindow" parent="Widget.Quantum.Light.TextSuggestionsPopupWindow"/>
+    <style name="Widget.DeviceDefault" parent="Widget.Holo" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Button" parent="Widget.Holo.Button" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Button.Small" parent="Widget.Holo.Button.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Button.Inset" parent="Widget.Holo.Button.Inset" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Button.Toggle" parent="Widget.Holo.Button.Toggle" >
+
+    </style>
+    <style name="Widget.DeviceDefault.TextView" parent="Widget.Holo.TextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.CheckedTextView" parent="Widget.Holo.CheckedTextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.AutoCompleteTextView" parent="Widget.Holo.AutoCompleteTextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.CompoundButton.CheckBox" parent="Widget.Holo.CompoundButton.CheckBox" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ListView.DropDown" parent="Widget.Holo.ListView.DropDown" >
+
+    </style>
+    <style name="Widget.DeviceDefault.EditText" parent="Widget.Holo.EditText" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ExpandableListView" parent="Widget.Holo.ExpandableListView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.GridView" parent="Widget.Holo.GridView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ImageButton" parent="Widget.Holo.ImageButton" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ListView" parent="Widget.Holo.ListView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.PopupWindow" parent="Widget.Holo.PopupWindow" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar" parent="Widget.Holo.ProgressBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar.Horizontal" parent="Widget.Holo.ProgressBar.Horizontal" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar.Small" parent="Widget.Holo.ProgressBar.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar.Small.Title" parent="Widget.Holo.ProgressBar.Small.Title" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar.Large" parent="Widget.Holo.ProgressBar.Large" >
+
+    </style>
+    <style name="Widget.DeviceDefault.SeekBar" parent="Widget.Holo.SeekBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.RatingBar" parent="Widget.Holo.RatingBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.RatingBar.Indicator" parent="Widget.Holo.RatingBar.Indicator" >
+
+    </style>
+    <style name="Widget.DeviceDefault.RatingBar.Small" parent="Widget.Holo.RatingBar.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.CompoundButton.RadioButton" parent="Widget.Holo.CompoundButton.RadioButton" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ScrollView" parent="Widget.Holo.ScrollView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.HorizontalScrollView" parent="Widget.Holo.HorizontalScrollView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Spinner" parent="Widget.Holo.Spinner" >
+
+    </style>
+    <style name="Widget.DeviceDefault.CompoundButton.Star" parent="Widget.Holo.CompoundButton.Star" >
+
+    </style>
+    <style name="Widget.DeviceDefault.TabWidget" parent="Widget.Holo.TabWidget" >
+
+    </style>
+    <style name="Widget.DeviceDefault.WebTextView" parent="Widget.Holo.WebTextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.WebView" parent="Widget.Holo.WebView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.DropDownItem" parent="Widget.Holo.DropDownItem" >
+
+    </style>
+    <style name="Widget.DeviceDefault.DropDownItem.Spinner" parent="Widget.Holo.DropDownItem.Spinner" >
+
+    </style>
+    <style name="Widget.DeviceDefault.TextView.SpinnerItem" parent="Widget.Holo.TextView.SpinnerItem" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ListPopupWindow" parent="Widget.Holo.ListPopupWindow" >
+
+    </style>
+    <style name="Widget.DeviceDefault.PopupMenu" parent="Widget.Holo.PopupMenu" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionButton" parent="Widget.Holo.ActionButton" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionButton.Overflow" parent="Widget.Holo.ActionButton.Overflow" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionButton.TextButton" parent="Widget.Holo.ActionButton.TextButton" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionMode" parent="Widget.Holo.ActionMode" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionButton.CloseMode" parent="Widget.Holo.ActionButton.CloseMode" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionBar" parent="Widget.Holo.ActionBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Button.Borderless" parent="Widget.Holo.Button.Borderless" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Tab" parent="Widget.Holo.Tab" >
+
+    </style>
+    <style name="Widget.DeviceDefault.CalendarView" parent="Widget.Holo.CalendarView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.DatePicker" parent="Widget.Holo.DatePicker" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionBar.TabView" parent="Widget.Holo.ActionBar.TabView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionBar.TabText" parent="Widget.Holo.ActionBar.TabText" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionBar.TabBar" parent="Widget.Holo.ActionBar.TabBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.ActionBar.Solid" parent="Widget.Holo.ActionBar.Solid" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Button.Borderless.Small" parent="Widget.Holo.Button.Borderless.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.AbsListView" parent="Widget.Holo.AbsListView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Spinner.DropDown.ActionBar" parent="Widget.Holo.Spinner.DropDown.ActionBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.PopupWindow.ActionMode" parent="Widget.Holo.PopupWindow.ActionMode" >
+
+    </style>
+    <style name="Widget.DeviceDefault.CompoundButton.Switch" parent="Widget.Holo.CompoundButton.Switch">
+
+    </style>
+    <style name="Widget.DeviceDefault.ExpandableListView.White" parent="Widget.Holo.ExpandableListView.White">
+
+    </style>
+    <style name="Widget.DeviceDefault.FastScroll" parent="Widget.Holo.FastScroll">
+
+    </style>
+    <style name="Widget.DeviceDefault.FragmentBreadCrumbs" parent="Widget.Holo.FragmentBreadCrumbs">
+
+    </style>
+    <style name="Widget.DeviceDefault.Gallery" parent="Widget.Holo.Gallery">
+
+    </style>
+    <style name="Widget.DeviceDefault.GestureOverlayView" parent="Widget.Holo.GestureOverlayView">
+
+    </style>
+    <style name="Widget.DeviceDefault.ImageWell" parent="Widget.Holo.ImageWell">
+
+    </style>
+    <style name="Widget.DeviceDefault.KeyboardView" parent="Widget.Holo.KeyboardView">
+
+    </style>
+    <style name="Widget.DeviceDefault.ListView.White" parent="Widget.Holo.ListView.White">
+
+    </style>
+    <style name="Widget.DeviceDefault.NumberPicker" parent="Widget.Holo.NumberPicker">
+
+    </style>
+    <style name="Widget.DeviceDefault.PreferenceFrameLayout" parent="Widget.Holo.PreferenceFrameLayout">
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar.Inverse" parent="Widget.Holo.ProgressBar.Inverse">
+
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar.Large.Inverse" parent="Widget.Holo.ProgressBar.Large.Inverse">
+
+    </style>
+    <style name="Widget.DeviceDefault.ProgressBar.Small.Inverse" parent="Widget.Holo.ProgressBar.Small.Inverse">
+
+    </style>
+    <style name="Widget.DeviceDefault.QuickContactBadge.WindowLarge" parent="Widget.Holo.QuickContactBadge.WindowLarge">
+
+    </style>
+    <style name="Widget.DeviceDefault.QuickContactBadge.WindowMedium" parent="Widget.Holo.QuickContactBadge.WindowMedium">
+
+    </style>
+    <style name="Widget.DeviceDefault.QuickContactBadge.WindowSmall" parent="Widget.Holo.QuickContactBadge.WindowSmall">
+
+    </style>
+    <style name="Widget.DeviceDefault.QuickContactBadgeSmall.WindowLarge" parent="Widget.Holo.QuickContactBadgeSmall.WindowLarge">
+
+    </style>
+    <style name="Widget.DeviceDefault.QuickContactBadgeSmall.WindowMedium" parent="Widget.Holo.QuickContactBadgeSmall.WindowMedium">
+
+    </style>
+    <style name="Widget.DeviceDefault.QuickContactBadgeSmall.WindowSmall" parent="Widget.Holo.QuickContactBadgeSmall.WindowSmall">
+
+    </style>
+    <style name="Widget.DeviceDefault.Spinner.DropDown" parent="Widget.Holo.Spinner.DropDown">
+
+    </style>
+    <style name="Widget.DeviceDefault.StackView" parent="Widget.Holo.StackView">
+
+    </style>
+    <style name="Widget.DeviceDefault.TextSelectHandle" parent="Widget.Holo.TextSelectHandle">
+
+    </style>
+    <style name="Widget.DeviceDefault.TextSuggestionsPopupWindow" parent="Widget.Holo.TextSuggestionsPopupWindow">
+
+    </style>
+    <style name="Widget.DeviceDefault.TextView.ListSeparator" parent="Widget.Holo.TextView.ListSeparator">
+
+    </style>
+    <style name="Widget.DeviceDefault.TimePicker" parent="Widget.Holo.TimePicker">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light" parent="Widget.Holo.Light" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Button" parent="Widget.Holo.Light.Button" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Button.Small" parent="Widget.Holo.Light.Button.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Button.Inset" parent="Widget.Holo.Light.Button.Inset" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Button.Toggle" parent="Widget.Holo.Light.Button.Toggle" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.TextView" parent="Widget.Holo.Light.TextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.CheckedTextView" parent="Widget.Holo.Light.CheckedTextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.AutoCompleteTextView" parent="Widget.Holo.Light.AutoCompleteTextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.CompoundButton.CheckBox" parent="Widget.Holo.Light.CompoundButton.CheckBox" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ListView.DropDown" parent="Widget.Holo.Light.ListView.DropDown" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.EditText" parent="Widget.Holo.Light.EditText" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ExpandableListView" parent="Widget.Holo.Light.ExpandableListView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.FastScroll" parent="Widget.Holo.Light.FastScroll">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" parent="Widget.Holo.Light.FragmentBreadCrumbs">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.GridView" parent="Widget.Holo.Light.GridView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ImageButton" parent="Widget.Holo.Light.ImageButton" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ListView" parent="Widget.Holo.Light.ListView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.PopupWindow" parent="Widget.Holo.Light.PopupWindow" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar" parent="Widget.Holo.Light.ProgressBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar.Horizontal" parent="Widget.Holo.Light.ProgressBar.Horizontal" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar.Small" parent="Widget.Holo.Light.ProgressBar.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar.Small.Title" parent="Widget.Holo.Light.ProgressBar.Small.Title" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar.Large" parent="Widget.Holo.Light.ProgressBar.Large" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar.Inverse" parent="Widget.Holo.Light.ProgressBar.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar.Small.Inverse" parent="Widget.Holo.Light.ProgressBar.Small.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ProgressBar.Large.Inverse" parent="Widget.Holo.Light.ProgressBar.Large.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.SeekBar" parent="Widget.Holo.Light.SeekBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.RatingBar" parent="Widget.Holo.Light.RatingBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.RatingBar.Indicator" parent="Widget.Holo.Light.RatingBar.Indicator" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.RatingBar.Small" parent="Widget.Holo.Light.RatingBar.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.CompoundButton.RadioButton" parent="Widget.Holo.Light.CompoundButton.RadioButton" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ScrollView" parent="Widget.Holo.Light.ScrollView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.HorizontalScrollView" parent="Widget.Holo.Light.HorizontalScrollView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Spinner" parent="Widget.Holo.Light.Spinner" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.CompoundButton.Star" parent="Widget.Holo.Light.CompoundButton.Star" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.TabWidget" parent="Widget.Holo.Light.TabWidget" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.WebTextView" parent="Widget.Holo.Light.WebTextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.WebView" parent="Widget.Holo.Light.WebView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.DropDownItem" parent="Widget.Holo.Light.DropDownItem" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.DropDownItem.Spinner" parent="Widget.Holo.Light.DropDownItem.Spinner" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.TextView.SpinnerItem" parent="Widget.Holo.Light.TextView.SpinnerItem" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ListPopupWindow" parent="Widget.Holo.Light.ListPopupWindow" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.PopupMenu" parent="Widget.Holo.Light.PopupMenu" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Tab" parent="Widget.Holo.Light.Tab" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.CalendarView" parent="Widget.Holo.Light.CalendarView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Button.Borderless.Small" parent="Widget.Holo.Light.Button.Borderless.Small" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionButton" parent="Widget.Holo.Light.ActionButton" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionButton.Overflow" parent="Widget.Holo.Light.ActionButton.Overflow" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionMode" parent="Widget.Holo.Light.ActionMode" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionButton.CloseMode" parent="Widget.Holo.Light.ActionButton.CloseMode" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar" parent="Widget.Holo.Light.ActionBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabView" parent="Widget.Holo.Light.ActionBar.TabView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabText" parent="Widget.Holo.Light.ActionBar.TabText" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabBar" parent="Widget.Holo.Light.ActionBar.TabBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.Holo.Light.ActionBar.Solid" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.Solid.Inverse" parent="Widget.Holo.Light.ActionBar.Solid.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabBar.Inverse" parent="Widget.Holo.Light.ActionBar.TabBar.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabView.Inverse" parent="Widget.Holo.Light.ActionBar.TabView.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabText.Inverse" parent="Widget.Holo.Light.ActionBar.TabText.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ActionMode.Inverse" parent="Widget.Holo.Light.ActionMode.Inverse" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.AbsListView" parent="Widget.Holo.Light.AbsListView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Spinner.DropDown.ActionBar" parent="Widget.Holo.Light.Spinner.DropDown.ActionBar" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.PopupWindow.ActionMode" parent="Widget.Holo.Light.PopupWindow.ActionMode" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Button.Borderless" parent="Widget.Holo.Light.Button.Borderless">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.DatePicker" parent="Widget.Holo.Light.DatePicker">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ExpandableListView.White" parent="Widget.Holo.Light.ExpandableListView.White">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Gallery" parent="Widget.Holo.Light.Gallery">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.GestureOverlayView" parent="Widget.Holo.Light.GestureOverlayView">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ImageWell" parent="Widget.Holo.Light.ImageWell">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.ListView.White" parent="Widget.Holo.Light.ListView.White">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.NumberPicker" parent="Widget.Holo.Light.NumberPicker">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.Spinner.DropDown" parent="Widget.Holo.Light.Spinner.DropDown">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.TextView.ListSeparator" parent="Widget.Holo.Light.TextView.ListSeparator">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.TimePicker" parent="Widget.Holo.Light.TimePicker">
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.TextSuggestionsPopupWindow" parent="Widget.Holo.Light.TextSuggestionsPopupWindow">
+
+    </style>
 
 
     <!-- Text Appearance Styles -->
-    <style name="TextAppearance.DeviceDefault" parent="TextAppearance.Quantum"/>
-    <style name="TextAppearance.DeviceDefault.Inverse" parent="TextAppearance.Quantum.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Large" parent="TextAppearance.Quantum.Large"/>
-    <style name="TextAppearance.DeviceDefault.Large.Inverse" parent="TextAppearance.Quantum.Large.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Medium" parent="TextAppearance.Quantum.Medium"/>
-    <style name="TextAppearance.DeviceDefault.Medium.Inverse" parent="TextAppearance.Quantum.Medium.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Small" parent="TextAppearance.Quantum.Small"/>
-    <style name="TextAppearance.DeviceDefault.Small.Inverse" parent="TextAppearance.Quantum.Small.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.SearchResult.Title" parent="TextAppearance.Quantum.SearchResult.Title"/>
-    <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Quantum.SearchResult.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Quantum.Widget"/>
-    <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Quantum.Widget.Button"/>
-    <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Quantum.Widget.IconMenu.Item"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TabWidget" parent="TextAppearance.Quantum.Widget.TabWidget"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TextView" parent="TextAppearance.Quantum.Widget.TextView"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TextView.PopupMenu" parent="TextAppearance.Quantum.Widget.TextView.PopupMenu"/>
-    <style name="TextAppearance.DeviceDefault.Widget.DropDownHint" parent="TextAppearance.Quantum.Widget.DropDownHint"/>
-    <style name="TextAppearance.DeviceDefault.Widget.DropDownItem" parent="TextAppearance.Quantum.Widget.DropDownItem"/>
-    <style name="TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem" parent="TextAppearance.Quantum.Widget.TextView.SpinnerItem"/>
-    <style name="TextAppearance.DeviceDefault.Widget.EditText" parent="TextAppearance.Quantum.Widget.EditText"/>
-    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu" parent="TextAppearance.Quantum.Widget.PopupMenu"/>
-    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" parent="TextAppearance.Quantum.Widget.PopupMenu.Large"/>
-    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" parent="TextAppearance.Quantum.Widget.PopupMenu.Small"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" parent="TextAppearance.Quantum.Widget.ActionBar.Title"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" parent="TextAppearance.Quantum.Widget.ActionBar.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" parent="TextAppearance.Quantum.Widget.ActionMode.Title"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" parent="TextAppearance.Quantum.Widget.ActionMode.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.WindowTitle" parent="TextAppearance.Quantum.WindowTitle"/>
-    <style name="TextAppearance.DeviceDefault.DialogWindowTitle" parent="TextAppearance.Quantum.DialogWindowTitle"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Quantum.Widget.ActionBar.Title.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Quantum.Widget.ActionBar.Subtitle.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Quantum.Widget.ActionMode.Title.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Quantum.Widget.ActionMode.Subtitle.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" parent="TextAppearance.Quantum.Widget.ActionBar.Menu"/>
-    <style name="TextAppearance.DeviceDefault.Light" parent="TextAppearance.Quantum.Light"/>
-    <style name="TextAppearance.DeviceDefault.Light.Inverse" parent="TextAppearance.Quantum.Light.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.Large" parent="TextAppearance.Quantum.Light.Large"/>
-    <style name="TextAppearance.DeviceDefault.Light.Large.Inverse" parent="TextAppearance.Quantum.Light.Large.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.Medium" parent="TextAppearance.Quantum.Light.Medium"/>
-    <style name="TextAppearance.DeviceDefault.Light.Medium.Inverse" parent="TextAppearance.Quantum.Light.Medium.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.SearchResult.Subtitle" parent="TextAppearance.Quantum.Light.SearchResult.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.Light.SearchResult.Title" parent="TextAppearance.Quantum.Light.SearchResult.Title"/>
-    <style name="TextAppearance.DeviceDefault.Light.Small" parent="TextAppearance.Quantum.Light.Small"/>
-    <style name="TextAppearance.DeviceDefault.Light.Small.Inverse" parent="TextAppearance.Quantum.Light.Small.Inverse"/>
-    <style name="TextAppearance.DeviceDefault.Light.Widget.Button" parent="TextAppearance.Quantum.Light.Widget.Button"/>
-    <style name="TextAppearance.DeviceDefault.Light.Widget.PopupMenu.Large" parent="TextAppearance.Quantum.Light.Widget.PopupMenu.Large"/>
-    <style name="TextAppearance.DeviceDefault.Light.Widget.PopupMenu.Small" parent="TextAppearance.Quantum.Light.Widget.PopupMenu.Small"/>
+    <style name="TextAppearance.DeviceDefault" parent="TextAppearance.Holo" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Inverse" parent="TextAppearance.Holo.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Large" parent="TextAppearance.Holo.Large" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Large.Inverse" parent="TextAppearance.Holo.Large.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Medium" parent="TextAppearance.Holo.Medium" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Medium.Inverse" parent="TextAppearance.Holo.Medium.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Small" parent="TextAppearance.Holo.Small" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Small.Inverse" parent="TextAppearance.Holo.Small.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.SearchResult.Title" parent="TextAppearance.Holo.SearchResult.Title" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Holo.SearchResult.Subtitle" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Holo.Widget" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Holo.Widget.Button" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Holo.Widget.IconMenu.Item" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TabWidget" parent="TextAppearance.Holo.Widget.TabWidget" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TextView" parent="TextAppearance.Holo.Widget.TextView" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TextView.PopupMenu" parent="TextAppearance.Holo.Widget.TextView.PopupMenu" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.DropDownHint" parent="TextAppearance.Holo.Widget.DropDownHint" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.DropDownItem" parent="TextAppearance.Holo.Widget.DropDownItem" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem" parent="TextAppearance.Holo.Widget.TextView.SpinnerItem" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.EditText" parent="TextAppearance.Holo.Widget.EditText" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu" parent="TextAppearance.Holo.Widget.PopupMenu" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" parent="TextAppearance.Holo.Widget.PopupMenu.Large" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" parent="TextAppearance.Holo.Widget.PopupMenu.Small" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" parent="TextAppearance.Holo.Widget.ActionBar.Title" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" parent="TextAppearance.Holo.Widget.ActionBar.Subtitle" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" parent="TextAppearance.Holo.Widget.ActionMode.Title" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" parent="TextAppearance.Holo.Widget.ActionMode.Subtitle" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.WindowTitle" parent="TextAppearance.Holo.WindowTitle" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.DialogWindowTitle" parent="TextAppearance.Holo.DialogWindowTitle" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Holo.Widget.ActionBar.Title.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Holo.Widget.ActionBar.Subtitle.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Holo.Widget.ActionMode.Title.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Holo.Widget.ActionMode.Subtitle.Inverse" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" parent="TextAppearance.Holo.Widget.ActionBar.Menu" >
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light" parent="TextAppearance.Holo.Light">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Inverse" parent="TextAppearance.Holo.Light.Inverse">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Large" parent="TextAppearance.Holo.Light.Large">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Large.Inverse" parent="TextAppearance.Holo.Light.Large.Inverse">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Medium" parent="TextAppearance.Holo.Light.Medium">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Medium.Inverse" parent="TextAppearance.Holo.Light.Medium.Inverse">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.SearchResult.Subtitle" parent="TextAppearance.Holo.Light.SearchResult.Subtitle">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.SearchResult.Title" parent="TextAppearance.Holo.Light.SearchResult.Title">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Small" parent="TextAppearance.Holo.Light.Small">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Small.Inverse" parent="TextAppearance.Holo.Light.Small.Inverse">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Widget.Button" parent="TextAppearance.Holo.Light.Widget.Button">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Widget.PopupMenu.Large" parent="TextAppearance.Holo.Light.Widget.PopupMenu.Large">
+
+    </style>
+    <style name="TextAppearance.DeviceDefault.Light.Widget.PopupMenu.Small" parent="TextAppearance.Holo.Light.Widget.PopupMenu.Small">
+
+    </style>
 
 
     <!-- Preference Styles -->
-    <style name="Preference.DeviceDefault" parent="Preference.Quantum"/>
-    <style name="Preference.DeviceDefault.Category" parent="Preference.Quantum.Category"/>
-    <style name="Preference.DeviceDefault.CheckBoxPreference" parent="Preference.Quantum.CheckBoxPreference"/>
-    <style name="Preference.DeviceDefault.DialogPreference" parent="Preference.Quantum.DialogPreference"/>
-    <style name="Preference.DeviceDefault.DialogPreference.EditTextPreference" parent="Preference.Quantum.DialogPreference.EditTextPreference"/>
-    <style name="Preference.DeviceDefault.DialogPreference.YesNoPreference" parent="Preference.Quantum.DialogPreference.YesNoPreference"/>
-    <style name="Preference.DeviceDefault.Information" parent="Preference.Quantum.Information"/>
-    <style name="Preference.DeviceDefault.PreferenceScreen" parent="Preference.Quantum.PreferenceScreen"/>
-    <style name="Preference.DeviceDefault.RingtonePreference" parent="Preference.Quantum.RingtonePreference"/>
-    <style name="Preference.DeviceDefault.SwitchPreference" parent="Preference.Quantum.SwitchPreference"/>
+    <style name="Preference.DeviceDefault" parent="Preference.Holo">
+
+    </style>
+    <style name="Preference.DeviceDefault.Category" parent="Preference.Holo.Category">
+
+    </style>
+    <style name="Preference.DeviceDefault.CheckBoxPreference" parent="Preference.Holo.CheckBoxPreference">
+
+    </style>
+    <style name="Preference.DeviceDefault.DialogPreference" parent="Preference.Holo.DialogPreference">
+
+    </style>
+    <style name="Preference.DeviceDefault.DialogPreference.EditTextPreference" parent="Preference.Holo.DialogPreference.EditTextPreference">
+
+    </style>
+    <style name="Preference.DeviceDefault.DialogPreference.YesNoPreference" parent="Preference.Holo.DialogPreference.YesNoPreference">
+
+    </style>
+    <style name="Preference.DeviceDefault.Information" parent="Preference.Holo.Information">
+
+    </style>
+    <style name="Preference.DeviceDefault.PreferenceScreen" parent="Preference.Holo.PreferenceScreen">
+
+    </style>
+    <style name="Preference.DeviceDefault.RingtonePreference" parent="Preference.Holo.RingtonePreference">
+
+    </style>
+    <style name="Preference.DeviceDefault.SwitchPreference" parent="Preference.Holo.SwitchPreference">
+
+    </style>
 
 
     <!-- AlertDialog Styles -->
-    <style name="AlertDialog.DeviceDefault" parent="AlertDialog.Quantum"/>
-    <style name="AlertDialog.DeviceDefault.Light" parent="AlertDialog.Quantum.Light"/>
+    <style name="AlertDialog.DeviceDefault" parent="AlertDialog.Holo">
+
+    </style>
+    <style name="AlertDialog.DeviceDefault.Light" parent="AlertDialog.Holo.Light" >
+
+    </style>
 
     <!-- Animation Styles -->
-    <style name="Animation.DeviceDefault.Activity" parent="Animation.Quantum.Activity"/>
-    <style name="Animation.DeviceDefault.Dialog" parent="Animation.Quantum.Dialog"/>
+    <style name="Animation.DeviceDefault.Activity" parent="Animation.Holo.Activity">
+
+    </style>
+    <style name="Animation.DeviceDefault.Dialog" parent="Animation.Holo.Dialog">
+
+    </style>
 
 
     <!-- DialogWindowTitle Styles -->
-    <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Quantum"/>
-    <style name="DialogWindowTitle.DeviceDefault.Light" parent="DialogWindowTitle.Quantum.Light"/>
+    <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Holo">
+
+    </style>
+    <style name="DialogWindowTitle.DeviceDefault.Light" parent="DialogWindowTitle.Holo.Light">
+
+    </style>
 
 
     <!-- WindowTitle Styles -->
-    <style name="WindowTitle.DeviceDefault" parent="WindowTitle.Quantum"/>
-    <style name="WindowTitleBackground.DeviceDefault" parent="WindowTitleBackground.Quantum"/>
+    <style name="WindowTitle.DeviceDefault" parent="WindowTitle.Holo">
+
+    </style>
+    <style name="WindowTitleBackground.DeviceDefault" parent="WindowTitleBackground.Holo">
+
+    </style>
 
 
     <!-- Other Styles -->
-    <style name="DeviceDefault.ButtonBar" parent="Quantum.ButtonBar"/>
-    <style name="DeviceDefault.ButtonBar.AlertDialog" parent="Quantum.ButtonBar.AlertDialog"/>
-    <style name="DeviceDefault.SegmentedButton" parent="Quantum.SegmentedButton"/>
-    <style name="DeviceDefault.Light.ButtonBar" parent="Quantum.Light.ButtonBar"/>
-    <style name="DeviceDefault.Light.ButtonBar.AlertDialog" parent="Quantum.Light.ButtonBar.AlertDialog"/>
-    <style name="DeviceDefault.Light.SegmentedButton" parent="Quantum.Light.SegmentedButton"/>
+    <style name="DeviceDefault.ButtonBar" parent="Holo.ButtonBar" >
 
-    <style name="Widget.DeviceDefault.MediaRouteButton" parent="Widget.Quantum.MediaRouteButton" />
-    <style name="Widget.DeviceDefault.Light.MediaRouteButton" parent="Widget.Quantum.Light.MediaRouteButton" />
+    </style>
+    <style name="DeviceDefault.ButtonBar.AlertDialog" parent="Holo.ButtonBar.AlertDialog" >
 
-    <style name="TextAppearance.DeviceDefault.TimePicker.TimeLabel" parent="TextAppearance.Quantum.TimePicker.TimeLabel"/>
-    <style name="TextAppearance.DeviceDefault.Light.TimePicker.TimeLabel" parent="TextAppearance.Quantum.Light.TimePicker.TimeLabel"/>
-    <style name="TextAppearance.DeviceDefault.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.TimePicker.AmPmLabel"/>
-    <style name="TextAppearance.DeviceDefault.Light.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.Light.TimePicker.AmPmLabel"/>
-    <style name="Theme.DeviceDefault.Dialog.TimePicker" parent="Theme.Quantum.Dialog.TimePicker"/>
-    <style name="Theme.DeviceDefault.Light.Dialog.TimePicker" parent="Theme.Quantum.Light.Dialog.TimePicker"/>
+    </style>
+    <style name="DeviceDefault.SegmentedButton" parent="Holo.SegmentedButton" >
+
+    </style>
+    <style name="DeviceDefault.Light.ButtonBar" parent="Holo.Light.ButtonBar" >
+
+    </style>
+    <style name="DeviceDefault.Light.ButtonBar.AlertDialog" parent="Holo.Light.ButtonBar.AlertDialog" >
+
+    </style>
+    <style name="DeviceDefault.Light.SegmentedButton" parent="Holo.Light.SegmentedButton" >
+
+    </style>
+
+    <style name="Widget.DeviceDefault.MediaRouteButton" parent="Widget.Holo.MediaRouteButton" />
+    <style name="Widget.DeviceDefault.Light.MediaRouteButton" parent="Widget.Holo.Light.MediaRouteButton" />
+
+    <style name="TextAppearance.DeviceDefault.TimePicker.TimeLabel" parent="TextAppearance.Holo.TimePicker.TimeLabel">
+    </style>
+
+    <style name="TextAppearance.DeviceDefault.Light.TimePicker.TimeLabel" parent="TextAppearance.Holo.Light.TimePicker.TimeLabel">
+    </style>
+
+    <style name="TextAppearance.DeviceDefault.TimePicker.AmPmLabel" parent="TextAppearance.Holo.TimePicker.AmPmLabel">
+    </style>
+
+    <style name="TextAppearance.DeviceDefault.Light.TimePicker.AmPmLabel" parent="TextAppearance.Holo.Light.TimePicker.AmPmLabel">
+    </style>
+
+    <style name="Theme.DeviceDefault.Dialog.TimePicker" parent="Theme.Holo.Dialog.TimePicker">
+    </style>
+
+    <style name="Theme.DeviceDefault.Light.Dialog.TimePicker" parent="Theme.Holo.Light.Dialog.TimePicker">
+    </style>
+
 </resources>
