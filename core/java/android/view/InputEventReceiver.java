@@ -34,7 +34,7 @@ public abstract class InputEventReceiver {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private int mReceiverPtr;
+    private long mReceiverPtr;
 
     // We keep references to the input channel and message queue objects here so that
     // they are not GC'd while the native peer of the receiver is using them.
@@ -44,11 +44,11 @@ public abstract class InputEventReceiver {
     // Map from InputEvent sequence numbers to dispatcher sequence numbers.
     private final SparseIntArray mSeqMap = new SparseIntArray();
 
-    private static native int nativeInit(WeakReference<InputEventReceiver> receiver,
+    private static native long nativeInit(WeakReference<InputEventReceiver> receiver,
             InputChannel inputChannel, MessageQueue messageQueue);
-    private static native void nativeDispose(int receiverPtr);
-    private static native void nativeFinishInputEvent(int receiverPtr, int seq, boolean handled);
-    private static native boolean nativeConsumeBatchedInputEvents(int receiverPtr,
+    private static native void nativeDispose(long receiverPtr);
+    private static native void nativeFinishInputEvent(long receiverPtr, int seq, boolean handled);
+    private static native boolean nativeConsumeBatchedInputEvents(long receiverPtr,
             long frameTimeNanos);
 
     /**

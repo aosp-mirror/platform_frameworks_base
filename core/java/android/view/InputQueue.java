@@ -22,7 +22,7 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
-import android.util.SparseArray;
+import android.util.LongSparseArray;
 
 import java.lang.ref.WeakReference;
 
@@ -31,20 +31,20 @@ import java.lang.ref.WeakReference;
  * input events.  Currently only usable from native code.
  */
 public final class InputQueue {
-    private final SparseArray<ActiveInputEvent> mActiveEventArray =
-            new SparseArray<ActiveInputEvent>(20);
+    private final LongSparseArray<ActiveInputEvent> mActiveEventArray =
+            new LongSparseArray<ActiveInputEvent>(20);
     private final Pool<ActiveInputEvent> mActiveInputEventPool =
             new SimplePool<ActiveInputEvent>(20);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private int mPtr;
+    private long mPtr;
 
-    private static native int nativeInit(WeakReference<InputQueue> weakQueue,
+    private static native long nativeInit(WeakReference<InputQueue> weakQueue,
             MessageQueue messageQueue);
-    private static native int nativeSendKeyEvent(int ptr, KeyEvent e, boolean preDispatch);
-    private static native int nativeSendMotionEvent(int ptr, MotionEvent e);
-    private static native void nativeDispose(int ptr);
+    private static native long nativeSendKeyEvent(long ptr, KeyEvent e, boolean preDispatch);
+    private static native long nativeSendMotionEvent(long ptr, MotionEvent e);
+    private static native void nativeDispose(long ptr);
 
     /** @hide */
     public InputQueue() {
@@ -83,7 +83,7 @@ public final class InputQueue {
     }
 
     /** @hide */
-    public int getNativePtr() {
+    public long getNativePtr() {
         return mPtr;
     }
 
@@ -91,7 +91,7 @@ public final class InputQueue {
     public void sendInputEvent(InputEvent e, Object token, boolean predispatch,
             FinishedInputEventCallback callback) {
         ActiveInputEvent event = obtainActiveInputEvent(token, callback);
-        int id;
+        long id;
         if (e instanceof KeyEvent) {
             id = nativeSendKeyEvent(mPtr, (KeyEvent) e, predispatch);
         } else {
@@ -100,7 +100,7 @@ public final class InputQueue {
         mActiveEventArray.put(id, event);
     }
 
-    private void finishInputEvent(int id, boolean handled) {
+    private void finishInputEvent(long id, boolean handled) {
         int index = mActiveEventArray.indexOfKey(id);
         if (index >= 0) {
             ActiveInputEvent e = mActiveEventArray.valueAt(index);
