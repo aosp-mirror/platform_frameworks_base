@@ -21,6 +21,7 @@
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <netinet/in.h>
+#include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
@@ -516,11 +517,14 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         }
     }
 
-    SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
-    if (data.get() == NULL) {
-        return nullObjectReturn("NewFromFD failed in nativeDecodeFileDescriptor");
+    FILE* file = fdopen(descriptor, "r");
+    if (file == NULL) {
+        return nullObjectReturn("Could not open file");
     }
-    SkAutoTUnref<SkMemoryStream> stream(new SkMemoryStream(data));
+
+    SkAutoTUnref<SkFILEStream> stream(new SkFILEStream(file,
+            weOwnTheFD ? SkFILEStream::kCallerPasses_Ownership :
+                         SkFILEStream::kCallerRetains_Ownership));
 
     /* Allow purgeable iff we own the FD, i.e., in the puregeable and
        shareable case.
