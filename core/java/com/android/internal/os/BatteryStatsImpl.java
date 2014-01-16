@@ -20,6 +20,7 @@ import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENAB
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.os.BatteryManager;
@@ -4940,6 +4941,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void pullPendingStateUpdatesLocked() {
+        updateKernelWakelocksLocked();
+        updateNetworkActivityLocked();
+    }
+
     void setOnBatteryLocked(boolean onBattery, int oldStatus, int level) {
         boolean doWrite = false;
         Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
@@ -4962,8 +4968,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 resetAllStatsLocked();
                 mDischargeStartLevel = level;
             }
-            updateKernelWakelocksLocked();
-            updateNetworkActivityLocked();
+            pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
             mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery unplugged to: "
@@ -4985,8 +4990,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeAmountScreenOff = 0;
             doUnplugLocked(realtime, mUnpluggedBatteryUptime, mUnpluggedBatteryRealtime);
         } else {
-            updateKernelWakelocksLocked();
-            updateNetworkActivityLocked();
+            pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
             mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Battery plugged to: "
@@ -6282,8 +6286,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     @SuppressWarnings("unused")
     void writeToParcelLocked(Parcel out, boolean inclUids, int flags) {
         // Need to update with current kernel wake lock counts.
-        updateKernelWakelocksLocked();
-        updateNetworkActivityLocked();
+        pullPendingStateUpdatesLocked();
 
         final long uSecUptime = SystemClock.uptimeMillis() * 1000;
         final long uSecRealtime = SystemClock.elapsedRealtime() * 1000;
@@ -6388,11 +6391,10 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void prepareForDumpLocked() {
         // Need to retrieve current kernel wake lock stats before printing.
-        updateKernelWakelocksLocked();
-        updateNetworkActivityLocked();
+        pullPendingStateUpdatesLocked();
     }
 
-    public void dumpLocked(PrintWriter pw, boolean isUnpluggedOnly, int reqUid) {
+    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid) {
         if (DEBUG) {
             Printer pr = new PrintWriterPrinter(pw);
             pr.println("*** Screen timer:");
@@ -6422,6 +6424,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             pr.println("*** Bluetooth timer:");
             mBluetoothOnTimer.logState(pr, "  ");
         }
-        super.dumpLocked(pw, isUnpluggedOnly, reqUid);
+        super.dumpLocked(context, pw, isUnpluggedOnly, reqUid);
     }
 }

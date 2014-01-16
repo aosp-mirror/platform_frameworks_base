@@ -24,11 +24,14 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import com.android.internal.os.BatterySipper;
+import com.android.internal.os.BatteryStatsHelper;
 
 /**
  * A class providing access to battery usage statistics, including information on
@@ -166,6 +169,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String SIGNAL_STRENGTH_COUNT_DATA = "sgc";
     private static final String DATA_CONNECTION_TIME_DATA = "dct";
     private static final String DATA_CONNECTION_COUNT_DATA = "dcc";
+    private static final String POWER_USE_SUMMARY_DATA = "pws";
+    private static final String POWER_USE_ITEM_DATA = "pwi";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(32);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
@@ -865,6 +870,8 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract long getBluetoothOnTime(long batteryRealtime, int which);
     
+    public abstract int getBluetoothPingCount();
+
     public static final int NETWORK_MOBILE_RX_DATA = 0;
     public static final int NETWORK_MOBILE_TX_DATA = 1;
     public static final int NETWORK_WIFI_RX_DATA = 2;
@@ -996,6 +1003,8 @@ public abstract class BatteryStats implements Parcelable {
 
     /** Returns the number of different speeds that the CPU can run at */
     public abstract int getCpuSpeedSteps();
+
+    public abstract void writeToParcelWithoutUids(Parcel out, int flags);
 
     private final static void formatTimeRaw(StringBuilder out, long seconds) {
         long days = seconds / (60 * 60 * 24);
@@ -1163,7 +1172,7 @@ public abstract class BatteryStats implements Parcelable {
      * 
      * NOTE: all times are expressed in 'ms'.
      */
-    public final void dumpCheckinLocked(PrintWriter pw, int which, int reqUid) {
+    public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
@@ -1300,6 +1309,61 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         
+        BatteryStatsHelper helper = new BatteryStatsHelper(context);
+        helper.create(this);
+        helper.refreshStats(which, UserHandle.USER_ALL);
+        List<BatterySipper> sippers = helper.getUsageList();
+        if (sippers != null && sippers.size() > 0) {
+            dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
+                    BatteryStatsHelper.makemAh(helper.getPowerProfile().getBatteryCapacity()),
+                    BatteryStatsHelper.makemAh(helper.getTotalPower()),
+                    BatteryStatsHelper.makemAh(helper.getMinDrainedPower()),
+                    BatteryStatsHelper.makemAh(helper.getMaxDrainedPower()));
+            for (int i=0; i<sippers.size(); i++) {
+                BatterySipper bs = sippers.get(i);
+                int uid = 0;
+                String label;
+                switch (bs.drainType) {
+                    case IDLE:
+                        label="idle";
+                        break;
+                    case CELL:
+                        label="cell";
+                        break;
+                    case PHONE:
+                        label="phone";
+                        break;
+                    case WIFI:
+                        label="wifi";
+                        break;
+                    case BLUETOOTH:
+                        label="blue";
+                        break;
+                    case SCREEN:
+                        label="scrn";
+                        break;
+                    case APP:
+                        uid = bs.uidObj.getUid();
+                        label = "uid";
+                        break;
+                    case USER:
+                        uid = UserHandle.getUid(bs.userId, 0);
+                        label = "user";
+                        break;
+                    case UNACCOUNTED:
+                        label = "unacc";
+                        break;
+                    case OVERCOUNTED:
+                        label = "over";
+                        break;
+                    default:
+                        label = "???";
+                }
+                dumpLine(pw, uid, category, POWER_USE_ITEM_DATA, label,
+                        BatteryStatsHelper.makemAh(bs.value));
+            }
+        }
+
         for (int iu = 0; iu < NU; iu++) {
             final int uid = uidStats.keyAt(iu);
             if (reqUid >= 0 && uid != reqUid) {
@@ -1471,8 +1535,13 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    private void printmAh(PrintWriter printer, double power) {
+        printer.print(BatteryStatsHelper.makemAh(power));
+    }
+
     @SuppressWarnings("unused")
-    public final void dumpLocked(PrintWriter pw, String prefix, final int which, int reqUid) {
+    public final void dumpLocked(Context context, PrintWriter pw, String prefix, final int which,
+            int reqUid) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
@@ -1756,6 +1825,65 @@ public abstract class BatteryStats implements Parcelable {
             pw.print(prefix); pw.print("    Amount discharged while screen off: ");
                     pw.println(getDischargeAmountScreenOffSinceCharge());
             pw.println();
+        }
+
+        BatteryStatsHelper helper = new BatteryStatsHelper(context);
+        helper.create(this);
+        helper.refreshStats(which, UserHandle.USER_ALL);
+        List<BatterySipper> sippers = helper.getUsageList();
+        if (sippers != null && sippers.size() > 0) {
+            pw.print(prefix); pw.println("  Estimated power use (mAh):");
+            pw.print(prefix); pw.print("    Capacity: ");
+                    printmAh(pw, helper.getPowerProfile().getBatteryCapacity());
+                    pw.print(", Computed drain: "); printmAh(pw, helper.getTotalPower());
+                    pw.print(", Min drain: "); printmAh(pw, helper.getMinDrainedPower());
+                    pw.print(", Max drain: "); printmAh(pw, helper.getMaxDrainedPower());
+                    pw.println();
+            for (int i=0; i<sippers.size(); i++) {
+                BatterySipper bs = sippers.get(i);
+                switch (bs.drainType) {
+                    case IDLE:
+                        pw.print(prefix); pw.print("    Idle: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case CELL:
+                        pw.print(prefix); pw.print("    Cell standby: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case PHONE:
+                        pw.print(prefix); pw.print("    Phone calls: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case WIFI:
+                        pw.print(prefix); pw.print("    Wifi: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case BLUETOOTH:
+                        pw.print(prefix); pw.print("    Bluetooth: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case SCREEN:
+                        pw.print(prefix); pw.print("    Screen: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case APP:
+                        pw.print(prefix); pw.print("    Uid "); pw.print(bs.uidObj.getUid());
+                        pw.print(": "); printmAh(pw, bs.value); pw.println();
+                        break;
+                    case USER:
+                        pw.print(prefix); pw.print("    User "); pw.print(bs.userId);
+                        pw.print(": "); printmAh(pw, bs.value); pw.println();
+                        break;
+                    case UNACCOUNTED:
+                        pw.print(prefix); pw.print("    Unaccounted: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case OVERCOUNTED:
+                        pw.print(prefix); pw.print("    Over-counted: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                }
+            }
         }
 
         if (timers.size() > 0) {
@@ -2287,7 +2415,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param pw a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dumpLocked(PrintWriter pw, boolean isUnpluggedOnly, int reqUid) {
+    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid) {
         prepareForDumpLocked();
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
@@ -2344,15 +2472,15 @@ public abstract class BatteryStats implements Parcelable {
             pw.println("Statistics since last charge:");
             pw.println("  System starts: " + getStartCount()
                     + ", currently on battery: " + getIsOnBattery());
-            dumpLocked(pw, "", STATS_SINCE_CHARGED, reqUid);
+            dumpLocked(context, pw, "", STATS_SINCE_CHARGED, reqUid);
             pw.println("");
         }
         pw.println("Statistics since last unplugged:");
-        dumpLocked(pw, "", STATS_SINCE_UNPLUGGED, reqUid);
+        dumpLocked(context, pw, "", STATS_SINCE_UNPLUGGED, reqUid);
     }
     
     @SuppressWarnings("unused")
-    public void dumpCheckinLocked(
+    public void dumpCheckinLocked(Context context,
             PrintWriter pw, List<ApplicationInfo> apps, boolean isUnpluggedOnly,
             boolean includeHistory) {
         prepareForDumpLocked();
@@ -2400,11 +2528,11 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         if (isUnpluggedOnly) {
-            dumpCheckinLocked(pw, STATS_SINCE_UNPLUGGED, -1);
+            dumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1);
         }
         else {
-            dumpCheckinLocked(pw, STATS_SINCE_CHARGED, -1);
-            dumpCheckinLocked(pw, STATS_SINCE_UNPLUGGED, -1);
+            dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1);
+            dumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1);
         }
     }
 }

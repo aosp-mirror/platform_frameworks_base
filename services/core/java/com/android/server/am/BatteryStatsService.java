@@ -568,11 +568,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (isCheckin) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
             synchronized (mStats) {
-                mStats.dumpCheckinLocked(pw, apps, isUnpluggedOnly, includeHistory);
+                mStats.dumpCheckinLocked(mContext, pw, apps, isUnpluggedOnly, includeHistory);
             }
         } else {
             synchronized (mStats) {
-                mStats.dumpLocked(pw, isUnpluggedOnly, reqUid);
+                mStats.dumpLocked(mContext, pw, isUnpluggedOnly, reqUid);
             }
         }
     }
