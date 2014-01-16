@@ -75,10 +75,10 @@ jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
     }
 
     return env->NewObject(gKeyCharacterMapClassInfo.clazz, gKeyCharacterMapClassInfo.ctor,
-            reinterpret_cast<jint>(map));
+            reinterpret_cast<jlong>(map));
 }
 
-static jint nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj) {
+static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (!parcel) {
         return 0;
@@ -95,10 +95,10 @@ static jint nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj) 
     }
 
     NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId, kcm);
-    return reinterpret_cast<jint>(map);
+    return reinterpret_cast<jlong>(map);
 }
 
-static void nativeWriteToParcel(JNIEnv* env, jobject clazz, jint ptr, jobject parcelObj) {
+static void nativeWriteToParcel(JNIEnv* env, jobject clazz, jlong ptr, jobject parcelObj) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel) {
@@ -107,18 +107,18 @@ static void nativeWriteToParcel(JNIEnv* env, jobject clazz, jint ptr, jobject pa
     }
 }
 
-static void nativeDispose(JNIEnv *env, jobject clazz, jint ptr) {
+static void nativeDispose(JNIEnv *env, jobject clazz, jlong ptr) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     delete map;
 }
 
-static jchar nativeGetCharacter(JNIEnv *env, jobject clazz, jint ptr,
+static jchar nativeGetCharacter(JNIEnv *env, jobject clazz, jlong ptr,
         jint keyCode, jint metaState) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     return map->getMap()->getCharacter(keyCode, metaState);
 }
 
-static jboolean nativeGetFallbackAction(JNIEnv *env, jobject clazz, jint ptr, jint keyCode,
+static jboolean nativeGetFallbackAction(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode,
         jint metaState, jobject fallbackActionObj) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     KeyCharacterMap::FallbackAction fallbackAction;
@@ -133,12 +133,12 @@ static jboolean nativeGetFallbackAction(JNIEnv *env, jobject clazz, jint ptr, ji
     return result;
 }
 
-static jchar nativeGetNumber(JNIEnv *env, jobject clazz, jint ptr, jint keyCode) {
+static jchar nativeGetNumber(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     return map->getMap()->getNumber(keyCode);
 }
 
-static jchar nativeGetMatch(JNIEnv *env, jobject clazz, jint ptr, jint keyCode,
+static jchar nativeGetMatch(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode,
         jcharArray charsArray, jint metaState) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
 
@@ -154,17 +154,17 @@ static jchar nativeGetMatch(JNIEnv *env, jobject clazz, jint ptr, jint keyCode,
     return result;
 }
 
-static jchar nativeGetDisplayLabel(JNIEnv *env, jobject clazz, jint ptr, jint keyCode) {
+static jchar nativeGetDisplayLabel(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     return map->getMap()->getDisplayLabel(keyCode);
 }
 
-static jint nativeGetKeyboardType(JNIEnv *env, jobject clazz, jint ptr) {
+static jint nativeGetKeyboardType(JNIEnv *env, jobject clazz, jlong ptr) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     return map->getMap()->getKeyboardType();
 }
 
-static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jint ptr,
+static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
         jcharArray charsArray) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
 
@@ -199,25 +199,25 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jint ptr,
 
 static JNINativeMethod g_methods[] = {
     /* name, signature, funcPtr */
-    { "nativeReadFromParcel", "(Landroid/os/Parcel;)I",
+    { "nativeReadFromParcel", "(Landroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
-    { "nativeWriteToParcel", "(ILandroid/os/Parcel;)V",
+    { "nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
-    { "nativeDispose", "(I)V",
+    { "nativeDispose", "(J)V",
             (void*)nativeDispose },
-    { "nativeGetCharacter", "(III)C",
+    { "nativeGetCharacter", "(JII)C",
             (void*)nativeGetCharacter },
-    { "nativeGetFallbackAction", "(IIILandroid/view/KeyCharacterMap$FallbackAction;)Z",
+    { "nativeGetFallbackAction", "(JIILandroid/view/KeyCharacterMap$FallbackAction;)Z",
             (void*)nativeGetFallbackAction },
-    { "nativeGetNumber", "(II)C",
+    { "nativeGetNumber", "(JI)C",
             (void*)nativeGetNumber },
-    { "nativeGetMatch", "(II[CI)C",
+    { "nativeGetMatch", "(JI[CI)C",
             (void*)nativeGetMatch },
-    { "nativeGetDisplayLabel", "(II)C",
+    { "nativeGetDisplayLabel", "(JI)C",
             (void*)nativeGetDisplayLabel },
-    { "nativeGetKeyboardType", "(I)I",
+    { "nativeGetKeyboardType", "(J)I",
             (void*)nativeGetKeyboardType },
-    { "nativeGetEvents", "(I[C)[Landroid/view/KeyEvent;",
+    { "nativeGetEvents", "(J[C)[Landroid/view/KeyEvent;",
             (void*)nativeGetEvents },
 };
 
@@ -239,7 +239,7 @@ int register_android_view_KeyCharacterMap(JNIEnv* env)
     gKeyCharacterMapClassInfo.clazz = jclass(env->NewGlobalRef(gKeyCharacterMapClassInfo.clazz));
 
     GET_METHOD_ID(gKeyCharacterMapClassInfo.ctor, gKeyCharacterMapClassInfo.clazz,
-            "<init>", "(I)V");
+            "<init>", "(J)V");
 
     FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
     gKeyEventClassInfo.clazz = jclass(env->NewGlobalRef(gKeyEventClassInfo.clazz));
