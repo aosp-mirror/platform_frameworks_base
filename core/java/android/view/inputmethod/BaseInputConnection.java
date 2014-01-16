@@ -484,10 +484,10 @@ public class BaseInputConnection implements InputConnection {
         final Editable content = getEditable();
         if (content == null) return false;
         int len = content.length();
-        if (start > len || end > len) {
+        if (start > len || end > len || start < 0 || end < 0) {
             // If the given selection is out of bounds, just ignore it.
             // Most likely the text was changed out from under the IME,
-            // the the IME is going to have to update all of its state
+            // and the IME is going to have to update all of its state
             // anyway.
             return true;
         }
