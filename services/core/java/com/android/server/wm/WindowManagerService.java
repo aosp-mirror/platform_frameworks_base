@@ -18,8 +18,6 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.*;
 
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
-
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
 import android.app.AppOpsManager;
@@ -3622,7 +3620,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (freezeThisOneIfNeeded != null) {
                 AppWindowToken atoken = findAppWindowToken(freezeThisOneIfNeeded);
                 if (atoken != null) {
-                    startAppFreezingScreenLocked(atoken, ActivityInfo.CONFIG_ORIENTATION);
+                    startAppFreezingScreenLocked(atoken);
                 }
             }
             config = computeNewConfigurationLocked();
@@ -4395,8 +4393,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void startAppFreezingScreenLocked(AppWindowToken wtoken,
-            int configChanges) {
+    private void startAppFreezingScreenLocked(AppWindowToken wtoken) {
         if (DEBUG_ORIENTATION) {
             RuntimeException e = null;
             if (!HIDE_STACK_CRAWLS) {
@@ -4445,7 +4442,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             final long origId = Binder.clearCallingIdentity();
-            startAppFreezingScreenLocked(wtoken, configChanges);
+            startAppFreezingScreenLocked(wtoken);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -8313,8 +8310,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // it frozen/off until this window draws at its new
         // orientation.
         if (!okToDisplay()) {
-            if (DEBUG_ORIENTATION) Slog.v(TAG,
-                    "Changing surface while display frozen: " + w);
+            if (DEBUG_ORIENTATION) Slog.v(TAG, "Changing surface while display frozen: " + w);
             w.mOrientationChanging = true;
             w.mLastFreezeDuration = 0;
             mInnerFields.mOrientationChangeComplete = false;
