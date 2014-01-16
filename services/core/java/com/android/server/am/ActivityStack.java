@@ -3624,8 +3624,10 @@ final class ActivityStack {
             if (isOnHomeDisplay()) {
                 mStackSupervisor.moveHomeStack(!isHomeStack());
             }
-            mStacks.remove(this);
-            mStacks.add(0, this);
+            if (mStacks != null) {
+                mStacks.remove(this);
+                mStacks.add(0, this);
+            }
         }
     }
 
