@@ -195,12 +195,12 @@ public final class CaptureResult extends CameraMetadata {
      * fields for a given capture will be available in its
      * CaptureResult.</p>
      *
+     * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#FLASH_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
-     * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -336,9 +336,9 @@ public final class CaptureResult extends CameraMetadata {
      * routine is disabled. The camera device uses each particular illumination
      * target for white balance adjustment.</p>
      *
-     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
-     * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
@@ -395,14 +395,14 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Overall mode of 3A control
      * routines</p>
      * <p>High-level 3A control. When set to OFF, all 3A control
-     * by the HAL is disabled. The application must set the fields for
+     * by the camera device is disabled. The application must set the fields for
      * capture parameters itself.</p>
      * <p>When set to AUTO, the individual algorithm controls in
      * android.control.* are in effect, such as {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}.</p>
      * <p>When set to USE_SCENE_MODE, the individual controls in
-     * android.control.* are mostly disabled, and the HAL implements
+     * android.control.* are mostly disabled, and the camera device implements
      * one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
-     * as it wishes. The HAL scene mode 3A settings are provided by
+     * as it wishes. The camera device scene mode 3A settings are provided by
      * android.control.sceneModeOverrides.</p>
      *
      * @see CaptureRequest#CONTROL_AF_MODE
@@ -418,10 +418,10 @@ public final class CaptureResult extends CameraMetadata {
      * enhancement</p>
      * <p>Edge/sharpness/detail enhancement. OFF means no
      * enhancement will be applied by the HAL.</p>
-     * <p>FAST/HIGH_QUALITY both mean HAL-determined enhancement
+     * <p>FAST/HIGH_QUALITY both mean camera device determined enhancement
      * will be applied. HIGH_QUALITY mode indicates that the
-     * HAL should use the highest-quality enhancement algorithms,
-     * even if it slows down capture rate. FAST means the HAL should
+     * camera device will use the highest-quality enhancement algorithms,
+     * even if it slows down capture rate. FAST means the camera device will
      * not slow down capture rate when applying edge enhancement.</p>
      * @see #EDGE_MODE_OFF
      * @see #EDGE_MODE_FAST
@@ -495,8 +495,8 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Resolution of embedded JPEG thumbnail</p>
-     * <p>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
-     * but the captured JPEG must still be a valid image.</p>
+     * <p>When set to (0, 0) value, the JPEG EXIF will not contain thumbnail,
+     * but the captured JPEG will still be a valid image.</p>
      * <p>When a jpeg image capture is issued, the thumbnail size selected should have
      * the same aspect ratio as the jpeg image.</p>
      */
@@ -521,9 +521,9 @@ public final class CaptureResult extends CameraMetadata {
      * auto-exposure algorithm, the overridden values are then provided
      * back to the user in the corresponding result.</p>
      *
-     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final Key<Float> LENS_APERTURE =
@@ -585,10 +585,10 @@ public final class CaptureResult extends CameraMetadata {
      * algorithm</p>
      * <p>Noise filtering control. OFF means no noise reduction
      * will be applied by the HAL.</p>
-     * <p>FAST/HIGH_QUALITY both mean HAL-determined noise filtering
-     * will be applied. HIGH_QUALITY mode indicates that the HAL
-     * should use the highest-quality noise filtering algorithms,
-     * even if it slows down capture rate. FAST means the HAL should not
+     * <p>FAST/HIGH_QUALITY both mean camera device determined noise filtering
+     * will be applied. HIGH_QUALITY mode indicates that the camera device
+     * will use the highest-quality noise filtering algorithms,
+     * even if it slows down capture rate. FAST means the camera device should not
      * slow down capture rate when applying noise filtering.</p>
      * @see #NOISE_REDUCTION_MODE_OFF
      * @see #NOISE_REDUCTION_MODE_FAST
@@ -818,8 +818,8 @@ public final class CaptureResult extends CameraMetadata {
      * image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
      *
-     * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
      */
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
@@ -885,8 +885,8 @@ public final class CaptureResult extends CameraMetadata {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_MODE
      */
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
@@ -898,8 +898,8 @@ public final class CaptureResult extends CameraMetadata {
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is CONTRAST_CURVE.</p>
      * <p>See {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} for more details.</p>
      *
-     * @see CaptureRequest#TONEMAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CaptureRequest#TONEMAP_MODE
      */
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);

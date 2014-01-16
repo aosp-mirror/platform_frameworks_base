@@ -318,8 +318,8 @@ public abstract class CameraMetadata {
      * device, along with android.flash.* fields, if there's
      * a flash unit for this camera device.</p>
      *
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#CONTROL_AE_MODE
      */
@@ -334,8 +334,8 @@ public abstract class CameraMetadata {
      * application has control over the various
      * android.flash.* fields.</p>
      *
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#CONTROL_AE_MODE
      */
@@ -351,8 +351,8 @@ public abstract class CameraMetadata {
      * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
      * STILL_CAPTURE</p>
      *
-     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2;
@@ -367,8 +367,8 @@ public abstract class CameraMetadata {
      * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
      * STILL_CAPTURE</p>
      *
-     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3;
