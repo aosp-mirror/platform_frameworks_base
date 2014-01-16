@@ -217,8 +217,8 @@ void Yuv422IToJpegEncoder::configSamplingFactors(jpeg_compress_struct* cinfo) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static jboolean YuvImage_compressToJpeg(JNIEnv* env, jobject, jbyteArray inYuv,
-        int format, int width, int height, jintArray offsets,
-        jintArray strides, int jpegQuality, jobject jstream,
+        jint format, jint width, jint height, jintArray offsets,
+        jintArray strides, jint jpegQuality, jobject jstream,
         jbyteArray jstorage) {
     jbyte* yuv = env->GetByteArrayElements(inYuv, NULL);
     SkWStream* strm = CreateJavaOutputStreamAdaptor(env, jstream, jstorage);
@@ -227,7 +227,7 @@ static jboolean YuvImage_compressToJpeg(JNIEnv* env, jobject, jbyteArray inYuv,
     jint* imgStrides = env->GetIntArrayElements(strides, NULL);
     YuvToJpegEncoder* encoder = YuvToJpegEncoder::create(format, imgStrides);
     if (encoder == NULL) {
-        return false;
+        return JNI_FALSE;
     }
     encoder->encode(strm, yuv, width, height, imgOffsets, jpegQuality);
 
@@ -235,7 +235,7 @@ static jboolean YuvImage_compressToJpeg(JNIEnv* env, jobject, jbyteArray inYuv,
     env->ReleaseByteArrayElements(inYuv, yuv, 0);
     env->ReleaseIntArrayElements(offsets, imgOffsets, 0);
     env->ReleaseIntArrayElements(strides, imgStrides, 0);
-    return true;
+    return JNI_TRUE;
 }
 ///////////////////////////////////////////////////////////////////////////////
 
