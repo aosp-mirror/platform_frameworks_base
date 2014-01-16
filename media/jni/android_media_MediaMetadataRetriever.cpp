@@ -67,15 +67,15 @@ static void process_media_retriever_call(JNIEnv *env, status_t opStatus, const c
 static MediaMetadataRetriever* getRetriever(JNIEnv* env, jobject thiz)
 {
     // No lock is needed, since it is called internally by other methods that are protected
-    MediaMetadataRetriever* retriever = (MediaMetadataRetriever*) env->GetIntField(thiz, fields.context);
+    MediaMetadataRetriever* retriever = (MediaMetadataRetriever*) env->GetLongField(thiz, fields.context);
     return retriever;
 }
 
-static void setRetriever(JNIEnv* env, jobject thiz, int retriever)
+static void setRetriever(JNIEnv* env, jobject thiz, MediaMetadataRetriever* retriever)
 {
     // No lock is needed, since it is called internally by other methods that are protected
-    MediaMetadataRetriever *old = (MediaMetadataRetriever*) env->GetIntField(thiz, fields.context);
-    env->SetIntField(thiz, fields.context, retriever);
+    MediaMetadataRetriever *old = (MediaMetadataRetriever*) env->GetLongField(thiz, fields.context);
+    env->SetLongField(thiz, fields.context, (jlong) retriever);
 }
 
 static void
@@ -146,10 +146,10 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (offset < 0 || length < 0 || fd < 0) {
         if (offset < 0) {
-            ALOGE("negative offset (%lld)", offset);
+            ALOGE("negative offset (%lld)", (long long)offset);
         }
         if (length < 0) {
-            ALOGE("negative length (%lld)", length);
+            ALOGE("negative length (%lld)", (long long)length);
         }
         if (fd < 0) {
             ALOGE("invalid file descriptor");
@@ -359,7 +359,7 @@ static void android_media_MediaMetadataRetriever_release(JNIEnv *env, jobject th
     Mutex::Autolock lock(sLock);
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     delete retriever;
-    setRetriever(env, thiz, 0);
+    setRetriever(env, thiz, (MediaMetadataRetriever*) 0);
 }
 
 static void android_media_MediaMetadataRetriever_native_finalize(JNIEnv *env, jobject thiz)
@@ -379,7 +379,7 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
         return;
     }
 
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     if (fields.context == NULL) {
         return;
     }
@@ -435,7 +435,7 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
     }
-    setRetriever(env, thiz, (int)retriever);
+    setRetriever(env, thiz, retriever);
 }
 
 // JNI mapping between Java methods and native methods

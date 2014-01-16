@@ -127,7 +127,7 @@ public class JetPlayer
      * Accessed by native methods: provides access to C++ JetPlayer object 
      */
     @SuppressWarnings("unused")
-    private int mNativePlayerInJavaObj;
+    private long mNativePlayerInJavaObj;
 
     
     //--------------------------------------------

@@ -171,7 +171,7 @@ static sp<AudioTrack> getAudioTrack(JNIEnv* env, jobject thiz)
 {
     Mutex::Autolock l(sLock);
     AudioTrack* const at =
-            (AudioTrack*)env->GetIntField(thiz, javaAudioTrackFields.nativeTrackInJavaObj);
+            (AudioTrack*)env->GetLongField(thiz, javaAudioTrackFields.nativeTrackInJavaObj);
     return sp<AudioTrack>(at);
 }
 
@@ -179,19 +179,19 @@ static sp<AudioTrack> setAudioTrack(JNIEnv* env, jobject thiz, const sp<AudioTra
 {
     Mutex::Autolock l(sLock);
     sp<AudioTrack> old =
-            (AudioTrack*)env->GetIntField(thiz, javaAudioTrackFields.nativeTrackInJavaObj);
+            (AudioTrack*)env->GetLongField(thiz, javaAudioTrackFields.nativeTrackInJavaObj);
     if (at.get()) {
         at->incStrong((void*)setAudioTrack);
     }
     if (old != 0) {
         old->decStrong((void*)setAudioTrack);
     }
-    env->SetIntField(thiz, javaAudioTrackFields.nativeTrackInJavaObj, (int)at.get());
+    env->SetLongField(thiz, javaAudioTrackFields.nativeTrackInJavaObj, (jlong)at.get());
     return old;
 }
 
 // ----------------------------------------------------------------------------
-static int
+static jint
 android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jint streamType, jint sampleRateInHertz, jint javaChannelMask,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession)
@@ -203,11 +203,11 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     if (AudioSystem::getOutputFrameCount(&afFrameCount, (audio_stream_type_t) streamType) != NO_ERROR) {
         ALOGE("Error creating AudioTrack: Could not get AudioSystem frame count.");
-        return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
+        return (jint) AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
     if (AudioSystem::getOutputSamplingRate(&afSampleRate, (audio_stream_type_t) streamType) != NO_ERROR) {
         ALOGE("Error creating AudioTrack: Could not get AudioSystem sampling rate.");
-        return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
+        return (jint) AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
 
     // Java channel masks don't map directly to the native definition, but it's a simple shift
@@ -216,7 +216,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     if (!audio_is_output_channel(nativeChannelMask)) {
         ALOGE("Error creating AudioTrack: invalid channel mask %#x.", javaChannelMask);
-        return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
+        return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
 
     int nbChannels = popcount(nativeChannelMask);
@@ -236,7 +236,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         break;
     default:
         ALOGE("Error creating AudioTrack: unknown stream type.");
-        return AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
+        return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
     }
 
     // check the format.
@@ -245,7 +245,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     if (format == AUDIO_FORMAT_INVALID) {
 
         ALOGE("Error creating AudioTrack: unsupported audio format.");
-        return AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
+        return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
     }
 
     // for the moment 8bitPCM in MODE_STATIC is not supported natively in the AudioTrack C++ class
@@ -268,18 +268,18 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
         ALOGE("Can't find %s when setting up callback.", kClassPathName);
-        return AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
+        return (jint) AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
     }
 
     if (jSession == NULL) {
         ALOGE("Error creating AudioTrack: invalid session ID pointer");
-        return AUDIOTRACK_ERROR;
+        return (jint) AUDIOTRACK_ERROR;
     }
 
     jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
     if (nSession == NULL) {
         ALOGE("Error creating AudioTrack: Error retrieving session id pointer");
-        return AUDIOTRACK_ERROR;
+        return (jint) AUDIOTRACK_ERROR;
     }
     int sessionId = nSession[0];
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
@@ -366,10 +366,10 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     setAudioTrack(env, thiz, lpTrack);
 
     // save the JNI resources so we can free them later
-    //ALOGV("storing lpJniStorage: %x\n", (int)lpJniStorage);
-    env->SetIntField(thiz, javaAudioTrackFields.jniData, (int)lpJniStorage);
+    //ALOGV("storing lpJniStorage: %x\n", (long)lpJniStorage);
+    env->SetLongField(thiz, javaAudioTrackFields.jniData, (jlong)lpJniStorage);
 
-    return AUDIOTRACK_SUCCESS;
+    return (jint) AUDIOTRACK_SUCCESS;
 
     // failures:
 native_init_failure:
@@ -379,9 +379,9 @@ native_init_failure:
     env->DeleteGlobalRef(lpJniStorage->mCallbackData.audioTrack_class);
     env->DeleteGlobalRef(lpJniStorage->mCallbackData.audioTrack_ref);
     delete lpJniStorage;
-    env->SetIntField(thiz, javaAudioTrackFields.jniData, 0);
+    env->SetLongField(thiz, javaAudioTrackFields.jniData, 0);
 
-    return AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
+    return (jint) AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
 }
 
 
@@ -470,11 +470,11 @@ static void android_media_AudioTrack_native_release(JNIEnv *env,  jobject thiz) 
     lpTrack->stop();
 
     // delete the JNI data
-    AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)env->GetIntField(
+    AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)env->GetLongField(
         thiz, javaAudioTrackFields.jniData);
     // reset the native resources in the Java object so any attempt to access
     // them after a call to release fails.
-    env->SetIntField(thiz, javaAudioTrackFields.jniData, 0);
+    env->SetLongField(thiz, javaAudioTrackFields.jniData, 0);
 
     if (pJniStorage) {
         Mutex::Autolock l(sLock);
@@ -970,7 +970,7 @@ int register_android_media_AudioTrack(JNIEnv *env)
     //      nativeTrackInJavaObj
     javaAudioTrackFields.nativeTrackInJavaObj = env->GetFieldID(
             audioTrackClass,
-            JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME, "I");
+            JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME, "J");
     if (javaAudioTrackFields.nativeTrackInJavaObj == NULL) {
         ALOGE("Can't find AudioTrack.%s", JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME);
         return -1;
@@ -978,7 +978,7 @@ int register_android_media_AudioTrack(JNIEnv *env)
     //      jniData;
     javaAudioTrackFields.jniData = env->GetFieldID(
             audioTrackClass,
-            JAVA_JNIDATA_FIELD_NAME, "I");
+            JAVA_JNIDATA_FIELD_NAME, "J");
     if (javaAudioTrackFields.jniData == NULL) {
         ALOGE("Can't find AudioTrack.%s", JAVA_JNIDATA_FIELD_NAME);
         return -1;
