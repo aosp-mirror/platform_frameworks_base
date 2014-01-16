@@ -43,19 +43,19 @@ public class MemoryFile
 
     private static native FileDescriptor native_open(String name, int length) throws IOException;
     // returns memory address for ashmem region
-    private static native int native_mmap(FileDescriptor fd, int length, int mode)
+    private static native long native_mmap(FileDescriptor fd, int length, int mode)
             throws IOException;
-    private static native void native_munmap(int addr, int length) throws IOException;
+    private static native void native_munmap(long addr, int length) throws IOException;
     private static native void native_close(FileDescriptor fd);
-    private static native int native_read(FileDescriptor fd, int address, byte[] buffer,
+    private static native int native_read(FileDescriptor fd, long address, byte[] buffer,
             int srcOffset, int destOffset, int count, boolean isUnpinned) throws IOException;
-    private static native void native_write(FileDescriptor fd, int address, byte[] buffer,
+    private static native void native_write(FileDescriptor fd, long address, byte[] buffer,
             int srcOffset, int destOffset, int count, boolean isUnpinned) throws IOException;
     private static native void native_pin(FileDescriptor fd, boolean pin) throws IOException;
     private static native int native_get_size(FileDescriptor fd) throws IOException;
 
     private FileDescriptor mFD;        // ashmem file descriptor
-    private int mAddress;   // address of ashmem memory
+    private long mAddress;   // address of ashmem memory
     private int mLength;    // total length of our ashmem region
     private boolean mAllowPurging = false;  // true if our ashmem region is unpinned
 
