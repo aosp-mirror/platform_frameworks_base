@@ -33,18 +33,18 @@ public abstract class InputEventSender {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private int mSenderPtr;
+    private long mSenderPtr;
 
     // We keep references to the input channel and message queue objects here so that
     // they are not GC'd while the native peer of the receiver is using them.
     private InputChannel mInputChannel;
     private MessageQueue mMessageQueue;
 
-    private static native int nativeInit(WeakReference<InputEventSender> sender,
+    private static native long nativeInit(WeakReference<InputEventSender> sender,
             InputChannel inputChannel, MessageQueue messageQueue);
-    private static native void nativeDispose(int senderPtr);
-    private static native boolean nativeSendKeyEvent(int senderPtr, int seq, KeyEvent event);
-    private static native boolean nativeSendMotionEvent(int senderPtr, int seq, MotionEvent event);
+    private static native void nativeDispose(long senderPtr);
+    private static native boolean nativeSendKeyEvent(long senderPtr, int seq, KeyEvent event);
+    private static native boolean nativeSendMotionEvent(long senderPtr, int seq, MotionEvent event);
 
     /**
      * Creates an input event sender bound to the specified input channel.
