@@ -68,7 +68,7 @@ int result = am.requestAudioFocus(afChangeListener,
                                  AudioManager.AUDIOFOCUS_GAIN);
    
 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-    am.unregisterMediaButtonEventReceiver(RemoteControlReceiver);
+    am.registerMediaButtonEventReceiver(RemoteControlReceiver);
     // Start playback.
 }
 </pre>
@@ -118,7 +118,7 @@ app requests it. How your app responds to a loss of audio focus depends on the m
 loss.</p>
 
 <p>The {@link android.media.AudioManager.OnAudioFocusChangeListener#onAudioFocusChange
-onAudioFocusChange()} callback method of they audio focus change listener you registered when
+onAudioFocusChange()} callback method of the audio focus change listener you registered when
 requesting audio focus receives a parameter that describes the focus change event. Specifically,
 the possible focus loss events mirror the focus request types from the previous
 section&mdash;permanent loss, transient loss, and transient with ducking permitted.</p>
