@@ -539,6 +539,12 @@ public final class AssetManager {
         public final int getAssetInt() {
             return mAsset;
         }
+        /**
+         * @hide
+         */
+        public final long getNativeAsset() {
+            return mAsset;
+        }
         private AssetInputStream(int asset)
         {
             mAsset = asset;

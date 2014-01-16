@@ -412,7 +412,7 @@ jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecode
 
     jobject obj = env->NewObject(gBitmapRegionDecoder_class,
             gBitmapRegionDecoder_constructorMethodID,
-            static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)));
+            reinterpret_cast<jlong>(bitmap));
     hasException(env); // For the side effect of logging.
     return obj;
 }
@@ -671,7 +671,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "(IIZ)V");
     gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");
     gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
-    gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(I)V");
+    gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(J)V");
 
     gBitmapConfig_class = make_globalref(env, "android/graphics/Bitmap$Config");
     gBitmapConfig_nativeInstanceID = getFieldIDCheck(env, gBitmapConfig_class,
