@@ -88,5 +88,5 @@ public final class MediaCrypto {
         native_init();
     }
 
-    private int mNativeContext;
+    private long mNativeContext;
 }

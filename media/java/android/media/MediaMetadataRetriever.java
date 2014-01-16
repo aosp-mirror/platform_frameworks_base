@@ -42,7 +42,7 @@ public class MediaMetadataRetriever
 
     // The field below is accessed by native methods
     @SuppressWarnings("unused")
-    private int mNativeContext;
+    private long mNativeContext;
  
     private static final int EMBEDDED_PICTURE_TYPE_ANY = 0xFFFF;
 

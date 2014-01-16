@@ -107,13 +107,13 @@ public class AudioRecord
      * Accessed by native methods: provides access to C++ AudioRecord object
      */
     @SuppressWarnings("unused")
-    private int mNativeRecorderInJavaObj;
+    private long mNativeRecorderInJavaObj;
 
     /**
      * Accessed by native methods: provides access to the callback data.
      */
     @SuppressWarnings("unused")
-    private int mNativeCallbackCookie;
+    private long mNativeCallbackCookie;
 
 
     //---------------------------------------------------------
