@@ -123,10 +123,10 @@ public final class Recognizer {
     public static final String KEY_MEANING = "meaning";
 
     // handle to SR_Vocabulary object
-    private int mVocabulary = 0;
+    private long mVocabulary = 0;
     
     // handle to SR_Recognizer object
-    private int mRecognizer = 0;
+    private long mRecognizer = 0;
     
     // Grammar currently associated with Recognizer via SR_GrammarSetupRecognizer
     private Grammar mActiveGrammar = null;
@@ -172,7 +172,7 @@ public final class Recognizer {
      * Represents a grammar loaded into the Recognizer.
      */
     public class Grammar {
-        private int mGrammar = 0;
+        private long mGrammar = 0;
 
         /**
          * Create a <code>Grammar</code> instance.
@@ -601,116 +601,116 @@ public final class Recognizer {
     //
     // SR_Recognizer methods
     //
-    private static native void SR_RecognizerStart(int recognizer);
-    private static native void SR_RecognizerStop(int recognizer);
-    private static native int SR_RecognizerCreate();
-    private static native void SR_RecognizerDestroy(int recognizer);
-    private static native void SR_RecognizerSetup(int recognizer);
-    private static native void SR_RecognizerUnsetup(int recognizer);
-    private static native boolean SR_RecognizerIsSetup(int recognizer);
-    private static native String SR_RecognizerGetParameter(int recognizer, String key);
-    private static native int SR_RecognizerGetSize_tParameter(int recognizer, String key);
-    private static native boolean SR_RecognizerGetBoolParameter(int recognizer, String key);
-    private static native void SR_RecognizerSetParameter(int recognizer, String key, String value);
-    private static native void SR_RecognizerSetSize_tParameter(int recognizer,
+    private static native void SR_RecognizerStart(long recognizer);
+    private static native void SR_RecognizerStop(long recognizer);
+    private static native long SR_RecognizerCreate();
+    private static native void SR_RecognizerDestroy(long recognizer);
+    private static native void SR_RecognizerSetup(long recognizer);
+    private static native void SR_RecognizerUnsetup(long recognizer);
+    private static native boolean SR_RecognizerIsSetup(long recognizer);
+    private static native String SR_RecognizerGetParameter(long recognizer, String key);
+    private static native int SR_RecognizerGetSize_tParameter(long recognizer, String key);
+    private static native boolean SR_RecognizerGetBoolParameter(long recognizer, String key);
+    private static native void SR_RecognizerSetParameter(long recognizer, String key, String value);
+    private static native void SR_RecognizerSetSize_tParameter(long recognizer,
             String key, int value);
-    private static native void SR_RecognizerSetBoolParameter(int recognizer, String key,
+    private static native void SR_RecognizerSetBoolParameter(long recognizer, String key,
             boolean value);
-    private static native void SR_RecognizerSetupRule(int recognizer, int grammar,
+    private static native void SR_RecognizerSetupRule(long recognizer, long grammar,
             String ruleName);
-    private static native boolean SR_RecognizerHasSetupRules(int recognizer);
-    private static native void SR_RecognizerActivateRule(int recognizer, int grammar,
+    private static native boolean SR_RecognizerHasSetupRules(long recognizer);
+    private static native void SR_RecognizerActivateRule(long recognizer, long grammar,
             String ruleName, int weight);
-    private static native void SR_RecognizerDeactivateRule(int recognizer, int grammar,
+    private static native void SR_RecognizerDeactivateRule(long recognizer, long grammar,
             String ruleName);
-    private static native void SR_RecognizerDeactivateAllRules(int recognizer);
-    private static native boolean SR_RecognizerIsActiveRule(int recognizer, int grammar,
+    private static native void SR_RecognizerDeactivateAllRules(long recognizer);
+    private static native boolean SR_RecognizerIsActiveRule(long recognizer, long grammar,
             String ruleName);
-    private static native boolean SR_RecognizerCheckGrammarConsistency(int recognizer,
-            int grammar);
-    private static native int SR_RecognizerPutAudio(int recognizer, byte[] buffer, int offset,
+    private static native boolean SR_RecognizerCheckGrammarConsistency(long recognizer,
+            long grammar);
+    private static native int SR_RecognizerPutAudio(long recognizer, byte[] buffer, int offset,
             int length, boolean isLast);
-    private static native int SR_RecognizerAdvance(int recognizer);
-    // private static native void SR_RecognizerLoadUtterance(int recognizer,
+    private static native int SR_RecognizerAdvance(long recognizer);
+    // private static native void SR_RecognizerLoadUtterance(long recognizer,
     //         const LCHAR* filename);
-    // private static native void SR_RecognizerLoadWaveFile(int recognizer,
+    // private static native void SR_RecognizerLoadWaveFile(long recognizer,
     //         const LCHAR* filename);
-    // private static native void SR_RecognizerSetLockFunction(int recognizer,
+    // private static native void SR_RecognizerSetLockFunction(long recognizer,
     //         SR_RecognizerLockFunction function, void* data);
-    private static native boolean SR_RecognizerIsSignalClipping(int recognizer);
-    private static native boolean SR_RecognizerIsSignalDCOffset(int recognizer);
-    private static native boolean SR_RecognizerIsSignalNoisy(int recognizer);
-    private static native boolean SR_RecognizerIsSignalTooQuiet(int recognizer);
-    private static native boolean SR_RecognizerIsSignalTooFewSamples(int recognizer);
-    private static native boolean SR_RecognizerIsSignalTooManySamples(int recognizer);
+    private static native boolean SR_RecognizerIsSignalClipping(long recognizer);
+    private static native boolean SR_RecognizerIsSignalDCOffset(long recognizer);
+    private static native boolean SR_RecognizerIsSignalNoisy(long recognizer);
+    private static native boolean SR_RecognizerIsSignalTooQuiet(long recognizer);
+    private static native boolean SR_RecognizerIsSignalTooFewSamples(long recognizer);
+    private static native boolean SR_RecognizerIsSignalTooManySamples(long recognizer);
     // private static native void SR_Recognizer_Change_Sample_Rate (size_t new_sample_rate);
     
     
     //
     // SR_AcousticState native methods
     //
-    private static native void SR_AcousticStateReset(int recognizer);
-    private static native void SR_AcousticStateSet(int recognizer, String state);
-    private static native String SR_AcousticStateGet(int recognizer);
+    private static native void SR_AcousticStateReset(long recognizer);
+    private static native void SR_AcousticStateSet(long recognizer, String state);
+    private static native String SR_AcousticStateGet(long recognizer);
 
 
     //
     // SR_Grammar native methods
     //
-    private static native void SR_GrammarCompile(int grammar);
-    private static native void SR_GrammarAddWordToSlot(int grammar, String slot,
+    private static native void SR_GrammarCompile(long grammar);
+    private static native void SR_GrammarAddWordToSlot(long grammar, String slot,
             String word, String pronunciation, int weight, String tag);
-    private static native void SR_GrammarResetAllSlots(int grammar);
-    // private static native void SR_GrammarAddNametagToSlot(int grammar, String slot,
+    private static native void SR_GrammarResetAllSlots(long grammar);
+    // private static native void SR_GrammarAddNametagToSlot(long grammar, String slot,
     // const struct SR_Nametag_t* nametag, int weight, String tag);
-    private static native void SR_GrammarSetupVocabulary(int grammar, int vocabulary);
-    // private static native void SR_GrammarSetupModels(int grammar, SR_AcousticModels* models);
-    private static native void SR_GrammarSetupRecognizer(int grammar, int recognizer);
-    private static native void SR_GrammarUnsetupRecognizer(int grammar);
-    // private static native void SR_GrammarGetModels(int grammar,SR_AcousticModels** models);
-    private static native int SR_GrammarCreate();
-    private static native void SR_GrammarDestroy(int grammar);
-    private static native int SR_GrammarLoad(String filename);
-    private static native void SR_GrammarSave(int grammar, String filename);
-    // private static native void SR_GrammarSetDispatchFunction(int grammar,
+    private static native void SR_GrammarSetupVocabulary(long grammar, long vocabulary);
+    // private static native void SR_GrammarSetupModels(long grammar, SR_AcousticModels* models);
+    private static native void SR_GrammarSetupRecognizer(long grammar, long recognizer);
+    private static native void SR_GrammarUnsetupRecognizer(long grammar);
+    // private static native void SR_GrammarGetModels(long grammar,SR_AcousticModels** models);
+    private static native long SR_GrammarCreate();
+    private static native void SR_GrammarDestroy(long grammar);
+    private static native long SR_GrammarLoad(String filename);
+    private static native void SR_GrammarSave(long grammar, String filename);
+    // private static native void SR_GrammarSetDispatchFunction(long grammar,
     //         const LCHAR* name, void* userData, SR_GrammarDispatchFunction function);
-    // private static native void SR_GrammarSetParameter(int grammar, const
+    // private static native void SR_GrammarSetParameter(long grammar, const
     //         LCHAR* key, void* value);
-    // private static native void SR_GrammarSetSize_tParameter(int grammar,
+    // private static native void SR_GrammarSetSize_tParameter(long grammar,
     //         const LCHAR* key, size_t value);
-    // private static native void SR_GrammarGetParameter(int grammar, const
+    // private static native void SR_GrammarGetParameter(long grammar, const
     //         LCHAR* key, void** value);
-    // private static native void SR_GrammarGetSize_tParameter(int grammar,
+    // private static native void SR_GrammarGetSize_tParameter(long grammar,
     //         const LCHAR* key, size_t* value);
-    // private static native void SR_GrammarCheckParse(int grammar, const LCHAR*
+    // private static native void SR_GrammarCheckParse(long grammar, const LCHAR*
     //         transcription, SR_SemanticResult** result, size_t* resultCount);
-    private static native void SR_GrammarAllowOnly(int grammar, String transcription);
-    private static native void SR_GrammarAllowAll(int grammar);
+    private static native void SR_GrammarAllowOnly(long grammar, String transcription);
+    private static native void SR_GrammarAllowAll(long grammar);
 
 
     //
     // SR_Vocabulary native methods
     //
     // private static native int SR_VocabularyCreate();
-    private static native int SR_VocabularyLoad();
+    private static native long SR_VocabularyLoad();
     // private static native void SR_VocabularySave(SR_Vocabulary* self,
     //         const LCHAR* filename);
     // private static native void SR_VocabularyAddWord(SR_Vocabulary* self,
     //         const LCHAR* word);
     // private static native void SR_VocabularyGetLanguage(SR_Vocabulary* self,
     //         ESR_Locale* locale);
-    private static native void SR_VocabularyDestroy(int vocabulary);
-    private static native String SR_VocabularyGetPronunciation(int vocabulary, String word);
+    private static native void SR_VocabularyDestroy(long vocabulary);
+    private static native String SR_VocabularyGetPronunciation(long vocabulary, String word);
 
 
     //
     // SR_RecognizerResult native methods
     //
-    private static native byte[] SR_RecognizerResultGetWaveform(int recognizer);
-    private static native int SR_RecognizerResultGetSize(int recognizer);
-    private static native int SR_RecognizerResultGetKeyCount(int recognizer, int nbest);
-    private static native String[] SR_RecognizerResultGetKeyList(int recognizer, int nbest);
-    private static native String SR_RecognizerResultGetValue(int recognizer,
+    private static native byte[] SR_RecognizerResultGetWaveform(long recognizer);
+    private static native int SR_RecognizerResultGetSize(long recognizer);
+    private static native int SR_RecognizerResultGetKeyCount(long recognizer, int nbest);
+    private static native String[] SR_RecognizerResultGetKeyList(long recognizer, int nbest);
+    private static native String SR_RecognizerResultGetValue(long recognizer,
             int nbest, String key);
-    // private static native void SR_RecognizerResultGetLocale(int recognizer, ESR_Locale* locale);
+    // private static native void SR_RecognizerResultGetLocale(long recognizer, ESR_Locale* locale);
 }
