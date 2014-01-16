@@ -232,9 +232,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     // requested because it is updated asynchronously by the display power controller.
     private final DisplayPowerRequest mDisplayPowerRequest = new DisplayPowerRequest();
 
-    // The time the screen was last turned off, in elapsedRealtime() timebase.
-    private long mLastScreenOffEventElapsedRealTime;
-
     // True if the display power state has been fully applied, which means the display
     // is actually on or actually off or whatever was requested.
     private boolean mDisplayReady;
@@ -1657,12 +1654,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
             int newScreenState = getDesiredScreenPowerStateLocked();
             if (newScreenState != mDisplayPowerRequest.screenState) {
-                if (newScreenState == DisplayPowerRequest.SCREEN_STATE_OFF
-                        && mDisplayPowerRequest.screenState
-                                != DisplayPowerRequest.SCREEN_STATE_OFF) {
-                    mLastScreenOffEventElapsedRealTime = SystemClock.elapsedRealtime();
-                }
-
                 mDisplayPowerRequest.screenState = newScreenState;
                 nativeSetPowerState(
                         newScreenState != DisplayPowerRequest.SCREEN_STATE_OFF,
@@ -2072,18 +2063,6 @@ public final class PowerManagerService extends IPowerManager.Stub
 
         // Control light outside of lock.
         light.setFlashing(color, Light.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
-    }
-
-    /**
-     * Used by the Watchdog.
-     */
-    public long timeSinceScreenWasLastOn() {
-        synchronized (mLock) {
-            if (mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF) {
-                return 0;
-            }
-            return SystemClock.elapsedRealtime() - mLastScreenOffEventElapsedRealTime;
-        }
     }
 
     /**
