@@ -196,11 +196,11 @@ public final class CaptureResult extends CameraMetadata {
      * CaptureResult.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * @see CaptureRequest#FLASH_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
-     * @see CaptureRequest#FLASH_MODE
-     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -228,8 +228,8 @@ public final class CaptureResult extends CameraMetadata {
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
      *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<int[]> CONTROL_AE_REGIONS =
             new Key<int[]>("android.control.aeRegions", int[].class);
@@ -286,8 +286,8 @@ public final class CaptureResult extends CameraMetadata {
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
      *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<int[]> CONTROL_AF_REGIONS =
             new Key<int[]>("android.control.afRegions", int[].class);
@@ -336,10 +336,10 @@ public final class CaptureResult extends CameraMetadata {
      * routine is disabled. The camera device uses each particular illumination
      * target for white balance adjustment.</p>
      *
-     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
-     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
      * @see #CONTROL_AWB_MODE_INCANDESCENT
@@ -372,8 +372,8 @@ public final class CaptureResult extends CameraMetadata {
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
      *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<int[]> CONTROL_AWB_REGIONS =
             new Key<int[]>("android.control.awbRegions", int[].class);
@@ -521,10 +521,10 @@ public final class CaptureResult extends CameraMetadata {
      * auto-exposure algorithm, the overridden values are then provided
      * back to the user in the corresponding result.</p>
      *
-     * @see CaptureRequest#SENSOR_SENSITIVITY
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
-     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     public static final Key<Float> LENS_APERTURE =
             new Key<Float>("android.lens.aperture", float.class);
@@ -818,9 +818,9 @@ public final class CaptureResult extends CameraMetadata {
      * image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
      *
-     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
+     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
      */
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
             new Key<float[]>("android.statistics.lensShadingMap", float[].class);
