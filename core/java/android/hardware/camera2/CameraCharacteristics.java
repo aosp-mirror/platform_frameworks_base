@@ -203,8 +203,15 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<byte[]>("android.control.availableEffects", byte[].class);
 
     /**
-     * <p>what subset of the scene mode enum list is
-     * supported.</p>
+     * <p>List containing a subset of scene modes
+     * specified in {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode}.</p>
+     * <p>This list contains scene modes that can be set for the camera device.
+     * Only scene modes that have been fully implemented for the
+     * camera device may be included here. Implementations are not expected
+     * to be consistent across all devices. If no scene modes are supported
+     * by the camera device, this will be set to <code>[DISABLED]</code>.</p>
+     *
+     * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final Key<byte[]> CONTROL_AVAILABLE_SCENE_MODES =
             new Key<byte[]>("android.control.availableSceneModes", byte[].class);
