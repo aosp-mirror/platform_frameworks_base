@@ -870,10 +870,20 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Float>("android.lens.aperture", float.class);
 
     /**
-     * <p>State of lens neutral density
-     * filter(s)</p>
-     * <p>Will not be supported on most devices. Can only
-     * pick from supported list</p>
+     * <p>State of lens neutral density filter(s).</p>
+     * <p>This will not be supported on most camera devices. On devices
+     * where this is supported, this may only be set to one of the
+     * values included in {@link CameraCharacteristics#LENS_INFO_AVAILABLE_FILTER_DENSITIES android.lens.info.availableFilterDensities}.</p>
+     * <p>Lens filters are typically used to lower the amount of light the
+     * sensor is exposed to (measured in steps of EV). As used here, an EV
+     * step is the standard logarithmic representation, which are
+     * non-negative, and inversely proportional to the amount of light
+     * hitting the sensor.  For example, setting this to 0 would result
+     * in no reduction of the incoming light, and setting this to 2 would
+     * mean that the filter is set to reduce incoming light by two stops
+     * (allowing 1/4 of the prior amount of light to the sensor).</p>
+     *
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_FILTER_DENSITIES
      */
     public static final Key<Float> LENS_FILTER_DENSITY =
             new Key<Float>("android.lens.filterDensity", float.class);

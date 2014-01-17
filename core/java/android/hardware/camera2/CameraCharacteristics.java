@@ -284,12 +284,14 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<float[]>("android.lens.info.availableApertures", float[].class);
 
     /**
-     * <p>List of supported ND filter
-     * values</p>
-     * <p>If not available, only setting is 0. Otherwise,
-     * lists the available exposure index values for dimming
-     * (2 would mean the filter is set to reduce incoming
-     * light by two stops)</p>
+     * <p>List of supported neutral density filter values for
+     * {@link CaptureRequest#LENS_FILTER_DENSITY android.lens.filterDensity}.</p>
+     * <p>If changing {@link CaptureRequest#LENS_FILTER_DENSITY android.lens.filterDensity} is not supported,
+     * availableFilterDensities must contain only 0. Otherwise, this
+     * list contains only the exact filter density values available on
+     * this camera device.</p>
+     *
+     * @see CaptureRequest#LENS_FILTER_DENSITY
      */
     public static final Key<float[]> LENS_INFO_AVAILABLE_FILTER_DENSITIES =
             new Key<float[]>("android.lens.info.availableFilterDensities", float[].class);
