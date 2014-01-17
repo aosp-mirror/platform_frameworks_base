@@ -85,7 +85,7 @@ void ShadowTessellator::tessellateAmbientShadow(float width, float height,
 }
 
 void ShadowTessellator::tessellateSpotShadow(float width, float height,
-        int screenWidth, int screenHeight,
+        const mat4& receiverTransform, int screenWidth, int screenHeight,
         const mat4& casterTransform, VertexBuffer& shadowVertexBuffer) {
     const int vertexCount = 4;
     Vector3 polygon[vertexCount];
@@ -101,6 +101,13 @@ void ShadowTessellator::tessellateSpotShadow(float width, float height,
 #if DEBUG_SHADOW
     ALOGD("light center %f %f %f", lightCenter.x, lightCenter.y, lightCenter.z);
 #endif
+
+    // light position (because it's in local space) needs to compensate for receiver transform
+    // TODO: should apply to light orientation, not just position
+    Matrix4 reverseReceiverTransform;
+    reverseReceiverTransform.loadInverse(receiverTransform);
+    reverseReceiverTransform.mapPoint3d(lightCenter);
+
     const float lightSize = maximal / 8;
     const int lightVertexCount = 16;
 
