@@ -45,28 +45,23 @@ static inline T max(T a, T b) {
  */
 void ShadowTessellator::generateCasterPolygon(float width, float height,
         const mat4& casterTransform, int vertexCount, Vector3* polygon) {
-
-    Vector3 pivot(width / 2, height / 2, 0.0f);
-    casterTransform.mapPoint3d(pivot);
-
-    // TODO: The zScaleFactor need to be mapped to the screen.
-    float zScaleFactor = 0.5;
-    Rect blockRect(pivot.x - width * zScaleFactor, pivot.y - height * zScaleFactor,
-            pivot.x + width * zScaleFactor, pivot.y + height * zScaleFactor);
-
-    // Generate the caster's polygon from the rect.
+    Rect blockRect(0, 0, width, height);
     polygon[0].x = blockRect.left;
     polygon[0].y = blockRect.top;
-    polygon[0].z = pivot.z;
+    polygon[0].z = 0;
     polygon[1].x = blockRect.right;
     polygon[1].y = blockRect.top;
-    polygon[1].z = pivot.z;
+    polygon[1].z = 0;
     polygon[2].x = blockRect.right;
     polygon[2].y = blockRect.bottom;
-    polygon[2].z = pivot.z;
+    polygon[2].z = 0;
     polygon[3].x = blockRect.left;
     polygon[3].y = blockRect.bottom;
-    polygon[3].z = pivot.z;
+    polygon[3].z = 0;
+    casterTransform.mapPoint3d(polygon[0]);
+    casterTransform.mapPoint3d(polygon[1]);
+    casterTransform.mapPoint3d(polygon[2]);
+    casterTransform.mapPoint3d(polygon[3]);
 }
 
 void ShadowTessellator::tessellateAmbientShadow(float width, float height,
