@@ -3200,9 +3200,12 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     drawVertexBuffer(ambientShadowVertexBuffer, &paint);
 
     VertexBuffer spotShadowVertexBuffer;
-    ShadowTessellator::tessellateSpotShadow(width, height,
+    Vector3 lightPosScale(mCaches.propertyLightPosXScale,
+            mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
+    ShadowTessellator::tessellateSpotShadow(width, height, lightPosScale,
             *currentTransform(), getWidth(), getHeight(),
             casterTransform, spotShadowVertexBuffer);
+
     drawVertexBuffer(spotShadowVertexBuffer, &paint);
 
     return DrawGlInfo::kStatusDrew;

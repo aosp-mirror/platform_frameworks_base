@@ -30,8 +30,9 @@ public:
             const mat4& casterTransform, VertexBuffer& shadowVertexBuffer);
 
     static void tessellateSpotShadow(float width, float height,
-            const mat4& receiverTransform, int screenWidth, int screenHeight,
-            const mat4& casterTransform, VertexBuffer& shadowVertexBuffer);
+            const Vector3& lightPosScale, const mat4& receiverTransform,
+            int screenWidth, int screenHeight, const mat4& casterTransform,
+            VertexBuffer& shadowVertexBuffer);
 
 private:
     static void generateCasterPolygon(float width, float height,
