@@ -140,20 +140,20 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Rational[]>("android.colorCorrection.transform", Rational[].class);
 
     /**
-     * <p>Gains applying to Bayer color channels for
+     * <p>Gains applying to Bayer raw color channels for
      * white-balance</p>
      * <p>The 4-channel white-balance gains are defined in
-     * the order of [R G_even G_odd B], where G_even is the gain
-     * for green pixels on even rows of the output, and G_odd
-     * is the gain for greenpixels on the odd rows. if a HAL
+     * the order of <code>[R G_even G_odd B]</code>, where <code>G_even</code> is the gain
+     * for green pixels on even rows of the output, and <code>G_odd</code>
+     * is the gain for green pixels on the odd rows. if a HAL
      * does not support a separate gain for even/odd green channels,
-     * it should use the G_even value,and write G_odd equal to
-     * G_even in the output result metadata.</p>
+     * it should use the <code>G_even</code> value, and write <code>G_odd</code> equal to
+     * <code>G_even</code> in the output result metadata.</p>
      * <p>This array is either set by HAL when the request
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
-     * <p>The ouput should be the gains actually applied by the HAL to
+     * <p>The output should be the gains actually applied by the HAL to
      * the current frame.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
