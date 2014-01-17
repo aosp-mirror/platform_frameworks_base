@@ -31,13 +31,16 @@ oneway interface ICallServiceAdapter {
     void getNextCallId(/* TODO(santoscordon): Needs response object */);
 
     /**
-     * Receives confirmation of the call service's ability to make a call to the specified handle.
+     * Receives confirmation of a call service's ability to place a call. This method is used in
+     * response to {@link ICallService#isCompatibleWith}.
+     * TODO(santoscordon): rename to setIsCompatibleWith().
      *
-     * @param handle The handle to call.
-     * @param callId The identifier of the call for which compatibility is being received.
-     * @param isCompatible True if the call service can place a call to the handle.
+     * @param callId The identifier of the call for which compatibility is being received. This ID
+     *     should correspond to the ID given as part of the call information in
+     *     {@link ICallService#isCompatibleWith}.
+     * @param isCompatible True if the call service can place the call.
      */
-    void setCompatibleWith(String handle, String callId, boolean isCompatible);
+    void setCompatibleWith(String callId, boolean isCompatible);
 
     /**
      * Tells CallsManager of a new incoming call.

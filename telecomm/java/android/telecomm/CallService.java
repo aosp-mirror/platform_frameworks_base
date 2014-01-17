@@ -59,25 +59,10 @@ public abstract class CallService extends Service {
                     setCallServiceAdapter((ICallServiceAdapter) msg.obj);
                     break;
                 case MSG_IS_COMPATIBLE_WITH:
-                    // See {@link CallServiceWrapper#isCompatibleWith} for dataObject definition.
-                    try {
-                        // TODO(santoscordon): Switch to using a custom class here instead.  When we
-                        // switch to using Call objects instead of handles directly, this may not even be
-                        // necessary.
-                        Pair<String, String> dataObject = (Pair<String, String>) msg.obj;
-                        isCompatibleWith(dataObject.first, dataObject.second);
-                    } catch (ClassCastException e) {
-                        Log.e(TAG, "Unexpected object type for MSG_IS_COMPATIBLE_WITH.", e);
-                    }
+                    isCompatibleWith((CallInfo) msg.obj);
                     break;
                 case MSG_CALL:
-                    // See {@link CallServiceWrapper#call} for dataObject definition.
-                    try {
-                        Pair<String, String> dataObject = (Pair<String, String>) msg.obj;
-                        call(dataObject.first, dataObject.second);
-                    } catch (ClassCastException e) {
-                        Log.e(TAG, "Unexpected object type for MSG_CALL.", e);
-                    }
+                    call((CallInfo) msg.obj);
                     break;
                 case MSG_DISCONNECT:
                     disconnect((String) msg.obj);
@@ -99,15 +84,13 @@ public abstract class CallService extends Service {
         }
 
         @Override
-        public void isCompatibleWith(String handle, String callId) {
-            Pair<String, String> dataObject = new Pair<String, String>(handle, callId);
-            mMessageHandler.obtainMessage(MSG_IS_COMPATIBLE_WITH, dataObject).sendToTarget();
+        public void isCompatibleWith(CallInfo callInfo) {
+            mMessageHandler.obtainMessage(MSG_IS_COMPATIBLE_WITH, callInfo).sendToTarget();
         }
 
         @Override
-        public void call(String handle, String callId) {
-            Pair<String, String> dataObject = new Pair<String, String>(handle, callId);
-            mMessageHandler.obtainMessage(MSG_CALL, dataObject).sendToTarget();
+        public void call(CallInfo callInfo) {
+            mMessageHandler.obtainMessage(MSG_CALL, callInfo).sendToTarget();
         }
 
         @Override
@@ -170,27 +153,25 @@ public abstract class CallService extends Service {
     public abstract void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter);
 
     /**
-     * Determines if the CallService can make calls to the handle. Response is sent via
-     * ICallServiceAdapter. When responding, the correct call ID must be specified along with
-     * the handle.
+     * Determines if the CallService can place the specified call. Response is sent via
+     * {@link ICallServiceAdapter#setCompatibleWith}. When responding, the correct call ID must be
+     * specified.
      *
-     * @param handle The destination handle to test against.
-     * @param callId The call identifier associated with this compatibility request.
+     * @param callInfo The details of the relevant call.
      */
-    public abstract void isCompatibleWith(String handle, String callId);
+    public abstract void isCompatibleWith(CallInfo callInfo);
 
     /**
-     * Attempts to call the relevant party using the specified handle, be it a phone number,
+     * Attempts to call the relevant party using the specified call's handle, be it a phone number,
      * SIP address, or some other kind of user ID.  Note that the set of handle types is
      * dynamically extensible since call providers should be able to implement arbitrary
      * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
      * call service respond via {@link ICallServiceAdapter#newOutgoingCall} if it can successfully
      * make the call.
      *
-     * @param handle The destination handle to call.
-     * @param callId Unique identifier for the call.
+     * @param callInfo The details of the relevant call.
      */
-    public abstract void call(String handle, String callId);
+    public abstract void call(CallInfo callInfo);
 
     /**
      * Disconnects the specified call.

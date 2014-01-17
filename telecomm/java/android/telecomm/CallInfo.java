@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * A parcelable holder class of Call information data. This class is intended for transfering call
@@ -35,6 +36,11 @@ public final class CallInfo implements Parcelable {
      */
     private final String mHandle;
 
+    /**
+     * Unique identifier for the call as a UUID string.
+     */
+    private String mId;
+
     // There are 4 timestamps that are important to a call:
     // 1) Created timestamp - The time at which the user explicitly chose to make the call.
     // 2) Connected timestamp - The time at which a call service confirms that it has connected
@@ -49,13 +55,21 @@ public final class CallInfo implements Parcelable {
 
     /**
      * Persists handle of the other party of this call.
+     *
+     * @param id The unique ID of the call.
+     * @param handle The handle to the other party in this call.
      */
-    public CallInfo(String handle) {
+    public CallInfo(String id, String handle) {
+        mId = id;
         mHandle = handle;
     }
 
     public String getHandle() {
         return mHandle;
+    }
+
+    public String getId() {
+        return mId;
     }
 
     //
@@ -70,7 +84,10 @@ public final class CallInfo implements Parcelable {
 
         @Override
         public CallInfo createFromParcel(Parcel source) {
-            return new CallInfo(source.readString());
+            String id = source.readString();
+            String handle = source.readString();
+
+            return new CallInfo(id, handle);
         }
 
         @Override
@@ -92,6 +109,7 @@ public final class CallInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel destination, int flags) {
+        destination.writeString(mId);
         destination.writeString(mHandle);
     }
 }

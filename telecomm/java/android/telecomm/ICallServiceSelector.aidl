@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.telecomm.CallInfo;
 import android.telecomm.ICallService;
 import android.telecomm.ICallServiceSelectionResponse;
 import android.telecomm.ICallSwitchabilityResponse;
@@ -67,27 +68,23 @@ oneway interface ICallServiceSelector {
     /**
      * Initiates the process to retrieve the sorted set of call services that are preferred
      * by this call-service selector.
-     * TODO(gilad): Pass reduced-visibility call-service objects, see isSwitchable/callId below.
-     * TODO(gilad): Consider passing a Call object encapsulating the relevant call details (e.g.
-     * handle, contactInfo, etc).
      *
-     * @param handle The handle to dial.
+     * @param callInfo The details of the relevant call.
      * @param callServiceBinders The list of binders to select call services from.
      * @param response The response object through which the selected services are passed back
      *         to the switchboard.
      */
     void select(
-            String handle,
+            in CallInfo callInfo,
             in List<IBinder> callServiceBinders,
             in ICallServiceSelectionResponse response);
 
     /**
      * Determines if the specified ongoing call can/should be switched from the currently-used
      * call service to another.
-     * TODO(gilad): Pass a CallInfo instead that contains (among other fields) the callId.
      *
-     * @param callId The identifier of the call to disconnect.
+     * @param callInfo The details of the relevant call.
      * @param response The response object to be populated and returned to switchboard.
      */
-    void isSwitchable(String callId, in ICallSwitchabilityResponse response);
+    void isSwitchable(in CallInfo callInfo, in ICallSwitchabilityResponse response);
 }
