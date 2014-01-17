@@ -865,24 +865,21 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>Do not fire the flash for this
-     * capture</p>
+     * <p>Do not fire the flash for this capture.</p>
      * @see CaptureRequest#FLASH_MODE
      */
     public static final int FLASH_MODE_OFF = 0;
 
     /**
-     * <p>if android.flash.available is true Fire flash
-     * for this capture based on firingPower,
-     * firingTime.</p>
+     * <p>If the flash is available and charged, fire flash
+     * for this capture based on android.flash.firingPower and
+     * android.flash.firingTime.</p>
      * @see CaptureRequest#FLASH_MODE
      */
     public static final int FLASH_MODE_SINGLE = 1;
 
     /**
-     * <p>if android.flash.available is true Flash
-     * continuously on, power set by
-     * firingPower</p>
+     * <p>Transition flash to continuously on.</p>
      * @see CaptureRequest#FLASH_MODE
      */
     public static final int FLASH_MODE_TORCH = 2;

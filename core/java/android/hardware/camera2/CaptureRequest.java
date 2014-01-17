@@ -652,10 +652,12 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<int[]>("android.control.awbRegions", int[].class);
 
     /**
-     * <p>Information to 3A routines about the purpose
-     * of this capture, to help decide optimal 3A
-     * strategy</p>
-     * <p>Only used if {@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF.</p>
+     * <p>Information to the camera device 3A (auto-exposure,
+     * auto-focus, auto-white balance) routines about the purpose
+     * of this capture, to help the camera device to decide optimal 3A
+     * strategy.</p>
+     * <p>This control is only effective if <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code>
+     * and any 3A routine is active.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_CAPTURE_INTENT_CUSTOM
@@ -764,7 +766,23 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Integer>("android.edge.mode", int.class);
 
     /**
-     * <p>Select flash operation mode</p>
+     * <p>The desired mode for for the camera device's flash control.</p>
+     * <p>This control is only effective when flash unit is available
+     * (<code>{@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} != 0</code>).</p>
+     * <p>When this control is used, the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} must be set to ON or OFF.
+     * Otherwise, the camera device auto-exposure related flash control (ON_AUTO_FLASH,
+     * ON_ALWAYS_FLASH, or ON_AUTO_FLASH_REDEYE) will override this control.</p>
+     * <p>When set to OFF, the camera device will not fire flash for this capture.</p>
+     * <p>When set to SINGLE, the camera device will fire flash regardless of the camera
+     * device's auto-exposure routine's result. When used in still capture case, this
+     * control should be used along with AE precapture metering sequence
+     * ({@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}), otherwise, the image may be incorrectly exposed.</p>
+     * <p>When set to TORCH, the flash will be on continuously. This mode can be used
+     * for use cases such as preview, auto-focus assist, still capture, or video recording.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see #FLASH_MODE_OFF
      * @see #FLASH_MODE_SINGLE
      * @see #FLASH_MODE_TORCH
