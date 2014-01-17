@@ -1239,9 +1239,93 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Duration from start of frame exposure to
-     * start of next frame exposure</p>
-     * <p>Exposure time has priority, so duration is set to
-     * max(duration, exposure time + overhead)</p>
+     * start of next frame exposure.</p>
+     * <p>The maximum frame rate that can be supported by a camera subsystem is
+     * a function of many factors:</p>
+     * <ul>
+     * <li>Requested resolutions of output image streams</li>
+     * <li>Availability of binning / skipping modes on the imager</li>
+     * <li>The bandwidth of the imager interface</li>
+     * <li>The bandwidth of the various ISP processing blocks</li>
+     * </ul>
+     * <p>Since these factors can vary greatly between different ISPs and
+     * sensors, the camera abstraction tries to represent the bandwidth
+     * restrictions with as simple a model as possible.</p>
+     * <p>The model presented has the following characteristics:</p>
+     * <ul>
+     * <li>The image sensor is always configured to output the smallest
+     * resolution possible given the application's requested output stream
+     * sizes.  The smallest resolution is defined as being at least as large
+     * as the largest requested output stream size; the camera pipeline must
+     * never digitally upsample sensor data when the crop region covers the
+     * whole sensor. In general, this means that if only small output stream
+     * resolutions are configured, the sensor can provide a higher frame
+     * rate.</li>
+     * <li>Since any request may use any or all the currently configured
+     * output streams, the sensor and ISP must be configured to support
+     * scaling a single capture to all the streams at the same time.  This
+     * means the camera pipeline must be ready to produce the largest
+     * requested output size without any delay.  Therefore, the overall
+     * frame rate of a given configured stream set is governed only by the
+     * largest requested stream resolution.</li>
+     * <li>Using more than one output stream in a request does not affect the
+     * frame duration.</li>
+     * <li>JPEG streams act like processed YUV streams in requests for which
+     * they are not included; in requests in which they are directly
+     * referenced, they act as JPEG streams. This is because supporting a
+     * JPEG stream requires the underlying YUV data to always be ready for
+     * use by a JPEG encoder, but the encoder will only be used (and impact
+     * frame duration) on requests that actually reference a JPEG stream.</li>
+     * <li>The JPEG processor can run concurrently to the rest of the camera
+     * pipeline, but cannot process more than 1 capture at a time.</li>
+     * </ul>
+     * <p>The necessary information for the application, given the model above,
+     * is provided via the android.scaler.available*MinDurations fields.
+     * These are used to determine the maximum frame rate / minimum frame
+     * duration that is possible for a given stream configuration.</p>
+     * <p>Specifically, the application can use the following rules to
+     * determine the minimum frame duration it can request from the HAL
+     * device:</p>
+     * <ol>
+     * <li>Given the application's currently configured set of output
+     * streams, <code>S</code>, divide them into three sets: streams in a JPEG format
+     * <code>SJ</code>, streams in a raw sensor format <code>SR</code>, and the rest ('processed')
+     * <code>SP</code>.</li>
+     * <li>For each subset of streams, find the largest resolution (by pixel
+     * count) in the subset. This gives (at most) three resolutions <code>RJ</code>,
+     * <code>RR</code>, and <code>RP</code>.</li>
+     * <li>If <code>RJ</code> is greater than <code>RP</code>, set <code>RP</code> equal to <code>RJ</code>. If there is
+     * no exact match for <code>RP == RJ</code> (in particular there isn't an available
+     * processed resolution at the same size as <code>RJ</code>), then set <code>RP</code> equal
+     * to the smallest processed resolution that is larger than <code>RJ</code>. If
+     * there are no processed resolutions larger than <code>RJ</code>, then set <code>RJ</code> to
+     * the processed resolution closest to <code>RJ</code>.</li>
+     * <li>If <code>RP</code> is greater than <code>RR</code>, set <code>RR</code> equal to <code>RP</code>. If there is
+     * no exact match for <code>RR == RP</code> (in particular there isn't an available
+     * raw resolution at the same size as <code>RP</code>), then set <code>RR</code> equal to
+     * or to the smallest raw resolution that is larger than <code>RP</code>. If
+     * there are no raw resolutions larger than <code>RP</code>, then set <code>RR</code> to
+     * the raw resolution closest to <code>RP</code>.</li>
+     * <li>Look up the matching minimum frame durations in the property lists
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS android.scaler.availableJpegMinDurations},
+     * android.scaler.availableRawMinDurations, and
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS android.scaler.availableProcessedMinDurations}.  This gives three
+     * minimum frame durations <code>FJ</code>, <code>FR</code>, and <code>FP</code>.</li>
+     * <li>If a stream of requests do not use a JPEG stream, then the minimum
+     * supported frame duration for each request is <code>max(FR, FP)</code>.</li>
+     * <li>If a stream of requests all use the JPEG stream, then the minimum
+     * supported frame duration for each request is <code>max(FR, FP, FJ)</code>.</li>
+     * <li>If a mix of JPEG-using and non-JPEG-using requests is submitted by
+     * the application, then the HAL will have to delay JPEG-using requests
+     * whenever the JPEG encoder is still busy processing an older capture.
+     * This will happen whenever a JPEG-using request starts capture less
+     * than <code>FJ</code> <em>ns</em> after a previous JPEG-using request. The minimum
+     * supported frame duration will vary between the values calculated in
+     * #6 and #7.</li>
+     * </ol>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS
+     * @see CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS
      */
     public static final Key<Long> SENSOR_FRAME_DURATION =
             new Key<Long>("android.sensor.frameDuration", long.class);
