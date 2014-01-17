@@ -319,9 +319,49 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
 
     /**
-     * <p>When {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} is not OFF, TRANSFORM_MATRIX
-     * should be ignored.</p>
+     * <p>The mode control selects how the image data is converted from the
+     * sensor's native color into linear sRGB color.</p>
+     * <p>When auto-white balance is enabled with {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, this
+     * control is overridden by the AWB routine. When AWB is disabled, the
+     * application controls how the color mapping is performed.</p>
+     * <p>We define the expected processing pipeline below. For consistency
+     * across devices, this is always the case with TRANSFORM_MATRIX.</p>
+     * <p>When either FULL or HIGH_QUALITY is used, the camera device may
+     * do additional processing but {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
+     * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} will still be provided by the
+     * camera device (in the results) and be roughly correct.</p>
+     * <p>Switching to TRANSFORM_MATRIX and using the data provided from
+     * FAST or HIGH_QUALITY will yield a picture with the same white point
+     * as what was produced by the camera device in the earlier frame.</p>
+     * <p>The expected processing pipeline is as follows:</p>
+     * <p><img alt="White balance processing pipeline" src="../../../../images/camera2/metadata/android.colorCorrection.mode/processing_pipeline.png" /></p>
+     * <p>The white balance is encoded by two values, a 4-channel white-balance
+     * gain vector (applied in the Bayer domain), and a 3x3 color transform
+     * matrix (applied after demosaic).</p>
+     * <p>The 4-channel white-balance gains are defined as:</p>
+     * <pre><code>{@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} = [ R G_even G_odd B ]
+     * </code></pre>
+     * <p>where <code>G_even</code> is the gain for green pixels on even rows of the
+     * output, and <code>G_odd</code> is the gain for green pixels on the odd rows.
+     * These may be identical for a given camera device implementation; if
+     * the camera device does not support a separate gain for even/odd green
+     * channels, it will use the <code>G_even</code> value, and write <code>G_odd</code> equal to
+     * <code>G_even</code> in the output result metadata.</p>
+     * <p>The matrices for color transforms are defined as a 9-entry vector:</p>
+     * <pre><code>{@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} = [ I0 I1 I2 I3 I4 I5 I6 I7 I8 ]
+     * </code></pre>
+     * <p>which define a transform from input sensor colors, <code>P_in = [ r g b ]</code>,
+     * to output linear sRGB, <code>P_out = [ r' g' b' ]</code>,</p>
+     * <p>with colors as follows:</p>
+     * <pre><code>r' = I0r + I1g + I2b
+     * g' = I3r + I4g + I5b
+     * b' = I6r + I7g + I8b
+     * </code></pre>
+     * <p>Both the input and output value ranges must match. Overflow/underflow
+     * values are clipped to fit within the range.</p>
      *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      * @see #COLOR_CORRECTION_MODE_TRANSFORM_MATRIX
      * @see #COLOR_CORRECTION_MODE_FAST
@@ -347,20 +387,20 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Rational[]>("android.colorCorrection.transform", Rational[].class);
 
     /**
-     * <p>Gains applying to Bayer color channels for
+     * <p>Gains applying to Bayer raw color channels for
      * white-balance</p>
      * <p>The 4-channel white-balance gains are defined in
-     * the order of [R G_even G_odd B], where G_even is the gain
-     * for green pixels on even rows of the output, and G_odd
-     * is the gain for greenpixels on the odd rows. if a HAL
+     * the order of <code>[R G_even G_odd B]</code>, where <code>G_even</code> is the gain
+     * for green pixels on even rows of the output, and <code>G_odd</code>
+     * is the gain for green pixels on the odd rows. if a HAL
      * does not support a separate gain for even/odd green channels,
-     * it should use the G_even value,and write G_odd equal to
-     * G_even in the output result metadata.</p>
+     * it should use the <code>G_even</code> value, and write <code>G_odd</code> equal to
+     * <code>G_even</code> in the output result metadata.</p>
      * <p>This array is either set by HAL when the request
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
-     * <p>The ouput should be the gains actually applied by the HAL to
+     * <p>The output should be the gains actually applied by the HAL to
      * the current frame.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
