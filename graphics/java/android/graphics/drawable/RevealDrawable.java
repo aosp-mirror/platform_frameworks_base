@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
@@ -248,6 +249,7 @@ public class RevealDrawable extends LayerDrawable {
         }
 
         // Draw ripple mask into a buffer that merges using SRC_OVER.
+        boolean needsMask = false;
         int layerSaveCount = -1;
         int n = activeRipples.size();
         for (int i = 0; i < n; i++) {
@@ -261,7 +263,7 @@ public class RevealDrawable extends LayerDrawable {
                     layerSaveCount = canvas.saveLayer(0, 0, width, height, null, 0);
                 }
 
-                ripple.draw(canvas, mRipplePaint);
+                needsMask |= ripple.draw(canvas, mRipplePaint);
             }
         }
 
@@ -269,15 +271,18 @@ public class RevealDrawable extends LayerDrawable {
         // into another layer and composite using SRC_IN, then composite onto
         // the original canvas.
         if (layerSaveCount >= 0) {
-            if (mMaskingPaint == null) {
-                mMaskingPaint = new Paint();
-                mMaskingPaint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+            if (needsMask) {
+                if (mMaskingPaint == null) {
+                    mMaskingPaint = new Paint();
+                    mMaskingPaint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+                }
+
+                // TODO: When Drawable.setXfermode() is supported by all drawables,
+                // we won't need an extra layer.
+                canvas.saveLayer(0, 0, width, height, mMaskingPaint, 0);
+                getDrawable(1).draw(canvas);
             }
 
-            // TODO: When Drawable.setXfermode() is supported by all drawables,
-            // we won't need an extra layer.
-            canvas.saveLayer(0, 0, width, height, mMaskingPaint, 0);
-            getDrawable(1).draw(canvas);
             canvas.restoreToCount(layerSaveCount);
         }
     }
