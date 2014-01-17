@@ -359,6 +359,14 @@ public:
     bool propertyEnable3d;
     bool propertyDirtyViewport; // flag set when dirtying the viewport
     float propertyCameraDistance;
+
+    // These scaling factors range from 0 to 1, to scale the light position
+    // within the bound of (screenwidth, screenheight, max(screenwidth, screenheight));
+    // The default scale is (0.5, 0, 1) which put the light at
+    // (screenwidth / 2, 0, max(screenwidth, screenheight)).
+    float propertyLightPosXScale;
+    float propertyLightPosYScale;
+    float propertyLightPosZScale;
     int propertyShadowStrength;
 
 private:

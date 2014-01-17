@@ -85,8 +85,9 @@ void ShadowTessellator::tessellateAmbientShadow(float width, float height,
 }
 
 void ShadowTessellator::tessellateSpotShadow(float width, float height,
-        const mat4& receiverTransform, int screenWidth, int screenHeight,
-        const mat4& casterTransform, VertexBuffer& shadowVertexBuffer) {
+        const Vector3& lightPosScale, const mat4& receiverTransform,
+        int screenWidth, int screenHeight, const mat4& casterTransform,
+        VertexBuffer& shadowVertexBuffer) {
     const int vertexCount = 4;
     Vector3 polygon[vertexCount];
     generateCasterPolygon(width, height, casterTransform, vertexCount, polygon);
@@ -97,7 +98,8 @@ void ShadowTessellator::tessellateSpotShadow(float width, float height,
     const int layers = 2;
     const float strength = 0.5;
     int maximal = max(screenWidth, screenHeight);
-    Vector3 lightCenter(screenWidth / 2, 0, maximal);
+    Vector3 lightCenter(screenWidth * lightPosScale.x, screenHeight * lightPosScale.y,
+            maximal * lightPosScale.z);
 #if DEBUG_SHADOW
     ALOGD("light center %f %f %f", lightCenter.x, lightCenter.y, lightCenter.z);
 #endif
@@ -108,7 +110,7 @@ void ShadowTessellator::tessellateSpotShadow(float width, float height,
     reverseReceiverTransform.loadInverse(receiverTransform);
     reverseReceiverTransform.mapPoint3d(lightCenter);
 
-    const float lightSize = maximal / 8;
+    const float lightSize = maximal / 4;
     const int lightVertexCount = 16;
 
     SpotShadow::createSpotShadow(polygon, vertexCount, lightCenter, lightSize,

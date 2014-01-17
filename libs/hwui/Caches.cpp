@@ -686,6 +686,10 @@ void Caches::initTempProperties() {
     propertyEnable3d = false;
     propertyCameraDistance = 1.0f;
     propertyShadowStrength = 0x3f;
+
+    propertyLightPosXScale = 0.5f;
+    propertyLightPosYScale = 0.0f;
+    propertyLightPosZScale = 1.0f;
 }
 
 void Caches::setTempProperty(const char* name, const char* value) {
@@ -703,6 +707,21 @@ void Caches::setTempProperty(const char* name, const char* value) {
     } else if (!strcmp(name, "shadowStrength")) {
         propertyShadowStrength = atoi(value);
         ALOGD("shadow strength = 0x%x out of 0xff", propertyShadowStrength);
+        return;
+    } else if (!strcmp(name, "lightPosXScale")) {
+        propertyLightPosXScale = fmin(fmax(atof(value), 0.0), 1.0);
+        propertyDirtyViewport = true;
+        ALOGD("lightPos X Scale = %.2f", propertyLightPosXScale);
+        return;
+    }  else if (!strcmp(name, "lightPosYScale")) {
+        propertyLightPosYScale = fmin(fmax(atof(value), 0.0), 1.0);
+        propertyDirtyViewport = true;
+        ALOGD("lightPos Y Scale = %.2f", propertyLightPosXScale);
+        return;
+    }  else if (!strcmp(name, "lightPosZScale")) {
+        propertyLightPosZScale = fmin(fmax(atof(value), 0.0), 1.0);
+        propertyDirtyViewport = true;
+        ALOGD("lightPos Z Scale = %.2f", propertyLightPosXScale);
         return;
     }
     ALOGD("    failed");
