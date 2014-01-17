@@ -250,24 +250,44 @@ public abstract class CameraMetadata {
 
     /**
      * <p>Use the {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} matrix
-     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} to do color conversion</p>
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} to do color conversion.</p>
+     * <p>All advanced white balance adjustments (not specified
+     * by our white balance pipeline) must be disabled.</p>
+     * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
+     * TRANSFORM_MATRIX is ignored. The camera device will override
+     * this value to either FAST or HIGH_QUALITY.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0;
 
     /**
-     * <p>Must not slow down frame rate relative to raw
-     * bayer output</p>
+     * <p>Must not slow down capture rate relative to sensor raw
+     * output.</p>
+     * <p>Advanced white balance adjustments above and beyond
+     * the specified white balance pipeline may be applied.</p>
+     * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
+     * the camera device uses the last frame's AWB values
+     * (or defaults if AWB has never been run).</p>
+     *
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_FAST = 1;
 
     /**
-     * <p>Frame rate may be reduced by high
-     * quality</p>
+     * <p>Capture rate (relative to sensor raw output)
+     * may be reduced by high quality.</p>
+     * <p>Advanced white balance adjustments above and beyond
+     * the specified white balance pipeline may be applied.</p>
+     * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
+     * the camera device uses the last frame's AWB values
+     * (or defaults if AWB has never been run).</p>
+     *
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2;
