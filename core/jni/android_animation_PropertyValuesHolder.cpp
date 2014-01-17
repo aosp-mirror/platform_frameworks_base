@@ -29,44 +29,44 @@ namespace android {
 
 const char* const kClassPathName = "android/animation/PropertyValuesHolder";
 
-static jmethodID android_animation_PropertyValuesHolder_getIntMethod(
+static jlong android_animation_PropertyValuesHolder_getIntMethod(
         JNIEnv* env, jclass pvhClass, jclass targetClass, jstring methodName)
 {
     const char *nativeString = env->GetStringUTFChars(methodName, 0);
     jmethodID mid = env->GetMethodID(targetClass, nativeString, "(I)V");
     env->ReleaseStringUTFChars(methodName, nativeString);
-    return mid;
+    return reinterpret_cast<jlong>(mid);
 }
 
-static jmethodID android_animation_PropertyValuesHolder_getFloatMethod(
+static jlong android_animation_PropertyValuesHolder_getFloatMethod(
         JNIEnv* env, jclass pvhClass, jclass targetClass, jstring methodName)
 {
     const char *nativeString = env->GetStringUTFChars(methodName, 0);
     jmethodID mid = env->GetMethodID(targetClass, nativeString, "(F)V");
     env->ReleaseStringUTFChars(methodName, nativeString);
-    return mid;
+    return reinterpret_cast<jlong>(mid);
 }
 
 static void android_animation_PropertyValuesHolder_callIntMethod(
-        JNIEnv* env, jclass pvhObject, jobject target, jmethodID methodID, int arg)
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, jint arg)
 {
-    env->CallVoidMethod(target, methodID, arg);
+    env->CallVoidMethod(target, reinterpret_cast<jmethodID>(methodID), arg);
 }
 
 static void android_animation_PropertyValuesHolder_callFloatMethod(
-        JNIEnv* env, jclass pvhObject, jobject target, jmethodID methodID, float arg)
+        JNIEnv* env, jclass pvhObject, jobject target, jlong methodID, jfloat arg)
 {
-    env->CallVoidMethod(target, methodID, arg);
+    env->CallVoidMethod(target, reinterpret_cast<jmethodID>(methodID), arg);
 }
 
 static JNINativeMethod gMethods[] = {
-    {   "nGetIntMethod", "(Ljava/lang/Class;Ljava/lang/String;)I",
+    {   "nGetIntMethod", "(Ljava/lang/Class;Ljava/lang/String;)J",
             (void*)android_animation_PropertyValuesHolder_getIntMethod },
-    {   "nGetFloatMethod", "(Ljava/lang/Class;Ljava/lang/String;)I",
+    {   "nGetFloatMethod", "(Ljava/lang/Class;Ljava/lang/String;)J",
             (void*)android_animation_PropertyValuesHolder_getFloatMethod },
-    {   "nCallIntMethod", "(Ljava/lang/Object;II)V",
+    {   "nCallIntMethod", "(Ljava/lang/Object;JI)V",
             (void*)android_animation_PropertyValuesHolder_callIntMethod },
-    {   "nCallFloatMethod", "(Ljava/lang/Object;IF)V",
+    {   "nCallFloatMethod", "(Ljava/lang/Object;JF)V",
             (void*)android_animation_PropertyValuesHolder_callFloatMethod }
 };
 
