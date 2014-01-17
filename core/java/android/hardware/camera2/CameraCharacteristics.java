@@ -297,11 +297,14 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<float[]>("android.lens.info.availableFilterDensities", float[].class);
 
     /**
-     * <p>If fitted with optical zoom, what focal
-     * lengths are available. If not, the static focal
-     * length</p>
-     * <p>If optical zoom not supported, only one value
-     * should be reported</p>
+     * <p>The available focal lengths for this device for use with
+     * {@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}.</p>
+     * <p>If optical zoom is not supported, this will only report
+     * a single value corresponding to the static focal length of the
+     * device. Otherwise, this will report every focal length supported
+     * by the device.</p>
+     *
+     * @see CaptureRequest#LENS_FOCAL_LENGTH
      */
     public static final Key<float[]> LENS_INFO_AVAILABLE_FOCAL_LENGTHS =
             new Key<float[]>("android.lens.info.availableFocalLengths", float[].class);
