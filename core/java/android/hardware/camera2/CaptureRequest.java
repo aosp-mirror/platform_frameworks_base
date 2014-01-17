@@ -929,8 +929,20 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Float>("android.lens.filterDensity", float.class);
 
     /**
-     * <p>Lens optical zoom setting</p>
-     * <p>Will not be supported on most devices.</p>
+     * <p>The current lens focal length; used for optical zoom.</p>
+     * <p>This setting controls the physical focal length of the camera
+     * device's lens. Changing the focal length changes the field of
+     * view of the camera device, and is usually used for optical zoom.</p>
+     * <p>Like {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} and {@link CaptureRequest#LENS_APERTURE android.lens.aperture}, this
+     * setting won't be applied instantaneously, and it may take several
+     * frames before the lens can move to the requested focal length.
+     * While the focal length is still changing, {@link CaptureResult#LENS_STATE android.lens.state} will
+     * be set to MOVING.</p>
+     * <p>This is expected not to be supported on most devices.</p>
+     *
+     * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
+     * @see CaptureResult#LENS_STATE
      */
     public static final Key<Float> LENS_FOCAL_LENGTH =
             new Key<Float>("android.lens.focalLength", float.class);
