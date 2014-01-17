@@ -31,7 +31,7 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-static jint android_content_XmlBlock_nativeCreate(JNIEnv* env, jobject clazz,
+static jlong android_content_XmlBlock_nativeCreate(JNIEnv* env, jobject clazz,
                                                jbyteArray bArray,
                                                jint off, jint len)
 {
@@ -55,25 +55,25 @@ static jint android_content_XmlBlock_nativeCreate(JNIEnv* env, jobject clazz,
         return 0;
     }
 
-    return (jint)osb;
+    return reinterpret_cast<jlong>(osb);
 }
 
-static jint android_content_XmlBlock_nativeGetStringBlock(JNIEnv* env, jobject clazz,
-                                                       jint token)
+static jlong android_content_XmlBlock_nativeGetStringBlock(JNIEnv* env, jobject clazz,
+                                                       jlong token)
 {
-    ResXMLTree* osb = (ResXMLTree*)token;
+    ResXMLTree* osb = reinterpret_cast<ResXMLTree*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)&osb->getStrings();
+    return reinterpret_cast<jlong>(&osb->getStrings());
 }
 
-static jint android_content_XmlBlock_nativeCreateParseState(JNIEnv* env, jobject clazz,
-                                                          jint token)
+static jlong android_content_XmlBlock_nativeCreateParseState(JNIEnv* env, jobject clazz,
+                                                          jlong token)
 {
-    ResXMLTree* osb = (ResXMLTree*)token;
+    ResXMLTree* osb = reinterpret_cast<ResXMLTree*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
@@ -87,19 +87,19 @@ static jint android_content_XmlBlock_nativeCreateParseState(JNIEnv* env, jobject
 
     st->restart();
 
-    return (jint)st;
+    return reinterpret_cast<jlong>(st);
 }
 
 static jint android_content_XmlBlock_nativeNext(JNIEnv* env, jobject clazz,
-                                             jint token)
+                                             jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         return ResXMLParser::END_DOCUMENT;
     }
 
     do {
-        jint code = (jint)st->next();
+        ResXMLParser::event_code_t code = st->next();
         switch (code) {
             case ResXMLParser::START_TAG:
                 return 2;
@@ -123,139 +123,139 @@ bad:
 }
 
 static jint android_content_XmlBlock_nativeGetNamespace(JNIEnv* env, jobject clazz,
-                                                   jint token)
+                                                   jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         return -1;
     }
 
-    return (jint)st->getElementNamespaceID();
+    return static_cast<jint>(st->getElementNamespaceID());
 }
 
 static jint android_content_XmlBlock_nativeGetName(JNIEnv* env, jobject clazz,
-                                                jint token)
+                                                jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         return -1;
     }
 
-    return (jint)st->getElementNameID();
+    return static_cast<jint>(st->getElementNameID());
 }
 
 static jint android_content_XmlBlock_nativeGetText(JNIEnv* env, jobject clazz,
-                                                jint token)
+                                                jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         return -1;
     }
 
-    return (jint)st->getTextID();
+    return static_cast<jint>(st->getTextID());
 }
 
 static jint android_content_XmlBlock_nativeGetLineNumber(JNIEnv* env, jobject clazz,
-                                                         jint token)
+                                                         jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getLineNumber();
+    return static_cast<jint>(st->getLineNumber());
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeCount(JNIEnv* env, jobject clazz,
-                                                          jint token)
+                                                          jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getAttributeCount();
+    return static_cast<jint>(st->getAttributeCount());
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeNamespace(JNIEnv* env, jobject clazz,
-                                                                 jint token, jint idx)
+                                                                 jlong token, jint idx)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getAttributeNamespaceID(idx);
+    return static_cast<jint>(st->getAttributeNamespaceID(idx));
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeName(JNIEnv* env, jobject clazz,
-                                                         jint token, jint idx)
+                                                         jlong token, jint idx)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getAttributeNameID(idx);
+    return static_cast<jint>(st->getAttributeNameID(idx));
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeResource(JNIEnv* env, jobject clazz,
-                                                             jint token, jint idx)
+                                                             jlong token, jint idx)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getAttributeNameResID(idx);
+    return static_cast<jint>(st->getAttributeNameResID(idx));
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeDataType(JNIEnv* env, jobject clazz,
-                                                                jint token, jint idx)
+                                                                jlong token, jint idx)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getAttributeDataType(idx);
+    return static_cast<jint>(st->getAttributeDataType(idx));
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeData(JNIEnv* env, jobject clazz,
-                                                            jint token, jint idx)
+                                                            jlong token, jint idx)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getAttributeData(idx);
+    return static_cast<jint>(st->getAttributeData(idx));
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeStringValue(JNIEnv* env, jobject clazz,
-                                                                   jint token, jint idx)
+                                                                   jlong token, jint idx)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    return (jint)st->getAttributeValueStringID(idx);
+    return static_cast<jint>(st->getAttributeValueStringID(idx));
 }
 
 static jint android_content_XmlBlock_nativeGetAttributeIndex(JNIEnv* env, jobject clazz,
-                                                             jint token,
+                                                             jlong token,
                                                              jstring ns, jstring name)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL || name == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
@@ -271,7 +271,7 @@ static jint android_content_XmlBlock_nativeGetAttributeIndex(JNIEnv* env, jobjec
     const char16_t* name16 = env->GetStringChars(name, NULL);
     jsize nameLen = env->GetStringLength(name);
 
-    jint idx = (jint)st->indexOfAttribute(ns16, nsLen, name16, nameLen);
+    jint idx = static_cast<jint>(st->indexOfAttribute(ns16, nsLen, name16, nameLen));
 
     if (ns) {
         env->ReleaseStringChars(ns, ns16);
@@ -282,35 +282,35 @@ static jint android_content_XmlBlock_nativeGetAttributeIndex(JNIEnv* env, jobjec
 }
 
 static jint android_content_XmlBlock_nativeGetIdAttribute(JNIEnv* env, jobject clazz,
-                                                          jint token)
+                                                          jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
     ssize_t idx = st->indexOfID();
-    return idx >= 0 ? (jint)st->getAttributeValueStringID(idx) : -1;
+    return idx >= 0 ? static_cast<jint>(st->getAttributeValueStringID(idx)) : -1;
 }
 
 static jint android_content_XmlBlock_nativeGetClassAttribute(JNIEnv* env, jobject clazz,
-                                                             jint token)
+                                                             jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
     ssize_t idx = st->indexOfClass();
-    return idx >= 0 ? (jint)st->getAttributeValueStringID(idx) : -1;
+    return idx >= 0 ? static_cast<jint>(st->getAttributeValueStringID(idx)) : -1;
 }
 
 static jint android_content_XmlBlock_nativeGetStyleAttribute(JNIEnv* env, jobject clazz,
-                                                             jint token)
+                                                             jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
@@ -332,9 +332,9 @@ static jint android_content_XmlBlock_nativeGetStyleAttribute(JNIEnv* env, jobjec
 }
 
 static void android_content_XmlBlock_nativeDestroyParseState(JNIEnv* env, jobject clazz,
-                                                          jint token)
+                                                          jlong token)
 {
-    ResXMLParser* st = (ResXMLParser*)token;
+    ResXMLParser* st = reinterpret_cast<ResXMLParser*>(token);
     if (st == NULL) {
         jniThrowNullPointerException(env, NULL);
         return;
@@ -344,9 +344,9 @@ static void android_content_XmlBlock_nativeDestroyParseState(JNIEnv* env, jobjec
 }
 
 static void android_content_XmlBlock_nativeDestroy(JNIEnv* env, jobject clazz,
-                                                   jint token)
+                                                   jlong token)
 {
-    ResXMLTree* osb = (ResXMLTree*)token;
+    ResXMLTree* osb = reinterpret_cast<ResXMLTree*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
         return;
@@ -362,47 +362,47 @@ static void android_content_XmlBlock_nativeDestroy(JNIEnv* env, jobject clazz,
  */
 static JNINativeMethod gXmlBlockMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeCreate",               "([BII)I",
+    { "nativeCreate",               "([BII)J",
             (void*) android_content_XmlBlock_nativeCreate },
-    { "nativeGetStringBlock",       "(I)I",
+    { "nativeGetStringBlock",       "(J)J",
             (void*) android_content_XmlBlock_nativeGetStringBlock },
-    { "nativeCreateParseState",     "(I)I",
+    { "nativeCreateParseState",     "(J)J",
             (void*) android_content_XmlBlock_nativeCreateParseState },
-    { "nativeNext",                 "(I)I",
+    { "nativeNext",                 "(J)I",
             (void*) android_content_XmlBlock_nativeNext },
-    { "nativeGetNamespace",         "(I)I",
+    { "nativeGetNamespace",         "(J)I",
             (void*) android_content_XmlBlock_nativeGetNamespace },
-    { "nativeGetName",              "(I)I",
+    { "nativeGetName",              "(J)I",
             (void*) android_content_XmlBlock_nativeGetName },
-    { "nativeGetText",              "(I)I",
+    { "nativeGetText",              "(J)I",
             (void*) android_content_XmlBlock_nativeGetText },
-    { "nativeGetLineNumber",        "(I)I",
+    { "nativeGetLineNumber",        "(J)I",
             (void*) android_content_XmlBlock_nativeGetLineNumber },
-    { "nativeGetAttributeCount",    "(I)I",
+    { "nativeGetAttributeCount",    "(J)I",
             (void*) android_content_XmlBlock_nativeGetAttributeCount },
-    { "nativeGetAttributeNamespace","(II)I",
+    { "nativeGetAttributeNamespace","(JI)I",
             (void*) android_content_XmlBlock_nativeGetAttributeNamespace },
-    { "nativeGetAttributeName",     "(II)I",
+    { "nativeGetAttributeName",     "(JI)I",
             (void*) android_content_XmlBlock_nativeGetAttributeName },
-    { "nativeGetAttributeResource", "(II)I",
+    { "nativeGetAttributeResource", "(JI)I",
             (void*) android_content_XmlBlock_nativeGetAttributeResource },
-    { "nativeGetAttributeDataType", "(II)I",
+    { "nativeGetAttributeDataType", "(JI)I",
             (void*) android_content_XmlBlock_nativeGetAttributeDataType },
-    { "nativeGetAttributeData",    "(II)I",
+    { "nativeGetAttributeData",    "(JI)I",
             (void*) android_content_XmlBlock_nativeGetAttributeData },
-    { "nativeGetAttributeStringValue", "(II)I",
+    { "nativeGetAttributeStringValue", "(JI)I",
             (void*) android_content_XmlBlock_nativeGetAttributeStringValue },
-    { "nativeGetAttributeIndex",    "(ILjava/lang/String;Ljava/lang/String;)I",
+    { "nativeGetAttributeIndex",    "(JLjava/lang/String;Ljava/lang/String;)I",
             (void*) android_content_XmlBlock_nativeGetAttributeIndex },
-    { "nativeGetIdAttribute",      "(I)I",
+    { "nativeGetIdAttribute",      "(J)I",
             (void*) android_content_XmlBlock_nativeGetIdAttribute },
-    { "nativeGetClassAttribute",   "(I)I",
+    { "nativeGetClassAttribute",   "(J)I",
             (void*) android_content_XmlBlock_nativeGetClassAttribute },
-    { "nativeGetStyleAttribute",   "(I)I",
+    { "nativeGetStyleAttribute",   "(J)I",
             (void*) android_content_XmlBlock_nativeGetStyleAttribute },
-    { "nativeDestroyParseState",    "(I)V",
+    { "nativeDestroyParseState",    "(J)V",
             (void*) android_content_XmlBlock_nativeDestroyParseState },
-    { "nativeDestroy",              "(I)V",
+    { "nativeDestroy",              "(J)V",
             (void*) android_content_XmlBlock_nativeDestroy },
 };
 
