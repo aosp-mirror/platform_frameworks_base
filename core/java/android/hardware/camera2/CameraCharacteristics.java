@@ -384,13 +384,15 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>The minimum frame duration that is supported
-     * for each resolution in availableJpegSizes. Should
-     * correspond to the frame duration when only that JPEG
-     * stream is active and captured in a burst, with all
-     * processing set to FAST</p>
+     * for each resolution in {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES android.scaler.availableJpegSizes}.</p>
+     * <p>This corresponds to the minimum steady-state frame duration when only
+     * that JPEG stream is active and captured in a burst, with all
+     * processing (typically in android.*.mode) set to FAST.</p>
      * <p>When multiple streams are configured, the minimum
      * frame duration will be &gt;= max(individual stream min
      * durations)</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES
      */
     public static final Key<long[]> SCALER_AVAILABLE_JPEG_MIN_DURATIONS =
             new Key<long[]>("android.scaler.availableJpegMinDurations", long[].class);
@@ -415,14 +417,16 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Float>("android.scaler.availableMaxDigitalZoom", float.class);
 
     /**
-     * <p>The minimum frame duration that is supported
-     * for each resolution in availableProcessedSizes. Should
-     * correspond to the frame duration when only that processed
-     * stream is active, with all processing set to
-     * FAST</p>
-     * <p>When multiple streams are configured, the minimum
-     * frame duration will be &gt;= max(individual stream min
-     * durations)</p>
+     * <p>For each available processed output size (defined in
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES android.scaler.availableProcessedSizes}), this property lists the
+     * minimum supportable frame duration for that size.</p>
+     * <p>This should correspond to the frame duration when only that processed
+     * stream is active, with all processing (typically in android.*.mode)
+     * set to FAST.</p>
+     * <p>When multiple streams are configured, the minimum frame duration will
+     * be &gt;= max(individual stream min durations).</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES
      */
     public static final Key<long[]> SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS =
             new Key<long[]>("android.scaler.availableProcessedMinDurations", long[].class);
