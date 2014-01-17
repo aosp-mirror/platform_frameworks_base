@@ -240,7 +240,6 @@ public class BatteryStatsHelper {
             double power = 0; // in mAs
             double highestDrain = 0;
             String packageWithHighestDrain = null;
-            //mUsageList.add(new AppUsage(u.getUid(), new double[] {power}));
             Map<String, ? extends BatteryStats.Uid.Proc> processStats = u.getProcessStats();
             long cpuTime = 0;
             long cpuFgTime = 0;
@@ -399,7 +398,6 @@ public class BatteryStatsHelper {
                     u.getUid(), makemAh(power)));
 
             // Add the app to the list if it is consuming power
-            boolean isOtherUser = false;
             final int userId = UserHandle.getUserId(u.getUid());
             if (power != 0 || u.getUid() == 0) {
                 BatterySipper app = new BatterySipper(BatterySipper.DrainType.APP, u,
@@ -420,40 +418,34 @@ public class BatteryStatsHelper {
                 app.packageWithHighestDrain = packageWithHighestDrain;
                 if (u.getUid() == Process.WIFI_UID) {
                     mWifiSippers.add(app);
+                    mWifiPower += power;
                 } else if (u.getUid() == Process.BLUETOOTH_UID) {
                     mBluetoothSippers.add(app);
+                    mBluetoothPower += power;
                 } else if (mAsUser != UserHandle.USER_ALL && userId != mAsUser
                         && UserHandle.getAppId(u.getUid()) >= Process.FIRST_APPLICATION_UID) {
-                    isOtherUser = true;
                     List<BatterySipper> list = mUserSippers.get(userId);
                     if (list == null) {
                         list = new ArrayList<BatterySipper>();
                         mUserSippers.put(userId, list);
                     }
                     list.add(app);
+                    if (power != 0) {
+                        Double userPower = mUserPower.get(userId);
+                        if (userPower == null) {
+                            userPower = power;
+                        } else {
+                            userPower += power;
+                        }
+                        mUserPower.put(userId, userPower);
+                    }
                 } else {
                     mUsageList.add(app);
+                    if (power > mMaxPower) mMaxPower = power;
+                    mTotalPower += power;
                 }
                 if (u.getUid() == 0) {
                     osApp = app;
-                }
-            }
-            if (power != 0) {
-                if (u.getUid() == Process.WIFI_UID) {
-                    mWifiPower += power;
-                } else if (u.getUid() == Process.BLUETOOTH_UID) {
-                    mBluetoothPower += power;
-                } else if (isOtherUser) {
-                    Double userPower = mUserPower.get(userId);
-                    if (userPower == null) {
-                        userPower = power;
-                    } else {
-                        userPower += power;
-                    }
-                    mUserPower.put(userId, userPower);
-                } else {
-                    if (power > mMaxPower) mMaxPower = power;
-                    mTotalPower += power;
                 }
             }
         }
@@ -679,7 +671,6 @@ public class BatteryStatsHelper {
 
     private BatterySipper addEntryNoTotal(DrainType drainType, long time, double power) {
         if (power > mMaxPower) mMaxPower = power;
-        mTotalPower += power;
         BatterySipper bs = new BatterySipper(drainType, null, new double[] {power});
         bs.usageTime = time;
         mUsageList.add(bs);
