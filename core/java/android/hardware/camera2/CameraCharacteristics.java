@@ -227,10 +227,10 @@ public final class CameraCharacteristics extends CameraMetadata {
      * which enables application control of white balance, by using
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}({@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} must be set to TRANSFORM_MATRIX).</p>
      *
-     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
-     * @see CaptureRequest#COLOR_CORRECTION_MODE
-     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final Key<byte[]> CONTROL_AWB_AVAILABLE_MODES =
             new Key<byte[]>("android.control.awbAvailableModes", byte[].class);
@@ -500,8 +500,8 @@ public final class CameraCharacteristics extends CameraMetadata {
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
-     * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     public static final Key<Integer> SENSOR_MAX_ANALOG_SENSITIVITY =
             new Key<Integer>("android.sensor.maxAnalogSensitivity", int.class);
