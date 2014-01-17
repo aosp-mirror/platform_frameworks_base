@@ -36,24 +36,24 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 /*package*/ class PropertyValuesHolder_Delegate {
 
     @LayoutlibDelegate
-    /*package*/ static int nGetIntMethod(Class<?> targetClass, String methodName) {
+    /*package*/ static long nGetIntMethod(Class<?> targetClass, String methodName) {
         // return 0 to force PropertyValuesHolder to use Java reflection.
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetFloatMethod(Class<?> targetClass, String methodName) {
+    /*package*/ static long nGetFloatMethod(Class<?> targetClass, String methodName) {
         // return 0 to force PropertyValuesHolder to use Java reflection.
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nCallIntMethod(Object target, int methodID, int arg) {
+    /*package*/ static void nCallIntMethod(Object target, long methodID, int arg) {
         // do nothing
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nCallFloatMethod(Object target, int methodID, float arg) {
+    /*package*/ static void nCallFloatMethod(Object target, long methodID, float arg) {
         // do nothing
     }
 }
