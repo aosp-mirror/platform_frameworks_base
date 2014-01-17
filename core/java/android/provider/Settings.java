@@ -6057,6 +6057,14 @@ public final class Settings {
          */
         public static final String WIFI_BOUNCE_DELAY_OVERRIDE_MS = "wifi_bounce_delay_override_ms";
 
+        /**
+         * Defines global runtime overrides to window policy.
+         *
+         * See {@link com.android.internal.policy.impl.PolicyControl} for value format.
+         *
+         * @hide
+         */
+        public static final String POLICY_CONTROL = "policy_control";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

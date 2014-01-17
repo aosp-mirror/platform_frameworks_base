@@ -1914,7 +1914,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
             if (sbModeChanged || nbModeChanged) {
                 // update transient bar autohide
-                if (sbMode == MODE_SEMI_TRANSPARENT || nbMode == MODE_SEMI_TRANSPARENT) {
+                if (mStatusBarMode == MODE_SEMI_TRANSPARENT || mNavigationBarMode == MODE_SEMI_TRANSPARENT) {
                     scheduleAutohide();
                 } else {
                     cancelAutohide();
