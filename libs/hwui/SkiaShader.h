@@ -145,7 +145,7 @@ struct SkiaBitmapShader: public SkiaShader {
             GLuint* textureUnit);
 
 private:
-    SkiaBitmapShader() {
+    SkiaBitmapShader() : mBitmap(NULL), mTexture(NULL) {
     }
 
     SkBitmap* mBitmap;
