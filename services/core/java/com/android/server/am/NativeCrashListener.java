@@ -95,8 +95,8 @@ final class NativeCrashListener extends Thread {
      * Daemon thread that accept()s incoming domain socket connections from debuggerd
      * and processes the crash dump that is passed through.
      */
-    NativeCrashListener() {
-        mAm = ActivityManagerService.self();
+    NativeCrashListener(ActivityManagerService am) {
+        mAm = am;
     }
 
     @Override

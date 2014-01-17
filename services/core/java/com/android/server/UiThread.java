@@ -17,21 +17,18 @@
 package com.android.server;
 
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.StrictMode;
-import android.util.Slog;
 
 /**
  * Shared singleton thread for showing UI.  This is a foreground thread, and in
  * additional should not have operations that can take more than a few ms scheduled
  * on it to avoid UI jank.
  */
-public final class UiThread extends HandlerThread {
+public final class UiThread extends ServiceThread {
     private static UiThread sInstance;
     private static Handler sHandler;
 
     private UiThread() {
-        super("android.ui", android.os.Process.THREAD_PRIORITY_FOREGROUND);
+        super("android.ui", android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
     }
 
     private static void ensureThreadLocked() {
@@ -39,19 +36,6 @@ public final class UiThread extends HandlerThread {
             sInstance = new UiThread();
             sInstance.start();
             sHandler = new Handler(sInstance.getLooper());
-            sHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //Looper.myLooper().setMessageLogging(new LogPrinter(
-                    //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
-                    android.os.Process.setCanSelfBackground(false);
-
-                    // For debug builds, log event loop stalls to dropbox for analysis.
-                    if (StrictMode.conditionallyEnableDebugLogging()) {
-                        Slog.i("UiThread", "Enabled StrictMode logging for UI thread");
-                    }
-                }
-            });
         }
     }
 
