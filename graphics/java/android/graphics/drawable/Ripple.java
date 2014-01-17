@@ -160,7 +160,7 @@ class Ripple {
         }
     }
 
-    public void draw(Canvas c, Paint p) {
+    public boolean draw(Canvas c, Paint p) {
         final Rect bounds = mBounds;
         final Rect padding = mPadding;
         final float dX = Math.max(mX, bounds.right - mX);
@@ -221,26 +221,34 @@ class Ripple {
             }
         }
 
-        if (exitState <= 0) {
-            // Exit state isn't showing, so we can simplify to a solid
-            // circle.
-            if (outerRadius > 0) {
-                p.setAlpha(maxAlpha);
-                p.setStyle(Style.FILL);
-                c.drawCircle(x, y, outerRadius, p);
-            }
-        } else {
-            // Both states are showing, so we need a circular stroke.
-            final float innerRadius = MathUtils.lerp(0, outerRadius, exitState);
-            final float strokeWidth = outerRadius - innerRadius;
-            if (strokeWidth > 0) {
-                final float strokeRadius = innerRadius + strokeWidth / 2f;
-                final int alpha = (int) (MathUtils.lerp(maxAlpha, 0, exitState) + 0.5f);
-                p.setAlpha(alpha);
-                p.setStyle(Style.STROKE);
-                p.setStrokeWidth(strokeWidth);
-                c.drawCircle(x, y, strokeRadius, p);
+        if (maxAlpha > 0) {
+            if (exitState <= 0) {
+                // Exit state isn't showing, so we can simplify to a solid
+                // circle.
+                if (outerRadius > 0) {
+                    p.setAlpha(maxAlpha);
+                    p.setStyle(Style.FILL);
+                    c.drawCircle(x, y, outerRadius, p);
+                    return true;
+                }
+            } else {
+                // Both states are showing, so we need a circular stroke.
+                final float innerRadius = MathUtils.lerp(0, outerRadius, exitState);
+                final float strokeWidth = outerRadius - innerRadius;
+                if (strokeWidth > 0) {
+                    final float strokeRadius = innerRadius + strokeWidth / 2f;
+                    final int alpha = (int) (MathUtils.lerp(maxAlpha, 0, exitState) + 0.5f);
+                    if (alpha > 0) {
+                        p.setAlpha(alpha);
+                        p.setStyle(Style.STROKE);
+                        p.setStrokeWidth(strokeWidth);
+                        c.drawCircle(x, y, strokeRadius, p);
+                        return true;
+                    }
+                }
             }
         }
+
+        return false;
     }
 }
