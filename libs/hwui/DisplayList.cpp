@@ -418,11 +418,16 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
         renderer.concatMatrix(mAnimationMatrix);
     }
     if (mMatrixFlags != 0) {
-        if (mMatrixFlags == TRANSLATION) {
-            renderer.translate(mTranslationX, mTranslationY, mTranslationZ);
-        } else {
-            if (Caches::getInstance().propertyEnable3d) {
+        if (Caches::getInstance().propertyEnable3d) {
+            if (mMatrixFlags == TRANSLATION) {
+                renderer.translate(mTranslationX, mTranslationY, mTranslationZ);
+            } else {
                 renderer.concatMatrix(mTransform);
+            }
+        } else {
+            // avoid setting translationZ, use SkMatrix
+            if (mMatrixFlags == TRANSLATION) {
+                renderer.translate(mTranslationX, mTranslationY, 0);
             } else {
                 renderer.concatMatrix(mTransformMatrix);
             }
