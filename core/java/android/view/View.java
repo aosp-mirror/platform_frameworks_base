@@ -1645,7 +1645,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setTag(Object)
      * @see #getTag()
      */
-    protected Object mTag;
+    protected Object mTag = null;
 
     // for mPrivateFlags:
     /** {@hide} */
@@ -16442,7 +16442,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Returns this view's tag.
      *
-     * @return the Object stored in this view as a tag
+     * @return the Object stored in this view as a tag, or {@code null} if not
+     *         set
      *
      * @see #setTag(Object)
      * @see #getTag(int)
@@ -16472,7 +16473,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param key The key identifying the tag
      *
-     * @return the Object stored in this view as a tag
+     * @return the Object stored in this view as a tag, or {@code null} if not
+     *         set
      *
      * @see #setTag(int, Object)
      * @see #getTag()
