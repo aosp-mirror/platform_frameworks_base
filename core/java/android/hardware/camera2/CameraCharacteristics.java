@@ -374,7 +374,10 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
 
     /**
-     * <p>List of app-visible formats</p>
+     * <p>The list of image formats that are supported by this
+     * camera device.</p>
+     * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
+     * <p>When set to YUV_420_888, application can access the YUV420 data directly.</p>
      */
     public static final Key<int[]> SCALER_AVAILABLE_FORMATS =
             new Key<int[]>("android.scaler.availableFormats", int[].class);
@@ -393,8 +396,11 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<long[]>("android.scaler.availableJpegMinDurations", long[].class);
 
     /**
-     * <p>The resolutions available for output from
-     * the JPEG block. Listed as width x height</p>
+     * <p>The JPEG resolutions that are supported by this camera device.</p>
+     * <p>The resolutions are listed as <code>(width, height)</code> pairs. All camera devices will support
+     * sensor maximum resolution (defined by {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}).</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_JPEG_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.scaler.availableJpegSizes", android.hardware.camera2.Size[].class);
@@ -425,13 +431,16 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>The resolutions available for use with
      * processed output streams, such as YV12, NV12, and
      * platform opaque YUV/RGB streams to the GPU or video
-     * encoders. Listed as width, height</p>
-     * <p>The actual supported resolution list may be limited by
-     * consumer end points for different use cases. For example, for
-     * recording use case, the largest supported resolution may be
-     * limited by max supported size from encoder, for preview use
-     * case, the largest supported resolution may be limited by max
-     * resolution SurfaceTexture/SurfaceView can support.</p>
+     * encoders.</p>
+     * <p>The resolutions are listed as <code>(width, height)</code> pairs.</p>
+     * <p>For a given use case, the actual maximum supported resolution
+     * may be lower than what is listed here, depending on the destination
+     * Surface for the image data. For example, for recording video,
+     * the video encoder chosen may have a maximum size limit (e.g. 1080p)
+     * smaller than what the camera (e.g. maximum resolution is 3264x2448)
+     * can provide.</p>
+     * <p>Please reference the documentation for the image data destination to
+     * check if it limits the maximum size for image data.</p>
      */
     public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.scaler.availableProcessedSizes", android.hardware.camera2.Size[].class);
