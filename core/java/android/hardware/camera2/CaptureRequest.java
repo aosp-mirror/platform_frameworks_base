@@ -504,15 +504,17 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<int[]>("android.control.aeTargetFpsRange", int[].class);
 
     /**
-     * <p>Whether the HAL must trigger precapture
-     * metering.</p>
+     * <p>Whether the camera device will trigger a precapture
+     * metering sequence when it processes this request.</p>
      * <p>This entry is normally set to IDLE, or is not
      * included at all in the request settings. When included and
-     * set to START, the HAL must trigger the autoexposure
+     * set to START, the camera device will trigger the autoexposure
      * precapture metering sequence.</p>
      * <p>The effect of AE precapture trigger depends on the current
-     * AE mode and state; see the camera HAL device v3 header for
-     * details.</p>
+     * AE mode and state; see {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE precapture
+     * state transition details.</p>
+     *
+     * @see CaptureResult#CONTROL_AE_STATE
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_START
      */
@@ -563,14 +565,16 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<int[]>("android.control.afRegions", int[].class);
 
     /**
-     * <p>Whether the HAL must trigger autofocus.</p>
+     * <p>Whether the camera device will trigger autofocus for this request.</p>
      * <p>This entry is normally set to IDLE, or is not
      * included at all in the request settings.</p>
-     * <p>When included and set to START, the HAL must trigger the
-     * autofocus algorithm. The effect of AF trigger depends on the
-     * current AF mode and state; see the camera HAL device v3
-     * header for details. When set to CANCEL, the HAL must cancel
-     * any active trigger, and return to initial AF state.</p>
+     * <p>When included and set to START, the camera device will trigger the
+     * autofocus algorithm. If autofocus is disabled, this trigger has no effect.</p>
+     * <p>When set to CANCEL, the camera device will cancel any active trigger,
+     * and return to its initial AF state.</p>
+     * <p>See {@link CaptureResult#CONTROL_AF_STATE android.control.afState} for what that means for each AF mode.</p>
+     *
+     * @see CaptureResult#CONTROL_AF_STATE
      * @see #CONTROL_AF_TRIGGER_IDLE
      * @see #CONTROL_AF_TRIGGER_START
      * @see #CONTROL_AF_TRIGGER_CANCEL

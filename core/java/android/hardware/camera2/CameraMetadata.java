@@ -393,10 +393,9 @@ public abstract class CameraMetadata {
     public static final int CONTROL_AE_PRECAPTURE_TRIGGER_IDLE = 0;
 
     /**
-     * <p>The precapture metering sequence
-     * must be started. The exact effect of the precapture
-     * trigger depends on the current AE mode and
-     * state.</p>
+     * <p>The precapture metering sequence will be started
+     * by the camera device. The exact effect of the precapture
+     * trigger depends on the current AE mode and state.</p>
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      */
     public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1;
@@ -504,14 +503,14 @@ public abstract class CameraMetadata {
     public static final int CONTROL_AF_TRIGGER_IDLE = 0;
 
     /**
-     * <p>Autofocus must trigger now.</p>
+     * <p>Autofocus will trigger now.</p>
      * @see CaptureRequest#CONTROL_AF_TRIGGER
      */
     public static final int CONTROL_AF_TRIGGER_START = 1;
 
     /**
-     * <p>Autofocus must return to initial
-     * state, and cancel any active trigger.</p>
+     * <p>Autofocus will return to its initial
+     * state, and cancel any currently active trigger.</p>
      * @see CaptureRequest#CONTROL_AF_TRIGGER
      */
     public static final int CONTROL_AF_TRIGGER_CANCEL = 2;
@@ -993,7 +992,7 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>AE is off.  When a camera device is opened, it starts in
+     * <p>AE is off or recently reset. When a camera device is opened, it starts in
      * this state.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
@@ -1001,21 +1000,20 @@ public abstract class CameraMetadata {
 
     /**
      * <p>AE doesn't yet have a good set of control values
-     * for the current scene</p>
+     * for the current scene.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_SEARCHING = 1;
 
     /**
      * <p>AE has a good set of control values for the
-     * current scene</p>
+     * current scene.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_CONVERGED = 2;
 
     /**
-     * <p>AE has been locked (aeMode =
-     * LOCKED)</p>
+     * <p>AE has been locked.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_LOCKED = 3;
@@ -1023,18 +1021,19 @@ public abstract class CameraMetadata {
     /**
      * <p>AE has a good set of control values, but flash
      * needs to be fired for good quality still
-     * capture</p>
+     * capture.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_FLASH_REQUIRED = 4;
 
     /**
      * <p>AE has been asked to do a precapture sequence
-     * (through the
-     * trigger_action(CAMERA2_TRIGGER_PRECAPTURE_METERING)
-     * call), and is currently executing it. Once PRECAPTURE
+     * (through the {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} START),
+     * and is currently executing it. Once PRECAPTURE
      * completes, AE will transition to CONVERGED or
-     * FLASH_REQUIRED as appropriate</p>
+     * FLASH_REQUIRED as appropriate.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CaptureResult#CONTROL_AE_STATE
      */
     public static final int CONTROL_AE_STATE_PRECAPTURE = 5;
@@ -1112,21 +1111,20 @@ public abstract class CameraMetadata {
 
     /**
      * <p>AWB doesn't yet have a good set of control
-     * values for the current scene</p>
+     * values for the current scene.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_SEARCHING = 1;
 
     /**
      * <p>AWB has a good set of control values for the
-     * current scene</p>
+     * current scene.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_CONVERGED = 2;
 
     /**
-     * <p>AE has been locked (aeMode =
-     * LOCKED)</p>
+     * <p>AWB has been locked.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_LOCKED = 3;

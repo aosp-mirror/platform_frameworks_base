@@ -236,9 +236,144 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Current state of AE algorithm</p>
-     * <p>Whenever the AE algorithm state changes, a
-     * MSG_AUTOEXPOSURE notification must be send if a
-     * notification callback is registered.</p>
+     * <p>Switching between or enabling AE modes ({@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}) always
+     * resets the AE state to INACTIVE. Similarly, switching between {@link CaptureRequest#CONTROL_MODE android.control.mode},
+     * or {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} if <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code> resets all
+     * the algorithm states to INACTIVE.</p>
+     * <p>The camera device can do several state transitions between two results, if it is
+     * allowed by the state transition table. For example: INACTIVE may never actually be
+     * seen in a result.</p>
+     * <p>The state in the result is the state for this image (in sync with this image): if
+     * AE state becomes CONVERGED, then the image data associated with this result should
+     * be good to use.</p>
+     * <p>Below are state transition tables for different AE modes.</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center"></td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Camera device auto exposure algorithm is disabled</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>When {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is AE_MODE_ON_*:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Camera device initiates AE scan</td>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Values changing</td>
+     * </tr>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Values locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Camera device finishes AE scan</td>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">Good values, not changing</td>
+     * </tr>
+     * <tr>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Camera device finishes AE scan</td>
+     * <td align="center">FLASH_REQUIRED</td>
+     * <td align="center">Converged but too dark w/o flash</td>
+     * </tr>
+     * <tr>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Values locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">Camera device initiates AE scan</td>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Values changing</td>
+     * </tr>
+     * <tr>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Values locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FLASH_REQUIRED</td>
+     * <td align="center">Camera device initiates AE scan</td>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Values changing</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FLASH_REQUIRED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Values locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">LOCKED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is OFF</td>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Values not good after unlock</td>
+     * </tr>
+     * <tr>
+     * <td align="center">LOCKED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is OFF</td>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">Values good after unlock</td>
+     * </tr>
+     * <tr>
+     * <td align="center">LOCKED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is OFF</td>
+     * <td align="center">FLASH_REQUIRED</td>
+     * <td align="center">Exposure good, but too dark</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PRECAPTURE</td>
+     * <td align="center">Sequence done. {@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is OFF</td>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">Ready for high-quality capture</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PRECAPTURE</td>
+     * <td align="center">Sequence done. {@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Ready for high-quality capture</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Any state</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} is START</td>
+     * <td align="center">PRECAPTURE</td>
+     * <td align="center">Start AE precapture metering sequence</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     *
+     * @see CaptureRequest#CONTROL_AE_LOCK
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#CONTROL_SCENE_MODE
      * @see #CONTROL_AE_STATE_INACTIVE
      * @see #CONTROL_AE_STATE_SEARCHING
      * @see #CONTROL_AE_STATE_CONVERGED
@@ -294,9 +429,313 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Current state of AF algorithm</p>
-     * <p>Whenever the AF algorithm state changes, a
-     * MSG_AUTOFOCUS notification must be send if a notification
-     * callback is registered.</p>
+     * <p>Switching between or enabling AF modes ({@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}) always
+     * resets the AF state to INACTIVE. Similarly, switching between {@link CaptureRequest#CONTROL_MODE android.control.mode},
+     * or {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} if <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code> resets all
+     * the algorithm states to INACTIVE.</p>
+     * <p>The camera device can do several state transitions between two results, if it is
+     * allowed by the state transition table. For example: INACTIVE may never actually be
+     * seen in a result.</p>
+     * <p>The state in the result is the state for this image (in sync with this image): if
+     * AF state becomes FOCUSED, then the image data associated with this result should
+     * be sharp.</p>
+     * <p>Below are state transition tables for different AF modes.</p>
+     * <p>When {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} is AF_MODE_OFF or AF_MODE_EDOF:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center"></td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Never changes</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>When {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} is AF_MODE_AUTO or AF_MODE_MACRO:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">ACTIVE_SCAN</td>
+     * <td align="center">Start AF sweep, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">ACTIVE_SCAN</td>
+     * <td align="center">AF sweep done</td>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">Focused, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">ACTIVE_SCAN</td>
+     * <td align="center">AF sweep done</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">Not focused, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">ACTIVE_SCAN</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Cancel/reset AF, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Cancel/reset AF</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">ACTIVE_SCAN</td>
+     * <td align="center">Start new sweep, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Cancel/reset AF</td>
+     * </tr>
+     * <tr>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">ACTIVE_SCAN</td>
+     * <td align="center">Start new sweep, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Any state</td>
+     * <td align="center">Mode change</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center"></td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>When {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} is AF_MODE_CONTINUOUS_VIDEO:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Camera device initiates new scan</td>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Start AF scan, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF state query, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Camera device completes current scan</td>
+     * <td align="center">PASSIVE_FOCUSED</td>
+     * <td align="center">End AF scan, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Camera device fails current scan</td>
+     * <td align="center">PASSIVE_UNFOCUSED</td>
+     * <td align="center">End AF scan, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">Immediate trans. If focus is good, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">Immediate trans. if focus is bad, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Reset lens position, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_FOCUSED</td>
+     * <td align="center">Camera device initiates new scan</td>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Start AF scan, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_UNFOCUSED</td>
+     * <td align="center">Camera device initiates new scan</td>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Start AF scan, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_FOCUSED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">Immediate trans. Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_UNFOCUSED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">Immediate trans. Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">No effect</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Restart AF scan</td>
+     * </tr>
+     * <tr>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">No effect</td>
+     * </tr>
+     * <tr>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Restart AF scan</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>When {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} is AF_MODE_CONTINUOUS_PICTURE:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Camera device initiates new scan</td>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Start AF scan, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF state query, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Camera device completes current scan</td>
+     * <td align="center">PASSIVE_FOCUSED</td>
+     * <td align="center">End AF scan, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Camera device fails current scan</td>
+     * <td align="center">PASSIVE_UNFOCUSED</td>
+     * <td align="center">End AF scan, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">Eventual trans. once focus good, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">Eventual trans. if cannot focus, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Reset lens position, Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_FOCUSED</td>
+     * <td align="center">Camera device initiates new scan</td>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Start AF scan, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_UNFOCUSED</td>
+     * <td align="center">Camera device initiates new scan</td>
+     * <td align="center">PASSIVE_SCAN</td>
+     * <td align="center">Start AF scan, Lens now moving</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_FOCUSED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">Immediate trans. Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">PASSIVE_UNFOCUSED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">Immediate trans. Lens now locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">No effect</td>
+     * </tr>
+     * <tr>
+     * <td align="center">FOCUSED_LOCKED</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Restart AF scan</td>
+     * </tr>
+     * <tr>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF_TRIGGER</td>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">No effect</td>
+     * </tr>
+     * <tr>
+     * <td align="center">NOT_FOCUSED_LOCKED</td>
+     * <td align="center">AF_CANCEL</td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Restart AF scan</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     *
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#CONTROL_SCENE_MODE
      * @see #CONTROL_AF_STATE_INACTIVE
      * @see #CONTROL_AF_STATE_PASSIVE_SCAN
      * @see #CONTROL_AF_STATE_PASSIVE_FOCUSED
@@ -380,9 +819,102 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Current state of AWB algorithm</p>
-     * <p>Whenever the AWB algorithm state changes, a
-     * MSG_AUTOWHITEBALANCE notification must be send if a
-     * notification callback is registered.</p>
+     * <p>Switching between or enabling AWB modes ({@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}) always
+     * resets the AWB state to INACTIVE. Similarly, switching between {@link CaptureRequest#CONTROL_MODE android.control.mode},
+     * or {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} if <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code> resets all
+     * the algorithm states to INACTIVE.</p>
+     * <p>The camera device can do several state transitions between two results, if it is
+     * allowed by the state transition table. So INACTIVE may never actually be seen in
+     * a result.</p>
+     * <p>The state in the result is the state for this image (in sync with this image): if
+     * AWB state becomes CONVERGED, then the image data associated with this result should
+     * be good to use.</p>
+     * <p>Below are state transition tables for different AWB modes.</p>
+     * <p>When <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != AWB_MODE_AUTO</code>:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center"></td>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Camera device auto white balance algorithm is disabled</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>When {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} is AWB_MODE_AUTO:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">State</th>
+     * <th align="center">Transition Cause</th>
+     * <th align="center">New State</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">Camera device initiates AWB scan</td>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Values changing</td>
+     * </tr>
+     * <tr>
+     * <td align="center">INACTIVE</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Values locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Camera device finishes AWB scan</td>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">Good values, not changing</td>
+     * </tr>
+     * <tr>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Values locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">Camera device initiates AWB scan</td>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Values changing</td>
+     * </tr>
+     * <tr>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} is ON</td>
+     * <td align="center">LOCKED</td>
+     * <td align="center">Values locked</td>
+     * </tr>
+     * <tr>
+     * <td align="center">LOCKED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} is OFF</td>
+     * <td align="center">SEARCHING</td>
+     * <td align="center">Values not good after unlock</td>
+     * </tr>
+     * <tr>
+     * <td align="center">LOCKED</td>
+     * <td align="center">{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} is OFF</td>
+     * <td align="center">CONVERGED</td>
+     * <td align="center">Values good after unlock</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     *
+     * @see CaptureRequest#CONTROL_AWB_LOCK
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#CONTROL_SCENE_MODE
      * @see #CONTROL_AWB_STATE_INACTIVE
      * @see #CONTROL_AWB_STATE_SEARCHING
      * @see #CONTROL_AWB_STATE_CONVERGED
