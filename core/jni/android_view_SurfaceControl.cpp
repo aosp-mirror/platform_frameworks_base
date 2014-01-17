@@ -61,54 +61,21 @@ static struct {
 
 class ScreenshotPixelRef : public SkPixelRef {
 public:
-    ScreenshotPixelRef(SkColorTable* ctable) {
-        fCTable = ctable;
-        SkSafeRef(ctable);
+    ScreenshotPixelRef(const SkImageInfo& info, ScreenshotClient* screenshot) :
+      SkPixelRef(info),
+      mScreenshot(screenshot) {
         setImmutable();
     }
 
     virtual ~ScreenshotPixelRef() {
-        SkSafeUnref(fCTable);
-    }
-
-    status_t update(const sp<IBinder>& display, int width, int height,
-            int minLayer, int maxLayer, bool allLayers,
-            bool useIdentityTransform) {
-        status_t res = (width > 0 && height > 0)
-                ? (allLayers
-                        ? mScreenshot.update(display, width, height,
-                                useIdentityTransform)
-                        : mScreenshot.update(display, width, height,
-                                minLayer, maxLayer, useIdentityTransform))
-                : mScreenshot.update(display, useIdentityTransform);
-        if (res != NO_ERROR) {
-            return res;
-        }
-
-        return NO_ERROR;
-    }
-
-    uint32_t getWidth() const {
-        return mScreenshot.getWidth();
-    }
-
-    uint32_t getHeight() const {
-        return mScreenshot.getHeight();
-    }
-
-    uint32_t getStride() const {
-        return mScreenshot.getStride();
-    }
-
-    uint32_t getFormat() const {
-        return mScreenshot.getFormat();
+        delete mScreenshot;
     }
 
 protected:
     // overrides from SkPixelRef
     virtual void* onLockPixels(SkColorTable** ct) {
-        *ct = fCTable;
-        return (void*)mScreenshot.getPixels();
+        *ct = NULL;
+        return (void*)mScreenshot->getPixels();
     }
 
     virtual void onUnlockPixels() {
@@ -116,8 +83,7 @@ protected:
 
     SK_DECLARE_UNFLATTENABLE_OBJECT()
 private:
-    ScreenshotClient mScreenshot;
-    SkColorTable*    fCTable;
+    ScreenshotClient* mScreenshot;
 
     typedef SkPixelRef INHERITED;
 };
@@ -150,20 +116,6 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
     ctrl->decStrong((void *)nativeCreate);
 }
 
-static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
-    /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
-        we can map to SkBitmap::kARGB_8888_Config, and optionally call
-        bitmap.setAlphaType(kOpaque_SkAlphaType) on the resulting SkBitmap
-        (as an accelerator)
-    */
-    switch (format) {
-    case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGBA_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGB_565:      return SkBitmap::kRGB_565_Config;
-    default:                        return SkBitmap::kNo_Config;
-    }
-}
-
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject displayTokenObj,
         jint width, jint height, jint minLayer, jint maxLayer, bool allLayers,
         bool useIdentityTransform) {
@@ -172,26 +124,57 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
         return NULL;
     }
 
-    ScreenshotPixelRef* pixels = new ScreenshotPixelRef(NULL);
-    if (pixels->update(displayToken, width, height,
-            minLayer, maxLayer, allLayers, useIdentityTransform) != NO_ERROR) {
-        delete pixels;
+    ScreenshotClient* screenshot = new ScreenshotClient();
+    status_t res;
+    if (width > 0 && height > 0) {
+        if (allLayers) {
+            res = screenshot->update(displayToken, width, height, useIdentityTransform);
+        } else {
+            res = screenshot->update(displayToken, width, height, minLayer, maxLayer,
+                    useIdentityTransform);
+        }
+    } else {
+        res = screenshot->update(displayToken, useIdentityTransform);
+    }
+    if (res != NO_ERROR) {
+        delete screenshot;
         return NULL;
     }
 
-    uint32_t w = pixels->getWidth();
-    uint32_t h = pixels->getHeight();
-    uint32_t s = pixels->getStride();
-    uint32_t f = pixels->getFormat();
-    ssize_t bpr = s * android::bytesPerPixel(f);
+    SkImageInfo screenshotInfo;
+    screenshotInfo.fWidth = screenshot->getWidth();
+    screenshotInfo.fHeight = screenshot->getHeight();
 
-    SkBitmap* bitmap = new SkBitmap();
-    bitmap->setConfig(convertPixelFormat(f), w, h, bpr);
-    if (f == PIXEL_FORMAT_RGBX_8888) {
-        bitmap->setAlphaType(kOpaque_SkAlphaType);
+    switch (screenshot->getFormat()) {
+        case PIXEL_FORMAT_RGBX_8888: {
+            screenshotInfo.fColorType = kRGBA_8888_SkColorType;
+            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            break;
+        }
+        case PIXEL_FORMAT_RGBA_8888: {
+            screenshotInfo.fColorType = kRGBA_8888_SkColorType;
+            screenshotInfo.fAlphaType = kPremul_SkAlphaType;
+            break;
+        }
+        case PIXEL_FORMAT_RGB_565: {
+            screenshotInfo.fColorType = kRGB_565_SkColorType;
+            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            break;
+        }
+        default: {
+            delete screenshot;
+            return NULL;
+        }
     }
 
-    if (w > 0 && h > 0) {
+    // takes ownership of ScreenshotClient
+    ScreenshotPixelRef* pixels = new ScreenshotPixelRef(screenshotInfo, screenshot);
+    const ssize_t rowBytes =
+            screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
+
+    SkBitmap* bitmap = new SkBitmap();
+    bitmap->setConfig(screenshotInfo, (size_t)rowBytes);
+    if (screenshotInfo.fWidth > 0 && screenshotInfo.fHeight > 0) {
         bitmap->setPixelRef(pixels)->unref();
         bitmap->lockPixels();
     } else {

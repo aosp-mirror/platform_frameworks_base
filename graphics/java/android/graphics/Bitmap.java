@@ -400,7 +400,7 @@ public final class Bitmap implements Parcelable {
          * No color information is stored.
          * With this configuration, each pixel requires 1 byte of memory.
          */
-        ALPHA_8     (2),
+        ALPHA_8     (1),
 
         /**
          * Each pixel is stored on 2 bytes and only the RGB channels are
@@ -416,7 +416,7 @@ public final class Bitmap implements Parcelable {
          * This configuration may be useful when using opaque bitmaps
          * that do not require high color fidelity.
          */
-        RGB_565     (4),
+        RGB_565     (3),
 
         /**
          * Each pixel is stored on 2 bytes. The three RGB color channels
@@ -438,7 +438,7 @@ public final class Bitmap implements Parcelable {
          *             it is advised to use {@link #ARGB_8888} instead.
          */
         @Deprecated
-        ARGB_4444   (5),
+        ARGB_4444   (4),
 
         /**
          * Each pixel is stored on 4 bytes. Each channel (RGB and alpha
@@ -448,13 +448,13 @@ public final class Bitmap implements Parcelable {
          * This configuration is very flexible and offers the best
          * quality. It should be used whenever possible.
          */
-        ARGB_8888   (6);
+        ARGB_8888   (5);
 
         final int nativeInt;
 
         @SuppressWarnings({"deprecation"})
         private static Config sConfigs[] = {
-            null, null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888
+            null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888
         };
         
         Config(int ni) {

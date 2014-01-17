@@ -125,12 +125,18 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStreamRewindable* stream,
         int sampleSize, bool ditherImage) {
 
+    SkImageInfo bitmapInfo;
+    if (!bitmap->asImageInfo(&bitmapInfo)) {
+        ALOGW("bitmap has unknown configuration so no memory has been allocated");
+        return NULL;
+    }
+
     SkImageRef* pr;
     // only use ashmem for large images, since mmaps come at a price
     if (bitmap->getSize() >= 32 * 1024) {
-        pr = new SkImageRef_ashmem(stream, bitmap->config(), sampleSize);
+        pr = new SkImageRef_ashmem(bitmapInfo, stream, sampleSize);
     } else {
-        pr = new SkImageRef_GlobalPool(stream, bitmap->config(), sampleSize);
+        pr = new SkImageRef_GlobalPool(bitmapInfo, stream, sampleSize);
     }
     pr->setDitherImage(ditherImage);
     bitmap->setPixelRef(pr)->unref();
@@ -192,8 +198,15 @@ public:
             return false;
         }
 
+        SkImageInfo bitmapInfo;
+        if (!bitmap->asImageInfo(&bitmapInfo)) {
+            ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
+            return false;
+        }
+
         // Create a new pixelref with the new ctable that wraps the previous pixelref
-        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef), ctable);
+        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef),
+                bitmapInfo, bitmap->rowBytes(), ctable);
 
         bitmap->setPixelRef(pr)->unref();
         // since we're already allocated, we lockPixels right away
@@ -418,7 +431,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         }
 
         SkPaint paint;
-        paint.setFilterBitmap(true);
+        paint.setFilterLevel(SkPaint::kLow_FilterLevel);
 
         SkCanvas canvas(*outputBitmap);
         canvas.scale(sx, sy);
