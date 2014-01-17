@@ -399,10 +399,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * issues. The {@link CaptureResult#STATISTICS_SCENE_FLICKER android.statistics.sceneFlicker} key can assist
      * the application in this.</p>
      *
-     * @see CaptureRequest#CONTROL_MODE
-     * @see CaptureResult#STATISTICS_SCENE_FLICKER
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureResult#STATISTICS_SCENE_FLICKER
      * @see #CONTROL_AE_ANTIBANDING_MODE_OFF
      * @see #CONTROL_AE_ANTIBANDING_MODE_50HZ
      * @see #CONTROL_AE_ANTIBANDING_MODE_60HZ
@@ -454,11 +454,11 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * CaptureResult.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * @see CaptureRequest#FLASH_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
-     * @see CaptureRequest#FLASH_MODE
-     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see #CONTROL_AE_MODE_OFF
      * @see #CONTROL_AE_MODE_ON
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
@@ -486,8 +486,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
      *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<int[]> CONTROL_AE_REGIONS =
             new Key<int[]>("android.control.aeRegions", int[].class);
@@ -556,8 +556,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
      *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<int[]> CONTROL_AF_REGIONS =
             new Key<int[]>("android.control.afRegions", int[].class);
@@ -605,10 +605,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * routine is disabled. The camera device uses each particular illumination
      * target for white balance adjustment.</p>
      *
-     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
-     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
      * @see #CONTROL_AWB_MODE_INCANDESCENT
@@ -641,8 +641,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * should ignore the sections outside the region and output the
      * used sections in the frame metadata</p>
      *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     public static final Key<int[]> CONTROL_AWB_REGIONS =
             new Key<int[]>("android.control.awbRegions", int[].class);
@@ -839,10 +839,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * auto-exposure algorithm, the overridden values are then provided
      * back to the user in the corresponding result.</p>
      *
-     * @see CaptureRequest#SENSOR_SENSITIVITY
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
-     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     public static final Key<Float> LENS_APERTURE =
             new Key<Float>("android.lens.aperture", float.class);

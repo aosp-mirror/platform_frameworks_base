@@ -252,8 +252,8 @@ public abstract class CameraMetadata {
      * <p>Use the {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} matrix
      * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} to do color conversion</p>
      *
-     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0;
@@ -318,8 +318,8 @@ public abstract class CameraMetadata {
      * device, along with android.flash.* fields, if there's
      * a flash unit for this camera device.</p>
      *
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#CONTROL_AE_MODE
      */
@@ -334,8 +334,8 @@ public abstract class CameraMetadata {
      * application has control over the various
      * android.flash.* fields.</p>
      *
-     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CaptureRequest#CONTROL_AE_MODE
      */
@@ -527,8 +527,8 @@ public abstract class CameraMetadata {
      * ({@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}) are used by the camera
      * device for manual white balance control.</p>
      *
-     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_OFF = 0;
