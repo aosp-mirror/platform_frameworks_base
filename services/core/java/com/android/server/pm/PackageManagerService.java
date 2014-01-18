@@ -1126,7 +1126,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
-            mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+            mHandlerThread = new ServiceThread(TAG,
+                    Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
             mHandlerThread.start();
             mHandler = new PackageHandler(mHandlerThread.getLooper());
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);

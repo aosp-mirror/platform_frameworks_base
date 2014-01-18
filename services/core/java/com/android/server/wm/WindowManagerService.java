@@ -33,15 +33,13 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AttributeCache;
+import com.android.server.DisplayThread;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
-import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
@@ -68,6 +66,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -117,6 +116,7 @@ import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
+import android.view.WindowManagerInternal;
 import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -156,7 +156,7 @@ import java.util.List;
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs,
-                DisplayManagerService.WindowManagerFuncs, DisplayManager.DisplayListener {
+        DisplayManager.DisplayListener {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
@@ -544,7 +544,7 @@ public class WindowManagerService extends IWindowManager.Stub
     float mAnimatorDurationScale = 1.0f;
 
     final InputManagerService mInputManager;
-    final DisplayManagerService mDisplayManagerService;
+    final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
 
     // Who is holding the screen on.
@@ -697,23 +697,22 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mOnlyCore;
 
     public static WindowManagerService main(final Context context,
-            final DisplayManagerService dm,
-            final InputManagerService im, final Handler wmHandler,
+            final InputManagerService im,
             final boolean haveInputMethods, final boolean showBootMsgs,
             final boolean onlyCore) {
         final WindowManagerService[] holder = new WindowManagerService[1];
-        wmHandler.runWithScissors(new Runnable() {
+        DisplayThread.getHandler().runWithScissors(new Runnable() {
             @Override
             public void run() {
-                holder[0] = new WindowManagerService(context, dm, im,
+                holder[0] = new WindowManagerService(context, im,
                         haveInputMethods, showBootMsgs, onlyCore);
             }
         }, 0);
         return holder[0];
     }
 
-    private void initPolicy(Handler uiHandler) {
-        uiHandler.runWithScissors(new Runnable() {
+    private void initPolicy() {
+        UiThread.getHandler().runWithScissors(new Runnable() {
             @Override
             public void run() {
                 WindowManagerPolicyThread.set(Thread.currentThread(), Looper.myLooper());
@@ -726,8 +725,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }, 0);
     }
 
-    private WindowManagerService(Context context,
-            DisplayManagerService displayManager, InputManagerService inputManager,
+    private WindowManagerService(Context context, InputManagerService inputManager,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -736,7 +734,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
-        mDisplayManagerService = displayManager;
+        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings(context);
         mDisplaySettings.readSettingsLocked();
 
@@ -792,7 +790,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAnimator = new WindowAnimator(this);
 
-        initPolicy(UiThread.getHandler());
+        initPolicy();
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
@@ -805,6 +803,8 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             SurfaceControl.closeTransaction();
         }
+
+        LocalServices.addService(WindowManagerInternal.class, new LocalService());
     }
 
     public InputMonitor getInputMonitor() {
@@ -5917,7 +5917,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            mDisplayManagerService.performTraversalInTransactionFromWindowManager();
+            mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
         } finally {
             if (!inTransaction) {
                 SurfaceControl.closeTransaction();
@@ -6617,7 +6617,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.getLogicalMetrics(mRealDisplayMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
             displayInfo.getAppMetrics(mDisplayMetrics);
-            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
+            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
                     displayContent.getDisplayId(), displayInfo);
         }
         if (false) {
@@ -6950,7 +6950,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 synchronized(displayContent.mDisplaySizeLock) {
                     // Bootstrap the default logical display from the display manager.
                     final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                    DisplayInfo newDisplayInfo = mDisplayManagerService.getDisplayInfo(displayId);
+                    DisplayInfo newDisplayInfo = mDisplayManagerInternal.getDisplayInfo(displayId);
                     if (newDisplayInfo != null) {
                         displayInfo.copyFrom(newDisplayInfo);
                     }
@@ -9106,7 +9106,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateResizingWindows(w);
                 }
 
-                mDisplayManagerService.setDisplayHasContent(displayId,
+                mDisplayManagerInternal.setDisplayHasContent(displayId,
                         mInnerFields.mDisplayHasContent,
                         true /* inTraversal, must call performTraversalInTrans... below */);
 
@@ -9123,7 +9123,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Give the display manager a chance to adjust properties
             // like display rotation if it needs to.
-            mDisplayManagerService.performTraversalInTransactionFromWindowManager();
+            mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
 
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
@@ -9492,8 +9492,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public void requestTraversal() {
+    void requestTraversal() {
         synchronized (mWindowMap) {
             requestTraversalLocked();
         }
@@ -10696,7 +10695,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.overscanTop = rect.top;
             displayInfo.overscanRight = rect.right;
             displayInfo.overscanBottom = rect.bottom;
-            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
+            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
                     displayId, displayInfo);
         }
         configureDisplayPolicyLocked(displayContent);
@@ -10818,5 +10817,12 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Object getWindowManagerLock() {
         return mWindowMap;
+    }
+
+    private final class LocalService extends WindowManagerInternal {
+        @Override
+        public void requestTraversalFromDisplayManager() {
+            requestTraversal();
+        }
     }
 }

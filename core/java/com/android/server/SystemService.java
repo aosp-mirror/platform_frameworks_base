@@ -48,6 +48,7 @@ public abstract class SystemService {
     /*
      * Boot Phases
      */
+    public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100; // maybe should be a dependency?
     public static final int PHASE_LOCK_SETTINGS_READY = 480;
     public static final int PHASE_SYSTEM_SERVICES_READY = 500;
     public static final int PHASE_THIRD_PARTY_APPS_CAN_START = 600;
@@ -93,7 +94,15 @@ public abstract class SystemService {
      * Publish the service so it is accessible to other services and apps.
      */
     protected final void publishBinderService(String name, IBinder service) {
-        ServiceManager.addService(name, service);
+        publishBinderService(name, service, false);
+    }
+
+    /**
+     * Publish the service so it is accessible to other services and apps.
+     */
+    protected final void publishBinderService(String name, IBinder service,
+            boolean allowIsolated) {
+        ServiceManager.addService(name, service, allowIsolated);
     }
 
     /**

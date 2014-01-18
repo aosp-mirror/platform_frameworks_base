@@ -998,8 +998,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     WindowManagerService mWindowManager;
 
-    static ActivityManagerService sSelf;
-    static ActivityThread sSystemThread;
+    final ActivityThread mSystemThread;
 
     int mCurrentUserId = 0;
     private UserManagerService mUserManager;
@@ -1735,38 +1734,34 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     };
 
-    public static void setSystemProcess() {
+    public void setSystemProcess() {
         try {
-            ActivityManagerService m = sSelf;
-
-            ServiceManager.addService(Context.ACTIVITY_SERVICE, m, true);
-            ServiceManager.addService(ProcessStats.SERVICE_NAME, m.mProcessStats);
-            ServiceManager.addService("meminfo", new MemBinder(m));
-            ServiceManager.addService("gfxinfo", new GraphicsBinder(m));
-            ServiceManager.addService("dbinfo", new DbBinder(m));
+            ServiceManager.addService(Context.ACTIVITY_SERVICE, this, true);
+            ServiceManager.addService(ProcessStats.SERVICE_NAME, mProcessStats);
+            ServiceManager.addService("meminfo", new MemBinder(this));
+            ServiceManager.addService("gfxinfo", new GraphicsBinder(this));
+            ServiceManager.addService("dbinfo", new DbBinder(this));
             if (MONITOR_CPU_USAGE) {
-                ServiceManager.addService("cpuinfo", new CpuBinder(m));
+                ServiceManager.addService("cpuinfo", new CpuBinder(this));
             }
-            ServiceManager.addService("permission", new PermissionController(m));
+            ServiceManager.addService("permission", new PermissionController(this));
 
-            ApplicationInfo info =
-                sSelf.mContext.getPackageManager().getApplicationInfo(
-                            "android", STOCK_PM_FLAGS);
-            sSystemThread.installSystemApplicationInfo(info);
+            ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
+                    "android", STOCK_PM_FLAGS);
+            mSystemThread.installSystemApplicationInfo(info);
 
-            synchronized (sSelf) {
-                ProcessRecord app = sSelf.newProcessRecordLocked(info,
-                        info.processName, false);
+            synchronized (this) {
+                ProcessRecord app = newProcessRecordLocked(info, info.processName, false);
                 app.persistent = true;
                 app.pid = MY_PID;
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
-                app.makeActive(sSystemThread.getApplicationThread(), sSelf.mProcessStats);
-                sSelf.mProcessNames.put(app.processName, app.uid, app);
-                synchronized (sSelf.mPidsSelfLocked) {
-                    sSelf.mPidsSelfLocked.put(app.pid, app);
+                app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
+                mProcessNames.put(app.processName, app.uid, app);
+                synchronized (mPidsSelfLocked) {
+                    mPidsSelfLocked.put(app.pid, app);
                 }
-                sSelf.updateLruProcessLocked(app, false, null);
-                sSelf.updateOomAdjLocked();
+                updateLruProcessLocked(app, false, null);
+                updateOomAdjLocked();
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(
@@ -1780,12 +1775,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void startObservingNativeCrashes() {
-        final NativeCrashListener ncl = new NativeCrashListener();
+        final NativeCrashListener ncl = new NativeCrashListener(this);
         ncl.start();
-    }
-
-    public static ActivityManagerService self() {
-        return sSelf;
     }
 
     public IAppOpsService getAppOpsService() {
@@ -1888,20 +1879,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         public void onStart() {
             mService.start();
         }
+
+        public ActivityManagerService getService() {
+            return mService;
+        }
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
     // handlers to other threads.  So take care to be explicit about the looper.
     public ActivityManagerService(Context systemContext) {
-        sSelf = this;
-        sSystemThread = ActivityThread.currentActivityThread();
-
         mContext = systemContext;
         mFactoryTest = FactoryTest.getMode();
+        mSystemThread = ActivityThread.currentActivityThread();
 
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
 
-        mHandlerThread = new ServiceThread(TAG, android.os.Process.THREAD_PRIORITY_FOREGROUND);
+        mHandlerThread = new ServiceThread(TAG,
+                android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
         mHandlerThread.start();
         mHandler = new MainHandler(mHandlerThread.getLooper());
 
@@ -2882,7 +2876,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // See if we should be showing the platform update setup UI.
             Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
-            List<ResolveInfo> ris = sSelf.mContext.getPackageManager()
+            List<ResolveInfo> ris = mContext.getPackageManager()
                     .queryIntentActivities(intent, PackageManager.GET_META_DATA);
 
             // We don't allow third party apps to replace this.
@@ -7974,11 +7968,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public static final void installSystemProviders() {
+    public final void installSystemProviders() {
         List<ProviderInfo> providers;
-        synchronized (sSelf) {
-            ProcessRecord app = sSelf.mProcessNames.get("system", Process.SYSTEM_UID);
-            providers = sSelf.generateApplicationProvidersLocked(app);
+        synchronized (this) {
+            ProcessRecord app = mProcessNames.get("system", Process.SYSTEM_UID);
+            providers = generateApplicationProvidersLocked(app);
             if (providers != null) {
                 for (int i=providers.size()-1; i>=0; i--) {
                     ProviderInfo pi = (ProviderInfo)providers.get(i);
@@ -7991,12 +7985,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (providers != null) {
-            sSystemThread.installSystemProviders(providers);
+            mSystemThread.installSystemProviders(providers);
         }
 
-        sSelf.mCoreSettingsObserver = new CoreSettingsObserver(sSelf);
+        mCoreSettingsObserver = new CoreSettingsObserver(this);
 
-        sSelf.mUsageStatsService.monitorPackages();
+        mUsageStatsService.monitorPackages();
     }
 
     /**
@@ -13999,7 +13993,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // boot, where the first config change needs to guarantee
                 // all resources have that config before following boot
                 // code is executed.
-                sSystemThread.applyConfigurationToResources(configCopy);
+                mSystemThread.applyConfigurationToResources(configCopy);
 
                 if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
                     Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);

@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.hardware.display.DisplayViewport;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Surface;

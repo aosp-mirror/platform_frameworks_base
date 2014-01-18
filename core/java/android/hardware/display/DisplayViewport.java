@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package android.hardware.display;
 
 import android.graphics.Rect;
 
@@ -25,6 +25,8 @@ import android.graphics.Rect;
  * This information is used by the input system to translate touch input from
  * physical display coordinates into logical display coordinates.
  * </p>
+ *
+ * @hide Only for use within the system server.
  */
 public final class DisplayViewport {
     // True if this viewport is valid.
