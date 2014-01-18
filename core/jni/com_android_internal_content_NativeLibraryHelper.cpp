@@ -202,7 +202,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     }
 
     // Only copy out the native file if it's different.
-    struct stat st;
+    struct stat64 st;
     if (!isFileDifferent(localFileName, uncompLen, modTime, crc, &st)) {
         return INSTALL_SUCCEEDED;
     }
