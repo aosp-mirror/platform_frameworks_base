@@ -245,6 +245,32 @@ public abstract class CameraMetadata {
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1;
 
     //
+    // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY
+    //
+
+    /**
+     * <p>Every frame has the requests immediately applied.
+     * (and furthermore for all results,
+     * <code>android.sync.frameNumber == android.request.frameCount</code>)</p>
+     * <p>Changing controls over multiple requests one after another will
+     * produce results that have those controls applied atomically
+     * each frame.</p>
+     * <p>All FULL capability devices will have this as their maxLatency.</p>
+     * @see CameraCharacteristics#SYNC_MAX_LATENCY
+     */
+    public static final int SYNC_MAX_LATENCY_PER_FRAME_CONTROL = 0;
+
+    /**
+     * <p>Each new frame has some subset (potentially the entire set)
+     * of the past requests applied to the camera settings.</p>
+     * <p>By submitting a series of identical requests, the camera device
+     * will eventually have the camera settings applied, but it is
+     * unknown when that exact point will be.</p>
+     * @see CameraCharacteristics#SYNC_MAX_LATENCY
+     */
+    public static final int SYNC_MAX_LATENCY_UNKNOWN = -1;
+
+    //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_MODE
     //
 
@@ -1396,6 +1422,43 @@ public abstract class CameraMetadata {
      * @see CaptureResult#STATISTICS_SCENE_FLICKER
      */
     public static final int STATISTICS_SCENE_FLICKER_60HZ = 2;
+
+    //
+    // Enumeration values for CaptureResult#SYNC_FRAME_NUMBER
+    //
+
+    /**
+     * <p>The current result is not yet fully synchronized to any request.
+     * Synchronization is in progress, and reading metadata from this
+     * result may include a mix of data that have taken effect since the
+     * last synchronization time.</p>
+     * <p>In some future result, within {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} frames,
+     * this value will update to the actual frame number frame number
+     * the result is guaranteed to be synchronized to (as long as the
+     * request settings remain constant).</p>
+     *
+     * @see CameraCharacteristics#SYNC_MAX_LATENCY
+     * @see CaptureResult#SYNC_FRAME_NUMBER
+     * @hide
+     */
+    public static final int SYNC_FRAME_NUMBER_CONVERGING = -1;
+
+    /**
+     * <p>The current result's synchronization status is unknown. The
+     * result may have already converged, or it may be in progress.
+     * Reading from this result may include some mix of settings from
+     * past requests.</p>
+     * <p>After a settings change, the new settings will eventually all
+     * take effect for the output buffers and results. However, this
+     * value will not change when that happens. Altering settings
+     * rapidly may provide outcomes using mixes of settings from recent
+     * requests.</p>
+     * <p>This value is intended primarily for backwards compatibility with
+     * the older camera implementations (for android.hardware.Camera).</p>
+     * @see CaptureResult#SYNC_FRAME_NUMBER
+     * @hide
+     */
+    public static final int SYNC_FRAME_NUMBER_UNKNOWN = -2;
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
