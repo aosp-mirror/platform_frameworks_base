@@ -1159,6 +1159,42 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Integer>("android.sensor.sensitivity", int.class);
 
     /**
+     * <p>A pixel <code>[R, G_even, G_odd, B]</code> that supplies the test pattern
+     * when {@link CaptureRequest#SENSOR_TEST_PATTERN_MODE android.sensor.testPatternMode} is SOLID_COLOR.</p>
+     * <p>Each color channel is treated as an unsigned 32-bit integer.
+     * The camera device then uses the most significant X bits
+     * that correspond to how many bits are in its Bayer raw sensor
+     * output.</p>
+     * <p>For example, a sensor with RAW10 Bayer output would use the
+     * 10 most significant bits from each color channel.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final Key<int[]> SENSOR_TEST_PATTERN_DATA =
+            new Key<int[]>("android.sensor.testPatternData", int[].class);
+
+    /**
+     * <p>When enabled, the sensor sends a test pattern instead of
+     * doing a real exposure from the camera.</p>
+     * <p>When a test pattern is enabled, all manual sensor controls specified
+     * by android.sensor.* should be ignored. All other controls should
+     * work as normal.</p>
+     * <p>For example, if manual flash is enabled, flash firing should still
+     * occur (and that the test pattern remain unmodified, since the flash
+     * would not actually affect it).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @see #SENSOR_TEST_PATTERN_MODE_OFF
+     * @see #SENSOR_TEST_PATTERN_MODE_SOLID_COLOR
+     * @see #SENSOR_TEST_PATTERN_MODE_COLOR_BARS
+     * @see #SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY
+     * @see #SENSOR_TEST_PATTERN_MODE_PN9
+     * @see #SENSOR_TEST_PATTERN_MODE_CUSTOM1
+     */
+    public static final Key<Integer> SENSOR_TEST_PATTERN_MODE =
+            new Key<Integer>("android.sensor.testPatternMode", int.class);
+
+    /**
      * <p>Quality of lens shading correction applied
      * to the image data.</p>
      * <p>When set to OFF mode, no lens shading correction will be applied by the
