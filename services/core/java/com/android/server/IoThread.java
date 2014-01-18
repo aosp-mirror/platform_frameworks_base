@@ -17,19 +17,18 @@
 package com.android.server;
 
 import android.os.Handler;
-import android.os.HandlerThread;
 
 /**
  * Shared singleton I/O thread for the system.  This is a thread for non-background
  * service operations that can potential block briefly on network IO operations
  * (not waiting for data itself, but communicating with network daemons).
  */
-public final class IoThread extends HandlerThread {
+public final class IoThread extends ServiceThread {
     private static IoThread sInstance;
     private static Handler sHandler;
 
     private IoThread() {
-        super("android.io", android.os.Process.THREAD_PRIORITY_DEFAULT);
+        super("android.io", android.os.Process.THREAD_PRIORITY_DEFAULT, true /*allowIo*/);
     }
 
     private static void ensureThreadLocked() {
@@ -37,12 +36,6 @@ public final class IoThread extends HandlerThread {
             sInstance = new IoThread();
             sInstance.start();
             sHandler = new Handler(sInstance.getLooper());
-            sHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    android.os.Process.setCanSelfBackground(false);
-                }
-            });
         }
     }
 

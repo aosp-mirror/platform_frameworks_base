@@ -19,30 +19,28 @@ package com.android.server;
 import android.os.Handler;
 
 /**
- * Shared singleton foreground thread for the system.  This is a thread for regular
- * foreground service operations, which shouldn't be blocked by anything running in
- * the background.  In particular, the shared background thread could be doing
- * relatively long-running operations like saving state to disk (in addition to
- * simply being a background priority), which can cause operations scheduled on it
- * to be delayed for a user-noticeable amount of time.
+ * Shared singleton foreground thread for the system.  This is a thread for
+ * operations that affect what's on the display, which needs to have a minimum
+ * of latency.  This thread should pretty much only be used by the WindowManager,
+ * DisplayManager, and InputManager to perform quick operations in real time.
  */
-public final class FgThread extends ServiceThread {
-    private static FgThread sInstance;
+public final class DisplayThread extends ServiceThread {
+    private static DisplayThread sInstance;
     private static Handler sHandler;
 
-    private FgThread() {
-        super("android.fg", android.os.Process.THREAD_PRIORITY_DEFAULT, true /*allowIo*/);
+    private DisplayThread() {
+        super("android.display", android.os.Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
     }
 
     private static void ensureThreadLocked() {
         if (sInstance == null) {
-            sInstance = new FgThread();
+            sInstance = new DisplayThread();
             sInstance.start();
             sHandler = new Handler(sInstance.getLooper());
         }
     }
 
-    public static FgThread get() {
+    public static DisplayThread get() {
         synchronized (UiThread.class) {
             ensureThreadLocked();
             return sInstance;

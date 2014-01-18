@@ -18,9 +18,9 @@ package com.android.server.input;
 
 import com.android.internal.R;
 import com.android.internal.util.XmlUtils;
+import com.android.server.DisplayThread;
+import com.android.server.LocalServices;
 import com.android.server.Watchdog;
-import com.android.server.display.DisplayManagerService;
-import com.android.server.display.DisplayViewport;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -44,10 +44,12 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerInternal;
 import android.hardware.input.KeyboardLayout;
 import android.os.Binder;
 import android.os.Bundle;
@@ -95,7 +97,7 @@ import libcore.util.Objects;
  * Wraps the C++ InputManager and provides its callbacks.
  */
 public class InputManagerService extends IInputManager.Stub
-        implements Watchdog.Monitor, DisplayManagerService.InputManagerFuncs {
+        implements Watchdog.Monitor {
     static final String TAG = "InputManager";
     static final boolean DEBUG = false;
 
@@ -242,15 +244,17 @@ public class InputManagerService extends IInputManager.Stub
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
     final boolean mUseDevInputEventForAudioJack;
 
-    public InputManagerService(Context context, Handler handler) {
+    public InputManagerService(Context context) {
         this.mContext = context;
-        this.mHandler = new InputManagerHandler(handler.getLooper());
+        this.mHandler = new InputManagerHandler(DisplayThread.get().getLooper());
 
         mUseDevInputEventForAudioJack =
                 context.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
         Slog.i(TAG, "Initializing input manager, mUseDevInputEventForAudioJack="
                 + mUseDevInputEventForAudioJack);
         mPtr = nativeInit(this, mContext, mHandler.getLooper().getQueue());
+
+        LocalServices.addService(InputManagerInternal.class, new LocalService());
     }
 
     public void setWindowManagerCallbacks(WindowManagerCallbacks callbacks) {
@@ -330,8 +334,7 @@ public class InputManagerService extends IInputManager.Stub
         nativeReloadDeviceAliases(mPtr);
     }
 
-    @Override
-    public void setDisplayViewports(DisplayViewport defaultViewport,
+    private void setDisplayViewportsInternal(DisplayViewport defaultViewport,
             DisplayViewport externalTouchViewport) {
         if (defaultViewport.valid) {
             setDisplayViewport(false, defaultViewport);
@@ -1673,6 +1676,14 @@ public class InputManagerService extends IInputManager.Stub
                 Slog.d(TAG, "Vibrator token died.");
             }
             onVibratorTokenDied(this);
+        }
+    }
+
+    private final class LocalService extends InputManagerInternal {
+        @Override
+        public void setDisplayViewports(
+                DisplayViewport defaultViewport, DisplayViewport externalTouchViewport) {
+            setDisplayViewportsInternal(defaultViewport, externalTouchViewport);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package android.view;
+
+import android.hardware.display.DisplayManagerInternal;
 
 /**
- * Called within a Surface transaction whenever the size or orientation of a
- * display may have changed.  Provides an opportunity for the client to
- * update the position of its surfaces as part of the same transaction.
+ * Window manager local system service interface.
+ *
+ * @hide Only for use within the system server.
  */
-public interface DisplayTransactionListener {
-    void onDisplayTransaction();
+public abstract class WindowManagerInternal {
+    /**
+     * Request that the window manager call
+     * {@link DisplayManagerInternal#performTraversalInTransactionFromWindowManager}
+     * within a surface transaction at a later time.
+     */
+    public abstract void requestTraversalFromDisplayManager();
 }
