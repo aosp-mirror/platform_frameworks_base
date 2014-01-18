@@ -11211,6 +11211,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
+    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PARTIAL_RESULT_COUNT;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PIPELINE_MAX_DEPTH;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;

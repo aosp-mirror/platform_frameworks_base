@@ -422,6 +422,22 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Byte>("android.request.pipelineMaxDepth", byte.class);
 
     /**
+     * <p>Optional. Defaults to 1. Defines how many sub-components
+     * a result will be composed of.</p>
+     * <p>In order to combat the pipeline latency, partial results
+     * may be delivered to the application layer from the camera device as
+     * soon as they are available.</p>
+     * <p>A value of 1 means that partial results are not supported.</p>
+     * <p>A typical use case for this might be: after requesting an AF lock the
+     * new AF state might be available 50% of the way through the pipeline.
+     * The camera device could then immediately dispatch this state via a
+     * partial result to the framework/application layer, and the rest of
+     * the metadata via later partial results.</p>
+     */
+    public static final Key<Integer> REQUEST_PARTIAL_RESULT_COUNT =
+            new Key<Integer>("android.request.partialResultCount", int.class);
+
+    /**
      * <p>The list of image formats that are supported by this
      * camera device.</p>
      * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
