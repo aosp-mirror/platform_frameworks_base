@@ -961,6 +961,31 @@ public abstract class CameraMetadata {
     public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
 
     //
+    // Enumeration values for CaptureRequest#SHADING_MODE
+    //
+
+    /**
+     * <p>No lens shading correction is applied</p>
+     * @see CaptureRequest#SHADING_MODE
+     * @hide
+     */
+    public static final int SHADING_MODE_OFF = 0;
+
+    /**
+     * <p>Must not slow down frame rate relative to sensor raw output</p>
+     * @see CaptureRequest#SHADING_MODE
+     * @hide
+     */
+    public static final int SHADING_MODE_FAST = 1;
+
+    /**
+     * <p>Frame rate may be reduced by high quality</p>
+     * @see CaptureRequest#SHADING_MODE
+     * @hide
+     */
+    public static final int SHADING_MODE_HIGH_QUALITY = 2;
+
+    //
     // Enumeration values for CaptureRequest#STATISTICS_FACE_DETECT_MODE
     //
 

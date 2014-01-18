@@ -1378,6 +1378,39 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Float>("android.sensor.temperature", float.class);
 
     /**
+     * <p>Quality of lens shading correction applied
+     * to the image data.</p>
+     * <p>When set to OFF mode, no lens shading correction will be applied by the
+     * camera device, and an identity lens shading map data will be provided
+     * if <code>{@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON</code>. For example, for lens
+     * shading map with size specified as <code>{@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize} = [ 4, 3 ]</code>,
+     * the output {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} for this case will be an identity map
+     * shown below:</p>
+     * <pre><code>[ 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+     * 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+     * 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+     * 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+     * 1.0, 1.0, 1.0, 1.0,   1.0, 1.0, 1.0, 1.0,
+     * 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0 ]
+     * </code></pre>
+     * <p>When set to other modes, lens shading correction will be applied by the
+     * camera device. Applications can request lens shading map data by setting
+     * {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} to ON, and then the camera device will provide
+     * lens shading map data in {@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap}, with size specified
+     * by {@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}.</p>
+     *
+     * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
+     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
+     * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
+     * @see #SHADING_MODE_OFF
+     * @see #SHADING_MODE_FAST
+     * @see #SHADING_MODE_HIGH_QUALITY
+     * @hide
+     */
+    public static final Key<Integer> SHADING_MODE =
+            new Key<Integer>("android.shading.mode", int.class);
+
+    /**
      * <p>State of the face detector
      * unit</p>
      * <p>Whether face detection is enabled, and whether it
