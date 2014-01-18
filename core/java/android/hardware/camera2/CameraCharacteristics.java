@@ -196,8 +196,20 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<byte[]>("android.control.afAvailableModes", byte[].class);
 
     /**
-     * <p>what subset of the full color effect enum
-     * list is supported</p>
+     * <p>List containing the subset of color effects
+     * specified in {@link CaptureRequest#CONTROL_EFFECT_MODE android.control.effectMode} that is supported by
+     * this device.</p>
+     * <p>This list contains the color effect modes that can be applied to
+     * images produced by the camera device. Only modes that have
+     * been fully implemented for the current device may be included here.
+     * Implementations are not expected to be consistent across all devices.
+     * If no color effect modes are available for a device, this should
+     * simply be set to OFF.</p>
+     * <p>A color effect will only be applied if
+     * {@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF.</p>
+     *
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     * @see CaptureRequest#CONTROL_MODE
      */
     public static final Key<byte[]> CONTROL_AVAILABLE_EFFECTS =
             new Key<byte[]>("android.control.availableEffects", byte[].class);
