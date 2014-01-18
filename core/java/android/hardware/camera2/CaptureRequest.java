@@ -758,11 +758,22 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Integer>("android.control.mode", int.class);
 
     /**
-     * <p>Which scene mode is active when
-     * {@link CaptureRequest#CONTROL_MODE android.control.mode} = SCENE_MODE</p>
+     * <p>A camera mode optimized for conditions typical in a particular
+     * capture setting.</p>
+     * <p>This is the mode that that is active when
+     * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code>. Aside from FACE_PRIORITY,
+     * these modes will disable {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} while in use.</p>
+     * <p>The interpretation and implementation of these scene modes is left
+     * to the implementor of the camera device. Their behavior will not be
+     * consistent across all devices, and any given device may only implement
+     * a subset of these modes.</p>
      *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#CONTROL_MODE
-     * @see #CONTROL_SCENE_MODE_UNSUPPORTED
+     * @see #CONTROL_SCENE_MODE_DISABLED
      * @see #CONTROL_SCENE_MODE_FACE_PRIORITY
      * @see #CONTROL_SCENE_MODE_ACTION
      * @see #CONTROL_SCENE_MODE_PORTRAIT

@@ -11360,6 +11360,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_BARCODE = 16; // 0x10
     field public static final int CONTROL_SCENE_MODE_BEACH = 8; // 0x8
     field public static final int CONTROL_SCENE_MODE_CANDLELIGHT = 15; // 0xf
+    field public static final int CONTROL_SCENE_MODE_DISABLED = 0; // 0x0
     field public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1; // 0x1
     field public static final int CONTROL_SCENE_MODE_FIREWORKS = 12; // 0xc
     field public static final int CONTROL_SCENE_MODE_LANDSCAPE = 4; // 0x4
@@ -11372,7 +11373,6 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_STEADYPHOTO = 11; // 0xb
     field public static final int CONTROL_SCENE_MODE_SUNSET = 10; // 0xa
     field public static final int CONTROL_SCENE_MODE_THEATRE = 7; // 0x7
-    field public static final int CONTROL_SCENE_MODE_UNSUPPORTED = 0; // 0x0
     field public static final int EDGE_MODE_FAST = 1; // 0x1
     field public static final int EDGE_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int EDGE_MODE_OFF = 0; // 0x0

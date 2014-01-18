@@ -781,95 +781,124 @@ public abstract class CameraMetadata {
     //
 
     /**
+     * <p>Indicates that no scene modes are set for a given capture request.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
-    public static final int CONTROL_SCENE_MODE_UNSUPPORTED = 0;
+    public static final int CONTROL_SCENE_MODE_DISABLED = 0;
 
     /**
-     * <p>if face detection support exists Use face
-     * detection data to drive 3A routines. If face detection
-     * statistics are disabled, should still operate correctly
-     * (but not return face detection statistics to the
-     * framework).</p>
-     * <p>Unlike the other scene modes, aeMode, awbMode, and afMode
-     * remain active when FACE_PRIORITY is set. This is due to
-     * compatibility concerns with the old camera
-     * API</p>
+     * <p>If face detection support exists, use face
+     * detection data for auto-focus, auto-white balance, and
+     * auto-exposure routines. If face detection statistics are
+     * disabled (i.e. {@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode} is set to OFF),
+     * this should still operate correctly (but will not return
+     * face detection statistics to the framework).</p>
+     * <p>Unlike the other scene modes, {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and android.control.afMode
+     * remain active when FACE_PRIORITY is set.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1;
 
     /**
+     * <p>Optimized for photos of quickly moving objects.
+     * Similar to SPORTS.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_ACTION = 2;
 
     /**
+     * <p>Optimized for still photos of people.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_PORTRAIT = 3;
 
     /**
+     * <p>Optimized for photos of distant macroscopic objects.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_LANDSCAPE = 4;
 
     /**
+     * <p>Optimized for low-light settings.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_NIGHT = 5;
 
     /**
+     * <p>Optimized for still photos of people in low-light
+     * settings.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_NIGHT_PORTRAIT = 6;
 
     /**
+     * <p>Optimized for dim, indoor settings where flash must
+     * remain off.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_THEATRE = 7;
 
     /**
+     * <p>Optimized for bright, outdoor beach settings.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_BEACH = 8;
 
     /**
+     * <p>Optimized for bright, outdoor settings containing snow.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_SNOW = 9;
 
     /**
+     * <p>Optimized for scenes of the setting sun.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_SUNSET = 10;
 
     /**
+     * <p>Optimized to avoid blurry photos due to small amounts of
+     * device motion (for example: due to hand shake).</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_STEADYPHOTO = 11;
 
     /**
+     * <p>Optimized for nighttime photos of fireworks.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_FIREWORKS = 12;
 
     /**
+     * <p>Optimized for photos of quickly moving people.
+     * Similar to ACTION.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_SPORTS = 13;
 
     /**
+     * <p>Optimized for dim, indoor settings with multiple moving
+     * people.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_PARTY = 14;
 
     /**
+     * <p>Optimized for dim settings where the main light source
+     * is a flame.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_CANDLELIGHT = 15;
 
     /**
+     * <p>Optimized for accurately capturing a photo of barcode
+     * for use by camera applications that wish to read the
+     * barcode value.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_BARCODE = 16;
