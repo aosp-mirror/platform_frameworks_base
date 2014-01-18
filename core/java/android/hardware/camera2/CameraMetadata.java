@@ -681,46 +681,64 @@ public abstract class CameraMetadata {
     //
 
     /**
+     * <p>No color effect will be applied.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_OFF = 0;
 
     /**
+     * <p>A "monocolor" effect where the image is mapped into
+     * a single color.  This will typically be grayscale.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_MONO = 1;
 
     /**
+     * <p>A "photo-negative" effect where the image's colors
+     * are inverted.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_NEGATIVE = 2;
 
     /**
+     * <p>A "solarisation" effect (Sabattier effect) where the
+     * image is wholly or partially reversed in
+     * tone.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_SOLARIZE = 3;
 
     /**
+     * <p>A "sepia" effect where the image is mapped into warm
+     * gray, red, and brown tones.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_SEPIA = 4;
 
     /**
+     * <p>A "posterization" effect where the image uses
+     * discrete regions of tone rather than a continuous
+     * gradient of tones.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_POSTERIZE = 5;
 
     /**
+     * <p>A "whiteboard" effect where the image is typically displayed
+     * as regions of white, with black or grey details.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_WHITEBOARD = 6;
 
     /**
+     * <p>A "blackboard" effect where the image is typically displayed
+     * as regions of black, with white or grey details.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_BLACKBOARD = 7;
 
     /**
+     * <p>An "aqua" effect where a blue hue is added to the image.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_AQUA = 8;

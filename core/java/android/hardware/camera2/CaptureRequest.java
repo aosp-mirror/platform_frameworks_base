@@ -711,8 +711,15 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Integer>("android.control.captureIntent", int.class);
 
     /**
-     * <p>Whether any special color effect is in use.
-     * Only used if {@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</p>
+     * <p>A special color effect to apply.</p>
+     * <p>When this mode is set, a color effect will be applied
+     * to images produced by the camera device. The interpretation
+     * and implementation of these color effects is left to the
+     * implementor of the camera device, and should not be
+     * depended on to be consistent (or present) across all
+     * devices.</p>
+     * <p>A color effect will only be applied if
+     * {@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_EFFECT_MODE_OFF
