@@ -964,9 +964,14 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
             new Key<Float>("android.lens.focusDistance", float.class);
 
     /**
-     * <p>Whether optical image stabilization is
-     * enabled.</p>
-     * <p>Will not be supported on most devices.</p>
+     * <p>Sets whether the camera device uses optical image stabilization (OIS)
+     * when capturing images.</p>
+     * <p>OIS is used to compensate for motion blur due to small movements of
+     * the camera during capture. Unlike digital image stabilization, OIS makes
+     * use of mechanical elements to stabilize the camera sensor, and thus
+     * allows for longer exposure times before camera shake becomes
+     * apparent.</p>
+     * <p>This is not expected to be supported on most devices.</p>
      * @see #LENS_OPTICAL_STABILIZATION_MODE_OFF
      * @see #LENS_OPTICAL_STABILIZATION_MODE_ON
      */

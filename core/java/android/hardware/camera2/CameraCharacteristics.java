@@ -329,8 +329,13 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<float[]>("android.lens.info.availableFocalLengths", float[].class);
 
     /**
-     * <p>List of supported optical image
-     * stabilization modes</p>
+     * <p>List containing a subset of the optical image
+     * stabilization (OIS) modes specified in
+     * {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}.</p>
+     * <p>If OIS is not implemented for a given camera device, this should
+     * contain only OFF.</p>
+     *
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
     public static final Key<byte[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
             new Key<byte[]>("android.lens.info.availableOpticalStabilization", byte[].class);
