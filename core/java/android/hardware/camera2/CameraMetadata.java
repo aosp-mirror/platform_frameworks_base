@@ -1028,21 +1028,31 @@ public abstract class CameraMetadata {
 
     /**
      * <p>Use the tone mapping curve specified in
-     * android.tonemap.curve</p>
+     * android.tonemap.curve.</p>
+     * <p>All color enhancement and tonemapping must be disabled, except
+     * for applying the tonemapping curve specified by
+     * {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}, {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}, or
+     * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}.</p>
+     * <p>Must not slow down frame rate relative to raw
+     * sensor output.</p>
+     *
+     * @see CaptureRequest#TONEMAP_CURVE_BLUE
+     * @see CaptureRequest#TONEMAP_CURVE_GREEN
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_CONTRAST_CURVE = 0;
 
     /**
-     * <p>Must not slow down frame rate relative to raw
-     * bayer output</p>
+     * <p>Advanced gamma mapping and color enhancement may be applied.</p>
+     * <p>Should not slow down frame rate relative to raw sensor output.</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_FAST = 1;
 
     /**
-     * <p>Frame rate may be reduced by high
-     * quality</p>
+     * <p>Advanced gamma mapping and color enhancement may be applied.</p>
+     * <p>May slow down frame rate relative to raw sensor output.</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_HIGH_QUALITY = 2;

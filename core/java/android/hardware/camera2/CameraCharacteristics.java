@@ -577,7 +577,19 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>Maximum number of supported points in the
-     * tonemap curve</p>
+     * tonemap curve that can be used for {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}, or
+     * {@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}, or {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}.</p>
+     * <p>If the actual number of points provided by the application (in
+     * android.tonemap.curve*)  is less than max, the camera device will
+     * resample the curve to its internal representation, using linear
+     * interpolation.</p>
+     * <p>The output curves in the result metadata may have a different number
+     * of points than the input curves, and will represent the actual
+     * hardware curves used as closely as possible when linearly interpolated.</p>
+     *
+     * @see CaptureRequest#TONEMAP_CURVE_BLUE
+     * @see CaptureRequest#TONEMAP_CURVE_GREEN
+     * @see CaptureRequest#TONEMAP_CURVE_RED
      */
     public static final Key<Integer> TONEMAP_MAX_CURVE_POINTS =
             new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
