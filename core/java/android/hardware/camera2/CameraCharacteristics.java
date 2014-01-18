@@ -396,6 +396,27 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
 
     /**
+     * <p>Specifies the number of maximum pipeline stages a frame
+     * has to go through from when it's exposed to when it's available
+     * to the framework.</p>
+     * <p>A typical minimum value for this is 2 (one stage to expose,
+     * one stage to readout) from the sensor. The ISP then usually adds
+     * its own stages to do custom HW processing. Further stages may be
+     * added by SW processing.</p>
+     * <p>Depending on what settings are used (e.g. YUV, JPEG) and what
+     * processing is enabled (e.g. face detection), the actual pipeline
+     * depth (specified by {@link CaptureResult#REQUEST_PIPELINE_DEPTH android.request.pipelineDepth}) may be less than
+     * the max pipeline depth.</p>
+     * <p>A pipeline depth of X stages is equivalent to a pipeline latency of
+     * X frame intervals.</p>
+     * <p>This value will be 8 or less.</p>
+     *
+     * @see CaptureResult#REQUEST_PIPELINE_DEPTH
+     */
+    public static final Key<Byte> REQUEST_PIPELINE_MAX_DEPTH =
+            new Key<Byte>("android.request.pipelineMaxDepth", byte.class);
+
+    /**
      * <p>The list of image formats that are supported by this
      * camera device.</p>
      * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
@@ -552,6 +573,14 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public static final Key<Integer> SENSOR_ORIENTATION =
             new Key<Integer>("android.sensor.orientation", int.class);
+
+    /**
+     * <p>Optional. Defaults to [OFF]. Lists the supported test
+     * pattern modes for android.test.patternMode.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    public static final Key<Byte> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
+            new Key<Byte>("android.sensor.availableTestPatternModes", byte.class);
 
     /**
      * <p>Which face detection modes are available,

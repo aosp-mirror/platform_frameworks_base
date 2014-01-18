@@ -990,6 +990,111 @@ public abstract class CameraMetadata {
     public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
 
     //
+    // Enumeration values for CaptureRequest#SENSOR_TEST_PATTERN_MODE
+    //
+
+    /**
+     * <p>Default. No test pattern mode is used, and the camera
+     * device returns captures from the image sensor.</p>
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final int SENSOR_TEST_PATTERN_MODE_OFF = 0;
+
+    /**
+     * <p>Each pixel in <code>[R, G_even, G_odd, B]</code> is replaced by its
+     * respective color channel provided in
+     * {@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData}.</p>
+     * <p>For example:</p>
+     * <pre><code>android.testPatternData = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
+     * </code></pre>
+     * <p>All green pixels are 100% green. All red/blue pixels are black.</p>
+     * <pre><code>android.testPatternData = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
+     * </code></pre>
+     * <p>All red pixels are 100% red. Only the odd green pixels
+     * are 100% green. All blue pixels are 100% black.</p>
+     *
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_DATA
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final int SENSOR_TEST_PATTERN_MODE_SOLID_COLOR = 1;
+
+    /**
+     * <p>All pixel data is replaced with an 8-bar color pattern.</p>
+     * <p>The vertical bars (left-to-right) are as follows:</p>
+     * <ul>
+     * <li>100% white</li>
+     * <li>yellow</li>
+     * <li>cyan</li>
+     * <li>green</li>
+     * <li>magenta</li>
+     * <li>red</li>
+     * <li>blue</li>
+     * <li>black</li>
+     * </ul>
+     * <p>In general the image would look like the following:</p>
+     * <pre><code>W Y C G M R B K
+     * W Y C G M R B K
+     * W Y C G M R B K
+     * W Y C G M R B K
+     * W Y C G M R B K
+     * . . . . . . . .
+     * . . . . . . . .
+     * . . . . . . . .
+     *
+     * (B = Blue, K = Black)
+     * </code></pre>
+     * <p>Each bar should take up 1/8 of the sensor pixel array width.
+     * When this is not possible, the bar size should be rounded
+     * down to the nearest integer and the pattern can repeat
+     * on the right side.</p>
+     * <p>Each bar's height must always take up the full sensor
+     * pixel array height.</p>
+     * <p>Each pixel in this test pattern must be set to either
+     * 0% intensity or 100% intensity.</p>
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS = 2;
+
+    /**
+     * <p>The test pattern is similar to COLOR_BARS, except that
+     * each bar should start at its specified color at the top,
+     * and fade to gray at the bottom.</p>
+     * <p>Furthermore each bar is further subdivided into a left and
+     * right half. The left half should have a smooth gradient,
+     * and the right half should have a quantized gradient.</p>
+     * <p>In particular, the right half's should consist of blocks of the
+     * same color for 1/16th active sensor pixel array width.</p>
+     * <p>The least significant bits in the quantized gradient should
+     * be copied from the most significant bits of the smooth gradient.</p>
+     * <p>The height of each bar should always be a multiple of 128.
+     * When this is not the case, the pattern should repeat at the bottom
+     * of the image.</p>
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY = 3;
+
+    /**
+     * <p>All pixel data is replaced by a pseudo-random sequence
+     * generated from a PN9 512-bit sequence (typically implemented
+     * in hardware with a linear feedback shift register).</p>
+     * <p>The generator should be reset at the beginning of each frame,
+     * and thus each subsequent raw frame with this test pattern should
+     * be exactly the same as the last.</p>
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final int SENSOR_TEST_PATTERN_MODE_PN9 = 4;
+
+    /**
+     * <p>The first custom test pattern. All custom patterns that are
+     * available only on this camera device are at least this numeric
+     * value.</p>
+     * <p>All of the custom test patterns will be static
+     * (that is the raw image must not vary from frame to frame).</p>
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
+     */
+    public static final int SENSOR_TEST_PATTERN_MODE_CUSTOM1 = 256;
+
+    //
     // Enumeration values for CaptureRequest#SHADING_MODE
     //
 
