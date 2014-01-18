@@ -982,11 +982,13 @@ public abstract class CameraMetadata {
     //
 
     /**
+     * <p>Optical stabilization is unavailable.</p>
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
     public static final int LENS_OPTICAL_STABILIZATION_MODE_OFF = 0;
 
     /**
+     * <p>Optical stabilization is enabled.</p>
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
     public static final int LENS_OPTICAL_STABILIZATION_MODE_ON = 1;
