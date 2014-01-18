@@ -11229,6 +11229,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_MAX_FACE_COUNT;
+    field public static final android.hardware.camera2.CameraMetadata.Key SYNC_MAX_LATENCY;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MAX_CURVE_POINTS;
   }
 
@@ -11410,6 +11411,8 @@ package android.hardware.camera2 {
     field public static final int STATISTICS_SCENE_FLICKER_50HZ = 1; // 0x1
     field public static final int STATISTICS_SCENE_FLICKER_60HZ = 2; // 0x2
     field public static final int STATISTICS_SCENE_FLICKER_NONE = 0; // 0x0
+    field public static final int SYNC_MAX_LATENCY_PER_FRAME_CONTROL = 0; // 0x0
+    field public static final int SYNC_MAX_LATENCY_UNKNOWN = -1; // 0xffffffff
     field public static final int TONEMAP_MODE_CONTRAST_CURVE = 0; // 0x0
     field public static final int TONEMAP_MODE_FAST = 1; // 0x1
     field public static final int TONEMAP_MODE_HIGH_QUALITY = 2; // 0x2

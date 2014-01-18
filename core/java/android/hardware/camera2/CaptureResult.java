@@ -1737,6 +1737,67 @@ public final class CaptureResult extends CameraMetadata {
     public static final Key<Boolean> BLACK_LEVEL_LOCK =
             new Key<Boolean>("android.blackLevel.lock", boolean.class);
 
+    /**
+     * <p>The frame number corresponding to the last request
+     * with which the output result (metadata + buffers) has been fully
+     * synchronized.</p>
+     * <p>When a request is submitted to the camera device, there is usually a
+     * delay of several frames before the controls get applied. A camera
+     * device may either choose to account for this delay by implementing a
+     * pipeline and carefully submit well-timed atomic control updates, or
+     * it may start streaming control changes that span over several frame
+     * boundaries.</p>
+     * <p>In the latter case, whenever a request's settings change relative to
+     * the previous submitted request, the full set of changes may take
+     * multiple frame durations to fully take effect. Some settings may
+     * take effect sooner (in less frame durations) than others.</p>
+     * <p>While a set of control changes are being propagated, this value
+     * will be CONVERGING.</p>
+     * <p>Once it is fully known that a set of control changes have been
+     * finished propagating, and the resulting updated control settings
+     * have been read back by the camera device, this value will be set
+     * to a non-negative frame number (corresponding to the request to
+     * which the results have synchronized to).</p>
+     * <p>Older camera device implementations may not have a way to detect
+     * when all camera controls have been applied, and will always set this
+     * value to UNKNOWN.</p>
+     * <p>FULL capability devices will always have this value set to the
+     * frame number of the request corresponding to this result.</p>
+     * <p><em>Further details</em>:</p>
+     * <ul>
+     * <li>Whenever a request differs from the last request, any future
+     * results not yet returned may have this value set to CONVERGING (this
+     * could include any in-progress captures not yet returned by the camera
+     * device, for more details see pipeline considerations below).</li>
+     * <li>Submitting a series of multiple requests that differ from the
+     * previous request (e.g. r1, r2, r3 s.t. r1 != r2 != r3)
+     * moves the new synchronization frame to the last non-repeating
+     * request (using the smallest frame number from the contiguous list of
+     * repeating requests).</li>
+     * <li>Submitting the same request repeatedly will not change this value
+     * to CONVERGING, if it was already a non-negative value.</li>
+     * <li>When this value changes to non-negative, that means that all of the
+     * metadata controls from the request have been applied, all of the
+     * metadata controls from the camera device have been read to the
+     * updated values (into the result), and all of the graphics buffers
+     * corresponding to this result are also synchronized to the request.</li>
+     * </ul>
+     * <p><em>Pipeline considerations</em>:</p>
+     * <p>Submitting a request with updated controls relative to the previously
+     * submitted requests may also invalidate the synchronization state
+     * of all the results corresponding to currently in-flight requests.</p>
+     * <p>In other words, results for this current request and up to
+     * {@link CameraCharacteristics#REQUEST_PIPELINE_MAX_DEPTH android.request.pipelineMaxDepth} prior requests may have their
+     * android.sync.frameNumber change to CONVERGING.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_PIPELINE_MAX_DEPTH
+     * @see #SYNC_FRAME_NUMBER_CONVERGING
+     * @see #SYNC_FRAME_NUMBER_UNKNOWN
+     * @hide
+     */
+    public static final Key<Integer> SYNC_FRAME_NUMBER =
+            new Key<Integer>("android.sync.frameNumber", int.class);
+
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
