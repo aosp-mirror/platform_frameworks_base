@@ -23,6 +23,8 @@ import java.nio.FloatBuffer;
 
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
 import android.opengl.EGL14;
 import android.opengl.EGLConfig;
 import android.opengl.EGLContext;
@@ -40,8 +42,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import com.android.server.display.DisplayManagerService;
-import com.android.server.display.DisplayTransactionListener;
+import com.android.server.LocalServices;
 
 /**
  * Bzzzoooop!  *crackle*
@@ -77,7 +78,7 @@ final class ElectronBeam {
     private boolean mPrepared;
     private int mMode;
 
-    private final DisplayManagerService mDisplayManager;
+    private final DisplayManagerInternal mDisplayManagerInternal;
     private int mDisplayLayerStack; // layer stack associated with primary display
     private int mDisplayWidth;      // real width, not rotated
     private int mDisplayHeight;     // real height, not rotated
@@ -118,8 +119,8 @@ final class ElectronBeam {
     public static final int MODE_FADE = 2;
 
 
-    public ElectronBeam(DisplayManagerService displayManager) {
-        mDisplayManager = displayManager;
+    public ElectronBeam() {
+        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
     }
 
     /**
@@ -138,7 +139,7 @@ final class ElectronBeam {
 
         // Get the display size and layer stack.
         // This is not expected to change while the electron beam surface is showing.
-        DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
+        DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(Display.DEFAULT_DISPLAY);
         mDisplayLayerStack = displayInfo.layerStack;
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();
@@ -527,7 +528,7 @@ final class ElectronBeam {
             mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);
 
-            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManager, mSurfaceControl);
+            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal, mSurfaceControl);
             mSurfaceLayout.onDisplayTransaction();
         } finally {
             SurfaceControl.closeTransaction();
@@ -685,20 +686,21 @@ final class ElectronBeam {
      * owns the electron beam.
      */
     private static final class NaturalSurfaceLayout implements DisplayTransactionListener {
-        private final DisplayManagerService mDisplayManager;
+        private final DisplayManagerInternal mDisplayManagerInternal;
         private SurfaceControl mSurfaceControl;
 
-        public NaturalSurfaceLayout(DisplayManagerService displayManager, SurfaceControl surfaceControl) {
-            mDisplayManager = displayManager;
+        public NaturalSurfaceLayout(DisplayManagerInternal displayManagerInternal,
+                SurfaceControl surfaceControl) {
+            mDisplayManagerInternal = displayManagerInternal;
             mSurfaceControl = surfaceControl;
-            mDisplayManager.registerDisplayTransactionListener(this);
+            mDisplayManagerInternal.registerDisplayTransactionListener(this);
         }
 
         public void dispose() {
             synchronized (this) {
                 mSurfaceControl = null;
             }
-            mDisplayManager.unregisterDisplayTransactionListener(this);
+            mDisplayManagerInternal.unregisterDisplayTransactionListener(this);
         }
 
         @Override
@@ -708,7 +710,8 @@ final class ElectronBeam {
                     return;
                 }
 
-                DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
+                DisplayInfo displayInfo =
+                        mDisplayManagerInternal.getDisplayInfo(Display.DEFAULT_DISPLAY);
                 switch (displayInfo.rotation) {
                     case Surface.ROTATION_0:
                         mSurfaceControl.setPosition(0, 0);

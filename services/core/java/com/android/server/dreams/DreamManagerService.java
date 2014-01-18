@@ -17,6 +17,7 @@
 package com.android.server.dreams;
 
 import com.android.internal.util.DumpUtils;
+import com.android.server.FgThread;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -65,9 +66,9 @@ public final class DreamManagerService extends IDreamManager.Stub {
     private int mCurrentDreamUserId;
     private boolean mCurrentDreamIsTest;
 
-    public DreamManagerService(Context context, Handler mainHandler) {
+    public DreamManagerService(Context context) {
         mContext = context;
-        mHandler = new DreamHandler(mainHandler.getLooper());
+        mHandler = new DreamHandler(FgThread.get().getLooper());
         mController = new DreamController(context, mHandler, mControllerListener);
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);

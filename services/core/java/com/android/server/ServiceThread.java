@@ -24,11 +24,14 @@ import android.util.Slog;
 /**
  * Special handler thread that we create for system services that require their own loopers.
  */
-public final class ServiceThread extends HandlerThread {
+public class ServiceThread extends HandlerThread {
     private static final String TAG = "ServiceThread";
 
-    public ServiceThread(String name, int priority) {
+    private final boolean mAllowIo;
+
+    public ServiceThread(String name, int priority, boolean allowIo) {
         super(name, priority);
+        mAllowIo = allowIo;
     }
 
     @Override
@@ -36,7 +39,7 @@ public final class ServiceThread extends HandlerThread {
         Process.setCanSelfBackground(false);
 
         // For debug builds, log event loop stalls to dropbox for analysis.
-        if (StrictMode.conditionallyEnableDebugLogging()) {
+        if (!mAllowIo && StrictMode.conditionallyEnableDebugLogging()) {
             Slog.i(TAG, "Enabled StrictMode logging for " + getName() + " looper.");
         }
 

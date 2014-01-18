@@ -121,8 +121,11 @@ public final class SystemServer {
     private Context mSystemContext;
     private SystemServiceManager mSystemServiceManager;
 
-    private Installer mInstaller; // TODO: remove this
-    private PowerManagerService mPowerManagerService; // TODO: remove this
+    // TODO: remove all of these references by improving dependency resolution and boot phases
+    private Installer mInstaller;
+    private PowerManagerService mPowerManagerService;
+    private ActivityManagerService mActivityManagerService;
+    private DisplayManagerService mDisplayManagerService;
     private ContentResolver mContentResolver;
 
     /**
@@ -213,6 +216,7 @@ public final class SystemServer {
         // Start services.
         try {
             startBootstrapServices();
+            startCoreServices();
             startOtherServices();
         } catch (RuntimeException ex) {
             Slog.e("System", "******************************************");
@@ -271,22 +275,21 @@ public final class SystemServer {
         mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
 
         // Activity manager runs the show.
-        mSystemServiceManager.startService(ActivityManagerService.Lifecycle.class);
+        mActivityManagerService = mSystemServiceManager.startService(
+                ActivityManagerService.Lifecycle.class).getService();
+    }
+
+    private void startCoreServices() {
+        // Display manager is needed to provide display metrics before package manager
+        // starts up.
+        mDisplayManagerService = mSystemServiceManager.startService(DisplayManagerService.class);
     }
 
     private void startOtherServices() {
-        // Create a handler thread that window manager will use.
-        final ServiceThread windowManagerThread = new ServiceThread("WindowManager",
-                android.os.Process.THREAD_PRIORITY_DISPLAY);
-        windowManagerThread.start();
-        final Handler windowManagerHandler = new Handler(windowManagerThread.getLooper());
-        Watchdog.getInstance().addThread(windowManagerHandler);
-
         final Context context = mSystemContext;
         AccountManagerService accountManager = null;
         ContentService contentService = null;
         LightsManager lights = null;
-        DisplayManagerService display = null;
         BatteryService battery = null;
         VibratorService vibrator = null;
         IAlarmManager alarm = null;
@@ -324,10 +327,6 @@ public final class SystemServer {
         boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
 
         try {
-            Slog.i(TAG, "Display Manager");
-            display = new DisplayManagerService(context, windowManagerHandler);
-            ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
-
             Slog.i(TAG, "Telephony Registry");
             telephonyRegistry = new TelephonyRegistry(context);
             ServiceManager.addService("telephony.registry", telephonyRegistry);
@@ -337,10 +336,8 @@ public final class SystemServer {
 
             AttributeCache.init(context);
 
-            if (!display.waitForDefaultDisplay()) {
-                reportWtf("Timeout waiting for default display to be initialized.",
-                        new Throwable());
-            }
+            // We need the default display before we can initialize the package manager.
+            mSystemServiceManager.startBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
 
             Slog.i(TAG, "Package Manager");
             // Only run "core" apps if we're encrypting the device.
@@ -361,7 +358,7 @@ public final class SystemServer {
             } catch (RemoteException e) {
             }
 
-            ActivityManagerService.setSystemProcess();
+            mActivityManagerService.setSystemProcess();
 
             Slog.i(TAG, "Entropy Mixer");
             ServiceManager.addService("entropy", new EntropyMixer(context));
@@ -387,7 +384,7 @@ public final class SystemServer {
                     mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL);
 
             Slog.i(TAG, "System Content Providers");
-            ActivityManagerService.installSystemProviders();
+            mActivityManagerService.installSystemProviders();
 
             mSystemServiceManager.startService(LightsService.class);
             lights = LocalServices.getService(LightsManager.class);
@@ -405,7 +402,7 @@ public final class SystemServer {
             // lights service, content providers and the battery service.
             mPowerManagerService.init(lights, battery,
                     BatteryStatsService.getService(),
-                    ActivityManagerService.self().getAppOpsService(), display);
+                    mActivityManagerService.getAppOpsService());
 
             Slog.i(TAG, "Consumer IR Service");
             consumerIr = new ConsumerIrService(context);
@@ -417,26 +414,25 @@ public final class SystemServer {
 
             Slog.i(TAG, "Init Watchdog");
             final Watchdog watchdog = Watchdog.getInstance();
-            watchdog.init(context, ActivityManagerService.self());
+            watchdog.init(context, mActivityManagerService);
 
             Slog.i(TAG, "Input Manager");
-            inputManager = new InputManagerService(context, windowManagerHandler);
+            inputManager = new InputManagerService(context);
 
             Slog.i(TAG, "Window Manager");
-            wm = WindowManagerService.main(context, display, inputManager,
-                    windowManagerHandler,
+            wm = WindowManagerService.main(context, inputManager,
                     mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
 
-            ActivityManagerService.self().setWindowManager(wm);
+            mActivityManagerService.setWindowManager(wm);
 
             inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
             inputManager.start();
 
-            display.setWindowManager(wm);
-            display.setInputManager(inputManager);
+            // TODO: Use service dependencies instead.
+            mDisplayManagerService.windowManagerAndInputReady();
 
             // Skip Bluetooth if we have an emulator kernel
             // TODO: Use a more reliable check to see if this product should
@@ -599,7 +595,7 @@ public final class SystemServer {
                 try {
                     Slog.i(TAG, "NetworkPolicy Service");
                     networkPolicy = new NetworkPolicyManagerService(
-                            context, ActivityManagerService.self(),
+                            context, mActivityManagerService,
                             (IPowerManager)ServiceManager.getService(Context.POWER_SERVICE),
                             networkStats, networkManagement);
                     ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
@@ -864,7 +860,7 @@ public final class SystemServer {
                 try {
                     Slog.i(TAG, "Dreams Service");
                     // Dreams (interactive idle-time views, a/k/a screen savers)
-                    dreamy = new DreamManagerService(context, windowManagerHandler);
+                    dreamy = new DreamManagerService(context);
                     ServiceManager.addService(DreamService.DREAM_SERVICE, dreamy);
                 } catch (Throwable e) {
                     reportWtf("starting DreamManagerService", e);
@@ -910,7 +906,7 @@ public final class SystemServer {
         // we are in safe mode.
         final boolean safeMode = wm.detectSafeMode();
         if (safeMode) {
-            ActivityManagerService.self().enterSafeMode();
+            mActivityManagerService.enterSafeMode();
             // Post the safe mode state in the Zygote class
             Zygote.systemInSafeMode = true;
             // Disable the JIT for the system_server process
@@ -948,7 +944,7 @@ public final class SystemServer {
         }
 
         if (safeMode) {
-            ActivityManagerService.self().showSafeModeOverlay();
+            mActivityManagerService.showSafeModeOverlay();
         }
 
         // Update the configuration for this context by hand, because we're going
@@ -974,7 +970,8 @@ public final class SystemServer {
         }
 
         try {
-            display.systemReady(safeMode, onlyCore);
+            // TODO: use boot phase and communicate these flags some other way
+            mDisplayManagerService.systemReady(safeMode, onlyCore);
         } catch (Throwable e) {
             reportWtf("making Display Manager Service ready", e);
         }
@@ -1009,12 +1006,12 @@ public final class SystemServer {
         // where third party code can really run (but before it has actually
         // started launching the initial applications), for us to complete our
         // initialization.
-        ActivityManagerService.self().systemReady(new Runnable() {
+        mActivityManagerService.systemReady(new Runnable() {
             public void run() {
                 Slog.i(TAG, "Making services ready");
 
                 try {
-                    ActivityManagerService.self().startObservingNativeCrashes();
+                    mActivityManagerService.startObservingNativeCrashes();
                 } catch (Throwable e) {
                     reportWtf("observing native crashes", e);
                 }

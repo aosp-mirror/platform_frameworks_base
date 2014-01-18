@@ -23,7 +23,7 @@ import android.view.WindowManagerPolicy;
  *
  * @hide Only for use within the system server.
  */
-public interface PowerManagerInternal {
+public abstract class PowerManagerInternal {
     /**
      * Used by the window manager to override the screen brightness based on the
      * current foreground activity.
@@ -32,7 +32,7 @@ public interface PowerManagerInternal {
      *
      * @param brightness The overridden brightness, or -1 to disable the override.
      */
-    public void setScreenBrightnessOverrideFromWindowManager(int brightness);
+    public abstract void setScreenBrightnessOverrideFromWindowManager(int brightness);
 
     /**
      * Used by the window manager to override the button brightness based on the
@@ -42,7 +42,7 @@ public interface PowerManagerInternal {
      *
      * @param brightness The overridden brightness, or -1 to disable the override.
      */
-    public void setButtonBrightnessOverrideFromWindowManager(int brightness);
+    public abstract void setButtonBrightnessOverrideFromWindowManager(int brightness);
 
     /**
      * Used by the window manager to override the user activity timeout based on the
@@ -53,8 +53,8 @@ public interface PowerManagerInternal {
      *
      * @param timeoutMillis The overridden timeout, or -1 to disable the override.
      */
-    public void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis);
+    public abstract void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis);
 
     // TODO: Remove this and retrieve as a local service instead.
-    public void setPolicy(WindowManagerPolicy policy);
+    public abstract void setPolicy(WindowManagerPolicy policy);
 }

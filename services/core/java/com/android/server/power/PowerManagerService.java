@@ -21,12 +21,10 @@ import com.android.internal.app.IBatteryStats;
 import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
 import com.android.server.ServiceThread;
-import com.android.server.lights.LightsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.Watchdog;
-import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 
 import android.Manifest;
@@ -40,11 +38,11 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.Looper;
@@ -173,7 +171,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     private Context mContext;
     private LightsManager mLightsManager;
     private BatteryService mBatteryService;
-    private DisplayManagerService mDisplayManagerService;
+    private DisplayManagerInternal mDisplayManagerInternal;
     private IBatteryStats mBatteryStats;
     private IAppOpsService mAppOps;
     private ServiceThread mHandlerThread;
@@ -409,13 +407,14 @@ public final class PowerManagerService extends com.android.server.SystemService
      */
     public void init(LightsManager ls,
             BatteryService bs, IBatteryStats bss,
-            IAppOpsService appOps, DisplayManagerService dm) {
+            IAppOpsService appOps) {
         mLightsManager = ls;
         mBatteryService = bs;
         mBatteryStats = bss;
         mAppOps = appOps;
-        mDisplayManagerService = dm;
-        mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_DISPLAY);
+        mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
+        mHandlerThread = new ServiceThread(TAG,
+                Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
 
@@ -459,7 +458,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             // own handler thread to ensure timely operation.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
                     mContext, mNotifier, mLightsManager, twilight, sensorManager,
-                    mDisplayManagerService, mDisplaySuspendBlocker, mDisplayBlanker,
+                    mDisplaySuspendBlocker, mDisplayBlanker,
                     mDisplayPowerControllerCallbacks, mHandler);
 
             mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
@@ -2296,7 +2295,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         public void blankAllDisplays() {
             synchronized (this) {
                 mBlanked = true;
-                mDisplayManagerService.blankAllDisplaysFromPowerManager();
+                mDisplayManagerInternal.blankAllDisplaysFromPowerManager();
                 nativeSetInteractive(false);
                 nativeSetAutoSuspend(true);
             }
@@ -2307,7 +2306,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             synchronized (this) {
                 nativeSetAutoSuspend(false);
                 nativeSetInteractive(true);
-                mDisplayManagerService.unblankAllDisplaysFromPowerManager();
+                mDisplayManagerInternal.unblankAllDisplaysFromPowerManager();
                 mBlanked = false;
             }
         }
@@ -2694,7 +2693,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
-    private final class LocalService implements PowerManagerInternal {
+    private final class LocalService extends PowerManagerInternal {
         /**
          * Used by the window manager to override the screen brightness based on the
          * current foreground activity.

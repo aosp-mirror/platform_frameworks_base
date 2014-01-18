@@ -19,7 +19,6 @@ package com.android.server.power;
 import com.android.server.lights.LightsManager;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
-import com.android.server.display.DisplayManagerService;
 import com.android.server.twilight.TwilightState;
 
 import android.animation.Animator;
@@ -184,9 +183,6 @@ final class DisplayPowerController {
 
     // The twilight service.
     private final TwilightManager mTwilight;
-
-    // The display manager.
-    private final DisplayManagerService mDisplayManager;
 
     // The sensor manager.
     private final SensorManager mSensorManager;
@@ -353,7 +349,6 @@ final class DisplayPowerController {
      */
     public DisplayPowerController(Looper looper, Context context, Notifier notifier,
             LightsManager lights, TwilightManager twilight, SensorManager sensorManager,
-            DisplayManagerService displayManager,
             SuspendBlocker displaySuspendBlocker, DisplayBlanker displayBlanker,
             Callbacks callbacks, Handler callbackHandler) {
         mHandler = new DisplayControllerHandler(looper);
@@ -366,7 +361,6 @@ final class DisplayPowerController {
         mLights = lights;
         mTwilight = twilight;
         mSensorManager = sensorManager;
-        mDisplayManager = displayManager;
 
         final Resources resources = context.getResources();
 
@@ -527,8 +521,7 @@ final class DisplayPowerController {
     }
 
     private void initialize() {
-        mPowerState = new DisplayPowerState(
-                new ElectronBeam(mDisplayManager), mDisplayBlanker,
+        mPowerState = new DisplayPowerState(new ElectronBeam(), mDisplayBlanker,
                 mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(

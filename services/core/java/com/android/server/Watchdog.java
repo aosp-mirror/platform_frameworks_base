@@ -225,6 +225,9 @@ public class Watchdog extends Thread {
         // And also check IO thread.
         mHandlerCheckers.add(new HandlerChecker(IoThread.getHandler(),
                 "i/o thread", DEFAULT_TIMEOUT));
+        // And the display thread.
+        mHandlerCheckers.add(new HandlerChecker(DisplayThread.getHandler(),
+                "display thread", DEFAULT_TIMEOUT));
     }
 
     public void init(Context context, ActivityManagerService activity) {
