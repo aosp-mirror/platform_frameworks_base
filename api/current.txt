@@ -11211,12 +11211,14 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
+    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PIPELINE_MAX_DEPTH;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_SIZES;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_AVAILABLE_TEST_PATTERN_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_ACTIVE_ARRAY_SIZE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_EXPOSURE_TIME_RANGE;
@@ -11394,6 +11396,12 @@ package android.hardware.camera2 {
     field public static final int NOISE_REDUCTION_MODE_FAST = 1; // 0x1
     field public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int NOISE_REDUCTION_MODE_OFF = 0; // 0x0
+    field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS = 2; // 0x2
+    field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY = 3; // 0x3
+    field public static final int SENSOR_TEST_PATTERN_MODE_CUSTOM1 = 256; // 0x100
+    field public static final int SENSOR_TEST_PATTERN_MODE_OFF = 0; // 0x0
+    field public static final int SENSOR_TEST_PATTERN_MODE_PN9 = 4; // 0x4
+    field public static final int SENSOR_TEST_PATTERN_MODE_SOLID_COLOR = 1; // 0x1
     field public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2; // 0x2
     field public static final int STATISTICS_FACE_DETECT_MODE_OFF = 0; // 0x0
     field public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1; // 0x1
@@ -11470,6 +11478,8 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_DATA;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;
@@ -11524,11 +11534,13 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_STATE;
     field public static final android.hardware.camera2.CameraMetadata.Key NOISE_REDUCTION_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_FRAME_COUNT;
+    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PIPELINE_DEPTH;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_CROP_REGION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEMPERATURE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEST_PATTERN_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TIMESTAMP;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;

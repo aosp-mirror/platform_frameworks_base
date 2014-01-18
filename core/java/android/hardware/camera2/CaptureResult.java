@@ -1206,6 +1206,20 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Integer>("android.request.id", int.class);
 
     /**
+     * <p>Specifies the number of pipeline stages the frame went
+     * through from when it was exposed to when the final completed result
+     * was available to the framework.</p>
+     * <p>Depending on what settings are used in the request, and
+     * what streams are configured, the data may undergo less processing,
+     * and some pipeline stages skipped.</p>
+     * <p>See {@link CameraCharacteristics#REQUEST_PIPELINE_MAX_DEPTH android.request.pipelineMaxDepth} for more details.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_PIPELINE_MAX_DEPTH
+     */
+    public static final Key<Byte> REQUEST_PIPELINE_DEPTH =
+            new Key<Byte>("android.request.pipelineDepth", byte.class);
+
+    /**
      * <p>(x, y, width, height).</p>
      * <p>A rectangle with the top-level corner of (x,y) and size
      * (width, height). The region of the sensor that is used for
@@ -1376,6 +1390,26 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<Float> SENSOR_TEMPERATURE =
             new Key<Float>("android.sensor.temperature", float.class);
+
+    /**
+     * <p>When enabled, the sensor sends a test pattern instead of
+     * doing a real exposure from the camera.</p>
+     * <p>When a test pattern is enabled, all manual sensor controls specified
+     * by android.sensor.* should be ignored. All other controls should
+     * work as normal.</p>
+     * <p>For example, if manual flash is enabled, flash firing should still
+     * occur (and that the test pattern remain unmodified, since the flash
+     * would not actually affect it).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @see #SENSOR_TEST_PATTERN_MODE_OFF
+     * @see #SENSOR_TEST_PATTERN_MODE_SOLID_COLOR
+     * @see #SENSOR_TEST_PATTERN_MODE_COLOR_BARS
+     * @see #SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY
+     * @see #SENSOR_TEST_PATTERN_MODE_PN9
+     * @see #SENSOR_TEST_PATTERN_MODE_CUSTOM1
+     */
+    public static final Key<Integer> SENSOR_TEST_PATTERN_MODE =
+            new Key<Integer>("android.sensor.testPatternMode", int.class);
 
     /**
      * <p>Quality of lens shading correction applied
