@@ -389,7 +389,7 @@ static void computeFrustum(const float* m, float* f) {
 }
 
 static
-int util_frustumCullSpheres(JNIEnv *env, jclass clazz,
+jint util_frustumCullSpheres(JNIEnv *env, jclass clazz,
         jfloatArray mvp_ref, jint mvpOffset,
         jfloatArray spheres_ref, jint spheresOffset, jint spheresCount,
         jintArray results_ref, jint resultsOffset, jint resultsCapacity) {
@@ -436,7 +436,7 @@ int util_frustumCullSpheres(JNIEnv *env, jclass clazz,
  */
 
 static
-int util_visibilityTest(JNIEnv *env, jclass clazz,
+jint util_visibilityTest(JNIEnv *env, jclass clazz,
         jfloatArray ws_ref, jint wsOffset,
         jfloatArray positions_ref, jint positionsOffset,
         jcharArray indices_ref, jint indicesOffset, jint indexCount) {
@@ -553,7 +553,7 @@ static jfieldID nativeBitmapID = 0;
 void nativeUtilsClassInit(JNIEnv *env, jclass clazz)
 {
     jclass bitmapClass = env->FindClass("android/graphics/Bitmap");
-    nativeBitmapID = env->GetFieldID(bitmapClass, "mNativeBitmap", "I");
+    nativeBitmapID = env->GetFieldID(bitmapClass, "mNativeBitmap", "J");
 }
 
 extern void setGLDebugLevel(int level);
@@ -630,7 +630,7 @@ static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
+            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
     SkBitmap::Config config = bitmap.config();
     return getInternalFormat(config);
@@ -640,7 +640,7 @@ static jint util_getType(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
+            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
     SkBitmap::Config config = bitmap.config();
     return getType(config);
@@ -651,7 +651,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jobject jbitmap, jint type, jint border)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
+            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
     SkBitmap::Config config = bitmap.config();
     if (internalformat < 0) {
@@ -700,7 +700,7 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
         jobject jbitmap, jint format, jint type)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
+            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
     SkBitmap::Config config = bitmap.config();
     if (format < 0) {
@@ -773,7 +773,7 @@ getPointer(JNIEnv *_env, jobject buffer, jint *remaining)
     pointer = _env->CallStaticLongMethod(nioAccessClass,
             getBasePointerID, buffer);
     if (pointer != 0L) {
-        return (void *) (jint) pointer;
+        return reinterpret_cast<void *>(pointer);
     }
     return NULL;
 }
@@ -974,7 +974,7 @@ static jboolean etc1_isValid(JNIEnv *env, jclass clazz,
             result = etc1_pkm_is_valid((etc1_byte*) headerB.getData());
         }
     }
-    return result;
+    return result ? JNI_TRUE : JNI_FALSE;
 }
 
 /**
@@ -997,7 +997,7 @@ static jint etc1_getWidth(JNIEnv *env, jclass clazz,
 /**
  * Read the image height from a PKM header
  */
-static int etc1_getHeight(JNIEnv *env, jclass clazz,
+static jint etc1_getHeight(JNIEnv *env, jclass clazz,
         jobject header) {
     jint result = 0;
     BufferHelper headerB(env, header);

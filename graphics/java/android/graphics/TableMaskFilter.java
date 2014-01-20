@@ -28,7 +28,7 @@ public class TableMaskFilter extends MaskFilter {
         native_instance = nativeNewTable(table);
     }
     
-    private TableMaskFilter(int ni) {
+    private TableMaskFilter(long ni) {
         native_instance = ni;
     }
     
@@ -40,7 +40,7 @@ public class TableMaskFilter extends MaskFilter {
         return new TableMaskFilter(nativeNewGamma(gamma));
     }
 
-    private static native int nativeNewTable(byte[] table);
-    private static native int nativeNewClip(int min, int max);
-    private static native int nativeNewGamma(float gamma);
+    private static native long nativeNewTable(byte[] table);
+    private static native long nativeNewClip(int min, int max);
+    private static native long nativeNewGamma(float gamma);
 }

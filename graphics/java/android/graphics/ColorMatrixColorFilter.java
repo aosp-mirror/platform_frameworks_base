@@ -119,6 +119,6 @@ public class ColorMatrixColorFilter extends ColorFilter {
         nativeColorFilter = nColorMatrixFilter(native_instance, colorMatrix);
     }
 
-    private static native int nativeColorMatrixFilter(float[] array);
-    private static native int nColorMatrixFilter(int nativeFilter, float[] array);
+    private static native long nativeColorMatrixFilter(float[] array);
+    private static native long nColorMatrixFilter(long nativeFilter, float[] array);
 }
