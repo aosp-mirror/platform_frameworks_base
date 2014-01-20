@@ -122,7 +122,7 @@ private:
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
+static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         jstring nameStr, jint w, jint h, jint format, jint flags) {
     ScopedUtfChars name(env, nameStr);
     sp<SurfaceComposerClient> client(android_view_SurfaceSession_getClient(env, sessionObj));
@@ -133,15 +133,15 @@ static jint nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         return 0;
     }
     surface->incStrong((void *)nativeCreate);
-    return int(surface.get());
+    return reinterpret_cast<jlong>(surface.get());
 }
 
-static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
+static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
     ctrl->decStrong((void *)nativeCreate);
 }
 
-static void nativeDestroy(JNIEnv* env, jclass clazz, jint nativeObject) {
+static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
     ctrl->clear();
     ctrl->decStrong((void *)nativeCreate);
@@ -230,7 +230,7 @@ static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz) {
     SurfaceComposerClient::setAnimationTransaction();
 }
 
-static void nativeSetLayer(JNIEnv* env, jclass clazz, jint nativeObject, jint zorder) {
+static void nativeSetLayer(JNIEnv* env, jclass clazz, jlong nativeObject, jint zorder) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setLayer(zorder);
     if (err < 0 && err != NO_INIT) {
@@ -238,7 +238,7 @@ static void nativeSetLayer(JNIEnv* env, jclass clazz, jint nativeObject, jint zo
     }
 }
 
-static void nativeSetPosition(JNIEnv* env, jclass clazz, jint nativeObject, jfloat x, jfloat y) {
+static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat x, jfloat y) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setPosition(x, y);
     if (err < 0 && err != NO_INIT) {
@@ -246,7 +246,7 @@ static void nativeSetPosition(JNIEnv* env, jclass clazz, jint nativeObject, jflo
     }
 }
 
-static void nativeSetSize(JNIEnv* env, jclass clazz, jint nativeObject, jint w, jint h) {
+static void nativeSetSize(JNIEnv* env, jclass clazz, jlong nativeObject, jint w, jint h) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setSize(w, h);
     if (err < 0 && err != NO_INIT) {
@@ -254,7 +254,7 @@ static void nativeSetSize(JNIEnv* env, jclass clazz, jint nativeObject, jint w, 
     }
 }
 
-static void nativeSetFlags(JNIEnv* env, jclass clazz, jint nativeObject, jint flags, jint mask) {
+static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong nativeObject, jint flags, jint mask) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setFlags(flags, mask);
     if (err < 0 && err != NO_INIT) {
@@ -262,7 +262,7 @@ static void nativeSetFlags(JNIEnv* env, jclass clazz, jint nativeObject, jint fl
     }
 }
 
-static void nativeSetTransparentRegionHint(JNIEnv* env, jclass clazz, jint nativeObject, jobject regionObj) {
+static void nativeSetTransparentRegionHint(JNIEnv* env, jclass clazz, jlong nativeObject, jobject regionObj) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     SkRegion* region = android_graphics_Region_getSkRegion(env, regionObj);
     if (!region) {
@@ -287,7 +287,7 @@ static void nativeSetTransparentRegionHint(JNIEnv* env, jclass clazz, jint nativ
     }
 }
 
-static void nativeSetAlpha(JNIEnv* env, jclass clazz, jint nativeObject, jfloat alpha) {
+static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat alpha) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setAlpha(alpha);
     if (err < 0 && err != NO_INIT) {
@@ -295,7 +295,7 @@ static void nativeSetAlpha(JNIEnv* env, jclass clazz, jint nativeObject, jfloat 
     }
 }
 
-static void nativeSetMatrix(JNIEnv* env, jclass clazz, jint nativeObject,
+static void nativeSetMatrix(JNIEnv* env, jclass clazz, jlong nativeObject,
         jfloat dsdx, jfloat dtdx, jfloat dsdy, jfloat dtdy) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setMatrix(dsdx, dtdx, dsdy, dtdy);
@@ -304,7 +304,7 @@ static void nativeSetMatrix(JNIEnv* env, jclass clazz, jint nativeObject,
     }
 }
 
-static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jint nativeObject,
+static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong nativeObject,
         jint l, jint t, jint r, jint b) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
@@ -314,7 +314,7 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jint nativeObject,
     }
 }
 
-static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jint nativeObject, jint layerStack) {
+static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jlong nativeObject, jint layerStack) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setLayerStack(layerStack);
     if (err < 0 && err != NO_INIT) {
@@ -342,7 +342,7 @@ static void nativeDestroyDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
 }
 
 static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jint nativeSurfaceObject) {
+        jobject tokenObj, jlong nativeSurfaceObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
     sp<IGraphicBufferProducer> bufferProducer;
@@ -411,11 +411,11 @@ static void nativeUnblankDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod sSurfaceControlMethods[] = {
-    {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIII)I",
+    {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIII)J",
             (void*)nativeCreate },
-    {"nativeRelease", "(I)V",
+    {"nativeRelease", "(J)V",
             (void*)nativeRelease },
-    {"nativeDestroy", "(I)V",
+    {"nativeDestroy", "(J)V",
             (void*)nativeDestroy },
     {"nativeScreenshot", "(Landroid/os/IBinder;IIIIZ)Landroid/graphics/Bitmap;",
             (void*)nativeScreenshotBitmap },
@@ -427,23 +427,23 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeCloseTransaction },
     {"nativeSetAnimationTransaction", "()V",
             (void*)nativeSetAnimationTransaction },
-    {"nativeSetLayer", "(II)V",
+    {"nativeSetLayer", "(JI)V",
             (void*)nativeSetLayer },
-    {"nativeSetPosition", "(IFF)V",
+    {"nativeSetPosition", "(JFF)V",
             (void*)nativeSetPosition },
-    {"nativeSetSize", "(III)V",
+    {"nativeSetSize", "(JII)V",
             (void*)nativeSetSize },
-    {"nativeSetTransparentRegionHint", "(ILandroid/graphics/Region;)V",
+    {"nativeSetTransparentRegionHint", "(JLandroid/graphics/Region;)V",
             (void*)nativeSetTransparentRegionHint },
-    {"nativeSetAlpha", "(IF)V",
+    {"nativeSetAlpha", "(JF)V",
             (void*)nativeSetAlpha },
-    {"nativeSetMatrix", "(IFFFF)V",
+    {"nativeSetMatrix", "(JFFFF)V",
             (void*)nativeSetMatrix },
-    {"nativeSetFlags", "(III)V",
+    {"nativeSetFlags", "(JII)V",
             (void*)nativeSetFlags },
-    {"nativeSetWindowCrop", "(IIIII)V",
+    {"nativeSetWindowCrop", "(JIIII)V",
             (void*)nativeSetWindowCrop },
-    {"nativeSetLayerStack", "(II)V",
+    {"nativeSetLayerStack", "(JI)V",
             (void*)nativeSetLayerStack },
     {"nativeGetBuiltInDisplay", "(I)Landroid/os/IBinder;",
             (void*)nativeGetBuiltInDisplay },
@@ -451,7 +451,7 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeCreateDisplay },
     {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
             (void*)nativeDestroyDisplay },
-    {"nativeSetDisplaySurface", "(Landroid/os/IBinder;I)V",
+    {"nativeSetDisplaySurface", "(Landroid/os/IBinder;J)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplayLayerStack },

@@ -38,6 +38,6 @@ public class PaintFlagsDrawFilter extends DrawFilter {
         mNativeInt = nativeConstructor(clearBits, setBits);
     }
     
-    private static native int nativeConstructor(int clearBits, int setBits);
+    private static native long nativeConstructor(int clearBits, int setBits);
 }
 

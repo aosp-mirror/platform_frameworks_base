@@ -34,7 +34,7 @@ public class LayerRasterizer extends Rasterizer {
         nativeAddLayer(native_instance, paint.mNativePaint, 0, 0);
     }
 
-    private static native int nativeConstructor();
-    private static native void nativeAddLayer(int native_layer, int native_paint, float dx, float dy);
+    private static native long nativeConstructor();
+    private static native void nativeAddLayer(long native_layer, long native_paint, float dx, float dy);
 }
 

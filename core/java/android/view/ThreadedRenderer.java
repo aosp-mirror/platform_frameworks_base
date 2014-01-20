@@ -217,12 +217,12 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void detachFunctor(int functor) {
+    void detachFunctor(long functor) {
         nDetachFunctor(mNativeProxy, functor);
     }
 
     @Override
-    void attachFunctor(AttachInfo attachInfo, int functor) {
+    void attachFunctor(AttachInfo attachInfo, long functor) {
         nAttachFunctor(mNativeProxy, functor);
     }
 
