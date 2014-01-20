@@ -26,6 +26,6 @@ public class DiscretePathEffect extends PathEffect {
         native_instance = nativeCreate(segmentLength, deviation);
     }
     
-    private static native int nativeCreate(float length, float deviation);
+    private static native long nativeCreate(float length, float deviation);
 }
 

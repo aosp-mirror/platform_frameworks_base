@@ -96,7 +96,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
             gSurfaceClassInfo.mLock);
     if (env->MonitorEnter(lock) == JNI_OK) {
         sur = reinterpret_cast<Surface *>(
-                env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeObject));
+                env->GetLongField(surfaceObj, gSurfaceClassInfo.mNativeObject));
         env->MonitorExit(lock);
     }
     return sur;
@@ -134,7 +134,7 @@ static inline bool isSurfaceValid(const sp<Surface>& sur) {
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
+static jlong nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surfaceTextureObj));
     if (producer == NULL) {
@@ -150,20 +150,20 @@ static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
     }
 
     surface->incStrong(&sRefBaseOwner);
-    return int(surface.get());
+    return jlong(surface.get());
 }
 
-static void nativeRelease(JNIEnv* env, jclass clazz, jint nativeObject) {
+static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     sur->decStrong(&sRefBaseOwner);
 }
 
-static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jint nativeObject) {
+static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     return isSurfaceValid(sur) ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jint nativeObject) {
+static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     if (!isSurfaceValid(sur)) {
         doThrowIAE(env);
@@ -191,14 +191,14 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
 static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
   jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
   SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
-          env->GetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas));
-  env->SetIntField(canvasObj, gCanvasClassInfo.mNativeCanvas, (int)newCanvas);
-  env->SetIntField(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (int)newCanvas);
+          env->GetLongField(canvasObj, gCanvasClassInfo.mNativeCanvas));
+  env->SetLongField(canvasObj, gCanvasClassInfo.mNativeCanvas, (jlong)newCanvas);
+  env->SetLongField(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (jlong)newCanvas);
   SkSafeUnref(previousCanvas);
 }
 
-static jint nativeLockCanvas(JNIEnv* env, jclass clazz,
-        jint nativeObject, jobject canvasObj, jobject dirtyRectObj) {
+static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
+        jlong nativeObject, jobject canvasObj, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
@@ -262,11 +262,11 @@ static jint nativeLockCanvas(JNIEnv* env, jclass clazz,
     // because the latter could be replaced while the surface is locked.
     sp<Surface> lockedSurface(surface);
     lockedSurface->incStrong(&sRefBaseOwner);
-    return (int) lockedSurface.get();
+    return (jlong) lockedSurface.get();
 }
 
 static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
-        jint nativeObject, jobject canvasObj) {
+        jlong nativeObject, jobject canvasObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
     if (!isSurfaceValid(surface)) {
         return;
@@ -285,8 +285,8 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
 
 // ----------------------------------------------------------------------------
 
-static jint nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
-        jint surfaceControlNativeObj) {
+static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
+        jlong surfaceControlNativeObj) {
     /*
      * This is used by the WindowManagerService just after constructing
      * a Surface and is necessary for returning the Surface reference to
@@ -298,11 +298,11 @@ static jint nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
     if (surface != NULL) {
         surface->incStrong(&sRefBaseOwner);
     }
-    return reinterpret_cast<jint>(surface.get());
+    return reinterpret_cast<jlong>(surface.get());
 }
 
-static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
-        jint nativeObject, jobject parcelObj) {
+static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
+        jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
         doThrowNPE(env);
@@ -317,7 +317,7 @@ static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
     if (self != NULL
             && (self->getIGraphicBufferProducer()->asBinder() == binder)) {
         // same IGraphicBufferProducer, return ourselves
-        return int(self.get());
+        return jlong(self.get());
     }
 
     sp<Surface> sur;
@@ -334,11 +334,11 @@ static jint nativeReadFromParcel(JNIEnv* env, jclass clazz,
         self->decStrong(&sRefBaseOwner);
     }
 
-    return int(sur.get());
+    return jlong(sur.get());
 }
 
 static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
-        jint nativeObject, jobject parcelObj) {
+        jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
         doThrowNPE(env);
@@ -351,23 +351,23 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gSurfaceMethods[] = {
-    {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)I",
+    {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
             (void*)nativeCreateFromSurfaceTexture },
-    {"nativeRelease", "(I)V",
+    {"nativeRelease", "(J)V",
             (void*)nativeRelease },
-    {"nativeIsValid", "(I)Z",
+    {"nativeIsValid", "(J)Z",
             (void*)nativeIsValid },
-    {"nativeIsConsumerRunningBehind", "(I)Z",
+    {"nativeIsConsumerRunningBehind", "(J)Z",
             (void*)nativeIsConsumerRunningBehind },
-    {"nativeLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)I",
+    {"nativeLockCanvas", "(JLandroid/graphics/Canvas;Landroid/graphics/Rect;)J",
             (void*)nativeLockCanvas },
-    {"nativeUnlockCanvasAndPost", "(ILandroid/graphics/Canvas;)V",
+    {"nativeUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)V",
             (void*)nativeUnlockCanvasAndPost },
-    {"nativeCreateFromSurfaceControl", "(I)I",
+    {"nativeCreateFromSurfaceControl", "(J)J",
             (void*)nativeCreateFromSurfaceControl },
-    {"nativeReadFromParcel", "(ILandroid/os/Parcel;)I",
+    {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
-    {"nativeWriteToParcel", "(ILandroid/os/Parcel;)V",
+    {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
 };
 
@@ -379,18 +379,18 @@ int register_android_view_Surface(JNIEnv* env)
     jclass clazz = env->FindClass("android/view/Surface");
     gSurfaceClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
     gSurfaceClassInfo.mNativeObject =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "I");
+            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "J");
     gSurfaceClassInfo.mLock =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mLock", "Ljava/lang/Object;");
-    gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");
+    gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(J)V");
 
     clazz = env->FindClass("android/graphics/Canvas");
     gCanvasClassInfo.mFinalizer = env->GetFieldID(clazz, "mFinalizer", "Landroid/graphics/Canvas$CanvasFinalizer;");
-    gCanvasClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "I");
+    gCanvasClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "J");
     gCanvasClassInfo.mSurfaceFormat = env->GetFieldID(clazz, "mSurfaceFormat", "I");
 
     clazz = env->FindClass("android/graphics/Canvas$CanvasFinalizer");
-    gCanvasFinalizerClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "I");
+    gCanvasFinalizerClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "J");
 
     clazz = env->FindClass("android/graphics/Rect");
     gRectClassInfo.left = env->GetFieldID(clazz, "left", "I");

@@ -28,6 +28,6 @@ public class CornerPathEffect extends PathEffect {
         native_instance = nativeCreate(radius);
     }
     
-    private static native int nativeCreate(float radius);
+    private static native long nativeCreate(float radius);
 }
 

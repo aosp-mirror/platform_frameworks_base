@@ -56,6 +56,6 @@ public class AvoidXfermode extends Xfermode {
         native_instance = nativeCreate(opColor, tolerance, mode.nativeInt);
     }
 
-    private static native int nativeCreate(int opColor, int tolerance,
-                                           int nativeMode);
+    private static native long nativeCreate(int opColor, int tolerance,
+                                            int nativeMode);
 }

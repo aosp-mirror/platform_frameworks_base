@@ -33,6 +33,6 @@ public class LightingColorFilter extends ColorFilter {
         nativeColorFilter = nCreateLightingFilter(native_instance, mul, add);
     }
 
-    private static native int native_CreateLightingFilter(int mul, int add);
-    private static native int nCreateLightingFilter(int nativeFilter, int mul, int add);
+    private static native long native_CreateLightingFilter(int mul, int add);
+    private static native long nCreateLightingFilter(long nativeFilter, int mul, int add);
 }
