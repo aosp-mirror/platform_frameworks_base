@@ -6,7 +6,8 @@ include $(CLEAR_VARS)
 test_src_files := \
     BackupData_test.cpp \
     ObbFile_test.cpp \
-    ZipUtils_test.cpp
+    ZipUtils_test.cpp \
+    ResourceTypes_test.cpp
 
 shared_libraries := \
     libandroidfw \
