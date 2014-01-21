@@ -28,6 +28,7 @@ import androidx.media.filterfw.FrameImage2D;
 import androidx.media.filterfw.ImageShader;
 import androidx.media.filterfw.TextureSource;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -86,9 +87,16 @@ public class GpuVideoTrackDecoder extends VideoTrackDecoder {
 
     @Override
     protected MediaCodec initMediaCodec(MediaFormat format) {
+        MediaCodec mediaCodec;
+        try {
+            mediaCodec = MediaCodec.createDecoderByType(
+                    format.getString(MediaFormat.KEY_MIME));
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "failed to create decoder for "
+                    + format.getString(MediaFormat.KEY_MIME), e);
+        }
         Surface surface = new Surface(mSurfaceTexture);
-        MediaCodec mediaCodec = MediaCodec.createDecoderByType(
-                format.getString(MediaFormat.KEY_MIME));
         mediaCodec.configure(format, surface, null, 0);
         surface.release();
         return mediaCodec;

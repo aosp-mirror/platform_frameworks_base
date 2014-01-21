@@ -30,6 +30,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class DisplaySinkService extends Service implements SurfaceHolder.Callback {
@@ -150,7 +151,12 @@ public class DisplaySinkService extends Service implements SurfaceHolder.Callbac
             if (mSurface != null) {
                 MediaFormat format = MediaFormat.createVideoFormat(
                         "video/avc", mSurfaceWidth, mSurfaceHeight);
-                mCodec = MediaCodec.createDecoderByType("video/avc");
+                try {
+                    mCodec = MediaCodec.createDecoderByType("video/avc");
+                } catch (IOException e) {
+                    throw new RuntimeException(
+                            "failed to create video/avc decoder", e);
+                }
                 mCodec.configure(format, mSurface, null, 0);
                 mCodec.start();
                 mCodecBufferInfo = new BufferInfo();

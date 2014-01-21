@@ -59,8 +59,15 @@ public class AudioTrackDecoder extends TrackDecoder {
 
     @Override
     protected MediaCodec initMediaCodec(MediaFormat format) {
-        MediaCodec mediaCodec = MediaCodec.createDecoderByType(
-                format.getString(MediaFormat.KEY_MIME));
+        MediaCodec mediaCodec;
+        try {
+            mediaCodec = MediaCodec.createDecoderByType(
+                    format.getString(MediaFormat.KEY_MIME));
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "failed to create decoder for "
+                    + format.getString(MediaFormat.KEY_MIME), e);
+        }
         mediaCodec.configure(format, null, null, 0);
         return mediaCodec;
     }
