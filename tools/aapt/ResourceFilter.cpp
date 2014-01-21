@@ -28,8 +28,8 @@ ResourceFilter::parse(const char* arg)
             mContainsPseudo = true;
         }
         int axis;
-        uint32_t value;
-        if (AaptGroupEntry::parseNamePart(part, &axis, &value)) {
+        AxisValue value;
+        if (!AaptGroupEntry::parseFilterNamePart(part, &axis, &value)) {
             fprintf(stderr, "Invalid configuration: %s\n", arg);
             fprintf(stderr, "                       ");
             for (int i=0; i<p-arg; i++) {
@@ -44,15 +44,20 @@ ResourceFilter::parse(const char* arg)
 
         ssize_t index = mData.indexOfKey(axis);
         if (index < 0) {
-            mData.add(axis, SortedVector<uint32_t>());
+            mData.add(axis, SortedVector<AxisValue>());
         }
-        SortedVector<uint32_t>& sv = mData.editValueFor(axis);
+        SortedVector<AxisValue>& sv = mData.editValueFor(axis);
         sv.add(value);
-        // if it's a locale with a region, also match an unmodified locale of the
-        // same language
-        if (axis == AXIS_LANGUAGE) {
-            if (value & 0xffff0000) {
-                sv.add(value & 0x0000ffff);
+
+        // If it's a locale with a region, script or variant, we should also match an
+        // unmodified locale of the same language
+        if (axis == AXIS_LOCALE) {
+            if (value.localeValue.region[0] || value.localeValue.script[0] ||
+                value.localeValue.variant[0]) {
+                AxisValue copy;
+                memcpy(copy.localeValue.language, value.localeValue.language,
+                       sizeof(value.localeValue.language));
+                sv.add(copy);
             }
         }
         p = q;
@@ -70,9 +75,9 @@ ResourceFilter::isEmpty() const
 }
 
 bool
-ResourceFilter::match(int axis, uint32_t value) const
+ResourceFilter::match(int axis, const AxisValue& value) const
 {
-    if (value == 0) {
+    if (value.intValue == 0 && (value.localeValue.language[0] == 0)) {
         // they didn't specify anything so take everything
         return true;
     }
@@ -81,7 +86,7 @@ ResourceFilter::match(int axis, uint32_t value) const
         // we didn't request anything on this axis so take everything
         return true;
     }
-    const SortedVector<uint32_t>& sv = mData.valueAt(index);
+    const SortedVector<AxisValue>& sv = mData.valueAt(index);
     return sv.indexOf(value) >= 0;
 }
 
@@ -102,7 +107,7 @@ ResourceFilter::match(const ResTable_config& config) const
     return true;
 }
 
-const SortedVector<uint32_t>* ResourceFilter::configsForAxis(int axis) const
+const SortedVector<AxisValue>* ResourceFilter::configsForAxis(int axis) const
 {
     ssize_t index = mData.indexOfKey(axis);
     if (index < 0) {

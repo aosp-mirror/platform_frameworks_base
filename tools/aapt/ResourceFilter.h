@@ -19,14 +19,15 @@ public:
     ResourceFilter() : mData(), mContainsPseudo(false) {}
     status_t parse(const char* arg);
     bool isEmpty() const;
-    bool match(int axis, uint32_t value) const;
     bool match(int axis, const ResTable_config& config) const;
     bool match(const ResTable_config& config) const;
-    const SortedVector<uint32_t>* configsForAxis(int axis) const;
+    const SortedVector<AxisValue>* configsForAxis(int axis) const;
     inline bool containsPseudo() const { return mContainsPseudo; }
 
 private:
-    KeyedVector<int,SortedVector<uint32_t> > mData;
+    bool match(int axis, const AxisValue& value) const;
+
+    KeyedVector<int,SortedVector<AxisValue> > mData;
     bool mContainsPseudo;
 };
 

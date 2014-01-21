@@ -146,5 +146,40 @@ TEST(ResourceTypesTest, IsMoreSpecificThan) {
     EXPECT_TRUE(r.isMoreSpecificThan(l));
 }
 
+TEST(ResourceTypesTest, setLocale) {
+    ResTable_config test;
+    test.setBcp47Locale("en-US");
+    EXPECT_EQ('e', test.language[0]);
+    EXPECT_EQ('n', test.language[1]);
+    EXPECT_EQ('U', test.country[0]);
+    EXPECT_EQ('S', test.country[1]);
+    EXPECT_EQ(0, test.localeScript[0]);
+    EXPECT_EQ(0, test.localeVariant[0]);
+
+    test.setBcp47Locale("eng-419");
+    char out[4] = { 1, 1, 1, 1};
+    test.unpackLanguage(out);
+    EXPECT_EQ('e', out[0]);
+    EXPECT_EQ('n', out[1]);
+    EXPECT_EQ('g', out[2]);
+    EXPECT_EQ(0, out[3]);
+    memset(out, 1, 4);
+    test.unpackRegion(out);
+    EXPECT_EQ('4', out[0]);
+    EXPECT_EQ('1', out[1]);
+    EXPECT_EQ('9', out[2]);
+
+
+    test.setBcp47Locale("en-Latn-419");
+    memset(out, 1, 4);
+    EXPECT_EQ('e', test.language[0]);
+    EXPECT_EQ('n', test.language[1]);
+
+    EXPECT_EQ(0, memcmp("Latn", test.localeScript, 4));
+    test.unpackRegion(out);
+    EXPECT_EQ('4', out[0]);
+    EXPECT_EQ('1', out[1]);
+    EXPECT_EQ('9', out[2]);
+}
 
 }  // namespace android.
