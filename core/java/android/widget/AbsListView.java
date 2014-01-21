@@ -36,7 +36,6 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.LongSparseArray;
-import android.util.MathUtils;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.StateSet;
@@ -61,8 +60,6 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.BaseInputConnection;
@@ -421,7 +418,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Handles scrolling between positions within the list.
      */
-    SubPositionScroller mPositionScroller;
+    PositionScroller mPositionScroller;
 
     /**
      * The offset in pixels form the top of the AdapterView to the top
@@ -4843,14 +4840,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void smoothScrollToPosition(int position) {
         if (mPositionScroller == null) {
-            mPositionScroller = new SubPositionScroller();
+            mPositionScroller = new PositionScroller();
         }
         mPositionScroller.start(position);
     }
 
     /**
      * Smoothly scroll to the specified adapter position. The view will scroll
-     * such that the indicated position is displayed <code>offset</code> pixels below
+     * such that the indicated position is displayed <code>offset</code> pixels from
      * the top edge of the view. If this is impossible, (e.g. the offset would scroll
      * the first or last item beyond the boundaries of the list) it will get as close
      * as possible. The scroll will take <code>duration</code> milliseconds to complete.
@@ -4862,14 +4859,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void smoothScrollToPositionFromTop(int position, int offset, int duration) {
         if (mPositionScroller == null) {
-            mPositionScroller = new SubPositionScroller();
+            mPositionScroller = new PositionScroller();
         }
         mPositionScroller.startWithOffset(position, offset, duration);
     }
 
     /**
      * Smoothly scroll to the specified adapter position. The view will scroll
-     * such that the indicated position is displayed <code>offset</code> pixels below
+     * such that the indicated position is displayed <code>offset</code> pixels from
      * the top edge of the view. If this is impossible, (e.g. the offset would scroll
      * the first or last item beyond the boundaries of the list) it will get as close
      * as possible.
@@ -4880,9 +4877,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void smoothScrollToPositionFromTop(int position, int offset) {
         if (mPositionScroller == null) {
-            mPositionScroller = new SubPositionScroller();
+            mPositionScroller = new PositionScroller();
         }
-        mPositionScroller.startWithOffset(position, offset, offset);
+        mPositionScroller.startWithOffset(position, offset);
     }
 
     /**
@@ -4896,7 +4893,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void smoothScrollToPosition(int position, int boundPosition) {
         if (mPositionScroller == null) {
-            mPositionScroller = new SubPositionScroller();
+            mPositionScroller = new PositionScroller();
         }
         mPositionScroller.start(position, boundPosition);
     }
@@ -6993,313 +6990,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return scrapViews.remove(size - 1);
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Returns the height of a row, which is computed as the maximum height of
-     * the items in the row.
-     *
-     * @param row the row index
-     * @return row height in pixels
-     */
-    private int getHeightForRow(int row) {
-        final int firstRowPosition = getFirstPositionForRow(row);
-        final int lastRowPosition = getFirstPositionForRow(row + 1);
-        int maxHeight = 0;
-        for (int i = firstRowPosition; i < lastRowPosition; i++) {
-            final int height = getHeightForPosition(i);
-            if (height > maxHeight) {
-                maxHeight = height;
-            }
-        }
-        return maxHeight;
-    }
-
-    /**
-     * Returns the height of the view for the specified position.
-     *
-     * @param position the item position
-     * @return view height in pixels
-     */
-    int getHeightForPosition(int position) {
-        final int firstVisiblePosition = getFirstVisiblePosition();
-        final int childCount = getChildCount();
-        final int index = position - firstVisiblePosition;
-        if (position >= 0 && position < childCount) {
-            final View view = getChildAt(index);
-            return view.getHeight();
-        } else {
-            final View view = obtainView(position, mIsScrap);
-            view.measure(mWidthMeasureSpec, MeasureSpec.UNSPECIFIED);
-            final int height = view.getMeasuredHeight();
-            mRecycler.addScrapView(view, position);
-            return height;
-        }
-    }
-
-    /**
-     * Returns the row for the specified item position.
-     *
-     * @param position the item position
-     * @return the row index
-     */
-    public int getRowForPosition(int position) {
-        return position;
-    }
-
-    /**
-     * Returns the first item position within the specified row.
-     *
-     * @param row the row
-     * @return the item position
-     */
-    public int getFirstPositionForRow(int row) {
-        return row;
-    }
-
-    /**
-     * Sets the selected item and positions the selection y pixels from the top edge
-     * of the ListView. (If in touch mode, the item will not be selected but it will
-     * still be positioned appropriately.)
-     *
-     * @param position Index (starting at 0) of the data item to be selected.
-     * @param y The distance from the top edge of the ListView (plus padding) that the
-     *        item will be positioned.
-     */
-    public void setSelectionFromTop(int position, int y) {
-        if (mAdapter == null) {
-            return;
-        }
-
-        if (!isInTouchMode()) {
-            position = lookForSelectablePosition(position, true);
-            if (position >= 0) {
-                setNextSelectedPositionInt(position);
-            }
-        } else {
-            mResurrectToPosition = position;
-        }
-
-        if (position >= 0) {
-            mLayoutMode = LAYOUT_SPECIFIC;
-            mSpecificTop = mListPadding.top + y;
-
-            if (mNeedSync) {
-                mSyncPosition = position;
-                mSyncRowId = mAdapter.getItemId(position);
-            }
-
-            if (mPositionScroller != null) {
-                mPositionScroller.stop();
-            }
-            requestLayout();
-        }
-    }
-
-    class SubPositionScroller {
-        private static final int DEFAULT_SCROLL_DURATION = 200;
-
-        private SubScroller mSubScroller;
-        private int mOffset;
-
-        /**
-         * Scroll the minimum amount to get the target view entirely on-screen.
-         */
-        private void scrollToPosition(final int targetPosition, final boolean useOffset,
-                final int offset, final int boundPosition, final int duration) {
-            stop();
-
-            if (mDataChanged) {
-                // Wait until we're back in a stable state to try this.
-                mPositionScrollAfterLayout = new Runnable() {
-                    @Override
-                    public void run() {
-                        scrollToPosition(
-                                targetPosition, useOffset, offset, boundPosition, duration);
-                    }
-                };
-                return;
-            }
-
-            final int firstPosition = getFirstVisiblePosition();
-            final int lastPosition = firstPosition + getChildCount();
-            final int targetRow = getRowForPosition(targetPosition);
-            final int firstRow = getRowForPosition(firstPosition);
-            final int lastRow = getRowForPosition(lastPosition);
-            if (useOffset || targetRow <= firstRow) {
-                mOffset = offset;
-            } else if (targetRow >= lastRow - 1) {
-                final int listHeight = getHeight() - getPaddingTop() - getPaddingBottom();
-                mOffset = listHeight - getHeightForPosition(targetPosition);
-            } else {
-                // Don't scroll, target is entirely on-screen.
-                return;
-            }
-
-            float endSubRow = targetRow;
-            if (boundPosition != INVALID_POSITION) {
-                final int boundRow = getRowForPosition(boundPosition);
-                if (boundRow >= firstRow && boundRow < lastRow) {
-                    endSubRow = computeBoundSubRow(targetRow, boundRow);
-                }
-            }
-
-            final View firstChild = getChildAt(0);
-            final float startOffsetRatio = -firstChild.getTop() / (float) firstChild.getHeight();
-            final float startSubRow = firstRow + startOffsetRatio;
-            if (startSubRow == endSubRow && mOffset == 0) {
-                // Don't scroll, target is already in position.
-                return;
-            }
-
-            if (mSubScroller == null) {
-                mSubScroller = new SubScroller();
-            }
-            mSubScroller.startScroll(startSubRow, endSubRow, duration);
-
-            postOnAnimation(mAnimationFrame);
-        }
-
-        private float computeBoundSubRow(int targetRow, int boundRow) {
-            // Compute the target and offset as a sub-position.
-            int remainingOffset = mOffset;
-            int targetHeight = getHeightForRow(targetRow - 1);
-            while (remainingOffset > 0) {
-                remainingOffset -= targetHeight;
-                targetRow--;
-                targetHeight = getHeightForRow(targetRow - 1);
-            }
-            final float targetSubRow = targetRow - remainingOffset / targetHeight;
-            mOffset = 0;
-
-            if (targetSubRow >= boundRow) {
-                // End position would push the bound position above the list.
-                return boundRow;
-            }
-
-            // Compute the closest possible sub-position that wouldn't push the
-            // bound position's view further below the list.
-            final int listHeight = getHeight() - getPaddingTop() - getPaddingBottom();
-            final int boundHeight = getHeightForRow(boundRow);
-            int endRow = boundRow;
-            int totalHeight = boundHeight;
-            int endHeight;
-            do {
-                endRow--;
-                endHeight = getHeightForRow(endRow);
-                totalHeight += endHeight;
-            } while (totalHeight < listHeight && endRow > 0);
-
-            final float endOffsetRatio = (totalHeight - listHeight) / (float) endHeight;
-            final float boundSubRow = endRow + endOffsetRatio;
-            return Math.max(boundSubRow, targetSubRow);
-        }
-
-        /**
-         * @param position
-         * @param boundPosition
-         */
-        public void start(int position, int boundPosition) {
-            scrollToPosition(position, false, 0, boundPosition, DEFAULT_SCROLL_DURATION);
-        }
-
-        /**
-         * @param position
-         * @param offset
-         * @param duration
-         */
-        public void startWithOffset(int position, int offset, int duration) {
-            scrollToPosition(position, true, offset, INVALID_POSITION, duration);
-        }
-
-        /**
-         * @param position
-         */
-        public void start(int position) {
-            scrollToPosition(position, false, 0, INVALID_POSITION, DEFAULT_SCROLL_DURATION);
-        }
-
-        public void stop() {
-            removeCallbacks(mAnimationFrame);
-        }
-
-        private void onAnimationFrame() {
-            final boolean shouldPost = mSubScroller.computePosition();
-            final float subRow = mSubScroller.getPosition();
-
-            final int row = (int) subRow;
-            final int position = getFirstPositionForRow(row);
-            final int rowHeight = getHeightForRow(row);
-            final int offset = (int) (rowHeight * (subRow - row));
-            final int addOffset = (int) (mOffset * mSubScroller.getInterpolatedValue());
-            setSelectionFromTop(position, -offset + addOffset);
-
-            if (shouldPost) {
-                postOnAnimation(mAnimationFrame);
-            }
-        }
-
-        private Runnable mAnimationFrame = new Runnable() {
-            @Override
-            public void run() {
-                onAnimationFrame();
-            }
-        };
-    }
-
-    /**
-     * Scroller capable of returning floating point positions.
-     */
-    private static class SubScroller {
-        private final Interpolator mInterpolator;
-
-        private float mStartPosition;
-        private float mEndPosition;
-        private long mStartTime;
-        private long mDuration;
-
-        private float mPosition;
-        private float mInterpolatedValue;
-
-        public SubScroller() {
-            this(null);
-        }
-
-        public SubScroller(Interpolator interpolator) {
-            if (interpolator == null) {
-                mInterpolator = new AccelerateDecelerateInterpolator();
-            } else {
-                mInterpolator = interpolator;
-            }
-        }
-
-        public void startScroll(float startPosition, float endPosition, int duration) {
-            mStartPosition = startPosition;
-            mEndPosition = endPosition;
-            mDuration = duration;
-
-            mStartTime = AnimationUtils.currentAnimationTimeMillis();
-            mPosition = startPosition;
-            mInterpolatedValue = 0;
-        }
-
-        public boolean computePosition() {
-            final long elapsed = AnimationUtils.currentAnimationTimeMillis() - mStartTime;
-            final float value = MathUtils.constrain(elapsed / (float) mDuration, 0, 1);
-
-            mInterpolatedValue = mInterpolator.getInterpolation(value);
-            mPosition = (mEndPosition - mStartPosition) * mInterpolatedValue + mStartPosition;
-
-            return elapsed < mDuration;
-        }
-
-        public float getPosition() {
-            return mPosition;
-        }
-
-        public float getInterpolatedValue() {
-            return mInterpolatedValue;
         }
     }
 }
