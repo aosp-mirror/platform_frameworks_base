@@ -1625,10 +1625,7 @@ public class Resources {
 
             String locale = null;
             if (mConfiguration.locale != null) {
-                locale = mConfiguration.locale.getLanguage();
-                if (mConfiguration.locale.getCountry() != null) {
-                    locale += "-" + mConfiguration.locale.getCountry();
-                }
+                locale = mConfiguration.locale.toLanguageTag();
             }
             int width, height;
             if (mMetrics.widthPixels >= mMetrics.heightPixels) {

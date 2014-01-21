@@ -80,6 +80,7 @@ public:
     ResourceDirIterator(const sp<ResourceTypeSet>& set, const String8& resType)
         : mResType(resType), mSet(set), mSetPos(0), mGroupPos(0)
     {
+        memset(&mParams, 0, sizeof(ResTable_config));
     }
 
     inline const sp<AaptGroup>& getGroup() const { return mGroup; }
