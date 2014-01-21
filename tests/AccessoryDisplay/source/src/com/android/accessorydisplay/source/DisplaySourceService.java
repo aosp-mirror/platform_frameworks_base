@@ -32,6 +32,7 @@ import android.os.Message;
 import android.view.Display;
 import android.view.Surface;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class DisplaySourceService extends Service {
@@ -191,8 +192,13 @@ public class DisplaySourceService extends Service {
             format.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
             format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL);
-
-            MediaCodec codec = MediaCodec.createEncoderByType("video/avc");
+            MediaCodec codec;
+            try {
+                codec = MediaCodec.createEncoderByType("video/avc");
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "failed to create video/avc encoder", e);
+            }
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             Surface surface = codec.createInputSurface();
             codec.start();
