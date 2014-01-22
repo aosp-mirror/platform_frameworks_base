@@ -1258,8 +1258,16 @@ class AlarmManagerService extends SystemService {
                                     || alarm.type == RTC_WAKEUP) {
                                 bs.numWakeup++;
                                 fs.numWakeup++;
-                                ActivityManagerNative.noteWakeupAlarm(
-                                        alarm.operation);
+                                if (alarm.workSource != null && alarm.workSource.size() > 0) {
+                                    for (int wi=0; wi<alarm.workSource.size(); wi++) {
+                                        ActivityManagerNative.noteWakeupAlarm(
+                                                alarm.operation, alarm.workSource.get(wi),
+                                                alarm.workSource.getName(wi));
+                                    }
+                                } else {
+                                    ActivityManagerNative.noteWakeupAlarm(
+                                            alarm.operation, -1, null);
+                                }
                             }
                         } catch (PendingIntent.CanceledException e) {
                             if (alarm.repeatInterval > 0) {

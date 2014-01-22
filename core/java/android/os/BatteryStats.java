@@ -162,6 +162,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String WIFI_DATA = "wfl";
     private static final String MISC_DATA = "m";
     private static final String GLOBAL_NETWORK_DATA = "gn";
+    private static final String HISTORY_STRING_POOL = "hsp";
     private static final String HISTORY_DATA = "h";
     private static final String SCREEN_BRIGHTNESS_DATA = "br";
     private static final String SIGNAL_STRENGTH_TIME_DATA = "sgt";
@@ -355,6 +356,11 @@ public abstract class BatteryStats implements Parcelable {
             }
 
             /**
+             * Returns true if this process is still active in the battery stats.
+             */
+            public abstract boolean isActive();
+
+            /**
              * Returns the total time (in 1/100 sec) spent executing in user code.
              *
              * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
@@ -446,9 +452,6 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     public final static class HistoryItem implements Parcelable {
-        static final String TAG = "HistoryItem";
-        static final boolean DEBUG = false;
-        
         public HistoryItem next;
         
         public long time;
@@ -526,12 +529,14 @@ public abstract class BatteryStats implements Parcelable {
         public int states;
 
         public static final int EVENT_NONE = 0;
-        public static final int EVENT_APP_FOREGROUND = 1;
+        public static final int EVENT_PROC_STARTED = 1;
+        public static final int EVENT_PROC_FINISHED = 2;
 
         // For CMD_EVENT.
         public int eventCode;
-        public int eventUid;
         public String eventName;
+        public int eventNameIdx;    // only filled in when iterating.
+        public int eventUid;
 
         public HistoryItem() {
         }
@@ -579,6 +584,7 @@ public abstract class BatteryStats implements Parcelable {
                 eventCode = src.readInt();
                 eventUid = src.readInt();
                 eventName = src.readString();
+                eventNameIdx = 0;
             } else {
                 eventCode = EVENT_NONE;
             }
@@ -612,6 +618,7 @@ public abstract class BatteryStats implements Parcelable {
             eventCode = o.eventCode;
             eventUid = o.eventUid;
             eventName = o.eventName;
+            eventNameIdx = o.eventNameIdx;
         }
 
         public void setTo(long time, byte cmd, int eventCode, int eventUid, String eventName,
@@ -621,6 +628,7 @@ public abstract class BatteryStats implements Parcelable {
             this.eventCode = eventCode;
             this.eventUid = eventUid;
             this.eventName = eventName;
+            this.eventNameIdx = 0;
             batteryLevel = o.batteryLevel;
             batteryStatus = o.batteryStatus;
             batteryHealth = o.batteryHealth;
@@ -680,6 +688,10 @@ public abstract class BatteryStats implements Parcelable {
     }
     
     public abstract boolean startIteratingHistoryLocked();
+
+    public abstract int getHistoryStringPoolSize();
+
+    public abstract String getHistoryStringPoolItem(int index);
 
     public abstract boolean getNextHistoryLocked(HistoryItem out);
 
@@ -1316,7 +1328,7 @@ public abstract class BatteryStats implements Parcelable {
         if (sippers != null && sippers.size() > 0) {
             dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
                     BatteryStatsHelper.makemAh(helper.getPowerProfile().getBatteryCapacity()),
-                    BatteryStatsHelper.makemAh(helper.getTotalPower()),
+                    BatteryStatsHelper.makemAh(helper.getComputedPower()),
                     BatteryStatsHelper.makemAh(helper.getMinDrainedPower()),
                     BatteryStatsHelper.makemAh(helper.getMaxDrainedPower()));
             for (int i=0; i<sippers.size(); i++) {
@@ -1835,7 +1847,7 @@ public abstract class BatteryStats implements Parcelable {
             pw.print(prefix); pw.println("  Estimated power use (mAh):");
             pw.print(prefix); pw.print("    Capacity: ");
                     printmAh(pw, helper.getPowerProfile().getBatteryCapacity());
-                    pw.print(", Computed drain: "); printmAh(pw, helper.getTotalPower());
+                    pw.print(", Computed drain: "); printmAh(pw, helper.getComputedPower());
                     pw.print(", Min drain: "); printmAh(pw, helper.getMinDrainedPower());
                     pw.print(", Max drain: "); printmAh(pw, helper.getMaxDrainedPower());
                     pw.println();
@@ -2244,10 +2256,14 @@ public abstract class BatteryStats implements Parcelable {
         if (diff == 0) return;
         for (int i=0; i<descriptions.length; i++) {
             BitDescription bd = descriptions[i];
-            if ((diff&bd.mask) != 0) {
+            int mask = bd.mask;
+            if (bd.shift > 0) {
+                mask <<= bd.shift;
+            }
+            if ((diff&mask) != 0) {
                 pw.print(longNames ? " " : ",");
                 if (bd.shift < 0) {
-                    pw.print((newval&bd.mask) != 0 ? "+" : "-");
+                    pw.print((newval&mask) != 0 ? "+" : "-");
                     pw.print(longNames ? bd.name : bd.shortName);
                 } else {
                     pw.print(longNames ? bd.name : bd.shortName);
@@ -2404,6 +2420,38 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 printBitDescriptions(pw, oldState, rec.states,
                         HISTORY_STATE_DESCRIPTIONS, !checkin);
+                if (rec.eventCode != HistoryItem.EVENT_NONE) {
+                    switch (rec.eventCode) {
+                        case HistoryItem.EVENT_PROC_STARTED:
+                            pw.print(checkin ? ",PrSt=" : " procstart=");
+                            break;
+                        case HistoryItem.EVENT_PROC_FINISHED:
+                            pw.print(checkin ? ",PrFn=" : " procfin=");
+                            break;
+                        default:
+                            if (checkin) {
+                                pw.print(",?cmd_");
+                                pw.print(rec.eventCode);
+                                pw.print("=");
+                            } else {
+                                pw.print(" cmd_");
+                                pw.print(rec.eventCode);
+                                pw.print("=");
+                            }
+                            break;
+                    }
+                    if (checkin) {
+                        pw.print(rec.eventUid);
+                    } else {
+                        UserHandle.formatUid(pw, rec.eventUid);
+                    }
+                    pw.print(":");
+                    if (checkin) {
+                        pw.print(rec.eventNameIdx);
+                    } else {
+                        pw.print(rec.eventName);
+                    }
+                }
                 pw.println();
             }
             oldState = rec.states;
@@ -2416,7 +2464,8 @@ public abstract class BatteryStats implements Parcelable {
      * @param pw a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid) {
+    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid,
+            boolean historyOnly) {
         prepareForDumpLocked();
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
@@ -2441,7 +2490,11 @@ public abstract class BatteryStats implements Parcelable {
             finishIteratingOldHistoryLocked();
             pw.println("");
         }
-        
+
+        if (historyOnly) {
+            return;
+        }
+
         SparseArray<? extends Uid> uidStats = getUidStats();
         final int NU = uidStats.size();
         boolean didPid = false;
@@ -2483,14 +2536,22 @@ public abstract class BatteryStats implements Parcelable {
     @SuppressWarnings("unused")
     public void dumpCheckinLocked(Context context,
             PrintWriter pw, List<ApplicationInfo> apps, boolean isUnpluggedOnly,
-            boolean includeHistory) {
+            boolean includeHistory, boolean historyOnly) {
         prepareForDumpLocked();
         
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
-        if (includeHistory) {
+        if (includeHistory || historyOnly) {
             final HistoryItem rec = new HistoryItem();
             if (startIteratingHistoryLocked()) {
+                for (int i=0; i<getHistoryStringPoolSize(); i++) {
+                    pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                    pw.print(HISTORY_STRING_POOL); pw.print(',');
+                    pw.print(i);
+                    pw.print(',');
+                    pw.print(getHistoryStringPoolItem(i));
+                    pw.println();
+                }
                 HistoryPrinter hprinter = new HistoryPrinter();
                 while (getNextHistoryLocked(rec)) {
                     pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
@@ -2499,6 +2560,10 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 finishIteratingHistoryLocked();
             }
+        }
+
+        if (historyOnly) {
+            return;
         }
 
         if (apps != null) {
