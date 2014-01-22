@@ -1,0 +1,60 @@
+page.title=Supporting Game Controllers
+page.tags="game controller"
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.3 (API level 9) or higher.</li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a
+href="http://source.android.com/devices/tech/input/key-layout-files.html"
+class="external-link" target="_blank">Key Layout Files</a></li>
+  <li><a href="{@docRoot}guide/topics/ui/ui-events.html">Input Events</a></li>
+</ul>
+
+<h2>Try it out</h2>
+<div class="download-box">
+  <a href="http://developer.android.com/shareables/training/ControllerSample.zip"
+class="button">Download the sample</a>
+  <p class="filename">ControllerSample.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>You can greatly enhance the user experience in your game by letting
+players use their favorite game controllers. The Android framework provides
+ APIs for detecting and processing user input from game controllers.</p>
+
+<p>This class shows how to make your game work consistently with game
+controllers across different Android API levels (API level 9 and up),
+and how to enhance the gaming experience for players by supporting multiple
+controllers simultaneously in your app.</p>
+
+<h2>Lessons</h2>
+
+<dl>
+    <dt><b><a href="controller-input.html">Handling Controller
+Actions</a></b></dt>
+    <dd>Learn how to handle user input from common
+input elements on game controllers, including directional pad (D-pad)
+buttons, gamepad buttons, and joysticks.</dd>
+  <dt><b><a href="compatibility.html">Supporting Controllers Across Android
+Versions</a></b></dt>
+    <dd>Learn how to make game controllers behave the same across
+devices running different versions of Android.</dd>
+  <dt><b><a href="multiple-controllers.html">Supporting Multiple Game
+Controllers</a></b></dt>
+    <dd>Learn how to detect and use multiple game controllers that
+are simultaneously connected.</dd>
