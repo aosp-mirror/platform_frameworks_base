@@ -209,7 +209,7 @@ private File createImageFile() throws IOException {
 create and invoke the {@link android.content.Intent} like this:</p>
 
 <pre>
-static final in REQUEST_TAKE_PHOTO = 1;
+static final int REQUEST_TAKE_PHOTO = 1;
 
 private void dispatchTakePictureIntent() {
     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
