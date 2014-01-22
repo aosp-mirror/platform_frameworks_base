@@ -105,6 +105,27 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         return data;
     }
     
+    public void addIsolatedUid(int isolatedUid, int appUid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.addIsolatedUidLocked(isolatedUid, appUid);
+        }
+    }
+
+    public void removeIsolatedUid(int isolatedUid, int appUid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.removeIsolatedUidLocked(isolatedUid, appUid);
+        }
+    }
+
+    public void noteEvent(int code, String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteEventLocked(code, name, uid);
+        }
+    }
+
     public void noteStartWakelock(int uid, int pid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -496,8 +517,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
-        pw.println("  [--checkin] [-c] [--unplugged] [--reset] [--write] [-h] [<package.name>]");
+        pw.println("  [--checkin] [--history] [-c] [--unplugged] [--reset] [--write]");
+        pw.println("  [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
+        pw.println("  --history: show only history data.");
         pw.println("  --unplugged: only output data since last unplugged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
@@ -517,6 +540,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
 
         boolean isCheckin = false;
         boolean includeHistory = false;
+        boolean historyOnly = false;
         boolean isUnpluggedOnly = false;
         boolean noOutput = false;
         int reqUid = -1;
@@ -524,6 +548,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             for (String arg : args) {
                 if ("--checkin".equals(arg)) {
                     isCheckin = true;
+                } else if ("--history".equals(arg)) {
+                    historyOnly = true;
                 } else if ("-c".equals(arg)) {
                     isCheckin = true;
                     includeHistory = true;
@@ -569,11 +595,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (isCheckin) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
             synchronized (mStats) {
-                mStats.dumpCheckinLocked(mContext, pw, apps, isUnpluggedOnly, includeHistory);
+                mStats.dumpCheckinLocked(mContext, pw, apps, isUnpluggedOnly, includeHistory,
+                        historyOnly);
             }
         } else {
             synchronized (mStats) {
-                mStats.dumpLocked(mContext, pw, isUnpluggedOnly, reqUid);
+                mStats.dumpLocked(mContext, pw, isUnpluggedOnly, reqUid, historyOnly);
             }
         }
     }

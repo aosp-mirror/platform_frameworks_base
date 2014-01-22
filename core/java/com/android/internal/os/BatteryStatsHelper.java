@@ -41,7 +41,6 @@ import android.util.SparseArray;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatterySipper.DrainType;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,6 +83,7 @@ public class BatteryStatsHelper {
 
     private long mStatsPeriod = 0;
     private double mMaxPower = 1;
+    private double mComputedPower;
     private double mTotalPower;
     private double mWifiPower;
     private double mBluetoothPower;
@@ -156,6 +156,7 @@ public class BatteryStatsHelper {
         getStats();
 
         mMaxPower = 0;
+        mComputedPower = 0;
         mTotalPower = 0;
         mWifiPower = 0;
         mBluetoothPower = 0;
@@ -195,21 +196,17 @@ public class BatteryStatsHelper {
         processMiscUsage();
 
         if (DEBUG) {
-            Log.d(TAG, "Accuracy: total computed=" + makemAh(mTotalPower) + ", min discharge="
+            Log.d(TAG, "Accuracy: total computed=" + makemAh(mComputedPower) + ", min discharge="
                     + makemAh(mMinDrainedPower) + ", max discharge=" + makemAh(mMaxDrainedPower));
         }
-        if (true || mStats.getLowDischargeAmountSinceCharge() > 10) {
-            if (mMinDrainedPower > mTotalPower) {
-                double amount = mMinDrainedPower - mTotalPower;
-                if (mMaxPower < amount) {
-                    mMaxPower = amount;
-                }
+        mTotalPower = mComputedPower;
+        if (mStats.getLowDischargeAmountSinceCharge() > 1) {
+            if (mMinDrainedPower > mComputedPower) {
+                double amount = mMinDrainedPower - mComputedPower;
+                mTotalPower = mMinDrainedPower;
                 addEntryNoTotal(BatterySipper.DrainType.UNACCOUNTED, 0, amount);
-            } else if (mMaxDrainedPower < mTotalPower) {
-                double amount = mTotalPower - mMaxDrainedPower;
-                if (mMaxPower < amount) {
-                    mMaxPower = amount;
-                }
+            } else if (mMaxDrainedPower < mComputedPower) {
+                double amount = mComputedPower - mMaxDrainedPower;
                 addEntryNoTotal(BatterySipper.DrainType.OVERCOUNTED, 0, amount);
             }
         }
@@ -442,7 +439,7 @@ public class BatteryStatsHelper {
                 } else {
                     mUsageList.add(app);
                     if (power > mMaxPower) mMaxPower = power;
-                    mTotalPower += power;
+                    mComputedPower += power;
                 }
                 if (u.getUid() == 0) {
                     osApp = app;
@@ -467,7 +464,7 @@ public class BatteryStatsHelper {
                 osApp.value += power;
                 osApp.values[0] += power;
                 if (osApp.value > mMaxPower) mMaxPower = osApp.value;
-                mTotalPower += power;
+                mComputedPower += power;
             }
         }
     }
@@ -476,7 +473,9 @@ public class BatteryStatsHelper {
         long phoneOnTimeMs = mStats.getPhoneOnTime(mBatteryRealtime, mStatsType) / 1000;
         double phoneOnPower = mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE)
                 * phoneOnTimeMs / (60*60*1000);
-        addEntry(BatterySipper.DrainType.PHONE, phoneOnTimeMs, phoneOnPower);
+        if (phoneOnPower != 0) {
+            addEntry(BatterySipper.DrainType.PHONE, phoneOnTimeMs, phoneOnPower);
+        }
     }
 
     private void addScreenUsage() {
@@ -493,12 +492,14 @@ public class BatteryStatsHelper {
             double p = screenBinPower*brightnessTime;
             if (DEBUG && p != 0) {
                 Log.d(TAG, "Screen bin #" + i + ": time=" + brightnessTime
-                        + " power=" + makemAh(p/(60*60*1000)));
+                        + " power=" + makemAh(p / (60 * 60 * 1000)));
             }
             power += p;
         }
         power /= (60*60*1000); // To hours
-        addEntry(BatterySipper.DrainType.SCREEN, screenOnTimeMs, power);
+        if (power != 0) {
+            addEntry(BatterySipper.DrainType.SCREEN, screenOnTimeMs, power);
+        }
     }
 
     private void addRadioUsage() {
@@ -530,10 +531,12 @@ public class BatteryStatsHelper {
             Log.d(TAG, "Cell radio scanning: time=" + scanningTimeMs + " power=" + makemAh(p));
         }
         power += p;
-        BatterySipper bs =
-                addEntry(BatterySipper.DrainType.CELL, signalTimeMs, power);
-        if (signalTimeMs != 0) {
-            bs.noCoveragePercent = noCoverageTimeMs * 100.0 / signalTimeMs;
+        if (power != 0) {
+            BatterySipper bs =
+                    addEntry(BatterySipper.DrainType.CELL, signalTimeMs, power);
+            if (signalTimeMs != 0) {
+                bs.noCoveragePercent = noCoverageTimeMs * 100.0 / signalTimeMs;
+            }
         }
     }
 
@@ -571,9 +574,11 @@ public class BatteryStatsHelper {
         if (DEBUG && wifiPower != 0) {
             Log.d(TAG, "Wifi: time=" + runningTimeMs + " power=" + makemAh(wifiPower));
         }
-        BatterySipper bs = addEntry(BatterySipper.DrainType.WIFI, runningTimeMs,
-                wifiPower + mWifiPower);
-        aggregateSippers(bs, mWifiSippers, "WIFI");
+        if ((wifiPower+mWifiPower) != 0) {
+            BatterySipper bs = addEntry(BatterySipper.DrainType.WIFI, runningTimeMs,
+                    wifiPower + mWifiPower);
+            aggregateSippers(bs, mWifiSippers, "WIFI");
+        }
     }
 
     private void addIdleUsage() {
@@ -584,7 +589,9 @@ public class BatteryStatsHelper {
         if (DEBUG && idlePower != 0) {
             Log.d(TAG, "Idle: time=" + idleTimeMs + " power=" + makemAh(idlePower));
         }
-        addEntry(BatterySipper.DrainType.IDLE, idleTimeMs, idlePower);
+        if (idlePower != 0) {
+            addEntry(BatterySipper.DrainType.IDLE, idleTimeMs, idlePower);
+        }
     }
 
     private void addBluetoothUsage() {
@@ -602,9 +609,11 @@ public class BatteryStatsHelper {
             Log.d(TAG, "Bluetooth ping: count=" + btPingCount + " power=" + makemAh(pingPower));
         }
         btPower += pingPower;
-        BatterySipper bs = addEntry(BatterySipper.DrainType.BLUETOOTH, btOnTimeMs,
-                btPower + mBluetoothPower);
-        aggregateSippers(bs, mBluetoothSippers, "Bluetooth");
+        if ((btPower+mBluetoothPower) != 0) {
+            BatterySipper bs = addEntry(BatterySipper.DrainType.BLUETOOTH, btOnTimeMs,
+                    btPower + mBluetoothPower);
+            aggregateSippers(bs, mBluetoothSippers, "Bluetooth");
+        }
     }
 
     private void addUserUsage() {
@@ -665,7 +674,7 @@ public class BatteryStatsHelper {
     }
 
     private BatterySipper addEntry(DrainType drainType, long time, double power) {
-        mTotalPower += power;
+        mComputedPower += power;
         return addEntryNoTotal(drainType, time, power);
     }
 
@@ -688,6 +697,8 @@ public class BatteryStatsHelper {
     public double getMaxPower() { return mMaxPower; }
 
     public double getTotalPower() { return mTotalPower; }
+
+    public double getComputedPower() { return mComputedPower; }
 
     public double getMinDrainedPower() {
         return mMinDrainedPower;

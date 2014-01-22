@@ -101,9 +101,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         }
     }
 
-    static public void noteWakeupAlarm(PendingIntent ps) {
+    static public void noteWakeupAlarm(PendingIntent ps, int sourceUid, String sourcePkg) {
         try {
-            getDefault().noteWakeupAlarm(ps.getTarget());
+            getDefault().noteWakeupAlarm(ps.getTarget(), sourceUid, sourcePkg);
         } catch (RemoteException ex) {
         }
     }
@@ -1258,7 +1258,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IIntentSender is = IIntentSender.Stub.asInterface(
                     data.readStrongBinder());
-            noteWakeupAlarm(is);
+            int sourceUid = data.readInt();
+            String sourcePkg = data.readString();
+            noteWakeupAlarm(is, sourceUid, sourcePkg);
             reply.writeNoException();
             return true;
         }
@@ -3651,10 +3653,13 @@ class ActivityManagerProxy implements IActivityManager
         mRemote.transact(ENTER_SAFE_MODE_TRANSACTION, data, null, 0);
         data.recycle();
     }
-    public void noteWakeupAlarm(IIntentSender sender) throws RemoteException {
+    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
-        data.writeStrongBinder(sender.asBinder());
         data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(sender.asBinder());
+        data.writeInt(sourceUid);
+        data.writeString(sourcePkg);
         mRemote.transact(NOTE_WAKEUP_ALARM_TRANSACTION, data, null, 0);
         data.recycle();
     }
