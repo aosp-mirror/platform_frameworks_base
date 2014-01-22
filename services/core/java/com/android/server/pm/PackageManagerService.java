@@ -3663,6 +3663,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             // An updated system app will not have the PARSE_IS_SYSTEM flag set
             // initially
             parseFlags |= PackageParser.PARSE_IS_SYSTEM;
+
+            // An updated privileged app will not have the PARSE_IS_PRIVILEGED
+            // flag set initially
+            if ((updatedPkg.pkgFlags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
+                parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
+            }
         }
         // Verify certificates against what was last scanned
         if (!collectCertificatesLI(pp, ps, pkg, scanFile, parseFlags)) {
