@@ -243,7 +243,8 @@ public interface IActivityManager extends IInterface {
 
     public void enterSafeMode() throws RemoteException;
     
-    public void noteWakeupAlarm(IIntentSender sender) throws RemoteException;
+    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg)
+            throws RemoteException;
 
     public boolean killPids(int[] pids, String reason, boolean secure) throws RemoteException;
     public boolean killProcessesBelowForeground(String reason) throws RemoteException;

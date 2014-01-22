@@ -32,6 +32,7 @@ import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
+import android.os.BatteryStats;
 import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -2107,29 +2108,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 totalUTime += otherUTime;
                                 totalSTime += otherSTime;
                                 if (pr != null) {
-                                    BatteryStatsImpl.Uid.Proc ps = bstats.getProcessStatsLocked(
-                                            st.name, st.pid);
+                                    BatteryStatsImpl.Uid.Proc ps = pr.curProcBatteryStats;
+                                    if (ps == null || !ps.isActive()) {
+                                        pr.curProcBatteryStats = ps = bstats.getProcessStatsLocked(
+                                                pr.info.uid, pr.processName);
+                                    }
                                     ps.addCpuTimeLocked(st.rel_utime-otherUTime,
                                             st.rel_stime-otherSTime);
                                     ps.addSpeedStepTimes(cpuSpeedTimes);
                                     pr.curCpuTime += (st.rel_utime+st.rel_stime) * 10;
-                                } else if (st.uid >= Process.FIRST_APPLICATION_UID) {
+                                } else {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
-                                    if (ps == null) {
-                                        st.batteryStats = ps = bstats.getProcessStatsLocked(st.uid,
-                                                "(Unknown)");
+                                    if (ps == null || !ps.isActive()) {
+                                        st.batteryStats = ps = bstats.getProcessStatsLocked(
+                                                bstats.mapUid(st.uid), st.name);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime-otherUTime,
                                             st.rel_stime-otherSTime);
                                     ps.addSpeedStepTimes(cpuSpeedTimes);
-                                } else {
-                                    BatteryStatsImpl.Uid.Proc ps =
-                                            bstats.getProcessStatsLocked(st.name, st.pid);
-                                    if (ps != null) {
-                                        ps.addCpuTimeLocked(st.rel_utime-otherUTime,
-                                                st.rel_stime-otherSTime);
-                                        ps.addSpeedStepTimes(cpuSpeedTimes);
-                                    }
                                 }
                             }
                             bstats.finishAddingCpuLocked(perc, totalUTime,
@@ -2777,6 +2773,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 msg.obj = app;
                 mHandler.sendMessageDelayed(msg, startResult.usingWrapper
                         ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
+            }
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_STARTED,
+                    app.processName, app.info.uid);
+            if (app.isolated) {
+                mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
             }
         } catch (RuntimeException e) {
             // XXX do better error recovery.
@@ -4732,6 +4733,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISHED,
+                    app.processName, app.info.uid);
+            if (app.isolated) {
+                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
+            }
             killUnneededProcessLocked(app, reason);
             handleAppDiedLocked(app, true, allowRestart);
             removeLruProcessLocked(app);
@@ -4771,6 +4777,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
                         mHeavyWeightProcess.userId, 0));
                 mHeavyWeightProcess = null;
+            }
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISHED,
+                    app.processName, app.info.uid);
+            if (app.isolated) {
+                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
             // Take care of any launching providers waiting for this process.
             checkAppInLaunchingProvidersLocked(app, true);
@@ -8726,7 +8737,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Context.WINDOW_SERVICE)).addView(v, lp);
     }
 
-    public void noteWakeupAlarm(IIntentSender sender) {
+    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg) {
         if (!(sender instanceof PendingIntentRecord)) {
             return;
         }
@@ -8738,7 +8749,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 int MY_UID = Binder.getCallingUid();
                 int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
                 BatteryStatsImpl.Uid.Pkg pkg =
-                    stats.getPackageStatsLocked(uid, rec.key.packageName);
+                    stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
+                            sourcePkg != null ? sourcePkg : rec.key.packageName);
                 pkg.incWakeupsLocked();
             }
         }
@@ -12453,9 +12465,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             startProcessLocked(app, "restart", app.processName);
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
+            boolean removed;
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
+            }
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISHED,
+                    app.processName, app.info.uid);
+            if (app.isolated) {
+                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
             app.setPid(0);
         }

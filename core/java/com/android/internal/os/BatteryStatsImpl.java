@@ -45,6 +45,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -86,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 69 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 70 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -142,6 +143,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     private BatteryCallback mCallback;
 
     /**
+     * Mapping isolated uids to the actual owning app uid.
+     */
+    final SparseIntArray mIsolatedUids = new SparseIntArray();
+
+    /**
      * The statistics we have collected organized by uids.
      */
     final SparseArray<BatteryStatsImpl.Uid> mUidStats =
@@ -183,6 +189,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     final HistoryItem mHistoryLastWritten = new HistoryItem();
     final HistoryItem mHistoryLastLastWritten = new HistoryItem();
     final HistoryItem mHistoryReadTmp = new HistoryItem();
+    final HashMap<String, Integer> mHistoryStringPool = new HashMap<String, Integer>();
+    String[] mReadHistoryStrings;
+    int mNextHistoryStringIdx = 0;
     int mHistoryBufferLastPos = -1;
     boolean mHistoryOverflow = false;
     long mLastHistoryTime = 0;
@@ -342,8 +351,6 @@ public final class BatteryStatsImpl extends BatteryStats {
      */
     private final Map<String, KernelWakelockStats> mProcWakelockFileStats =
             new HashMap<String, KernelWakelockStats>();
-
-    private HashMap<String, Integer> mUidCache = new HashMap<String, Integer>();
 
     private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
     private NetworkStats mLastSnapshot;
@@ -1554,9 +1561,19 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + " states=0x" + Integer.toHexString(cur.states));
         }
         if (cur.cmd == HistoryItem.CMD_EVENT) {
-            dest.writeInt(cur.eventCode);
+            Integer idxObj = mHistoryStringPool.get(cur.eventName);
+            int codeAndIndex = (cur.eventCode&0xffff);
+            int idx;
+            if (idxObj != null) {
+                idx = idxObj;
+            } else {
+                idx = mNextHistoryStringIdx;
+                mHistoryStringPool.put(cur.eventName, mNextHistoryStringIdx);
+                mNextHistoryStringIdx++;
+            }
+            codeAndIndex |= (idx<<16);
+            dest.writeInt(codeAndIndex);
             dest.writeInt(cur.eventUid);
-            dest.writeString(cur.eventName);
         }
     }
 
@@ -1625,9 +1642,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if (cur.cmd == HistoryItem.CMD_EVENT) {
-            cur.eventCode = src.readInt();
+            int codeAndIndex = src.readInt();
+            cur.eventCode = (codeAndIndex&0xffff);
+            int index = ((codeAndIndex>>16)&0xffff);
+            cur.eventName = mReadHistoryStrings[index];
+            cur.eventNameIdx = index;
             cur.eventUid = src.readInt();
-            cur.eventName = src.readString();
         } else {
             cur.eventCode = HistoryItem.EVENT_NONE;
         }
@@ -1688,15 +1708,15 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     void addHistoryBufferLocked(long curTime, byte cmd) {
-        addHistoryBufferLocked(curTime, cmd, HistoryItem.EVENT_NONE, 0, null);
+        addHistoryBufferLocked(curTime, cmd, HistoryItem.EVENT_NONE, null, 0);
     }
 
-    void addHistoryBufferEventLocked(long curTime, int eventCode, int eventUid, String eventName) {
-        addHistoryBufferLocked(curTime, HistoryItem.CMD_EVENT, eventCode, eventUid, eventName);
+    void addHistoryBufferEventLocked(long curTime, int eventCode, String eventName, int eventUid) {
+        addHistoryBufferLocked(curTime, HistoryItem.CMD_EVENT, eventCode, eventName, eventUid);
     }
 
     private void addHistoryBufferLocked(long curTime, byte cmd,
-            int eventCode, int eventUid, String eventName) {
+            int eventCode, String eventName, int eventUid) {
         int origPos = 0;
         if (mIteratingHistory) {
             origPos = mHistoryBuffer.dataPosition();
@@ -1778,6 +1798,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryRecordLocked(curTime, HistoryItem.CMD_UPDATE);
     }
 
+    void addHistoryEventLocked(long curTime, int code, String name, int uid) {
+        addHistoryBufferEventLocked(curTime, code, name, uid);
+    }
+
     void addHistoryRecordLocked(long curTime, byte cmd) {
         HistoryItem rec = mHistoryCache;
         if (rec != null) {
@@ -1822,6 +1846,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHistoryBuffer.setDataCapacity(MAX_HISTORY_BUFFER/2);
         mHistoryLastLastWritten.cmd = HistoryItem.CMD_NULL;
         mHistoryLastWritten.cmd = HistoryItem.CMD_NULL;
+        mHistoryStringPool.clear();
+        mNextHistoryStringIdx = 0;
         mHistoryBufferLastPos = -1;
         mHistoryOverflow = false;
     }
@@ -1856,7 +1882,29 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     int mWakeLockNesting;
 
+    public void addIsolatedUidLocked(int isolatedUid, int appUid) {
+        mIsolatedUids.put(isolatedUid, appUid);
+    }
+
+    public void removeIsolatedUidLocked(int isolatedUid, int appUid) {
+        int curUid = mIsolatedUids.get(isolatedUid, -1);
+        if (curUid == appUid) {
+            mIsolatedUids.delete(isolatedUid);
+        }
+    }
+
+    public int mapUid(int uid) {
+        int isolated = mIsolatedUids.get(uid, -1);
+        return isolated > 0 ? isolated : uid;
+    }
+
+    public void noteEventLocked(int code, String name, int uid) {
+        uid = mapUid(uid);
+        addHistoryEventLocked(SystemClock.elapsedRealtime(), code, name, uid);
+    }
+
     public void noteStartWakeLocked(int uid, int pid, String name, int type) {
+        uid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             // Only care about partial wake locks, since full wake locks
             // will be canceled when the user puts the screen to sleep.
@@ -1878,6 +1926,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteStopWakeLocked(int uid, int pid, String name, int type) {
+        uid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             mWakeLockNesting--;
             if (mWakeLockNesting == 0) {
@@ -2009,6 +2058,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteProcessDiedLocked(int uid, int pid) {
+        uid = mapUid(uid);
         Uid u = mUidStats.get(uid);
         if (u != null) {
             u.mPids.remove(pid);
@@ -2016,6 +2066,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public long getProcessWakeTime(int uid, int pid, long realtime) {
+        uid = mapUid(uid);
         Uid u = mUidStats.get(uid);
         if (u != null) {
             Uid.Pid p = u.mPids.get(pid);
@@ -2027,6 +2078,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void reportExcessiveWakeLocked(int uid, String proc, long overTime, long usedTime) {
+        uid = mapUid(uid);
         Uid u = mUidStats.get(uid);
         if (u != null) {
             u.reportExcessiveWakeLocked(proc, overTime, usedTime);
@@ -2034,6 +2086,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void reportExcessiveCpuLocked(int uid, String proc, long overTime, long usedTime) {
+        uid = mapUid(uid);
         Uid u = mUidStats.get(uid);
         if (u != null) {
             u.reportExcessiveCpuLocked(proc, overTime, usedTime);
@@ -2043,6 +2096,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mSensorNesting;
 
     public void noteStartSensorLocked(int uid, int sensor) {
+        uid = mapUid(uid);
         if (mSensorNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_SENSOR_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Start sensor to: "
@@ -2054,6 +2108,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteStopSensorLocked(int uid, int sensor) {
+        uid = mapUid(uid);
         mSensorNesting--;
         if (mSensorNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_SENSOR_ON_FLAG;
@@ -2067,6 +2122,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mGpsNesting;
 
     public void noteStartGpsLocked(int uid) {
+        uid = mapUid(uid);
         if (mGpsNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_GPS_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Start GPS to: "
@@ -2078,6 +2134,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteStopGpsLocked(int uid) {
+        uid = mapUid(uid);
         mGpsNesting--;
         if (mGpsNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_GPS_ON_FLAG;
@@ -2158,6 +2215,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteUserActivityLocked(int uid, int event) {
+        uid = mapUid(uid);
         getUidStatsLocked(uid).noteUserActivityLocked(event);
     }
 
@@ -2400,6 +2458,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteAudioOnLocked(int uid) {
+        uid = mapUid(uid);
         if (!mAudioOn) {
             mHistoryCur.states |= HistoryItem.STATE_AUDIO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Audio on to: "
@@ -2412,6 +2471,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteAudioOffLocked(int uid) {
+        uid = mapUid(uid);
         if (mAudioOn) {
             mHistoryCur.states &= ~HistoryItem.STATE_AUDIO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Audio off to: "
@@ -2424,6 +2484,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteVideoOnLocked(int uid) {
+        uid = mapUid(uid);
         if (!mVideoOn) {
             mHistoryCur.states |= HistoryItem.STATE_VIDEO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Video on to: "
@@ -2436,6 +2497,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteVideoOffLocked(int uid) {
+        uid = mapUid(uid);
         if (mVideoOn) {
             mHistoryCur.states &= ~HistoryItem.STATE_VIDEO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Video off to: "
@@ -2448,18 +2510,22 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteActivityResumedLocked(int uid) {
+        uid = mapUid(uid);
         getUidStatsLocked(uid).noteActivityResumedLocked();
     }
 
     public void noteActivityPausedLocked(int uid) {
+        uid = mapUid(uid);
         getUidStatsLocked(uid).noteActivityPausedLocked();
     }
 
     public void noteVibratorOnLocked(int uid, long durationMillis) {
+        uid = mapUid(uid);
         getUidStatsLocked(uid).noteVibratorOnLocked(durationMillis);
     }
 
     public void noteVibratorOffLocked(int uid) {
+        uid = mapUid(uid);
         getUidStatsLocked(uid).noteVibratorOffLocked();
     }
 
@@ -2473,7 +2539,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mGlobalWifiRunningTimer.startRunningLocked(this);
             int N = ws.size();
             for (int i=0; i<N; i++) {
-                getUidStatsLocked(ws.get(i)).noteWifiRunningLocked();
+                int uid = mapUid(ws.get(i));
+                getUidStatsLocked(uid).noteWifiRunningLocked();
             }
         } else {
             Log.w(TAG, "noteWifiRunningLocked -- called while WIFI running");
@@ -2484,11 +2551,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (mGlobalWifiRunning) {
             int N = oldWs.size();
             for (int i=0; i<N; i++) {
-                getUidStatsLocked(oldWs.get(i)).noteWifiStoppedLocked();
+                int uid = mapUid(oldWs.get(i));
+                getUidStatsLocked(uid).noteWifiStoppedLocked();
             }
             N = newWs.size();
             for (int i=0; i<N; i++) {
-                getUidStatsLocked(newWs.get(i)).noteWifiRunningLocked();
+                int uid = mapUid(newWs.get(i));
+                getUidStatsLocked(uid).noteWifiRunningLocked();
             }
         } else {
             Log.w(TAG, "noteWifiRunningChangedLocked -- called while WIFI not running");
@@ -2505,7 +2574,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mGlobalWifiRunningTimer.stopRunningLocked(this);
             int N = ws.size();
             for (int i=0; i<N; i++) {
-                getUidStatsLocked(ws.get(i)).noteWifiStoppedLocked();
+                int uid = mapUid(ws.get(i));
+                getUidStatsLocked(uid).noteWifiStoppedLocked();
             }
         } else {
             Log.w(TAG, "noteWifiStoppedLocked -- called while WIFI not running");
@@ -2537,6 +2607,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mWifiFullLockNesting = 0;
 
     public void noteFullWifiLockAcquiredLocked(int uid) {
+        uid = mapUid(uid);
         if (mWifiFullLockNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_WIFI_FULL_LOCK_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI full lock on to: "
@@ -2548,6 +2619,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteFullWifiLockReleasedLocked(int uid) {
+        uid = mapUid(uid);
         mWifiFullLockNesting--;
         if (mWifiFullLockNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_FULL_LOCK_FLAG;
@@ -2561,6 +2633,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mWifiScanNesting = 0;
 
     public void noteWifiScanStartedLocked(int uid) {
+        uid = mapUid(uid);
         if (mWifiScanNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_WIFI_SCAN_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI scan started for: "
@@ -2572,6 +2645,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteWifiScanStoppedLocked(int uid) {
+        uid = mapUid(uid);
         mWifiScanNesting--;
         if (mWifiScanNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_SCAN_FLAG;
@@ -2583,16 +2657,19 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteWifiBatchedScanStartedLocked(int uid, int csph) {
+        uid = mapUid(uid);
         getUidStatsLocked(uid).noteWifiBatchedScanStartedLocked(csph);
     }
 
     public void noteWifiBatchedScanStoppedLocked(int uid) {
+        uid = mapUid(uid);
         getUidStatsLocked(uid).noteWifiBatchedScanStoppedLocked();
     }
 
     int mWifiMulticastNesting = 0;
 
     public void noteWifiMulticastEnabledLocked(int uid) {
+        uid = mapUid(uid);
         if (mWifiMulticastNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast on to: "
@@ -2604,6 +2681,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteWifiMulticastDisabledLocked(int uid) {
+        uid = mapUid(uid);
         mWifiMulticastNesting--;
         if (mWifiMulticastNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG;
@@ -3781,6 +3859,11 @@ public final class BatteryStatsImpl extends BatteryStats {
          */
         public final class Proc extends BatteryStats.Uid.Proc implements Unpluggable {
             /**
+             * Remains true until removed from the stats.
+             */
+            boolean mActive = true;
+
+            /**
              * Total time (in 1/100 sec) spent executing in user code.
              */
             long mUserTime;
@@ -3880,6 +3963,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             void detach() {
+                mActive = false;
                 mUnpluggables.remove(this);
                 for (int i = 0; i < mSpeedBins.length; i++) {
                     SamplingCounter c = mSpeedBins[i];
@@ -4035,6 +4119,11 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             public void incStartsLocked() {
                 mStarts++;
+            }
+
+            @Override
+            public boolean isActive() {
+                return mActive;
             }
 
             @Override
@@ -4812,7 +4901,21 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHistoryBuffer.setDataPosition(0);
         mReadOverflow = false;
         mIteratingHistory = true;
+        mReadHistoryStrings = new String[mHistoryStringPool.size()];
+        for (HashMap.Entry<String, Integer> ent : mHistoryStringPool.entrySet()) {
+            mReadHistoryStrings[ent.getValue()] = ent.getKey();
+        }
         return mHistoryBuffer.dataSize() > 0;
+    }
+
+    @Override
+    public int getHistoryStringPoolSize() {
+        return mReadHistoryStrings.length;
+    }
+
+    @Override
+    public String getHistoryStringPoolItem(int index) {
+        return mReadHistoryStrings[index];
     }
 
     @Override
@@ -4834,6 +4937,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void finishIteratingHistoryLocked() {
         mIteratingHistory = false;
         mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
+        mReadHistoryStrings = null;
     }
 
     @Override
@@ -5396,24 +5500,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
-     * Retrieve the statistics object for a particular process, given
-     * the name of the process.
-     * @param name process name
-     * @return the statistics object for the process
-     */
-    public Uid.Proc getProcessStatsLocked(String name, int pid) {
-        int uid;
-        if (mUidCache.containsKey(name)) {
-            uid = mUidCache.get(name);
-        } else {
-            uid = Process.getUidForPid(pid);
-            mUidCache.put(name, uid);
-        }
-        Uid u = getUidStatsLocked(uid);
-        return u.getProcessStatsLocked(name);
-    }
-
-    /**
      * Retrieve the statistics object for a particular process, creating
      * if needed.
      */
@@ -5624,6 +5710,18 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
+        mHistoryStringPool.clear();
+        mNextHistoryStringIdx = 0;
+
+        int numStrings = in.readInt();
+        for (int i=0; i<numStrings; i++) {
+            String str = in.readString();
+            int idx = in.readInt();
+            mHistoryStringPool.put(str, idx);
+            if (idx >= mNextHistoryStringIdx) {
+                mNextHistoryStringIdx = idx+1;
+            }
+        }
 
         int bufSize = in.readInt();
         int curPos = in.dataPosition();
@@ -5692,6 +5790,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             Slog.i(TAG, sb.toString());
         }
         out.writeLong(mHistoryBaseTime + mLastHistoryTime);
+        out.writeInt(mHistoryStringPool.size());
+        for (HashMap.Entry<String, Integer> ent : mHistoryStringPool.entrySet()) {
+            out.writeString(ent.getKey());
+            out.writeInt(ent.getValue());
+        }
         out.writeInt(mHistoryBuffer.dataSize());
         if (DEBUG_HISTORY) Slog.i(TAG, "***************** WRITING HISTORY: "
                 + mHistoryBuffer.dataSize() + " bytes at " + out.dataPosition());
@@ -6399,7 +6502,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         pullPendingStateUpdatesLocked();
     }
 
-    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid) {
+    public void dumpLocked(Context context, PrintWriter pw, boolean isUnpluggedOnly, int reqUid,
+            boolean historyOnly) {
         if (DEBUG) {
             Printer pr = new PrintWriterPrinter(pw);
             pr.println("*** Screen timer:");
@@ -6429,6 +6533,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             pr.println("*** Bluetooth timer:");
             mBluetoothOnTimer.logState(pr, "  ");
         }
-        super.dumpLocked(context, pw, isUnpluggedOnly, reqUid);
+        super.dumpLocked(context, pw, isUnpluggedOnly, reqUid, historyOnly);
     }
 }

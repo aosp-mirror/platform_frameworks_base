@@ -59,6 +59,7 @@ final class ProcessRecord {
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
     ProcessStats.ProcessState baseProcessTracker;
+    BatteryStatsImpl.Uid.Proc curProcBatteryStats;
     int pid;                    // The process of this application; 0 if none
     boolean starting;           // True if the process is being started
     long lastActivityTime;      // For managing the LRU list

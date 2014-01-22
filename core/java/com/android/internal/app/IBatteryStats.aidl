@@ -29,6 +29,12 @@ interface IBatteryStats {
 
     // Remaining methods are only used in Java.
     byte[] getStatistics();
+
+    void addIsolatedUid(int isolatedUid, int appUid);
+    void removeIsolatedUid(int isolatedUid, int appUid);
+
+    void noteEvent(int code, String name, int uid);
+
     void noteStartWakelock(int uid, int pid, String name, int type);
     void noteStopWakelock(int uid, int pid, String name, int type);
 
