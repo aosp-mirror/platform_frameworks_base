@@ -823,8 +823,8 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
                     exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_Y_DIMENSION);
             info.mThumbCompressedSize = exifdata->data ? exifdata->size : 0;
             info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
-            info.mImagePixWidth = getLongFromExifEntry(w);
-            info.mImagePixHeight = getLongFromExifEntry(h);
+            info.mImagePixWidth = w ? getLongFromExifEntry(w) : 0;
+            info.mImagePixHeight = h ? getLongFromExifEntry(h) : 0;
             exif_data_unref(exifdata);
         }
     }
