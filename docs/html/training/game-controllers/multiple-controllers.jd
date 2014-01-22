@@ -1,0 +1,130 @@
+page.title=Supporting Multiple Game Controllers
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#map">Map Players to Controller Device IDs</a></li>
+  <li><a href="#detect">Process Multiple Controller Input</a></li>
+</ol>
+
+<h2>Try it out</h2>
+<div class="download-box">
+  <a href="http://developer.android.com/shareables/training/ControllerSample.zip"
+class="button">Download the sample</a>
+  <p class="filename">ControllerSample.zip</p>
+</div>
+
+
+</div>
+</div>
+<p>While most games are designed to support a single user per Android device,
+it's also possible to support multiple users with game controllers that are
+connected simultaneously on the same Android device.</p>
+<p>This lesson covers some basic techniques for handling input in your single
+device multiplayer game from multiple connected controllers. This includes
+maintaining a mapping between player avatars and each controller device and
+processing controller input events appropriately.
+</p>
+
+<h2 id="map">Map Players to Controller Device IDs</h2>
+<p>When a game controller is connected to an Android device, the system
+assigns it an integer device ID. You can obtain the device IDs for connected
+game controllers by calling {@link android.view.InputDevice#getDeviceIds() InputDevice.getDeviceIds()}, as shown in <a href="controller-input.html#input">Verify a Game Controller is Connected</a>. You can then associate each
+device ID with a player in your game, and process game actions for each player separately.
+</p>
+<p class="note"><strong>Note: </strong>On devices running Android 4.1 (API
+level 16) and higher, you can obtain an input device’s descriptor using
+{@link android.view.InputDevice#getDescriptor()}, which returns a unique
+persistent string value for the input device. Unlike a device ID, the descriptor
+value won't change even if the input device is disconnected, reconnected, or
+reconfigured.
+</p>
+<p>The code snippet below shows how to use a {@link android.util.SparseArray}
+to associate a player's avatar with a specific controller. In this example, the
+{@code mShips} variable stores a collection of {@code Ship} objects. A new
+player avatar is created in-game when a new controller is attached by a user,
+and removed when its associated controller is removed.
+</p>
+<p>The {@code onInputDeviceAdded()} and {@code onInputDeviceRemoved()} callback
+methods are part of the abstraction layer introduced in
+<a href="{@docRoot}training/game-controllers/compatibility.html#status_callbacks}">
+Supporting Controllers Across Android Versions</a>. By implementing these
+listener callbacks, your game can identify the game controller's device ID when a
+controller is added or removed. This detection is compatible with Android 2.3
+(API level 9) and higher.
+</p>
+
+<pre>
+private final SparseArray&lt;Ship&gt; mShips = new SparseArray&lt;Ship&gt;();
+
+&#64;Override
+public void onInputDeviceAdded(int deviceId) {
+    getShipForID(deviceId);
+}
+
+&#64;Override
+public void onInputDeviceRemoved(int deviceId) {
+    removeShipForID(deviceId);
+}
+
+private Ship getShipForID(int shipID) {
+    Ship currentShip = mShips.get(shipID);
+    if ( null == currentShip ) {
+        currentShip = new Ship();
+        mShips.append(shipID, currentShip);
+    }
+    return currentShip;
+}
+
+private void removeShipForID(int shipID) {
+    mShips.remove(shipID);
+}
+</pre>
+
+<h2 id="detect">Process Multiple Controller Input</h2>
+<p>Your game should execute the following loop to process
+input from multiple controllers:
+</p>
+<ol>
+<li>Detect whether an input event occurred.</li>
+<li>Identify the input source and its device ID.</li>
+<li>Based on the action indicated by the input event key code or axis value,
+    update the player avatar associated with that device ID.</li>
+<li>Render and update the user interface.</li>
+</ol>
+<p>{@link android.view.KeyEvent} and {@link android.view.MotionEvent} input
+events have device IDs associated with them. Your game can take advantage of
+this to determine which controller the input event came from, and update the
+player avatar associated with that controller.
+</p>
+<p>The following code snippet shows how you might get a player avatar reference
+corresponding to a game controller device ID, and update the game based on the
+user's button press on that controller.
+</p>
+<pre>
+&#64;Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if ((event.getSource() &amp; InputDevice.SOURCE_GAMEPAD)
+                == InputDevice.SOURCE_GAMEPAD) {
+        int deviceId = event.getDeviceId();
+        if (deviceId != -1) {
+            Ship currentShip = getShipForId(deviceId);
+            // Based on which key was pressed, update the player avatar
+            // (e.g. set the ship headings or fire lasers)
+            ...
+            return true;
+        }
+    }
+    return super.onKeyDown(keyCode, event);
+}
+</pre>
+<p class="note"><strong>Note: </strong>As a best practice, when a user's
+game controller disconnects, you should pause the game and ask if the user
+wants to reconnect.
+</p>
