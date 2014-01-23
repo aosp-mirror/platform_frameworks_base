@@ -35835,6 +35835,109 @@ package java.lang {
     field public static final java.lang.Character.UnicodeBlock YI_SYLLABLES;
   }
 
+  public static final class Character.UnicodeScript extends java.lang.Enum {
+    method public static java.lang.Character.UnicodeScript forName(java.lang.String);
+    method public static java.lang.Character.UnicodeScript of(int);
+    method public static java.lang.Character.UnicodeScript valueOf(java.lang.String);
+    method public static final java.lang.Character.UnicodeScript[] values();
+    enum_constant public static final java.lang.Character.UnicodeScript ARABIC;
+    enum_constant public static final java.lang.Character.UnicodeScript ARMENIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript AVESTAN;
+    enum_constant public static final java.lang.Character.UnicodeScript BALINESE;
+    enum_constant public static final java.lang.Character.UnicodeScript BAMUM;
+    enum_constant public static final java.lang.Character.UnicodeScript BATAK;
+    enum_constant public static final java.lang.Character.UnicodeScript BENGALI;
+    enum_constant public static final java.lang.Character.UnicodeScript BOPOMOFO;
+    enum_constant public static final java.lang.Character.UnicodeScript BRAHMI;
+    enum_constant public static final java.lang.Character.UnicodeScript BRAILLE;
+    enum_constant public static final java.lang.Character.UnicodeScript BUGINESE;
+    enum_constant public static final java.lang.Character.UnicodeScript BUHID;
+    enum_constant public static final java.lang.Character.UnicodeScript CANADIAN_ABORIGINAL;
+    enum_constant public static final java.lang.Character.UnicodeScript CARIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript CHAM;
+    enum_constant public static final java.lang.Character.UnicodeScript CHEROKEE;
+    enum_constant public static final java.lang.Character.UnicodeScript COMMON;
+    enum_constant public static final java.lang.Character.UnicodeScript COPTIC;
+    enum_constant public static final java.lang.Character.UnicodeScript CUNEIFORM;
+    enum_constant public static final java.lang.Character.UnicodeScript CYPRIOT;
+    enum_constant public static final java.lang.Character.UnicodeScript CYRILLIC;
+    enum_constant public static final java.lang.Character.UnicodeScript DESERET;
+    enum_constant public static final java.lang.Character.UnicodeScript DEVANAGARI;
+    enum_constant public static final java.lang.Character.UnicodeScript EGYPTIAN_HIEROGLYPHS;
+    enum_constant public static final java.lang.Character.UnicodeScript ETHIOPIC;
+    enum_constant public static final java.lang.Character.UnicodeScript GEORGIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript GLAGOLITIC;
+    enum_constant public static final java.lang.Character.UnicodeScript GOTHIC;
+    enum_constant public static final java.lang.Character.UnicodeScript GREEK;
+    enum_constant public static final java.lang.Character.UnicodeScript GUJARATI;
+    enum_constant public static final java.lang.Character.UnicodeScript GURMUKHI;
+    enum_constant public static final java.lang.Character.UnicodeScript HAN;
+    enum_constant public static final java.lang.Character.UnicodeScript HANGUL;
+    enum_constant public static final java.lang.Character.UnicodeScript HANUNOO;
+    enum_constant public static final java.lang.Character.UnicodeScript HEBREW;
+    enum_constant public static final java.lang.Character.UnicodeScript HIRAGANA;
+    enum_constant public static final java.lang.Character.UnicodeScript IMPERIAL_ARAMAIC;
+    enum_constant public static final java.lang.Character.UnicodeScript INHERITED;
+    enum_constant public static final java.lang.Character.UnicodeScript INSCRIPTIONAL_PAHLAVI;
+    enum_constant public static final java.lang.Character.UnicodeScript INSCRIPTIONAL_PARTHIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript JAVANESE;
+    enum_constant public static final java.lang.Character.UnicodeScript KAITHI;
+    enum_constant public static final java.lang.Character.UnicodeScript KANNADA;
+    enum_constant public static final java.lang.Character.UnicodeScript KATAKANA;
+    enum_constant public static final java.lang.Character.UnicodeScript KAYAH_LI;
+    enum_constant public static final java.lang.Character.UnicodeScript KHAROSHTHI;
+    enum_constant public static final java.lang.Character.UnicodeScript KHMER;
+    enum_constant public static final java.lang.Character.UnicodeScript LAO;
+    enum_constant public static final java.lang.Character.UnicodeScript LATIN;
+    enum_constant public static final java.lang.Character.UnicodeScript LEPCHA;
+    enum_constant public static final java.lang.Character.UnicodeScript LIMBU;
+    enum_constant public static final java.lang.Character.UnicodeScript LINEAR_B;
+    enum_constant public static final java.lang.Character.UnicodeScript LISU;
+    enum_constant public static final java.lang.Character.UnicodeScript LYCIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript LYDIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript MALAYALAM;
+    enum_constant public static final java.lang.Character.UnicodeScript MANDAIC;
+    enum_constant public static final java.lang.Character.UnicodeScript MEETEI_MAYEK;
+    enum_constant public static final java.lang.Character.UnicodeScript MONGOLIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript MYANMAR;
+    enum_constant public static final java.lang.Character.UnicodeScript NEW_TAI_LUE;
+    enum_constant public static final java.lang.Character.UnicodeScript NKO;
+    enum_constant public static final java.lang.Character.UnicodeScript OGHAM;
+    enum_constant public static final java.lang.Character.UnicodeScript OLD_ITALIC;
+    enum_constant public static final java.lang.Character.UnicodeScript OLD_PERSIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript OLD_SOUTH_ARABIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript OLD_TURKIC;
+    enum_constant public static final java.lang.Character.UnicodeScript OL_CHIKI;
+    enum_constant public static final java.lang.Character.UnicodeScript ORIYA;
+    enum_constant public static final java.lang.Character.UnicodeScript OSMANYA;
+    enum_constant public static final java.lang.Character.UnicodeScript PHAGS_PA;
+    enum_constant public static final java.lang.Character.UnicodeScript PHOENICIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript REJANG;
+    enum_constant public static final java.lang.Character.UnicodeScript RUNIC;
+    enum_constant public static final java.lang.Character.UnicodeScript SAMARITAN;
+    enum_constant public static final java.lang.Character.UnicodeScript SAURASHTRA;
+    enum_constant public static final java.lang.Character.UnicodeScript SHAVIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript SINHALA;
+    enum_constant public static final java.lang.Character.UnicodeScript SUNDANESE;
+    enum_constant public static final java.lang.Character.UnicodeScript SYLOTI_NAGRI;
+    enum_constant public static final java.lang.Character.UnicodeScript SYRIAC;
+    enum_constant public static final java.lang.Character.UnicodeScript TAGALOG;
+    enum_constant public static final java.lang.Character.UnicodeScript TAGBANWA;
+    enum_constant public static final java.lang.Character.UnicodeScript TAI_LE;
+    enum_constant public static final java.lang.Character.UnicodeScript TAI_THAM;
+    enum_constant public static final java.lang.Character.UnicodeScript TAI_VIET;
+    enum_constant public static final java.lang.Character.UnicodeScript TAMIL;
+    enum_constant public static final java.lang.Character.UnicodeScript TELUGU;
+    enum_constant public static final java.lang.Character.UnicodeScript THAANA;
+    enum_constant public static final java.lang.Character.UnicodeScript THAI;
+    enum_constant public static final java.lang.Character.UnicodeScript TIBETAN;
+    enum_constant public static final java.lang.Character.UnicodeScript TIFINAGH;
+    enum_constant public static final java.lang.Character.UnicodeScript UGARITIC;
+    enum_constant public static final java.lang.Character.UnicodeScript UNKNOWN;
+    enum_constant public static final java.lang.Character.UnicodeScript VAI;
+    enum_constant public static final java.lang.Character.UnicodeScript YI;
+  }
+
   public final class Class implements java.lang.reflect.AnnotatedElement java.lang.reflect.GenericDeclaration java.io.Serializable java.lang.reflect.Type {
     method public java.lang.Class<? extends U> asSubclass(java.lang.Class<U>);
     method public T cast(java.lang.Object);
@@ -43049,6 +43152,13 @@ package java.util {
     method public int getWidth();
   }
 
+  public class IllformedLocaleException extends java.lang.RuntimeException {
+    ctor public IllformedLocaleException();
+    ctor public IllformedLocaleException(java.lang.String);
+    ctor public IllformedLocaleException(java.lang.String, int);
+    method public int getErrorIndex();
+  }
+
   public class InputMismatchException extends java.util.NoSuchElementException implements java.io.Serializable {
     ctor public InputMismatchException();
     ctor public InputMismatchException(java.lang.String);
@@ -43163,6 +43273,7 @@ package java.util {
     ctor public Locale(java.lang.String, java.lang.String);
     ctor public Locale(java.lang.String, java.lang.String, java.lang.String);
     method public java.lang.Object clone();
+    method public static java.util.Locale forLanguageTag(java.lang.String);
     method public static java.util.Locale[] getAvailableLocales();
     method public java.lang.String getCountry();
     method public static java.util.Locale getDefault();
@@ -43172,15 +43283,24 @@ package java.util {
     method public java.lang.String getDisplayLanguage(java.util.Locale);
     method public final java.lang.String getDisplayName();
     method public java.lang.String getDisplayName(java.util.Locale);
+    method public java.lang.String getDisplayScript();
+    method public java.lang.String getDisplayScript(java.util.Locale);
     method public final java.lang.String getDisplayVariant();
     method public java.lang.String getDisplayVariant(java.util.Locale);
+    method public java.lang.String getExtension(char);
+    method public java.util.Set<java.lang.Character> getExtensionKeys();
     method public java.lang.String getISO3Country();
     method public java.lang.String getISO3Language();
     method public static java.lang.String[] getISOCountries();
     method public static java.lang.String[] getISOLanguages();
     method public java.lang.String getLanguage();
+    method public java.lang.String getScript();
+    method public java.util.Set<java.lang.String> getUnicodeLocaleAttributes();
+    method public java.util.Set<java.lang.String> getUnicodeLocaleKeys();
+    method public java.lang.String getUnicodeLocaleType(java.lang.String);
     method public java.lang.String getVariant();
     method public static synchronized void setDefault(java.util.Locale);
+    method public java.lang.String toLanguageTag();
     method public final java.lang.String toString();
     field public static final java.util.Locale CANADA;
     field public static final java.util.Locale CANADA_FRENCH;
@@ -43198,12 +43318,31 @@ package java.util {
     field public static final java.util.Locale KOREA;
     field public static final java.util.Locale KOREAN;
     field public static final java.util.Locale PRC;
+    field public static final char PRIVATE_USE_EXTENSION = 120; // 0x0078 'x'
     field public static final java.util.Locale ROOT;
     field public static final java.util.Locale SIMPLIFIED_CHINESE;
     field public static final java.util.Locale TAIWAN;
     field public static final java.util.Locale TRADITIONAL_CHINESE;
     field public static final java.util.Locale UK;
+    field public static final char UNICODE_LOCALE_EXTENSION = 117; // 0x0075 'u'
     field public static final java.util.Locale US;
+  }
+
+  public static final class Locale.Builder {
+    ctor public Locale.Builder();
+    method public java.util.Locale.Builder addUnicodeLocaleAttribute(java.lang.String);
+    method public java.util.Locale build();
+    method public java.util.Locale.Builder clear();
+    method public java.util.Locale.Builder clearExtensions();
+    method public java.util.Locale.Builder removeUnicodeLocaleAttribute(java.lang.String);
+    method public java.util.Locale.Builder setExtension(char, java.lang.String);
+    method public java.util.Locale.Builder setLanguage(java.lang.String);
+    method public java.util.Locale.Builder setLanguageTag(java.lang.String);
+    method public java.util.Locale.Builder setLocale(java.util.Locale);
+    method public java.util.Locale.Builder setRegion(java.lang.String);
+    method public java.util.Locale.Builder setScript(java.lang.String);
+    method public java.util.Locale.Builder setUnicodeLocaleKeyword(java.lang.String, java.lang.String);
+    method public java.util.Locale.Builder setVariant(java.lang.String);
   }
 
   public abstract interface Map {
