@@ -50,6 +50,11 @@ public interface WebViewFactoryProvider {
         String getDefaultUserAgent(Context context);
 
         /**
+         * Used for tests only.
+         */
+         void freeMemoryForTests();
+
+        /**
          * Implements the API method:
          * {@link android.webkit.WebView#setWebContentsDebuggingEnabled(boolean) }
          */
