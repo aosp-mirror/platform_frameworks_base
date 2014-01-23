@@ -35,6 +35,7 @@ public class NotificationData {
         public ExpandableNotificationRow row; // the outer expanded view
         public View content; // takes the click events and sends the PendingIntent
         public View expanded; // the inflated RemoteViews
+        public View expandedPublic; // for insecure lockscreens
         public ImageView largeIcon;
         private View expandedBig;
         private boolean interruption;
@@ -51,6 +52,7 @@ public class NotificationData {
         public View getBigContentView() {
             return expandedBig;
         }
+        public View getPublicContentView() { return expandedPublic; }
         /**
          * Set the flag indicating that this is being touched by the user.
          */
@@ -106,19 +108,6 @@ public class NotificationData {
         }
         mEntries.add(i, entry);
         return i;
-    }
-
-    public int add(IBinder key, StatusBarNotification notification, ExpandableNotificationRow row,
-            View content, View expanded, StatusBarIconView icon) {
-        Entry entry = new Entry();
-        entry.key = key;
-        entry.notification = notification;
-        entry.row = row;
-        entry.content = content;
-        entry.expanded = expanded;
-        entry.icon = icon;
-        entry.largeIcon = null; // TODO add support for large icons
-        return add(entry);
     }
 
     public Entry remove(IBinder key) {

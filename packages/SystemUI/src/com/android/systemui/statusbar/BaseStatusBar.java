@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -130,6 +131,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
     protected int mRowHeight;
+    private boolean mPublicMode = false;
 
     // UI-specific methods
 
@@ -548,6 +550,14 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public abstract void resetHeadsUpDecayTimer();
 
+    public void setPublicMode(boolean publicMode) {
+        mPublicMode = publicMode;
+    }
+
+    public boolean isPublicMode() {
+        return mPublicMode;
+    }
+
     protected class H extends Handler {
         public void handleMessage(Message m) {
             Intent intent;
@@ -625,6 +635,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
+        Log.v(TAG, "publicNotification: "
+                + sbn.getNotification().publicVersion);
+
+        Notification publicNotification = sbn.getNotification().publicVersion;
+
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
@@ -642,8 +657,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         // NB: the large icon is now handled entirely by the template
 
         // bind the click event to the content area
-        ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
-        ViewGroup adaptive = (ViewGroup)row.findViewById(R.id.adaptive);
+        ViewGroup content = (ViewGroup)row.findViewById(R.id.container);
+        SizeAdaptiveLayout expanded = (SizeAdaptiveLayout)row.findViewById(R.id.expanded);
+        SizeAdaptiveLayout expandedPublic
+                = (SizeAdaptiveLayout)row.findViewById(R.id.expandedPublic);
 
         content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
@@ -656,12 +673,13 @@ public abstract class BaseStatusBar extends SystemUI implements
             content.setOnClickListener(null);
         }
 
+        // set up the adaptive layout
         View contentViewLocal = null;
         View bigContentViewLocal = null;
         try {
-            contentViewLocal = contentView.apply(mContext, adaptive, mOnClickHandler);
+            contentViewLocal = contentView.apply(mContext, expanded, mOnClickHandler);
             if (bigContentView != null) {
-                bigContentViewLocal = bigContentView.apply(mContext, adaptive, mOnClickHandler);
+                bigContentViewLocal = bigContentView.apply(mContext, expanded, mOnClickHandler);
             }
         }
         catch (RuntimeException e) {
@@ -675,15 +693,70 @@ public abstract class BaseStatusBar extends SystemUI implements
                     new SizeAdaptiveLayout.LayoutParams(contentViewLocal.getLayoutParams());
             params.minHeight = minHeight;
             params.maxHeight = minHeight;
-            adaptive.addView(contentViewLocal, params);
+            expanded.addView(contentViewLocal, params);
         }
         if (bigContentViewLocal != null) {
             SizeAdaptiveLayout.LayoutParams params =
                     new SizeAdaptiveLayout.LayoutParams(bigContentViewLocal.getLayoutParams());
             params.minHeight = minHeight+1;
             params.maxHeight = maxHeight;
-            adaptive.addView(bigContentViewLocal, params);
+            expanded.addView(bigContentViewLocal, params);
         }
+
+        PackageManager pm = mContext.getPackageManager();
+
+        // now the public version
+        View publicViewLocal = null;
+        if (publicNotification != null) {
+            try {
+                publicViewLocal = publicNotification.contentView.apply(mContext,
+                        expandedPublic, mOnClickHandler);
+
+                if (publicViewLocal != null) {
+                    SizeAdaptiveLayout.LayoutParams params =
+                            new SizeAdaptiveLayout.LayoutParams(publicViewLocal.getLayoutParams());
+                    params.minHeight = minHeight;
+                    params.maxHeight = minHeight;
+                    expandedPublic.addView(publicViewLocal, params);
+                }
+            }
+            catch (RuntimeException e) {
+                final String ident = sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId());
+                Log.e(TAG, "couldn't inflate public view for notification " + ident, e);
+                publicViewLocal = null;
+            }
+        }
+
+        if (publicViewLocal == null) {
+            // Add a basic notification template
+            publicViewLocal = LayoutInflater.from(mContext).inflate(
+                    com.android.internal.R.layout.notification_template_base, expandedPublic, true);
+
+            final TextView title = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.title);
+            try {
+                title.setText(pm.getApplicationLabel(
+                        pm.getApplicationInfo(entry.notification.getPackageName(), 0)));
+            } catch (NameNotFoundException e) {
+                title.setText(entry.notification.getPackageName());
+            }
+
+            final ImageView icon = (ImageView) publicViewLocal.findViewById(com.android.internal.R.id.icon);
+
+            final StatusBarIcon ic = new StatusBarIcon(entry.notification.getPackageName(),
+                    entry.notification.getUser(),
+                    entry.notification.getNotification().icon,
+                    entry.notification.getNotification().iconLevel,
+                    entry.notification.getNotification().number,
+                    entry.notification.getNotification().tickerText);
+
+            icon.setImageDrawable(StatusBarIconView.getIcon(mContext, ic));
+
+            final TextView text = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.text);
+            text.setText("Unlock your device to see this notification.");
+
+            // TODO: fill out "time" as well
+        }
+
         row.setDrawingCacheEnabled(true);
 
         applyLegacyRowBackground(sbn, content);
@@ -699,6 +772,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.row.setRowHeight(mRowHeight);
         entry.content = content;
         entry.expanded = contentViewLocal;
+        entry.expandedPublic = publicViewLocal;
         entry.setBigContentView(bigContentViewLocal);
 
         return true;
@@ -904,6 +978,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         final RemoteViews contentView = notification.getNotification().contentView;
         final RemoteViews oldBigContentView = oldNotification.getNotification().bigContentView;
         final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        final Notification oldPublicNotification = oldNotification.getNotification().publicVersion;
+        final RemoteViews oldPublicContentView = oldPublicNotification != null
+                ? oldPublicNotification.contentView : null;
+        final Notification publicNotification = notification.getNotification().publicVersion;
+        final RemoteViews publicContentView = publicNotification != null
+                ? publicNotification.contentView : null;
 
         if (DEBUG) {
             Log.d(TAG, "old notification: when=" + oldNotification.getNotification().when
@@ -911,11 +991,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                     + " expanded=" + oldEntry.expanded
                     + " contentView=" + oldContentView
                     + " bigContentView=" + oldBigContentView
+                    + " publicView=" + oldPublicContentView
                     + " rowParent=" + oldEntry.row.getParent());
             Log.d(TAG, "new notification: when=" + notification.getNotification().when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " contentView=" + contentView
-                    + " bigContentView=" + bigContentView);
+                    + " bigContentView=" + bigContentView
+                    + " publicView=" + publicContentView);
         }
 
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
@@ -935,8 +1017,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                     && oldBigContentView.getPackage() != null
                     && oldBigContentView.getPackage().equals(bigContentView.getPackage())
                     && oldBigContentView.getLayoutId() == bigContentView.getLayoutId());
+        boolean publicUnchanged  =
+                (oldPublicContentView == null && publicContentView == null)
+                || ((oldPublicContentView != null && publicContentView != null)
+                        && publicContentView.getPackage() != null
+                        && oldPublicContentView.getPackage() != null
+                        && oldPublicContentView.getPackage().equals(publicContentView.getPackage())
+                        && oldPublicContentView.getLayoutId() == publicContentView.getLayoutId());
+
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
-        boolean orderUnchanged = notification.getNotification().when== oldNotification.getNotification().when
+        boolean orderUnchanged =
+                   notification.getNotification().when == oldNotification.getNotification().when
                 && notification.getScore() == oldNotification.getScore();
                 // score now encompasses/supersedes isOngoing()
 
@@ -944,7 +1035,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && !TextUtils.equals(notification.getNotification().tickerText,
                         oldEntry.notification.getNotification().tickerText);
         boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
-        if (contentsUnchanged && bigContentsUnchanged && (orderUnchanged || isTopAnyway)) {
+        if (contentsUnchanged && bigContentsUnchanged && publicUnchanged
+                && (orderUnchanged || isTopAnyway)) {
             if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
@@ -1018,10 +1110,16 @@ public abstract class BaseStatusBar extends SystemUI implements
             StatusBarNotification notification) {
         final RemoteViews contentView = notification.getNotification().contentView;
         final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        final RemoteViews publicContentView
+                = notification.getNotification().publicVersion.contentView;
+
         // Reapply the RemoteViews
         contentView.reapply(mContext, entry.expanded, mOnClickHandler);
         if (bigContentView != null && entry.getBigContentView() != null) {
             bigContentView.reapply(mContext, entry.getBigContentView(), mOnClickHandler);
+        }
+        if (publicContentView != null && entry.getPublicContentView() != null) {
+            publicContentView.reapply(mContext, entry.getPublicContentView(), mOnClickHandler);
         }
         // update the contentIntent
         final PendingIntent contentIntent = notification.getNotification().contentIntent;

@@ -25,7 +25,7 @@
         android:paddingStart="8dp"
         />
 
-    <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
+    <com.android.systemui.statusbar.LatestItemView android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/notification_divider_height"
@@ -34,10 +34,13 @@
         android:clickable="true"
         >
 
-        <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/adaptive"
+        <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expanded"
            android:layout_width="match_parent"
            android:layout_height="wrap_content" />
 
+        <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/expandedPublic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </com.android.systemui.statusbar.LatestItemView>
 
     <View
