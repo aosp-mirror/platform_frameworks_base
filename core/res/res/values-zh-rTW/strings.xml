@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"允許應用程式存取 Keyguard 安全儲存空間。"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"控制鍵盤鎖的顯示和隱藏"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"允許應用程式控制鍵盤鎖。"</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"與更新和還原系統互動"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"允許應用程式與還原系統及系統更新互動。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"輕觸兩下即可控制縮放"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>

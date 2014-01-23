@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"ឲ្យ​កម្មវិធី​ចូល​​ការ​ផ្ទុក​មាន​សុវត្ថិភាព keguard ។"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"ពិនិត្យ​ការ​បង្ហាញ និង​លាក់​ការ​ការពារ"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង keguard ។"</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"អន្តរកម្ម​ជា​មួយ​បច្ចុប្បន្នភាព និង​ប្រព័ន្ធ​សង្គ្រោះ"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"ឲ្យ​កម្មវិធី​មាន​អន្តរកម្ម​ជា​មួយ​ប្រព័ន្ធ​សង្គ្រោះ និង​បច្ចុប្បន្នភាព​ប្រព័ន្ធ។"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ប៉ះ​ពីរ​ដង ​​ដើម្បី​គ្រប់គ្រង​ការ​ពង្រីក"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"មិន​អាច​បន្ថែម​ធាតុ​ក្រាហ្វិក។"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ទៅ"</string>
