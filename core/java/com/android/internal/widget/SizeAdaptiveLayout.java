@@ -154,6 +154,10 @@ public class SizeAdaptiveLayout extends ViewGroup {
         if (DEBUG) Log.d(TAG, this + " measure spec: " +
                          MeasureSpec.toString(heightMeasureSpec));
         View model = selectActiveChild(heightMeasureSpec);
+        if (model == null) {
+            setMeasuredDimension(0, 0);
+            return;
+        }
         SizeAdaptiveLayout.LayoutParams lp =
           (SizeAdaptiveLayout.LayoutParams) model.getLayoutParams();
         if (DEBUG) Log.d(TAG, "active min: " + lp.minHeight + " max: " + lp.maxHeight);
@@ -242,6 +246,8 @@ public class SizeAdaptiveLayout extends ViewGroup {
         int measureSpec = View.MeasureSpec.makeMeasureSpec(bottom - top,
                                                            View.MeasureSpec.EXACTLY);
         mActiveChild = selectActiveChild(measureSpec);
+        if (mActiveChild == null) return;
+
         mActiveChild.setVisibility(View.VISIBLE);
 
         if (mLastActive != mActiveChild && mLastActive != null) {
