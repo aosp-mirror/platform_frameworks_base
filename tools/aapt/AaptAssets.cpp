@@ -1631,9 +1631,18 @@ String8 AaptFile::getPrintableSource() const
 // =========================================================================
 // =========================================================================
 
-status_t AaptGroup::addFile(const sp<AaptFile>& file)
+status_t AaptGroup::addFile(const sp<AaptFile>& file, const bool overwriteDuplicate)
 {
-    if (mFiles.indexOfKey(file->getGroupEntry()) < 0) {
+    ssize_t index = mFiles.indexOfKey(file->getGroupEntry());
+    if (index >= 0 && overwriteDuplicate) {
+        fprintf(stderr, "warning: overwriting '%s' with '%s'\n",
+                mFiles[index]->getSourceFile().string(),
+                file->getSourceFile().string());
+        removeFile(index);
+        index = -1;
+    }
+
+    if (index < 0) {
         file->mPath = mPath;
         mFiles.add(file->getGroupEntry(), file);
         return NO_ERROR;
@@ -1739,7 +1748,8 @@ void AaptDir::removeDir(const String8& name)
     mDirs.removeItem(name);
 }
 
-status_t AaptDir::addLeafFile(const String8& leafName, const sp<AaptFile>& file)
+status_t AaptDir::addLeafFile(const String8& leafName, const sp<AaptFile>& file,
+        const bool overwrite)
 {
     sp<AaptGroup> group;
     if (mFiles.indexOfKey(leafName) >= 0) {
@@ -1749,12 +1759,12 @@ status_t AaptDir::addLeafFile(const String8& leafName, const sp<AaptFile>& file)
         mFiles.add(leafName, group);
     }
 
-    return group->addFile(file);
+    return group->addFile(file, overwrite);
 }
 
 ssize_t AaptDir::slurpFullTree(Bundle* bundle, const String8& srcDir,
                             const AaptGroupEntry& kind, const String8& resType,
-                            sp<FilePathStore>& fullResPaths)
+                            sp<FilePathStore>& fullResPaths, const bool overwrite)
 {
     Vector<String8> fileNames;
     {
@@ -1813,7 +1823,7 @@ ssize_t AaptDir::slurpFullTree(Bundle* bundle, const String8& srcDir,
                 notAdded = true;
             }
             ssize_t res = subdir->slurpFullTree(bundle, pathName, kind,
-                                                resType, fullResPaths);
+                                                resType, fullResPaths, overwrite);
             if (res < NO_ERROR) {
                 return res;
             }
@@ -1823,7 +1833,7 @@ ssize_t AaptDir::slurpFullTree(Bundle* bundle, const String8& srcDir,
             count += res;
         } else if (type == kFileTypeRegular) {
             sp<AaptFile> file = new AaptFile(pathName, kind, resType);
-            status_t err = addLeafFile(fileNames[i], file);
+            status_t err = addLeafFile(fileNames[i], file, overwrite);
             if (err != NO_ERROR) {
                 return err;
             }
@@ -2089,24 +2099,24 @@ ssize_t AaptAssets::slurpFromArgs(Bundle* bundle)
     /*
      * If a directory of custom assets was supplied, slurp 'em up.
      */
-    if (bundle->getAssetSourceDir()) {
-        const char* assetDir = bundle->getAssetSourceDir();
-
-        FileType type = getFileType(assetDir);
+    const Vector<const char*>& assetDirs = bundle->getAssetSourceDirs();
+    const int AN = assetDirs.size();
+    for (int i = 0; i < AN; i++) {
+        FileType type = getFileType(assetDirs[i]);
         if (type == kFileTypeNonexistent) {
-            fprintf(stderr, "ERROR: asset directory '%s' does not exist\n", assetDir);
+            fprintf(stderr, "ERROR: asset directory '%s' does not exist\n", assetDirs[i]);
             return UNKNOWN_ERROR;
         }
         if (type != kFileTypeDirectory) {
-            fprintf(stderr, "ERROR: '%s' is not a directory\n", assetDir);
+            fprintf(stderr, "ERROR: '%s' is not a directory\n", assetDirs[i]);
             return UNKNOWN_ERROR;
         }
 
-        String8 assetRoot(assetDir);
+        String8 assetRoot(assetDirs[i]);
         sp<AaptDir> assetAaptDir = makeDir(String8(kAssetDir));
         AaptGroupEntry group;
         count = assetAaptDir->slurpFullTree(bundle, assetRoot, group,
-                                            String8(), mFullAssetPaths);
+                                            String8(), mFullAssetPaths, true);
         if (count < 0) {
             totalCount = count;
             goto bail;
@@ -2116,9 +2126,10 @@ ssize_t AaptAssets::slurpFromArgs(Bundle* bundle)
         }
         totalCount += count;
 
-        if (bundle->getVerbose())
+        if (bundle->getVerbose()) {
             printf("Found %d custom asset file%s in %s\n",
-                   count, (count==1) ? "" : "s", assetDir);
+                   count, (count==1) ? "" : "s", assetDirs[i]);
+        }
     }
 
     /*

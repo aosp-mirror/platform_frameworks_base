@@ -235,7 +235,7 @@ public:
     const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& getFiles() const
         { return mFiles; }
 
-    status_t addFile(const sp<AaptFile>& file);
+    status_t addFile(const sp<AaptFile>& file, const bool overwriteDuplicate=false);
     void removeFile(size_t index);
 
     void print(const String8& prefix) const;
@@ -301,12 +301,14 @@ private:
     status_t addDir(const String8& name, const sp<AaptDir>& dir);
     sp<AaptDir> makeDir(const String8& name);
     status_t addLeafFile(const String8& leafName,
-                         const sp<AaptFile>& file);
+                         const sp<AaptFile>& file,
+                         const bool overwrite=false);
     virtual ssize_t slurpFullTree(Bundle* bundle,
                                   const String8& srcDir,
                                   const AaptGroupEntry& kind,
                                   const String8& resType,
-                                  sp<FilePathStore>& fullResPaths);
+                                  sp<FilePathStore>& fullResPaths,
+                                  const bool overwrite=false);
 
     String8 mLeaf;
     String8 mPath;

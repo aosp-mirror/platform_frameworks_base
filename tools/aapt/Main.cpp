@@ -345,7 +345,7 @@ int main(int argc, char* const argv[])
                     goto bail;
                 }
                 convertPath(argv[0]);
-                bundle.setAssetSourceDir(argv[0]);
+                bundle.addAssetSourceDir(argv[0]);
                 break;
             case 'G':
                 argc--;
