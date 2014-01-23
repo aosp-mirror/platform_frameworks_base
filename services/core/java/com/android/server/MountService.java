@@ -877,7 +877,7 @@ class MountService extends IMountService.Stub
                 /* Send the media unmounted event first */
                 if (DEBUG_EVENTS) Slog.i(TAG, "Sending unmounted event first");
                 updatePublicVolumeState(volume, Environment.MEDIA_UNMOUNTED);
-                sendStorageIntent(Environment.MEDIA_UNMOUNTED, volume, UserHandle.ALL);
+                sendStorageIntent(Intent.ACTION_MEDIA_UNMOUNTED, volume, UserHandle.ALL);
 
                 if (DEBUG_EVENTS) Slog.i(TAG, "Sending media removed");
                 updatePublicVolumeState(volume, Environment.MEDIA_REMOVED);
@@ -1164,6 +1164,7 @@ class MountService extends IMountService.Stub
     private void sendStorageIntent(String action, StorageVolume volume, UserHandle user) {
         final Intent intent = new Intent(action, Uri.parse("file://" + volume.getPath()));
         intent.putExtra(StorageVolume.EXTRA_STORAGE_VOLUME, volume);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         Slog.d(TAG, "sendStorageIntent " + intent + " to " + user);
         mContext.sendBroadcastAsUser(intent, user);
     }
