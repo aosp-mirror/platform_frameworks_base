@@ -971,7 +971,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ይዘት አቅራቢዎችን በውጭ በኩል ድረስባቸው"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"ያዢውን ከቀፎው ወደሚመጡ የይዘት አቅራቢዎች እንዲደርስ ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በፍጹም ማስፈለግ የለባቸውም።"</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"ራስ-ሰር የመሳሪያ መሻሻሎች አታበረታታ"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"ያዢው መሳሪያው ለማሻሻል መቼ መስተጋብራዊ ያልሆነ ዳግም ማስጀመር ቢደረግ ጥሩ ጊዜ እንደሆነ መረጃ ለስርዓቱ መረጃ እንዲያቀርብለት ያስችለዋል።"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"ያዢው መሳሪያው ለማላቅ መቼ መስተጋብራዊ ያልሆነ ዳግም ማስጀመር ቢደረግ ጥሩ ጊዜ እንደሆነ መረጃ ለስርዓቱ መረጃ እንዲያቀርብለት ያስችለዋል።"</string>
     <string name="save_password_message" msgid="767344687139195790">"አሳሹ ይህን ይለፍ ቃል እንዲያስታወስ ይፈልጋሉ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"አሁን አይደለም"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"አስታውስ"</string>
@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"አንድ መተግበሪያ ደህንነቱ በቁልፍ የተጠበቀ ማከማቻ እንዲደርስ ያስችለዋል።"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"የቁልፍ መጠበቂያውን ማሳየት እና መደበቅ ይቆጣጠሩ"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"አንድ መተግበሪያ የቁልፍ መጠበቂያውን እንዲቆጣጠር ያስችለዋል።"</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"ከዝማኔዎች እና ከመልሶ ማግኛ ስርዓቶች ጋር ይገናኙ"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"መተግበሪያው ከመልሶ ማግኛ ስርዓት እና ከስርዓት ማዘመኛዎች ጋር እንዲገናኝ ይፈቅድለታል።"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ለአጉላ መቆጣጠሪያ ሁለት ጊዜ ነካ አድርግ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ምግብር ማከል አልተቻለም።"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ሂድ"</string>

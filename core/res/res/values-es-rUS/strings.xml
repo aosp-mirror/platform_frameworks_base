@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permite que una aplicación acceda al almacenamiento seguro de bloqueos."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Controlar cuándo se muestra y se oculta el bloqueo"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permite que una aplicación controle los bloqueos."</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"Interaccionar con el sistema de recuperación y las actualizaciones"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"Permite que una aplicación interaccione con el sistema de recuperación y las actualizaciones del sistema."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se pudo agregar el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>

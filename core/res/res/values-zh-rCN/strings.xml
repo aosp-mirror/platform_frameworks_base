@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"允许应用访问密钥保护安全存储空间。"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"控制是显示还是隐藏锁屏"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"允许应用控制锁屏。"</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"与更新和恢复系统互动"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"允许应用与恢复系统和系统更新互动。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>

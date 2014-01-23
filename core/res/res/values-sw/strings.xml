@@ -690,23 +690,23 @@
     <string name="policylab_watchLogin" msgid="914130646942199503">"Kuhesabu idadi ya mara ambazo skrini inajaribu kufunguliwa"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Fuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na ufunge kompyuta kibao au ufute data yote iliyomo kama manenosiri mengi yenye makosa yataingizwa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Fuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na ufunge simu au ufute data yote iliyomo kama manenosiri mengi sana yasiyo sahihi yataingizwa."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Badilisha nenosiri la kufungua skrini"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Badilisha nenosiri la kufungua skrini."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Funga skrini"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Dhibiti jinsi na wakati skrini inapofunga."</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Kubadilisha nenosiri la kufungua skrini"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"Kubadilisha nenosiri la kufungua skrini."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Kufunga skrini"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kudhibiti jinsi na wakati skrini inapofunga."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Kufuta data yote"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ya mwanzo."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Kufuta data ya simu bila ilani kwa kurejesha data ambayo kifaa kilitoka nayo kiwandani"</string>
-    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Weka mbadala wa kifaa cha ulimwengu"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Weka kifaa mbadala cha ulimwengu kitakachotumiwa wakati wa kuwezesha sera. Msimamizi wa kwanza wa kifaa pekee anaweka matekelezo mbadala ya ulimwengu."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Weka muda wa kuisha wa nenosiri"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Dhibiti ni mara ngapi nenosiri la kufunga skrini linafaa libadilishwe."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Weka msimbo fiche wa hifadhi"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Inahitaji kwamba data ya programu iliyohifadhiwa iwe na msimbo fiche."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Zima kamera"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zuia matumizi yote ya kamera za kifaa."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Lemaza vipengele kwenye kilinzi cha kitufe."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Inazuia matumizi ya baadhi ya vipengele kwenye kilinzi cha kitufe."</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Weka seva mbadala ya ulimwengu kote ya kifaa"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Weka seva mbadala ya ulimwengu kote ya kifaa itakayotumiwa wakati sera iwezeshwa. Msimamizi wa kwanza wa kifaa pekee ndiye anaweza kuweka seva mbadala ya ulimwengu inayofanya kazi."</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Kuweka kipindi cha kutumia nenosiri la kufunga skrini"</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Kudhibiti ni mara ngapi nenosiri la kufunga skrini linafaa libadilishwe."</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Kuweka msimbo fiche wa hifadhi"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Inahitaji kwamba data iliyohifadhiwa ya programu iwe na msimbo fiche."</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Kuzima kamera"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Kuzuia matumizi yote ya kamera za kifaa."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Kuzima vipengele kwenye kilinda vitufe"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Inazuia matumizi ya baadhi ya vipengele kwenye kilinda vitufe."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nyumbani"</item>
     <item msgid="869923650527136615">"Simu ya mkononi"</item>
@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Inaruhusu programu kufikia hifadhi salama ya ufunguo wa ulinzi."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Dhibiti uonyeshaji na ufichaji wa kilinda-funguo"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Huruhusu programu kudhibiti kilinda-funguo."</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"Ingiliana na sasisho na mfumo wa kurejesha"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"Huruhusu programu kuingiliana na mfumo wa kurejesha na sasisho la mfumo."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Gusa mara mbili kwa udhibiti cha kuza"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Haikuweza kuongeza wijeti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Nenda"</string>

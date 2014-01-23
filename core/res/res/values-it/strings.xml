@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Consente a un\'applicazione di accedere all\'archivio sicuro keguard."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Controllo della visualizzazione e dell\'occultamento di keyguard"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Consente a un\'applicazione di controllare keguard."</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"Interazione con il sistema di ripristino e aggiornamento"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"Consente a un\'applicazione di interagire con il sistema di ripristino e con gli aggiornamenti di sistema."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tocca due volte per il comando dello zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Aggiunta del widget non riuscita."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Vai"</string>

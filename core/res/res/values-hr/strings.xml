@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Omogućuje aplikaciji pristupanje zaključanoj sigurnoj pohrani."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Upravljanje prikazivanjem i skrivanjem zaključavanja tipkovnice"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Omogućuje aplikaciji upravljanje zaključavanjem tipkovnice."</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"Interakcija s ažuriranjem i sustavom za oporavak"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"Omogućuje aplikaciji interakciju sa sustavom za oporavak i ažuriranjima sustava."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dodirnite dvaput za upravljanje zumiranjem"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget nije moguće dodati."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Idi"</string>

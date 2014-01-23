@@ -1317,6 +1317,8 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Permet que una aplicació accedeixi a l\'emmagatzematge protegit per contrasenya."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Controla si es mostra o s\'amaga el bloqueig de les tecles."</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permet que una aplicació controli el bloqueig de les tecles."</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"Interacciona amb el sistema de recuperació i amb les actualitzacions"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"Permet que una aplicació interaccioni amb el sistema de recuperació i amb les actualitzacions del sistema."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos cops per controlar el zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No s\'ha pogut afegir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Vés"</string>
