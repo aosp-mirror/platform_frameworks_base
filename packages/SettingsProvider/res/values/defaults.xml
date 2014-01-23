@@ -173,4 +173,8 @@
          0 means no timeout; battery sounds will always play
          >0 is milliseconds of screen-off time after which battery sounds will not play -->
     <integer name="def_low_battery_sound_timeout">0</integer>
+
+    <!-- Default for Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE -->
+    <integer name="def_wifi_scan_always_available">0</integer>
+
 </resources>
