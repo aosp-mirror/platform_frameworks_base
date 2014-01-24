@@ -261,6 +261,7 @@ void DisplayList::init() {
     mHeight = 0;
     mPivotExplicitlySet = false;
     mCaching = false;
+    mOrderingId = 0;
 }
 
 size_t DisplayList::getSize() {
@@ -501,13 +502,20 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
  */
 void DisplayList::computeOrdering() {
     ATRACE_CALL();
-    if (mDisplayListData == NULL) return;
+    m3dNodes.clear();
+    mProjectedNodes.clear();
+    mRootDisplayList = this;
+    mOrderingId++;
 
+    // TODO: create temporary DDLOp and call computeOrderingImpl on top DisplayList so that
+    // transform properties are applied correctly to top level children
+    if (mDisplayListData == NULL) return;
     for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
         DrawDisplayListOp* childOp = mDisplayListData->children[i];
         childOp->mDisplayList->computeOrderingImpl(childOp,
                 &m3dNodes, &mat4::identity(),
-                &mProjectedNodes, &mat4::identity());
+                &mProjectedNodes, &mat4::identity(),
+                mRootDisplayList, mOrderingId);
     }
 }
 
@@ -516,7 +524,14 @@ void DisplayList::computeOrderingImpl(
         Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
         const mat4* transformFrom3dRoot,
         Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
-        const mat4* transformFromProjectionSurface) {
+        const mat4* transformFromProjectionSurface,
+        const void* rootDisplayList, const int orderingId) {
+    m3dNodes.clear();
+    mProjectedNodes.clear();
+
+    // Temporary, for logging
+    mRootDisplayList = rootDisplayList;
+    mOrderingId = orderingId;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
@@ -546,7 +561,6 @@ void DisplayList::computeOrderingImpl(
         opState->mSkipInOrderDraw = false;
     }
 
-    m3dNodes.clear();
     if (mIsContainedVolume) {
         // create a new 3d space for descendents by collecting them
         compositedChildrenOf3dRoot = &m3dNodes;
@@ -556,7 +570,6 @@ void DisplayList::computeOrderingImpl(
         transformFrom3dRoot = &localTransformFrom3dRoot;
     }
 
-    mProjectedNodes.clear();
     if (mDisplayListData != NULL && mDisplayListData->projectionIndex >= 0) {
         // create a new projection surface for descendents by collecting them
         compositedChildrenOfProjectionSurface = &mProjectedNodes;
@@ -571,7 +584,8 @@ void DisplayList::computeOrderingImpl(
             DrawDisplayListOp* childOp = mDisplayListData->children[i];
             childOp->mDisplayList->computeOrderingImpl(childOp,
                     compositedChildrenOf3dRoot, transformFrom3dRoot,
-                    compositedChildrenOfProjectionSurface, transformFromProjectionSurface);
+                    compositedChildrenOfProjectionSurface, transformFromProjectionSurface,
+                    rootDisplayList, orderingId);
         }
     }
 }
@@ -585,6 +599,7 @@ public:
     }
     inline LinearAllocator& allocator() { return *(mDeferStruct.mAllocator); }
 
+    const DisplayList* getRoot() { return mDeferStruct.mRoot; }
 private:
     DeferStateStruct& mDeferStruct;
     const int mLevel;
@@ -607,6 +622,7 @@ public:
     }
     inline LinearAllocator& allocator() { return *(mReplayStruct.mAllocator); }
 
+    const DisplayList* getRoot() { return mReplayStruct.mRoot; }
 private:
     ReplayStateStruct& mReplayStruct;
     const int mLevel;
@@ -642,6 +658,14 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
     for (size_t i = 0; i < m3dNodes.size(); i++) {
         const float zValue = m3dNodes[i].key;
         DrawDisplayListOp* childOp = m3dNodes[i].value;
+
+        if (CC_UNLIKELY(handler.getRoot()->mRootDisplayList != childOp->mDisplayList->mRootDisplayList ||
+                handler.getRoot()->mOrderingId != childOp->mDisplayList->mOrderingId)) {
+            ALOGW("Error in 3d order computation: Root %p, order %d, expected %p %d",
+                    childOp->mDisplayList->mRootDisplayList, childOp->mDisplayList->mOrderingId,
+                    handler.getRoot()->mRootDisplayList, handler.getRoot()->mOrderingId);
+            CRASH();
+        }
 
         if (mode == kPositiveZChildren && zValue < 0.0f) continue;
         if (mode == kNegativeZChildren && zValue > 0.0f) break;
@@ -704,6 +728,15 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
         ALOGW("Error: %s is drawing after destruction, size %d", getName(), mSize);
         CRASH();
     }
+
+    if (CC_UNLIKELY(handler.getRoot()->mRootDisplayList != mRootDisplayList ||
+            handler.getRoot()->mOrderingId != mOrderingId)) {
+        ALOGW("Error in order computation: Root %p, order %d, expected %p %d",
+                mRootDisplayList, mOrderingId,
+                handler.getRoot()->mRootDisplayList, handler.getRoot()->mOrderingId);
+        CRASH();
+    }
+
     if (mSize == 0 || mAlpha <= 0) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
