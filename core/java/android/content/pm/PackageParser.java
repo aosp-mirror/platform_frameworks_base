@@ -980,7 +980,7 @@ public class PackageParser {
         
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifest);
-        pkg.mVersionCode = sa.getInteger(
+        pkg.mVersionCode = pkg.applicationInfo.versionCode = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_versionCode, 0);
         pkg.mVersionName = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifest_versionName, 0);

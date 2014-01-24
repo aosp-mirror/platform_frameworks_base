@@ -338,7 +338,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * the normal application lifecycle.
      *
      * <p>Comes from the
-     * {@link android.R.styleable#AndroidManifestApplication_cantSaveState android:cantSaveState}
+     * android.R.styleable#AndroidManifestApplication_cantSaveState
      * attribute of the &lt;application&gt; tag.
      *
      * {@hide}
@@ -456,7 +456,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * behavior was introduced.
      */
     public int targetSdkVersion;
-    
+
+    /**
+     * The app's declared version code.
+     * @hide
+     */
+    public int versionCode;
+
     /**
      * When false, indicates that all components within this application are
      * considered disabled, regardless of their individually set enabled status.
@@ -508,7 +514,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (sharedLibraryFiles != null) {
             pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
         }
-        pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion);
+        pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion
+                + " versionCode=" + versionCode);
         if (manageSpaceActivityName != null) {
             pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
         }
@@ -576,6 +583,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dataDir = orig.dataDir;
         uid = orig.uid;
         targetSdkVersion = orig.targetSdkVersion;
+        versionCode = orig.versionCode;
         enabled = orig.enabled;
         enabledSetting = orig.enabledSetting;
         installLocation = orig.installLocation;
@@ -616,6 +624,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(dataDir);
         dest.writeInt(uid);
         dest.writeInt(targetSdkVersion);
+        dest.writeInt(versionCode);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(enabledSetting);
         dest.writeInt(installLocation);
@@ -655,6 +664,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dataDir = source.readString();
         uid = source.readInt();
         targetSdkVersion = source.readInt();
+        versionCode = source.readInt();
         enabled = source.readInt() != 0;
         enabledSetting = source.readInt();
         installLocation = source.readInt();
