@@ -76,7 +76,7 @@ class DrawDisplayListOp;
 class PlaybackStateStruct {
 protected:
     PlaybackStateStruct(OpenGLRenderer& renderer, int replayFlags, LinearAllocator* allocator)
-            : mRenderer(renderer), mReplayFlags(replayFlags), mAllocator(allocator){}
+            : mRenderer(renderer), mReplayFlags(replayFlags), mAllocator(allocator), mRoot(NULL) {}
 
 public:
     OpenGLRenderer& mRenderer;
@@ -85,6 +85,7 @@ public:
     // Allocator with the lifetime of a single frame.
     // replay uses an Allocator owned by the struct, while defer shares the DeferredDisplayList's Allocator
     LinearAllocator * const mAllocator;
+    const DisplayList* mRoot; // TEMPORARY, for debug logging only
 };
 
 class DeferStateStruct : public PlaybackStateStruct {
@@ -195,6 +196,9 @@ public:
     }
 
     void setProjectToContainedVolume(bool shouldProject) {
+        if (!mProjectToContainedVolume && shouldProject) {
+            ALOGD("DL %s(%p) marked for projection", getName(), this);
+        }
         mProjectToContainedVolume = shouldProject;
     }
 
@@ -260,6 +264,9 @@ public:
 
     void setTranslationZ(float translationZ) {
         if (translationZ != mTranslationZ) {
+            if (mTranslationZ == 0.0f) {
+                ALOGD("DL %s(%p) marked for 3d compositing", getName(), this);
+            }
             mTranslationZ = translationZ;
             onTranslationUpdate();
         }
@@ -527,10 +534,11 @@ private:
     void applyViewPropertyTransforms(mat4& matrix);
 
     void computeOrderingImpl(DrawDisplayListOp* opState,
-        Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
-        const mat4* transformFrom3dRoot,
-        Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
-        const mat4* transformFromProjectionSurface);
+            Vector<ZDrawDisplayListOpPair>* compositedChildrenOf3dRoot,
+            const mat4* transformFrom3dRoot,
+            Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
+            const mat4* transformFromProjectionSurface,
+            const void* rootDisplayList, const int orderingId);
 
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler, const int level);
@@ -623,6 +631,10 @@ private:
 
     // for projection surfaces, contains a list of all children items
     Vector<DrawDisplayListOp*> mProjectedNodes;
+
+    // TEMPORARY, for debug logging only
+    const void* mRootDisplayList;
+    int mOrderingId;
 }; // class DisplayList
 
 }; // namespace uirenderer
