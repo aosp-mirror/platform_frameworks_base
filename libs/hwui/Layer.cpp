@@ -199,6 +199,7 @@ void Layer::defer() {
 
     DeferStateStruct deferredState(*deferredList, *renderer,
             DisplayList::kReplayFlag_ClipChildren);
+    deferredState.mRoot = displayList;
 
     renderer->initViewport(width, height);
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
