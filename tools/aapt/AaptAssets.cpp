@@ -2140,6 +2140,9 @@ ssize_t AaptAssets::slurpFromArgs(Bundle* bundle)
                     current->setFullResPaths(mFullResPaths);
                 }
                 count = current->slurpResourceTree(bundle, String8(res));
+                if (i > 0 && count > 0) {
+                  count = current->filter(bundle);
+                }
 
                 if (count < 0) {
                     totalCount = count;
