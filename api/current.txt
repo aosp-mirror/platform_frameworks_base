@@ -18706,7 +18706,6 @@ package android.os {
     method public final boolean hasFileDescriptors();
     method public final byte[] marshall();
     method public static android.os.Parcel obtain();
-    method protected static final android.os.Parcel obtain(int);
     method public final java.lang.Object[] readArray(java.lang.ClassLoader);
     method public final java.util.ArrayList readArrayList(java.lang.ClassLoader);
     method public final void readBinderArray(android.os.IBinder[]);

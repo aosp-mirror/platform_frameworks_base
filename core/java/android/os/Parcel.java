@@ -2246,6 +2246,7 @@ public final class Parcel {
     private static final HashMap<ClassLoader,HashMap<String,Parcelable.Creator>>
         mCreators = new HashMap<ClassLoader,HashMap<String,Parcelable.Creator>>();
 
+    /** @hide for internal use only. */
     static protected final Parcel obtain(int obj) {
         final Parcel[] pool = sHolderPool;
         synchronized (pool) {
