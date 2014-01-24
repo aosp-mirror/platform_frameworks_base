@@ -329,7 +329,8 @@ final class ServiceRecord extends Binder {
         }
         if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
             tracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
-                    serviceInfo.applicationInfo.uid, serviceInfo.processName, serviceInfo.name);
+                    serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.versionCode,
+                    serviceInfo.processName, serviceInfo.name);
             tracker.applyNewOwner(this);
         }
         return tracker;
@@ -346,7 +347,8 @@ final class ServiceRecord extends Binder {
         if (restartTracker == null) {
             if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
                 restartTracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
-                        serviceInfo.applicationInfo.uid, serviceInfo.processName, serviceInfo.name);
+                        serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.versionCode,
+                        serviceInfo.processName, serviceInfo.name);
             }
             if (restartTracker == null) {
                 return;

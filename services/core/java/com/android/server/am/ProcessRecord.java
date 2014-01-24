@@ -392,14 +392,15 @@ final class ProcessRecord {
                 origBase.makeInactive();
             }
             baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
-                    processName);
+                    info.versionCode, processName);
             baseProcessTracker.makeActive();
             for (int i=0; i<pkgList.size(); i++) {
                 ProcessStats.ProcessState ps = pkgList.valueAt(i);
                 if (ps != null && ps != origBase) {
                     ps.makeInactive();
                 }
-                ps = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid, processName);
+                ps = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid,
+                        info.versionCode, processName);
                 if (ps != baseProcessTracker) {
                     ps.makeActive();
                 }
@@ -572,7 +573,7 @@ final class ProcessRecord {
         if (!pkgList.containsKey(pkg)) {
             if (baseProcessTracker != null) {
                 ProcessStats.ProcessState state = tracker.getProcessStateLocked(
-                        pkg, info.uid, processName);
+                        pkg, info.uid, info.versionCode, processName);
                 pkgList.put(pkg, state);
                 if (state != baseProcessTracker) {
                     state.makeActive();
@@ -619,7 +620,7 @@ final class ProcessRecord {
                 }
                 pkgList.clear();
                 ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
-                        info.packageName, info.uid, processName);
+                        info.packageName, info.uid, info.versionCode, processName);
                 pkgList.put(info.packageName, ps);
                 if (ps != baseProcessTracker) {
                     ps.makeActive();

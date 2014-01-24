@@ -108,13 +108,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     public ProcessStats.ProcessState getProcessStateLocked(String packageName,
-            int uid, String processName) {
-        return mProcessStats.getProcessStateLocked(packageName, uid, processName);
+            int uid, int versionCode, String processName) {
+        return mProcessStats.getProcessStateLocked(packageName, uid, versionCode, processName);
     }
 
     public ProcessStats.ServiceState getServiceStateLocked(String packageName, int uid,
-            String processName, String className) {
-        return mProcessStats.getServiceStateLocked(packageName, uid, processName, className);
+            int versionCode, String processName, String className) {
+        return mProcessStats.getServiceStateLocked(packageName, uid, versionCode, processName,
+                className);
     }
 
     public boolean isMemFactorLowered() {
@@ -134,25 +135,29 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
             mProcessStats.mMemFactor = memFactor;
             mProcessStats.mStartTime = now;
-            ArrayMap<String, SparseArray<ProcessStats.PackageState>> pmap
+            final ArrayMap<String, SparseArray<SparseArray<ProcessStats.PackageState>>> pmap
                     = mProcessStats.mPackages.getMap();
-            for (int i=0; i<pmap.size(); i++) {
-                SparseArray<ProcessStats.PackageState> uids = pmap.valueAt(i);
-                for (int j=0; j<uids.size(); j++) {
-                    ProcessStats.PackageState pkg = uids.valueAt(j);
-                    ArrayMap<String, ProcessStats.ServiceState> services = pkg.mServices;
-                    for (int k=0; k<services.size(); k++) {
-                        ProcessStats.ServiceState service = services.valueAt(k);
-                        if (service.isInUse()) {
-                            if (service.mStartedState != ProcessStats.STATE_NOTHING) {
-                                service.setStarted(true, memFactor, now);
+            for (int ipkg=pmap.size()-1; ipkg>=0; ipkg--) {
+                final SparseArray<SparseArray<ProcessStats.PackageState>> uids = pmap.valueAt(ipkg);
+                for (int iuid=uids.size()-1; iuid>=0; iuid--) {
+                    final SparseArray<ProcessStats.PackageState> vers = uids.valueAt(iuid);
+                    for (int iver=vers.size()-1; iver>=0; iver--) {
+                        final ProcessStats.PackageState pkg = vers.valueAt(iver);
+                        final ArrayMap<String, ProcessStats.ServiceState> services = pkg.mServices;
+                        for (int isvc=services.size()-1; isvc>=0; isvc--) {
+                            final ProcessStats.ServiceState service = services.valueAt(isvc);
+                            if (service.isInUse()) {
+                                if (service.mStartedState != ProcessStats.STATE_NOTHING) {
+                                    service.setStarted(true, memFactor, now);
+                                }
+                                if (service.mBoundState != ProcessStats.STATE_NOTHING) {
+                                    service.setBound(true, memFactor, now);
+                                }
+                                if (service.mExecState != ProcessStats.STATE_NOTHING) {
+                                    service.setExecuting(true, memFactor, now);
+                                }
                             }
-                            if (service.mBoundState != ProcessStats.STATE_NOTHING) {
-                                service.setBound(true, memFactor, now);
-                            }
-                            if (service.mExecState != ProcessStats.STATE_NOTHING) {
-                                service.setExecuting(true, memFactor, now);
-                            }
+
                         }
                     }
                 }
@@ -291,25 +296,32 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                             Slog.w(TAG, "  Uid " + uids.keyAt(iu) + ": " + uids.valueAt(iu));
                         }
                     }
-                    ArrayMap<String, SparseArray<ProcessStats.PackageState>> pkgMap
+                    ArrayMap<String, SparseArray<SparseArray<ProcessStats.PackageState>>> pkgMap
                             = stats.mPackages.getMap();
                     final int NPKG = pkgMap.size();
                     for (int ip=0; ip<NPKG; ip++) {
                         Slog.w(TAG, "Package: " + pkgMap.keyAt(ip));
-                        SparseArray<ProcessStats.PackageState> uids = pkgMap.valueAt(ip);
+                        SparseArray<SparseArray<ProcessStats.PackageState>> uids
+                                = pkgMap.valueAt(ip);
                         final int NUID = uids.size();
                         for (int iu=0; iu<NUID; iu++) {
                             Slog.w(TAG, "  Uid: " + uids.keyAt(iu));
-                            ProcessStats.PackageState pkgState = uids.valueAt(iu);
-                            final int NPROCS = pkgState.mProcesses.size();
-                            for (int iproc=0; iproc<NPROCS; iproc++) {
-                                Slog.w(TAG, "    Process " + pkgState.mProcesses.keyAt(iproc)
-                                        + ": " + pkgState.mProcesses.valueAt(iproc));
-                            }
-                            final int NSRVS = pkgState.mServices.size();
-                            for (int isvc=0; isvc<NSRVS; isvc++) {
-                                Slog.w(TAG, "    Service " + pkgState.mServices.keyAt(isvc)
-                                        + ": " + pkgState.mServices.valueAt(isvc));
+                            SparseArray<ProcessStats.PackageState> vers = uids.valueAt(iu);
+                            final int NVERS = vers.size();
+                            for (int iv=0; iv<NVERS; iv++) {
+                                Slog.w(TAG, "    Vers: " + vers.keyAt(iv));
+                                ProcessStats.PackageState pkgState = vers.valueAt(iv);
+                                final int NPROCS = pkgState.mProcesses.size();
+                                for (int iproc=0; iproc<NPROCS; iproc++) {
+                                    Slog.w(TAG, "      Process " + pkgState.mProcesses.keyAt(iproc)
+                                            + ": " + pkgState.mProcesses.valueAt(iproc));
+                                }
+                                final int NSRVS = pkgState.mServices.size();
+                                for (int isvc=0; isvc<NSRVS; isvc++) {
+                                    Slog.w(TAG, "      Service " + pkgState.mServices.keyAt(isvc)
+                                            + ": " + pkgState.mServices.valueAt(isvc));
+
+                                }
                             }
                         }
                     }
