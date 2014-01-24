@@ -65,7 +65,7 @@ public final class ConsumerIrManager {
     }
 
     /**
-     * Tansmit and infrared pattern
+     * Transmit an infrared pattern
      * <p>
      * This method is synchronous; when it returns the pattern has
      * been transmitted. Only patterns shorter than 2 seconds will
