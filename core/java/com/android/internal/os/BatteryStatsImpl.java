@@ -87,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 70 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 71 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -208,6 +208,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     private boolean mIteratingHistory;
 
     int mStartCount;
+
+    long mStartClockTime;
 
     long mBatteryUptime;
     long mBatteryLastUptime;
@@ -2842,6 +2844,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @Override public long getStartClockTime() {
+        return mStartClockTime;
+    }
+
     @Override public boolean getIsOnBattery() {
         return mOnBattery;
     }
@@ -4959,6 +4965,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     void initTimes() {
+        mStartClockTime = System.currentTimeMillis();
         mBatteryRealtime = mTrackBatteryPastUptime = 0;
         mBatteryUptime = mTrackBatteryPastRealtime = 0;
         mUptimeStart = mTrackBatteryUptimeStart = SystemClock.uptimeMillis() * 1000;
@@ -5832,6 +5839,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBatteryRealtime = in.readLong();
         mUptime = in.readLong();
         mRealtime = in.readLong();
+        mStartClockTime = in.readLong();
         mDischargeUnplugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
@@ -6040,9 +6048,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param out the Parcel to be written to.
      */
     public void writeSummaryToParcel(Parcel out) {
-        // Need to update with current kernel wake lock counts.
-        updateKernelWakelocksLocked();
-        updateNetworkActivityLocked();
+        pullPendingStateUpdatesLocked();
 
         final long NOW_SYS = SystemClock.uptimeMillis() * 1000;
         final long NOWREAL_SYS = SystemClock.elapsedRealtime() * 1000;
@@ -6058,6 +6064,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(computeBatteryRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
         out.writeLong(computeUptime(NOW_SYS, STATS_SINCE_CHARGED));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
+        out.writeLong(mStartClockTime);
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(getLowDischargeAmountSinceCharge());
@@ -6293,6 +6300,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBatteryLastUptime = 0;
         mBatteryRealtime = in.readLong();
         mBatteryLastRealtime = 0;
+        mStartClockTime = in.readLong();
         mScreenOn = false;
         mScreenOnTimer = new StopwatchTimer(null, -1, null, mUnpluggables, in);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -6408,6 +6416,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mStartCount);
         out.writeLong(mBatteryUptime);
         out.writeLong(mBatteryRealtime);
+        out.writeLong(mStartClockTime);
         mScreenOnTimer.writeToParcel(out, batteryRealtime);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].writeToParcel(out, batteryRealtime);
