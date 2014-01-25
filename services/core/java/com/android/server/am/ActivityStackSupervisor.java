@@ -1524,9 +1524,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         } else {
                             ActivityOptions.abort(options);
                         }
-                        if (r.task == null)  Slog.v(TAG,
-                                "startActivityUncheckedLocked: task left null",
-                                new RuntimeException("here").fillInStackTrace());
                         return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags &
@@ -1619,9 +1616,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         } else {
                             ActivityOptions.abort(options);
                         }
-                        if (r.task == null)  Slog.v(TAG,
-                            "startActivityUncheckedLocked: task left null",
-                            new RuntimeException("here").fillInStackTrace());
                         return ActivityManager.START_TASK_TO_FRONT;
                     }
                 }
@@ -1726,9 +1720,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         targetStack.resumeTopActivityLocked(null);
                     }
                     ActivityOptions.abort(options);
-                    if (r.task == null)  Slog.w(TAG,
-                        "startActivityUncheckedLocked: task left null",
-                        new RuntimeException("here").fillInStackTrace());
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
             } else if (!addingToTask &&
