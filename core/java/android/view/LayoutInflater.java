@@ -91,7 +91,8 @@ public abstract class LayoutInflater {
     private static final String TAG_1995 = "blink";
     private static final String TAG_REQUEST_FOCUS = "requestFocus";
 
-    private static final String ATTR_THEME = "theme";
+    private static final int[] ATTRS_THEME = new int[] {
+            com.android.internal.R.attr.theme };
 
     /**
      * Hook to allow clients of the LayoutInflater to restrict the set of Views that are allowed
@@ -689,10 +690,12 @@ public abstract class LayoutInflater {
         }
 
         // Apply a theme wrapper, if requested.
-        final int themeResId = attrs.getAttributeResourceValue(null, ATTR_THEME, 0);
+        final TypedArray ta = viewContext.obtainStyledAttributes(attrs, ATTRS_THEME);
+        final int themeResId = ta.getResourceId(0, 0);
         if (themeResId != 0) {
             viewContext = new ContextThemeWrapper(viewContext, themeResId);
         }
+        ta.recycle();
 
         if (name.equals(TAG_1995)) {
             // Let's party like it's 1995!
