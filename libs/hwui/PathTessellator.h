@@ -31,18 +31,64 @@ class PathTessellator {
 public:
     static void expandBoundsForStroke(SkRect& bounds, const SkPaint* paint);
 
+    /**
+     * Populates a VertexBuffer with a tessellated approximation of the input convex path, as a single
+     * triangle strip. Note: joins are not currently supported.
+     *
+     * @param path The path to be approximated
+     * @param paint The paint the path will be drawn with, indicating AA, painting style
+     *        (stroke vs fill), stroke width, stroke cap & join style, etc.
+     * @param transform The transform the path is to be drawn with, used to drive stretch-aware path
+     *        vertex approximation, and correct AA ramp offsetting.
+     * @param vertexBuffer The output buffer
+     */
     static void tessellatePath(const SkPath& path, const SkPaint* paint,
             const mat4& transform, VertexBuffer& vertexBuffer);
 
+    /**
+     * Populates a VertexBuffer with a tessellated approximation of points as a single triangle
+     * strip (with degenerate tris separating), respecting the shape defined by the paint cap.
+     *
+     * @param points The center vertices of the points to be drawn
+     * @param count The number of floats making up the point vertices
+     * @param paint The paint the points will be drawn with indicating AA, stroke width & cap
+     * @param transform The transform the points will be drawn with, used to drive stretch-aware path
+     *        vertex approximation, and correct AA ramp offsetting
+     * @param bounds An output rectangle, which returns the total area covered by the output buffer
+     * @param vertexBuffer The output buffer
+     */
     static void tessellatePoints(const float* points, int count, const SkPaint* paint,
             const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
 
+    /**
+     * Populates a VertexBuffer with a tessellated approximation of lines as a single triangle
+     * strip (with degenerate tris separating).
+     *
+     * @param points Pairs of endpoints defining the lines to be drawn
+     * @param count The number of floats making up the line vertices
+     * @param paint The paint the lines will be drawn with indicating AA, stroke width & cap
+     * @param transform The transform the points will be drawn with, used to drive stretch-aware path
+     *        vertex approximation, and correct AA ramp offsetting
+     * @param bounds An output rectangle, which returns the total area covered by the output buffer
+     * @param vertexBuffer The output buffer
+     */
     static void tessellateLines(const float* points, int count, const SkPaint* paint,
             const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
 
+    /**
+     * Approximates a convex, CW outline into a Vector of 2d vertices.
+     *
+     * @param path The outline to be approximated
+     * @param thresholdSquared The threshold of acceptable error (in pixels) when approximating
+     * @param outputVertices An empty Vector which will be populated with the output
+     */
+    static bool approximatePathOutlineVertices(const SkPath &path, float thresholdSquared,
+            Vector<Vertex> &outputVertices);
+
 private:
     static bool approximatePathOutlineVertices(const SkPath &path, bool forceClose,
-        float sqrInvScaleX, float sqrInvScaleY, Vector<Vertex> &outputVertices);
+            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+            Vector<Vertex> &outputVertices);
 
 /*
   endpoints a & b,
@@ -52,7 +98,7 @@ private:
             float ax, float ay,
             float bx, float by,
             float cx, float cy,
-            float sqrInvScaleX, float sqrInvScaleY,
+            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
             Vector<Vertex> &outputVertices);
 
 /*
@@ -64,7 +110,7 @@ private:
             float c1x, float c1y,
             float p2x, float p2y,
             float c2x, float c2y,
-            float sqrInvScaleX, float sqrInvScaleY,
+            float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
             Vector<Vertex> &outputVertices);
 };
 
