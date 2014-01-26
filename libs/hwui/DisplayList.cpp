@@ -238,8 +238,8 @@ void DisplayList::init() {
     mRight = 0;
     mBottom = 0;
     mClipToBounds = true;
-    mIsContainedVolume = true;
-    mProjectToContainedVolume = false;
+    mIsolatedZVolume = true;
+    mProjectBackwards = false;
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
@@ -542,7 +542,7 @@ void DisplayList::computeOrderingImpl(
         applyViewPropertyTransforms(totalTransform);
         totalTransform.mapPoint3d(pivot);
         compositedChildrenOf3dRoot->add(ZDrawDisplayListOpPair(pivot.z, opState));
-    } else if (mProjectToContainedVolume) {
+    } else if (mProjectBackwards) {
         // composited projectee, flag for out of order draw, save matrix, and store in proj surface
         opState->mSkipInOrderDraw = true;
         opState->mTransformFromCompositingAncestor.load(localTransformFromProjectionSurface);
@@ -552,7 +552,7 @@ void DisplayList::computeOrderingImpl(
         opState->mSkipInOrderDraw = false;
     }
 
-    if (mIsContainedVolume) {
+    if (mIsolatedZVolume) {
         // create a new 3d space for descendents by collecting them
         compositedChildrenOf3dRoot = &m3dNodes;
         transformFrom3dRoot = &mat4::identity();

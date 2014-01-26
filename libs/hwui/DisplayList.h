@@ -190,12 +190,12 @@ public:
         mClipToBounds = clipToBounds;
     }
 
-    void setIsContainedVolume(bool isContainedVolume) {
-        mIsContainedVolume = isContainedVolume;
+    void setIsolatedZVolume(bool shouldIsolate) {
+        mIsolatedZVolume = shouldIsolate;
     }
 
-    void setProjectToContainedVolume(bool shouldProject) {
-        mProjectToContainedVolume = shouldProject;
+    void setProjectBackwards(bool shouldProject) {
+        mProjectBackwards = shouldProject;
     }
 
     void setStaticMatrix(SkMatrix* matrix) {
@@ -590,8 +590,8 @@ private:
 
     // Rendering properties
     bool mClipToBounds;
-    bool mIsContainedVolume;
-    bool mProjectToContainedVolume;
+    bool mIsolatedZVolume;
+    bool mProjectBackwards;
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;

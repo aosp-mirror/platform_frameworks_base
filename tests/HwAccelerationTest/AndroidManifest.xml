@@ -867,5 +867,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+                android:name="IsolationVolumeActivity"
+                android:label="Reordering/IsolationVolume">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
     </application>
 </manifest>

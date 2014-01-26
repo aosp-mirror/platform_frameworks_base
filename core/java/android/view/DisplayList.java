@@ -406,26 +406,26 @@ public class DisplayList {
      * Set whether the display list should collect and Z order all 3d composited descendents, and
      * draw them in order with the default Z=0 content.
      *
-     * @param isContainedVolume true if the display list should collect and Z order descendents.
+     * @param isolateZVolume true if the display list should collect and Z order descendents.
      */
-    public void setIsContainedVolume(boolean isContainedVolume) {
+    public void setIsolatedZVolume(boolean isolatedZVolume) {
         if (hasNativeDisplayList()) {
-            nSetIsContainedVolume(mFinalizer.mNativeDisplayList, isContainedVolume);
+            nSetIsolatedZVolume(mFinalizer.mNativeDisplayList, isolatedZVolume);
         }
     }
 
     /**
      * Sets whether the display list should be drawn immediately after the
-     * closest ancestor display list where isContainedVolume is true. If the
+     * closest ancestor display list where isolateZVolume is true. If the
      * display list itself satisfies this constraint, changing this attribute
      * has no effect on drawing order.
      *
      * @param shouldProject true if the display list should be projected onto a
      *            containing volume.
      */
-    public void setProjectToContainedVolume(boolean shouldProject) {
+    public void setProjectBackwards(boolean shouldProject) {
         if (hasNativeDisplayList()) {
-            nSetProjectToContainedVolume(mFinalizer.mNativeDisplayList, shouldProject);
+            nSetProjectBackwards(mFinalizer.mNativeDisplayList, shouldProject);
         }
     }
 
@@ -1049,8 +1049,8 @@ public class DisplayList {
     private static native void nSetPivotX(long displayList, float pivotX);
     private static native void nSetCaching(long displayList, boolean caching);
     private static native void nSetClipToBounds(long displayList, boolean clipToBounds);
-    private static native void nSetProjectToContainedVolume(long displayList, boolean shouldProject);
-    private static native void nSetIsContainedVolume(long displayList, boolean isContainedVolume);
+    private static native void nSetProjectBackwards(long displayList, boolean shouldProject);
+    private static native void nSetIsolatedZVolume(long displayList, boolean isolateZVolume);
     private static native void nSetAlpha(long displayList, float alpha);
     private static native void nSetHasOverlappingRendering(long displayList,
             boolean hasOverlappingRendering);

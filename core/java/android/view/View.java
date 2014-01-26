@@ -14263,8 +14263,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         (((ViewGroup) mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
             }
             if (this instanceof ViewGroup) {
-                displayList.setIsContainedVolume(
-                        (((ViewGroup) this).mGroupFlags & ViewGroup.FLAG_IS_CONTAINED_VOLUME) != 0);
+                displayList.setIsolatedZVolume(
+                        (((ViewGroup) this).mGroupFlags & ViewGroup.FLAG_ISOLATED_Z_VOLUME) != 0);
             }
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
