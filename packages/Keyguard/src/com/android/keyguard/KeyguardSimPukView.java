@@ -272,7 +272,7 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
 
     private boolean checkPuk() {
         // make sure the puk is at least 8 digits long.
-        if (mPasswordEntry.getText().length() >= 8) {
+        if (mPasswordEntry.getText().length() == 8) {
             mPukText = mPasswordEntry.getText().toString();
             return true;
         }
