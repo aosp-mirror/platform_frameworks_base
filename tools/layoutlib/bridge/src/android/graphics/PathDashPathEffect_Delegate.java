@@ -62,7 +62,7 @@ public class PathDashPathEffect_Delegate extends PathEffect_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate(int native_path, float advance, float phase,
+    /*package*/ static long nativeCreate(long native_path, float advance, float phase,
             int native_style) {
         PathDashPathEffect_Delegate newDelegate = new PathDashPathEffect_Delegate();
         return sManager.addNewDelegate(newDelegate);

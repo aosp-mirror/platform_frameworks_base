@@ -61,7 +61,7 @@ public class PixelXorXfermode_Delegate extends Xfermode_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate(int opColor) {
+    /*package*/ static long nativeCreate(int opColor) {
         PixelXorXfermode_Delegate newDelegate = new PixelXorXfermode_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }

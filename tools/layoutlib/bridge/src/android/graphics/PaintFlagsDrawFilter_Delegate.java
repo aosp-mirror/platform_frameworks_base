@@ -55,7 +55,7 @@ public class PaintFlagsDrawFilter_Delegate extends DrawFilter_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeConstructor(int clearBits, int setBits) {
+    /*package*/ static long nativeConstructor(int clearBits, int setBits) {
         PaintFlagsDrawFilter_Delegate newDelegate = new PaintFlagsDrawFilter_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }

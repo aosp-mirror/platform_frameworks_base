@@ -61,7 +61,7 @@ public class AvoidXfermode_Delegate extends Xfermode_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate(int opColor, int tolerance, int nativeMode) {
+    /*package*/ static long nativeCreate(int opColor, int tolerance, int nativeMode) {
         AvoidXfermode_Delegate newDelegate = new AvoidXfermode_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }

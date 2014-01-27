@@ -30,13 +30,14 @@ import java.lang.ref.WeakReference;
  *
  * The code is taken from {@link SparseArray} directly and adapted to use weak references.
  *
- * Because our usage means that we never actually call {@link #remove(int)} or {@link #delete(int)},
- * we must manually check if there are reclaimed references to trigger an internal compact step
- * (which is normally only triggered when an item is manually removed).
+ * Because our usage means that we never actually call {@link #remove(long)} or
+ * {@link #delete(long)}, we must manually check if there are reclaimed references to
+ * trigger an internal compact step (which is normally only triggered when an item is manually
+ * removed).
  *
- * SparseArrays map integers to Objects.  Unlike a normal array of Objects,
+ * SparseArrays map integral values to Objects.  Unlike a normal array of Objects,
  * there can be gaps in the indices.  It is intended to be more efficient
- * than using a HashMap to map Integers to Objects.
+ * than using a HashMap to map Integers (or Longs) to Objects.
  */
 @SuppressWarnings("unchecked")
 public class SparseWeakArray<E> {
@@ -58,9 +59,9 @@ public class SparseWeakArray<E> {
      * number of mappings.
      */
     public SparseWeakArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
+        initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
 
-        mKeys = new int[initialCapacity];
+        mKeys = new long[initialCapacity];
         mValues = new WeakReference[initialCapacity];
         mSize = 0;
     }
@@ -69,7 +70,7 @@ public class SparseWeakArray<E> {
      * Gets the Object mapped from the specified key, or <code>null</code>
      * if no such mapping has been made.
      */
-    public E get(int key) {
+    public E get(long key) {
         return get(key, null);
     }
 
@@ -77,7 +78,7 @@ public class SparseWeakArray<E> {
      * Gets the Object mapped from the specified key, or the specified Object
      * if no such mapping has been made.
      */
-    public E get(int key, E valueIfKeyNotFound) {
+    public E get(long key, E valueIfKeyNotFound) {
         int i = binarySearch(mKeys, 0, mSize, key);
 
         if (i < 0 || mValues[i] == DELETED || mValues[i].get() == null) {
@@ -90,7 +91,7 @@ public class SparseWeakArray<E> {
     /**
      * Removes the mapping from the specified key, if there was any.
      */
-    public void delete(int key) {
+    public void delete(long key) {
         int i = binarySearch(mKeys, 0, mSize, key);
 
         if (i >= 0) {
@@ -102,9 +103,9 @@ public class SparseWeakArray<E> {
     }
 
     /**
-     * Alias for {@link #delete(int)}.
+     * Alias for {@link #delete(long)}.
      */
-    public void remove(int key) {
+    public void remove(long key) {
         delete(key);
     }
 
@@ -121,7 +122,7 @@ public class SparseWeakArray<E> {
     private void gc() {
         int n = mSize;
         int o = 0;
-        int[] keys = mKeys;
+        long[] keys = mKeys;
         WeakReference<?>[] values = mValues;
 
         for (int i = 0; i < n; i++) {
@@ -142,9 +143,9 @@ public class SparseWeakArray<E> {
         mGarbage = false;
         mSize = o;
 
-        int newSize = ArrayUtils.idealIntArraySize(mSize);
+        int newSize = ArrayUtils.idealLongArraySize(mSize);
         if (newSize < mKeys.length) {
-            int[] nkeys = new int[newSize];
+            long[] nkeys = new long[newSize];
             WeakReference<?>[] nvalues = new WeakReference[newSize];
 
             System.arraycopy(mKeys, 0, nkeys, 0, newSize);
@@ -160,7 +161,7 @@ public class SparseWeakArray<E> {
      * replacing the previous mapping from the specified key if there
      * was one.
      */
-    public void put(int key, E value) {
+    public void put(long key, E value) {
         int i = binarySearch(mKeys, 0, mSize, key);
 
         if (i >= 0) {
@@ -182,9 +183,9 @@ public class SparseWeakArray<E> {
             }
 
             if (mSize >= mKeys.length) {
-                int n = ArrayUtils.idealIntArraySize(mSize + 1);
+                int n = ArrayUtils.idealLongArraySize(mSize + 1);
 
-                int[] nkeys = new int[n];
+                long[] nkeys = new long[n];
                 WeakReference<?>[] nvalues = new WeakReference[n];
 
                 // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
@@ -224,7 +225,7 @@ public class SparseWeakArray<E> {
      * the key from the <code>index</code>th key-value mapping that this
      * SparseArray stores.
      */
-    public int keyAt(int index) {
+    public long keyAt(int index) {
         if (mGarbage) {
             gc();
         }
@@ -263,7 +264,7 @@ public class SparseWeakArray<E> {
      * specified key, or a negative number if the specified
      * key is not mapped.
      */
-    public int indexOfKey(int key) {
+    public int indexOfKey(long key) {
         if (mGarbage) {
             gc();
         }
@@ -310,7 +311,7 @@ public class SparseWeakArray<E> {
      * Puts a key/value pair into the array, optimizing for the case where
      * the key is greater than all existing keys in the array.
      */
-    public void append(int key, E value) {
+    public void append(long key, E value) {
         if (mSize != 0 && key <= mKeys[mSize - 1]) {
             put(key, value);
             return;
@@ -322,9 +323,9 @@ public class SparseWeakArray<E> {
 
         int pos = mSize;
         if (pos >= mKeys.length) {
-            int n = ArrayUtils.idealIntArraySize(pos + 1);
+            int n = ArrayUtils.idealLongArraySize(pos + 1);
 
-            int[] nkeys = new int[n];
+            long[] nkeys = new long[n];
             WeakReference<?>[] nvalues = new WeakReference[n];
 
             // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
@@ -350,7 +351,7 @@ public class SparseWeakArray<E> {
         return false;
     }
 
-    private static int binarySearch(int[] a, int start, int len, int key) {
+    private static int binarySearch(long[] a, int start, int len, long key) {
         int high = start + len, low = start - 1, guess;
 
         while (high - low > 1) {
@@ -370,7 +371,7 @@ public class SparseWeakArray<E> {
             return ~high;
     }
 
-    private int[] mKeys;
+    private long[] mKeys;
     private WeakReference<?>[] mValues;
     private int mSize;
 }
