@@ -22,6 +22,7 @@ LOCAL_JAVA_RESOURCE_DIRS := resources
 
 LOCAL_JAVA_LIBRARIES := \
 	kxml2-2.3.0 \
+	icu4j \
 	layoutlib_api-prebuilt \
 	tools-common-prebuilt
 
