@@ -2435,9 +2435,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                     "\n   car=" + car);
                         }
                     } else {
-                        if (DBG) {
-                            log("handleConnectivityChange: address are the same reset per doReset" +
-                                   " linkProperty[" + netType + "]:" +
+                        if (VDBG) {
+                            log("handleConnectivityChange: addresses are the same reset per" +
+                                   " doReset linkProperty[" + netType + "]:" +
                                    " resetMask=" + resetMask);
                         }
                     }
