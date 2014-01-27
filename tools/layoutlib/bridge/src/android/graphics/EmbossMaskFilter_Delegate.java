@@ -55,7 +55,7 @@ public class EmbossMaskFilter_Delegate extends MaskFilter_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeConstructor(float[] direction, float ambient,
+    /*package*/ static long nativeConstructor(float[] direction, float ambient,
             float specular, float blurRadius) {
         EmbossMaskFilter_Delegate newDelegate = new EmbossMaskFilter_Delegate();
         return sManager.addNewDelegate(newDelegate);

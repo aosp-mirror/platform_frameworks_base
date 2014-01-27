@@ -48,7 +48,7 @@ public abstract class Xfermode_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static Xfermode_Delegate getDelegate(int native_instance) {
+    public static Xfermode_Delegate getDelegate(long native_instance) {
         return sManager.getDelegate(native_instance);
     }
 
@@ -60,7 +60,7 @@ public abstract class Xfermode_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void finalizer(int native_instance) {
+    /*package*/ static void finalizer(long native_instance) {
         sManager.removeJavaReferenceFor(native_instance);
     }
 

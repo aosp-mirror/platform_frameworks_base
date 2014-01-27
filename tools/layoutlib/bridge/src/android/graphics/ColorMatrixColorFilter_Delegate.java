@@ -55,13 +55,13 @@ public class ColorMatrixColorFilter_Delegate extends ColorFilter_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeColorMatrixFilter(float[] array) {
+    /*package*/ static long nativeColorMatrixFilter(float[] array) {
         ColorMatrixColorFilter_Delegate newDelegate = new ColorMatrixColorFilter_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nColorMatrixFilter(int nativeFilter, float[] array) {
+    /*package*/ static long nColorMatrixFilter(long nativeFilter, float[] array) {
         // pass
         return 0;
     }

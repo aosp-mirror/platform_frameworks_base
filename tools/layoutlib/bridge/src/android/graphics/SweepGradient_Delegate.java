@@ -52,25 +52,25 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate1(float x, float y, int colors[], float positions[]) {
+    /*package*/ static long nativeCreate1(float x, float y, int colors[], float positions[]) {
         SweepGradient_Delegate newDelegate = new SweepGradient_Delegate(x, y, colors, positions);
         return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate2(float x, float y, int color0, int color1) {
+    /*package*/ static long nativeCreate2(float x, float y, int color0, int color1) {
         return nativeCreate1(x, y, new int[] { color0, color1 }, null /*positions*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate1(int native_shader, float cx, float cy,
+    /*package*/ static long nativePostCreate1(long native_shader, float cx, float cy,
             int[] colors, float[] positions) {
         // nothing to be done here.
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate2(int native_shader, float cx, float cy,
+    /*package*/ static long nativePostCreate2(long native_shader, float cx, float cy,
             int color0, int color1) {
         // nothing to be done here.
         return 0;

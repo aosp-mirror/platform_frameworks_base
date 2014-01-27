@@ -127,7 +127,7 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreateXfermode(int mode) {
+    /*package*/ static long nativeCreateXfermode(int mode) {
         PorterDuffXfermode_Delegate newDelegate = new PorterDuffXfermode_Delegate(mode);
         return sManager.addNewDelegate(newDelegate);
     }

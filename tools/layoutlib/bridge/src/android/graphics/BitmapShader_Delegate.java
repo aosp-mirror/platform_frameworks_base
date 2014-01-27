@@ -65,7 +65,7 @@ public class BitmapShader_Delegate extends Shader_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate(int native_bitmap, int shaderTileModeX,
+    /*package*/ static long nativeCreate(long native_bitmap, int shaderTileModeX,
             int shaderTileModeY) {
         Bitmap_Delegate bitmap = Bitmap_Delegate.getDelegate(native_bitmap);
         if (bitmap == null) {
@@ -80,7 +80,7 @@ public class BitmapShader_Delegate extends Shader_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate(int native_shader, int native_bitmap,
+    /*package*/ static long nativePostCreate(long native_shader, long native_bitmap,
             int shaderTileModeX, int shaderTileModeY) {
         // pass, not needed.
         return 0;

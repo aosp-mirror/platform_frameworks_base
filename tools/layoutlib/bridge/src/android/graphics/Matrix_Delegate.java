@@ -53,7 +53,7 @@ public final class Matrix_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static Matrix_Delegate getDelegate(int native_instance) {
+    public static Matrix_Delegate getDelegate(long native_instance) {
         return sManager.getDelegate(native_instance);
     }
 
@@ -174,7 +174,7 @@ public final class Matrix_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int native_create(int native_src_or_zero) {
+    /*package*/ static long native_create(long native_src_or_zero) {
         // create the delegate
         Matrix_Delegate newDelegate = new Matrix_Delegate();
 
@@ -193,7 +193,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_isIdentity(int native_object) {
+    /*package*/ static boolean native_isIdentity(long native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -203,7 +203,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_rectStaysRect(int native_object) {
+    /*package*/ static boolean native_rectStaysRect(long native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return true;
@@ -213,7 +213,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_reset(int native_object) {
+    /*package*/ static void native_reset(long native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -223,7 +223,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_set(int native_object, int other) {
+    /*package*/ static void native_set(long native_object, long other) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -238,7 +238,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setTranslate(int native_object, float dx, float dy) {
+    /*package*/ static void native_setTranslate(long native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -248,7 +248,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setScale(int native_object, float sx, float sy,
+    /*package*/ static void native_setScale(long native_object, float sx, float sy,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -259,7 +259,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setScale(int native_object, float sx, float sy) {
+    /*package*/ static void native_setScale(long native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -277,7 +277,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setRotate(int native_object, float degrees, float px, float py) {
+    /*package*/ static void native_setRotate(long native_object, float degrees, float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -287,7 +287,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setRotate(int native_object, float degrees) {
+    /*package*/ static void native_setRotate(long native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -297,7 +297,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setSinCos(int native_object, float sinValue, float cosValue,
+    /*package*/ static void native_setSinCos(long native_object, float sinValue, float cosValue,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -316,7 +316,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setSinCos(int native_object, float sinValue, float cosValue) {
+    /*package*/ static void native_setSinCos(long native_object, float sinValue, float cosValue) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -326,7 +326,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setSkew(int native_object, float kx, float ky,
+    /*package*/ static void native_setSkew(long native_object, float kx, float ky,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -337,7 +337,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setSkew(int native_object, float kx, float ky) {
+    /*package*/ static void native_setSkew(long native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -355,7 +355,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_setConcat(int native_object, int a, int b) {
+    /*package*/ static boolean native_setConcat(long native_object, long a, long b) {
         if (a == native_object) {
             return native_preConcat(native_object, b);
         } else if (b == native_object) {
@@ -383,7 +383,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preTranslate(int native_object, float dx, float dy) {
+    /*package*/ static boolean native_preTranslate(long native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -394,7 +394,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preScale(int native_object, float sx, float sy,
+    /*package*/ static boolean native_preScale(long native_object, float sx, float sy,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -406,7 +406,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preScale(int native_object, float sx, float sy) {
+    /*package*/ static boolean native_preScale(long native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -417,7 +417,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preRotate(int native_object, float degrees,
+    /*package*/ static boolean native_preRotate(long native_object, float degrees,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -429,7 +429,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preRotate(int native_object, float degrees) {
+    /*package*/ static boolean native_preRotate(long native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -444,7 +444,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preSkew(int native_object, float kx, float ky,
+    /*package*/ static boolean native_preSkew(long native_object, float kx, float ky,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -456,7 +456,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preSkew(int native_object, float kx, float ky) {
+    /*package*/ static boolean native_preSkew(long native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -467,7 +467,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_preConcat(int native_object, int other_matrix) {
+    /*package*/ static boolean native_preConcat(long native_object, long other_matrix) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -483,7 +483,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postTranslate(int native_object, float dx, float dy) {
+    /*package*/ static boolean native_postTranslate(long native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -494,7 +494,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postScale(int native_object, float sx, float sy,
+    /*package*/ static boolean native_postScale(long native_object, float sx, float sy,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -506,7 +506,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postScale(int native_object, float sx, float sy) {
+    /*package*/ static boolean native_postScale(long native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -517,7 +517,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postRotate(int native_object, float degrees,
+    /*package*/ static boolean native_postRotate(long native_object, float degrees,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -529,7 +529,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postRotate(int native_object, float degrees) {
+    /*package*/ static boolean native_postRotate(long native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -540,7 +540,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postSkew(int native_object, float kx, float ky,
+    /*package*/ static boolean native_postSkew(long native_object, float kx, float ky,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -552,7 +552,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postSkew(int native_object, float kx, float ky) {
+    /*package*/ static boolean native_postSkew(long native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -563,7 +563,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_postConcat(int native_object, int other_matrix) {
+    /*package*/ static boolean native_postConcat(long native_object, long other_matrix) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -579,7 +579,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_setRectToRect(int native_object, RectF src,
+    /*package*/ static boolean native_setRectToRect(long native_object, RectF src,
             RectF dst, int stf) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -644,7 +644,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_setPolyToPoly(int native_object, float[] src, int srcIndex,
+    /*package*/ static boolean native_setPolyToPoly(long native_object, float[] src, int srcIndex,
             float[] dst, int dstIndex, int pointCount) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
@@ -654,7 +654,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_invert(int native_object, int inverse) {
+    /*package*/ static boolean native_invert(long native_object, int inverse) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -682,7 +682,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_mapPoints(int native_object, float[] dst, int dstIndex,
+    /*package*/ static void native_mapPoints(long native_object, float[] dst, int dstIndex,
             float[] src, int srcIndex, int ptCount, boolean isPts) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -697,7 +697,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_mapRect(int native_object, RectF dst, RectF src) {
+    /*package*/ static boolean native_mapRect(long native_object, RectF dst, RectF src) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
@@ -707,7 +707,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float native_mapRadius(int native_object, float radius) {
+    /*package*/ static float native_mapRadius(long native_object, float radius) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return 0.f;
@@ -723,7 +723,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_getValues(int native_object, float[] values) {
+    /*package*/ static void native_getValues(long native_object, float[] values) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -733,7 +733,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setValues(int native_object, float[] values) {
+    /*package*/ static void native_setValues(long native_object, float[] values) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return;
@@ -743,7 +743,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_equals(int native_a, int native_b) {
+    /*package*/ static boolean native_equals(long native_a, long native_b) {
         Matrix_Delegate a = sManager.getDelegate(native_a);
         if (a == null) {
             return false;
@@ -764,7 +764,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void finalizer(int native_instance) {
+    /*package*/ static void finalizer(long native_instance) {
         sManager.removeJavaReferenceFor(native_instance);
     }
 

@@ -63,15 +63,15 @@ public class ComposeShader_Delegate extends Shader_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate1(int native_shaderA, int native_shaderB,
-            int native_mode) {
+    /*package*/ static long nativeCreate1(long native_shaderA, long native_shaderB,
+            long native_mode) {
         // FIXME not supported yet.
         ComposeShader_Delegate newDelegate = new ComposeShader_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate2(int native_shaderA, int native_shaderB,
+    /*package*/ static long nativeCreate2(long native_shaderA, long native_shaderB,
             int porterDuffMode) {
         // FIXME not supported yet.
         ComposeShader_Delegate newDelegate = new ComposeShader_Delegate();
@@ -79,15 +79,15 @@ public class ComposeShader_Delegate extends Shader_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate1(int native_shader, int native_skiaShaderA,
-            int native_skiaShaderB, int native_mode) {
+    /*package*/ static long nativePostCreate1(long native_shader, long native_skiaShaderA,
+            long native_skiaShaderB, long native_mode) {
         // pass, not needed.
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate2(int native_shader, int native_skiaShaderA,
-            int native_skiaShaderB, int porterDuffMode) {
+    /*package*/ static long nativePostCreate2(long native_shader, long native_skiaShaderA,
+            long native_skiaShaderB, int porterDuffMode) {
         // pass, not needed.
         return 0;
     }
