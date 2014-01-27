@@ -3185,28 +3185,43 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, const SkPaint*
 }
 
 status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlpha,
-        float width, float height) {
+        const SkPath* casterOutline) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
-    // For now, always and scissor
-    // TODO: use quickReject
+    // TODO: use quickRejectWithScissor. For now, always force enable scissor.
     mCaches.enableScissor();
 
     SkPaint paint;
-    paint.setColor(mCaches.propertyShadowStrength << 24);
+    paint.setARGB(mCaches.propertyShadowStrength, 0, 0, 0);
     paint.setAntiAlias(true); // want to use AlphaVertex
 
+    // tessellate caster outline into a 2d polygon
+    Vector<Vertex> casterVertices2d;
+    const float casterRefinementThresholdSquared = 20.0f; // TODO: experiment with this value
+    PathTessellator::approximatePathOutlineVertices(*casterOutline,
+            casterRefinementThresholdSquared, casterVertices2d);
+
+    // map 2d caster poly into 3d
+    const int casterVertexCount = casterVertices2d.size();
+    Vector3 casterPolygon[casterVertexCount];
+    for (int i = 0; i < casterVertexCount; i++) {
+        const Vertex& point2d = casterVertices2d[i];
+        casterPolygon[i] = Vector3(point2d.x, point2d.y, 0);
+        casterTransform.mapPoint3d(casterPolygon[i]);
+    }
+
+    // draw caster's shadows
     VertexBuffer ambientShadowVertexBuffer;
-    ShadowTessellator::tessellateAmbientShadow(width, height, casterTransform,
+    ShadowTessellator::tessellateAmbientShadow(casterPolygon, casterVertexCount,
             ambientShadowVertexBuffer);
     drawVertexBuffer(ambientShadowVertexBuffer, &paint);
 
     VertexBuffer spotShadowVertexBuffer;
     Vector3 lightPosScale(mCaches.propertyLightPosXScale,
             mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
-    ShadowTessellator::tessellateSpotShadow(width, height, lightPosScale,
-            *currentTransform(), getWidth(), getHeight(),
-            casterTransform, spotShadowVertexBuffer);
+    ShadowTessellator::tessellateSpotShadow(casterPolygon, casterVertexCount,
+            lightPosScale, *currentTransform(), getWidth(), getHeight(),
+            spotShadowVertexBuffer);
 
     drawVertexBuffer(spotShadowVertexBuffer, &paint);
 

@@ -1589,7 +1589,9 @@ public:
             mWidth(width), mHeight(height) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return renderer.drawShadow(mCasterTransform, mCasterAlpha, mWidth, mHeight);
+        SkPath casterOutline; // TODO: drive with path from view
+        casterOutline.addRect(0, 0, mWidth, mHeight);
+        return renderer.drawShadow(mCasterTransform, mCasterAlpha, &casterOutline);
     }
 
     virtual void output(int level, uint32_t logFlags) const {

@@ -31,46 +31,8 @@ static inline T max(T a, T b) {
     return a > b ? a : b;
 }
 
-// TODO: Support path as the input of the polygon instead of the rect's width
-// and height. And the z values need to be computed according to the
-// transformation for each vertex.
-/**
- * Generate the polygon for the caster.
- *
- * @param width the width of the caster
- * @param height the height of the caster
- * @param casterTransform transformation info of the caster
- * @param polygon return the caster's polygon
- *
- */
-void ShadowTessellator::generateCasterPolygon(float width, float height,
-        const mat4& casterTransform, int vertexCount, Vector3* polygon) {
-    Rect blockRect(0, 0, width, height);
-    polygon[0].x = blockRect.left;
-    polygon[0].y = blockRect.top;
-    polygon[0].z = 0;
-    polygon[1].x = blockRect.right;
-    polygon[1].y = blockRect.top;
-    polygon[1].z = 0;
-    polygon[2].x = blockRect.right;
-    polygon[2].y = blockRect.bottom;
-    polygon[2].z = 0;
-    polygon[3].x = blockRect.left;
-    polygon[3].y = blockRect.bottom;
-    polygon[3].z = 0;
-    casterTransform.mapPoint3d(polygon[0]);
-    casterTransform.mapPoint3d(polygon[1]);
-    casterTransform.mapPoint3d(polygon[2]);
-    casterTransform.mapPoint3d(polygon[3]);
-}
-
-void ShadowTessellator::tessellateAmbientShadow(float width, float height,
-        const mat4& casterTransform, VertexBuffer& shadowVertexBuffer) {
-
-    const int vertexCount = 4;
-    Vector3 polygon[vertexCount];
-    generateCasterPolygon(width, height, casterTransform, vertexCount, polygon);
-
+void ShadowTessellator::tessellateAmbientShadow(const Vector3* casterPolygon, int casterVertexCount,
+        VertexBuffer& shadowVertexBuffer) {
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
     const int rays = 128;
@@ -79,19 +41,14 @@ void ShadowTessellator::tessellateAmbientShadow(float width, float height,
     const float heightFactor = 128;
     const float geomFactor = 64;
 
-    AmbientShadow::createAmbientShadow(polygon, vertexCount, rays, layers, strength,
+    AmbientShadow::createAmbientShadow(casterPolygon, casterVertexCount, rays, layers, strength,
             heightFactor, geomFactor, shadowVertexBuffer);
 
 }
 
-void ShadowTessellator::tessellateSpotShadow(float width, float height,
+void ShadowTessellator::tessellateSpotShadow(const Vector3* casterPolygon, int casterVertexCount,
         const Vector3& lightPosScale, const mat4& receiverTransform,
-        int screenWidth, int screenHeight, const mat4& casterTransform,
-        VertexBuffer& shadowVertexBuffer) {
-    const int vertexCount = 4;
-    Vector3 polygon[vertexCount];
-    generateCasterPolygon(width, height, casterTransform, vertexCount, polygon);
-
+        int screenWidth, int screenHeight, VertexBuffer& shadowVertexBuffer) {
     // A bunch of parameters to tweak the shadow.
     // TODO: Allow some of these changable by debug settings or APIs.
     const int rays = 256;
@@ -113,7 +70,7 @@ void ShadowTessellator::tessellateSpotShadow(float width, float height,
     const float lightSize = maximal / 4;
     const int lightVertexCount = 16;
 
-    SpotShadow::createSpotShadow(polygon, vertexCount, lightCenter, lightSize,
+    SpotShadow::createSpotShadow(casterPolygon, casterVertexCount, lightCenter, lightSize,
             lightVertexCount, rays, layers, strength, shadowVertexBuffer);
 
 }
