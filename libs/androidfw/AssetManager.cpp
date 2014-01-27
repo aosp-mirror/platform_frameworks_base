@@ -689,7 +689,7 @@ const ResTable* AssetManager::getResTable(bool required) const
             }
         } else {
             ALOGV("loading resource table %s\n", ap.path.string());
-            Asset* ass = const_cast<AssetManager*>(this)->
+            ass = const_cast<AssetManager*>(this)->
                 openNonAssetInPathLocked("resources.arsc",
                                          Asset::ACCESS_BUFFER,
                                          ap);
