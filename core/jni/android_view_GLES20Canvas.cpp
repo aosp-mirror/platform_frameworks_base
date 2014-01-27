@@ -336,34 +336,36 @@ static jboolean android_view_GLES20Canvas_quickReject(JNIEnv* env, jobject clazz
 
 static jboolean android_view_GLES20Canvas_clipRectF(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jfloat left, jfloat top, jfloat right, jfloat bottom,
-        SkRegion::Op op) {
+        jint op) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    const bool result = renderer->clipRect(left, top, right, bottom, op);
+    const bool result = renderer->clipRect(left, top, right, bottom,
+                                           static_cast<SkRegion::Op>(op));
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean android_view_GLES20Canvas_clipRect(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint left, jint top, jint right, jint bottom,
-        SkRegion::Op op) {
+        jint op) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     const bool result = renderer->clipRect(float(left), float(top), float(right),
-                                           float(bottom), op);
+                                           float(bottom),
+                                           static_cast<SkRegion::Op>(op));
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean android_view_GLES20Canvas_clipPath(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint pathPtr, SkRegion::Op op) {
+        jlong rendererPtr, jlong pathPtr, jint op) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     SkPath* path = reinterpret_cast<SkPath*>(pathPtr);
-    const bool result = renderer->clipPath(path, op);
+    const bool result = renderer->clipPath(path, static_cast<SkRegion::Op>(op));
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean android_view_GLES20Canvas_clipRegion(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint regionPtr, SkRegion::Op op) {
+        jlong rendererPtr, jlong regionPtr, jint op) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     SkRegion* region = reinterpret_cast<SkRegion*>(regionPtr);
-    const bool result = renderer->clipRegion(region, op);
+    const bool result = renderer->clipRegion(region, static_cast<SkRegion::Op>(op));
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -994,7 +996,7 @@ static void android_view_GLES20Canvas_setLayerPaint(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_setLayerColorFilter(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jint colorFilterPtr) {
+        jlong layerPtr, jlong colorFilterPtr) {
     Layer* layer = reinterpret_cast<Layer*>(layerPtr);
     if (layer) {
         SkiaColorFilter* colorFilter = reinterpret_cast<SkiaColorFilter*>(colorFilterPtr);
