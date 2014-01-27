@@ -351,11 +351,11 @@ class GLES20Canvas extends HardwareCanvas {
     // Atlas
     ///////////////////////////////////////////////////////////////////////////
 
-    static void initAtlas(GraphicBuffer buffer, int[] map) {
+    static void initAtlas(GraphicBuffer buffer, long[] map) {
         nInitAtlas(buffer, map, map.length);
     }
 
-    private static native void nInitAtlas(GraphicBuffer buffer, int[] map, int count);
+    private static native void nInitAtlas(GraphicBuffer buffer, long[] map, int count);
 
     ///////////////////////////////////////////////////////////////////////////
     // Display list
