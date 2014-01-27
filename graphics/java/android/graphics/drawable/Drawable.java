@@ -156,7 +156,7 @@ public abstract class Drawable {
      * @param canvas The canvas to draw into
      */
     public void draw(Canvas canvas) {
-        if (canvas != null && canvas.isHardwareAccelerated()) {
+        if (canvas != null && canvas.isHardwareAccelerated() && false) { // temporarily disabled
             final HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
             final DisplayList displayList = getDisplayList(hardwareCanvas);
             if (displayList != null) {
