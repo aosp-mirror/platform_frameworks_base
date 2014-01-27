@@ -389,7 +389,8 @@ static void printResolvedResourceAttribute(const ResTable* resTable, const ResXM
     }
     if (value.dataType == Res_value::TYPE_STRING) {
         String8 result = getResolvedAttribute(resTable, tree, attrRes, outError);
-        printf("%s='%s'", attrLabel.string(), result.string());
+        printf("%s='%s'", attrLabel.string(),
+                ResTable::normalizeForOutput(result.string()).string());
     } else if (Res_value::TYPE_FIRST_INT <= value.dataType &&
             value.dataType <= Res_value::TYPE_LAST_INT) {
         printf("%s='%d'", attrLabel.string(), value.data);
@@ -436,7 +437,7 @@ enum {
     CATEGORY_ATTR = 0x010103e8,
 };
 
-const char *getComponentName(String8 &pkgName, String8 &componentName) {
+String8 getComponentName(String8 &pkgName, String8 &componentName) {
     ssize_t idx = componentName.find(".");
     String8 retStr(pkgName);
     if (idx == 0) {
@@ -445,9 +446,9 @@ const char *getComponentName(String8 &pkgName, String8 &componentName) {
         retStr += ".";
         retStr += componentName;
     } else {
-        return componentName.string();
+        return componentName;
     }
-    return retStr.string();
+    return retStr;
 }
 
 static void printCompatibleScreens(ResXMLTree& tree) {
@@ -692,7 +693,7 @@ int doDump(Bundle* bundle)
                         goto bail;
                     }
                     String8 pkg = getAttribute(tree, NULL, "package", NULL);
-                    printf("package: %s\n", pkg.string());
+                    printf("package: %s\n", ResTable::normalizeForOutput(pkg.string()).string());
                 } else if (depth == 2 && tag == "permission") {
                     String8 error;
                     String8 name = getAttribute(tree, NAME_ATTR, &error);
@@ -700,7 +701,8 @@ int doDump(Bundle* bundle)
                         fprintf(stderr, "ERROR: %s\n", error.string());
                         goto bail;
                     }
-                    printf("permission: %s\n", name.string());
+                    printf("permission: %s\n",
+                            ResTable::normalizeForOutput(name.string()).string());
                 } else if (depth == 2 && tag == "uses-permission") {
                     String8 error;
                     String8 name = getAttribute(tree, NAME_ATTR, &error);
@@ -708,10 +710,12 @@ int doDump(Bundle* bundle)
                         fprintf(stderr, "ERROR: %s\n", error.string());
                         goto bail;
                     }
-                    printf("uses-permission: %s\n", name.string());
+                    printf("uses-permission: %s\n",
+                            ResTable::normalizeForOutput(name.string()).string());
                     int req = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
                     if (!req) {
-                        printf("optional-permission: %s\n", name.string());
+                        printf("optional-permission: %s\n",
+                                ResTable::normalizeForOutput(name.string()).string());
                     }
                 }
             }
@@ -859,7 +863,8 @@ int doDump(Bundle* bundle)
                             printf("supports-input: '");
                             const size_t N = supportedInput.size();
                             for (size_t i=0; i<N; i++) {
-                                printf("%s", supportedInput[i].string());
+                                printf("%s", ResTable::normalizeForOutput(
+                                        supportedInput[i].string()).string());
                                 if (i != N - 1) {
                                     printf("' '");
                                 } else {
@@ -872,14 +877,15 @@ int doDump(Bundle* bundle)
                         withinSupportsInput = false;
                     } else if (depth < 3) {
                         if (withinActivity && isMainActivity && isLauncherActivity) {
-                            const char *aName = getComponentName(pkg, activityName);
+                            String8 aName(getComponentName(pkg, activityName));
                             printf("launchable-activity:");
-                            if (aName != NULL) {
-                                printf(" name='%s' ", aName);
+                            if (aName.length() > 0) {
+                                printf(" name='%s' ",
+                                        ResTable::normalizeForOutput(aName.string()).string());
                             }
                             printf(" label='%s' icon='%s'\n",
-                                    activityLabel.string(),
-                                    activityIcon.string());
+                                    ResTable::normalizeForOutput(activityLabel.string()).string(),
+                                    ResTable::normalizeForOutput(activityIcon.string()).string());
                         }
                         if (!hasIntentFilter) {
                             hasOtherActivities |= withinActivity;
@@ -935,7 +941,8 @@ int doDump(Bundle* bundle)
                         goto bail;
                     }
                     pkg = getAttribute(tree, NULL, "package", NULL);
-                    printf("package: name='%s' ", pkg.string());
+                    printf("package: name='%s' ",
+                            ResTable::normalizeForOutput(pkg.string()).string());
                     int32_t versionCode = getIntegerAttribute(tree, VERSION_CODE_ATTR, &error);
                     if (error != "") {
                         fprintf(stderr, "ERROR getting 'android:versionCode' attribute: %s\n", error.string());
@@ -951,7 +958,8 @@ int doDump(Bundle* bundle)
                         fprintf(stderr, "ERROR getting 'android:versionName' attribute: %s\n", error.string());
                         goto bail;
                     }
-                    printf("versionName='%s'\n", versionName.string());
+                    printf("versionName='%s'\n",
+                            ResTable::normalizeForOutput(versionName.string()).string());
                 } else if (depth == 2) {
                     withinApplication = false;
                     if (tag == "application") {
@@ -966,13 +974,14 @@ int doDump(Bundle* bundle)
                             if (llabel != "") {
                                 if (localeStr == NULL || strlen(localeStr) == 0) {
                                     label = llabel;
-                                    printf("application-label:'%s'\n", llabel.string());
+                                    printf("application-label:'%s'\n",
+                                            ResTable::normalizeForOutput(llabel.string()).string());
                                 } else {
                                     if (label == "") {
                                         label = llabel;
                                     }
                                     printf("application-label-%s:'%s'\n", localeStr,
-                                            llabel.string());
+                                           ResTable::normalizeForOutput(llabel.string()).string());
                                 }
                             }
                         }
@@ -984,7 +993,8 @@ int doDump(Bundle* bundle)
                             assets.setConfiguration(tmpConfig);
                             String8 icon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
                             if (icon != "") {
-                                printf("application-icon-%d:'%s'\n", densities[i], icon.string());
+                                printf("application-icon-%d:'%s'\n", densities[i],
+                                        ResTable::normalizeForOutput(icon.string()).string());
                             }
                         }
                         assets.setConfiguration(config);
@@ -999,8 +1009,9 @@ int doDump(Bundle* bundle)
                             fprintf(stderr, "ERROR getting 'android:testOnly' attribute: %s\n", error.string());
                             goto bail;
                         }
-                        printf("application: label='%s' ", label.string());
-                        printf("icon='%s'\n", icon.string());
+                        printf("application: label='%s' ",
+                                ResTable::normalizeForOutput(label.string()).string());
+                        printf("icon='%s'\n", ResTable::normalizeForOutput(icon.string()).string());
                         if (testOnly != 0) {
                             printf("testOnly='%d'\n", testOnly);
                         }
@@ -1024,7 +1035,8 @@ int doDump(Bundle* bundle)
                                 goto bail;
                             }
                             if (name == "Donut") targetSdk = 4;
-                            printf("sdkVersion:'%s'\n", name.string());
+                            printf("sdkVersion:'%s'\n",
+                                    ResTable::normalizeForOutput(name.string()).string());
                         } else if (code != -1) {
                             targetSdk = code;
                             printf("sdkVersion:'%d'\n", code);
@@ -1043,7 +1055,8 @@ int doDump(Bundle* bundle)
                                 goto bail;
                             }
                             if (name == "Donut" && targetSdk < 4) targetSdk = 4;
-                            printf("targetSdkVersion:'%s'\n", name.string());
+                            printf("targetSdkVersion:'%s'\n",
+                                    ResTable::normalizeForOutput(name.string()).string());
                         } else if (code != -1) {
                             if (targetSdk < code) {
                                 targetSdk = code;
@@ -1148,7 +1161,8 @@ int doDump(Bundle* bundle)
                                 specScreenLandscapeFeature = true;
                             }
                             printf("uses-feature%s:'%s'\n",
-                                    req ? "" : "-not-required", name.string());
+                                    req ? "" : "-not-required",
+                                            ResTable::normalizeForOutput(name.string()).string());
                         } else {
                             int vers = getIntegerAttribute(tree,
                                     GL_ES_VERSION_ATTR, &error);
@@ -1206,10 +1220,12 @@ int doDump(Bundle* bundle)
                             } else if (name == "android.permission.WRITE_CALL_LOG") {
                                 hasWriteCallLogPermission = true;
                             }
-                            printf("uses-permission:'%s'\n", name.string());
+                            printf("uses-permission:'%s'\n",
+                                    ResTable::normalizeForOutput(name.string()).string());
                             int req = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
                             if (!req) {
-                                printf("optional-permission:'%s'\n", name.string());
+                                printf("optional-permission:'%s'\n",
+                                        ResTable::normalizeForOutput(name.string()).string());
                             }
                         } else {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
@@ -1219,7 +1235,8 @@ int doDump(Bundle* bundle)
                     } else if (tag == "uses-package") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
-                            printf("uses-package:'%s'\n", name.string());
+                            printf("uses-package:'%s'\n",
+                                    ResTable::normalizeForOutput(name.string()).string());
                         } else {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
                                     error.string());
@@ -1228,7 +1245,8 @@ int doDump(Bundle* bundle)
                     } else if (tag == "original-package") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
-                            printf("original-package:'%s'\n", name.string());
+                            printf("original-package:'%s'\n",
+                                    ResTable::normalizeForOutput(name.string()).string());
                         } else {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
                                     error.string());
@@ -1237,7 +1255,8 @@ int doDump(Bundle* bundle)
                     } else if (tag == "supports-gl-texture") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
-                            printf("supports-gl-texture:'%s'\n", name.string());
+                            printf("supports-gl-texture:'%s'\n",
+                                    ResTable::normalizeForOutput(name.string()).string());
                         } else {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
                                     error.string());
@@ -1252,7 +1271,8 @@ int doDump(Bundle* bundle)
                             String8 publicKey = getAttribute(tree, PUBLIC_KEY_ATTR, &error);
                             if (publicKey != "" && error == "") {
                                 printf("package-verifier: name='%s' publicKey='%s'\n",
-                                        name.string(), publicKey.string());
+                                        ResTable::normalizeForOutput(name.string()).string(),
+                                        ResTable::normalizeForOutput(publicKey.string()).string());
                             }
                         }
                     }
@@ -1314,7 +1334,8 @@ int doDump(Bundle* bundle)
                             int req = getIntegerAttribute(tree,
                                     REQUIRED_ATTR, NULL, 1);
                             printf("uses-library%s:'%s'\n",
-                                    req ? "" : "-not-required", libraryName.string());
+                                    req ? "" : "-not-required", ResTable::normalizeForOutput(
+                                            libraryName.string()).string());
                         } else if (tag == "receiver") {
                             withinReceiver = true;
                             receiverName = getAttribute(tree, NAME_ATTR, &error);
@@ -1367,7 +1388,8 @@ int doDump(Bundle* bundle)
                                         "meta-data:%s\n", error.string());
                                 goto bail;
                             }
-                            printf("meta-data: name='%s' ", metaDataName.string());
+                            printf("meta-data: name='%s' ",
+                                    ResTable::normalizeForOutput(metaDataName.string()).string());
                             printResolvedResourceAttribute(&res, tree, VALUE_ATTR, String8("value"),
                                     &error);
                             if (error != "") {
@@ -1565,7 +1587,7 @@ int doDump(Bundle* bundle)
                     printf("uses-implied-feature:'android.hardware.camera'," \
                             "'requested android.hardware.camera.autofocus feature'\n");
                 } else if (hasCameraPermission) {
-                    // if app wants to use camera but didn't request the feature, we infer 
+                    // if app wants to use camera but didn't request the feature, we infer
                     // that it meant to, and further that it wants autofocus
                     // (which was the 1.0 - 1.5 behavior)
                     printf("uses-feature:'android.hardware.camera'\n");
@@ -1812,7 +1834,8 @@ int doDump(Bundle* bundle)
                 if (dir->getFileCount() > 0) {
                     printf("native-code:");
                     for (size_t i=0; i<dir->getFileCount(); i++) {
-                        printf(" '%s'", dir->getFileName(i).string());
+                        printf(" '%s'", ResTable::normalizeForOutput(
+                                dir->getFileName(i).string()).string());
                     }
                     printf("\n");
                 }
@@ -1885,7 +1908,8 @@ int doAdd(Bundle* bundle)
         } else {
             if (bundle->getJunkPath()) {
                 String8 storageName = String8(fileName).getPathLeaf();
-                printf(" '%s' as '%s'...\n", fileName, storageName.string());
+                printf(" '%s' as '%s'...\n", fileName,
+                        ResTable::normalizeForOutput(storageName.string()).string());
                 result = zip->add(fileName, storageName.string(),
                                   bundle->getCompressionMethod(), NULL);
             } else {
@@ -2166,7 +2190,7 @@ bail:
  *
  * POSTCONDITIONS
  *  Destination directory will be updated to match the PNG files in
- *  the source directory. 
+ *  the source directory.
  */
 int doCrunch(Bundle* bundle)
 {
