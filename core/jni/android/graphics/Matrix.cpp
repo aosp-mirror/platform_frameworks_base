@@ -239,8 +239,8 @@ public:
         SkASSERT(dstIndex >= 0);
         SkASSERT((unsigned)ptCount <= 4);
 
-        AutoJavaFloatArray autoSrc(env, jsrc, srcIndex + (ptCount << 1));
-        AutoJavaFloatArray autoDst(env, jdst, dstIndex + (ptCount << 1));
+        AutoJavaFloatArray autoSrc(env, jsrc, srcIndex + (ptCount << 1), kRO_JNIAccess);
+        AutoJavaFloatArray autoDst(env, jdst, dstIndex + (ptCount << 1), kRW_JNIAccess);
         float* src = autoSrc.ptr() + srcIndex;
         float* dst = autoDst.ptr() + dstIndex;
 
@@ -268,8 +268,8 @@ public:
                               jfloatArray src, int srcIndex,
                               int ptCount, bool isPts) {
         SkASSERT(ptCount >= 0);
-        AutoJavaFloatArray autoSrc(env, src, srcIndex + (ptCount << 1));
-        AutoJavaFloatArray autoDst(env, dst, dstIndex + (ptCount << 1));
+        AutoJavaFloatArray autoSrc(env, src, srcIndex + (ptCount << 1), kRO_JNIAccess);
+        AutoJavaFloatArray autoDst(env, dst, dstIndex + (ptCount << 1), kRW_JNIAccess);
         float* srcArray = autoSrc.ptr() + srcIndex;
         float* dstArray = autoDst.ptr() + dstIndex;
         
@@ -318,7 +318,7 @@ public:
     }
  
     static void getValues(JNIEnv* env, jobject clazz, SkMatrix* matrix, jfloatArray values) {
-        AutoJavaFloatArray autoValues(env, values, 9);
+        AutoJavaFloatArray autoValues(env, values, 9, kRW_JNIAccess);
         float* dst = autoValues.ptr();
 
 #ifdef SK_SCALAR_IS_FIXED
@@ -336,7 +336,7 @@ public:
     }
  
     static void setValues(JNIEnv* env, jobject clazz, SkMatrix* matrix, jfloatArray values) {
-        AutoJavaFloatArray autoValues(env, values, 9);
+        AutoJavaFloatArray autoValues(env, values, 9, kRO_JNIAccess);
         const float* src = autoValues.ptr();
 
 #ifdef SK_SCALAR_IS_FIXED
