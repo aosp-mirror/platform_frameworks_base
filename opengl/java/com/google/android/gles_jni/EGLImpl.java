@@ -51,7 +51,7 @@ public class EGLImpl implements EGL10 {
     public static native int  getInitCount(EGLDisplay display);
 
     public EGLContext eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, int[] attrib_list) {
-        int eglContextId = _eglCreateContext(display, config, share_context, attrib_list);
+        long eglContextId = _eglCreateContext(display, config, share_context, attrib_list);
         if (eglContextId == 0) {
             return EGL10.EGL_NO_CONTEXT;
         }
@@ -59,7 +59,7 @@ public class EGLImpl implements EGL10 {
     }
 
     public EGLSurface eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list) {
-        int eglSurfaceId = _eglCreatePbufferSurface(display, config, attrib_list);
+        long eglSurfaceId = _eglCreatePbufferSurface(display, config, attrib_list);
         if (eglSurfaceId == 0) {
             return EGL10.EGL_NO_SURFACE;
         }
@@ -87,7 +87,7 @@ public class EGLImpl implements EGL10 {
             sur = (Surface) native_window;
         }
 
-        int eglSurfaceId;
+        long eglSurfaceId;
         if (sur != null) {
             eglSurfaceId = _eglCreateWindowSurface(display, config, sur, attrib_list);
         } else if (native_window instanceof SurfaceTexture) {
@@ -106,7 +106,7 @@ public class EGLImpl implements EGL10 {
     }
 
     public synchronized EGLDisplay eglGetDisplay(Object native_display) {
-        int value = _eglGetDisplay(native_display);
+        long value = _eglGetDisplay(native_display);
         if (value == 0) {
             return EGL10.EGL_NO_DISPLAY;
         }
@@ -116,7 +116,7 @@ public class EGLImpl implements EGL10 {
     }
 
     public synchronized EGLContext eglGetCurrentContext() {
-        int value = _eglGetCurrentContext();
+        long value = _eglGetCurrentContext();
         if (value == 0) {
             return EGL10.EGL_NO_CONTEXT;
         }
@@ -126,7 +126,7 @@ public class EGLImpl implements EGL10 {
     }
 
     public synchronized EGLDisplay eglGetCurrentDisplay() {
-        int value = _eglGetCurrentDisplay();
+        long value = _eglGetCurrentDisplay();
         if (value == 0) {
             return EGL10.EGL_NO_DISPLAY;
         }
@@ -136,7 +136,7 @@ public class EGLImpl implements EGL10 {
     }
 
     public synchronized EGLSurface eglGetCurrentSurface(int readdraw) {
-        int value = _eglGetCurrentSurface(readdraw);
+        long value = _eglGetCurrentSurface(readdraw);
         if (value == 0) {
             return EGL10.EGL_NO_SURFACE;
         }
@@ -145,15 +145,15 @@ public class EGLImpl implements EGL10 {
         return mSurface;
     }
 
-    private native int _eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, int[] attrib_list);
-    private native int _eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list);
+    private native long _eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, int[] attrib_list);
+    private native long _eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list);
     private native void _eglCreatePixmapSurface(EGLSurface sur, EGLDisplay display, EGLConfig config, Object native_pixmap, int[] attrib_list);
-    private native int _eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
-    private native int _eglCreateWindowSurfaceTexture(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
-    private native int _eglGetDisplay(Object native_display);
-    private native int _eglGetCurrentContext();
-    private native int _eglGetCurrentDisplay();
-    private native int _eglGetCurrentSurface(int readdraw);
+    private native long _eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
+    private native long _eglCreateWindowSurfaceTexture(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
+    private native long _eglGetDisplay(Object native_display);
+    private native long _eglGetCurrentContext();
+    private native long _eglGetCurrentDisplay();
+    private native long _eglGetCurrentSurface(int readdraw);
 
     native private static void _nativeClassInit();
     static { _nativeClassInit(); }
