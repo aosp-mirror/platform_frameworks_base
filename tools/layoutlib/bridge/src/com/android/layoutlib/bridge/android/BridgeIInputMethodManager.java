@@ -215,6 +215,11 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
+        public void notifyTextCommitted() throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void updateStatusIcon(IBinder arg0, String arg1, int arg2) throws RemoteException {
         // TODO Auto-generated method stub
 
