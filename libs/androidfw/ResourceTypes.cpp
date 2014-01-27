@@ -66,9 +66,9 @@ namespace android {
 // size measured in sizeof(uint32_t)
 #define IDMAP_HEADER_SIZE (ResTable::IDMAP_HEADER_SIZE_BYTES / sizeof(uint32_t))
 
-static void printToLogFunc(void* cookie, const char* txt)
+static void printToLogFunc(int32_t cookie, const char* txt)
 {
-    ALOGV("%s", txt);
+    ALOGV("[cookie=%d] %s", cookie, txt);
 }
 
 // Standard C isspace() is only required to look at the low byte of its input, so
@@ -2461,7 +2461,7 @@ struct ResTable::Header
     size_t                          size;
     const uint8_t*                  dataEnd;
     size_t                          index;
-    void*                           cookie;
+    int32_t                         cookie;
 
     ResStringPool                   values;
     uint32_t*                       resourceIDMap;
@@ -2860,12 +2860,12 @@ ResTable::ResTable()
     //ALOGI("Creating ResTable %p\n", this);
 }
 
-ResTable::ResTable(const void* data, size_t size, void* cookie, bool copyData)
+ResTable::ResTable(const void* data, size_t size, const int32_t cookie, bool copyData)
     : mError(NO_INIT)
 {
     memset(&mParams, 0, sizeof(mParams));
     memset(mPackageMap, 0, sizeof(mPackageMap));
-    add(data, size, cookie, copyData);
+    addInternal(data, size, cookie, NULL /* asset */, copyData, NULL /* idMap */);
     LOG_FATAL_IF(mError != NO_ERROR, "Error parsing resource table");
     //ALOGI("Creating ResTable %p\n", this);
 }
@@ -2881,13 +2881,12 @@ inline ssize_t ResTable::getResourcePackageIndex(uint32_t resID) const
     return ((ssize_t)mPackageMap[Res_GETPACKAGE(resID)+1])-1;
 }
 
-status_t ResTable::add(const void* data, size_t size, void* cookie, bool copyData,
-                       const void* idmap)
-{
-    return add(data, size, cookie, NULL, copyData, reinterpret_cast<const Asset*>(idmap));
+status_t ResTable::add(const void* data, size_t size) {
+    return addInternal(data, size, 0 /* cookie */, NULL /* asset */,
+            false /* copyData */, NULL /* idMap */);
 }
 
-status_t ResTable::add(Asset* asset, void* cookie, bool copyData, const void* idmap)
+status_t ResTable::add(Asset* asset, const int32_t cookie, bool copyData, const void* idmap)
 {
     const void* data = asset->getBuffer(true);
     if (data == NULL) {
@@ -2895,7 +2894,8 @@ status_t ResTable::add(Asset* asset, void* cookie, bool copyData, const void* id
         return UNKNOWN_ERROR;
     }
     size_t size = (size_t)asset->getLength();
-    return add(data, size, cookie, asset, copyData, reinterpret_cast<const Asset*>(idmap));
+    return addInternal(data, size, cookie, asset, copyData,
+            reinterpret_cast<const Asset*>(idmap));
 }
 
 status_t ResTable::add(ResTable* src)
@@ -2922,7 +2922,7 @@ status_t ResTable::add(ResTable* src)
     return mError;
 }
 
-status_t ResTable::add(const void* data, size_t size, void* cookie,
+status_t ResTable::addInternal(const void* data, size_t size, const int32_t cookie,
                        Asset* asset, bool copyData, const Asset* idmap)
 {
     if (!data) return NO_ERROR;
@@ -2945,7 +2945,7 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
     const bool notDeviceEndian = htods(0xf0) != 0xf0;
 
     LOAD_TABLE_NOISY(
-        ALOGV("Adding resources to ResTable: data=%p, size=0x%x, cookie=%p, asset=%p, copy=%d "
+        ALOGV("Adding resources to ResTable: data=%p, size=0x%x, cookie=%d, asset=%p, copy=%d "
              "idmap=%p\n", data, size, cookie, asset, copyData, idmap));
     
     if (copyData || notDeviceEndian) {
@@ -4930,7 +4930,7 @@ const ResStringPool* ResTable::getTableStringBlock(size_t index) const
     return &mHeaders[index]->values;
 }
 
-void* ResTable::getTableCookie(size_t index) const
+int32_t ResTable::getTableCookie(size_t index) const
 {
     return mHeaders[index]->cookie;
 }

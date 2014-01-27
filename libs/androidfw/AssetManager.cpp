@@ -335,7 +335,7 @@ bool AssetManager::createIdmapFileLocked(const String8& originalPath, const Stri
             ALOGW("failed to find resources.arsc in %s\n", ap.path.string());
             goto error;
         }
-        tables[i].add(ass, (void*)1, false);
+        tables[i].add(ass, 1, false /* copyData */, NULL /* idMap */);
     }
 
     if (!getZipEntryCrcLocked(originalPath, "resources.arsc", &originalCrc)) {
@@ -682,7 +682,7 @@ const ResTable* AssetManager::getResTable(bool required) const
                     // can quickly copy it out for others.
                     ALOGV("Creating shared resources for %s", ap.path.string());
                     sharedRes = new ResTable();
-                    sharedRes->add(ass, (void*)(i+1), false, idmap);
+                    sharedRes->add(ass, i + 1, false, idmap);
                     sharedRes = const_cast<AssetManager*>(this)->
                         mZipSet.setZipResourceTable(ap.path, sharedRes);
                 }
@@ -706,7 +706,7 @@ const ResTable* AssetManager::getResTable(bool required) const
                 rt->add(sharedRes);
             } else {
                 ALOGV("Parsing resources for %s", ap.path.string());
-                rt->add(ass, (void*)(i+1), !shared, idmap);
+                rt->add(ass, i + 1, !shared, idmap);
             }
 
             if (!shared) {
