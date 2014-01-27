@@ -305,10 +305,11 @@ bool AssetManager::getZipEntryCrcLocked(const String8& zipPath, const char* entr
     if (entry == NULL) {
         return false;
     }
-    if (!zip->getEntryInfo(entry, NULL, NULL, NULL, NULL, NULL, (long*)pCrc)) {
-        return false;
-    }
-    return true;
+
+    const bool gotInfo = zip->getEntryInfo(entry, NULL, NULL, NULL, NULL, NULL, (long*)pCrc);
+    zip->releaseEntry(entry);
+
+    return gotInfo;
 }
 
 bool AssetManager::createIdmapFileLocked(const String8& originalPath, const String8& overlayPath,
@@ -821,16 +822,14 @@ Asset* AssetManager::openNonAssetInPathLocked(const char* fileName, AccessMode m
         String8 path(fileName);
 
         /* check the appropriate Zip file */
-        ZipFileRO* pZip;
-        ZipEntryRO entry;
-
-        pZip = getZipFileLocked(ap);
+        ZipFileRO* pZip = getZipFileLocked(ap);
         if (pZip != NULL) {
             //printf("GOT zip, checking NA '%s'\n", (const char*) path);
-            entry = pZip->findEntryByName(path.string());
+            ZipEntryRO entry = pZip->findEntryByName(path.string());
             if (entry != NULL) {
                 //printf("FOUND NA in Zip file for %s\n", appName ? appName : kAppCommon);
                 pAsset = openAssetFromZipLocked(pZip, entry, mode, path);
+                pZip->releaseEntry(entry);
             }
         }
 
@@ -975,17 +974,15 @@ Asset* AssetManager::openInLocaleVendorLocked(const char* fileName, AccessMode m
         path.appendPath(fileName);
 
         /* check the appropriate Zip file */
-        ZipFileRO* pZip;
-        ZipEntryRO entry;
-
-        pZip = getZipFileLocked(ap);
+        ZipFileRO* pZip = getZipFileLocked(ap);
         if (pZip != NULL) {
             //printf("GOT zip, checking '%s'\n", (const char*) path);
-            entry = pZip->findEntryByName(path.string());
+            ZipEntryRO entry = pZip->findEntryByName(path.string());
             if (entry != NULL) {
                 //printf("FOUND in Zip file for %s/%s-%s\n",
                 //    appName, locale, vendor);
                 pAsset = openAssetFromZipLocked(pZip, entry, mode, path);
+                pZip->releaseEntry(entry);
             }
         }
 
@@ -1487,11 +1484,16 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
      * semantics.
      */
     int dirNameLen = dirName.length();
-    for (int i = 0; i < pZip->getNumEntries(); i++) {
-        ZipEntryRO entry;
+    void *iterationCookie;
+    if (!pZip->startIteration(&iterationCookie)) {
+        ALOGW("ZipFileRO::startIteration returned false");
+        return false;
+    }
+
+    ZipEntryRO entry;
+    while ((entry = pZip->nextEntry(iterationCookie)) != NULL) {
         char nameBuf[256];
 
-        entry = pZip->findEntryByIndex(i);
         if (pZip->getEntryFileName(entry, nameBuf, sizeof(nameBuf)) != 0) {
             // TODO: fix this if we expect to have long names
             ALOGE("ARGH: name too long?\n");
@@ -1540,6 +1542,8 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
             }
         }
     }
+
+    pZip->endIteration(iterationCookie);
 
     /*
      * Add the set of unique directories.
@@ -1814,12 +1818,10 @@ AssetManager::SharedZip::SharedZip(const String8& path, time_t modWhen)
       mResourceTableAsset(NULL), mResourceTable(NULL)
 {
     //ALOGI("Creating SharedZip %p %s\n", this, (const char*)mPath);
-    mZipFile = new ZipFileRO;
     ALOGV("+++ opening zip '%s'\n", mPath.string());
-    if (mZipFile->open(mPath.string()) != NO_ERROR) {
+    mZipFile = ZipFileRO::open(mPath.string());
+    if (mZipFile == NULL) {
         ALOGD("failed to open Zip archive '%s'\n", mPath.string());
-        delete mZipFile;
-        mZipFile = NULL;
     }
 }
 
