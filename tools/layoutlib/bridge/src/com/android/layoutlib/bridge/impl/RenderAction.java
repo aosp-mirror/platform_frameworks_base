@@ -248,11 +248,16 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
      * The counterpart is {@link #setUp()}.
      */
     private void tearDown() {
-        // Make sure to remove static references, otherwise we could not unload the lib
-        mContext.disposeResources();
+        // The context may be null, if there was an error during init().
+        if (mContext != null) {
+            // Make sure to remove static references, otherwise we could not unload the lib
+            mContext.disposeResources();
+        }
 
-        // quit HandlerThread created during this session.
-        HandlerThread_Delegate.cleanUp(sCurrentContext);
+        if (sCurrentContext != null) {
+            // quit HandlerThread created during this session.
+            HandlerThread_Delegate.cleanUp(sCurrentContext);
+        }
 
         // clear the stored ViewConfiguration since the map is per density and not per context.
         ViewConfiguration_Accessor.clearConfigurations();
@@ -263,8 +268,12 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         sCurrentContext = null;
 
         Bridge.setLog(null);
-        mContext.getRenderResources().setFrameworkResourceIdProvider(null);
-        mContext.getRenderResources().setLogger(null);
+        if (mContext != null) {
+            mContext.getRenderResources().setFrameworkResourceIdProvider(null);
+            mContext.getRenderResources().setLogger(null);
+        }
+
+        mContext = null;
     }
 
     public static BridgeContext getCurrentContext() {
