@@ -505,7 +505,7 @@ int doDump(Bundle* bundle)
     const char* filename = bundle->getFileSpecEntry(1);
 
     AssetManager assets;
-    void* assetsCookie;
+    int32_t assetsCookie;
     if (!assets.addAssetPath(String8(filename), &assetsCookie)) {
         fprintf(stderr, "ERROR: dump failed because assets could not be loaded\n");
         return 1;
