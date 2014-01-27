@@ -273,7 +273,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkBitmap* outputBitmap = NULL;
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
-        outputBitmap = (SkBitmap*) env->GetLongField(javaBitmap, gBitmap_nativeBitmapFieldID);
+        outputBitmap = (SkBitmap*) env->GetIntField(javaBitmap, gBitmap_nativeBitmapFieldID);
         if (outputBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;
@@ -532,7 +532,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     return doDecode(env, stream, padding, bitmapFactoryOptions, weOwnTheFD);
 }
 
-static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
+static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jint native_asset,
         jobject padding, jobject options) {
 
     SkStreamRewindable* stream;
@@ -557,7 +557,7 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
-        jint offset, jint length, jobject options) {
+        int offset, int length, jobject options) {
 
     /*  If optionsShareable() we could decide to just wrap the java array and
         share it, but that means adding a globalref to the java array object
@@ -594,7 +594,7 @@ static JNINativeMethod gMethods[] = {
     },
 
     {   "nativeDecodeAsset",
-        "(JLandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
+        "(ILandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeAsset
     },
 
@@ -647,7 +647,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
 
     jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
     SkASSERT(bitmap_class);
-    gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, bitmap_class, "mNativeBitmap", "J");
+    gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, bitmap_class, "mNativeBitmap", "I");
     gBitmap_layoutBoundsFieldID = getFieldIDCheck(env, bitmap_class, "mLayoutBounds", "[I");
     int ret = AndroidRuntime::registerNativeMethods(env,
                                     "android/graphics/BitmapFactory$Options",

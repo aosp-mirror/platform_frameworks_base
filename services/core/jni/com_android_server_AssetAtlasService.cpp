@@ -54,11 +54,11 @@ static struct {
     jfieldID mNativeCanvas;
 } gCanvasFinalizerClassInfo;
 
-#define GET_LONG(object, field) \
-    env->GetLongField(object, field)
+#define GET_INT(object, field) \
+    env->GetIntField(object, field)
 
-#define SET_LONG(object, field, value) \
-    env->SetLongField(object, field, value)
+#define SET_INT(object, field, value) \
+    env->SetIntField(object, field, value)
 
 // ----------------------------------------------------------------------------
 // Canvas management
@@ -67,9 +67,9 @@ static struct {
 static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
     jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
     SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
-            GET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas));
-    SET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas, (long) newCanvas);
-    SET_LONG(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (long) newCanvas);
+            GET_INT(canvasObj, gCanvasClassInfo.mNativeCanvas));
+    SET_INT(canvasObj, gCanvasClassInfo.mNativeCanvas, (int) newCanvas);
+    SET_INT(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (int) newCanvas);
     SkSafeUnref(previousCanvas);
 }
 
@@ -261,10 +261,10 @@ int register_android_server_AssetAtlasService(JNIEnv* env) {
     FIND_CLASS(clazz, "android/graphics/Canvas");
     GET_FIELD_ID(gCanvasClassInfo.mFinalizer, clazz, "mFinalizer",
             "Landroid/graphics/Canvas$CanvasFinalizer;");
-    GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
+    GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "I");
 
     FIND_CLASS(clazz, "android/graphics/Canvas$CanvasFinalizer");
-    GET_FIELD_ID(gCanvasFinalizerClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
+    GET_FIELD_ID(gCanvasFinalizerClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "I");
 
     return jniRegisterNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }

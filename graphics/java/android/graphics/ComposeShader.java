@@ -104,12 +104,12 @@ public class ComposeShader extends Shader {
         return copy;
     }
 
-    private static native long nativeCreate1(long native_shaderA, long native_shaderB,
-            long native_mode);
-    private static native long nativeCreate2(long native_shaderA, long native_shaderB,
+    private static native int nativeCreate1(int native_shaderA, int native_shaderB,
+            int native_mode);
+    private static native int nativeCreate2(int native_shaderA, int native_shaderB,
             int porterDuffMode);
-    private static native long nativePostCreate1(long native_shader, long native_skiaShaderA,
-            long native_skiaShaderB, long native_mode);
-    private static native long nativePostCreate2(long native_shader, long native_skiaShaderA,
-            long native_skiaShaderB, int porterDuffMode);
+    private static native int nativePostCreate1(int native_shader, int native_skiaShaderA,
+            int native_skiaShaderB, int native_mode);
+    private static native int nativePostCreate2(int native_shader, int native_skiaShaderA,
+            int native_skiaShaderB, int porterDuffMode);
 }

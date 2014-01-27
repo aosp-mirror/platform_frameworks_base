@@ -31,15 +31,15 @@ namespace android {
 class SkPorterDuffGlue {
 public:
 
-    static jlong CreateXfermode(JNIEnv* env, jobject, jint modeHandle) {
-        SkPorterDuff::Mode mode = static_cast<SkPorterDuff::Mode>(modeHandle);
-        return reinterpret_cast<jlong>(SkPorterDuff::CreateXfermode(mode));
+    static SkXfermode* CreateXfermode(JNIEnv* env, jobject,
+                                      SkPorterDuff::Mode mode) {
+        return SkPorterDuff::CreateXfermode(mode);
     }
  
 };
 
 static JNINativeMethod methods[] = {
-    {"nativeCreateXfermode","(I)J", (void*) SkPorterDuffGlue::CreateXfermode},
+    {"nativeCreateXfermode","(I)I", (void*) SkPorterDuffGlue::CreateXfermode},
 };
 
 int register_android_graphics_PorterDuff(JNIEnv* env) {

@@ -46,22 +46,22 @@ class SkNinePatchGlue {
 public:
     static jboolean isNinePatchChunk(JNIEnv* env, jobject, jbyteArray obj) {
         if (NULL == obj) {
-            return JNI_FALSE;
+            return false;
         }
         if (env->GetArrayLength(obj) < (int)sizeof(Res_png_9patch)) {
-            return JNI_FALSE;
+            return false;
         }
         const jbyte* array = env->GetByteArrayElements(obj, 0);
         if (array != NULL) {
             const Res_png_9patch* chunk = reinterpret_cast<const Res_png_9patch*>(array);
             int8_t wasDeserialized = chunk->wasDeserialized;
             env->ReleaseByteArrayElements(obj, const_cast<jbyte*>(array), JNI_ABORT);
-            return (wasDeserialized != -1) ? JNI_TRUE : JNI_FALSE;
+            return wasDeserialized != -1;
         }
-        return JNI_FALSE;
+        return false;
     }
 
-    static jlong validateNinePatchChunk(JNIEnv* env, jobject, jlong, jbyteArray obj) {
+    static int8_t* validateNinePatchChunk(JNIEnv* env, jobject, jint, jbyteArray obj) {
         size_t chunkSize = env->GetArrayLength(obj);
         if (chunkSize < (int) (sizeof(Res_png_9patch))) {
             jniThrowRuntimeException(env, "Array too small for chunk.");
@@ -72,11 +72,10 @@ public:
         // This call copies the content of the jbyteArray
         env->GetByteArrayRegion(obj, 0, chunkSize, reinterpret_cast<jbyte*>(storage));
         // Deserialize in place, return the array we just allocated
-        return reinterpret_cast<jlong>(Res_png_9patch::deserialize(storage));
+        return (int8_t*) Res_png_9patch::deserialize(storage);
     }
 
-    static void finalize(JNIEnv* env, jobject, jlong patchHandle) {
-        int8_t* patch = reinterpret_cast<int8_t*>(patchHandle);
+    static void finalize(JNIEnv* env, jobject, int8_t* patch) {
 #ifdef USE_OPENGL_RENDERER
         if (android::uirenderer::Caches::hasInstance()) {
             Res_png_9patch* p = (Res_png_9patch*) patch;
@@ -116,13 +115,9 @@ public:
         }
     }
 
-    static void drawF(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRectF,
-            jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
+    static void drawF(JNIEnv* env, jobject, SkCanvas* canvas, jobject boundsRectF,
+            const SkBitmap* bitmap, Res_png_9patch* chunk, const SkPaint* paint,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<SkCanvas*>(canvasHandle);
-        const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-        Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
         SkASSERT(canvas);
         SkASSERT(boundsRectF);
         SkASSERT(bitmap);
@@ -135,13 +130,9 @@ public:
         draw(env, canvas, bounds, bitmap, chunk, paint, destDensity, srcDensity);
     }
 
-    static void drawI(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRect,
-            jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
+    static void drawI(JNIEnv* env, jobject, SkCanvas* canvas, jobject boundsRect,
+            const SkBitmap* bitmap, Res_png_9patch* chunk, const SkPaint* paint,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<SkCanvas*>(canvasHandle);
-        const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-        Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
-        const SkPaint* paint   = reinterpret_cast<SkPaint*>(paintHandle);
         SkASSERT(canvas);
         SkASSERT(boundsRect);
         SkASSERT(bitmap);
@@ -153,10 +144,8 @@ public:
         draw(env, canvas, bounds, bitmap, chunk, paint, destDensity, srcDensity);
     }
 
-    static jlong getTransparentRegion(JNIEnv* env, jobject, jlong bitmapHandle,
-            jlong chunkHandle, jobject boundsRect) {
-        const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-        Res_png_9patch* chunk = reinterpret_cast<Res_png_9patch*>(chunkHandle);
+    static jint getTransparentRegion(JNIEnv* env, jobject, const SkBitmap* bitmap,
+            Res_png_9patch* chunk, jobject boundsRect) {
         SkASSERT(bitmap);
         SkASSERT(chunk);
         SkASSERT(boundsRect);
@@ -167,7 +156,7 @@ public:
         SkRegion* region = NULL;
         NinePatch_Draw(NULL, bounds, *bitmap, *chunk, NULL, &region);
 
-        return reinterpret_cast<jlong>(region);
+        return (jint) region;
     }
 
 };
@@ -178,11 +167,11 @@ public:
 
 static JNINativeMethod gNinePatchMethods[] = {
     { "isNinePatchChunk", "([B)Z",                        (void*) SkNinePatchGlue::isNinePatchChunk },
-    { "validateNinePatchChunk", "(J[B)J",                 (void*) SkNinePatchGlue::validateNinePatchChunk },
-    { "nativeFinalize", "(J)V",                           (void*) SkNinePatchGlue::finalize },
-    { "nativeDraw", "(JLandroid/graphics/RectF;JJJII)V",  (void*) SkNinePatchGlue::drawF },
-    { "nativeDraw", "(JLandroid/graphics/Rect;JJJII)V",   (void*) SkNinePatchGlue::drawI },
-    { "nativeGetTransparentRegion", "(JJLandroid/graphics/Rect;)J",
+    { "validateNinePatchChunk", "(I[B)I",                 (void*) SkNinePatchGlue::validateNinePatchChunk },
+    { "nativeFinalize", "(I)V",                           (void*) SkNinePatchGlue::finalize },
+    { "nativeDraw", "(ILandroid/graphics/RectF;IIIII)V",  (void*) SkNinePatchGlue::drawF },
+    { "nativeDraw", "(ILandroid/graphics/Rect;IIIII)V",   (void*) SkNinePatchGlue::drawI },
+    { "nativeGetTransparentRegion", "(IILandroid/graphics/Rect;)I",
                                                           (void*) SkNinePatchGlue::getTransparentRegion }
 };
 

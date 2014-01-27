@@ -288,8 +288,8 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
                         }
                         canvas.drawBitmap(bitmap, 0.0f, 0.0f, null);
                         canvas.restore();
-                        // TODO: Change mAtlasMap to long[] to support 64-bit systems
-                        atlasMap[mapIndex++] = (int) bitmap.mNativeBitmap;
+
+                        atlasMap[mapIndex++] = bitmap.mNativeBitmap;
                         atlasMap[mapIndex++] = entry.x;
                         atlasMap[mapIndex++] = entry.y;
                         atlasMap[mapIndex++] = entry.rotated ? 1 : 0;

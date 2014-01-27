@@ -26,37 +26,35 @@ namespace android {
 class SkXfermodeGlue {
 public:
 
-    static void finalizer(JNIEnv* env, jobject, jlong objHandle)
+    static void finalizer(JNIEnv* env, jobject, SkXfermode* obj)
     {
-        SkXfermode* obj = reinterpret_cast<SkXfermode *>(objHandle);
         SkSafeUnref(obj);
     }
     
-    static jlong avoid_create(JNIEnv* env, jobject, jint opColor,
-                                jint tolerance, jint modeHandle)
+    static SkXfermode* avoid_create(JNIEnv* env, jobject, SkColor opColor,
+                                U8CPU tolerance, SkAvoidXfermode::Mode mode)
     {
-        SkAvoidXfermode::Mode mode = static_cast<SkAvoidXfermode::Mode>(modeHandle);
-        return reinterpret_cast<jlong>(new SkAvoidXfermode(opColor, tolerance, mode));
+        return new SkAvoidXfermode(opColor, tolerance, mode);
     }
-
-    static jlong pixelxor_create(JNIEnv* env, jobject, jint opColor)
+    
+    static SkXfermode* pixelxor_create(JNIEnv* env, jobject, SkColor opColor)
     {
-        return reinterpret_cast<jlong>(new SkPixelXorXfermode(opColor));
+        return new SkPixelXorXfermode(opColor);
     }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gXfermodeMethods[] = {
-    {"finalizer", "(J)V", (void*) SkXfermodeGlue::finalizer}
+    {"finalizer", "(I)V", (void*) SkXfermodeGlue::finalizer}
 };
 
 static JNINativeMethod gAvoidMethods[] = {
-    {"nativeCreate", "(III)J", (void*) SkXfermodeGlue::avoid_create}
+    {"nativeCreate", "(III)I", (void*) SkXfermodeGlue::avoid_create}
 };
 
 static JNINativeMethod gPixelXorMethods[] = {
-    {"nativeCreate", "(I)J", (void*) SkXfermodeGlue::pixelxor_create}
+    {"nativeCreate", "(I)I", (void*) SkXfermodeGlue::pixelxor_create}
 };
 
 #include <android_runtime/AndroidRuntime.h>

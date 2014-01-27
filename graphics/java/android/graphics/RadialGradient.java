@@ -117,14 +117,14 @@ public class RadialGradient extends Shader {
         return copy;
     }
 
-    private static native long nativeCreate1(float x, float y, float radius,
+    private static native int nativeCreate1(float x, float y, float radius,
             int colors[], float positions[], int tileMode);
-	private static native long nativeCreate2(float x, float y, float radius,
+	private static native int nativeCreate2(float x, float y, float radius,
             int color0, int color1, int tileMode);
 
-    private static native long nativePostCreate1(long native_shader, float x, float y, float radius,
+    private static native int nativePostCreate1(int native_shader, float x, float y, float radius,
             int colors[], float positions[], int tileMode);
-    private static native long nativePostCreate2(long native_shader, float x, float y, float radius,
+    private static native int nativePostCreate2(int native_shader, float x, float y, float radius,
             int color0, int color1, int tileMode);
 }
 

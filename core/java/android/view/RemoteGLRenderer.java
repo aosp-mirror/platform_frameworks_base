@@ -938,14 +938,14 @@ public class RemoteGLRenderer extends HardwareRenderer {
     }
 
     @Override
-    void detachFunctor(long functor) {
+    void detachFunctor(int functor) {
         if (mCanvas != null) {
             mCanvas.detachFunctor(functor);
         }
     }
 
     @Override
-    boolean attachFunctor(View.AttachInfo attachInfo, long functor) {
+    boolean attachFunctor(View.AttachInfo attachInfo, int functor) {
         if (mCanvas != null) {
             mCanvas.attachFunctor(functor);
             mFunctorsRunnable.attachInfo = attachInfo;

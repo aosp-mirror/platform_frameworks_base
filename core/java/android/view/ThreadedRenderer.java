@@ -227,12 +227,12 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void detachFunctor(long functor) {
+    void detachFunctor(int functor) {
         run("detachFunctor", functor);
     }
 
     @Override
-    boolean attachFunctor(AttachInfo attachInfo, long functor) {
+    boolean attachFunctor(AttachInfo attachInfo, int functor) {
         return (Boolean) run("attachFunctor", attachInfo, functor);
     }
 

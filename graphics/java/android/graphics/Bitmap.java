@@ -41,7 +41,7 @@ public final class Bitmap implements Parcelable {
      * 
      * @hide
      */
-    public final long mNativeBitmap;
+    public final int mNativeBitmap;
 
     /**
      * Backing buffer for the Bitmap.
@@ -113,7 +113,7 @@ public final class Bitmap implements Parcelable {
      * int (pointer).
      */
     @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
-    Bitmap(long nativeBitmap, byte[] buffer, int width, int height, int density,
+    Bitmap(int nativeBitmap, byte[] buffer, int width, int height, int density,
             boolean isMutable, boolean isPremultiplied,
             byte[] ninePatchChunk, int[] layoutBounds) {
         if (nativeBitmap == 0) {
@@ -1536,7 +1536,7 @@ public final class Bitmap implements Parcelable {
      */
     public Bitmap extractAlpha(Paint paint, int[] offsetXY) {
         checkRecycled("Can't extractAlpha on a recycled bitmap");
-        long nativePaint = paint != null ? paint.mNativePaint : 0;
+        int nativePaint = paint != null ? paint.mNativePaint : 0;
         Bitmap bm = nativeExtractAlpha(mNativeBitmap, nativePaint, offsetXY);
         if (bm == null) {
             throw new RuntimeException("Failed to extractAlpha on Bitmap");
@@ -1570,9 +1570,9 @@ public final class Bitmap implements Parcelable {
     }
 
     private static class BitmapFinalizer {
-        private final long mNativeBitmap;
+        private final int mNativeBitmap;
 
-        BitmapFinalizer(long nativeBitmap) {
+        BitmapFinalizer(int nativeBitmap) {
             mNativeBitmap = nativeBitmap;
         }
 
@@ -1593,57 +1593,56 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeCreate(int[] colors, int offset,
                                               int stride, int width, int height,
                                               int nativeConfig, boolean mutable);
-    private static native Bitmap nativeCopy(long nativeSrcBitmap, int nativeConfig,
+    private static native Bitmap nativeCopy(int srcBitmap, int nativeConfig,
                                             boolean isMutable);
-    private static native void nativeDestructor(long nativeBitmap);
-    private static native boolean nativeRecycle(long nativeBitmap);
-    private static native void nativeReconfigure(long nativeBitmap, int width, int height,
+    private static native void nativeDestructor(int nativeBitmap);
+    private static native boolean nativeRecycle(int nativeBitmap);
+    private static native void nativeReconfigure(int nativeBitmap, int width, int height,
                                                  int config, int allocSize);
 
-    private static native boolean nativeCompress(long nativeBitmap, int format,
+    private static native boolean nativeCompress(int nativeBitmap, int format,
                                             int quality, OutputStream stream,
                                             byte[] tempStorage);
-    private static native void nativeErase(long nativeBitmap, int color);
-    private static native int nativeRowBytes(long nativeBitmap);
-    private static native int nativeConfig(long nativeBitmap);
+    private static native void nativeErase(int nativeBitmap, int color);
+    private static native int nativeRowBytes(int nativeBitmap);
+    private static native int nativeConfig(int nativeBitmap);
 
-    private static native int nativeGetPixel(long nativeBitmap, int x, int y,
+    private static native int nativeGetPixel(int nativeBitmap, int x, int y,
                                              boolean isPremultiplied);
-    private static native void nativeGetPixels(long nativeBitmap, int[] pixels,
+    private static native void nativeGetPixels(int nativeBitmap, int[] pixels,
                                                int offset, int stride, int x, int y,
                                                int width, int height, boolean isPremultiplied);
 
-    private static native void nativeSetPixel(long nativeBitmap, int x, int y,
+    private static native void nativeSetPixel(int nativeBitmap, int x, int y,
                                               int color, boolean isPremultiplied);
-    private static native void nativeSetPixels(long nativeBitmap, int[] colors,
+    private static native void nativeSetPixels(int nativeBitmap, int[] colors,
                                                int offset, int stride, int x, int y,
                                                int width, int height, boolean isPremultiplied);
-    private static native void nativeCopyPixelsToBuffer(long nativeBitmap,
+    private static native void nativeCopyPixelsToBuffer(int nativeBitmap,
                                                         Buffer dst);
-    private static native void nativeCopyPixelsFromBuffer(long nativeBitmap, Buffer src);
-    private static native int nativeGenerationId(long nativeBitmap);
+    private static native void nativeCopyPixelsFromBuffer(int nb, Buffer src);
+    private static native int nativeGenerationId(int nativeBitmap);
 
     private static native Bitmap nativeCreateFromParcel(Parcel p);
     // returns true on success
-    private static native boolean nativeWriteToParcel(long nativeBitmap,
+    private static native boolean nativeWriteToParcel(int nativeBitmap,
                                                       boolean isMutable,
                                                       int density,
                                                       Parcel p);
     // returns a new bitmap built from the native bitmap's alpha, and the paint
-    private static native Bitmap nativeExtractAlpha(long nativeBitmap,
-                                                    long nativePaint,
+    private static native Bitmap nativeExtractAlpha(int nativeBitmap,
+                                                    int nativePaint,
                                                     int[] offsetXY);
 
-    private static native void nativePrepareToDraw(long nativeBitmap);
-    private static native boolean nativeHasAlpha(long nativeBitmap);
-    private static native void nativeSetAlphaAndPremultiplied(long nativeBitmap,
-                                                              boolean hasAlpha,
+    private static native void nativePrepareToDraw(int nativeBitmap);
+    private static native boolean nativeHasAlpha(int nativeBitmap);
+    private static native void nativeSetAlphaAndPremultiplied(int nBitmap, boolean hasAlpha,
                                                               boolean isPremul);
-    private static native boolean nativeHasMipMap(long nativeBitmap);
-    private static native void nativeSetHasMipMap(long nativeBitmap, boolean hasMipMap);
-    private static native boolean nativeSameAs(long nativeBitmap0, long nativeBitmap1);
-
-    /* package */ final long ni() {
+    private static native boolean nativeHasMipMap(int nativeBitmap);
+    private static native void nativeSetHasMipMap(int nBitmap, boolean hasMipMap);
+    private static native boolean nativeSameAs(int nb0, int nb1);
+    
+    /* package */ final int ni() {
         return mNativeBitmap;
     }
 }

@@ -32,11 +32,11 @@ public class Paint {
     /**
      * @hide
      */
-    public long mNativePaint;
+    public int mNativePaint;
     /**
      * @hide
      */
-    public long mNativeTypeface;
+    public int mNativeTypeface;
 
     private ColorFilter mColorFilter;
     private MaskFilter  mMaskFilter;
@@ -949,7 +949,7 @@ public class Paint {
      * @return       shader
      */
     public Shader setShader(Shader shader) {
-        long shaderNative = 0;
+        int shaderNative = 0;
         if (shader != null)
             shaderNative = shader.native_instance;
         native_setShader(mNativePaint, shaderNative);
@@ -973,7 +973,7 @@ public class Paint {
      * @return       filter
      */
     public ColorFilter setColorFilter(ColorFilter filter) {
-        long filterNative = 0;
+        int filterNative = 0;
         if (filter != null)
             filterNative = filter.native_instance;
         native_setColorFilter(mNativePaint, filterNative);
@@ -1000,7 +1000,7 @@ public class Paint {
      * @return         xfermode
      */
     public Xfermode setXfermode(Xfermode xfermode) {
-        long xfermodeNative = 0;
+        int xfermodeNative = 0;
         if (xfermode != null)
             xfermodeNative = xfermode.native_instance;
         native_setXfermode(mNativePaint, xfermodeNative);
@@ -1027,7 +1027,7 @@ public class Paint {
      * @return       effect
      */
     public PathEffect setPathEffect(PathEffect effect) {
-        long effectNative = 0;
+        int effectNative = 0;
         if (effect != null) {
             effectNative = effect.native_instance;
         }
@@ -1056,7 +1056,7 @@ public class Paint {
      * @return           maskfilter
      */
     public MaskFilter setMaskFilter(MaskFilter maskfilter) {
-        long maskfilterNative = 0;
+        int maskfilterNative = 0;
         if (maskfilter != null) {
             maskfilterNative = maskfilter.native_instance;
         }
@@ -1087,7 +1087,7 @@ public class Paint {
      * @return         typeface
      */
     public Typeface setTypeface(Typeface typeface) {
-        long typefaceNative = 0;
+        int typefaceNative = 0;
         if (typeface != null) {
             typefaceNative = typeface.native_instance;
         }
@@ -1119,7 +1119,7 @@ public class Paint {
      * @return           rasterizer
      */
     public Rasterizer setRasterizer(Rasterizer rasterizer) {
-        long rasterizerNative = 0;
+        int rasterizerNative = 0;
         if (rasterizer != null) {
             rasterizerNative = rasterizer.native_instance;
         }
@@ -2214,68 +2214,68 @@ public class Paint {
         }
     }
 
-    private static native long native_init();
-    private static native long native_initWithPaint(long paint);
-    private static native void native_reset(long native_object);
-    private static native void native_set(long native_dst, long native_src);
-    private static native int native_getStyle(long native_object);
-    private static native void native_setStyle(long native_object, int style);
-    private static native int native_getStrokeCap(long native_object);
-    private static native void native_setStrokeCap(long native_object, int cap);
-    private static native int native_getStrokeJoin(long native_object);
-    private static native void native_setStrokeJoin(long native_object,
+    private static native int native_init();
+    private static native int native_initWithPaint(int paint);
+    private static native void native_reset(int native_object);
+    private static native void native_set(int native_dst, int native_src);
+    private static native int native_getStyle(int native_object);
+    private static native void native_setStyle(int native_object, int style);
+    private static native int native_getStrokeCap(int native_object);
+    private static native void native_setStrokeCap(int native_object, int cap);
+    private static native int native_getStrokeJoin(int native_object);
+    private static native void native_setStrokeJoin(int native_object,
                                                     int join);
-    private static native boolean native_getFillPath(long native_object,
-                                                     long src, long dst);
-    private static native long native_setShader(long native_object, long shader);
-    private static native long native_setColorFilter(long native_object,
-                                                    long filter);
-    private static native long native_setXfermode(long native_object,
-                                                  long xfermode);
-    private static native long native_setPathEffect(long native_object,
-                                                    long effect);
-    private static native long native_setMaskFilter(long native_object,
-                                                    long maskfilter);
-    private static native long native_setTypeface(long native_object,
-                                                  long typeface);
-    private static native long native_setRasterizer(long native_object,
-                                                   long rasterizer);
+    private static native boolean native_getFillPath(int native_object,
+                                                     int src, int dst);
+    private static native int native_setShader(int native_object, int shader);
+    private static native int native_setColorFilter(int native_object,
+                                                    int filter);
+    private static native int native_setXfermode(int native_object,
+                                                 int xfermode);
+    private static native int native_setPathEffect(int native_object,
+                                                   int effect);
+    private static native int native_setMaskFilter(int native_object,
+                                                   int maskfilter);
+    private static native int native_setTypeface(int native_object,
+                                                 int typeface);
+    private static native int native_setRasterizer(int native_object,
+                                                   int rasterizer);
 
-    private static native int native_getTextAlign(long native_object);
-    private static native void native_setTextAlign(long native_object,
+    private static native int native_getTextAlign(int native_object);
+    private static native void native_setTextAlign(int native_object,
                                                    int align);
 
-    private static native void native_setTextLocale(long native_object,
+    private static native void native_setTextLocale(int native_object,
                                                     String locale);
 
-    private static native int native_getTextWidths(long native_object,
+    private static native int native_getTextWidths(int native_object,
                             char[] text, int index, int count, int bidiFlags, float[] widths);
-    private static native int native_getTextWidths(long native_object,
+    private static native int native_getTextWidths(int native_object,
                             String text, int start, int end, int bidiFlags, float[] widths);
 
-    private static native int native_getTextGlyphs(long native_object,
+    private static native int native_getTextGlyphs(int native_object,
             String text, int start, int end, int contextStart, int contextEnd,
             int flags, char[] glyphs);
 
-    private static native float native_getTextRunAdvances(long native_object,
+    private static native float native_getTextRunAdvances(int native_object,
             char[] text, int index, int count, int contextIndex, int contextCount,
             int flags, float[] advances, int advancesIndex);
-    private static native float native_getTextRunAdvances(long native_object,
+    private static native float native_getTextRunAdvances(int native_object,
             String text, int start, int end, int contextStart, int contextEnd,
             int flags, float[] advances, int advancesIndex);
 
-    private native int native_getTextRunCursor(long native_object, char[] text,
+    private native int native_getTextRunCursor(int native_object, char[] text,
             int contextStart, int contextLength, int flags, int offset, int cursorOpt);
-    private native int native_getTextRunCursor(long native_object, String text,
+    private native int native_getTextRunCursor(int native_object, String text,
             int contextStart, int contextEnd, int flags, int offset, int cursorOpt);
 
-    private static native void native_getTextPath(long native_object, int bidiFlags,
-                char[] text, int index, int count, float x, float y, long path);
-    private static native void native_getTextPath(long native_object, int bidiFlags,
-                String text, int start, int end, float x, float y, long path);
-    private static native void nativeGetStringBounds(long nativePaint,
+    private static native void native_getTextPath(int native_object, int bidiFlags,
+                char[] text, int index, int count, float x, float y, int path);
+    private static native void native_getTextPath(int native_object, int bidiFlags,
+                String text, int start, int end, float x, float y, int path);
+    private static native void nativeGetStringBounds(int nativePaint,
                                 String text, int start, int end, int bidiFlags, Rect bounds);
-    private static native void nativeGetCharArrayBounds(long nativePaint,
+    private static native void nativeGetCharArrayBounds(int nativePaint,
                                 char[] text, int index, int count, int bidiFlags, Rect bounds);
-    private static native void finalizer(long nativePaint);
+    private static native void finalizer(int nativePaint);
 }
