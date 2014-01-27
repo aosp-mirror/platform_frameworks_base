@@ -24,10 +24,13 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.res.BridgeResources.NinePatchInputStream;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.Bitmap_Delegate.BitmapCreateFlags;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Delegate implementing the native methods of android.graphics.BitmapFactory
@@ -98,8 +101,12 @@ import java.io.InputStream;
         //TODO support rescaling
 
         Density density = Density.MEDIUM;
+        Set<BitmapCreateFlags> bitmapCreateFlags = EnumSet.of(BitmapCreateFlags.MUTABLE);
         if (opts != null) {
             density = Density.getEnum(opts.inDensity);
+            if (opts.inPremultiplied) {
+                bitmapCreateFlags.add(BitmapCreateFlags.PREMULTIPLIED);
+            }
         }
 
         try {
@@ -112,7 +119,7 @@ import java.io.InputStream;
                         npis, true /*is9Patch*/, false /*convert*/);
 
                 // get the bitmap and chunk objects.
-                bm = Bitmap_Delegate.createBitmap(ninePatch.getImage(), true /*isMutable*/,
+                bm = Bitmap_Delegate.createBitmap(ninePatch.getImage(), bitmapCreateFlags,
                         density);
                 NinePatchChunk chunk = ninePatch.getChunk();
 
@@ -127,7 +134,7 @@ import java.io.InputStream;
                 padding.bottom = paddingarray[3];
             } else {
                 // load the bitmap directly.
-                bm = Bitmap_Delegate.createBitmap(is, true, density);
+                bm = Bitmap_Delegate.createBitmap(is, bitmapCreateFlags, density);
             }
         } catch (IOException e) {
             Bridge.getLog().error(null,"Failed to load image" , e, null);
