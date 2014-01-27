@@ -704,7 +704,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تنظیم رمزگذاری حافظه"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"باید اطلاعات ذخیره شده برنامه رمزگذاری شود."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"غیر فعال کردن دوربین ها"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"‏از استفاده از تمام دوربین‎های دستگاه جلوگیری کنید."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"جلوگیری از استفاده از همه دوربین‌های دستگاه."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"غیرفعال کردن ویژگی‌‌ها در محافظ کلید"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"از استفاده از برخی ویژگی‌ها در محافظ کلید جلوگیری شود."</string>
   <string-array name="phoneTypes">
@@ -1526,7 +1526,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"بازگشایی قفل سیم کارت..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"پین کد اشتباه است."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"یک پین ۴ تا ۸ رقمی را تایپ کنید."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"پین کد باید ۸ عدد یا بیشتر باشد."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
+    <skip />
     <string name="kg_invalid_puk" msgid="3638289409676051243">"پین کد صحیح را دوباره وارد کنید. تلاش‌های مکرر به‌طور دائم سیم کارت را غیرفعال خواهد کرد."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"پین کدها منطبق نیستند"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>

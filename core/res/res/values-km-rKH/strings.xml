@@ -1526,7 +1526,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"កំពុង​ដោះ​សោ​​ស៊ីម​កាត..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"កូដ PIN មិន​ត្រឹមត្រូវ។"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"បញ្ចូល​កូដ PIN ដែល​មាន​ពី ៤ ដល់ ៨ លេខ។"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"កូដ PUK គួរ​តែ​មាន​​ ៨ លេខ ឬ​​ច្រើន​ជាង​នេះ។"</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
+    <skip />
     <string name="kg_invalid_puk" msgid="3638289409676051243">"បញ្ចូល​កូដ PUK ម្ដង​ទៀត។ ការ​ព្យាយាម​ដដែល​ច្រើន​ដឹង​នឹង​បិទ​ស៊ីម​កាត​ជា​អចិន្ត្រៃយ៍។"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"កូដ PIN មិន​ដូច​គ្នា"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>

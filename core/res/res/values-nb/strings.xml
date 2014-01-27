@@ -1491,7 +1491,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skjerm"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieutgang"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Koble til enheten"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Send skjermen til enheten"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Cast skjermen til enheten"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søker etter enheter …"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Innstillinger"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Koble fra"</string>
@@ -1526,7 +1526,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Låser opp SIM-kortet ..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Feil PIN-kode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Skriv inn en PIN-kode på fire til åtte sifre."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-koden skal være på åtte eller flere siffer."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
+    <skip />
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Skriv inn den korrekte PUK-koden på nytt. Gjentatte forsøk kommer til å deaktivere SIM-kortet."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kodene stemmer ikke overens"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøk på tegning av mønster"</string>

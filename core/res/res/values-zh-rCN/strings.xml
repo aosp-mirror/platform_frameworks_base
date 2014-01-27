@@ -1526,7 +1526,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解锁 SIM 卡..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN 码有误。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"请输入 4 至 8 位数的 PIN。"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 码应至少包含 8 位数字。"</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
+    <skip />
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的 PUK 码。如果尝试错误次数过多，SIM 卡将永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
