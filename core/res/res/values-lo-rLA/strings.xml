@@ -1526,7 +1526,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ປົດລັອກ SIM card..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ພິມລະຫັດ PIN ຄວາມຍາວ 4 ເຖິງ 8 ໂຕເລກ."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"ລະຫັດ PUK ຄວນມີຢ່າງໜ້ອຍ 8 ໂຕເລກ."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
+    <skip />
     <string name="kg_invalid_puk" msgid="3638289409676051243">"ປ້ອນລະຫັດ PUK ທີ່ຖືກຕ້ອງຄືນໃໝ່. ການພະຍາຍາມໃສ່ຫຼາຍເທື່ອຈະເຮັດໃຫ້ຊິມກາດໃຊ້ບໍ່ໄດ້ຖາວອນ."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ລະຫັດ PIN ບໍ່ກົງກັນ"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ແຕ້ມຮູບແບບປົດລັອກຫຼາຍເກີນໄປ"</string>

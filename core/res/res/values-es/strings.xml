@@ -1526,7 +1526,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Desbloqueando tarjeta SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Código PIN incorrecto"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Introduce un código PIN con una longitud comprendida entre cuatro y ocho dígitos."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"El código PUK debe tener ocho números como mínimo."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
+    <skip />
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Vuelve a introducir el código PUK correcto. Si introduces un código incorrecto varias veces, se inhabilitará la tarjeta SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Los códigos PIN no coinciden."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Demasiados intentos incorrectos de crear el patrón"</string>

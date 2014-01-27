@@ -1526,7 +1526,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ապակողպում է SIM քարտը ..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Սխալ PIN ծածկագիր:"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK կոդը պետք է լինի 8 կամ ավելի թիվ:"</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
+    <skip />
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Վերամուտքագրեք ճիշտ PUK ծածկագիրը: Կրկնվող փորձերը ընդմիշտ կկասեցնեն SIM քարտը:"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN ծածկագրերը չեն համընկնում"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Չափից շատ սխեմայի փորձեր"</string>
