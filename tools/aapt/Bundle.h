@@ -55,14 +55,15 @@ public:
           mCompressionMethod(0), mJunkPath(false), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mGenDependencies(false),
-          mAssetSourceDir(NULL), 
+          mAssetSourceDir(NULL),
           mCrunchedOutputDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
           mVersionCode(NULL), mVersionName(NULL), mCustomPackage(NULL), mExtraPackages(NULL),
           mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false), mProduct(NULL),
-          mUseCrunchCache(false), mErrorOnFailedInsert(false), mOutputTextSymbols(NULL),
+          mUseCrunchCache(false), mErrorOnFailedInsert(false), mErrorOnMissingConfigEntry(false),
+          mOutputTextSymbols(NULL),
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
           mArgc(0), mArgv(NULL)
         {}
@@ -117,6 +118,8 @@ public:
     void setGenDependencies(bool val) { mGenDependencies = val; }
     bool getErrorOnFailedInsert() { return mErrorOnFailedInsert; }
     void setErrorOnFailedInsert(bool val) { mErrorOnFailedInsert = val; }
+    bool getErrorOnMissingConfigEntry() { return mErrorOnMissingConfigEntry; }
+    void setErrorOnMissingConfigEntry(bool val) { mErrorOnMissingConfigEntry = val; }
 
     bool getUTF16StringsOption() {
         return mWantUTF16 || !isMinSdkAtLeast(SDK_FROYO);
@@ -291,6 +294,7 @@ private:
     const char* mProduct;
     bool        mUseCrunchCache;
     bool        mErrorOnFailedInsert;
+    bool        mErrorOnMissingConfigEntry;
     const char* mOutputTextSymbols;
     const char* mSingleCrunchInputFile;
     const char* mSingleCrunchOutputFile;
