@@ -214,7 +214,7 @@ public:
     virtual status_t drawRects(const float* rects, int count, const SkPaint* paint);
 
     status_t drawShadow(const mat4& casterTransform, float casterAlpha,
-            float width, float height);
+            const SkPath* casterOutline);
 
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);

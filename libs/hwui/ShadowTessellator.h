@@ -26,18 +26,12 @@ namespace uirenderer {
 
 class ShadowTessellator {
 public:
-    static void tessellateAmbientShadow(float width, float height,
-            const mat4& casterTransform, VertexBuffer& shadowVertexBuffer);
-
-    static void tessellateSpotShadow(float width, float height,
-            const Vector3& lightPosScale, const mat4& receiverTransform,
-            int screenWidth, int screenHeight, const mat4& casterTransform,
+    static void tessellateAmbientShadow(const Vector3* casterPolygon, int casterVertexCount,
             VertexBuffer& shadowVertexBuffer);
 
-private:
-    static void generateCasterPolygon(float width, float height,
-            const mat4& casterTransform, int vertexCount, Vector3* polygon);
-
+    static void tessellateSpotShadow(const Vector3* casterPolygon, int casterVertexCount,
+            const Vector3& lightPosScale, const mat4& receiverTransform,
+            int screenWidth, int screenHeight, VertexBuffer& shadowVertexBuffer);
 }; // ShadowTessellator
 
 }; // namespace uirenderer
