@@ -1877,7 +1877,6 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             status = startFrame();
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
-            replayStruct.mRoot = displayList;
             displayList->replay(replayStruct, 0);
             return status | replayStruct.mDrawGlStatus;
         }
@@ -1885,7 +1884,6 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         bool avoidOverdraw = !mCaches.debugOverdraw && !mCountOverdraw; // shh, don't tell devs!
         DeferredDisplayList deferredList(*currentClipRect(), avoidOverdraw);
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
-        deferStruct.mRoot = displayList;
         displayList->defer(deferStruct, 0);
 
         flushLayers();
