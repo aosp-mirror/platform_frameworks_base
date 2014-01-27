@@ -12845,6 +12845,7 @@ package android.media {
     method public final void queueSecureInputBuffer(int, int, android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
     method public final void release();
     method public final void releaseOutputBuffer(int, boolean);
+    method public void setNotificationCallback(android.media.MediaCodec.NotificationCallback);
     method public final void setParameters(android.os.Bundle);
     method public final void setVideoScalingMode(int);
     method public final void signalEndOfInputStream();
@@ -12892,6 +12893,10 @@ package android.media {
     field public int[] numBytesOfClearData;
     field public int[] numBytesOfEncryptedData;
     field public int numSubSamples;
+  }
+
+  public static abstract interface MediaCodec.NotificationCallback {
+    method public abstract void onCodecNotify(android.media.MediaCodec);
   }
 
   public final class MediaCodecInfo {
@@ -52422,7 +52427,7 @@ package org.json {
     method public java.lang.String getString(java.lang.String) throws org.json.JSONException;
     method public boolean has(java.lang.String);
     method public boolean isNull(java.lang.String);
-    method public java.util.Iterator keys();
+    method public java.util.Iterator<java.lang.String> keys();
     method public int length();
     method public org.json.JSONArray names();
     method public static java.lang.String numberToString(java.lang.Number) throws org.json.JSONException;
