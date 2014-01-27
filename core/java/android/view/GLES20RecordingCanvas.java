@@ -58,7 +58,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
         mDisplayList.clearReferences();
     }
 
-    long end(long nativeDisplayList) {
+    int end(int nativeDisplayList) {
         return getDisplayList(nativeDisplayList);
     }
 

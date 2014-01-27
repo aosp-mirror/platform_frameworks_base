@@ -29,7 +29,7 @@ import java.io.OutputStream;
  */
 public class Picture {
     private Canvas mRecordingCanvas;
-    private final long mNativePicture;
+    private final int mNativePicture;
 
     /**
      * @hide
@@ -63,7 +63,7 @@ public class Picture {
      * into it.
      */
     public Canvas beginRecording(int width, int height) {
-        long ni = nativeBeginRecording(mNativePicture, width, height);
+        int ni = nativeBeginRecording(mNativePicture, width, height);
         mRecordingCanvas = new RecordingCanvas(this, ni);
         return mRecordingCanvas;
     }
@@ -164,11 +164,11 @@ public class Picture {
         }
     }
 
-    final long ni() {
+    final int ni() {
         return mNativePicture;
     }
     
-    private Picture(long nativePicture, boolean fromStream) {
+    private Picture(int nativePicture, boolean fromStream) {
         if (nativePicture == 0) {
             throw new RuntimeException();
         }
@@ -177,21 +177,21 @@ public class Picture {
     }
 
     // return empty picture if src is 0, or a copy of the native src
-    private static native long nativeConstructor(long nativeSrcOr0);
-    private static native long nativeCreateFromStream(InputStream stream,
+    private static native int nativeConstructor(int nativeSrcOr0);
+    private static native int nativeCreateFromStream(InputStream stream,
                                                 byte[] storage);
-    private static native long nativeBeginRecording(long nativeCanvas,
+    private static native int nativeBeginRecording(int nativeCanvas,
                                                     int w, int h);
-    private static native void nativeEndRecording(long nativeCanvas);
-    private static native void nativeDraw(long nativeCanvas, long nativePicture);
-    private static native boolean nativeWriteToStream(long nativePicture,
+    private static native void nativeEndRecording(int nativeCanvas);
+    private static native void nativeDraw(int nativeCanvas, int nativePicture);
+    private static native boolean nativeWriteToStream(int nativePicture,
                                            OutputStream stream, byte[] storage);
-    private static native void nativeDestructor(long nativePicture);
+    private static native void nativeDestructor(int nativePicture);
     
     private static class RecordingCanvas extends Canvas {
         private final Picture mPicture;
 
-        public RecordingCanvas(Picture pict, long nativeCanvas) {
+        public RecordingCanvas(Picture pict, int nativeCanvas) {
             super(nativeCanvas);
             mPicture = pict;
         }

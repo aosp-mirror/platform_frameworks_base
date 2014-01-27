@@ -82,7 +82,7 @@ static void nativeClassInit(JNIEnv *_env, jclass eglImplClass)
     gSurface_NativePixelRefFieldID = _env->GetFieldID(surface_class, "mNativePixelRef", "I");
 
     jclass bitmap_class = _env->FindClass("android/graphics/Bitmap");
-    gBitmap_NativeBitmapFieldID = _env->GetFieldID(bitmap_class, "mNativeBitmap", "J");
+    gBitmap_NativeBitmapFieldID = _env->GetFieldID(bitmap_class, "mNativeBitmap", "I");
 }
 
 static const jint gNull_attrib_base[] = {EGL_NONE};
@@ -276,7 +276,7 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
     jint* base = 0;
 
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetLongField(native_pixmap,
+            (SkBitmap const *)_env->GetIntField(native_pixmap,
                     gBitmap_NativeBitmapFieldID);
     SkPixelRef* ref = nativeBitmap ? nativeBitmap->pixelRef() : 0;
     if (ref == NULL) {

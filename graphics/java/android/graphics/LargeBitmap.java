@@ -27,7 +27,7 @@ package android.graphics;
  * @hide
  */
 public final class LargeBitmap {
-    private long mNativeLargeBitmap;
+    private int mNativeLargeBitmap;
     private boolean mRecycled;
 
     /*  Private constructor that must received an already allocated native
@@ -35,8 +35,8 @@ public final class LargeBitmap {
 
         This can be called from JNI code.
     */
-    private LargeBitmap(long nativeLbm) {
-        mNativeLargeBitmap = nativeLbm;
+    private LargeBitmap(int lbm) {
+        mNativeLargeBitmap = lbm;
         mRecycled = false;
     }
 
@@ -109,10 +109,10 @@ public final class LargeBitmap {
         recycle();
     }
 
-    private static native Bitmap nativeDecodeRegion(long nativeLbm,
+    private static native Bitmap nativeDecodeRegion(int lbm,
             int start_x, int start_y, int width, int height,
             BitmapFactory.Options options);
-    private static native int nativeGetWidth(long nativeLbm);
-    private static native int nativeGetHeight(long nativeLbm);
-    private static native void nativeClean(long nativeLbm);
+    private static native int nativeGetWidth(int lbm);
+    private static native int nativeGetHeight(int lbm);
+    private static native void nativeClean(int lbm);
 }

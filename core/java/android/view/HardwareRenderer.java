@@ -453,9 +453,9 @@ public abstract class HardwareRenderer {
      * @param functor The native functor to remove from the execution queue.
      *
      * @see HardwareCanvas#callDrawGLFunction(int)
-     * @see #attachFunctor(android.view.View.AttachInfo, long)
+     * @see #attachFunctor(android.view.View.AttachInfo, int)
      */
-    abstract void detachFunctor(long functor);
+    abstract void detachFunctor(int functor);
 
     /**
      * Schedules the specified functor in the functors execution queue.
@@ -464,11 +464,11 @@ public abstract class HardwareRenderer {
      * @param functor The native functor to insert in the execution queue.
      *
      * @see HardwareCanvas#callDrawGLFunction(int)
-     * @see #detachFunctor(long)
+     * @see #detachFunctor(int)
      *
      * @return true if the functor was attached successfully
      */
-    abstract boolean attachFunctor(View.AttachInfo attachInfo, long functor);
+    abstract boolean attachFunctor(View.AttachInfo attachInfo, int functor);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the

@@ -28,11 +28,11 @@ public class Shader {
      * 
      * @hide 
      */
-    public long native_instance;
+    public int native_instance;
     /**
      * @hide
      */
-    public long native_shader;
+    public int native_shader;
 
     private Matrix mLocalMatrix;
 
@@ -112,7 +112,7 @@ public class Shader {
         }
     }
 
-    private static native void nativeDestructor(long native_shader, long native_skiaShader);
-    private static native void nativeSetLocalMatrix(long native_shader,
-            long native_skiaShader, long matrix_instance);
+    private static native void nativeDestructor(int native_shader, int native_skiaShader);
+    private static native void nativeSetLocalMatrix(int native_shader,
+            int native_skiaShader, int matrix_instance);
 }

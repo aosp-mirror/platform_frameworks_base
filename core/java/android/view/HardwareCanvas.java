@@ -107,7 +107,7 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @hide
      */
-    public int callDrawGLFunction(long drawGLFunction) {
+    public int callDrawGLFunction(int drawGLFunction) {
         // Noop - this is done in the display list recorder subclass
         return DisplayList.STATUS_DONE;
     }
@@ -132,12 +132,12 @@ public abstract class HardwareCanvas extends Canvas {
      * @param functor The native functor to remove from the execution queue.
      *
      * @see #invokeFunctors(android.graphics.Rect)
-     * @see #callDrawGLFunction(long)
-     * @see #detachFunctor(long)
+     * @see #callDrawGLFunction(int)
+     * @see #detachFunctor(int)
      *
      * @hide
      */
-    abstract void detachFunctor(long functor);
+    abstract void detachFunctor(int functor);
 
     /**
      * Attaches the specified functor to the current functor execution queue.
@@ -145,12 +145,12 @@ public abstract class HardwareCanvas extends Canvas {
      * @param functor The native functor to add to the execution queue.
      *
      * @see #invokeFunctors(android.graphics.Rect)
-     * @see #callDrawGLFunction(long)
-     * @see #detachFunctor(long)
+     * @see #callDrawGLFunction(int)
+     * @see #detachFunctor(int)
      *
      * @hide
      */
-    abstract void attachFunctor(long functor);
+    abstract void attachFunctor(int functor);
 
     /**
      * Indicates that the specified layer must be updated as soon as possible.

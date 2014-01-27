@@ -24,7 +24,7 @@ import android.graphics.Paint;
  * An OpenGL ES 2.0 implementation of {@link HardwareLayer}.
  */
 abstract class GLES20Layer extends HardwareLayer {
-    long mLayer;
+    int mLayer;
     Finalizer mFinalizer;
 
     GLES20Layer() {
@@ -39,7 +39,7 @@ abstract class GLES20Layer extends HardwareLayer {
      * 
      * @return A pointer to the native layer object, or 0 if the object is NULL
      */
-    public long getLayer() {
+    public int getLayer() {
         return mLayer;
     }
 
@@ -75,9 +75,9 @@ abstract class GLES20Layer extends HardwareLayer {
     }
 
     static class Finalizer {
-        private long mLayerId;
+        private int mLayerId;
 
-        public Finalizer(long layerId) {
+        public Finalizer(int layerId) {
             mLayerId = layerId;
         }
 

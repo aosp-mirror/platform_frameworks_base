@@ -11,29 +11,22 @@
 class SkPathEffectGlue {
 public:
 
-    static void destructor(JNIEnv* env, jobject, jlong effectHandle) {
-        SkPathEffect* effect = reinterpret_cast<SkPathEffect*>(effectHandle);
+    static void destructor(JNIEnv* env, jobject, SkPathEffect* effect) {
         SkSafeUnref(effect);
     }
 
-    static jlong Compose_constructor(JNIEnv* env, jobject,
-                                     jlong outerHandle, jlong innerHandle) {
-        SkPathEffect* outer = reinterpret_cast<SkPathEffect*>(outerHandle);
-        SkPathEffect* inner = reinterpret_cast<SkPathEffect*>(innerHandle);
-        SkPathEffect* effect = new SkComposePathEffect(outer, inner);
-        return reinterpret_cast<jlong>(effect);
+    static SkPathEffect* Compose_constructor(JNIEnv* env, jobject,
+                                   SkPathEffect* outer, SkPathEffect* inner) {
+        return new SkComposePathEffect(outer, inner);
     }
 
-    static jlong Sum_constructor(JNIEnv* env, jobject,
-                                 jlong firstHandle, jlong secondHandle) {
-        SkPathEffect* first = reinterpret_cast<SkPathEffect*>(firstHandle);
-        SkPathEffect* second = reinterpret_cast<SkPathEffect*>(secondHandle);
-        SkPathEffect* effect = new SkSumPathEffect(first, second);
-        return reinterpret_cast<jlong>(effect);
+    static SkPathEffect* Sum_constructor(JNIEnv* env, jobject,
+                                  SkPathEffect* first, SkPathEffect* second) {
+        return new SkSumPathEffect(first, second);
     }
 
-    static jlong Dash_constructor(JNIEnv* env, jobject,
-                                      jfloatArray intervalArray, jfloat phase) {
+    static SkPathEffect* Dash_constructor(JNIEnv* env, jobject,
+                                      jfloatArray intervalArray, float phase) {
         AutoJavaFloatArray autoInterval(env, intervalArray);
         int     count = autoInterval.length() & ~1;  // even number
         float*  values = autoInterval.ptr();
@@ -43,29 +36,24 @@ public:
         for (int i = 0; i < count; i++) {
             intervals[i] = SkFloatToScalar(values[i]);
         }
-        SkPathEffect* effect = new SkDashPathEffect(intervals, count, SkFloatToScalar(phase));
-        return reinterpret_cast<jlong>(effect);
+        return new SkDashPathEffect(intervals, count, SkFloatToScalar(phase));
     }
 
-    static jlong OneD_constructor(JNIEnv* env, jobject,
-                  jlong shapeHandle, jfloat advance, jfloat phase, jint style) {
-        const SkPath* shape = reinterpret_cast<SkPath*>(shapeHandle);
+    static SkPathEffect* OneD_constructor(JNIEnv* env, jobject,
+                  const SkPath* shape, float advance, float phase, int style) {
         SkASSERT(shape != NULL);
-        SkPathEffect* effect = new SkPath1DPathEffect(*shape, SkFloatToScalar(advance),
+        return new SkPath1DPathEffect(*shape, SkFloatToScalar(advance),
                      SkFloatToScalar(phase), (SkPath1DPathEffect::Style)style);
-        return reinterpret_cast<jlong>(effect);
     }
 
-    static jlong Corner_constructor(JNIEnv* env, jobject, jfloat radius){
-        SkPathEffect* effect = new SkCornerPathEffect(SkFloatToScalar(radius));
-        return reinterpret_cast<jlong>(effect);
+    static SkPathEffect* Corner_constructor(JNIEnv* env, jobject, float radius){
+        return new SkCornerPathEffect(SkFloatToScalar(radius));
     }
 
-    static jlong Discrete_constructor(JNIEnv* env, jobject,
-                                      jfloat length, jfloat deviation) {
-        SkPathEffect* effect = new SkDiscretePathEffect(SkFloatToScalar(length),
+    static SkPathEffect* Discrete_constructor(JNIEnv* env, jobject,
+                                              float length, float deviation) {
+        return new SkDiscretePathEffect(SkFloatToScalar(length),
                                         SkFloatToScalar(deviation));
-        return reinterpret_cast<jlong>(effect);
     }
 
 };
@@ -73,31 +61,31 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gPathEffectMethods[] = {
-    { "nativeDestructor", "(J)V", (void*)SkPathEffectGlue::destructor }
+    { "nativeDestructor", "(I)V", (void*)SkPathEffectGlue::destructor }
 };
 
 static JNINativeMethod gComposePathEffectMethods[] = {
-    { "nativeCreate", "(JJ)J", (void*)SkPathEffectGlue::Compose_constructor }
+    { "nativeCreate", "(II)I", (void*)SkPathEffectGlue::Compose_constructor }
 };
 
 static JNINativeMethod gSumPathEffectMethods[] = {
-    { "nativeCreate", "(JJ)J", (void*)SkPathEffectGlue::Sum_constructor }
+    { "nativeCreate", "(II)I", (void*)SkPathEffectGlue::Sum_constructor }
 };
 
 static JNINativeMethod gDashPathEffectMethods[] = {
-    { "nativeCreate", "([FF)J", (void*)SkPathEffectGlue::Dash_constructor }
+    { "nativeCreate", "([FF)I", (void*)SkPathEffectGlue::Dash_constructor }
 };
 
 static JNINativeMethod gPathDashPathEffectMethods[] = {
-    { "nativeCreate", "(JFFI)J", (void*)SkPathEffectGlue::OneD_constructor }
+    { "nativeCreate", "(IFFI)I", (void*)SkPathEffectGlue::OneD_constructor }
 };
 
 static JNINativeMethod gCornerPathEffectMethods[] = {
-    { "nativeCreate", "(F)J", (void*)SkPathEffectGlue::Corner_constructor }
+    { "nativeCreate", "(F)I", (void*)SkPathEffectGlue::Corner_constructor }
 };
 
 static JNINativeMethod gDiscretePathEffectMethods[] = {
-    { "nativeCreate", "(FF)J", (void*)SkPathEffectGlue::Discrete_constructor }
+    { "nativeCreate", "(FF)I", (void*)SkPathEffectGlue::Discrete_constructor }
 };
 
 #include <android_runtime/AndroidRuntime.h>

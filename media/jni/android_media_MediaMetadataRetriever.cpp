@@ -264,7 +264,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                             config);
 
     SkBitmap *bitmap =
-            (SkBitmap *) env->GetLongField(jBitmap, fields.nativeBitmap);
+            (SkBitmap *) env->GetIntField(jBitmap, fields.nativeBitmap);
 
     bitmap->lockPixels();
     rotate((uint16_t*)bitmap->getPixels(),
@@ -406,7 +406,7 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
     if (fields.createScaledBitmapMethod == NULL) {
         return;
     }
-    fields.nativeBitmap = env->GetFieldID(fields.bitmapClazz, "mNativeBitmap", "J");
+    fields.nativeBitmap = env->GetFieldID(fields.bitmapClazz, "mNativeBitmap", "I");
     if (fields.nativeBitmap == NULL) {
         return;
     }
