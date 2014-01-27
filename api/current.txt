@@ -14294,6 +14294,13 @@ package android.media {
     field public int size;
   }
 
+  public static final class MediaCodec.CodecException extends java.lang.IllegalStateException {
+    ctor public MediaCodec.CodecException(int, int, java.lang.String);
+    method public int getErrorCode();
+    method public boolean isRecoverable();
+    method public boolean isTransient();
+  }
+
   public static final class MediaCodec.CryptoException extends java.lang.RuntimeException {
     ctor public MediaCodec.CryptoException(int, java.lang.String);
     method public int getErrorCode();

@@ -124,16 +124,44 @@ import java.util.Map;
  * for this a full {@link #stop}, {@link #configure}, {@link #start}
  * cycle is necessary.
  *
+ * <p> During its life, a codec conceptually exists in one of the following states:
+ * Initialized, Configured, Executing, Uninitialized, (omitting transitory states
+ * between them). When created by one of the factory methods,
+ * the codec is in the Initialized state; {@link #configure} brings it to the
+ * Configured state; {@link #start} brings it to the Executing state.
+ * In the Executing state, decoding or encoding occurs through the buffer queue
+ * manipulation described above. The method {@link #stop}
+ * returns the codec to the Initialized state, whereupon it may be configured again,
+ * and {@link #release} brings the codec to the terminal Uninitialized state.
+ *
  * <p> The factory methods
  * {@link #createByCodecName},
  * {@link #createDecoderByType},
  * and {@link #createEncoderByType}
  * throw {@link java.io.IOException} on failure which
  * the caller must catch or declare to pass up.
- * Other methods will throw {@link java.lang.IllegalStateException}
- * if the codec is in an Uninitialized, Invalid, or Error state (e.g. not
- * initialized properly).  Exceptions are thrown elsewhere as noted. </p>
+ * MediaCodec methods throw {@link java.lang.IllegalStateException}
+ * when the method is called from a codec state that does not allow it;
+ * this is typically due to incorrect application API usage.
+ * Methods involving secure buffers may throw
+ * {@link MediaCodec.CryptoException#MediaCodec.CryptoException}, which
+ * has further error information obtainable from {@link MediaCodec.CryptoException#getErrorCode}.
  *
+ * <p> Internal codec errors result in a {@link MediaCodec.CodecException},
+ * which may be due to media content corruption, hardware failure, resource exhaustion,
+ * and so forth, even when the application is correctly using the API.
+ * The recommended action when receiving a {@link MediaCodec.CodecException} can be determined by
+ * calling {@link MediaCodec.CodecException#isRecoverable} and
+ * {@link MediaCodec.CodecException#isTransient}.
+ * If {@link MediaCodec.CodecException#isRecoverable} returns true,
+ * then a {@link #stop}, {@link #configure}, and {@link #start} can be performed to recover.
+ * If {@link MediaCodec.CodecException#isTransient} returns true,
+ * then resources are temporarily unavailable and the method may be retried at a later time.
+ * If both {@link MediaCodec.CodecException#isRecoverable}
+ * and {@link MediaCodec.CodecException#isTransient} return false,
+ * then the {@link MediaCodec.CodecException} is fatal and the codec must be released.
+ * Both {@link MediaCodec.CodecException#isRecoverable} and
+ * {@link MediaCodec.CodecException#isTransient} do not return true at the same time.
  */
 final public class MediaCodec {
     /**
@@ -226,7 +254,8 @@ final public class MediaCodec {
      *
      * @param type The mime type of the input data.
      * @throws IOException if the codec cannot be created.
-     * @throws IllegalArgumentException if type is null.
+     * @throws IllegalArgumentException if type is not a valid mime type.
+     * @throws NullPointerException if type is null.
      */
     public static MediaCodec createDecoderByType(String type)
             throws IOException {
@@ -237,7 +266,8 @@ final public class MediaCodec {
      * Instantiate an encoder supporting output data of the given mime type.
      * @param type The desired mime type of the output data.
      * @throws IOException if the codec cannot be created.
-     * @throws IllegalArgumentException if type is null.
+     * @throws IllegalArgumentException if type is not a valid mime type.
+     * @throws NullPointerException if type is null.
      */
     public static MediaCodec createEncoderByType(String type)
             throws IOException {
@@ -250,7 +280,8 @@ final public class MediaCodec {
      * Likely to be used with information obtained from {@link android.media.MediaCodecList}
      * @param name The name of the codec to be instantiated.
      * @throws IOException if the codec cannot be created.
-     * @throws IllegalArgumentException if name is null.
+     * @throws IllegalArgumentException if name is not valid.
+     * @throws NullPointerException if name is null.
      */
     public static MediaCodec createByCodecName(String name)
             throws IOException {
@@ -300,6 +331,11 @@ final public class MediaCodec {
      *                of the media data.
      * @param flags   Specify {@link #CONFIGURE_FLAG_ENCODE} to configure the
      *                component as an encoder.
+     * @throws IllegalArgumentException if the surface has been released (or is invalid),
+     * or the format is unacceptable (e.g. missing a mandatory key),
+     * or the flags are not set properly
+     * (e.g. missing {@link #CONFIGURE_FLAG_ENCODE} for an encoder).
+     * @throws IllegalStateException if not in the Initialized state.
      */
     public void configure(
             MediaFormat format,
@@ -338,12 +374,16 @@ final public class MediaCodec {
      * The Surface must be rendered with a hardware-accelerated API, such as OpenGL ES.
      * {@link android.view.Surface#lockCanvas(android.graphics.Rect)} may fail or produce
      * unexpected results.
+     * @throws IllegalStateException if not in the Configured state.
      */
     public native final Surface createInputSurface();
 
     /**
      * After successfully configuring the component, call start. On return
      * you can query the component for its input/output buffers.
+     * @throws IllegalStateException if not in the Configured state.
+     * @throws MediaCodec.CodecException upon codec error. Note that some codec errors
+     * for start may be attributed to future method calls.
      */
     public native final void start();
 
@@ -352,6 +392,7 @@ final public class MediaCodec {
      * remains active and ready to be {@link #start}ed again.
      * To ensure that it is available to other client call {@link #release}
      * and don't just rely on garbage collection to eventually do this for you.
+     * @throws IllegalStateException if in the Uninitialized state.
      */
     public final void stop() {
         native_stop();
@@ -367,8 +408,55 @@ final public class MediaCodec {
      * Flush both input and output ports of the component, all indices
      * previously returned in calls to {@link #dequeueInputBuffer} and
      * {@link #dequeueOutputBuffer} become invalid.
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public native final void flush();
+
+    /**
+     * Thrown when an internal codec error occurs.
+     */
+    public final static class CodecException extends IllegalStateException {
+        public CodecException(int errorCode, int actionCode, String detailMessage) {
+            super(detailMessage);
+            mErrorCode = errorCode;
+            mActionCode = actionCode;
+        }
+
+        /**
+         * Returns true if the codec exception is a transient issue,
+         * perhaps due to resource constraints, and that the method
+         * (or encoding/decoding) may be retried at a later time.
+         */
+        public boolean isTransient() {
+            return mActionCode == ACTION_TRANSIENT;
+        }
+
+        /**
+         * Returns true if the codec cannot proceed further,
+         * but can be recovered by stopping, configuring,
+         * and starting again.
+         */
+        public boolean isRecoverable() {
+            return mActionCode == ACTION_RECOVERABLE;
+        }
+
+        /**
+         * Retrieve the error code associated with a CodecException.
+         * This is opaque diagnostic information and may depend on
+         * hardware or API level.
+         */
+        public int getErrorCode() {
+            return mErrorCode;
+        }
+
+        /* Must be in sync with android_media_MediaCodec.cpp */
+        private final static int ACTION_TRANSIENT = 1;
+        private final static int ACTION_RECOVERABLE = 2;
+
+        private final int mErrorCode;
+        private final int mActionCode;
+    }
 
     /**
      * Thrown when a crypto error occurs while queueing a secure input buffer.
@@ -432,6 +520,8 @@ final public class MediaCodec {
      * @param presentationTimeUs The time at which this buffer should be rendered.
      * @param flags A bitmask of flags {@link #BUFFER_FLAG_SYNC_FRAME},
      *              {@link #BUFFER_FLAG_CODEC_CONFIG} or {@link #BUFFER_FLAG_END_OF_STREAM}.
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      * @throws CryptoException if a crypto object has been specified in
      *         {@link #configure}
      */
@@ -531,6 +621,8 @@ final public class MediaCodec {
      * @param presentationTimeUs The time at which this buffer should be rendered.
      * @param flags A bitmask of flags {@link #BUFFER_FLAG_SYNC_FRAME},
      *              {@link #BUFFER_FLAG_CODEC_CONFIG} or {@link #BUFFER_FLAG_END_OF_STREAM}.
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      * @throws CryptoException if an error occurs while attempting to decrypt the buffer.
      *              An error code associated with the exception helps identify the
      *              reason for the failure.
@@ -549,6 +641,8 @@ final public class MediaCodec {
      * for the availability of an input buffer if timeoutUs &lt; 0 or wait up
      * to "timeoutUs" microseconds if timeoutUs &gt; 0.
      * @param timeoutUs The timeout in microseconds, a negative timeout indicates "infinite".
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public native final int dequeueInputBuffer(long timeoutUs);
 
@@ -577,6 +671,8 @@ final public class MediaCodec {
      * decoded or one of the INFO_* constants below.
      * @param info Will be filled with buffer meta data.
      * @param timeoutUs The timeout in microseconds, a negative timeout indicates "infinite".
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public native final int dequeueOutputBuffer(
             BufferInfo info, long timeoutUs);
@@ -589,6 +685,8 @@ final public class MediaCodec {
      *              from a call to {@link #dequeueOutputBuffer}.
      * @param render If a valid surface was specified when configuring the codec,
      *               passing true renders this output buffer to the surface.
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public final void releaseOutputBuffer(int index, boolean render) {
         releaseOutputBuffer(index, render, false /* updatePTS */, 0 /* dummy */);
@@ -648,12 +746,16 @@ final public class MediaCodec {
      * Signals end-of-stream on input.  Equivalent to submitting an empty buffer with
      * {@link #BUFFER_FLAG_END_OF_STREAM} set.  This may only be used with
      * encoders receiving input from a Surface created by {@link #createInputSurface}.
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public native final void signalEndOfInputStream();
 
     /**
      * Call this after dequeueOutputBuffer signals a format change by returning
      * {@link #INFO_OUTPUT_FORMAT_CHANGED}
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public final MediaFormat getOutputFormat() {
         return new MediaFormat(getOutputFormatNative());
@@ -663,6 +765,8 @@ final public class MediaCodec {
 
     /**
      * Call this after start() returns.
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public ByteBuffer[] getInputBuffers() {
         return getBuffers(true /* input */);
@@ -672,6 +776,8 @@ final public class MediaCodec {
      * Call this after start() returns and whenever dequeueOutputBuffer
      * signals an output buffer change by returning
      * {@link #INFO_OUTPUT_BUFFERS_CHANGED}
+     * @throws IllegalStateException if not in the Executing state.
+     * @throws MediaCodec.CodecException upon codec error.
      */
     public ByteBuffer[] getOutputBuffers() {
         return getBuffers(false /* input */);
@@ -691,12 +797,15 @@ final public class MediaCodec {
     /**
      * If a surface has been specified in a previous call to {@link #configure}
      * specifies the scaling mode to use. The default is "scale to fit".
+     * @throws IllegalArgumentException if mode is not recognized.
+     * @throws IllegalStateException if in the Uninitialized state.
      */
     public native final void setVideoScalingMode(int mode);
 
     /**
      * Get the component name. If the codec was created by createDecoderByType
      * or createEncoderByType, what component is chosen is not known beforehand.
+     * @throws IllegalStateException if in the Uninitialized state.
      */
     public native final String getName();
 
@@ -725,6 +834,7 @@ final public class MediaCodec {
 
     /**
      * Communicate additional parameter changes to the component instance.
+     * @throws IllegalStateException if in the Uninitialized state.
      */
     public final void setParameters(Bundle params) {
         if (params == null) {
@@ -794,6 +904,7 @@ final public class MediaCodec {
      * Get the codec info. If the codec was created by createDecoderByType
      * or createEncoderByType, what component is chosen is not known beforehand,
      * and thus the caller does not have the MediaCodecInfo.
+     * @throws IllegalStateException if in the Uninitialized state.
      */
     public MediaCodecInfo getCodecInfo() {
         return MediaCodecList.getCodecInfoAt(
