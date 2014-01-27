@@ -19,6 +19,7 @@ package android.app;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.SurfaceTexture;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -28,6 +29,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -37,7 +39,6 @@ public class ActivityView extends ViewGroup {
     private final TextureView mTextureView;
     private IActivityContainer mActivityContainer;
     private Activity mActivity;
-    private boolean mAttached;
     private int mWidth;
     private int mHeight;
     private Surface mSurface;
@@ -85,24 +86,33 @@ public class ActivityView extends ViewGroup {
                     + e);
         }
 
-        final SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
-        if (surfaceTexture != null) {
-            attachToSurface(surfaceTexture);
-        }
+        attachToSurfaceWhenReady();
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        detachFromSurface();
+        if (mActivityContainer != null) {
+            detach();
+            mActivityContainer = null;
+        }
     }
 
     @Override
-    public boolean isAttachedToWindow() {
-        return mAttached;
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == View.VISIBLE) {
+            attachToSurfaceWhenReady();
+        } else {
+            detach();
+        }
+    }
+
+    public boolean isAttachedToDisplay() {
+        return mSurface != null;
     }
 
     public void startActivity(Intent intent) {
-        if (mActivityContainer != null && mAttached) {
+        if (mSurface != null) {
             try {
                 mActivityContainer.startActivity(intent);
             } catch (RemoteException e) {
@@ -111,40 +121,59 @@ public class ActivityView extends ViewGroup {
         }
     }
 
-    /** Call when both mActivityContainer and mTextureView's SurfaceTexture are not null */
-    private void attachToSurface(SurfaceTexture surfaceTexture) {
+    public void startActivity(IntentSender intentSender) {
+        if (mSurface != null) {
+            try {
+                mActivityContainer.startActivityIntentSender(intentSender.getTarget());
+            } catch (RemoteException e) {
+                throw new IllegalStateException(
+                        "ActivityView: Unable to startActivity from IntentSender. " + e);
+            }
+        }
+    }
+
+    public void startActivity(PendingIntent pendingIntent) {
+        if (mSurface != null) {
+            try {
+                mActivityContainer.startActivityIntentSender(pendingIntent.getTarget());
+            } catch (RemoteException e) {
+                throw new IllegalStateException(
+                        "ActivityView: Unable to startActivity from PendingIntent. " + e);
+            }
+        }
+    }
+
+    private void attachToSurfaceWhenReady() {
+        final SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
+        if (mActivityContainer == null || surfaceTexture == null || mSurface != null) {
+            // Either not ready to attach, or already attached.
+            return;
+        }
+
         WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics metrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(metrics);
 
         mSurface = new Surface(surfaceTexture);
         try {
-            mActivityContainer.attachToSurface(mSurface, mWidth, mHeight,
-                    metrics.densityDpi);
+            mActivityContainer.attachToSurface(mSurface, mWidth, mHeight, metrics.densityDpi);
         } catch (RemoteException e) {
-            mActivityContainer = null;
             mSurface.release();
             mSurface = null;
-            mAttached = false;
             throw new IllegalStateException(
                     "ActivityView: Unable to create ActivityContainer. " + e);
         }
-        mAttached = true;
     }
 
-    private void detachFromSurface() {
-        if (mActivityContainer != null) {
+    private void detach() {
+        if (mSurface != null) {
             try {
                 mActivityContainer.detachFromDisplay();
             } catch (RemoteException e) {
             }
-            mActivityContainer = null;
-        }
-        if (mSurface != null) {
             mSurface.release();
             mSurface = null;
         }
-        mAttached = false;
     }
 
     private class ActivityViewSurfaceTextureListener implements SurfaceTextureListener {
@@ -154,7 +183,7 @@ public class ActivityView extends ViewGroup {
             mWidth = width;
             mHeight = height;
             if (mActivityContainer != null) {
-                attachToSurface(surfaceTexture);
+                attachToSurfaceWhenReady();
             }
         }
 
@@ -167,7 +196,7 @@ public class ActivityView extends ViewGroup {
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
             Log.d(TAG, "onSurfaceTextureDestroyed");
-            detachFromSurface();
+            detach();
             return true;
         }
 
