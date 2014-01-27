@@ -92,7 +92,7 @@ public:
      * then on success, *cookie is set to the value corresponding to the
      * newly-added asset source.
      */
-    bool addAssetPath(const String8& path, void** cookie);
+    bool addAssetPath(const String8& path, int32_t* cookie);
 
     /*                                                                       
      * Convenience for adding the standard system assets.  Uses the
@@ -103,17 +103,17 @@ public:
     /*                                                                       
      * Iterate over the asset paths in this manager.  (Previously
      * added via addAssetPath() and addDefaultAssets().)  On first call,
-     * 'cookie' must be NULL, resulting in the first cookie being returned.
-     * Each next cookie will be returned there-after, until NULL indicating
+     * 'cookie' must be 0, resulting in the first cookie being returned.
+     * Each next cookie will be returned there-after, until -1 indicating
      * the end has been reached.
      */
-    void* nextAssetPath(void* cookie) const;
+    int32_t nextAssetPath(const int32_t cookie) const;
 
     /*                                                                       
      * Return an asset path in the manager.  'which' must be between 0 and
      * countAssetPaths().
      */
-    String8 getAssetPath(void* cookie) const;
+    String8 getAssetPath(const int32_t cookie) const;
 
     /*
      * Set the current locale and vendor.  The locale can change during
@@ -159,7 +159,7 @@ public:
      * Explicit non-asset file.  The file explicitly named by the cookie (the
      * resource set to look in) and fileName will be opened and returned.
      */
-    Asset* openNonAsset(void* cookie, const char* fileName, AccessMode mode);
+    Asset* openNonAsset(const int32_t cookie, const char* fileName, AccessMode mode);
 
     /*
      * Open a directory within the asset hierarchy.
@@ -183,7 +183,7 @@ public:
      *
      * To open the top-level directory, pass in "".
      */
-    AssetDir* openNonAssetDir(void* cookie, const char* dirName);
+    AssetDir* openNonAssetDir(const int32_t cookie, const char* dirName);
 
     /*
      * Get the type of a file in the asset hierarchy.  They will either
