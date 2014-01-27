@@ -229,7 +229,8 @@ static jint android_content_AssetManager_openNonAssetNative(JNIEnv* env, jobject
     }
 
     Asset* a = cookie
-        ? am->openNonAsset((void*)cookie, fileName8.c_str(), (Asset::AccessMode)mode)
+        ? am->openNonAsset(static_cast<int32_t>(cookie), fileName8.c_str(),
+                (Asset::AccessMode)mode)
         : am->openNonAsset(fileName8.c_str(), (Asset::AccessMode)mode);
 
     if (a == NULL) {
@@ -260,7 +261,7 @@ static jobject android_content_AssetManager_openNonAssetFdNative(JNIEnv* env, jo
     }
 
     Asset* a = cookie
-        ? am->openNonAsset((void*)cookie, fileName8.c_str(), Asset::ACCESS_RANDOM)
+        ? am->openNonAsset(static_cast<int32_t>(cookie), fileName8.c_str(), Asset::ACCESS_RANDOM)
         : am->openNonAsset(fileName8.c_str(), Asset::ACCESS_RANDOM);
 
     if (a == NULL) {
@@ -435,10 +436,10 @@ static jint android_content_AssetManager_addAssetPath(JNIEnv* env, jobject clazz
         return 0;
     }
 
-    void* cookie;
+    int32_t cookie;
     bool res = am->addAssetPath(String8(path8.c_str()), &cookie);
 
-    return (res) ? (jint)cookie : 0;
+    return (res) ? static_cast<jint>(cookie) : 0;
 }
 
 static jboolean android_content_AssetManager_isUpToDate(JNIEnv* env, jobject clazz)
@@ -800,7 +801,7 @@ static jstring android_content_AssetManager_getCookieName(JNIEnv* env, jobject c
     if (am == NULL) {
         return NULL;
     }
-    String8 name(am->getAssetPath((void*)cookie));
+    String8 name(am->getAssetPath(static_cast<int32_t>(cookie)));
     if (name.length() == 0) {
         jniThrowException(env, "java/lang/IndexOutOfBoundsException", "Empty cookie name");
         return NULL;
@@ -1386,7 +1387,7 @@ static jint android_content_AssetManager_openXmlAssetNative(JNIEnv* env, jobject
     }
 
     Asset* a = cookie
-        ? am->openNonAsset((void*)cookie, fileName8.c_str(), Asset::ACCESS_BUFFER)
+        ? am->openNonAsset(static_cast<int32_t>(cookie), fileName8.c_str(), Asset::ACCESS_BUFFER)
         : am->openNonAsset(fileName8.c_str(), Asset::ACCESS_BUFFER);
 
     if (a == NULL) {
