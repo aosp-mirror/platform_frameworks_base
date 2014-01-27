@@ -494,4 +494,8 @@ public class IWindowManagerImpl implements IWindowManager {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public void setTouchExplorationEnabled(boolean enabled) {
+    }
 }
