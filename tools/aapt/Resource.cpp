@@ -172,7 +172,7 @@ private:
 bool isValidResourceType(const String8& type)
 {
     return type == "anim" || type == "animator" || type == "interpolator"
-        || type == "transition" || type == "scene"
+        || type == "transition"
         || type == "drawable" || type == "layout"
         || type == "values" || type == "xml" || type == "raw"
         || type == "color" || type == "menu" || type == "mipmap";
@@ -934,7 +934,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     sp<ResourceTypeSet> animators;
     sp<ResourceTypeSet> interpolators;
     sp<ResourceTypeSet> transitions;
-    sp<ResourceTypeSet> scenes;
     sp<ResourceTypeSet> xmls;
     sp<ResourceTypeSet> raws;
     sp<ResourceTypeSet> colors;
@@ -947,7 +946,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     ASSIGN_IT(animator);
     ASSIGN_IT(interpolator);
     ASSIGN_IT(transition);
-    ASSIGN_IT(scene);
     ASSIGN_IT(xml);
     ASSIGN_IT(raw);
     ASSIGN_IT(color);
@@ -971,7 +969,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             !applyFileOverlay(bundle, assets, &animators, "animator") ||
             !applyFileOverlay(bundle, assets, &interpolators, "interpolator") ||
             !applyFileOverlay(bundle, assets, &transitions, "transition") ||
-            !applyFileOverlay(bundle, assets, &scenes, "scene") ||
             !applyFileOverlay(bundle, assets, &xmls, "xml") ||
             !applyFileOverlay(bundle, assets, &raws, "raw") ||
             !applyFileOverlay(bundle, assets, &colors, "color") ||
@@ -1033,13 +1030,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     if (transitions != NULL) {
         err = makeFileResources(bundle, assets, &table, transitions, "transition");
-        if (err != NO_ERROR) {
-            hasErrors = true;
-        }
-    }
-
-    if (scenes != NULL) {
-        err = makeFileResources(bundle, assets, &table, scenes, "scene");
         if (err != NO_ERROR) {
             hasErrors = true;
         }
@@ -1191,21 +1181,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     if (transitions != NULL) {
         ResourceDirIterator it(transitions, String8("transition"));
-        while ((err=it.next()) == NO_ERROR) {
-            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
-            if (err != NO_ERROR) {
-                hasErrors = true;
-            }
-        }
-
-        if (err < NO_ERROR) {
-            hasErrors = true;
-        }
-        err = NO_ERROR;
-    }
-
-    if (scenes != NULL) {
-        ResourceDirIterator it(scenes, String8("scene"));
         while ((err=it.next()) == NO_ERROR) {
             err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {
