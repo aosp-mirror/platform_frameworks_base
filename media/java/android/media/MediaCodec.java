@@ -21,6 +21,9 @@ import android.media.MediaCodecList;
 import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.Surface;
 
 import java.io.IOException;
@@ -173,6 +176,33 @@ final public class MediaCodec {
      */
     public static final int BUFFER_FLAG_END_OF_STREAM         = 4;
 
+    private EventHandler mEventHandler;
+    private NotificationCallback mNotificationCallback;
+
+    static final int EVENT_NOTIFY = 1;
+
+    private class EventHandler extends Handler {
+        private MediaCodec mCodec;
+
+        public EventHandler(MediaCodec codec, Looper looper) {
+            super(looper);
+            mCodec = codec;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case EVENT_NOTIFY:
+                {
+                    if (mNotificationCallback != null) {
+                        mNotificationCallback.onCodecNotify(mCodec);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * Instantiate a decoder supporting input data of the given mime type.
      *
@@ -228,6 +258,15 @@ final public class MediaCodec {
 
     private MediaCodec(
             String name, boolean nameIsType, boolean encoder) {
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else {
+            mEventHandler = null;
+        }
+
         native_setup(name, nameIsType, encoder);
     }
 
@@ -308,7 +347,15 @@ final public class MediaCodec {
      * To ensure that it is available to other client call {@link #release}
      * and don't just rely on garbage collection to eventually do this for you.
      */
-    public native final void stop();
+    public final void stop() {
+        native_stop();
+
+        if (mEventHandler != null) {
+            mEventHandler.removeMessages(EVENT_NOTIFY);
+        }
+    }
+
+    private native final void native_stop();
 
     /**
      * Flush both input and output ports of the component, all indices
@@ -637,6 +684,22 @@ final public class MediaCodec {
         }
 
         setParameters(keys, values);
+    }
+
+    public void setNotificationCallback(NotificationCallback cb) {
+        mNotificationCallback = cb;
+    }
+
+    public interface NotificationCallback {
+        void onCodecNotify(MediaCodec codec);
+    }
+
+    private void postEventFromNative(
+            int what, int arg1, int arg2, Object obj) {
+        if (mEventHandler != null) {
+            Message msg = mEventHandler.obtainMessage(what, arg1, arg2, obj);
+            mEventHandler.sendMessage(msg);
+        }
     }
 
     private native final void setParameters(String[] keys, Object[] values);

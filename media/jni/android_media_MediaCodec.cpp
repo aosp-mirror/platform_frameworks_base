@@ -51,6 +51,10 @@ enum {
     DEQUEUE_INFO_OUTPUT_BUFFERS_CHANGED     = -3,
 };
 
+enum {
+    EVENT_NOTIFY = 1,
+};
+
 struct CryptoErrorCodes {
     jint cryptoErrorNoKey;
     jint cryptoErrorKeyExpired;
@@ -59,6 +63,7 @@ struct CryptoErrorCodes {
 
 struct fields_t {
     jfieldID context;
+    jmethodID postEventFromNativeID;
     jfieldID cryptoInfoNumSubSamplesID;
     jfieldID cryptoInfoNumBytesOfClearDataID;
     jfieldID cryptoInfoNumBytesOfEncryptedDataID;
@@ -75,7 +80,9 @@ JMediaCodec::JMediaCodec(
         JNIEnv *env, jobject thiz,
         const char *name, bool nameIsType, bool encoder)
     : mClass(NULL),
-      mObject(NULL) {
+      mObject(NULL),
+      mGeneration(1),
+      mRequestedActivityNotification(false) {
     jclass clazz = env->GetObjectClass(thiz);
     CHECK(clazz != NULL);
 
@@ -87,7 +94,7 @@ JMediaCodec::JMediaCodec(
 
     mLooper->start(
             false,      // runOnCallingThread
-            false,       // canCallJava
+            true,       // canCallJava
             PRIORITY_FOREGROUND);
 
     if (nameIsType) {
@@ -99,6 +106,10 @@ JMediaCodec::JMediaCodec(
 
 status_t JMediaCodec::initCheck() const {
     return mCodec != NULL ? OK : NO_INIT;
+}
+
+void JMediaCodec::registerSelf() {
+    mLooper->registerHandler(this);
 }
 
 JMediaCodec::~JMediaCodec() {
@@ -122,7 +133,8 @@ status_t JMediaCodec::configure(
         int flags) {
     sp<Surface> client;
     if (bufferProducer != NULL) {
-        mSurfaceTextureClient = new Surface(bufferProducer, true /* controlledByApp */);
+        mSurfaceTextureClient =
+            new Surface(bufferProducer, true /* controlledByApp */);
     } else {
         mSurfaceTextureClient.clear();
     }
@@ -136,13 +148,32 @@ status_t JMediaCodec::createInputSurface(
 }
 
 status_t JMediaCodec::start() {
-    return mCodec->start();
+    status_t err = mCodec->start();
+
+    if (err != OK) {
+        return err;
+    }
+
+    mActivityNotification = new AMessage(kWhatActivityNotify, id());
+    mActivityNotification->setInt32("generation", mGeneration);
+
+    requestActivityNotification();
+
+    return err;
 }
 
 status_t JMediaCodec::stop() {
     mSurfaceTextureClient.clear();
 
-    return mCodec->stop();
+    status_t err = mCodec->stop();
+
+    sp<AMessage> msg = new AMessage(kWhatStopActivityNotifications, id());
+    sp<AMessage> response;
+    msg->postAndAwaitResponse(&response);
+
+    mActivityNotification.clear();
+
+    return err;
 }
 
 status_t JMediaCodec::flush() {
@@ -174,7 +205,11 @@ status_t JMediaCodec::queueSecureInputBuffer(
 }
 
 status_t JMediaCodec::dequeueInputBuffer(size_t *index, int64_t timeoutUs) {
-    return mCodec->dequeueInputBuffer(index, timeoutUs);
+    status_t err = mCodec->dequeueInputBuffer(index, timeoutUs);
+
+    requestActivityNotification();
+
+    return err;
 }
 
 status_t JMediaCodec::dequeueOutputBuffer(
@@ -182,9 +217,12 @@ status_t JMediaCodec::dequeueOutputBuffer(
     size_t size, offset;
     int64_t timeUs;
     uint32_t flags;
-    status_t err;
-    if ((err = mCodec->dequeueOutputBuffer(
-                    index, &offset, &size, &timeUs, &flags, timeoutUs)) != OK) {
+    status_t err = mCodec->dequeueOutputBuffer(
+            index, &offset, &size, &timeUs, &flags, timeoutUs);
+
+    requestActivityNotification();
+
+    if (err != OK) {
         return err;
     }
 
@@ -318,6 +356,67 @@ void JMediaCodec::setVideoScalingMode(int mode) {
     if (mSurfaceTextureClient != NULL) {
         native_window_set_scaling_mode(mSurfaceTextureClient.get(), mode);
     }
+}
+
+void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
+    switch (msg->what()) {
+        case kWhatRequestActivityNotifications:
+        {
+            if (mRequestedActivityNotification) {
+                break;
+            }
+
+            mCodec->requestActivityNotification(mActivityNotification);
+            mRequestedActivityNotification = true;
+            break;
+        }
+
+        case kWhatActivityNotify:
+        {
+            {
+                int32_t generation;
+                CHECK(msg->findInt32("generation", &generation));
+
+                if (generation != mGeneration) {
+                    // stale
+                    break;
+                }
+
+                mRequestedActivityNotification = false;
+            }
+
+            JNIEnv *env = AndroidRuntime::getJNIEnv();
+            env->CallVoidMethod(
+                    mObject,
+                    gFields.postEventFromNativeID,
+                    EVENT_NOTIFY,
+                    0 /* arg1 */,
+                    0 /* arg2 */,
+                    NULL /* obj */);
+
+            break;
+        }
+
+        case kWhatStopActivityNotifications:
+        {
+            uint32_t replyID;
+            CHECK(msg->senderAwaitsResponse(&replyID));
+
+            ++mGeneration;
+            mRequestedActivityNotification = false;
+
+            sp<AMessage> response = new AMessage;
+            response->postReply(replyID);
+            break;
+        }
+
+        default:
+            TRESPASS();
+    }
+}
+
+void JMediaCodec::requestActivityNotification() {
+    (new AMessage(kWhatRequestActivityNotifications, id()))->post();
 }
 
 }  // namespace android
@@ -888,6 +987,12 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "J");
     CHECK(gFields.context != NULL);
 
+    gFields.postEventFromNativeID =
+        env->GetMethodID(
+                clazz.get(), "postEventFromNative", "(IIILjava/lang/Object;)V");
+
+    CHECK(gFields.postEventFromNativeID != NULL);
+
     clazz.reset(env->FindClass("android/media/MediaCodec$CryptoInfo"));
     CHECK(clazz.get() != NULL);
 
@@ -961,6 +1066,8 @@ static void android_media_MediaCodec_native_setup(
         return;
     }
 
+    codec->registerSelf();
+
     setMediaCodec(env,thiz, codec);
 }
 
@@ -981,7 +1088,7 @@ static JNINativeMethod gMethods[] = {
       (void *)android_media_MediaCodec_createInputSurface },
 
     { "start", "()V", (void *)android_media_MediaCodec_start },
-    { "stop", "()V", (void *)android_media_MediaCodec_stop },
+    { "native_stop", "()V", (void *)android_media_MediaCodec_stop },
     { "flush", "()V", (void *)android_media_MediaCodec_flush },
 
     { "queueInputBuffer", "(IIIJI)V",
