@@ -487,6 +487,29 @@ static void printCompatibleScreens(ResXMLTree& tree) {
     printf("\n");
 }
 
+static void printUsesPermission(const String8& name, bool optional=false, int maxSdkVersion=-1) {
+    printf("uses-permission: name='%s'", ResTable::normalizeForOutput(name.string()).string());
+    if (maxSdkVersion != -1) {
+         printf(" maxSdkVersion='%d'", maxSdkVersion);
+    }
+    printf("\n");
+
+    if (optional) {
+        printf("optional-permission: name='%s'",
+                ResTable::normalizeForOutput(name.string()).string());
+        if (maxSdkVersion != -1) {
+            printf(" maxSdkVersion='%d'", maxSdkVersion);
+        }
+        printf("\n");
+    }
+}
+
+static void printUsesImpliedPermission(const String8& name, const String8& reason) {
+    printf("uses-implied-permission: name='%s' reason='%s'\n",
+            ResTable::normalizeForOutput(name.string()).string(),
+            ResTable::normalizeForOutput(reason.string()).string());
+}
+
 Vector<String8> getNfcAidCategories(AssetManager& assets, String8 xmlPath, bool offHost,
         String8 *outError = NULL)
 {
@@ -710,13 +733,9 @@ int doDump(Bundle* bundle)
                         fprintf(stderr, "ERROR: %s\n", error.string());
                         goto bail;
                     }
-                    printf("uses-permission: %s\n",
-                            ResTable::normalizeForOutput(name.string()).string());
-                    int req = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
-                    if (!req) {
-                        printf("optional-permission: %s\n",
-                                ResTable::normalizeForOutput(name.string()).string());
-                    }
+                    printUsesPermission(name,
+                            getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1) == 0,
+                            getIntegerAttribute(tree, MAX_SDK_VERSION_ATTR, NULL, -1));
                 }
             }
         } else if (strcmp("badging", option) == 0) {
@@ -1220,14 +1239,11 @@ int doDump(Bundle* bundle)
                             } else if (name == "android.permission.WRITE_CALL_LOG") {
                                 hasWriteCallLogPermission = true;
                             }
-                            printf("uses-permission:'%s'\n",
-                                    ResTable::normalizeForOutput(name.string()).string());
-                            int req = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
-                            if (!req) {
-                                printf("optional-permission:'%s'\n",
-                                        ResTable::normalizeForOutput(name.string()).string());
-                            }
-                        } else {
+
+                            printUsesPermission(name,
+                                    getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1) == 0,
+                                    getIntegerAttribute(tree, MAX_SDK_VERSION_ATTR, NULL, -1));
+                       } else {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
                                     error.string());
                             goto bail;
@@ -1530,15 +1546,15 @@ int doDump(Bundle* bundle)
             // Pre-1.6 implicitly granted permission compatibility logic
             if (targetSdk < 4) {
                 if (!hasWriteExternalStoragePermission) {
-                    printf("uses-permission:'android.permission.WRITE_EXTERNAL_STORAGE'\n");
-                    printf("uses-implied-permission:'android.permission.WRITE_EXTERNAL_STORAGE'," \
-                            "'targetSdkVersion < 4'\n");
+                    printUsesPermission(String8("android.permission.WRITE_EXTERNAL_STORAGE"));
+                    printUsesImpliedPermission(String8("android.permission.WRITE_EXTERNAL_STORAGE"),
+                            String8("targetSdkVersion < 4"));
                     hasWriteExternalStoragePermission = true;
                 }
                 if (!hasReadPhoneStatePermission) {
-                    printf("uses-permission:'android.permission.READ_PHONE_STATE'\n");
-                    printf("uses-implied-permission:'android.permission.READ_PHONE_STATE'," \
-                            "'targetSdkVersion < 4'\n");
+                    printUsesPermission(String8("android.permission.READ_PHONE_STATE"));
+                    printUsesImpliedPermission(String8("android.permission.READ_PHONE_STATE"),
+                            String8("targetSdkVersion < 4"));
                 }
             }
 
@@ -1547,22 +1563,22 @@ int doDump(Bundle* bundle)
             // do this (regardless of target API version) because we can't have
             // an app with write permission but not read permission.
             if (!hasReadExternalStoragePermission && hasWriteExternalStoragePermission) {
-                printf("uses-permission:'android.permission.READ_EXTERNAL_STORAGE'\n");
-                printf("uses-implied-permission:'android.permission.READ_EXTERNAL_STORAGE'," \
-                        "'requested WRITE_EXTERNAL_STORAGE'\n");
+                printUsesPermission(String8("android.permission.READ_EXTERNAL_STORAGE"));
+                printUsesImpliedPermission(String8("android.permission.READ_EXTERNAL_STORAGE"),
+                        String8("requested WRITE_EXTERNAL_STORAGE"));
             }
 
             // Pre-JellyBean call log permission compatibility.
             if (targetSdk < 16) {
                 if (!hasReadCallLogPermission && hasReadContactsPermission) {
-                    printf("uses-permission:'android.permission.READ_CALL_LOG'\n");
-                    printf("uses-implied-permission:'android.permission.READ_CALL_LOG'," \
-                            "'targetSdkVersion < 16 and requested READ_CONTACTS'\n");
+                    printUsesPermission(String8("android.permission.READ_CALL_LOG"));
+                    printUsesImpliedPermission(String8("android.permission.READ_CALL_LOG"),
+                            String8("targetSdkVersion < 16 and requested READ_CONTACTS"));
                 }
                 if (!hasWriteCallLogPermission && hasWriteContactsPermission) {
-                    printf("uses-permission:'android.permission.WRITE_CALL_LOG'\n");
-                    printf("uses-implied-permission:'android.permission.WRITE_CALL_LOG'," \
-                            "'targetSdkVersion < 16 and requested WRITE_CONTACTS'\n");
+                    printUsesPermission(String8("android.permission.WRITE_CALL_LOG"));
+                    printUsesImpliedPermission(String8("android.permission.WRITE_CALL_LOG"),
+                            String8("targetSdkVersion < 16 and requested WRITE_CONTACTS"));
                 }
             }
 
