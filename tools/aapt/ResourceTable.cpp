@@ -636,6 +636,30 @@ bool isInProductList(const String16& needle, const String16& haystack) {
     return false;
 }
 
+/*
+ * A simple container that holds a resource type and name. It is ordered first by type then
+ * by name.
+ */
+struct type_ident_pair_t {
+    String16 type;
+    String16 ident;
+
+    type_ident_pair_t() { };
+    type_ident_pair_t(const String16& t, const String16& i) : type(t), ident(i) { }
+    type_ident_pair_t(const type_ident_pair_t& o) : type(o.type), ident(o.ident) { }
+    inline bool operator < (const type_ident_pair_t& o) const {
+        int cmp = compare_type(type, o.type);
+        if (cmp < 0) {
+            return true;
+        } else if (cmp > 0) {
+            return false;
+        } else {
+            return strictly_order_type(ident, o.ident);
+        }
+    }
+};
+
+
 status_t parseAndAddEntry(Bundle* bundle,
                         const sp<AaptFile>& in,
                         ResXMLTree* block,
@@ -650,6 +674,7 @@ status_t parseAndAddEntry(Bundle* bundle,
                         const String16& product,
                         bool pseudolocalize,
                         const bool overwrite,
+                        KeyedVector<type_ident_pair_t, bool>* skippedResourceNames,
                         ResourceTable* outTable)
 {
     status_t err;
@@ -684,6 +709,13 @@ status_t parseAndAddEntry(Bundle* bundle,
 
         if (bundleProduct[0] == '\0') {
             if (strcmp16(String16("default").string(), product.string()) != 0) {
+                /*
+                 * This string has a product other than 'default'. Do not add it,
+                 * but record it so that if we do not see the same string with
+                 * product 'default' or no product, then report an error.
+                 */
+                skippedResourceNames->replaceValueFor(
+                        type_ident_pair_t(curType, ident), true);
                 return NO_ERROR;
             }
         } else {
@@ -796,6 +828,11 @@ status_t compileResourceFile(Bundle* bundle,
     }
 
     DefaultKeyedVector<String16, uint32_t> nextPublicId(0);
+
+    // Stores the resource names that were skipped. Typically this happens when
+    // AAPT is invoked without a product specified and a resource has no
+    // 'default' product attribute.
+    KeyedVector<type_ident_pair_t, bool> skippedResourceNames;
 
     ResXMLTree::event_code_t code;
     do {
@@ -1544,7 +1581,7 @@ status_t compileResourceFile(Bundle* bundle,
 
                 err = parseAndAddEntry(bundle, in, &block, curParams, myPackage, curType, ident,
                         *curTag, curIsStyled, curFormat, curIsFormatted,
-                        product, false, overwrite, outTable);
+                        product, false, overwrite, &skippedResourceNames, outTable);
 
                 if (err < NO_ERROR) { // Why err < NO_ERROR instead of err != NO_ERROR?
                     hasErrors = localHasErrors = true;
@@ -1557,7 +1594,7 @@ status_t compileResourceFile(Bundle* bundle,
                         err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
                                 ident, *curTag, curIsStyled, curFormat,
                                 curIsFormatted, product,
-                                true, overwrite, outTable);
+                                true, overwrite, &skippedResourceNames, outTable);
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
                         }
@@ -1593,6 +1630,30 @@ status_t compileResourceFile(Bundle* bundle,
                     "Found text \"%s\" where item tag is expected\n",
                     String8(block.getText(&len)).string());
             return UNKNOWN_ERROR;
+        }
+    }
+
+    // For every resource defined, there must be exist one variant with a product attribute
+    // set to 'default' (or no product attribute at all).
+    // We check to see that for every resource that was ignored because of a mismatched
+    // product attribute, some product variant of that resource was processed.
+    for (size_t i = 0; i < skippedResourceNames.size(); i++) {
+        if (skippedResourceNames[i]) {
+            const type_ident_pair_t& p = skippedResourceNames.keyAt(i);
+            if (!outTable->hasBagOrEntry(myPackage, p.type, p.ident)) {
+                const char* bundleProduct =
+                        (bundle->getProduct() == NULL) ? "" : bundle->getProduct();
+                fprintf(stderr, "In resource file %s: %s\n",
+                        in->getPrintableSource().string(),
+                        curParams.toString().string());
+
+                fprintf(stderr, "\t%s '%s' does not match product %s.\n"
+                        "\tYou may have forgotten to include a 'default' product variant"
+                        " of the resource.\n",
+                        String8(p.type).string(), String8(p.ident).string(),
+                        bundleProduct[0] == 0 ? "default" : bundleProduct);
+                return UNKNOWN_ERROR;
+            }
         }
     }
 
@@ -2483,8 +2544,8 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols) {
                     
                     String16 comment(c->getComment());
                     typeSymbols->appendComment(String8(c->getName()), comment, c->getPos());
-                    //printf("Type symbol %s comment: %s\n", String8(e->getName()).string(),
-                    //     String8(comment).string());
+                    //printf("Type symbol [%08x] %s comment: %s\n", rid,
+                    //        String8(c->getName()).string(), String8(comment).string());
                     comment = c->getTypeComment();
                     typeSymbols->appendTypeComment(String8(c->getName()), comment);
                 } else {
