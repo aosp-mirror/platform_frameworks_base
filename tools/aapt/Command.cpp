@@ -378,6 +378,26 @@ static void getResolvedResourceAttribute(Res_value* value, const ResTable* resTa
     }
 }
 
+static void printResolvedResourceAttribute(const ResTable* resTable, const ResXMLTree& tree,
+        uint32_t attrRes, String8 attrLabel, String8* outError)
+{
+    Res_value value;
+    getResolvedResourceAttribute(&value, resTable, tree, attrRes, outError);
+    if (*outError != "") {
+        *outError = "error print resolved resource attribute";
+        return;
+    }
+    if (value.dataType == Res_value::TYPE_STRING) {
+        String8 result = getResolvedAttribute(resTable, tree, attrRes, outError);
+        printf("%s='%s'", attrLabel.string(), result.string());
+    } else if (Res_value::TYPE_FIRST_INT <= value.dataType &&
+            value.dataType <= Res_value::TYPE_LAST_INT) {
+        printf("%s='%d'", attrLabel.string(), value.data);
+    } else {
+        printf("%s='0x%x'", attrLabel.string(), (int)value.data);
+    }
+}
+
 // These are attribute resource constants for the platform, as found
 // in android.R.attr
 enum {
@@ -1348,28 +1368,21 @@ int doDump(Bundle* bundle)
                                 goto bail;
                             }
                             printf("meta-data: name='%s' ", metaDataName.string());
-                            Res_value value;
-                            getResolvedResourceAttribute(&value, &res, tree, VALUE_ATTR, &error);
+                            printResolvedResourceAttribute(&res, tree, VALUE_ATTR, String8("value"),
+                                    &error);
                             if (error != "") {
-                                fprintf(stderr, "ERROR getting 'android:value' attribute for "
-                                        "meta-data:%s\n", error.string());
-                                goto bail;
-                            }
-                            if (value.dataType == Res_value::TYPE_STRING) {
-                                String8 metaDataValue = getAttribute(tree, value.data, &error);
+                                // Try looking for a RESOURCE_ATTR
+                                error = "";
+                                printResolvedResourceAttribute(&res, tree, RESOURCE_ATTR,
+                                        String8("resource"), &error);
                                 if (error != "") {
-                                    fprintf(stderr, "ERROR getting 'android:value' attribute for "
-                                            "meta-data: %s\n", error.string());
+                                    fprintf(stderr, "ERROR getting 'android:value' or "
+                                            "'android:resource' attribute for "
+                                            "meta-data:%s\n", error.string());
                                     goto bail;
                                 }
-                                printf("value='%s'\n", metaDataValue.string());
-                            } else if (Res_value::TYPE_FIRST_INT <= value.dataType &&
-                                    value.dataType <= Res_value::TYPE_LAST_INT) {
-                                printf("value='%d'\n", value.data);
-                            } else {
-                                printf("value=(type 0x%x)0x%x",
-                                        (int)value.dataType, (int)value.data);
                             }
+                            printf("\n");
                         } else if (withinSupportsInput && tag == "input-type") {
                             String8 name = getAttribute(tree, NAME_ATTR, &error);
                             if (name != "" && error == "") {
