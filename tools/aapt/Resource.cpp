@@ -2219,10 +2219,10 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
 
         status_t err = writeSymbolClass(fp, assets, includePrivate, symbols,
                 className, 0, bundle->getNonConstantId());
+        fclose(fp);
         if (err != NO_ERROR) {
             return err;
         }
-        fclose(fp);
 
         if (textSymbolsDest != NULL && R == className) {
             String8 textDest(textSymbolsDest);
@@ -2241,10 +2241,10 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
 
             status_t err = writeTextSymbolClass(fp, assets, includePrivate, symbols,
                     className);
+            fclose(fp);
             if (err != NO_ERROR) {
                 return err;
             }
-            fclose(fp);
         }
 
         // If we were asked to generate a dependency file, we'll go ahead and add this R.java
