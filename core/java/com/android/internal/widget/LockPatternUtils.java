@@ -30,10 +30,12 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.View;
 import android.widget.Button;
@@ -498,6 +500,13 @@ public class LockPatternUtils {
             getLockSettings().setLockPattern(patternToString(pattern), getCurrentOrCallingUserId());
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (pattern != null) {
+
+                int userHandle = getCurrentOrCallingUserId();
+                if (userHandle == UserHandle.USER_OWNER) {
+                    String stringPattern = patternToString(pattern);
+                    updateEncryptionPassword(StorageManager.CRYPT_TYPE_PATTERN, stringPattern);
+                }
+
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
                 if (!isFallback) {
                     deleteGallery();
@@ -565,7 +574,7 @@ public class LockPatternUtils {
     }
 
     /** Update the encryption password if it is enabled **/
-    private void updateEncryptionPassword(String password) {
+    private void updateEncryptionPassword(int type, String password) {
         DevicePolicyManager dpm = getDevicePolicyManager();
         if (dpm.getStorageEncryptionStatus(getCurrentOrCallingUserId())
                 != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
@@ -580,7 +589,7 @@ public class LockPatternUtils {
 
         IMountService mountService = IMountService.Stub.asInterface(service);
         try {
-            mountService.changeEncryptionPassword(password);
+            mountService.changeEncryptionPassword(type, password);
         } catch (RemoteException e) {
             Log.e(TAG, "Error changing encryption password", e);
         }
@@ -623,12 +632,15 @@ public class LockPatternUtils {
             getLockSettings().setLockPassword(password, userHandle);
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (password != null) {
+                int computedQuality = computePasswordQuality(password);
+
                 if (userHandle == UserHandle.USER_OWNER) {
                     // Update the encryption password.
-                    updateEncryptionPassword(password);
+                    int type = computedQuality == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+                        ? StorageManager.CRYPT_TYPE_PIN : StorageManager.CRYPT_TYPE_PASSWORD;
+                    updateEncryptionPassword(type, password);
                 }
 
-                int computedQuality = computePasswordQuality(password);
                 if (!isFallback) {
                     deleteGallery();
                     setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality), userHandle);
@@ -675,8 +687,7 @@ public class LockPatternUtils {
                             0, 0, 0, 0, 0, 0, 0, userHandle);
                 }
                 // Add the password to the password history. We assume all
-                // password
-                // hashes have the same length for simplicity of implementation.
+                // password hashes have the same length for simplicity of implementation.
                 String passwordHistory = getString(PASSWORD_HISTORY_KEY, userHandle);
                 if (passwordHistory == null) {
                     passwordHistory = new String();
@@ -695,6 +706,11 @@ public class LockPatternUtils {
                 }
                 setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
             } else {
+                if (userHandle == UserHandle.USER_OWNER) {
+                    // Update the encryption password.
+                    updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, password);
+                }
+
                 dpm.setActivePasswordState(
                         DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0,
                         userHandle);

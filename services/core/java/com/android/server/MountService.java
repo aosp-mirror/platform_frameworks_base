@@ -73,13 +73,16 @@ import com.android.server.pm.UserManagerService;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
+import org.apache.commons.codec.binary.Hex;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -188,6 +191,12 @@ class MountService extends IMountService.Stub
          */
         public static final int FstrimCompleted                = 700;
     }
+
+    /** List of crypto types.
+      * These must match CRYPT_TYPE_XXX in cryptfs.h AND their
+      * corresponding commands in CommandListener.cpp */
+    public static final String[] CRYPTO_TYPES
+        = { "password", "default", "pattern", "pin" };
 
     private Context mContext;
     private NativeDaemonConnector mConnector;
@@ -2036,6 +2045,14 @@ class MountService extends IMountService.Stub
         }
     }
 
+    private String toHex(String password) {
+        if (password == null) {
+            return null;
+        }
+        byte[] bytes = password.getBytes(StandardCharsets.UTF_8);
+        return new String(Hex.encodeHex(bytes));
+    }
+
     @Override
     public int decryptStorage(String password) {
         if (TextUtils.isEmpty(password)) {
@@ -2053,7 +2070,7 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "checkpw", new SensitiveArg(password));
+            event = mConnector.execute("cryptfs", "checkpw", new SensitiveArg(toHex(password)));
 
             final int code = Integer.parseInt(event.getMessage());
             if (code == 0) {
@@ -2092,7 +2109,8 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            mConnector.execute("cryptfs", "enablecrypto", "inplace", new SensitiveArg(password));
+            mConnector.execute("cryptfs", "enablecrypto", "inplace",
+                               new SensitiveArg(toHex(password)));
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
@@ -2101,11 +2119,11 @@ class MountService extends IMountService.Stub
         return 0;
     }
 
-    public int changeEncryptionPassword(String password) {
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
+    /** Set the password for encrypting the master key.
+     *  @param type One of the CRYPTO_TYPE_XXX consts defined in StorageManager.
+     *  @param password The password to set.
+     */
+    public int changeEncryptionPassword(int type, String password) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
@@ -2117,7 +2135,8 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "changepw", new SensitiveArg(password));
+            event = mConnector.execute("cryptfs", "changepw", CRYPTO_TYPES[type],
+                                       new SensitiveArg(toHex(password)));
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
@@ -2150,12 +2169,35 @@ class MountService extends IMountService.Stub
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("cryptfs", "verifypw", new SensitiveArg(password));
+            event = mConnector.execute("cryptfs", "verifypw", new SensitiveArg(toHex(password)));
             Slog.i(TAG, "cryptfs verifypw => " + event.getMessage());
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
+        }
+    }
+
+    /**
+     * Get the type of encryption used to encrypt the master key.
+     * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
+     */
+    @Override
+    public int getPasswordType() throws RemoteException {
+
+        waitForReady();
+
+        final NativeDaemonEvent event;
+        try {
+            event = mConnector.execute("cryptfs", "getpwtype");
+            for (int i = 0; i < CRYPTO_TYPES.length; ++i) {
+                if (CRYPTO_TYPES[i].equals(event.getMessage()))
+                    return i;
+            }
+
+            throw new IllegalStateException("unexpected return from cryptfs");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
         }
     }
 
