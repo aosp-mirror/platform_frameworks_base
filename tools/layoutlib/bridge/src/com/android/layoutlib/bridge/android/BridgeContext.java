@@ -1090,6 +1090,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public String getOpPackageName() {
+        // pass
+        return null;
+    }
+
+    @Override
     public ApplicationInfo getApplicationInfo() {
         return mApplicationInfo;
     }
