@@ -33,6 +33,6 @@ public class EmbossMaskFilter extends MaskFilter {
         native_instance = nativeConstructor(direction, ambient, specular, blurRadius);
     }
 
-    private static native int nativeConstructor(float[] direction, float ambient, float specular, float blurRadius);
+    private static native long nativeConstructor(float[] direction, float ambient, float specular, float blurRadius);
 }
 

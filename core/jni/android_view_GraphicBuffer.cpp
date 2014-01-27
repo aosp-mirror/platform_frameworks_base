@@ -89,6 +89,12 @@ static struct {
 #define SET_INT(object, field, value) \
     env->SetIntField(object, field, value)
 
+#define GET_LONG(object, field) \
+    env->GetLongField(object, field)
+
+#define SET_LONG(object, field, value) \
+    env->SetLongField(object, field, value)
+
 #define INVOKEV(object, method, ...) \
     env->CallVoidMethod(object, method, __VA_ARGS__)
 
@@ -108,7 +114,7 @@ public:
 // GraphicBuffer lifecycle
 // ----------------------------------------------------------------------------
 
-static GraphicBufferWrapper* android_view_GraphiceBuffer_create(JNIEnv* env, jobject clazz,
+static jlong android_view_GraphiceBuffer_create(JNIEnv* env, jobject clazz,
         jint width, jint height, jint format, jint usage) {
 
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
@@ -125,11 +131,14 @@ static GraphicBufferWrapper* android_view_GraphiceBuffer_create(JNIEnv* env, job
         return NULL;
     }
 
-    return new GraphicBufferWrapper(buffer);
+    GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(buffer);
+    return reinterpret_cast<jlong>(wrapper);
 }
 
 static void android_view_GraphiceBuffer_destroy(JNIEnv* env, jobject clazz,
-        GraphicBufferWrapper* wrapper) {
+        jlong wrapperHandle) {
+    GraphicBufferWrapper* wrapper =
+                reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
     delete wrapper;
 }
 
@@ -140,9 +149,9 @@ static void android_view_GraphiceBuffer_destroy(JNIEnv* env, jobject clazz,
 static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCanvas) {
     jobject canvasFinalizerObj = env->GetObjectField(canvasObj, gCanvasClassInfo.mFinalizer);
     SkCanvas* previousCanvas = reinterpret_cast<SkCanvas*>(
-            GET_INT(canvasObj, gCanvasClassInfo.mNativeCanvas));
-    SET_INT(canvasObj, gCanvasClassInfo.mNativeCanvas, (int) newCanvas);
-    SET_INT(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (int) newCanvas);
+            GET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas));
+    SET_LONG(canvasObj, gCanvasClassInfo.mNativeCanvas, (long) newCanvas);
+    SET_LONG(canvasFinalizerObj, gCanvasFinalizerClassInfo.mNativeCanvas, (long) newCanvas);
     SkSafeUnref(previousCanvas);
 }
 
@@ -160,10 +169,12 @@ static inline SkBitmap::Config convertPixelFormat(int32_t format) {
 }
 
 static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
-        GraphicBufferWrapper* wrapper, jobject canvas, jobject dirtyRect) {
+        jlong wrapperHandle, jobject canvas, jobject dirtyRect) {
 
+    GraphicBufferWrapper* wrapper =
+                reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
     if (!wrapper) {
-        return false;
+        return JNI_FALSE;
     }
 
     sp<GraphicBuffer> buffer(wrapper->buffer);
@@ -181,10 +192,10 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     void* bits = NULL;
     status_t status = buffer->lock(LOCK_CANVAS_USAGE, rect, &bits);
 
-    if (status) return false;
+    if (status) return JNI_FALSE;
     if (!bits) {
         buffer->unlock();
-        return false;
+        return JNI_FALSE;
     }
 
     ssize_t bytesCount = buffer->getStride() * bytesPerPixel(buffer->getPixelFormat());
@@ -213,21 +224,23 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
                 int(rect.left), int(rect.top), int(rect.right), int(rect.bottom));
     }
 
-    return true;
+    return JNI_TRUE;
 }
 
 static jboolean android_view_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobject,
-        GraphicBufferWrapper* wrapper, jobject canvas) {
+        jlong wrapperHandle, jobject canvas) {
 
+    GraphicBufferWrapper* wrapper =
+                reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
     SkCanvas* nativeCanvas = SkNEW(SkCanvas);
     swapCanvasPtr(env, canvas, nativeCanvas);
 
     if (wrapper) {
         status_t status = wrapper->buffer->unlock();
-        return status == 0;
+        return status == 0 ? JNI_TRUE : JNI_FALSE;
     }
 
-    return false;
+    return JNI_FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -235,21 +248,23 @@ static jboolean android_view_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobj
 // ----------------------------------------------------------------------------
 
 static void android_view_GraphiceBuffer_write(JNIEnv* env, jobject clazz,
-        GraphicBufferWrapper* wrapper, jobject dest) {
+        jlong wrapperHandle, jobject dest) {
+    GraphicBufferWrapper* wrapper =
+                reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
     Parcel* parcel = parcelForJavaObject(env, dest);
     if (parcel) {
         parcel->write(*wrapper->buffer);
     }
 }
 
-static GraphicBufferWrapper* android_view_GraphiceBuffer_read(JNIEnv* env, jobject clazz,
+static jlong android_view_GraphiceBuffer_read(JNIEnv* env, jobject clazz,
         jobject in) {
 
     Parcel* parcel = parcelForJavaObject(env, in);
     if (parcel) {
         sp<GraphicBuffer> buffer = new GraphicBuffer();
         parcel->read(*buffer);
-        return new GraphicBufferWrapper(buffer);
+        return reinterpret_cast<jlong>(new GraphicBufferWrapper(buffer));
     }
 
     return NULL;
@@ -261,7 +276,7 @@ static GraphicBufferWrapper* android_view_GraphiceBuffer_read(JNIEnv* env, jobje
 
 sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
     if (obj) {
-        jint nativeObject = env->GetIntField(obj, gGraphicBufferClassInfo.mNativeObject);
+        jlong nativeObject = env->GetLongField(obj, gGraphicBufferClassInfo.mNativeObject);
         GraphicBufferWrapper* wrapper = (GraphicBufferWrapper*) nativeObject;
         if (wrapper != NULL) {
             sp<GraphicBuffer> buffer(wrapper->buffer);
@@ -290,24 +305,24 @@ sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
 const char* const kClassPathName = "android/view/GraphicBuffer";
 
 static JNINativeMethod gMethods[] = {
-    { "nCreateGraphicBuffer",  "(IIII)I", (void*) android_view_GraphiceBuffer_create },
-    { "nDestroyGraphicBuffer", "(I)V",    (void*) android_view_GraphiceBuffer_destroy },
+    { "nCreateGraphicBuffer",  "(IIII)J", (void*) android_view_GraphiceBuffer_create },
+    { "nDestroyGraphicBuffer", "(J)V",    (void*) android_view_GraphiceBuffer_destroy },
 
-    { "nWriteGraphicBufferToParcel",  "(ILandroid/os/Parcel;)V",
+    { "nWriteGraphicBufferToParcel",  "(JLandroid/os/Parcel;)V",
             (void*) android_view_GraphiceBuffer_write },
-    { "nReadGraphicBufferFromParcel", "(Landroid/os/Parcel;)I",
+    { "nReadGraphicBufferFromParcel", "(Landroid/os/Parcel;)J",
             (void*) android_view_GraphiceBuffer_read },
 
-    { "nLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)Z",
+    { "nLockCanvas", "(JLandroid/graphics/Canvas;Landroid/graphics/Rect;)Z",
             (void*) android_view_GraphicBuffer_lockCanvas },
-    { "nUnlockCanvasAndPost", "(ILandroid/graphics/Canvas;)Z",
+    { "nUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)Z",
             (void*) android_view_GraphicBuffer_unlockCanvasAndPost },
 };
 
 int register_android_view_GraphicBuffer(JNIEnv* env) {
     jclass clazz;
     FIND_CLASS(clazz, "android/view/GraphicBuffer");
-    GET_FIELD_ID(gGraphicBufferClassInfo.mNativeObject, clazz, "mNativeObject", "I");
+    GET_FIELD_ID(gGraphicBufferClassInfo.mNativeObject, clazz, "mNativeObject", "J");
 
     FIND_CLASS(clazz, "android/graphics/Rect");
     GET_METHOD_ID(gRectClassInfo.set, clazz, "set", "(IIII)V");
@@ -319,11 +334,11 @@ int register_android_view_GraphicBuffer(JNIEnv* env) {
     FIND_CLASS(clazz, "android/graphics/Canvas");
     GET_FIELD_ID(gCanvasClassInfo.mFinalizer, clazz, "mFinalizer",
             "Landroid/graphics/Canvas$CanvasFinalizer;");
-    GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "I");
+    GET_FIELD_ID(gCanvasClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
     GET_FIELD_ID(gCanvasClassInfo.mSurfaceFormat, clazz, "mSurfaceFormat", "I");
 
     FIND_CLASS(clazz, "android/graphics/Canvas$CanvasFinalizer");
-    GET_FIELD_ID(gCanvasFinalizerClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "I");
+    GET_FIELD_ID(gCanvasFinalizerClassInfo.mNativeCanvas, clazz, "mNativeCanvas", "J");
 
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }

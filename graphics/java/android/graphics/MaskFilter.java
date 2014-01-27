@@ -27,6 +27,6 @@ public class MaskFilter {
         nativeDestructor(native_instance);
     }
 
-    private static native void nativeDestructor(int native_filter);
-    int native_instance;
+    private static native void nativeDestructor(long native_filter);
+    long native_instance;
 }

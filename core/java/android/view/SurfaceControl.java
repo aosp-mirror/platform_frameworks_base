@@ -32,11 +32,11 @@ import android.view.Surface.OutOfResourcesException;
 public class SurfaceControl {
     private static final String TAG = "SurfaceControl";
 
-    private static native int nativeCreate(SurfaceSession session, String name,
+    private static native long nativeCreate(SurfaceSession session, String name,
             int w, int h, int format, int flags)
             throws OutOfResourcesException;
-    private static native void nativeRelease(int nativeObject);
-    private static native void nativeDestroy(int nativeObject);
+    private static native void nativeRelease(long nativeObject);
+    private static native void nativeDestroy(long nativeObject);
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
             int width, int height, int minLayer, int maxLayer, boolean allLayers);
@@ -47,21 +47,21 @@ public class SurfaceControl {
     private static native void nativeCloseTransaction();
     private static native void nativeSetAnimationTransaction();
 
-    private static native void nativeSetLayer(int nativeObject, int zorder);
-    private static native void nativeSetPosition(int nativeObject, float x, float y);
-    private static native void nativeSetSize(int nativeObject, int w, int h);
-    private static native void nativeSetTransparentRegionHint(int nativeObject, Region region);
-    private static native void nativeSetAlpha(int nativeObject, float alpha);
-    private static native void nativeSetMatrix(int nativeObject, float dsdx, float dtdx, float dsdy, float dtdy);
-    private static native void nativeSetFlags(int nativeObject, int flags, int mask);
-    private static native void nativeSetWindowCrop(int nativeObject, int l, int t, int r, int b);
-    private static native void nativeSetLayerStack(int nativeObject, int layerStack);
+    private static native void nativeSetLayer(long nativeObject, int zorder);
+    private static native void nativeSetPosition(long nativeObject, float x, float y);
+    private static native void nativeSetSize(long nativeObject, int w, int h);
+    private static native void nativeSetTransparentRegionHint(long nativeObject, Region region);
+    private static native void nativeSetAlpha(long nativeObject, float alpha);
+    private static native void nativeSetMatrix(long nativeObject, float dsdx, float dtdx, float dsdy, float dtdy);
+    private static native void nativeSetFlags(long nativeObject, int flags, int mask);
+    private static native void nativeSetWindowCrop(long nativeObject, int l, int t, int r, int b);
+    private static native void nativeSetLayerStack(long nativeObject, int layerStack);
 
     private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
     private static native void nativeDestroyDisplay(IBinder displayToken);
     private static native void nativeSetDisplaySurface(
-            IBinder displayToken, int nativeSurfaceObject);
+            IBinder displayToken, long nativeSurfaceObject);
     private static native void nativeSetDisplayLayerStack(
             IBinder displayToken, int layerStack);
     private static native void nativeSetDisplayProjection(
@@ -76,7 +76,7 @@ public class SurfaceControl {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private final String mName;
-    int mNativeObject; // package visibility only for Surface.java access
+    long mNativeObject; // package visibility only for Surface.java access
 
     /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
 
