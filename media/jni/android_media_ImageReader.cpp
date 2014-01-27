@@ -707,6 +707,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     }
     status_t res = consumer->lockNextBuffer(buffer);
     if (res != NO_ERROR) {
+        ctx->returnLockedBuffer(buffer);
         if (res != BAD_VALUE /*no buffers*/) {
             if (res == NOT_ENOUGH_DATA) {
                 return ACQUIRE_MAX_IMAGES;
