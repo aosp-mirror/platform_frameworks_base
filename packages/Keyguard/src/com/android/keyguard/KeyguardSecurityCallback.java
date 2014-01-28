@@ -15,8 +15,6 @@
  */
 package com.android.keyguard;
 
-import com.android.keyguard.KeyguardHostView.OnDismissAction;
-
 public interface KeyguardSecurityCallback {
 
     /**
@@ -40,29 +38,13 @@ public interface KeyguardSecurityCallback {
 
     /**
      * Call when user correctly enters their credentials
+     * @param success
      */
-    void reportSuccessfulUnlockAttempt();
-
-    /**
-     * Call when the user incorrectly enters their credentials
-     */
-    void reportFailedUnlockAttempt();
-
-    /**
-     * Gets the number of attempts thus far as reported by {@link #reportFailedUnlockAttempt()}
-     * @return number of failed attempts
-     */
-    int getFailedAttempts();
+    void reportUnlockAttempt(boolean success);
 
     /**
      * Shows the backup security for the current method.  If none available, this call is a no-op.
      */
     void showBackupSecurity();
-
-    /**
-     * Sets an action to perform after the user successfully enters their credentials.
-     * @param action
-     */
-    void setOnDismissAction(OnDismissAction action);
 
 }

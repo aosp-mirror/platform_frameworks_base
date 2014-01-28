@@ -260,7 +260,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         public void onPatternDetected(List<LockPatternView.Cell> pattern) {
             if (mLockPatternUtils.checkPattern(pattern)) {
-                mCallback.reportSuccessfulUnlockAttempt();
+                mCallback.reportUnlockAttempt(true);
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mTotalFailedPatternAttempts = 0;
                 mCallback.dismiss(true);
@@ -272,7 +272,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 if (pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                     mTotalFailedPatternAttempts++;
                     mFailedPatternAttemptsSinceLastTimeout++;
-                    mCallback.reportFailedUnlockAttempt();
+                    mCallback.reportUnlockAttempt(false);
                 }
                 if (mFailedPatternAttemptsSinceLastTimeout
                         >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {

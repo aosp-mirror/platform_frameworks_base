@@ -53,9 +53,11 @@ public abstract class KeyguardActivityLauncher {
 
     abstract Context getContext();
 
-    abstract KeyguardSecurityCallback getCallback();
-
     abstract LockPatternUtils getLockPatternUtils();
+
+    abstract void setOnDismissAction(OnDismissAction action);
+
+    abstract void requestDismissKeyguard();
 
     public static class CameraWidgetInfo {
         public String contextPackage;
@@ -190,8 +192,7 @@ public abstract class KeyguardActivityLauncher {
         } else {
             // Create a runnable to start the activity and ask the user to enter their
             // credentials.
-            KeyguardSecurityCallback callback = getCallback();
-            callback.setOnDismissAction(new OnDismissAction() {
+            setOnDismissAction(new OnDismissAction() {
                 @Override
                 public boolean onDismiss() {
                     dismissKeyguardOnNextActivity();
@@ -199,7 +200,7 @@ public abstract class KeyguardActivityLauncher {
                     return true;
                 }
             });
-            callback.dismiss(false);
+            requestDismissKeyguard();
         }
     }
 
