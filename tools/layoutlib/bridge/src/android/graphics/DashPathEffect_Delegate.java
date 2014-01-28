@@ -73,7 +73,7 @@ public final class DashPathEffect_Delegate extends PathEffect_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate(float intervals[], float phase) {
+    /*package*/ static long nativeCreate(float intervals[], float phase) {
         DashPathEffect_Delegate newDelegate = new DashPathEffect_Delegate(intervals, phase);
         return sManager.addNewDelegate(newDelegate);
     }

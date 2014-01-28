@@ -46,7 +46,7 @@ public abstract class DrawFilter_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static DrawFilter_Delegate getDelegate(int nativeDrawFilter) {
+    public static DrawFilter_Delegate getDelegate(long nativeDrawFilter) {
         return sManager.getDelegate(nativeDrawFilter);
     }
 
@@ -56,7 +56,7 @@ public abstract class DrawFilter_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDestructor(int nativeDrawFilter) {
+    /*package*/ static void nativeDestructor(long nativeDrawFilter) {
         sManager.removeJavaReferenceFor(nativeDrawFilter);
     }
 

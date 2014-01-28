@@ -46,7 +46,7 @@ public abstract class ColorFilter_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static ColorFilter_Delegate getDelegate(int nativeShader) {
+    public static ColorFilter_Delegate getDelegate(long nativeShader) {
         return sManager.getDelegate(nativeShader);
     }
 
@@ -56,7 +56,7 @@ public abstract class ColorFilter_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void finalizer(int native_instance, int nativeColorFilter) {
+    /*package*/ static void finalizer(long native_instance, long nativeColorFilter) {
         sManager.removeJavaReferenceFor(native_instance);
     }
 

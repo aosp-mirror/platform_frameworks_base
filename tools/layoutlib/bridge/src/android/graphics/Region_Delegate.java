@@ -57,7 +57,7 @@ public class Region_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static Region_Delegate getDelegate(int nativeShader) {
+    public static Region_Delegate getDelegate(long nativeShader) {
         return sManager.getDelegate(nativeShader);
     }
 
@@ -264,18 +264,18 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeConstructor() {
+    /*package*/ static long nativeConstructor() {
         Region_Delegate newDelegate = new Region_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDestructor(int native_region) {
+    /*package*/ static void nativeDestructor(long native_region) {
         sManager.removeJavaReferenceFor(native_region);
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeSetRegion(int native_dst, int native_src) {
+    /*package*/ static boolean nativeSetRegion(long native_dst, long native_src) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
         if (dstRegion == null) {
             return true;
@@ -293,7 +293,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeSetRect(int native_dst,
+    /*package*/ static boolean nativeSetRect(long native_dst,
             int left, int top, int right, int bottom) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
         if (dstRegion == null) {
@@ -305,7 +305,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeSetPath(int native_dst, int native_path, int native_clip) {
+    /*package*/ static boolean nativeSetPath(long native_dst, long native_path, long native_clip) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
         if (dstRegion == null) {
             return true;
@@ -327,7 +327,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeGetBounds(int native_region, Rect rect) {
+    /*package*/ static boolean nativeGetBounds(long native_region, Rect rect) {
         Region_Delegate region = sManager.getDelegate(native_region);
         if (region == null) {
             return true;
@@ -347,7 +347,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeGetBoundaryPath(int native_region, int native_path) {
+    /*package*/ static boolean nativeGetBoundaryPath(long native_region, long native_path) {
         Region_Delegate region = sManager.getDelegate(native_region);
         if (region == null) {
             return false;
@@ -368,7 +368,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeOp(int native_dst,
+    /*package*/ static boolean nativeOp(long native_dst,
             int left, int top, int right, int bottom, int op) {
         Region_Delegate region = sManager.getDelegate(native_dst);
         if (region == null) {
@@ -387,7 +387,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeOp(int native_dst, Rect rect, int native_region, int op) {
+    /*package*/ static boolean nativeOp(long native_dst, Rect rect, long native_region, int op) {
         Region_Delegate region = sManager.getDelegate(native_dst);
         if (region == null) {
             return false;
@@ -405,8 +405,8 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeOp(int native_dst,
-            int native_region1, int native_region2, int op) {
+    /*package*/ static boolean nativeOp(long native_dst,
+            long native_region1, long native_region2, int op) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
         if (dstRegion == null) {
             return true;
@@ -434,7 +434,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreateFromParcel(Parcel p) {
+    /*package*/ static long nativeCreateFromParcel(Parcel p) {
         // This is only called by Region.CREATOR (Parcelable.Creator<Region>), which is only
         // used during aidl call so really this should not be called.
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
@@ -444,7 +444,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeWriteToParcel(int native_region,
+    /*package*/ static boolean nativeWriteToParcel(long native_region,
                                                       Parcel p) {
         // This is only called when sending a region through aidl, so really this should not
         // be called.
@@ -455,7 +455,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nativeEquals(int native_r1, int native_r2) {
+    /*package*/ static boolean nativeEquals(long native_r1, long native_r2) {
         Region_Delegate region1 = sManager.getDelegate(native_r1);
         if (region1 == null) {
             return false;
@@ -470,7 +470,7 @@ public class Region_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static String nativeToString(int native_region) {
+    /*package*/ static String nativeToString(long native_region) {
         Region_Delegate region = sManager.getDelegate(native_region);
         if (region == null) {
             return "not found";
