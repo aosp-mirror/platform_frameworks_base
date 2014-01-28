@@ -77,7 +77,7 @@ public final class Canvas_Delegate {
     /**
      * Returns the native delegate associated to a given an int referencing a {@link Canvas} object.
      */
-    public static Canvas_Delegate getDelegate(int native_canvas) {
+    public static Canvas_Delegate getDelegate(long native_canvas) {
         return sManager.getDelegate(native_canvas);
     }
 
@@ -310,7 +310,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int initRaster(int nativeBitmapOrZero) {
+    /*package*/ static long initRaster(long nativeBitmapOrZero) {
         if (nativeBitmapOrZero > 0) {
             // get the Bitmap from the int
             Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nativeBitmapOrZero);
@@ -328,7 +328,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void copyNativeCanvasState(int srcCanvas, int dstCanvas) {
+    /*package*/ static void copyNativeCanvasState(long srcCanvas, long dstCanvas) {
         // get the delegate from the native int.
         Canvas_Delegate srcCanvasDelegate = sManager.getDelegate(srcCanvas);
         if (srcCanvasDelegate == null) {
@@ -344,8 +344,8 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int native_saveLayer(int nativeCanvas, RectF bounds,
-                                               int paint, int layerFlags) {
+    /*package*/ static long native_saveLayer(long nativeCanvas, RectF bounds,
+                                               long paint, int layerFlags) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -361,9 +361,9 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int native_saveLayer(int nativeCanvas, float l,
+    /*package*/ static long native_saveLayer(long nativeCanvas, float l,
                                                float t, float r, float b,
-                                               int paint, int layerFlags) {
+                                               long paint, int layerFlags) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -380,7 +380,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int native_saveLayerAlpha(int nativeCanvas,
+    /*package*/ static long native_saveLayerAlpha(long nativeCanvas,
                                                     RectF bounds, int alpha,
                                                     int layerFlags) {
         // get the delegate from the native int.
@@ -393,7 +393,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int native_saveLayerAlpha(int nativeCanvas, float l,
+    /*package*/ static long native_saveLayerAlpha(long nativeCanvas, float l,
                                                     float t, float r, float b,
                                                     int alpha, int layerFlags) {
         // get the delegate from the native int.
@@ -407,7 +407,7 @@ public final class Canvas_Delegate {
 
 
     @LayoutlibDelegate
-    /*package*/ static void native_concat(int nCanvas, int nMatrix) {
+    /*package*/ static void native_concat(long nCanvas, long nMatrix) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
@@ -435,7 +435,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setMatrix(int nCanvas, int nMatrix) {
+    /*package*/ static void native_setMatrix(long nCanvas, long nMatrix) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
@@ -465,7 +465,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_clipRect(int nCanvas,
+    /*package*/ static boolean native_clipRect(long nCanvas,
                                                   float left, float top,
                                                   float right, float bottom,
                                                   int regionOp) {
@@ -480,8 +480,8 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_clipPath(int nativeCanvas,
-                                                  int nativePath,
+    /*package*/ static boolean native_clipPath(long nativeCanvas,
+                                                  long nativePath,
                                                   int regionOp) {
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -497,8 +497,8 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_clipRegion(int nativeCanvas,
-                                                    int nativeRegion,
+    /*package*/ static boolean native_clipRegion(long nativeCanvas,
+                                                    long nativeRegion,
                                                     int regionOp) {
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -514,7 +514,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeSetDrawFilter(int nativeCanvas, int nativeFilter) {
+    /*package*/ static void nativeSetDrawFilter(long nativeCanvas, long nativeFilter) {
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
             return;
@@ -530,7 +530,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_getClipBounds(int nativeCanvas,
+    /*package*/ static boolean native_getClipBounds(long nativeCanvas,
                                                        Rect bounds) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
@@ -551,7 +551,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_getCTM(int canvas, int matrix) {
+    /*package*/ static void native_getCTM(long canvas, long matrix) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(canvas);
         if (canvasDelegate == null) {
@@ -568,21 +568,21 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_quickReject(int nativeCanvas,
+    /*package*/ static boolean native_quickReject(long nativeCanvas,
                                                      RectF rect) {
         // FIXME properly implement quickReject
         return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_quickReject(int nativeCanvas,
-                                                     int path) {
+    /*package*/ static boolean native_quickReject(long nativeCanvas,
+                                                     long path) {
         // FIXME properly implement quickReject
         return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_quickReject(int nativeCanvas,
+    /*package*/ static boolean native_quickReject(long nativeCanvas,
                                                      float left, float top,
                                                      float right, float bottom) {
         // FIXME properly implement quickReject
@@ -590,25 +590,25 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawRGB(int nativeCanvas, int r, int g, int b) {
+    /*package*/ static void native_drawRGB(long nativeCanvas, int r, int g, int b) {
         native_drawColor(nativeCanvas, 0xFF000000 | r << 16 | (g&0xFF) << 8 | (b&0xFF),
                 PorterDuff.Mode.SRC_OVER.nativeInt);
 
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawARGB(int nativeCanvas, int a, int r, int g, int b) {
+    /*package*/ static void native_drawARGB(long nativeCanvas, int a, int r, int g, int b) {
         native_drawColor(nativeCanvas, a << 24 | (r&0xFF) << 16 | (g&0xFF) << 8 | (b&0xFF),
                 PorterDuff.Mode.SRC_OVER.nativeInt);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawColor(int nativeCanvas, int color) {
+    /*package*/ static void native_drawColor(long nativeCanvas, int color) {
         native_drawColor(nativeCanvas, color, PorterDuff.Mode.SRC_OVER.nativeInt);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawColor(int nativeCanvas, final int color, final int mode) {
+    /*package*/ static void native_drawColor(long nativeCanvas, final int color, final int mode) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -639,16 +639,16 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPaint(int nativeCanvas, int paint) {
+    /*package*/ static void native_drawPaint(long nativeCanvas, long paint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawPaint is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawLine(int nativeCanvas,
+    /*package*/ static void native_drawLine(long nativeCanvas,
             final float startX, final float startY, final float stopX, final float stopY,
-            int paint) {
+            long paint) {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
@@ -660,14 +660,13 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawRect(int nativeCanvas, RectF rect,
-                                               int paint) {
+    /*package*/ static void native_drawRect(long nativeCanvas, RectF rect, long paint) {
         native_drawRect(nativeCanvas, rect.left, rect.top, rect.right, rect.bottom, paint);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawRect(int nativeCanvas,
-            final float left, final float top, final float right, final float bottom, int paint) {
+    /*package*/ static void native_drawRect(long nativeCanvas,
+            final float left, final float top, final float right, final float bottom, long paint) {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
@@ -692,7 +691,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawOval(int nativeCanvas, final RectF oval, int paint) {
+    /*package*/ static void native_drawOval(long nativeCanvas, final RectF oval, long paint) {
         if (oval.right > oval.left && oval.bottom > oval.top) {
             draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                     new GcSnapshot.Drawable() {
@@ -718,17 +717,17 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawCircle(int nativeCanvas,
-            float cx, float cy, float radius, int paint) {
+    /*package*/ static void native_drawCircle(long nativeCanvas,
+            float cx, float cy, float radius, long paint) {
         native_drawOval(nativeCanvas,
                 new RectF(cx - radius, cy - radius, cx + radius, cy + radius),
                 paint);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawArc(int nativeCanvas,
+    /*package*/ static void native_drawArc(long nativeCanvas,
             final RectF oval, final float startAngle, final float sweep,
-            final boolean useCenter, int paint) {
+            final boolean useCenter, long paint) {
         if (oval.right > oval.left && oval.bottom > oval.top) {
             draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                     new GcSnapshot.Drawable() {
@@ -757,8 +756,8 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawRoundRect(int nativeCanvas,
-            final RectF rect, final float rx, final float ry, int paint) {
+    /*package*/ static void native_drawRoundRect(long nativeCanvas,
+            final RectF rect, final float rx, final float ry, long paint) {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
@@ -787,7 +786,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPath(int nativeCanvas, int path, int paint) {
+    /*package*/ static void native_drawPath(long nativeCanvas, int path, long paint) {
         final Path_Delegate pathDelegate = Path_Delegate.getDelegate(path);
         if (pathDelegate == null) {
             return;
@@ -814,9 +813,9 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawBitmap(Canvas thisCanvas, int nativeCanvas, int bitmap,
+    /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, long bitmap,
                                                  float left, float top,
-                                                 int nativePaintOrZero,
+                                                 long nativePaintOrZero,
                                                  int canvasDensity,
                                                  int screenDensity,
                                                  int bitmapDensity) {
@@ -836,9 +835,9 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawBitmap(Canvas thisCanvas, int nativeCanvas, int bitmap,
+    /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, long bitmap,
                                                  Rect src, RectF dst,
-                                                 int nativePaintOrZero,
+                                                 long nativePaintOrZero,
                                                  int screenDensity,
                                                  int bitmapDensity) {
         // get the delegate from the native int.
@@ -861,9 +860,9 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawBitmap(int nativeCanvas, int bitmap,
+    /*package*/ static void native_drawBitmap(long nativeCanvas, long bitmap,
                                                  Rect src, Rect dst,
-                                                 int nativePaintOrZero,
+                                                 long nativePaintOrZero,
                                                  int screenDensity,
                                                  int bitmapDensity) {
         // get the delegate from the native int.
@@ -886,11 +885,11 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawBitmap(int nativeCanvas, int[] colors,
+    /*package*/ static void native_drawBitmap(long nativeCanvas, int[] colors,
                                                 int offset, int stride, final float x,
                                                  final float y, int width, int height,
                                                  boolean hasAlpha,
-                                                 int nativePaintOrZero) {
+                                                 long nativePaintOrZero) {
 
         // create a temp BufferedImage containing the content.
         final BufferedImage image = new BufferedImage(width, height,
@@ -912,8 +911,8 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDrawBitmapMatrix(int nCanvas, int nBitmap,
-                                                      int nMatrix, int nPaint) {
+    /*package*/ static void nativeDrawBitmapMatrix(long nCanvas, long nBitmap,
+                                                      long nMatrix, long nPaint) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
@@ -953,30 +952,30 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDrawBitmapMesh(int nCanvas, int nBitmap,
+    /*package*/ static void nativeDrawBitmapMesh(long nCanvas, long nBitmap,
             int meshWidth, int meshHeight, float[] verts, int vertOffset, int[] colors,
-            int colorOffset, int nPaint) {
+            int colorOffset, long nPaint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawBitmapMesh is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDrawVertices(int nCanvas, int mode, int n,
+    /*package*/ static void nativeDrawVertices(long nCanvas, int mode, int n,
             float[] verts, int vertOffset,
             float[] texs, int texOffset,
             int[] colors, int colorOffset,
             short[] indices, int indexOffset,
-            int indexCount, int nPaint) {
+            int indexCount, long nPaint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawVertices is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawText(int nativeCanvas,
+    /*package*/ static void native_drawText(long nativeCanvas,
             final char[] text, final int index, final int count,
-            final float startX, final float startY, final int flags, int paint) {
+            final float startX, final float startY, final int flags, long paint) {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
@@ -1005,8 +1004,8 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawText(int nativeCanvas, String text,
-            int start, int end, float x, float y, final int flags, int paint) {
+    /*package*/ static void native_drawText(long nativeCanvas, String text,
+            int start, int end, float x, float y, final int flags, long paint) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
@@ -1015,9 +1014,9 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawTextRun(int nativeCanvas, String text,
+    /*package*/ static void native_drawTextRun(long nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, int paint) {
+            float x, float y, int flags, long paint) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
@@ -1026,56 +1025,56 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawTextRun(int nativeCanvas, char[] text,
+    /*package*/ static void native_drawTextRun(long nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
-            float x, float y, int flags, int paint) {
+            float x, float y, int flags, long paint) {
         native_drawText(nativeCanvas, text, start, count, x, y, flags, paint);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPosText(int nativeCanvas,
+    /*package*/ static void native_drawPosText(long nativeCanvas,
                                                   char[] text, int index,
                                                   int count, float[] pos,
-                                                  int paint) {
+                                                  long paint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawPosText is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPosText(int nativeCanvas,
+    /*package*/ static void native_drawPosText(long nativeCanvas,
                                                   String text, float[] pos,
-                                                  int paint) {
+                                                  long paint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawPosText is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawTextOnPath(int nativeCanvas,
+    /*package*/ static void native_drawTextOnPath(long nativeCanvas,
                                                      char[] text, int index,
-                                                     int count, int path,
+                                                     int count, long path,
                                                      float hOffset,
                                                      float vOffset, int bidiFlags,
-                                                     int paint) {
+                                                     long paint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawTextOnPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawTextOnPath(int nativeCanvas,
-                                                     String text, int path,
+    /*package*/ static void native_drawTextOnPath(long nativeCanvas,
+                                                     String text, long path,
                                                      float hOffset,
                                                      float vOffset,
-                                                     int flags, int paint) {
+                                                     int flags, long paint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawTextOnPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void finalizer(int nativeCanvas) {
+    /*package*/ static void finalizer(long nativeCanvas) {
         // get the delegate from the native int so that it can be disposed.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -1095,7 +1094,7 @@ public final class Canvas_Delegate {
      * <p>Note that the drawable may actually be executed several times if there are
      * layers involved (see {@link #saveLayer(RectF, int, int)}.
      */
-    private static void draw(int nCanvas, int nPaint, boolean compositeOnly, boolean forceSrcMode,
+    private static void draw(long nCanvas, long nPaint, boolean compositeOnly, boolean forceSrcMode,
             GcSnapshot.Drawable drawable) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
@@ -1115,7 +1114,7 @@ public final class Canvas_Delegate {
      * <p>Note that the drawable may actually be executed several times if there are
      * layers involved (see {@link #saveLayer(RectF, int, int)}.
      */
-    private static void draw(int nCanvas, GcSnapshot.Drawable drawable) {
+    private static void draw(long nCanvas, GcSnapshot.Drawable drawable) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
@@ -1193,9 +1192,9 @@ public final class Canvas_Delegate {
     }
 
     private static void drawBitmap(
-            int nativeCanvas,
+            long nativeCanvas,
             Bitmap_Delegate bitmap,
-            int nativePaintOrZero,
+            long nativePaintOrZero,
             final int sleft, final int stop, final int sright, final int sbottom,
             final int dleft, final int dtop, final int dright, final int dbottom) {
         // get the delegate from the native int.

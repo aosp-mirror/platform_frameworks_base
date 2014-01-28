@@ -54,7 +54,7 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate1(LinearGradient thisGradient,
+    /*package*/ static long nativeCreate1(LinearGradient thisGradient,
             float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode) {
         LinearGradient_Delegate newDelegate = new LinearGradient_Delegate(x0, y0, x1, y1,
@@ -63,7 +63,7 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate2(LinearGradient thisGradient,
+    /*package*/ static long nativeCreate2(LinearGradient thisGradient,
             float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode) {
         return nativeCreate1(thisGradient,
@@ -72,16 +72,16 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate1(LinearGradient thisGradient,
-            int native_shader, float x0, float y0, float x1, float y1,
+    /*package*/ static long nativePostCreate1(LinearGradient thisGradient,
+            long native_shader, float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode) {
         // nothing to be done here.
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate2(LinearGradient thisGradient,
-            int native_shader, float x0, float y0, float x1, float y1,
+    /*package*/ static long nativePostCreate2(LinearGradient thisGradient,
+            long native_shader, float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode) {
         // nothing to be done here.
         return 0;

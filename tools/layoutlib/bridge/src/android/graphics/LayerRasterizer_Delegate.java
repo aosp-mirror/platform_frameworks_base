@@ -55,13 +55,13 @@ public class LayerRasterizer_Delegate extends Rasterizer_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeConstructor() {
+    /*package*/ static long nativeConstructor() {
         LayerRasterizer_Delegate newDelegate = new LayerRasterizer_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeAddLayer(int native_layer, int native_paint, float dx, float dy) {
+    /*package*/ static void nativeAddLayer(long native_layer, long native_paint, float dx, float dy) {
 
     }
 

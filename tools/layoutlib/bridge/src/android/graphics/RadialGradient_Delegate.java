@@ -54,7 +54,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate1(float x, float y, float radius,
+    /*package*/ static long nativeCreate1(float x, float y, float radius,
             int colors[], float positions[], int tileMode) {
         RadialGradient_Delegate newDelegate = new RadialGradient_Delegate(x, y, radius,
                 colors, positions, Shader_Delegate.getTileMode(tileMode));
@@ -62,21 +62,21 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate2(float x, float y, float radius,
+    /*package*/ static long nativeCreate2(float x, float y, float radius,
             int color0, int color1, int tileMode) {
         return nativeCreate1(x, y, radius, new int[] { color0, color1 }, null /*positions*/,
                 tileMode);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate1(int native_shader, float x, float y, float radius,
+    /*package*/ static long nativePostCreate1(long native_shader, float x, float y, float radius,
             int colors[], float positions[], int tileMode) {
         // nothing to be done here.
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativePostCreate2(int native_shader, float x, float y, float radius,
+    /*package*/ static long nativePostCreate2(long native_shader, float x, float y, float radius,
             int color0, int color1, int tileMode) {
         // nothing to be done here.
         return 0;
