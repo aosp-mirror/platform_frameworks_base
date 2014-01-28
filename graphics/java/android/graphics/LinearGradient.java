@@ -116,12 +116,12 @@ public class LinearGradient extends Shader {
         return copy;
     }
 
-    private native int nativeCreate1(float x0, float y0, float x1, float y1,
+    private native long nativeCreate1(float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode);
-	private native int nativeCreate2(float x0, float y0, float x1, float y1,
+	private native long nativeCreate2(float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode);
-    private native int nativePostCreate1(int native_shader, float x0, float y0, float x1, float y1,
+    private native long nativePostCreate1(long native_shader, float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode);
-    private native int nativePostCreate2(int native_shader, float x0, float y0, float x1, float y1,
+    private native long nativePostCreate2(long native_shader, float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode);
 }

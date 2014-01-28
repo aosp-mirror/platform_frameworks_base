@@ -27,8 +27,8 @@ public class Path {
     /**
      * @hide
      */
-    public final int mNativePath;
-    private int mNativePathMeasure;
+    public final long mNativePath;
+    private long mNativePathMeasure;
 
     /**
      * @hide
@@ -53,7 +53,7 @@ public class Path {
      * @param src The path to copy from when initializing the new path
      */
     public Path(Path src) {
-        int valNative = 0;
+        long valNative = 0;
         if (src != null) {
             valNative = src.mNativePath;
             isSimplePath = src.isSimplePath;
@@ -657,7 +657,7 @@ public class Path {
      *            the original path is modified.
      */
     public void offset(float dx, float dy, Path dst) {
-        int dstNative = 0;
+        long dstNative = 0;
         if (dst != null) {
             dstNative = dst.mNativePath;
             dst.isSimplePath = false;
@@ -703,7 +703,7 @@ public class Path {
      *               then the the original path is modified
      */
     public void transform(Matrix matrix, Path dst) {
-        int dstNative = 0;
+        long dstNative = 0;
         if (dst != null) {
             dst.isSimplePath = false;
             dstNative = dst.mNativePath;
@@ -738,7 +738,7 @@ public class Path {
         }
     }
 
-    final int ni() {
+    final long ni() {
         return mNativePath;
     }
 
@@ -818,7 +818,7 @@ public class Path {
         if (trimStart > trimEnd) {
             throw new IllegalArgumentException("trim end cannot be less than start");
         }
-        int dstNative = 0;
+        long dstNative = 0;
         if (dst != null) {
             dstNative = dst.mNativePath;
             dst.isSimplePath = false;
@@ -828,54 +828,54 @@ public class Path {
                 trimStart, trimEnd, trimOffset);
     }
 
-    private static native int init1();
-    private static native int init2(int nPath);
-    private static native void native_reset(int nPath);
-    private static native void native_rewind(int nPath);
-    private static native void native_set(int native_dst, int native_src);
-    private static native int native_getFillType(int nPath);
-    private static native void native_setFillType(int nPath, int ft);
-    private static native boolean native_isEmpty(int nPath);
-    private static native boolean native_isRect(int nPath, RectF rect);
-    private static native void native_computeBounds(int nPath, RectF bounds);
-    private static native void native_incReserve(int nPath, int extraPtCount);
-    private static native void native_moveTo(int nPath, float x, float y);
-    private static native void native_rMoveTo(int nPath, float dx, float dy);
-    private static native void native_lineTo(int nPath, float x, float y);
-    private static native void native_rLineTo(int nPath, float dx, float dy);
-    private static native void native_quadTo(int nPath, float x1, float y1,
+    private static native long init1();
+    private static native long init2(long nPath);
+    private static native void native_reset(long nPath);
+    private static native void native_rewind(long nPath);
+    private static native void native_set(long native_dst, long native_src);
+    private static native int native_getFillType(long nPath);
+    private static native void native_setFillType(long nPath, int ft);
+    private static native boolean native_isEmpty(long nPath);
+    private static native boolean native_isRect(long nPath, RectF rect);
+    private static native void native_computeBounds(long nPath, RectF bounds);
+    private static native void native_incReserve(long nPath, int extraPtCount);
+    private static native void native_moveTo(long nPath, float x, float y);
+    private static native void native_rMoveTo(long nPath, float dx, float dy);
+    private static native void native_lineTo(long nPath, float x, float y);
+    private static native void native_rLineTo(long nPath, float dx, float dy);
+    private static native void native_quadTo(long nPath, float x1, float y1,
                                              float x2, float y2);
-    private static native void native_rQuadTo(int nPath, float dx1, float dy1,
+    private static native void native_rQuadTo(long nPath, float dx1, float dy1,
                                               float dx2, float dy2);
-    private static native void native_cubicTo(int nPath, float x1, float y1,
+    private static native void native_cubicTo(long nPath, float x1, float y1,
                                         float x2, float y2, float x3, float y3);
-    private static native void native_rCubicTo(int nPath, float x1, float y1,
+    private static native void native_rCubicTo(long nPath, float x1, float y1,
                                         float x2, float y2, float x3, float y3);
-    private static native void native_arcTo(int nPath, RectF oval,
+    private static native void native_arcTo(long nPath, RectF oval,
                     float startAngle, float sweepAngle, boolean forceMoveTo);
-    private static native void native_close(int nPath);
-    private static native void native_addRect(int nPath, RectF rect, int dir);
-    private static native void native_addRect(int nPath, float left, float top,
+    private static native void native_close(long nPath);
+    private static native void native_addRect(long nPath, RectF rect, int dir);
+    private static native void native_addRect(long nPath, float left, float top,
                                             float right, float bottom, int dir);
-    private static native void native_addOval(int nPath, RectF oval, int dir);
-    private static native void native_addCircle(int nPath, float x, float y, float radius, int dir);
-    private static native void native_addArc(int nPath, RectF oval,
+    private static native void native_addOval(long nPath, RectF oval, int dir);
+    private static native void native_addCircle(long nPath, float x, float y, float radius, int dir);
+    private static native void native_addArc(long nPath, RectF oval,
                                             float startAngle, float sweepAngle);
-    private static native void native_addRoundRect(int nPath, RectF rect,
+    private static native void native_addRoundRect(long nPath, RectF rect,
                                                    float rx, float ry, int dir);
-    private static native void native_addRoundRect(int nPath, RectF r, float[] radii, int dir);
-    private static native void native_addPath(int nPath, int src, float dx, float dy);
-    private static native void native_addPath(int nPath, int src);
-    private static native void native_addPath(int nPath, int src, int matrix);
-    private static native void native_offset(int nPath, float dx, float dy, int dst_path);
-    private static native void native_offset(int nPath, float dx, float dy);
-    private static native void native_setLastPoint(int nPath, float dx, float dy);
-    private static native void native_transform(int nPath, int matrix, int dst_path);
-    private static native void native_transform(int nPath, int matrix);
-    private static native boolean native_op(int path1, int path2, int op, int result);
-    private static native void finalizer(int nPath);
-    private static native float[] native_approximate(int nPath, float error);
-    private static native int native_trim(int nPath, int nTargetPath, int nPathMeasure,
+    private static native void native_addRoundRect(long nPath, RectF r, float[] radii, int dir);
+    private static native void native_addPath(long nPath, long src, float dx, float dy);
+    private static native void native_addPath(long nPath, long src);
+    private static native void native_addPath(long nPath, long src, long matrix);
+    private static native void native_offset(long nPath, float dx, float dy, long dst_path);
+    private static native void native_offset(long nPath, float dx, float dy);
+    private static native void native_setLastPoint(long nPath, float dx, float dy);
+    private static native void native_transform(long nPath, long matrix, long dst_path);
+    private static native void native_transform(long nPath, long matrix);
+    private static native boolean native_op(long path1, long path2, int op, long result);
+    private static native void finalizer(long nPath);
+    private static native float[] native_approximate(long nPath, float error);
+    private static native int native_trim(long nPath, long nTargetPath, long nPathMeasure,
             float trimStart, float trimEnd, float trimOffset);
-    private static native void native_destroyMeasure(int nPathMeasure);
+    private static native void native_destroyMeasure(long nPathMeasure);
 }

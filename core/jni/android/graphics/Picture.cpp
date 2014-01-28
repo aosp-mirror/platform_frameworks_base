@@ -28,71 +28,80 @@ namespace android {
 
 class SkPictureGlue {
 public:
-    static SkPicture* newPicture(JNIEnv* env, jobject, const SkPicture* src) {
+    static jlong newPicture(JNIEnv* env, jobject, jlong srcHandle) {
+        const SkPicture* src = reinterpret_cast<SkPicture*>(srcHandle);
         if (src) {
-            return new SkPicture(*src);
+            return reinterpret_cast<jlong>(new SkPicture(*src));
         } else {
-            return new SkPicture;
+            return reinterpret_cast<jlong>(new SkPicture);
         }
     }
-    
-    static SkPicture* deserialize(JNIEnv* env, jobject, jobject jstream,
-                                  jbyteArray jstorage) {
+
+    static jlong deserialize(JNIEnv* env, jobject, jobject jstream,
+                             jbyteArray jstorage) {
         SkPicture* picture = NULL;
         SkStream* strm = CreateJavaInputStreamAdaptor(env, jstream, jstorage);
         if (strm) {
             picture = SkPicture::CreateFromStream(strm);
             delete strm;
         }
-        return picture;
+        return reinterpret_cast<jlong>(picture);
     }
-    
-    static void killPicture(JNIEnv* env, jobject, SkPicture* picture) {
+
+    static void killPicture(JNIEnv* env, jobject, jlong pictureHandle) {
+        SkPicture* picture = reinterpret_cast<SkPicture*>(pictureHandle);
         SkASSERT(picture);
         picture->unref();
     }
-    
-    static void draw(JNIEnv* env, jobject, SkCanvas* canvas,
-                            SkPicture* picture) {
+
+    static void draw(JNIEnv* env, jobject, jlong canvasHandle,
+                            jlong pictureHandle) {
+        SkCanvas* canvas = reinterpret_cast<SkCanvas*>(canvasHandle);
+        SkPicture* picture = reinterpret_cast<SkPicture*>(pictureHandle);
         SkASSERT(canvas);
         SkASSERT(picture);
         picture->draw(canvas);
     }
-    
-    static bool serialize(JNIEnv* env, jobject, SkPicture* picture,
+
+    static jboolean serialize(JNIEnv* env, jobject, jlong pictureHandle,
                           jobject jstream, jbyteArray jstorage) {
+        SkPicture* picture = reinterpret_cast<SkPicture*>(pictureHandle);
         SkWStream* strm = CreateJavaOutputStreamAdaptor(env, jstream, jstorage);
         
         if (NULL != strm) {
             picture->serialize(strm);
             delete strm;
-            return true;
+            return JNI_TRUE;
         }
-        return false;
+        return JNI_FALSE;
     }
-        
-    static int getWidth(JNIEnv* env, jobject jpic) {
+
+    static jint getWidth(JNIEnv* env, jobject jpic) {
         NPE_CHECK_RETURN_ZERO(env, jpic);
-        return GraphicsJNI::getNativePicture(env, jpic)->width();
+        int width = GraphicsJNI::getNativePicture(env, jpic)->width();
+        return static_cast<jint>(width);
     }
-    
-    static int getHeight(JNIEnv* env, jobject jpic) {
+
+    static jint getHeight(JNIEnv* env, jobject jpic) {
         NPE_CHECK_RETURN_ZERO(env, jpic);
-        return GraphicsJNI::getNativePicture(env, jpic)->height();
+        int height = GraphicsJNI::getNativePicture(env, jpic)->height();
+        return static_cast<jint>(height);
     }
-    
-    static SkCanvas* beginRecording(JNIEnv* env, jobject, SkPicture* pict,
-                                    int w, int h) {
+
+    static jlong beginRecording(JNIEnv* env, jobject, jlong pictHandle,
+                                    jint w, jint h) {
+        SkPicture* pict = reinterpret_cast<SkPicture*>(pictHandle);
         // beginRecording does not ref its return value, it just returns it.
         SkCanvas* canvas = pict->beginRecording(w, h);
         // the java side will wrap this guy in a Canvas.java, which will call
         // unref in its finalizer, so we have to ref it here, so that both that
         // Canvas.java and our picture can both be owners
         canvas->ref();
-        return canvas;
+        return reinterpret_cast<jlong>(canvas);
     }
-    
-    static void endRecording(JNIEnv* env, jobject, SkPicture* pict) {
+
+    static void endRecording(JNIEnv* env, jobject, jlong pictHandle) {
+        SkPicture* pict = reinterpret_cast<SkPicture*>(pictHandle);
         pict->endRecording();
     }
 };
@@ -100,30 +109,30 @@ public:
 static JNINativeMethod gPictureMethods[] = {
     {"getWidth", "()I", (void*) SkPictureGlue::getWidth},
     {"getHeight", "()I", (void*) SkPictureGlue::getHeight},
-    {"nativeConstructor", "(I)I", (void*) SkPictureGlue::newPicture},
-    {"nativeCreateFromStream", "(Ljava/io/InputStream;[B)I", (void*)SkPictureGlue::deserialize},
-    {"nativeBeginRecording", "(III)I", (void*) SkPictureGlue::beginRecording},
-    {"nativeEndRecording", "(I)V", (void*) SkPictureGlue::endRecording},
-    {"nativeDraw", "(II)V", (void*) SkPictureGlue::draw},
-    {"nativeWriteToStream", "(ILjava/io/OutputStream;[B)Z", (void*)SkPictureGlue::serialize},
-    {"nativeDestructor","(I)V", (void*) SkPictureGlue::killPicture}
+    {"nativeConstructor", "(J)J", (void*) SkPictureGlue::newPicture},
+    {"nativeCreateFromStream", "(Ljava/io/InputStream;[B)J", (void*)SkPictureGlue::deserialize},
+    {"nativeBeginRecording", "(JII)J", (void*) SkPictureGlue::beginRecording},
+    {"nativeEndRecording", "(J)V", (void*) SkPictureGlue::endRecording},
+    {"nativeDraw", "(JJ)V", (void*) SkPictureGlue::draw},
+    {"nativeWriteToStream", "(JLjava/io/OutputStream;[B)Z", (void*)SkPictureGlue::serialize},
+    {"nativeDestructor","(J)V", (void*) SkPictureGlue::killPicture}
 };
 
 #include <android_runtime/AndroidRuntime.h>
-    
+
 #define REG(env, name, array) \
     result = android::AndroidRuntime::registerNativeMethods(env, name, array, \
     SK_ARRAY_COUNT(array));  \
     if (result < 0) return result
-    
+
 int register_android_graphics_Picture(JNIEnv* env) {
     int result;
-    
+
     REG(env, "android/graphics/Picture", gPictureMethods);
-    
+
     return result;
 }
-    
+
 }
 
 

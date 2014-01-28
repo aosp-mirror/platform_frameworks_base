@@ -30,7 +30,7 @@ public class Region implements Parcelable {
     /**
      * @hide
      */
-    public final int mNativeRegion;
+    public final long mNativeRegion;
 
     // the native values for these must match up with the enum in SkRegion.h
     public enum Op {
@@ -342,7 +342,7 @@ public class Region implements Parcelable {
              * @return a new region created from the data in the parcel
              */
             public Region createFromParcel(Parcel p) {
-                int ni = nativeCreateFromParcel(p);
+                long ni = nativeCreateFromParcel(p);
                 if (ni == 0) {
                     throw new RuntimeException();
                 }
@@ -385,7 +385,7 @@ public class Region implements Parcelable {
         }
     }
     
-    Region(int ni) {
+    Region(long ni) {
         if (ni == 0) {
             throw new RuntimeException();
         }
@@ -394,38 +394,38 @@ public class Region implements Parcelable {
 
     /* add dummy parameter so constructor can be called from jni without
        triggering 'not cloneable' exception */
-    private Region(int ni, int dummy) {
+    private Region(long ni, int dummy) {
         this(ni);
     }
 
-    final int ni() {
+    final long ni() {
         return mNativeRegion;
     }
 
-    private static native boolean nativeEquals(int native_r1, int native_r2);
+    private static native boolean nativeEquals(long native_r1, long native_r2);
 
-    private static native int nativeConstructor();
-    private static native void nativeDestructor(int native_region);
+    private static native long nativeConstructor();
+    private static native void nativeDestructor(long native_region);
 
-    private static native void nativeSetRegion(int native_dst, int native_src);
-    private static native boolean nativeSetRect(int native_dst, int left,
+    private static native void nativeSetRegion(long native_dst, long native_src);
+    private static native boolean nativeSetRect(long native_dst, int left,
                                                 int top, int right, int bottom);
-    private static native boolean nativeSetPath(int native_dst, int native_path,
-                                                int native_clip);
-    private static native boolean nativeGetBounds(int native_region, Rect rect);
-    private static native boolean nativeGetBoundaryPath(int native_region,
-                                                        int native_path);
+    private static native boolean nativeSetPath(long native_dst, long native_path,
+                                                long native_clip);
+    private static native boolean nativeGetBounds(long native_region, Rect rect);
+    private static native boolean nativeGetBoundaryPath(long native_region,
+                                                        long native_path);
 
-    private static native boolean nativeOp(int native_dst, int left, int top,
+    private static native boolean nativeOp(long native_dst, int left, int top,
                                            int right, int bottom, int op);
-    private static native boolean nativeOp(int native_dst, Rect rect,
-                                           int native_region, int op);
-    private static native boolean nativeOp(int native_dst, int native_region1,
-                                           int native_region2, int op);
+    private static native boolean nativeOp(long native_dst, Rect rect,
+                                           long native_region, int op);
+    private static native boolean nativeOp(long native_dst, long native_region1,
+                                           long native_region2, int op);
 
-    private static native int nativeCreateFromParcel(Parcel p);
-    private static native boolean nativeWriteToParcel(int native_region,
+    private static native long nativeCreateFromParcel(Parcel p);
+    private static native boolean nativeWriteToParcel(long native_region,
                                                       Parcel p);
 
-    private static native String nativeToString(int native_region);
+    private static native String nativeToString(long native_region);
 }

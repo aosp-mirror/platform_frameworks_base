@@ -28,14 +28,14 @@ package android.graphics;
  */
 public class ColorFilter {
     // Holds the pointer to the native SkColorFilter instance
-    int native_instance;
+    long native_instance;
 
     /**
      * Holds the pointer to the native SkiaColorFilter instance, from libhwui.
      *
      * @hide
      */
-    public int nativeColorFilter;
+    public long nativeColorFilter;
 
     @Override
     protected void finalize() throws Throwable {
@@ -46,5 +46,5 @@ public class ColorFilter {
         }
     }
 
-    static native void destroyFilter(int native_instance, int nativeColorFilter);
+    static native void destroyFilter(long native_instance, long nativeColorFilter);
 }

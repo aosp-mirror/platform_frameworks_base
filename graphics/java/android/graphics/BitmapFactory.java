@@ -595,7 +595,7 @@ public class BitmapFactory {
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeBitmap");
         try {
             if (is instanceof AssetManager.AssetInputStream) {
-                final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+                final long asset = ((AssetManager.AssetInputStream) is).getNativeAsset();
                 bm = nativeDecodeAsset(asset, outPadding, opts);
             } else {
                 bm = decodeStreamInternal(is, outPadding, opts);
@@ -698,7 +698,7 @@ public class BitmapFactory {
             Rect padding, Options opts);
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts);
-    private static native Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts);
+    private static native Bitmap nativeDecodeAsset(long nativeAsset, Rect padding, Options opts);
     private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts);
     private static native boolean nativeIsSeekable(FileDescriptor fd);
