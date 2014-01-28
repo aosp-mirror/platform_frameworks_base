@@ -94,7 +94,7 @@ public final class DelegateManager<T> {
      * @param native_object the native int.
      * @return the delegate or null if not found.
      */
-    public T getDelegate(int native_object) {
+    public T getDelegate(long native_object) {
         if (native_object > 0) {
             T delegate =  mDelegates.get(native_object);
 
@@ -116,8 +116,8 @@ public final class DelegateManager<T> {
      * @param newDelegate the delegate to add
      * @return a unique native int to identify the delegate
      */
-    public int addNewDelegate(T newDelegate) {
-        int native_object = ++mDelegateCounter;
+    public long addNewDelegate(T newDelegate) {
+        long native_object = ++mDelegateCounter;
         mDelegates.put(native_object, newDelegate);
         assert !mJavaReferences.contains(newDelegate);
         mJavaReferences.add(newDelegate);
@@ -133,7 +133,7 @@ public final class DelegateManager<T> {
      * Removes the main reference on the given delegate.
      * @param native_object the native integer representing the delegate.
      */
-    public void removeJavaReferenceFor(int native_object) {
+    public void removeJavaReferenceFor(long native_object) {
         T delegate = getDelegate(native_object);
 
         if (Debug.DEBUG) {
