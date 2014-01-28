@@ -48,7 +48,7 @@ public abstract class PathEffect_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static PathEffect_Delegate getDelegate(int nativeShader) {
+    public static PathEffect_Delegate getDelegate(long nativeShader) {
         return sManager.getDelegate(nativeShader);
     }
 
@@ -60,7 +60,7 @@ public abstract class PathEffect_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDestructor(int native_patheffect) {
+    /*package*/ static void nativeDestructor(long native_patheffect) {
         sManager.removeJavaReferenceFor(native_patheffect);
     }
 

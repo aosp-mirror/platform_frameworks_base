@@ -46,7 +46,7 @@ public abstract class Rasterizer_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static Rasterizer_Delegate getDelegate(int nativeShader) {
+    public static Rasterizer_Delegate getDelegate(long nativeShader) {
         return sManager.getDelegate(nativeShader);
     }
 
@@ -56,7 +56,7 @@ public abstract class Rasterizer_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void finalizer(int native_instance) {
+    /*package*/ static void finalizer(long native_instance) {
         sManager.removeJavaReferenceFor(native_instance);
     }
 

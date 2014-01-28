@@ -62,7 +62,7 @@ public class ComposePathEffect_Delegate extends PathEffect_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeCreate(int outerpe, int innerpe) {
+    /*package*/ static long nativeCreate(long outerpe, long innerpe) {
         ComposePathEffect_Delegate newDelegate = new ComposePathEffect_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }
