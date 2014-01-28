@@ -19,13 +19,21 @@
 #include "CanvasContext.h"
 
 #include <cutils/properties.h>
+#include <private/hwui/DrawGlInfo.h>
 #include <strings.h>
 
+#include "RenderThread.h"
 #include "../Caches.h"
+#include "../OpenGLRenderer.h"
 #include "../Stencil.h"
 
 #define PROPERTY_RENDER_DIRTY_REGIONS "debug.hwui.render_dirty_regions"
 #define GLES_VERSION 2
+
+#ifdef USE_OPENGL_RENDERER
+// Android-specific addition that is used to show when frames began in systrace
+EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
+#endif
 
 namespace android {
 namespace uirenderer {
@@ -69,19 +77,19 @@ class GlobalContext {
 public:
     static GlobalContext* get();
 
-    // Returns true if EGL was initialized,
-    // false if it was already initialized
-    bool initialize();
+    // Returns true on success, false on failure
+    void initialize();
 
-    bool usePBufferSurface();
+    void usePBufferSurface();
     EGLSurface createSurface(EGLNativeWindowType window);
     void destroySurface(EGLSurface surface);
 
     void destroy();
 
     bool isCurrent(EGLSurface surface) { return mCurrentSurface == surface; }
-    bool makeCurrent(EGLSurface surface);
-    bool swapBuffers(EGLSurface surface);
+    void makeCurrent(EGLSurface surface);
+    void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
+    void swapBuffers(EGLSurface surface);
 
     bool enableDirtyRegions(EGLSurface surface);
 
@@ -90,8 +98,9 @@ private:
     // GlobalContext is never destroyed, method is purposely not implemented
     ~GlobalContext();
 
-    bool loadConfig();
-    bool createContext();
+    void loadConfig();
+    void createContext();
+    void initAtlas();
 
     static GlobalContext* sContext;
 
@@ -126,33 +135,27 @@ GlobalContext::GlobalContext()
     ALOGD("Render dirty regions requested: %s", mRequestDirtyRegions ? "true" : "false");
 }
 
-bool GlobalContext::initialize() {
-    if (mEglDisplay != EGL_NO_DISPLAY) return false;
+void GlobalContext::initialize() {
+    if (mEglDisplay != EGL_NO_DISPLAY) return;
 
     mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if (mEglDisplay == EGL_NO_DISPLAY) {
-        ALOGE("Failed to get EGL_DEFAULT_DISPLAY! err=%s", egl_error_str());
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
+            "Failed to get EGL_DEFAULT_DISPLAY! err=%s", egl_error_str());
 
     EGLint major, minor;
-    if (eglInitialize(mEglDisplay, &major, &minor) == EGL_FALSE) {
-        ALOGE("Failed to initialize display %p! err=%s", mEglDisplay, egl_error_str());
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(eglInitialize(mEglDisplay, &major, &minor) == EGL_FALSE,
+            "Failed to initialize display %p! err=%s", mEglDisplay, egl_error_str());
+
     ALOGI("Initialized EGL, version %d.%d", (int)major, (int)minor);
 
-    if (!loadConfig()) {
-        return false;
-    }
-    if (!createContext()) {
-        return false;
-    }
-
-    return true;
+    loadConfig();
+    createContext();
+    usePBufferSurface();
+    Caches::getInstance().init();
+    initAtlas();
 }
 
-bool GlobalContext::loadConfig() {
+void GlobalContext::loadConfig() {
     EGLint swapBehavior = mCanSetDirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
     EGLint attribs[] = {
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -177,31 +180,32 @@ bool GlobalContext::loadConfig() {
             mCanSetDirtyRegions = false;
             loadConfig();
         } else {
-            ALOGE("Failed to choose config, error = %s", egl_error_str());
-            return false;
+            LOG_ALWAYS_FATAL("Failed to choose config, error = %s", egl_error_str());
         }
     }
-    return true;
 }
 
-bool GlobalContext::createContext() {
+void GlobalContext::createContext() {
     EGLint attribs[] = { EGL_CONTEXT_CLIENT_VERSION, GLES_VERSION, EGL_NONE };
     mEglContext = eglCreateContext(mEglDisplay, mEglConfig, EGL_NO_CONTEXT, attribs);
-    if (mEglContext == EGL_NO_CONTEXT) {
-        ALOGE("Failed to create context, error = %s", egl_error_str());
-        return false;
-    }
-    return true;
+    LOG_ALWAYS_FATAL_IF(mEglContext == EGL_NO_CONTEXT,
+        "Failed to create context, error = %s", egl_error_str());
 }
 
-bool GlobalContext::usePBufferSurface() {
-    if (mEglDisplay == EGL_NO_DISPLAY) return false;
+void GlobalContext::initAtlas() {
+    // TODO implement
+    // For now just run without an atlas
+}
+
+void GlobalContext::usePBufferSurface() {
+    LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
+            "usePBufferSurface() called on uninitialized GlobalContext!");
 
     if (mPBufferSurface == EGL_NO_SURFACE) {
         EGLint attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
         mPBufferSurface = eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
     }
-    return makeCurrent(mPBufferSurface);
+    makeCurrent(mPBufferSurface);
 }
 
 EGLSurface GlobalContext::createSurface(EGLNativeWindowType window) {
@@ -238,8 +242,8 @@ void GlobalContext::destroy() {
     mCurrentSurface = EGL_NO_SURFACE;
 }
 
-bool GlobalContext::makeCurrent(EGLSurface surface) {
-    if (isCurrent(surface)) return true;
+void GlobalContext::makeCurrent(EGLSurface surface) {
+    if (isCurrent(surface)) return;
 
     if (surface == EGL_NO_SURFACE) {
         // If we are setting EGL_NO_SURFACE we don't care about any of the potential
@@ -247,19 +251,31 @@ bool GlobalContext::makeCurrent(EGLSurface surface) {
         // destroyed in which case the current context is already NO_CONTEXT
         eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     } else if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
-        ALOGE("Failed to make current on surface %p, error=%s", (void*)surface, egl_error_str());
-        return false;
+        LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
+                (void*)surface, egl_error_str());
     }
     mCurrentSurface = surface;
-    return true;
 }
 
-bool GlobalContext::swapBuffers(EGLSurface surface) {
-    if (!eglSwapBuffers(mEglDisplay, surface)) {
-        ALOGW("eglSwapBuffers failed on surface %p, error=%s", (void*)surface, egl_error_str());
-        return false;
+void GlobalContext::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
+    LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
+            "Tried to beginFrame on EGL_NO_SURFACE!");
+    makeCurrent(surface);
+    if (width) {
+        eglQuerySurface(mEglDisplay, surface, EGL_WIDTH, width);
     }
-    return true;
+    if (height) {
+        eglQuerySurface(mEglDisplay, surface, EGL_HEIGHT, height);
+    }
+    eglBeginFrame(mEglDisplay, surface);
+}
+
+void GlobalContext::swapBuffers(EGLSurface surface) {
+    eglSwapBuffers(mEglDisplay, surface);
+    EGLint err = eglGetError();
+    // TODO: Check whether we need to special case EGL_CONTEXT_LOST
+    LOG_ALWAYS_FATAL_IF(err != EGL_SUCCESS,
+            "Encountered EGL error %d %s during rendering", err, egl_error_str(err));
 }
 
 bool GlobalContext::enableDirtyRegions(EGLSurface surface) {
@@ -283,17 +299,32 @@ bool GlobalContext::enableDirtyRegions(EGLSurface surface) {
     return value == EGL_BUFFER_PRESERVED;
 }
 
-CanvasContext::CanvasContext()
-        : mEglSurface(EGL_NO_SURFACE)
-        , mDirtyRegionsEnabled(false) {
+CanvasContext::CanvasContext(bool translucent)
+        : mRenderThread(RenderThread::getInstance())
+        , mEglSurface(EGL_NO_SURFACE)
+        , mDirtyRegionsEnabled(false)
+        , mOpaque(!translucent)
+        , mCanvas(0)
+        , mHaveNewSurface(false)
+        , mInvokeFunctorsPending(false)
+        , mInvokeFunctorsTask(this) {
     mGlobalContext = GlobalContext::get();
 }
 
 CanvasContext::~CanvasContext() {
+    removeFunctorsTask();
+    destroyCanvas();
+}
+
+void CanvasContext::destroyCanvas() {
+    if (mCanvas) {
+        delete mCanvas;
+        mCanvas = 0;
+    }
     setSurface(NULL);
 }
 
-bool CanvasContext::setSurface(EGLNativeWindowType window) {
+void CanvasContext::setSurface(EGLNativeWindowType window) {
     if (mEglSurface != EGL_NO_SURFACE) {
         mGlobalContext->destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
@@ -301,24 +332,134 @@ bool CanvasContext::setSurface(EGLNativeWindowType window) {
 
     if (window) {
         mEglSurface = mGlobalContext->createSurface(window);
+        LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
+                "Failed to create EGLSurface for window %p, eglErr = %s",
+                (void*) window, egl_error_str());
     }
 
     if (mEglSurface != EGL_NO_SURFACE) {
         mDirtyRegionsEnabled = mGlobalContext->enableDirtyRegions(mEglSurface);
+        mHaveNewSurface = true;
     }
-    return !window || mEglSurface != EGL_NO_SURFACE;
 }
 
-bool CanvasContext::swapBuffers() {
-    return mGlobalContext->swapBuffers(mEglSurface);
+void CanvasContext::swapBuffers() {
+    mGlobalContext->swapBuffers(mEglSurface);
+    mHaveNewSurface = false;
 }
 
-bool CanvasContext::makeCurrent() {
-    return mGlobalContext->makeCurrent(mEglSurface);
+void CanvasContext::makeCurrent() {
+    mGlobalContext->makeCurrent(mEglSurface);
 }
 
-bool CanvasContext::useGlobalPBufferSurface() {
-    return GlobalContext::get()->usePBufferSurface();
+bool CanvasContext::initialize(EGLNativeWindowType window) {
+    if (mCanvas) return false;
+    setSurface(window);
+    makeCurrent();
+    mCanvas = new OpenGLRenderer();
+    mCanvas->initProperties();
+    return true;
+}
+
+void CanvasContext::updateSurface(EGLNativeWindowType window) {
+    setSurface(window);
+    makeCurrent();
+}
+
+void CanvasContext::setup(int width, int height) {
+    if (!mCanvas) return;
+    mCanvas->setViewport(width, height);
+}
+
+void CanvasContext::drawDisplayList(DisplayList* displayList, Rect* dirty) {
+    LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
+            "drawDisplayList called on a context with no canvas or surface!");
+
+    EGLint width, height;
+    mGlobalContext->beginFrame(mEglSurface, &width, &height);
+    if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {
+        mCanvas->setViewport(width, height);
+        dirty = NULL;
+    } else if (!mDirtyRegionsEnabled || mHaveNewSurface) {
+        dirty = NULL;
+    }
+
+    status_t status;
+    if (dirty) {
+        status = mCanvas->prepareDirty(dirty->left, dirty->top,
+                dirty->right, dirty->bottom, mOpaque);
+    } else {
+        status = mCanvas->prepare(mOpaque);
+    }
+
+    Rect outBounds;
+    status |= mCanvas->drawDisplayList(displayList, outBounds);
+    handleFunctorStatus(status, outBounds);
+
+    // TODO: Draw debug info
+    // TODO: Performance tracking
+
+    mCanvas->finish();
+
+    if (status & DrawGlInfo::kStatusDrew) {
+        swapBuffers();
+    }
+}
+
+void InvokeFunctorsTask::run() {
+    mContext->invokeFunctors();
+}
+
+void CanvasContext::attachFunctor(Functor* functor) {
+    if (!mCanvas) return;
+
+    mCanvas->attachFunctor(functor);
+    removeFunctorsTask();
+    queueFunctorsTask(0);
+}
+
+void CanvasContext::detachFunctor(Functor* functor) {
+    if (!mCanvas) return;
+
+    mCanvas->detachFunctor(functor);
+}
+
+void CanvasContext::invokeFunctors() {
+    mInvokeFunctorsPending = false;
+
+    if (!mCanvas) return;
+
+    makeCurrent();
+    Rect dirty;
+    int status = mCanvas->invokeFunctors(dirty);
+    handleFunctorStatus(status, dirty);
+}
+
+void CanvasContext::handleFunctorStatus(int status, const Rect& redrawClip) {
+    if (status & DrawGlInfo::kStatusDraw) {
+        // TODO: Invalidate the redrawClip
+        // Do we need to post to ViewRootImpl like the current renderer?
+        // Can we just enqueue ourselves to re-invoke the same display list?
+        // Something else entirely? Does ChromiumView still want this in a
+        // RenderThread world?
+    }
+
+    if (status & DrawGlInfo::kStatusInvoke) {
+        queueFunctorsTask();
+    }
+}
+
+void CanvasContext::removeFunctorsTask() {
+    if (!mInvokeFunctorsPending) return;
+
+    mRenderThread.remove(&mInvokeFunctorsTask);
+}
+
+void CanvasContext::queueFunctorsTask(int delayMs) {
+    if (mInvokeFunctorsPending) return;
+
+    mInvokeFunctorsPending = true;
+    mRenderThread.queueDelayed(&mInvokeFunctorsTask, delayMs);
 }
 
 } /* namespace renderthread */

@@ -247,8 +247,6 @@ public:
 
     // TODO: rename for consistency
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty) = 0;
-
-private:
 }; // class Renderer
 
 }; // namespace uirenderer

@@ -18,24 +18,25 @@ package android.view;
 
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 
 /**
  * Hardware renderer that proxies the rendering to a render thread. Most calls
- * are synchronous, however a few such as draw() are posted async. The display list
- * is shared between the two threads and is guarded by a top level lock.
+ * are currently synchronous.
+ * TODO: Make draw() async.
+ * TODO: Figure out how to share the DisplayList between two threads (global lock?)
  *
  * The UI thread can block on the RenderThread, but RenderThread must never
  * block on the UI thread.
+ *
+ * ThreadedRenderer creates an instance of RenderProxy. RenderProxy in turn creates
+ * and manages a CanvasContext on the RenderThread. The CanvasContext is fully managed
+ * by the lifecycle of the RenderProxy.
  *
  * Note that although currently the EGL context & surfaces are created & managed
  * by the render thread, the goal is to move that into a shared structure that can
@@ -48,49 +49,29 @@ import java.util.HashMap;
 public class ThreadedRenderer extends HardwareRenderer {
     private static final String LOGTAG = "ThreadedRenderer";
 
-    @SuppressWarnings("serial")
-    static HashMap<String, Method> sMethodLut = new HashMap<String, Method>() {{
-        Method[] methods = RemoteGLRenderer.class.getDeclaredMethods();
-        for (Method m : methods) {
-            m.setAccessible(true);
-            put(m.getName() + ":" + m.getParameterTypes().length, m);
-        }
-    }};
-    static boolean sNeedsInit = true;
+    private static final Rect NULL_RECT = new Rect(-1, -1, -1, -1);
 
-    private RemoteGLRenderer mRemoteRenderer;
     private int mWidth, mHeight;
-    private RTJob mPreviousDraw;
+    private long mNativeProxy;
 
     ThreadedRenderer(boolean translucent) {
-        mRemoteRenderer = new RemoteGLRenderer(this, translucent);
-        setEnabled(true);
-        if (sNeedsInit) {
-            sNeedsInit = false;
-            postToRenderThread(new Runnable() {
-                @Override
-                public void run() {
-                    // Hack to allow GLRenderer to create a handler to post the EGL
-                    // destruction to, although it'll never run
-                    Looper.prepare();
-                }
-            });
-        }
+        mNativeProxy = nCreateProxy(translucent);
+        setEnabled(mNativeProxy != 0);
     }
 
     @Override
     void destroy(boolean full) {
-        run("destroy", full);
+        nDestroyCanvas(mNativeProxy);
     }
 
     @Override
     boolean initialize(Surface surface) throws OutOfResourcesException {
-        return (Boolean) run("initialize", surface);
+        return nInitialize(mNativeProxy, surface);
     }
 
     @Override
     void updateSurface(Surface surface) throws OutOfResourcesException {
-        post("updateSurface", surface);
+        nUpdateSurface(mNativeProxy, surface);
     }
 
     @Override
@@ -100,12 +81,27 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void destroyHardwareResources(View view) {
-        run("destroyHardwareResources", view);
+        // TODO: canvas.clearLayerUpdates()
+        destroyResources(view);
+        // TODO: GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
+    }
+
+    private static void destroyResources(View view) {
+        view.destroyHardwareResources();
+
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+
+            int count = group.getChildCount();
+            for (int i = 0; i < count; i++) {
+                destroyResources(group.getChildAt(i));
+            }
+        }
     }
 
     @Override
     void invalidate(Surface surface) {
-        post("invalidate", surface);
+        updateSurface(surface);
     }
 
     @Override
@@ -116,14 +112,15 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     boolean safelyRun(Runnable action) {
-        return (Boolean) run("safelyRun", action);
+        // TODO:
+        return false;
     }
 
     @Override
     void setup(int width, int height) {
         mWidth = width;
         mHeight = height;
-        post("setup", width, height);
+        nSetup(mNativeProxy, width, height);
     }
 
     @Override
@@ -149,7 +146,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     boolean loadSystemProperties() {
-        return (Boolean) run("loadSystemProperties");
+        return false;
     }
 
     @Override
@@ -174,20 +171,10 @@ public class ThreadedRenderer extends HardwareRenderer {
      *
      *  @hide */
     public void repeatLastDraw() {
-        if (mPreviousDraw == null) {
-            throw new IllegalStateException("There isn't a previous draw");
-        }
-        synchronized (mPreviousDraw) {
-            mPreviousDraw.completed = false;
-        }
-        mPreviousDraw.args[3] = null;
-        postToRenderThread(mPreviousDraw);
     }
 
     @Override
     void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks, Rect dirty) {
-        requireCompletion(mPreviousDraw);
-
         attachInfo.mIgnoreDirtyState = true;
         attachInfo.mDrawingTime = SystemClock.uptimeMillis();
         view.mPrivateFlags |= View.PFLAG_DRAWN;
@@ -202,8 +189,11 @@ public class ThreadedRenderer extends HardwareRenderer {
 
         view.mRecreateDisplayList = false;
 
-        mPreviousDraw = post("drawDisplayList", displayList, attachInfo,
-                callbacks, dirty);
+        if (dirty == null) {
+            dirty = NULL_RECT;
+        }
+        nDrawDisplayList(mNativeProxy, displayList.getNativeDisplayList(),
+                dirty.left, dirty.top, dirty.right, dirty.bottom);
     }
 
     @Override
@@ -228,85 +218,40 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void detachFunctor(int functor) {
-        run("detachFunctor", functor);
+        nDetachFunctor(mNativeProxy, functor);
     }
 
     @Override
-    boolean attachFunctor(AttachInfo attachInfo, int functor) {
-        return (Boolean) run("attachFunctor", attachInfo, functor);
+    void attachFunctor(AttachInfo attachInfo, int functor) {
+        nAttachFunctor(mNativeProxy, functor);
     }
 
     @Override
     void setName(String name) {
-        post("setName", name);
     }
 
-    private static void requireCompletion(RTJob job) {
-        if (job != null) {
-            synchronized (job) {
-                if (!job.completed) {
-                    try {
-                        job.wait();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-        }
-    }
-
-    private RTJob post(String method, Object... args) {
-        RTJob job = new RTJob();
-        job.method = sMethodLut.get(method + ":" + args.length);
-        job.args = args;
-        job.target = mRemoteRenderer;
-        if (job.method == null) {
-            throw new NullPointerException("Couldn't find method: " + method);
-        }
-        postToRenderThread(job);
-        return job;
-    }
-
-    private Object run(String method, Object... args) {
-        RTJob job = new RTJob();
-        job.method = sMethodLut.get(method + ":" + args.length);
-        job.args = args;
-        job.target = mRemoteRenderer;
-        if (job.method == null) {
-            throw new NullPointerException("Couldn't find method: " + method);
-        }
-        synchronized (job) {
-            postToRenderThread(job);
-            try {
-                job.wait();
-                return job.ret;
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    static class RTJob implements Runnable {
-        Method method;
-        Object[] args;
-        Object target;
-        Object ret;
-        boolean completed = false;
-
-        @Override
-        public void run() {
-            try {
-                ret = method.invoke(target, args);
-                synchronized (this) {
-                    completed = true;
-                    notify();
-                }
-            } catch (Exception e) {
-                Log.e(LOGTAG, "Failed to invoke: " + method.getName(), e);
-            }
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            nDeleteProxy(mNativeProxy);
+        } finally {
+            super.finalize();
         }
     }
 
     /** @hide */
     public static native void postToRenderThread(Runnable runnable);
+
+    private static native long nCreateProxy(boolean translucent);
+    private static native void nDeleteProxy(long nativeProxy);
+
+    private static native boolean nInitialize(long nativeProxy, Surface window);
+    private static native void nUpdateSurface(long nativeProxy, Surface window);
+    private static native void nSetup(long nativeProxy, int width, int height);
+    private static native void nDrawDisplayList(long nativeProxy, long displayList,
+            int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
+    private static native void nDestroyCanvas(long nativeProxy);
+
+    private static native void nAttachFunctor(long nativeProxy, long functor);
+    private static native void nDetachFunctor(long nativeProxy, long functor);
 }

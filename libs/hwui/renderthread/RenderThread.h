@@ -28,11 +28,27 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+class TaskQueue {
+public:
+    TaskQueue();
+
+    RenderTask* next();
+    void queue(RenderTask* task);
+    RenderTask* peek();
+    void remove(RenderTask* task);
+
+private:
+    RenderTask* mHead;
+    RenderTask* mTail;
+};
+
 class ANDROID_API RenderThread : public Thread, public Singleton<RenderThread> {
 public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
     ANDROID_API void queue(RenderTask* task);
+    void queueDelayed(RenderTask* task, int delayMs);
+    void remove(RenderTask* task);
 
 protected:
     virtual bool threadLoop();
@@ -43,13 +59,16 @@ private:
     RenderThread();
     virtual ~RenderThread();
 
-    RenderTask* nextTask();
+    // Returns the next task to be run. If this returns NULL nextWakeup is set
+    // to the time to requery for the nextTask to run. mNextWakeup is also
+    // set to this time
+    RenderTask* nextTask(nsecs_t* nextWakeup);
 
     sp<Looper> mLooper;
     Mutex mLock;
 
-    RenderTask* mQueueHead;
-    RenderTask* mQueueTail;
+    nsecs_t mNextWakeup;
+    TaskQueue mQueue;
 };
 
 } /* namespace renderthread */
