@@ -1,26 +1,22 @@
 LOCAL_PATH:= $(call my-dir)
 
-# the java library
+# merge all required services into one jar
 # ============================================================
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES :=
+LOCAL_MODULE := services
 
-# TODO: Move this to the product makefiles
-REQUIRED_SERVICES := core accessibility appwidget backup devicepolicy print
+LOCAL_SRC_FILES := $(call all-java-files-under,java)
 
-include $(patsubst %,$(LOCAL_PATH)/%/java/service.mk,$(REQUIRED_SERVICES))
-
-LOCAL_MODULE:= services
-
-LOCAL_JAVA_LIBRARIES := android.policy conscrypt telephony-common
-
-#LOCAL_PROGUARD_ENABLED := full
-#LOCAL_PROGUARD_FLAG_FILES := proguard.flags
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    services.core \
+    services.accessibility \
+    services.appwidget \
+    services.backup \
+    services.devicepolicy \
+    services.print
 
 include $(BUILD_JAVA_LIBRARY)
-
-include $(BUILD_DROIDDOC)
 
 # native library
 # =============================================================
