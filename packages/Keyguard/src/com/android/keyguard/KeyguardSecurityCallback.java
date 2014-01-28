@@ -37,8 +37,8 @@ public interface KeyguardSecurityCallback {
     boolean isVerifyUnlockOnly();
 
     /**
-     * Call when user correctly enters their credentials
-     * @param success
+     * Call to report an unlock attempt.
+     * @param success set to 'true' if user correctly entered security credentials.
      */
     void reportUnlockAttempt(boolean success);
 
