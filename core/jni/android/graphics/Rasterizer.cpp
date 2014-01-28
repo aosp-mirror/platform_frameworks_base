@@ -31,14 +31,15 @@ namespace android {
 class SkRasterizerGlue {
 public:
 
-    static void finalizer(JNIEnv* env, jobject clazz, SkRasterizer* obj) {
+    static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
+        SkRasterizer* obj = reinterpret_cast<SkRasterizer *>(objHandle);
         SkSafeUnref(obj);
     }
  
 };
 
 static JNINativeMethod methods[] = {
-    {"finalizer", "(I)V", (void*) SkRasterizerGlue::finalizer}
+    {"finalizer", "(J)V", (void*) SkRasterizerGlue::finalizer}
 };
 
 int register_android_graphics_Rasterizer(JNIEnv* env) {

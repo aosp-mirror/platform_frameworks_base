@@ -39,7 +39,7 @@ public class NinePatch {
      *
      * @hide
      */
-    public final int mNativeChunk;
+    public final long mNativeChunk;
 
     private Paint mPaint;
     private String mSrcName;
@@ -217,7 +217,7 @@ public class NinePatch {
      * that are transparent.
      */
     public final Region getTransparentRegion(Rect bounds) {
-        int r = nativeGetTransparentRegion(mBitmap.ni(), mNativeChunk, bounds);
+        long r = nativeGetTransparentRegion(mBitmap.ni(), mNativeChunk, bounds);
         return r != 0 ? new Region(r) : null;
     }
 
@@ -236,11 +236,11 @@ public class NinePatch {
      * If validation is successful, this method returns a native Res_png_9patch*
      * object used by the renderers.
      */
-    private static native int validateNinePatchChunk(int bitmap, byte[] chunk);
-    private static native void nativeFinalize(int chunk);
-    private static native void nativeDraw(int canvas_instance, RectF loc, int bitmap_instance,
-            int c, int paint_instance_or_null, int destDensity, int srcDensity);
-    private static native void nativeDraw(int canvas_instance, Rect loc, int bitmap_instance,
-            int c, int paint_instance_or_null, int destDensity, int srcDensity);
-    private static native int nativeGetTransparentRegion(int bitmap, int chunk, Rect location);
+    private static native long validateNinePatchChunk(long bitmap, byte[] chunk);
+    private static native void nativeFinalize(long chunk);
+    private static native void nativeDraw(long canvas_instance, RectF loc, long bitmap_instance,
+            long c, long paint_instance_or_null, int destDensity, int srcDensity);
+    private static native void nativeDraw(long canvas_instance, Rect loc, long bitmap_instance,
+            long c, long paint_instance_or_null, int destDensity, int srcDensity);
+    private static native long nativeGetTransparentRegion(long bitmap, long chunk, Rect location);
 }

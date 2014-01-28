@@ -27,6 +27,6 @@ public class PathEffect {
         nativeDestructor(native_instance);
     }
 
-    private static native void nativeDestructor(int native_patheffect);
-    int native_instance;
+    private static native void nativeDestructor(long native_patheffect);
+    long native_instance;
 }

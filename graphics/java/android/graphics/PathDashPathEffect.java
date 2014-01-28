@@ -45,7 +45,7 @@ public class PathDashPathEffect extends PathEffect {
                                        style.native_style);
     }
     
-    private static native int nativeCreate(int native_path, float advance,
+    private static native long nativeCreate(long native_path, float advance,
                                            float phase, int native_style);
 }
 
