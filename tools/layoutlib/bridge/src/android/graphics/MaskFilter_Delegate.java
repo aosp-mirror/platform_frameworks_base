@@ -46,7 +46,7 @@ public abstract class MaskFilter_Delegate {
 
     // ---- Public Helper methods ----
 
-    public static MaskFilter_Delegate getDelegate(int nativeShader) {
+    public static MaskFilter_Delegate getDelegate(long nativeShader) {
         return sManager.getDelegate(nativeShader);
     }
 
@@ -56,7 +56,7 @@ public abstract class MaskFilter_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDestructor(int native_filter) {
+    /*package*/ static void nativeDestructor(long native_filter) {
         sManager.removeJavaReferenceFor(native_filter);
     }
 
