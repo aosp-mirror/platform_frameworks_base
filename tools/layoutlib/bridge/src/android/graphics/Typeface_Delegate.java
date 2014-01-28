@@ -75,7 +75,7 @@ public final class Typeface_Delegate {
         sPostInitDelegate.clear();
     }
 
-    public static Typeface_Delegate getDelegate(int nativeTypeface) {
+    public static Typeface_Delegate getDelegate(long nativeTypeface) {
         return sManager.getDelegate(nativeTypeface);
     }
 
@@ -83,7 +83,7 @@ public final class Typeface_Delegate {
         return getFonts(typeface.native_instance);
     }
 
-    public static List<Font> getFonts(int native_int) {
+    public static List<Font> getFonts(long native_int) {
         Typeface_Delegate delegate = sManager.getDelegate(native_int);
         if (delegate == null) {
             return null;
@@ -99,7 +99,7 @@ public final class Typeface_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static synchronized int nativeCreate(String familyName, int style) {
+    /*package*/ static synchronized long nativeCreate(String familyName, int style) {
         if (familyName == null) {
             familyName = DEFAULT_FAMILY;
         }
@@ -118,7 +118,7 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static synchronized int nativeCreateFromTypeface(int native_instance, int style) {
+    /*package*/ static synchronized long nativeCreateFromTypeface(long native_instance, int style) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
             return 0;
@@ -138,14 +138,14 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
+    /*package*/ static synchronized long nativeCreateFromAsset(AssetManager mgr, String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Typeface.createFromAsset() is not supported.", null /*throwable*/, null /*data*/);
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static synchronized int nativeCreateFromFile(String path) {
+    /*package*/ static synchronized long nativeCreateFromFile(String path) {
         if (path.startsWith(SYSTEM_FONTS) ) {
             String relativePath = path.substring(SYSTEM_FONTS.length());
             File f = new File(sFontLoader.getOsFontsLocation(), relativePath);
@@ -174,12 +174,12 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeUnref(int native_instance) {
+    /*package*/ static void nativeUnref(long native_instance) {
         sManager.removeJavaReferenceFor(native_instance);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeGetStyle(int native_instance) {
+    /*package*/ static int nativeGetStyle(long native_instance) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
             return 0;

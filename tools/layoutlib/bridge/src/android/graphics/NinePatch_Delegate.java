@@ -158,7 +158,7 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int validateNinePatchChunk(int bitmap, byte[] chunk) {
+    /*package*/ static long validateNinePatchChunk(long bitmap, byte[] chunk) {
         // the default JNI implementation only checks that the byte[] has the same
         // size as the C struct it represent. Since we cannot do the same check (serialization
         // will return different size depending on content), we do nothing.
@@ -168,13 +168,13 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeFinalize(int chunk) {
+    /*package*/ static void nativeFinalize(long chunk) {
         sManager.removeJavaReferenceFor(chunk);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDraw(int canvas_instance, RectF loc, int bitmap_instance,
-            int chunk, int paint_instance_or_null, int destDensity, int srcDensity) {
+    /*package*/ static void nativeDraw(long canvas_instance, RectF loc, long bitmap_instance,
+            long chunk, long paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
                 (int) loc.left, (int) loc.top, (int) loc.width(), (int) loc.height(),
                 bitmap_instance, chunk, paint_instance_or_null,
@@ -182,8 +182,8 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDraw(int canvas_instance, Rect loc, int bitmap_instance,
-            int chunk, int paint_instance_or_null, int destDensity, int srcDensity) {
+    /*package*/ static void nativeDraw(long canvas_instance, Rect loc, long bitmap_instance,
+            long chunk, long paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
                 loc.left, loc.top, loc.width(), loc.height(),
                 bitmap_instance, chunk, paint_instance_or_null,
@@ -191,15 +191,15 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeGetTransparentRegion(int bitmap, int chunk, Rect location) {
+    /*package*/ static long nativeGetTransparentRegion(long bitmap, long chunk, Rect location) {
         return 0;
     }
 
     // ---- Private Helper methods ----
 
-    private static void draw(int canvas_instance,
+    private static void draw(long canvas_instance,
             final int left, final int top, final int right, final int bottom,
-            int bitmap_instance, int chunk, int paint_instance_or_null,
+            long bitmap_instance, long chunk, long paint_instance_or_null,
             final int destDensity, final int srcDensity) {
         // get the delegate from the native int.
         final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);

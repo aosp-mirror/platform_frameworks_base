@@ -55,7 +55,7 @@ public class BlurMaskFilter_Delegate extends MaskFilter_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nativeConstructor(float radius, int style) {
+    /*package*/ static long nativeConstructor(float radius, int style) {
         BlurMaskFilter_Delegate newDelegate = new BlurMaskFilter_Delegate();
         return sManager.addNewDelegate(newDelegate);
     }
