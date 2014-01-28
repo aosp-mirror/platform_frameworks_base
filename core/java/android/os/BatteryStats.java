@@ -27,6 +27,7 @@ import java.util.Map;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
+import android.text.format.DateFormat;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -895,6 +896,11 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getNetworkActivityPackets(int type, int which);
 
     /**
+     * Return the wall clock time when battery stats data collection started.
+     */
+    public abstract long getStartClockTime();
+
+    /**
      * Return whether we are currently running on battery.
      */
     public abstract boolean getIsOnBattery();
@@ -1210,7 +1216,8 @@ public abstract class BatteryStats implements Parcelable {
         dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, 
                 which == STATS_SINCE_CHARGED ? getStartCount() : "N/A",
                 whichBatteryRealtime / 1000, whichBatteryUptime / 1000,
-                totalRealtime / 1000, totalUptime / 1000); 
+                totalRealtime / 1000, totalUptime / 1000,
+                getStartClockTime());
         
         // Calculate wakelock times across all uids.
         long fullWakeLockTimeTotal = 0;
@@ -1587,7 +1594,9 @@ public abstract class BatteryStats implements Parcelable {
                 formatTimeMs(sb, totalUptime / 1000);
                 sb.append("uptime, ");
         pw.println(sb.toString());
-        
+        pw.print("  Start clock time: ");
+        pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss", getStartClockTime()).toString());
+
         final long screenOnTime = getScreenOnTime(batteryRealtime, which);
         final long phoneOnTime = getPhoneOnTime(batteryRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(batteryRealtime, which);
