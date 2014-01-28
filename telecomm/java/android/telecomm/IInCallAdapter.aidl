@@ -28,6 +28,7 @@ package android.telecomm;
  * TODO(santoscordon): Specify the adapter will stop functioning when there are no more calls.
  * TODO(santoscordon): Once we have proper "CallState" constant definitions, consider rewording
  * the javadoc to reference those states precisely.
+ * @hide
  */
 oneway interface IInCallAdapter {
     /**

@@ -26,6 +26,7 @@ import android.telecomm.IInCallAdapter;
  * TODO(santoscordon): Needs more/better description of lifecycle once the interface is better
  * defined.
  * TODO(santoscordon): What happens if two or more apps on a given decide implement this interface?
+ * @hide
  */
 oneway interface IInCallService {
 
