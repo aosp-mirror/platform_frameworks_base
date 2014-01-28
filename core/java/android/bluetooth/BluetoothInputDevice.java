@@ -129,17 +129,17 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     /**
      * @hide
      */
-    public static final byte REPORT_TYPE_INPUT = 0;
+    public static final byte REPORT_TYPE_INPUT = 1;
 
     /**
      * @hide
      */
-    public static final byte REPORT_TYPE_OUTPUT = 1;
+    public static final byte REPORT_TYPE_OUTPUT = 2;
 
     /**
      * @hide
      */
-    public static final byte REPORT_TYPE_FEATURE = 2;
+    public static final byte REPORT_TYPE_FEATURE = 3;
 
     /**
      * @hide
