@@ -29,5 +29,5 @@ public class PixelXorXfermode extends Xfermode {
         native_instance = nativeCreate(opColor);
     }
 
-    private static native int nativeCreate(int opColor);
+    private static native long nativeCreate(int opColor);
 }

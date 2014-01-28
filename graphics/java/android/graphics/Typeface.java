@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 import android.util.SparseArray;
+import android.util.LongSparseArray;
 
 import java.io.File;
 
@@ -45,10 +46,10 @@ public class Typeface {
     public static final Typeface MONOSPACE;
 
     static Typeface[] sDefaults;
-    private static final SparseArray<SparseArray<Typeface>> sTypefaceCache =
-            new SparseArray<SparseArray<Typeface>>(3);
+    private static final LongSparseArray<SparseArray<Typeface>> sTypefaceCache =
+            new LongSparseArray<SparseArray<Typeface>>(3);
 
-    int native_instance;
+    long native_instance;
 
     // Style
     public static final int NORMAL = 0;
@@ -100,7 +101,7 @@ public class Typeface {
      * @return The best matching typeface.
      */
     public static Typeface create(Typeface family, int style) {
-        int ni = 0;        
+        long ni = 0;
         if (family != null) {
             // Return early if we're asked for the same face/style
             if (family.mStyle == style) {
@@ -170,7 +171,7 @@ public class Typeface {
     }
 
     // don't allow clients to call this directly
-    private Typeface(int ni) {
+    private Typeface(long ni) {
         if (ni == 0) {
             throw new RuntimeException("native typeface cannot be made");
         }
@@ -214,15 +215,20 @@ public class Typeface {
 
     @Override
     public int hashCode() {
-        int result = native_instance;
+        /*
+         * Modified method for hashCode with long native_instance derived from
+         * http://developer.android.com/reference/java/lang/Object.html
+         */
+        int result = 17;
+        result = 31 * result + (int) (native_instance ^ (native_instance >>> 32));
         result = 31 * result + mStyle;
         return result;
     }
 
-    private static native int  nativeCreate(String familyName, int style);
-    private static native int  nativeCreateFromTypeface(int native_instance, int style); 
-    private static native void nativeUnref(int native_instance);
-    private static native int  nativeGetStyle(int native_instance);
-    private static native int  nativeCreateFromAsset(AssetManager mgr, String path);
-    private static native int nativeCreateFromFile(String path);
+    private static native long nativeCreate(String familyName, int style);
+    private static native long nativeCreateFromTypeface(long native_instance, int style);
+    private static native void nativeUnref(long native_instance);
+    private static native int  nativeGetStyle(long native_instance);
+    private static native long nativeCreateFromAsset(AssetManager mgr, String path);
+    private static native long nativeCreateFromFile(String path);
 }

@@ -33,18 +33,20 @@ namespace android {
 class SkDrawFilterGlue {
 public:
 
-    static void finalizer(JNIEnv* env, jobject clazz, SkDrawFilter* obj) {
+    static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
+        SkDrawFilter* obj = reinterpret_cast<SkDrawFilter*>(objHandle);
         SkSafeUnref(obj);
     }
 
-    static SkDrawFilter* CreatePaintFlagsDF(JNIEnv* env, jobject clazz,
-                                           int clearFlags, int setFlags) {
+    static jlong CreatePaintFlagsDF(JNIEnv* env, jobject clazz,
+                                    jint clearFlags, jint setFlags) {
         // trim off any out-of-range bits
         clearFlags &= SkPaint::kAllFlags;
         setFlags &= SkPaint::kAllFlags;
 
         if (clearFlags | setFlags) {
-            return new SkPaintFlagsDrawFilter(clearFlags, setFlags);
+            SkDrawFilter* filter = new SkPaintFlagsDrawFilter(clearFlags, setFlags);
+            return reinterpret_cast<jlong>(filter);
         } else {
             return NULL;
         }
@@ -52,11 +54,11 @@ public:
 };
 
 static JNINativeMethod drawfilter_methods[] = {
-    {"nativeDestructor", "(I)V", (void*) SkDrawFilterGlue::finalizer}
+    {"nativeDestructor", "(J)V", (void*) SkDrawFilterGlue::finalizer}
 };
 
 static JNINativeMethod paintflags_methods[] = {
-    {"nativeConstructor","(II)I", (void*) SkDrawFilterGlue::CreatePaintFlagsDF}
+    {"nativeConstructor","(II)J", (void*) SkDrawFilterGlue::CreatePaintFlagsDF}
 };
 
 #define REG(env, name, array)                                                                       \

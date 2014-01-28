@@ -116,7 +116,7 @@ static void _nInit(JNIEnv *_env, jclass _this)
     gContextId             = _env->GetFieldID(_this, "mContext", "I");
 
     jclass bitmapClass = _env->FindClass("android/graphics/Bitmap");
-    gNativeBitmapID = _env->GetFieldID(bitmapClass, "mNativeBitmap", "I");
+    gNativeBitmapID = _env->GetFieldID(bitmapClass, "mNativeBitmap", "J");
 }
 
 // ---------------------------------------------------------------------------
@@ -522,7 +522,7 @@ static int
 nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+            (SkBitmap const *)_env->GetLongField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
@@ -538,7 +538,7 @@ static int
 nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+            (SkBitmap const *)_env->GetLongField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
@@ -554,7 +554,7 @@ static int
 nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+            (SkBitmap const *)_env->GetLongField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
@@ -570,7 +570,7 @@ static void
 nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jobject jbitmap)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+            (SkBitmap const *)_env->GetLongField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
     int w = bitmap.width();
     int h = bitmap.height();
@@ -587,7 +587,7 @@ static void
 nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jobject jbitmap)
 {
     SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+            (SkBitmap const *)_env->GetLongField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();

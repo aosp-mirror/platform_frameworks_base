@@ -568,7 +568,7 @@ public abstract class HardwareRenderer {
      * @see HardwareCanvas#callDrawGLFunction(int)
      * @see #attachFunctor(android.view.View.AttachInfo, int)
      */
-    abstract void detachFunctor(int functor);
+    abstract void detachFunctor(long functor);
 
     /**
      * Schedules the specified functor in the functors execution queue.
@@ -581,7 +581,7 @@ public abstract class HardwareRenderer {
      *
      * @return true if the functor was attached successfully
      */
-    abstract boolean attachFunctor(View.AttachInfo attachInfo, int functor);
+    abstract boolean attachFunctor(View.AttachInfo attachInfo, long functor);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -1712,14 +1712,14 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void detachFunctor(int functor) {
+        void detachFunctor(long functor) {
             if (mCanvas != null) {
                 mCanvas.detachFunctor(functor);
             }
         }
 
         @Override
-        boolean attachFunctor(View.AttachInfo attachInfo, int functor) {
+        boolean attachFunctor(View.AttachInfo attachInfo, long functor) {
             if (mCanvas != null) {
                 mCanvas.attachFunctor(functor);
                 mFunctorsRunnable.attachInfo = attachInfo;

@@ -47,5 +47,5 @@ public class BlurMaskFilter extends MaskFilter {
         native_instance = nativeConstructor(radius, style.native_int);
     }
 
-    private static native int nativeConstructor(float radius, int style);
+    private static native long nativeConstructor(float radius, int style);
 }
