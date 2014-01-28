@@ -75,6 +75,12 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     public static final String ACTION_PROTOCOL_MODE_CHANGED =
         "android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED";
 
+    /**
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_REPORT =
+        "android.bluetooth.input.profile.action.REPORT";
 
     /**
      * @hide
