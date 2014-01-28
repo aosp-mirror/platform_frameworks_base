@@ -177,7 +177,7 @@ final public class MediaCodec {
     public static final int BUFFER_FLAG_END_OF_STREAM         = 4;
 
     private EventHandler mEventHandler;
-    private NotificationCallback mNotificationCallback;
+    private volatile NotificationCallback mNotificationCallback;
 
     static final int EVENT_NOTIFY = 1;
 
@@ -194,8 +194,9 @@ final public class MediaCodec {
             switch (msg.what) {
                 case EVENT_NOTIFY:
                 {
-                    if (mNotificationCallback != null) {
-                        mNotificationCallback.onCodecNotify(mCodec);
+                    NotificationCallback cb = mNotificationCallback;
+                    if (cb != null) {
+                        cb.onCodecNotify(mCodec);
                     }
                     break;
                 }
