@@ -184,6 +184,7 @@ public class InputManagerService extends IInputManager.Stub
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
+    private static native void nativeReloadCalibration(long ptr);
     private static native void nativeVibrate(long ptr, int deviceId, long[] pattern,
             int repeat, int token);
     private static native void nativeCancelVibrate(long ptr, int deviceId, int token);
@@ -701,7 +702,7 @@ public class InputManagerService extends IInputManager.Stub
         mTempFullKeyboards.clear();
     }
 
-    @Override // Binder call
+    @Override // Binder call & native callback
     public TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor) {
         if (inputDeviceDescriptor == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
@@ -728,7 +729,9 @@ public class InputManagerService extends IInputManager.Stub
 
         synchronized (mDataStore) {
             try {
-                mDataStore.setTouchCalibration(inputDeviceDescriptor, calibration);
+                if (mDataStore.setTouchCalibration(inputDeviceDescriptor, calibration)) {
+                    nativeReloadCalibration(mPtr);
+                }
             } finally {
                 mDataStore.saveIfNeeded();
             }
