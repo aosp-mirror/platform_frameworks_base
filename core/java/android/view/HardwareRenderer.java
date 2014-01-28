@@ -466,9 +466,8 @@ public abstract class HardwareRenderer {
      * @see HardwareCanvas#callDrawGLFunction(int)
      * @see #detachFunctor(int)
      *
-     * @return true if the functor was attached successfully
      */
-    abstract boolean attachFunctor(View.AttachInfo attachInfo, int functor);
+    abstract void attachFunctor(View.AttachInfo attachInfo, int functor);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the

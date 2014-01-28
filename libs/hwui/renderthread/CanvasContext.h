@@ -19,31 +19,75 @@
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
+#include <utils/Functor.h>
+
+#include "RenderTask.h"
+
+#define FUNCTOR_PROCESS_DELAY 4
 
 namespace android {
 namespace uirenderer {
+
+class DisplayList;
+class OpenGLRenderer;
+class Rect;
+
 namespace renderthread {
 
 class GlobalContext;
+class CanvasContext;
+class RenderThread;
+
+class InvokeFunctorsTask : public RenderTask {
+public:
+    InvokeFunctorsTask(CanvasContext* context)
+        : mContext(context) {}
+
+    virtual void run();
+
+private:
+    CanvasContext* mContext;
+};
 
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
 class CanvasContext {
 public:
-    ANDROID_API CanvasContext();
-    ANDROID_API ~CanvasContext();
+    CanvasContext(bool translucent);
+    ~CanvasContext();
 
-    ANDROID_API bool setSurface(EGLNativeWindowType window);
-    ANDROID_API bool swapBuffers();
-    ANDROID_API bool makeCurrent();
+    bool initialize(EGLNativeWindowType window);
+    void updateSurface(EGLNativeWindowType window);
+    void setup(int width, int height);
+    void drawDisplayList(DisplayList* displayList, Rect* dirty);
+    void destroyCanvas();
 
-    ANDROID_API static bool useGlobalPBufferSurface();
+    void attachFunctor(Functor* functor);
+    void detachFunctor(Functor* functor);
 
 private:
+    void setSurface(EGLNativeWindowType window);
+    void swapBuffers();
+    void makeCurrent();
+
+    friend class InvokeFunctorsTask;
+    void invokeFunctors();
+    void handleFunctorStatus(int status, const Rect& redrawClip);
+    void removeFunctorsTask();
+    void queueFunctorsTask(int delayMs = FUNCTOR_PROCESS_DELAY);
 
     GlobalContext* mGlobalContext;
+    RenderThread& mRenderThread;
     EGLSurface mEglSurface;
     bool mDirtyRegionsEnabled;
+
+    bool mOpaque;
+    OpenGLRenderer* mCanvas;
+    bool mHaveNewSurface;
+
+    bool mInvokeFunctorsPending;
+    InvokeFunctorsTask mInvokeFunctorsTask;
+
 };
 
 } /* namespace renderthread */

@@ -1413,15 +1413,13 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
-    boolean attachFunctor(View.AttachInfo attachInfo, int functor) {
+    void attachFunctor(View.AttachInfo attachInfo, int functor) {
         if (mCanvas != null) {
             mCanvas.attachFunctor(functor);
             mFunctorsRunnable.attachInfo = attachInfo;
             attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
             attachInfo.mHandler.postDelayed(mFunctorsRunnable,  0);
-            return true;
         }
-        return false;
     }
 
     /**

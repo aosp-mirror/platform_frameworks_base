@@ -19,15 +19,18 @@
 #include "RenderTask.h"
 
 #include <utils/Log.h>
+#include <utils/Condition.h>
+#include <utils/Mutex.h>
 
 namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-RenderTask::RenderTask() : mNext(0) {
-}
-
-RenderTask::~RenderTask() {
+void SignalingRenderTask::run() {
+    mTask->run();
+    mLock->lock();
+    mSignal->signal();
+    mLock->unlock();
 }
 
 } /* namespace renderthread */

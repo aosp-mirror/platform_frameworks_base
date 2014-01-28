@@ -20,6 +20,11 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include <utils/StrongPointer.h>
+#include <android_runtime/android_view_Surface.h>
+#include <system/window.h>
+
+#include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
 
@@ -27,23 +32,22 @@ namespace android {
 
 #ifdef USE_OPENGL_RENDERER
 
-namespace RT = android::uirenderer::renderthread;
+using namespace android::uirenderer;
+using namespace android::uirenderer::renderthread;
 
 static jmethodID gRunnableMethod;
 
-class JavaTask : public RT::RenderTask {
+class JavaTask : public RenderTask {
 public:
     JavaTask(JNIEnv* env, jobject jrunnable) {
         env->GetJavaVM(&mVm);
         mRunnable = env->NewGlobalRef(jrunnable);
     }
 
-    virtual ~JavaTask() {
-        env()->DeleteGlobalRef(mRunnable);
-    }
-
     virtual void run() {
         env()->CallVoidMethod(mRunnable, gRunnableMethod);
+        env()->DeleteGlobalRef(mRunnable);
+        delete this;
     };
 
 private:
@@ -61,8 +65,70 @@ private:
 
 static void android_view_ThreadedRenderer_postToRenderThread(JNIEnv* env, jobject clazz,
         jobject jrunnable) {
-    RT::RenderTask* task = new JavaTask(env, jrunnable);
-    RT::RenderThread::getInstance().queue(task);
+    RenderTask* task = new JavaTask(env, jrunnable);
+    RenderThread::getInstance().queue(task);
+}
+
+static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject clazz,
+        jboolean translucent) {
+    return (jlong) new RenderProxy(translucent);
+}
+
+static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    delete proxy;
+}
+
+static jboolean android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jobject jsurface) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    sp<ANativeWindow> window = android_view_Surface_getNativeWindow(env, jsurface);
+    return proxy->initialize(window.get());
+}
+
+static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jobject jsurface) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    sp<ANativeWindow> window;
+    if (jsurface) {
+        window = android_view_Surface_getNativeWindow(env, jsurface);
+    }
+    proxy->updateSurface(window.get());
+}
+
+static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jint width, jint height) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    proxy->setup(width, height);
+}
+
+static void android_view_ThreadedRenderer_drawDisplayList(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong displayListPtr, jint dirtyLeft, jint dirtyTop,
+        jint dirtyRight, jint dirtyBottom) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    DisplayList* displayList = reinterpret_cast<DisplayList*>( displayListPtr);
+    proxy->drawDisplayList(displayList, dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+}
+
+static void android_view_ThreadedRenderer_destroyCanvas(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    proxy->destroyCanvas();
+}
+
+static void android_view_ThreadedRenderer_attachFunctor(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong functorPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
+    proxy->attachFunctor(functor);
+}
+
+static void android_view_ThreadedRenderer_detachFunctor(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong functorPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
+    proxy->detachFunctor(functor);
 }
 
 #endif
@@ -76,6 +142,15 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "postToRenderThread", "(Ljava/lang/Runnable;)V",   (void*) android_view_ThreadedRenderer_postToRenderThread },
+    { "nCreateProxy", "(Z)J", (void*) android_view_ThreadedRenderer_createProxy },
+    { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
+    { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
+    { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
+    { "nSetup", "(JII)V", (void*) android_view_ThreadedRenderer_setup },
+    { "nDrawDisplayList", "(JJIIII)V", (void*) android_view_ThreadedRenderer_drawDisplayList},
+    { "nDestroyCanvas", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvas},
+    { "nAttachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_attachFunctor},
+    { "nDetachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_detachFunctor},
 #endif
 };
 
