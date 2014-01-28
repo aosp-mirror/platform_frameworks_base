@@ -177,14 +177,14 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivityAsUser(intent,
                             new UserHandle(mLockPatternUtils.getCurrentUser()));
-                    mCallback.reportSuccessfulUnlockAttempt();
+                    mCallback.reportUnlockAttempt(true);
 
                     // dismiss keyguard
                     mCallback.dismiss(true);
                 } else {
                     mSecurityMessageDisplay.setMessage(R.string.kg_login_invalid_input, true);
                     mPassword.setText("");
-                    mCallback.reportFailedUnlockAttempt();
+                    mCallback.reportUnlockAttempt(false);
                 }
             }
         });

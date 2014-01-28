@@ -154,14 +154,14 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected void verifyPasswordAndUnlock() {
         String entry = mPasswordEntry.getText().toString();
         if (mLockPatternUtils.checkPassword(entry)) {
-            mCallback.reportSuccessfulUnlockAttempt();
+            mCallback.reportUnlockAttempt(true);
             mCallback.dismiss(true);
         } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
-            mCallback.reportFailedUnlockAttempt();
-            if (0 == (mCallback.getFailedAttempts()
-                    % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
+            mCallback.reportUnlockAttempt(false);
+            int attempts = KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts();
+            if (0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                 long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                 handleAttemptLockout(deadline);
             }
