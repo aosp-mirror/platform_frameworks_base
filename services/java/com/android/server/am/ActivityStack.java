@@ -1094,6 +1094,7 @@ final class ActivityStack {
                             if (!r.visible) {
                                 if (DEBUG_VISBILITY) Slog.v(
                                         TAG, "Starting and making visible: " + r);
+                                r.visible = true;
                                 mWindowManager.setAppVisibility(r.appToken, true);
                             }
                             if (r != starting) {
