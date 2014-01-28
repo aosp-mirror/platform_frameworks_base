@@ -53,6 +53,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -61,6 +62,7 @@ import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 
@@ -83,6 +85,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Properties;
+
+import libcore.io.IoUtils;
 
 /**
  * A GPS implementation of LocationProvider used by LocationManager.
@@ -194,7 +198,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int AGPS_SETID_TYPE_IMSI = 1;
     private static final int AGPS_SETID_TYPE_MSISDN = 2;
 
-    private static final String PROPERTIES_FILE = "/etc/gps.conf";
+    private static final String PROPERTIES_FILE_PREFIX = "/etc/gps";
+    private static final String PROPERTIES_FILE_SUFFIX = ".conf";
+    private static final String DEFAULT_PROPERTIES_FILE = PROPERTIES_FILE_PREFIX + PROPERTIES_FILE_SUFFIX;
 
     private static final int GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
     private static final int GPS_GEOFENCE_AVAILABLE = 1<<1L;
@@ -444,6 +450,44 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return native_is_supported();
     }
 
+    private boolean loadPropertiesFile(String filename) {
+        mProperties = new Properties();
+        try {
+            File file = new File(filename);
+            FileInputStream stream = null;
+            try {
+                stream = new FileInputStream(file);
+                mProperties.load(stream);
+            } finally {
+                IoUtils.closeQuietly(stream);
+            }
+
+            mSuplServerHost = mProperties.getProperty("SUPL_HOST");
+            String portString = mProperties.getProperty("SUPL_PORT");
+            if (mSuplServerHost != null && portString != null) {
+                try {
+                    mSuplServerPort = Integer.parseInt(portString);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
+                }
+            }
+
+            mC2KServerHost = mProperties.getProperty("C2K_HOST");
+            portString = mProperties.getProperty("C2K_PORT");
+            if (mC2KServerHost != null && portString != null) {
+                try {
+                    mC2KServerPort = Integer.parseInt(portString);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "unable to parse C2K_PORT: " + portString);
+                }
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "Could not open GPS configuration file " + filename);
+            return false;
+        }
+        return true;
+    }
+
     public GpsLocationProvider(Context context, ILocationManager ilocationManager,
             Looper looper) {
         mContext = context;
@@ -472,34 +516,15 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
 
-        mProperties = new Properties();
-        try {
-            File file = new File(PROPERTIES_FILE);
-            FileInputStream stream = new FileInputStream(file);
-            mProperties.load(stream);
-            stream.close();
+        boolean propertiesLoaded = false;
+        final String gpsHardware = SystemProperties.get("ro.hardware.gps");
+        if (!TextUtils.isEmpty(gpsHardware)) {
+            final String propFilename = PROPERTIES_FILE_PREFIX + "." + gpsHardware + PROPERTIES_FILE_SUFFIX;
+            propertiesLoaded = loadPropertiesFile(propFilename);
+        }
 
-            mSuplServerHost = mProperties.getProperty("SUPL_HOST");
-            String portString = mProperties.getProperty("SUPL_PORT");
-            if (mSuplServerHost != null && portString != null) {
-                try {
-                    mSuplServerPort = Integer.parseInt(portString);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
-                }
-            }
-
-            mC2KServerHost = mProperties.getProperty("C2K_HOST");
-            portString = mProperties.getProperty("C2K_PORT");
-            if (mC2KServerHost != null && portString != null) {
-                try {
-                    mC2KServerPort = Integer.parseInt(portString);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "unable to parse C2K_PORT: " + portString);
-                }
-            }
-        } catch (IOException e) {
-            Log.w(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
+        if (!propertiesLoaded) {
+            loadPropertiesFile(DEFAULT_PROPERTIES_FILE);
         }
 
         // construct handler, listen for events
