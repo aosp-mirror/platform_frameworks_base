@@ -1638,6 +1638,7 @@ public class CalendarView extends FrameLayout {
                         || mMaxDate.get(Calendar.DAY_OF_WEEK) != mFirstDayOfWeek) {
                     mTotalWeekCount++;
                 }
+                notifyDataSetChanged();
             }
 
             /**
