@@ -23,12 +23,12 @@ package android.graphics;
 
 
 public class ColorFilter {
-    int native_instance;
+    long native_instance;
 
     /**
      * @hide
      */
-    public int nativeColorFilter;
+    public long nativeColorFilter;
 
     protected void finalize() throws Throwable {
         try {
@@ -38,5 +38,5 @@ public class ColorFilter {
         }
     }
 
-    private static native void finalizer(int native_instance, int nativeColorFilter);
+    private static native void finalizer(long native_instance, long nativeColorFilter);
 }
