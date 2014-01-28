@@ -27,8 +27,9 @@ private:
     const char* fCStr;
 };
 
-static SkTypeface* Typeface_create(JNIEnv* env, jobject, jstring name,
-                                   SkTypeface::Style style) {
+static jlong Typeface_create(JNIEnv* env, jobject, jstring name,
+                             jint styleHandle) {
+    SkTypeface::Style style = static_cast<SkTypeface::Style>(styleHandle);
     SkTypeface* face = NULL;
 
     if (NULL != name) {
@@ -47,10 +48,11 @@ static SkTypeface* Typeface_create(JNIEnv* env, jobject, jstring name,
     if (NULL == face) {
         face = SkTypeface::CreateFromName(NULL, style);
     }
-    return face;
+    return reinterpret_cast<jlong>(face);
 }
 
-static SkTypeface* Typeface_createFromTypeface(JNIEnv* env, jobject, SkTypeface* family, int style) {
+static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandle, jint style) {
+    SkTypeface* family = reinterpret_cast<SkTypeface*>(familyHandle);
     SkTypeface* face = SkTypeface::CreateFromTypeface(family, (SkTypeface::Style)style);
     // Try to find the closest matching font, using the standard heuristic
     if (NULL == face) {
@@ -62,15 +64,17 @@ static SkTypeface* Typeface_createFromTypeface(JNIEnv* env, jobject, SkTypeface*
     if (NULL == face) {
         face = SkTypeface::CreateFromName(NULL, (SkTypeface::Style)style);
     }
-    return face;
+    return reinterpret_cast<jlong>(face);
 }
 
-static void Typeface_unref(JNIEnv* env, jobject obj, SkTypeface* face) {
+static void Typeface_unref(JNIEnv* env, jobject obj, jlong faceHandle) {
+    SkTypeface* face = reinterpret_cast<SkTypeface*>(faceHandle);
     SkSafeUnref(face);
 }
 
-static int Typeface_getStyle(JNIEnv* env, jobject obj, SkTypeface* face) {
-    return face->style();
+static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
+    SkTypeface* face = reinterpret_cast<SkTypeface*>(faceHandle);
+    return static_cast<jint>(face->style());
 }
 
 class AssetStream : public SkStream {
@@ -132,9 +136,9 @@ private:
     const void* fMemoryBase;
 };
 
-static SkTypeface* Typeface_createFromAsset(JNIEnv* env, jobject,
-                                            jobject jassetMgr,
-                                            jstring jpath) {
+static jlong Typeface_createFromAsset(JNIEnv* env, jobject,
+                                      jobject jassetMgr,
+                                      jstring jpath) {
 
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
     NPE_CHECK_RETURN_ZERO(env, jpath);
@@ -156,27 +160,27 @@ static SkTypeface* Typeface_createFromAsset(JNIEnv* env, jobject,
     // need to unref it here or it won't be freed later on
     stream->unref();
 
-    return face;
+    return reinterpret_cast<jlong>(face);
 }
 
-static SkTypeface* Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) {
+static jlong Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) {
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
     AutoJavaStringToUTF8 str(env, jpath);
 
-    return SkTypeface::CreateFromFile(str.c_str());
+    return reinterpret_cast<jlong>(SkTypeface::CreateFromFile(str.c_str()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gTypefaceMethods[] = {
-    { "nativeCreate",        "(Ljava/lang/String;I)I", (void*)Typeface_create },
-    { "nativeCreateFromTypeface", "(II)I", (void*)Typeface_createFromTypeface },
-    { "nativeUnref",              "(I)V",  (void*)Typeface_unref },
-    { "nativeGetStyle",           "(I)I",  (void*)Typeface_getStyle },
-    { "nativeCreateFromAsset",    "(Landroid/content/res/AssetManager;Ljava/lang/String;)I",
+    { "nativeCreate",        "(Ljava/lang/String;I)J", (void*)Typeface_create },
+    { "nativeCreateFromTypeface", "(JI)J", (void*)Typeface_createFromTypeface },
+    { "nativeUnref",              "(J)V",  (void*)Typeface_unref },
+    { "nativeGetStyle",           "(J)I",  (void*)Typeface_getStyle },
+    { "nativeCreateFromAsset",    "(Landroid/content/res/AssetManager;Ljava/lang/String;)J",
                                            (void*)Typeface_createFromAsset },
-    { "nativeCreateFromFile",     "(Ljava/lang/String;)I",
+    { "nativeCreateFromFile",     "(Ljava/lang/String;)J",
                                            (void*)Typeface_createFromFile },
 };
 

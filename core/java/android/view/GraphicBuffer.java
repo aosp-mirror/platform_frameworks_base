@@ -56,7 +56,7 @@ public class GraphicBuffer implements Parcelable {
     private final int mFormat;
     private final int mUsage;
     // Note: do not rename, this field is used by native code
-    private final int mNativeObject;
+    private final long mNativeObject;
 
     // These two fields are only used by lock/unlockCanvas()
     private Canvas mCanvas;
@@ -77,7 +77,7 @@ public class GraphicBuffer implements Parcelable {
      * @return A <code>GraphicBuffer</code> instance or null
      */
     public static GraphicBuffer create(int width, int height, int format, int usage) {
-        int nativeObject = nCreateGraphicBuffer(width, height, format, usage);
+        long nativeObject = nCreateGraphicBuffer(width, height, format, usage);
         if (nativeObject != 0) {
             return new GraphicBuffer(width, height, format, usage, nativeObject);
         }
@@ -87,7 +87,7 @@ public class GraphicBuffer implements Parcelable {
     /**
      * Private use only. See {@link #create(int, int, int, int)}.
      */
-    private GraphicBuffer(int width, int height, int format, int usage, int nativeObject) {
+    private GraphicBuffer(int width, int height, int format, int usage, long nativeObject) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
@@ -271,7 +271,7 @@ public class GraphicBuffer implements Parcelable {
             int height = in.readInt();
             int format = in.readInt();
             int usage = in.readInt();
-            int nativeObject = nReadGraphicBufferFromParcel(in);
+            long nativeObject = nReadGraphicBufferFromParcel(in);
             if (nativeObject != 0) {
                 return new GraphicBuffer(width, height, format, usage, nativeObject);
             }
@@ -283,10 +283,10 @@ public class GraphicBuffer implements Parcelable {
         }
     };
 
-    private static native int nCreateGraphicBuffer(int width, int height, int format, int usage);
-    private static native void nDestroyGraphicBuffer(int nativeObject);
-    private static native void nWriteGraphicBufferToParcel(int nativeObject, Parcel dest);
-    private static native int nReadGraphicBufferFromParcel(Parcel in);
-    private static native boolean nLockCanvas(int nativeObject, Canvas canvas, Rect dirty);
-    private static native boolean nUnlockCanvasAndPost(int nativeObject, Canvas canvas);
+    private static native long nCreateGraphicBuffer(int width, int height, int format, int usage);
+    private static native void nDestroyGraphicBuffer(long nativeObject);
+    private static native void nWriteGraphicBufferToParcel(long nativeObject, Parcel dest);
+    private static native long nReadGraphicBufferFromParcel(Parcel in);
+    private static native boolean nLockCanvas(long nativeObject, Canvas canvas, Rect dirty);
+    private static native boolean nUnlockCanvasAndPost(long nativeObject, Canvas canvas);
 }
