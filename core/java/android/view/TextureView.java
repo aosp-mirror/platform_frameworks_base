@@ -127,7 +127,7 @@ public class TextureView extends View {
     private final Object[] mNativeWindowLock = new Object[0];
     // Used from native code, do not write!
     @SuppressWarnings({"UnusedDeclaration"})
-    private int mNativeWindow;
+    private long mNativeWindow;
 
     /**
      * Creates a new TextureView.
@@ -816,6 +816,6 @@ public class TextureView extends View {
     private native void nCreateNativeWindow(SurfaceTexture surface);
     private native void nDestroyNativeWindow();
 
-    private static native boolean nLockCanvas(int nativeWindow, Canvas canvas, Rect dirty);
-    private static native void nUnlockCanvasAndPost(int nativeWindow, Canvas canvas);
+    private static native boolean nLockCanvas(long nativeWindow, Canvas canvas, Rect dirty);
+    private static native void nUnlockCanvasAndPost(long nativeWindow, Canvas canvas);
 }
