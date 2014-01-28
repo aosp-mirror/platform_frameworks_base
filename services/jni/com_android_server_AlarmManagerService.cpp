@@ -164,16 +164,16 @@ int AlarmImplTimerFd::setTime(struct timeval *tv)
     int fd;
     int res;
 
-    fd = open("/dev/rtc0", O_RDWR);
-    if (fd < 0) {
-        ALOGV("Unable to open RTC driver: %s\n", strerror(errno));
-        return -1;
-    }
-
     res = settimeofday(tv, NULL);
     if (res < 0) {
         ALOGV("settimeofday() failed: %s\n", strerror(errno));
-        goto done;
+        return -1;
+    }
+
+    fd = open("/dev/rtc0", O_RDWR);
+    if (fd < 0) {
+        ALOGV("Unable to open RTC driver: %s\n", strerror(errno));
+        return res;
     }
 
     gmtime_res = gmtime_r(&tv->tv_sec, &tm);
