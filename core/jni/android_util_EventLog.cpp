@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2007-2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
 #include "log/logger.h"
+
+#define UNUSED  __attribute__((__unused__))
 
 // The size of the tag number comes out of the payload size.
 #define MAX_EVENT_PAYLOAD (LOGGER_ENTRY_MAX_PAYLOAD - sizeof(int32_t))
@@ -44,7 +46,8 @@ static jclass gStringClass;
  * In class android.util.EventLog:
  *  static native int writeEvent(int tag, int value)
  */
-static jint android_util_EventLog_writeEvent_Integer(JNIEnv* env, jobject clazz,
+static jint android_util_EventLog_writeEvent_Integer(JNIEnv* env UNUSED,
+                                                     jobject clazz UNUSED,
                                                      jint tag, jint value)
 {
     return android_btWriteLog(tag, EVENT_TYPE_INT, &value, sizeof(value));
@@ -54,7 +57,8 @@ static jint android_util_EventLog_writeEvent_Integer(JNIEnv* env, jobject clazz,
  * In class android.util.EventLog:
  *  static native int writeEvent(long tag, long value)
  */
-static jint android_util_EventLog_writeEvent_Long(JNIEnv* env, jobject clazz,
+static jint android_util_EventLog_writeEvent_Long(JNIEnv* env UNUSED,
+                                                  jobject clazz UNUSED,
                                                   jint tag, jlong value)
 {
     return android_btWriteLog(tag, EVENT_TYPE_LONG, &value, sizeof(value));
@@ -64,7 +68,8 @@ static jint android_util_EventLog_writeEvent_Long(JNIEnv* env, jobject clazz,
  * In class android.util.EventLog:
  *  static native int writeEvent(int tag, String value)
  */
-static jint android_util_EventLog_writeEvent_String(JNIEnv* env, jobject clazz,
+static jint android_util_EventLog_writeEvent_String(JNIEnv* env,
+                                                    jobject clazz UNUSED,
                                                     jint tag, jstring value) {
     uint8_t buf[MAX_EVENT_PAYLOAD];
 
@@ -142,18 +147,21 @@ static jint android_util_EventLog_writeEvent_Array(JNIEnv* env, jobject clazz,
  * In class android.util.EventLog:
  *  static native void readEvents(int[] tags, Collection<Event> output)
  *
- *  Reads events from the event log, typically /dev/log/events
+ *  Reads events from the event log
  */
-static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
+static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
                                              jintArray tags,
                                              jobject out) {
+
     if (tags == NULL || out == NULL) {
         jniThrowNullPointerException(env, NULL);
         return;
     }
 
-    int fd = open("/dev/" LOGGER_LOG_EVENTS, O_RDONLY | O_NONBLOCK);
-    if (fd < 0) {
+    struct logger_list *logger_list = android_logger_list_open(
+        LOG_ID_EVENTS, O_RDONLY | O_NONBLOCK, 0, 0);
+
+    if (!logger_list) {
         jniThrowIOException(env, errno);
         return;
     }
@@ -161,41 +169,26 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
     jsize tagLength = env->GetArrayLength(tags);
     jint *tagValues = env->GetIntArrayElements(tags, NULL);
 
-    uint8_t buf[LOGGER_ENTRY_MAX_LEN];
-    struct timeval timeout = {0, 0};
-    fd_set readset;
-    FD_ZERO(&readset);
+    while (1) {
+        log_msg log_msg;
+        int ret = android_logger_list_read(logger_list, &log_msg);
 
-    for (;;) {
-        // Use a short select() to try to avoid problems hanging on read().
-        // This means we block for 5ms at the end of the log -- oh well.
-        timeout.tv_usec = 5000;
-        FD_SET(fd, &readset);
-        int r = select(fd + 1, &readset, NULL, NULL, &timeout);
-        if (r == 0) {
-            break;  // no more events
-        } else if (r < 0 && errno == EINTR) {
-            continue;  // interrupted by signal, try again
-        } else if (r < 0) {
-            jniThrowIOException(env, errno);  // Will throw on return
+        if (ret == 0) {
+            break;
+        }
+        if (ret < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            if (errno == EINVAL) {
+                jniThrowException(env, "java/io/IOException", "Event too short");
+            } else if (errno != EAGAIN) {
+                jniThrowIOException(env, errno);  // Will throw on return
+            }
             break;
         }
 
-        int len = read(fd, buf, sizeof(buf));
-        if (len == 0 || (len < 0 && errno == EAGAIN)) {
-            break;  // no more events
-        } else if (len < 0 && errno == EINTR) {
-            continue;  // interrupted by signal, try again
-        } else if (len < 0) {
-            jniThrowIOException(env, errno);  // Will throw on return
-            break;
-        } else if ((size_t) len < sizeof(logger_entry) + sizeof(int32_t)) {
-            jniThrowException(env, "java/io/IOException", "Event too short");
-            break;
-        }
-
-        logger_entry* entry = (logger_entry*) buf;
-        int32_t tag = * (int32_t*) (buf + sizeof(*entry));
+        int32_t tag = * (int32_t *) log_msg.msg();
 
         int found = 0;
         for (int i = 0; !found && i < tagLength; ++i) {
@@ -203,16 +196,20 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
         }
 
         if (found) {
-            jsize len = sizeof(*entry) + entry->len;
+            jsize len = ret;
             jbyteArray array = env->NewByteArray(len);
-            if (array == NULL) break;
+            if (array == NULL) {
+                break;
+            }
 
             jbyte *bytes = env->GetByteArrayElements(array, NULL);
-            memcpy(bytes, buf, len);
+            memcpy(bytes, log_msg.buf, len);
             env->ReleaseByteArrayElements(array, bytes, 0);
 
             jobject event = env->NewObject(gEventClass, gEventInitID, array);
-            if (event == NULL) break;
+            if (event == NULL) {
+                break;
+            }
 
             env->CallBooleanMethod(out, gCollectionAddID, event);
             env->DeleteLocalRef(event);
@@ -220,7 +217,8 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
         }
     }
 
-    close(fd);
+    android_logger_list_close(logger_list);
+
     env->ReleaseIntArrayElements(tags, tagValues, 0);
 }
 
