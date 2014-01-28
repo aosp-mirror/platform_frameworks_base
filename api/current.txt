@@ -27211,7 +27211,6 @@ package android.util {
     method public final java.lang.CharSequence coerceToString();
     method public static final java.lang.String coerceToString(int, int);
     method public static float complexToDimension(int, android.util.DisplayMetrics);
-    method public static float complexToDimensionNoisy(int, android.util.DisplayMetrics);
     method public static int complexToDimensionPixelOffset(int, android.util.DisplayMetrics);
     method public static int complexToDimensionPixelSize(int, android.util.DisplayMetrics);
     method public static float complexToFloat(int);
