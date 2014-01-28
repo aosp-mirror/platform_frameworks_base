@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.hardware.input.TouchCalibration;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -80,6 +81,25 @@ final class PersistentDataStore {
             save();
             mDirty = false;
         }
+    }
+
+    public TouchCalibration getTouchCalibration(String inputDeviceDescriptor) {
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
+        if (state == null) {
+            return TouchCalibration.IDENTITY;
+        }
+        else {
+            return state.getTouchCalibration();
+        }
+    }
+
+    public boolean setTouchCalibration(String inputDeviceDescriptor, TouchCalibration calibration) {
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
+        if (state.setTouchCalibration(calibration)) {
+            setDirty();
+            return true;
+        }
+        return false;
     }
 
     public String getCurrentKeyboardLayout(String inputDeviceDescriptor) {
@@ -275,8 +295,24 @@ final class PersistentDataStore {
     }
 
     private static final class InputDeviceState {
+        private static final String[] CALIBRATION_NAME = { "x_scale",
+                "x_ymix", "x_offset", "y_xmix", "y_scale", "y_offset" };
+
+        private TouchCalibration mTouchCalibration = TouchCalibration.IDENTITY;
         private String mCurrentKeyboardLayout;
         private ArrayList<String> mKeyboardLayouts = new ArrayList<String>();
+
+        public TouchCalibration getTouchCalibration() {
+            return mTouchCalibration;
+        }
+
+        public boolean setTouchCalibration(TouchCalibration calibration) {
+            if (calibration.equals(mTouchCalibration)) {
+                return false;
+            }
+            mTouchCalibration = calibration;
+            return true;
+        }
 
         public String getCurrentKeyboardLayout() {
             return mCurrentKeyboardLayout;
@@ -389,6 +425,31 @@ final class PersistentDataStore {
                         }
                         mCurrentKeyboardLayout = descriptor;
                     }
+                } else if (parser.getName().equals("calibration")) {
+                    String format = parser.getAttributeValue(null, "format");
+                    if (format == null) {
+                        throw new XmlPullParserException(
+                                "Missing format attribute on calibration.");
+                    }
+                    if (format.equals("affine")) {
+                        float[] matrix = TouchCalibration.IDENTITY.getAffineTransform();
+                        int depth = parser.getDepth();
+                        while (XmlUtils.nextElementWithin(parser, depth)) {
+                            String tag = parser.getName().toLowerCase();
+                            String value = parser.nextText();
+
+                            for (int i = 0; i < matrix.length && i < CALIBRATION_NAME.length; i++) {
+                                if (tag.equals(CALIBRATION_NAME[i])) {
+                                    matrix[i] = Float.parseFloat(value);
+                                    break;
+                                }
+                            }
+                        }
+                        mTouchCalibration = new TouchCalibration(matrix[0], matrix[1], matrix[2],
+                                matrix[3], matrix[4], matrix[5]);
+                    } else {
+                        throw new XmlPullParserException("Unsupported format for calibration.");
+                    }
                 }
             }
 
@@ -411,6 +472,16 @@ final class PersistentDataStore {
                 }
                 serializer.endTag(null, "keyboard-layout");
             }
+
+            serializer.startTag(null, "calibration");
+            serializer.attribute(null, "format", "affine");
+            float[] transform = mTouchCalibration.getAffineTransform();
+            for (int i = 0; i < transform.length && i < CALIBRATION_NAME.length; i++) {
+                serializer.startTag(null, CALIBRATION_NAME[i]);
+                serializer.text(Float.toString(transform[i]));
+                serializer.endTag(null, CALIBRATION_NAME[i]);
+            }
+            serializer.endTag(null, "calibration");
         }
     }
 }
