@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -751,12 +756,6 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
 <p itemprop="articleBody">A folder in Drive. This class provides access to list or query the contents of the folder, or
  create new resources within it.
  <p>To retrieve a DriveFolder from a known drive id, use <code><a href="/">ERROR(/DriveApi#getFolder(DriveId))</a></code>.
@@ -819,42 +818,6 @@ Summary:
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a get children request.&nbsp;</td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFileCallback.html">DriveFolder.OnCreateFileCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a create file request.&nbsp;</td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFolderCallback.html">DriveFolder.OnCreateFolderCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a create folder request.&nbsp;</td>
-    </tr>
-
-
 
 
 
@@ -911,7 +874,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFileCallback.html">DriveFolder.OnCreateFileCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.Contents)">createFile</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
@@ -929,7 +892,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFolderCallback.html">DriveFolder.OnCreateFolderCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFolder(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">createFolder</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
@@ -947,7 +910,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#listChildren(com.google.android.gms.common.api.GoogleApiClient)">listChildren</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
@@ -965,7 +928,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#queryChildren(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)">queryChildren</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</nobr>
@@ -1035,7 +998,7 @@ From interface
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataRetrievedCallback.html">DriveResource.OnMetadataRetrievedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getMetadata(com.google.android.gms.common.api.GoogleApiClient)">getMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
@@ -1053,7 +1016,7 @@ From interface
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataUpdatedCallback.html">DriveResource.OnMetadataUpdatedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#updateMetadata(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">updateMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
@@ -1167,7 +1130,7 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFileCallback.html">DriveFolder.OnCreateFileCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;
       </span>
       <span class="sympad">createFile</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</span>
@@ -1220,7 +1183,7 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFolderCallback.html">DriveFolder.OnCreateFolderCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a>&gt;
       </span>
       <span class="sympad">createFolder</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</span>
@@ -1269,7 +1232,7 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;
       </span>
       <span class="sympad">listChildren</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</span>
@@ -1313,7 +1276,7 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;
       </span>
       <span class="sympad">queryChildren</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</span>

@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>DriveFolder.OnChildrenRetrievedCallback | Android Developers</title>
+<title>AppStateManager.StateResult | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -657,7 +662,35 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+
+
+
+
+
+
+
 <div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#pubmethods">Methods</a>
+
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -677,10 +710,15 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
     interface
-<h1 itemprop="name">DriveFolder.OnChildrenRetrievedCallback</h1>
+<h1 itemprop="name">AppStateManager.StateResult</h1>
 
 
 
+
+
+      implements
+
+        <a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>
 
 
 
@@ -696,7 +734,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DriveFolder.OnChildrenRetrievedCallback</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.appstate.AppStateManager.StateResult</td>
     </tr>
 
 
@@ -712,13 +750,10 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
-<p itemprop="articleBody">A callback that provides the result for a get children request.
+<p itemprop="articleBody">Result of an operation that could potentially generate a state conflict. Note that at most
+ one of <code>getLoadedResult</code> or <code>getConflictResult</code> will ever return a non-null
+ value.  In the event of a <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERRUPTED">INTERRUPTED</a></code> status, both <code>getLoadedResult</code>
+ and <code>getConflictResult</code> will return null.
 </p>
 
 
@@ -786,10 +821,26 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-            void</nobr>
+            <a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html#onChildrenRetrieved(com.google.android.gms.drive.DriveApi.MetadataBufferResult)">onChildrenRetrieved</a></span>(<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a> result)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html#getConflictResult()">getConflictResult</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html#getLoadedResult()">getLoadedResult</a></span>()</nobr>
 
   </td></tr>
 
@@ -801,6 +852,56 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Result" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.api.Result-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/common/api/Result.html">com.google.android.gms.common.api.Result</a>
+
+<div id="inherited-methods-com.google.android.gms.common.api.Result">
+  <div id="inherited-methods-com.google.android.gms.common.api.Result-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.common.api.Result-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Result.html#getStatus()">getStatus</a></span>()</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -842,7 +943,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-<A NAME="onChildrenRetrieved(com.google.android.gms.drive.DriveApi.MetadataBufferResult)"></A>
+<A NAME="getConflictResult()"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -852,10 +953,10 @@ onkeyup="return search_changed(event, false, '/')" />
 
         abstract
 
-        void
+        <a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a>
       </span>
-      <span class="sympad">onChildrenRetrieved</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a> result)</span>
+      <span class="sympad">getConflictResult</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -866,6 +967,47 @@ onkeyup="return search_changed(event, false, '/')" />
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a></code> if the operation resulted in a conflict, or null
+         otherwise.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getLoadedResult()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a>
+      </span>
+      <span class="sympad">getLoadedResult</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></code> if the operation did not result in a conflict, or
+         null otherwise.
+</li></ul>
+  </div>
 
     </div>
 </div>
