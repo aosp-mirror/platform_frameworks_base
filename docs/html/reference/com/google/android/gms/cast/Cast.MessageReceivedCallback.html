@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>DriveFolder.OnCreateFolderCallback | Android Developers</title>
+<title>Cast.MessageReceivedCallback | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -659,6 +664,25 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div class="sum-details-links">
 
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#pubmethods">Methods</a>
+
+
+
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
 </div><!-- end sum-details-links -->
 <div class="api-level">
 
@@ -677,7 +701,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
     interface
-<h1 itemprop="name">DriveFolder.OnCreateFolderCallback</h1>
+<h1 itemprop="name">Cast.MessageReceivedCallback</h1>
 
 
 
@@ -696,7 +720,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DriveFolder.OnCreateFolderCallback</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.cast.Cast.MessageReceivedCallback</td>
     </tr>
 
 
@@ -707,18 +731,43 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+<table class="jd-sumtable jd-sumtable-subclasses"><tr><td colspan="12" style="border:none;margin:0;padding:0;">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-indirect" class="jd-expando-trigger closed"
+          ><img id="subclasses-indirect-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>Known Indirect Subclasses
+
+  <div id="subclasses-indirect">
+      <div id="subclasses-indirect-list"
+              class="jd-inheritedlinks"
+
+              >
+
+
+              <a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html">RemoteMediaPlayer</a>
+
+
+      </div>
+      <div id="subclasses-indirect-summary"
+              style="display: none;"
+              >
+  <table class="jd-sumtable-expando">
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.html">RemoteMediaPlayer</a></td>
+              <td class="jd-descrcol" width="100%">Class for controlling a media player application running on a receiver.&nbsp;</td>
+          </tr>
+  </table>
+      </div>
+  </div>
+</td></tr></table>
+
 
 <div class="jd-descr">
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
-<p itemprop="articleBody">A callback that provides the result for a create folder request.
+<p itemprop="articleBody">The interface to process received messages from a <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.
 </p>
 
 
@@ -789,7 +838,9 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFolderCallback.html#onCreateFolder(com.google.android.gms.drive.DriveFolder.DriveFolderResult)">onCreateFolder</a></span>(<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a> result)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html#onMessageReceived(com.google.android.gms.cast.CastDevice, java.lang.String, java.lang.String)">onMessageReceived</a></span>(<a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a> castDevice, String namespace, String message)</nobr>
+
+        <div class="jd-descrdiv">Called when a message is received from a given <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.</div>
 
   </td></tr>
 
@@ -842,7 +893,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-<A NAME="onCreateFolder(com.google.android.gms.drive.DriveFolder.DriveFolderResult)"></A>
+<A NAME="onMessageReceived(com.google.android.gms.cast.CastDevice, java.lang.String, java.lang.String)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -854,8 +905,8 @@ onkeyup="return search_changed(event, false, '/')" />
 
         void
       </span>
-      <span class="sympad">onCreateFolder</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a> result)</span>
+      <span class="sympad">onMessageReceived</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a> castDevice, String namespace, String message)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -865,7 +916,25 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a message is received from a given <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>castDevice</td>
+          <td>The castDevice from whence the message originated.</td>
+        </tr>
+        <tr>
+          <th>namespace</td>
+          <td>The namespace of the received message.</td>
+        </tr>
+        <tr>
+          <th>message</td>
+          <td>The received payload for the message.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

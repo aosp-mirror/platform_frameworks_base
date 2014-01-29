@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -751,12 +756,6 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
 <p itemprop="articleBody">A file in Drive. This class provides access to the contents and metadata of the specified file.
  To retrieve a DriveFile from a known drive id, use <code><a href="/">ERROR(/DriveApi#getFile(DriveId))</a></code>.
 </p>
@@ -803,30 +802,6 @@ Summary:
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.DownloadProgressListener.html">DriveFile.DownloadProgressListener</a></td>
       <td class="jd-descrcol" width="100%">A listener that listens for progress events on an active contents download.&nbsp;</td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsClosedCallback.html">DriveFile.OnContentsClosedCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">commitAndCloseContents(GoogleApiClient, Contents)</a></code> request.&nbsp;</td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsOpenedCallback.html">DriveFile.OnContentsOpenedCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a OpenContents request.&nbsp;</td>
     </tr>
 
 
@@ -900,7 +875,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsClosedCallback.html">DriveFile.OnContentsClosedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">commitAndCloseContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
@@ -919,7 +894,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
@@ -937,7 +912,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsOpenedCallback.html">DriveFile.OnContentsOpenedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#openContents(com.google.android.gms.common.api.GoogleApiClient, int, com.google.android.gms.drive.DriveFile.DownloadProgressListener)">openContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int mode, <a href="/reference/com/google/android/gms/drive/DriveFile.DownloadProgressListener.html">DriveFile.DownloadProgressListener</a> listener)</nobr>
@@ -1007,7 +982,7 @@ From interface
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataRetrievedCallback.html">DriveResource.OnMetadataRetrievedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getMetadata(com.google.android.gms.common.api.GoogleApiClient)">getMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
@@ -1025,7 +1000,7 @@ From interface
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataUpdatedCallback.html">DriveResource.OnMetadataUpdatedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#updateMetadata(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">updateMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
@@ -1218,7 +1193,7 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsClosedCallback.html">DriveFile.OnContentsClosedCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">commitAndCloseContents</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</span>
@@ -1235,7 +1210,7 @@ From interface
  for write. After invoking this method, the contents are no longer valid.  New contents
  should not be closed via this method.  Instead, use them to create a new file via
  <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.Contents)">createFile(GoogleApiClient, MetadataChangeSet, Contents)</a></code> or
- <code><a href="/">ERROR(/DriveApi#newCreateFileActivityBuilder(GoogleApiClient))</a></code>.</p></div>
+ <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newCreateFileActivityBuilder()">newCreateFileActivityBuilder()</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1270,7 +1245,7 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">discardContents</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</span>
@@ -1318,7 +1293,7 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsOpenedCallback.html">DriveFile.OnContentsOpenedCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>&gt;
       </span>
       <span class="sympad">openContents</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int mode, <a href="/reference/com/google/android/gms/drive/DriveFile.DownloadProgressListener.html">DriveFile.DownloadProgressListener</a> listener)</span>
@@ -1338,7 +1313,10 @@ From interface
 
  <p>The contents must be closed via <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">commitAndCloseContents(GoogleApiClient, Contents)</a></code>. If the contents are
  opened for write, invoking close will save the updates.  Every open must be matched with a
- corresponding <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">commitAndCloseContents(GoogleApiClient, Contents)</a></code>.</p></div>
+ corresponding <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">commitAndCloseContents(GoogleApiClient, Contents)</a></code>.
+
+ <p>Note: to open the file in edit mode, the user must have edit access. See
+ <code><a href="/reference/com/google/android/gms/drive/Metadata.html#isEditable()">isEditable()</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

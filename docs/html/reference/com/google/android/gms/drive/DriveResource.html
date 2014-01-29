@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -771,12 +776,6 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
 <p itemprop="articleBody">A Resource represents a file or folder in Drive.
 </p>
 
@@ -822,30 +821,6 @@ Summary:
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a></td>
       <td class="jd-descrcol" width="100%">Result that is returned in response to metadata requests.&nbsp;</td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataRetrievedCallback.html">DriveResource.OnMetadataRetrievedCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a get request.&nbsp;</td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataUpdatedCallback.html">DriveResource.OnMetadataUpdatedCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that indicates that the metadata update has completed.&nbsp;</td>
     </tr>
 
 
@@ -907,7 +882,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataRetrievedCallback.html">DriveResource.OnMetadataRetrievedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getMetadata(com.google.android.gms.common.api.GoogleApiClient)">getMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
@@ -925,7 +900,7 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataUpdatedCallback.html">DriveResource.OnMetadataUpdatedCallback</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#updateMetadata(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">updateMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
@@ -1024,7 +999,7 @@ Summary:
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataRetrievedCallback.html">DriveResource.OnMetadataRetrievedCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;
       </span>
       <span class="sympad">getMetadata</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</span>
@@ -1067,7 +1042,7 @@ Summary:
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataUpdatedCallback.html">DriveResource.OnMetadataUpdatedCallback</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;
       </span>
       <span class="sympad">updateMetadata</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</span>
@@ -1081,7 +1056,10 @@ Summary:
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Updates the Metadata that is associated with this resource with the changes described
- in the <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code>.</p></div>
+ in the <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code>.
+
+ <p>Note: to update the metadata, the user must have edit access. See
+ <code><a href="/reference/com/google/android/gms/drive/Metadata.html#isEditable()">isEditable()</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
