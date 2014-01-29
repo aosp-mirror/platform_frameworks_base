@@ -6041,6 +6041,16 @@ public final class Settings {
         public static final String LOW_BATTERY_SOUND_TIMEOUT = "low_battery_sound_timeout";
 
         /**
+         * Milliseconds to wait before bouncing Wi-Fi after settings is restored. Note that after
+         * the caller is done with this, they should call {@link ContentResolver#delete(Uri)} to
+         * clean up any value that they may have written.
+         *
+         * @hide
+         */
+        public static final String WIFI_BOUNCE_DELAY_OVERRIDE_MS = "wifi_bounce_delay_override_ms";
+
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
