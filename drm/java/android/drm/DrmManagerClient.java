@@ -116,7 +116,7 @@ public class DrmManagerClient {
     private static final int ACTION_PROCESS_DRM_INFO = 1002;
 
     private int mUniqueId;
-    private int mNativeContext;
+    private long mNativeContext;
     private volatile boolean mReleased;
     private Context mContext;
     private InfoHandler mInfoHandler;
