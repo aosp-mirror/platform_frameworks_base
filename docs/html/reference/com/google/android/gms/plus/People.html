@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>DriveFile.OnContentsOpenedCallback | Android Developers</title>
+<title>People | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -673,11 +678,11 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div id="jd-header">
     public
-    static
+
 
 
     interface
-<h1 itemprop="name">DriveFile.OnContentsOpenedCallback</h1>
+<h1 itemprop="name">People</h1>
 
 
 
@@ -696,7 +701,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DriveFile.OnContentsOpenedCallback</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.People</td>
     </tr>
 
 
@@ -712,13 +717,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
-<p itemprop="articleBody">A callback that provides the result for a OpenContents request.
+<p itemprop="articleBody">Methods and interfaces related to people in Google+.
 </p>
 
 
@@ -746,6 +745,38 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <h2>Summary</h2>
+
+
+
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+
+
+
+
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></td>
+      <td class="jd-descrcol" width="100%">Information about the set of people that was loaded.&nbsp;</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+      <td class="jd-typecol"><nobr>
+
+
+
+
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.OrderBy.html">People.OrderBy</a></td>
+      <td class="jd-descrcol" width="100%">Constants to declare the order to return people in.&nbsp;</td>
+    </tr>
+
+
 
 
 
@@ -786,10 +817,103 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-            void</nobr>
+            <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsOpenedCallback.html#onOpen(com.google.android.gms.drive.DriveApi.ContentsResult)">onOpen</a></span>(<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a> result)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/People.html#getCurrentPerson(com.google.android.gms.common.api.GoogleApiClient)">getCurrentPerson</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</nobr>
+
+        <div class="jd-descrdiv">Returns profile information for the current user.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, String... personIds)</nobr>
+
+        <div class="jd-descrdiv">Loads a list of specified people.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.util.Collection<java.lang.String>)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, Collection&lt;String&gt; personIds)</nobr>
+
+        <div class="jd-descrdiv">Loads a list of specified people.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/People.html#loadConnected(com.google.android.gms.common.api.GoogleApiClient)">loadConnected</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</nobr>
+
+        <div class="jd-descrdiv">Loads a list of visible people in the authenticated user’s circles that are signed into the
+ same app with Google+.</div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">loadVisible</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, String pageToken)</nobr>
+
+        <div class="jd-descrdiv">Loads the list of visible people in the user's circles.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)">loadVisible</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, int orderBy, String pageToken)</nobr>
+
+        <div class="jd-descrdiv">Loads the list of visible people in the user's circles.</div>
 
   </td></tr>
 
@@ -842,7 +966,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-<A NAME="onOpen(com.google.android.gms.drive.DriveApi.ContentsResult)"></A>
+<A NAME="getCurrentPerson(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -852,10 +976,10 @@ onkeyup="return search_changed(event, false, '/')" />
 
         abstract
 
-        void
+        <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a>
       </span>
-      <span class="sympad">onOpen</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a> result)</span>
+      <span class="sympad">getCurrentPerson</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -865,7 +989,309 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns profile information for the current user.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/get">
+ https://developers.google.com/+/api/latest/people/get</a>.
+ <p>
+ This method can return <code>null</code> if the required scopes weren't specified in the
+ <code><a href="/">ERROR(/com.google.android.gms.GoogleApiClient.Builder)</a></code>, or if there was a network error while
+ connecting.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/plus/Plus.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/plus/Plus.html#SCOPE_PLUS_LOGIN">SCOPE_PLUS_LOGIN</a></code> or <code><a href="/reference/com/google/android/gms/plus/Plus.html#SCOPE_PLUS_PROFILE">SCOPE_PLUS_PROFILE</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>googleApiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Profile information for the current user, if available, or <code>null</code> otherwise.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;
+      </span>
+      <span class="sympad">load</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, String... personIds)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Loads a list of specified people.
+ <p>
+ This call returns all information in <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code>, but only for the people
+ specified and for data that is public in their profiles.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/plus/Plus.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/plus/Plus.html#SCOPE_PLUS_LOGIN">SCOPE_PLUS_LOGIN</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>googleApiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>personIds</td>
+          <td>The ids of people to load. This should match the user id that would be
+             sent to <a href="https://developers.google.com/+/api/latest/people/get">
+             https://developers.google.com/+/api/latest/people/get</a></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the PendingResult for notification and access to the result when it's available.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="load(com.google.android.gms.common.api.GoogleApiClient, java.util.Collection<java.lang.String>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;
+      </span>
+      <span class="sympad">load</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, Collection&lt;String&gt; personIds)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Loads a list of specified people.
+ <p>
+ This call returns all information in <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code>, but only for the people
+ specified and for data that is public in their profiles.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/plus/Plus.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/plus/Plus.html#SCOPE_PLUS_LOGIN">SCOPE_PLUS_LOGIN</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>googleApiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>personIds</td>
+          <td>The IDs of people to load. This should match the user id that would be
+             sent to <a href="https://developers.google.com/+/api/latest/people/get">
+             https://developers.google.com/+/api/latest/people/get</a></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the PendingResult for notification and access to the result when it's available.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadConnected(com.google.android.gms.common.api.GoogleApiClient)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;
+      </span>
+      <span class="sympad">loadConnected</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Loads a list of visible people in the authenticated user’s circles that are signed into the
+ same app with Google+.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/list">
+ https://developers.google.com/+/api/latest/people/list</a>.
+ <p>
+ Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
+ <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
+ To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code> method.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/plus/Plus.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/plus/Plus.html#SCOPE_PLUS_LOGIN">SCOPE_PLUS_LOGIN</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>googleApiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadVisible(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;
+      </span>
+      <span class="sympad">loadVisible</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, String pageToken)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Loads the list of visible people in the user's circles.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/list">
+ https://developers.google.com/+/api/latest/people/list</a>.
+ <p>
+ Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
+ <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
+ To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code> method.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/plus/Plus.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/plus/Plus.html#SCOPE_PLUS_LOGIN">SCOPE_PLUS_LOGIN</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>googleApiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>pageToken</td>
+          <td>Result of <code><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html#getNextPageToken()">getNextPageToken()</a></code> to get the next page of
+             data.  Pass in <code>null</code> to get the first page.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the PendingResult for notification and access to the result when it's available.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a>&gt;
+      </span>
+      <span class="sympad">loadVisible</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, int orderBy, String pageToken)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Loads the list of visible people in the user's circles.  For more information, see:
+ <a href="https://developers.google.com/+/api/latest/people/list">
+ https://developers.google.com/+/api/latest/people/list</a>.
+ <p>
+ Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
+ <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
+ To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code> method.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/plus/Plus.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/plus/Plus.html#SCOPE_PLUS_LOGIN">SCOPE_PLUS_LOGIN</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>googleApiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>orderBy</td>
+          <td>The order to return people in.  Valid values are:<p>
+             <code><a href="/reference/com/google/android/gms/plus/People.OrderBy.html#ALPHABETICAL">ALPHABETICAL</a></code> - Order the people by their display name.
+             <code><a href="/reference/com/google/android/gms/plus/People.OrderBy.html#BEST">BEST</a></code> - Order people based on the relevance to the viewer.</td>
+        </tr>
+        <tr>
+          <th>pageToken</td>
+          <td>Result of <code><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html#getNextPageToken()">getNextPageToken()</a></code> to get the next page of
+             data.  Pass in <code>null</code> to get the first page.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the PendingResult for notification and access to the result when it's available.
+</li></ul>
+  </div>
 
     </div>
 </div>
