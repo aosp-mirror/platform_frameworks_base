@@ -21,7 +21,9 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.media.MediaHTTPService;
 import android.net.Uri;
+import android.os.IBinder;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -137,11 +139,19 @@ final public class MediaExtractor {
                 ++i;
             }
         }
-        setDataSource(path, keys, values);
+
+        nativeSetDataSource(
+                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
+                path,
+                keys,
+                values);
     }
 
-    private native final void setDataSource(
-            String path, String[] keys, String[] values) throws IOException;
+    private native final void nativeSetDataSource(
+            IBinder httpServiceBinder,
+            String path,
+            String[] keys,
+            String[] values) throws IOException;
 
     /**
      * Sets the data source (file-path or http URL) to use.
@@ -156,7 +166,11 @@ final public class MediaExtractor {
      * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
      */
     public final void setDataSource(String path) throws IOException {
-        setDataSource(path, null, null);
+        nativeSetDataSource(
+                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
+                path,
+                null,
+                null);
     }
 
     /**

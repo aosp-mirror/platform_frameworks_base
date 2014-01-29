@@ -8,6 +8,7 @@ LOCAL_SRC_FILES:= \
     android_media_MediaCodecList.cpp \
     android_media_MediaDrm.cpp \
     android_media_MediaExtractor.cpp \
+    android_media_MediaHTTPConnection.cpp \
     android_media_MediaMuxer.cpp \
     android_media_MediaPlayer.cpp \
     android_media_MediaRecorder.cpp \
