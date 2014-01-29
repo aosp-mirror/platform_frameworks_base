@@ -3199,6 +3199,11 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     PathTessellator::approximatePathOutlineVertices(*casterOutline,
             casterRefinementThresholdSquared, casterVertices2d);
 
+    if (casterVertices2d.size() == 0) {
+        // empty caster polygon computed from path
+        return DrawGlInfo::kStatusDone;
+    }
+
     // map 2d caster poly into 3d
     const int casterVertexCount = casterVertices2d.size();
     Vector3 casterPolygon[casterVertexCount];

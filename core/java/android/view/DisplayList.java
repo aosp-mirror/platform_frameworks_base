@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Matrix;
+import android.graphics.Path;
 
 import java.util.ArrayList;
 
@@ -151,7 +152,7 @@ public class DisplayList {
 
     /**
      * Indicates that the display list is done drawing.
-     * 
+     *
      * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)
      *
      * @hide
@@ -160,7 +161,7 @@ public class DisplayList {
 
     /**
      * Indicates that the display list needs another drawing pass.
-     * 
+     *
      * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)
      *
      * @hide
@@ -169,9 +170,9 @@ public class DisplayList {
 
     /**
      * Indicates that the display list needs to re-execute its GL functors.
-     * 
-     * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int) 
-     * @see HardwareCanvas#callDrawGLFunction(int)
+     *
+     * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)
+     * @see HardwareCanvas#callDrawGLFunction(long)
      *
      * @hide
      */
@@ -406,7 +407,7 @@ public class DisplayList {
      * Set whether the display list should collect and Z order all 3d composited descendents, and
      * draw them in order with the default Z=0 content.
      *
-     * @param isolateZVolume true if the display list should collect and Z order descendents.
+     * @param isolatedZVolume true if the display list should collect and Z order descendents.
      */
     public void setIsolatedZVolume(boolean isolatedZVolume) {
         if (hasNativeDisplayList()) {
@@ -426,6 +427,20 @@ public class DisplayList {
     public void setProjectBackwards(boolean shouldProject) {
         if (hasNativeDisplayList()) {
             nSetProjectBackwards(mFinalizer.mNativeDisplayList, shouldProject);
+        }
+    }
+
+    /**
+     * Sets the outline, defining the shape that casts a shadow.
+     *
+     * Deep copies the native path to simplify reference ownership.
+     *
+     * @param outline Convex, CW Path to store in the DisplayList. May be null.
+     */
+    public void setOutline(Path outline) {
+        if (hasNativeDisplayList()) {
+            long nativePath = (outline == null) ? 0 : outline.mNativePath;
+            nSetOutline(mFinalizer.mNativeDisplayList, nativePath);
         }
     }
 
@@ -1051,6 +1066,7 @@ public class DisplayList {
     private static native void nSetClipToBounds(long displayList, boolean clipToBounds);
     private static native void nSetProjectBackwards(long displayList, boolean shouldProject);
     private static native void nSetIsolatedZVolume(long displayList, boolean isolateZVolume);
+    private static native void nSetOutline(long displayList, long nativePath);
     private static native void nSetAlpha(long displayList, float alpha);
     private static native void nSetHasOverlappingRendering(long displayList,
             boolean hasOverlappingRendering);
