@@ -1526,8 +1526,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"กำลังปลดล็อกซิมการ์ด…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"รหัส PIN ไม่ถูกต้อง"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"พิมพ์ PIN ซึ่งเป็นเลข 4 ถึง 8 หลัก"</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"รหัส PUK ต้องเป็นตัวเลข 8 ตัว"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"ใส่รหัส PUK ที่ถูกต้องอีกครั้ง การพยายามซ้ำหลายครั้งจะทำให้ซิมการ์ดถูกปิดใช้งานอย่างถาวร"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"รหัส PIN ไม่ตรง"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ลองหลายรูปแบบมากเกินไป"</string>
