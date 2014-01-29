@@ -516,7 +516,7 @@ public:
         return result;
     }
 
-    static SkPathMeasure* trim(JNIEnv* env, jobject clazz, jlong inPathPtr, jlong outPathPtr,
+    static jlong trim(JNIEnv* env, jobject clazz, jlong inPathPtr, jlong outPathPtr,
             jlong pathMeasurePtr, jfloat trimStart, jfloat trimEnd, jfloat trimOffset) {
         SkPath* inPath = reinterpret_cast<SkPath*>(inPathPtr);
         SkPath* outPath = reinterpret_cast<SkPath*>(outPathPtr);
@@ -525,7 +525,7 @@ public:
             if (outPath != NULL) {
                 *outPath = *inPath;
             }
-            return pathMeasure;
+            return reinterpret_cast<jlong>(pathMeasure);
         }
 
         bool modifyPath = (outPath == NULL);
@@ -557,7 +557,7 @@ public:
             *inPath = *outPath;
             delete outPath;
         }
-        return pathMeasure;
+        return reinterpret_cast<jlong>(pathMeasure);
     }
 
     static void destroyMeasure(JNIEnv* env, jobject clazz, jlong measure) {
@@ -606,7 +606,7 @@ static JNINativeMethod methods[] = {
     {"native_op","(JJIJ)Z", (void*) SkPathGlue::op},
     {"native_approximate", "(JF)[F", (void*) SkPathGlue::approximate},
     {"native_destroyMeasure","(J)V", (void*) SkPathGlue::destroyMeasure},
-    {"native_trim","(JJJFFF)I", (void*) SkPathGlue::trim},
+    {"native_trim","(JJJFFF)J", (void*) SkPathGlue::trim},
 };
 
 int register_android_graphics_Path(JNIEnv* env) {
