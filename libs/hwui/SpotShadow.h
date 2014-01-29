@@ -48,7 +48,7 @@ private:
 
     static void xsort(Vector2* points, int pointsLength);
     static int hull(Vector2* points, int pointsLength, Vector2* retPoly);
-    static bool rightTurn(double ax, double ay, double bx, double by, double cx, double cy);
+    static bool ccw(double ax, double ay, double bx, double by, double cx, double cy);
     static int intersection(Vector2* poly1, int poly1length, Vector2* poly2, int poly2length);
     static void sort(Vector2* poly, int polyLength, const Vector2& center);
 
@@ -69,6 +69,17 @@ private:
             float strength, VertexBuffer& retstrips);
 
     static const double EPSILON = 1e-7;
+
+#if DEBUG_SHADOW
+    // Verification utility function.
+    static bool testConvex(const Vector2* polygon, int polygonLength,
+            const char* name);
+    static void testIntersection(const Vector2* poly1, int poly1Length,
+        const Vector2* poly2, int poly2Length,
+        const Vector2* intersection, int intersectionLength);
+    static void updateBound(const Vector2 inVector, Vector2& lowerBound, Vector2& upperBound );
+#endif
+
 }; // SpotShadow
 
 }; // namespace uirenderer
