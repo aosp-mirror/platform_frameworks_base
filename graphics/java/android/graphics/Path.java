@@ -875,7 +875,7 @@ public class Path {
     private static native boolean native_op(long path1, long path2, int op, long result);
     private static native void finalizer(long nPath);
     private static native float[] native_approximate(long nPath, float error);
-    private static native int native_trim(long nPath, long nTargetPath, long nPathMeasure,
+    private static native long native_trim(long nPath, long nTargetPath, long nPathMeasure,
             float trimStart, float trimEnd, float trimOffset);
     private static native void native_destroyMeasure(long nPathMeasure);
 }
