@@ -2099,6 +2099,7 @@
   <public type="attr" name="translationZ" />
   <public type="attr" name="colorFilterColor" />
   <public type="attr" name="colorFilterMode" />
+  <public type="attr" name="isolatedZVolume" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
