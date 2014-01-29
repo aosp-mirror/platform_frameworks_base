@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -657,35 +662,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
-
-Summary:
-
-
-
-
-
-
-
-
-
-
-
-  <a href="#pubmethods">Methods</a>
-
-
-
-
-  &#124; <a href="#inhmethods">Inherited Methods</a>
-
-&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -711,11 +688,6 @@ Summary:
 
 
 
-      implements
-
-        <a href="/reference/com/google/android/gms/common/api/Releasable.html">Releasable</a>
-
-
 
 
 
@@ -729,7 +701,7 @@ Summary:
 
     <tr>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.api.PendingResult&lt;R&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Result.html">com.google.android.gms.common.api.Result</a>,&nbsp;C&gt;</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.api.PendingResult&lt;R&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Result.html">com.google.android.gms.common.api.Result</a>&gt;</td>
     </tr>
 
 
@@ -746,17 +718,18 @@ Summary:
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">Represents a pending result from calling an API method in Google Play services.  The final result
- object from a PendingResult<R,C> is of class R, which can be retrieved in one of two ways.
+ object from a PendingResult<R> is of type R, which can be retrieved in one of two ways.
  <ul>
     <li>via blocking calls to <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#await()">await()</a></code>, or <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#await(long, java.util.concurrent.TimeUnit)">await(long, TimeUnit)</a></code>, or
-    <li>via a callback by passing in an object implementing interface C to
-        <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#addResultCallback(C)">addResultCallback(C)</a></code>.
+    <li>via a callback by passing in an object implementing interface <code><a href="/reference/com/google/android/gms/common/api/ResultCallback.html">ResultCallback</a></code> to
+        <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>)">setResultCallback(ResultCallback<R>)</a></code>.
  </ul>
  <p>
- Some method calls may hold resources that need to be closed (e.g. any <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> in the
- result).  Resources can be released individually, or all resources that are part of the final
- result can be released by calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#release()">release()</a></code>.  Note it is safe to release resources
- before the final results.
+ After the result has been retrieved using <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#await()">await()</a></code> or delivered to the
+ result callback, it is an error to to attempt to retrieve the result again. It is the
+ responsibility of the caller or callback receiver to release any resources associated with the
+ returned result. Some result types may implement <code><a href="/reference/com/google/android/gms/common/api/Releasable.html">Releasable</a></code>, in which case
+ <code><a href="/reference/com/google/android/gms/common/api/Releasable.html#release()">release()</a></code> should be used to free the associated resources.
  <p></p>
 
 
@@ -824,25 +797,6 @@ Summary:
 
 
 
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/PendingResult.html#addResultCallback(C)">addResultCallback</a></span>(C callback)</nobr>
-
-        <div class="jd-descrdiv">Add your callback here if you want the result to be delivered via a callback when the
- result is ready.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
             R</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -854,7 +808,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -872,58 +826,6 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/PendingResult.html#release()">release</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Releases any open resources.</div>
-
-  </td></tr>
-
-
-
-</table>
-
-
-
-
-
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Releasable" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.api.Releasable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  <a href="/reference/com/google/android/gms/common/api/Releasable.html">com.google.android.gms.common.api.Releasable</a>
-
-<div id="inherited-methods-com.google.android.gms.common.api.Releasable">
-  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
@@ -934,18 +836,21 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Releasable.html#release()">release</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>)">setResultCallback</a></span>(<a href="/reference/com/google/android/gms/common/api/ResultCallback.html">ResultCallback</a>&lt;R&gt; callback)</nobr>
+
+        <div class="jd-descrdiv">Set the callback here if you want the result to be delivered via a callback when the
+ result is ready.</div>
 
   </td></tr>
 
 
-</table>
-  </div>
-</div>
-</td></tr>
-
 
 </table>
+
+
+
+
+
 
 
 </div><!-- jd-descr (summary) -->
@@ -987,37 +892,6 @@ From interface
 
 
 
-<A NAME="addResultCallback(C)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        void
-      </span>
-      <span class="sympad">addResultCallback</span>
-      <span class="normal">(C callback)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Add your callback here if you want the result to be delivered via a callback when the
- result is ready.
-</p></div>
-
-    </div>
-</div>
-
-
 <A NAME="await()"></A>
 
 <div class="jd-details api apilevel-">
@@ -1042,7 +916,7 @@ From interface
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Blocks until the task is completed.  This is not allowed on the UI thread.  The returned
- result object can have an additional failure mode of <code><a href="/reference/com/google/android/gms/common/api/Status.html#INTERRUPTED">INTERRUPTED</a></code>.
+ result object can have an additional failure mode of <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERRUPTED">INTERRUPTED</a></code>.
 </p></div>
 
     </div>
@@ -1074,14 +948,14 @@ From interface
 
   <div class="jd-tagdata jd-tagdescr"><p>Blocks until the task is completed or has timed out waiting for the result.  This is not
  allowed on the UI thread.  The returned result object can have an additional failure mode of
- <code><a href="/reference/com/google/android/gms/common/api/Status.html#INTERRUPTED">INTERRUPTED</a></code>.
+ <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERRUPTED">INTERRUPTED</a></code>.
 </p></div>
 
     </div>
 </div>
 
 
-<A NAME="release()"></A>
+<A NAME="setResultCallback(com.google.android.gms.common.api.ResultCallback<R>)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1093,8 +967,8 @@ From interface
 
         void
       </span>
-      <span class="sympad">release</span>
-      <span class="normal">()</span>
+      <span class="sympad">setResultCallback</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/ResultCallback.html">ResultCallback</a>&lt;R&gt; callback)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1104,7 +978,8 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Releases any open resources.  This is safe to call before results are ready.
+  <div class="jd-tagdata jd-tagdescr"><p>Set the callback here if you want the result to be delivered via a callback when the
+ result is ready.
 </p></div>
 
     </div>

@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -782,12 +787,6 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
 <p itemprop="articleBody">A data buffer that points to Metadata entries. Objects of this class are returned in responses to
  list requests (such as <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#query(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)">query(GoogleApiClient, Query)</a></code>). This object behaves as an Iterable, as well as
  allowing indexed access to its entries. Be sure to call close on any buffers when you are done
