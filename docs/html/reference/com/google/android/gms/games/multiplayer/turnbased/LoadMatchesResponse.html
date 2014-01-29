@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -755,7 +760,7 @@ Summary:
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">Response object containing the data requested in a
- loadMatchesByStatus(GoogleApiClient, int...) call.
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int...)">loadMatchesByStatus(GoogleApiClient, int...)</a></code> call.
 </p>
 
 
@@ -823,6 +828,24 @@ Summary:
 
 
 
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/LoadMatchesResponse.html#close()">close</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Close all the buffers stored in this response.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -834,7 +857,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -852,7 +875,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -870,7 +893,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1143,6 +1166,37 @@ From class
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="close()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">close</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Close all the buffers stored in this response. Note that using one of these buffers after
+ calling this method will result in an error.
+</p></div>
+
+    </div>
+</div>
 
 
 <A NAME="getCompletedMatches()"></A>

@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>DriveApi.OnContentsDiscardedCallback | Android Developers</title>
+<title>Wallet.WalletOptions.Builder | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -435,6 +435,11 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -657,7 +662,38 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+
+
+
+
+
+
+
 <div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+  <a href="#pubctors">Ctors</a>
+
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -674,10 +710,16 @@ onkeyup="return search_changed(event, false, '/')" />
 <div id="jd-header">
     public
     static
+    final
+
+    class
+<h1 itemprop="name">Wallet.WalletOptions.Builder</h1>
 
 
-    interface
-<h1 itemprop="name">DriveApi.OnContentsDiscardedCallback</h1>
+
+
+    extends Object<br/>
+
 
 
 
@@ -696,7 +738,15 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DriveApi.OnContentsDiscardedCallback</td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+
+
+    <tr>
+
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.wallet.Wallet.WalletOptions.Builder</td>
     </tr>
 
 
@@ -710,16 +760,6 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div class="jd-descr">
 
-
-<h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
-<p itemprop="articleBody">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents(GoogleApiClient, Contents)</a></code> request.
-</p>
 
 
 
@@ -769,6 +809,31 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#Wallet.WalletOptions.Builder()">Wallet.WalletOptions.Builder</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+</table>
+
+
 
 
 
@@ -781,15 +846,47 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
 
 
 
 
-            void</nobr>
+
+            <a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.html">Wallet.WalletOptions</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html#onContentsDiscarded(com.google.android.gms.common.api.Status)">onContentsDiscarded</a></span>(<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a> result)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#build()">build</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html">Wallet.WalletOptions.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setEnvironment(int)">setEnvironment</a></span>(int environment)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html">Wallet.WalletOptions.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme</a></span>(int theme)</nobr>
 
   </td></tr>
 
@@ -801,6 +898,216 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -829,6 +1136,42 @@ onkeyup="return search_changed(event, false, '/')" />
 <!-- Public ctors -->
 
 
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+
+<A NAME="Wallet.WalletOptions.Builder()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+
+      </span>
+      <span class="sympad">Wallet.WalletOptions.Builder</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -842,7 +1185,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-<A NAME="onContentsDiscarded(com.google.android.gms.common.api.Status)"></A>
+<A NAME="build()"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -850,12 +1193,70 @@ onkeyup="return search_changed(event, false, '/')" />
         public
 
 
-        abstract
 
-        void
+
+        <a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.html">Wallet.WalletOptions</a>
       </span>
-      <span class="sympad">onContentsDiscarded</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a> result)</span>
+      <span class="sympad">build</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setEnvironment(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html">Wallet.WalletOptions.Builder</a>
+      </span>
+      <span class="sympad">setEnvironment</span>
+      <span class="normal">(int environment)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setTheme(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html">Wallet.WalletOptions.Builder</a>
+      </span>
+      <span class="sympad">setTheme</span>
+      <span class="normal">(int theme)</span>
     </h4>
       <div class="api-level">
         <div></div>
