@@ -105,16 +105,16 @@ static void android_view_DisplayList_setClipToBounds(JNIEnv* env,
     displayList->setClipToBounds(clipToBounds);
 }
 
-static void android_view_DisplayList_setIsContainedVolume(JNIEnv* env,
-        jobject clazz, jlong displayListPtr, jboolean isContainedVolume) {
+static void android_view_DisplayList_setIsolatedZVolume(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jboolean shouldIsolate) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    displayList->setIsContainedVolume(isContainedVolume);
+    displayList->setIsolatedZVolume(shouldIsolate);
 }
 
-static void android_view_DisplayList_setProjectToContainedVolume(JNIEnv* env,
+static void android_view_DisplayList_setProjectBackwards(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jboolean shouldProject) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    displayList->setProjectToContainedVolume(shouldProject);
+    displayList->setProjectBackwards(shouldProject);
 }
 
 static void android_view_DisplayList_setAlpha(JNIEnv* env,
@@ -383,9 +383,8 @@ static JNINativeMethod gMethods[] = {
     { "nSetStaticMatrix",      "(JJ)V",  (void*) android_view_DisplayList_setStaticMatrix },
     { "nSetAnimationMatrix",   "(JJ)V",  (void*) android_view_DisplayList_setAnimationMatrix },
     { "nSetClipToBounds",      "(JZ)V",  (void*) android_view_DisplayList_setClipToBounds },
-    { "nSetIsContainedVolume", "(JZ)V",  (void*) android_view_DisplayList_setIsContainedVolume },
-    { "nSetProjectToContainedVolume", "(JZ)V",
-            (void*) android_view_DisplayList_setProjectToContainedVolume },
+    { "nSetIsolatedZVolume",   "(JZ)V",  (void*) android_view_DisplayList_setIsolatedZVolume },
+    { "nSetProjectBackwards",  "(JZ)V", (void*) android_view_DisplayList_setProjectBackwards },
     { "nSetAlpha",             "(JF)V",  (void*) android_view_DisplayList_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",
             (void*) android_view_DisplayList_setHasOverlappingRendering },

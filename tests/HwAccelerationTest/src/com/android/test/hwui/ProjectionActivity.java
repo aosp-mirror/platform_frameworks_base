@@ -48,7 +48,7 @@ public class ProjectionActivity extends Activity {
         private void setProject(boolean value) {
             DisplayList displayList = getDisplayList();
             if (displayList != null) {
-                displayList.setProjectToContainedVolume(value);
+                displayList.setProjectBackwards(value);
             }
             // NOTE: we can't invalidate ProjectedView for the redraw because:
             // 1) the view won't preserve displayList properties that it doesn't know about
