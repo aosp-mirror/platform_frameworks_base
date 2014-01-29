@@ -29,10 +29,8 @@ oneway interface ICallServiceSelectionResponse {
      * Records the sorted set of call services that are preferred by the corresponding
      * call-service selector.
      *
-     * @param callServiceBinders The relevant call-service binders ordered by priority (most
-     *         desired first).
-     * TODO(gilad): Move to use call-service IDs or (reduced-visibility) call-service wrappers
-     * instead, see isSwitchable/callId in ICallServiceSelector.aidl for more details.
+     * @param selectedCallServiceIds The relevant call-service IDs ordered by priority (most desired
+     *         first).
      */
-    void setPreferredCallServices(in List<IBinder> callServiceBinders);
+    void setSelectedCallServiceIds(in List<String> selectedCallServiceIds);
 }

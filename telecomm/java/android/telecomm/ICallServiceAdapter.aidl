@@ -43,13 +43,12 @@ oneway interface ICallServiceAdapter {
     void setCompatibleWith(String callId, boolean isCompatible);
 
     /**
-     * Tells CallsManager of a new incoming call.
+     * Tells CallsManager of a new incoming call. CallInfo should be populated using a new call ID
+     * retrieved via {@link #getNextCallId}.
      *
-     * @param handle The handle to the other party or null if no such handle is available (as with
-     *     blocked caller ID).
-     * @param callId The unique ID (via {@link #getNextCallId}) of the new incoming call.
+     * @param callInfo The details of the relevant call.
      */
-    void newIncomingCall(String handle, String callId);
+    void newIncomingCall(in CallInfo callInfo);
 
     /**
      * Tells CallsManager of a new outgoing call. Use of this method should always follow

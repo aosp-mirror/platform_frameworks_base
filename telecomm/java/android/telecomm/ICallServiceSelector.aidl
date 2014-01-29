@@ -66,17 +66,17 @@ import java.util.List;
 oneway interface ICallServiceSelector {
 
     /**
-     * Initiates the process to retrieve the sorted set of call services that are preferred
-     * by this call-service selector.
+     * Initiates the process to retrieve the sorted set of call service IDs that are preferred by
+     * this call-service selector.
      *
      * @param callInfo The details of the relevant call.
-     * @param callServiceBinders The list of binders to select call services from.
-     * @param response The response object through which the selected services are passed back
-     *         to the switchboard.
+     * @param callServiceIds The list of call-service IDs.
+     * @param response The response object through which the selected service IDs are passed back
+     *         to Telecomm.
      */
     void select(
             in CallInfo callInfo,
-            in List<IBinder> callServiceBinders,
+            in List<String> callServiceIds,
             in ICallServiceSelectionResponse response);
 
     /**
