@@ -56,7 +56,7 @@ public class Binder implements IBinder {
     private static String sDumpDisabled = null;
 
     /* mObject is used by native code, do not remove or rename */
-    private int mObject;
+    private long mObject;
     private IInterface mOwner;
     private String mDescriptor;
     
@@ -390,7 +390,7 @@ public class Binder implements IBinder {
     private native final void destroy();
 
     // Entry point from android_util_Binder.cpp's onTransact
-    private boolean execTransact(int code, int dataObj, int replyObj,
+    private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
         Parcel data = Parcel.obtain(dataObj);
         Parcel reply = Parcel.obtain(replyObj);
@@ -499,6 +499,6 @@ final class BinderProxy implements IBinder {
     }
     
     final private WeakReference mSelf;
-    private int mObject;
-    private int mOrgue;
+    private long mObject;
+    private long mOrgue;
 }
