@@ -182,25 +182,27 @@ static sp<DrmManagerClientImpl> setDrmManagerClientImpl(
             JNIEnv* env, jobject thiz, const sp<DrmManagerClientImpl>& client) {
     Mutex::Autolock l(sLock);
     jclass clazz = env->FindClass("android/drm/DrmManagerClient");
-    jfieldID fieldId = env->GetFieldID(clazz, "mNativeContext", "I");
+    jfieldID fieldId = env->GetFieldID(clazz, "mNativeContext", "J");
 
-    sp<DrmManagerClientImpl> old = (DrmManagerClientImpl*)env->GetIntField(thiz, fieldId);
+    jlong oldHandle = env->GetLongField(thiz, fieldId);
+    sp<DrmManagerClientImpl> old = reinterpret_cast<DrmManagerClientImpl*>(oldHandle);
     if (client.get()) {
         client->incStrong(thiz);
     }
     if (old != 0) {
         old->decStrong(thiz);
     }
-    env->SetIntField(thiz, fieldId, (int)client.get());
+    env->SetLongField(thiz, fieldId, reinterpret_cast<jlong>(client.get()));
     return old;
 }
 
 static sp<DrmManagerClientImpl> getDrmManagerClientImpl(JNIEnv* env, jobject thiz) {
     Mutex::Autolock l(sLock);
     jclass clazz = env->FindClass("android/drm/DrmManagerClient");
-    jfieldID fieldId = env->GetFieldID(clazz, "mNativeContext", "I");
+    jfieldID fieldId = env->GetFieldID(clazz, "mNativeContext", "J");
 
-    DrmManagerClientImpl* const client = (DrmManagerClientImpl*)env->GetIntField(thiz, fieldId);
+    jlong clientHandle = env->GetLongField(thiz, fieldId);
+    DrmManagerClientImpl* const client = reinterpret_cast<DrmManagerClientImpl*>(clientHandle);
     return sp<DrmManagerClientImpl>(client);
 }
 
@@ -214,7 +216,7 @@ static jint android_drm_DrmManagerClient_initialize(
 
     setDrmManagerClientImpl(env, thiz, drmManager);
     ALOGV("initialize - Exit");
-    return uniqueId;
+    return static_cast<jint>(uniqueId);
 }
 
 static void android_drm_DrmManagerClient_setListeners(
@@ -406,7 +408,7 @@ static jint android_drm_DrmManagerClient_saveRights(
 
     delete[] mData; mData = NULL;
     ALOGV("saveRights - Exit");
-    return result;
+    return static_cast<jint>(result);
 }
 
 static jboolean android_drm_DrmManagerClient_canHandle(
@@ -583,7 +585,7 @@ static jint android_drm_DrmManagerClient_getDrmObjectType(
             ->getDrmObjectType(uniqueId, Utility::getStringValue(env, path),
                                 Utility::getStringValue(env, mimeType));
     ALOGV("getDrmObjectType Exit");
-    return drmObjectType;
+    return static_cast<jint>(drmObjectType);
 }
 
 static jstring android_drm_DrmManagerClient_getOriginalMimeType(
@@ -609,20 +611,21 @@ static jint android_drm_DrmManagerClient_checkRightsStatus(
         = getDrmManagerClientImpl(env, thiz)
             ->checkRightsStatus(uniqueId, Utility::getStringValue(env, path), action);
     ALOGV("checkRightsStatus Exit");
-    return rightsStatus;
+    return static_cast<jint>(rightsStatus);
 }
 
 static jint android_drm_DrmManagerClient_removeRights(
             JNIEnv* env, jobject thiz, jint uniqueId, jstring path) {
     ALOGV("removeRights");
-    return getDrmManagerClientImpl(env, thiz)
-               ->removeRights(uniqueId, Utility::getStringValue(env, path));
+    return static_cast<jint>(getDrmManagerClientImpl(env, thiz)
+               ->removeRights(uniqueId, Utility::getStringValue(env, path)));
 }
 
 static jint android_drm_DrmManagerClient_removeAllRights(
             JNIEnv* env, jobject thiz, jint uniqueId) {
     ALOGV("removeAllRights");
-    return getDrmManagerClientImpl(env, thiz)->removeAllRights(uniqueId);
+    return static_cast<jint>(getDrmManagerClientImpl(env, thiz)
+                ->removeAllRights(uniqueId));
 }
 
 static jint android_drm_DrmManagerClient_openConvertSession(
@@ -632,7 +635,7 @@ static jint android_drm_DrmManagerClient_openConvertSession(
         = getDrmManagerClientImpl(env, thiz)
             ->openConvertSession(uniqueId, Utility::getStringValue(env, mimeType));
     ALOGV("openConvertSession Exit");
-    return convertId;
+    return static_cast<jint>(convertId);
 }
 
 static jobject GetConvertedStatus(JNIEnv* env, DrmConvertedStatus* pDrmConvertedStatus) {
@@ -686,7 +689,7 @@ static jobject android_drm_DrmManagerClient_convertData(
 }
 
 static jobject android_drm_DrmManagerClient_closeConvertSession(
-            JNIEnv* env, jobject thiz, int uniqueId, jint convertId) {
+            JNIEnv* env, jobject thiz, jint uniqueId, jint convertId) {
 
     ALOGV("closeConvertSession Enter");
 
