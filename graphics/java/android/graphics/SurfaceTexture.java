@@ -69,9 +69,9 @@ public class SurfaceTexture {
     /**
      * These fields are used by native code, do not access or modify.
      */
-    private int mSurfaceTexture;
-    private int mBufferQueue;
-    private int mFrameAvailableListener;
+    private long mSurfaceTexture;
+    private long mBufferQueue;
+    private long mFrameAvailableListener;
 
     /**
      * Callback interface for being notified that a new stream frame is available.
