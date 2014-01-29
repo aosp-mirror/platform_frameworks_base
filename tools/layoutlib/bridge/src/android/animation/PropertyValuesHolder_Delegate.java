@@ -48,12 +48,62 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
     }
 
     @LayoutlibDelegate
+    /*package*/ static int nGetMultipleIntMethod(Class<?> targetClass, String methodName,
+            int numParams) {
+        // TODO: return the right thing.
+        return 0;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int nGetMultipleFloatMethod(Class<?> targetClass, String methodName,
+            int numParams) {
+        // TODO: return the right thing.
+        return 0;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void nCallIntMethod(Object target, long methodID, int arg) {
         // do nothing
     }
 
     @LayoutlibDelegate
     /*package*/ static void nCallFloatMethod(Object target, long methodID, float arg) {
+        // do nothing
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nCallTwoIntMethod(Object target, long methodID, int arg1,
+            int arg2) {
+        // do nothing
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nCallFourIntMethod(Object target, long methodID, int arg1,
+            int arg2, int arg3, int arg4) {
+        // do nothing
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nCallMultipleIntMethod(Object target, long methodID,
+            int[] args) {
+        // do nothing
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nCallTwoFloatMethod(Object target, long methodID, float arg1,
+            float arg2) {
+        // do nothing
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nCallFourFloatMethod(Object target, long methodID, float arg1,
+            float arg2, float arg3, float arg4) {
+        // do nothing
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nCallMultipleFloatMethod(Object target, long methodID,
+            float[] args) {
         // do nothing
     }
 }

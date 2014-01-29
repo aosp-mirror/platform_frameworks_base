@@ -654,7 +654,7 @@ public final class Matrix_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_invert(long native_object, int inverse) {
+    /*package*/ static boolean native_invert(long native_object, long inverse) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             return false;
