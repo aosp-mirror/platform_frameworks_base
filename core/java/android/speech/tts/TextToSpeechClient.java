@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Synthesizes speech from text for immediate playback or to create a sound
@@ -292,7 +293,8 @@ public final class TextToSpeechClient {
          * @param msFromStart
          *            Miliseconds from the start of the synthesis.
          */
-        public void onSynthesisProgress(UtteranceId utteranceId, int charIndex, int msFromStart) {}
+        public void onSynthesisProgress(UtteranceId utteranceId, int charIndex,
+                int msFromStart) {}
     }
 
     /**
@@ -366,38 +368,28 @@ public final class TextToSpeechClient {
     }
 
     /** Unique synthesis request identifier. */
-    public static final class UtteranceId {
-        private final String mDescription;
+    public static class UtteranceId {
+        /** Unique identifier */
+        private final int id;
+
+        /** Unique identifier generator */
+        private static final AtomicInteger ID_GENERATOR = new AtomicInteger();
+
         /**
          * Create new, unique UtteranceId instance.
          */
         public UtteranceId() {
-            mDescription = null;
-        }
-
-        /**
-         * Create new, unique UtteranceId instance.
-         *
-         * @param description Additional string, that will be appended to
-         * {@link #toUniqueString()} output, allowing easier identification of the utterance in
-         * callbacks.
-         */
-        public UtteranceId(String description) {
-            mDescription = description;
+            id = ID_GENERATOR.getAndIncrement();
         }
 
         /**
          * Returns a unique string associated with an instance of this object.
          *
-         * If you subclass {@link UtteranceId} make sure that output of this method is
-         * consistent across multiple calls and unique for the instance.
-         *
          * This string will be used to identify the synthesis request/utterance inside the
          * TTS service.
          */
-        public String toUniqueString() {
-            return mDescription == null ? "UtteranceId" + System.identityHashCode(this) :
-                    "UtteranceId" + System.identityHashCode(this) + ": " + mDescription;
+        public final String toUniqueString() {
+            return "UID" + id;
         }
     }
 
@@ -680,7 +672,8 @@ public final class TextToSpeechClient {
 
             public void onFallback(String utteranceIdStr) {
                 synchronized (mLock) {
-                    Pair<UtteranceId, RequestCallbacks> callbacks = getCallback(utteranceIdStr);
+                    Pair<UtteranceId, RequestCallbacks> callbacks = getCallback(
+                            utteranceIdStr);
                     callbacks.second.onSynthesisFallback(callbacks.first);
                 }
             };
