@@ -267,7 +267,7 @@ protected:
         //data.print();
         //printf("\n");
         jboolean res = env->CallBooleanMethod(mObject, gBinderOffsets.mExecTransact,
-            code, (int32_t)&data, (int32_t)reply, flags);
+            code, reinterpret_cast<jlong>(&data), reinterpret_cast<jlong>(reply), flags);
         jthrowable excep = env->ExceptionOccurred();
 
         if (excep) {
@@ -577,7 +577,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
     if (object != NULL) {
         LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object);
         // The proxy holds a reference to the native object.
-        env->SetIntField(object, gBinderProxyOffsets.mObject, (int)val.get());
+        env->SetLongField(object, gBinderProxyOffsets.mObject, (jlong)val.get());
         val->incStrong((void*)javaObjectForIBinder);
 
         // The native object needs to hold a weak reference back to the
@@ -590,7 +590,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
         // Also remember the death recipients registered on this proxy
         sp<DeathRecipientList> drl = new DeathRecipientList;
         drl->incStrong((void*)javaObjectForIBinder);
-        env->SetIntField(object, gBinderProxyOffsets.mOrgue, reinterpret_cast<jint>(drl.get()));
+        env->SetLongField(object, gBinderProxyOffsets.mOrgue, reinterpret_cast<jlong>(drl.get()));
 
         // Note that a new object reference has been created.
         android_atomic_inc(&gNumProxyRefs);
@@ -606,13 +606,13 @@ sp<IBinder> ibinderForJavaObject(JNIEnv* env, jobject obj)
 
     if (env->IsInstanceOf(obj, gBinderOffsets.mClass)) {
         JavaBBinderHolder* jbh = (JavaBBinderHolder*)
-            env->GetIntField(obj, gBinderOffsets.mObject);
+            env->GetLongField(obj, gBinderOffsets.mObject);
         return jbh != NULL ? jbh->get(env, obj) : NULL;
     }
 
     if (env->IsInstanceOf(obj, gBinderProxyOffsets.mClass)) {
         return (IBinder*)
-            env->GetIntField(obj, gBinderProxyOffsets.mObject);
+            env->GetLongField(obj, gBinderProxyOffsets.mObject);
     }
 
     ALOGW("ibinderForJavaObject: %p is not a Binder object", obj);
@@ -764,15 +764,15 @@ static void android_os_Binder_init(JNIEnv* env, jobject obj)
     }
     ALOGV("Java Binder %p: acquiring first ref on holder %p", obj, jbh);
     jbh->incStrong((void*)android_os_Binder_init);
-    env->SetIntField(obj, gBinderOffsets.mObject, (int)jbh);
+    env->SetLongField(obj, gBinderOffsets.mObject, (jlong)jbh);
 }
 
 static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
 {
     JavaBBinderHolder* jbh = (JavaBBinderHolder*)
-        env->GetIntField(obj, gBinderOffsets.mObject);
+        env->GetLongField(obj, gBinderOffsets.mObject);
     if (jbh != NULL) {
-        env->SetIntField(obj, gBinderOffsets.mObject, 0);
+        env->SetLongField(obj, gBinderOffsets.mObject, 0);
         ALOGV("Java Binder %p: removing ref on holder %p", obj, jbh);
         jbh->decStrong((void*)android_os_Binder_init);
     } else {
@@ -812,11 +812,11 @@ static int int_register_android_os_Binder(JNIEnv* env)
 
     gBinderOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
     gBinderOffsets.mExecTransact
-        = env->GetMethodID(clazz, "execTransact", "(IIII)Z");
+        = env->GetMethodID(clazz, "execTransact", "(IJJI)Z");
     assert(gBinderOffsets.mExecTransact);
 
     gBinderOffsets.mObject
-        = env->GetFieldID(clazz, "mObject", "I");
+        = env->GetFieldID(clazz, "mObject", "J");
     assert(gBinderOffsets.mObject);
 
     return AndroidRuntime::registerNativeMethods(
@@ -911,7 +911,7 @@ static int int_register_android_os_BinderInternal(JNIEnv* env)
 static jboolean android_os_BinderProxy_pingBinder(JNIEnv* env, jobject obj)
 {
     IBinder* target = (IBinder*)
-        env->GetIntField(obj, gBinderProxyOffsets.mObject);
+        env->GetLongField(obj, gBinderProxyOffsets.mObject);
     if (target == NULL) {
         return JNI_FALSE;
     }
@@ -921,7 +921,7 @@ static jboolean android_os_BinderProxy_pingBinder(JNIEnv* env, jobject obj)
 
 static jstring android_os_BinderProxy_getInterfaceDescriptor(JNIEnv* env, jobject obj)
 {
-    IBinder* target = (IBinder*) env->GetIntField(obj, gBinderProxyOffsets.mObject);
+    IBinder* target = (IBinder*) env->GetLongField(obj, gBinderProxyOffsets.mObject);
     if (target != NULL) {
         const String16& desc = target->getInterfaceDescriptor();
         return env->NewString(desc.string(), desc.size());
@@ -934,7 +934,7 @@ static jstring android_os_BinderProxy_getInterfaceDescriptor(JNIEnv* env, jobjec
 static jboolean android_os_BinderProxy_isBinderAlive(JNIEnv* env, jobject obj)
 {
     IBinder* target = (IBinder*)
-        env->GetIntField(obj, gBinderProxyOffsets.mObject);
+        env->GetLongField(obj, gBinderProxyOffsets.mObject);
     if (target == NULL) {
         return JNI_FALSE;
     }
@@ -1062,7 +1062,7 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
     }
 
     IBinder* target = (IBinder*)
-        env->GetIntField(obj, gBinderProxyOffsets.mObject);
+        env->GetLongField(obj, gBinderProxyOffsets.mObject);
     if (target == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", "Binder has been finalized!");
         return JNI_FALSE;
@@ -1109,7 +1109,7 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
     }
 
     IBinder* target = (IBinder*)
-        env->GetIntField(obj, gBinderProxyOffsets.mObject);
+        env->GetLongField(obj, gBinderProxyOffsets.mObject);
     if (target == NULL) {
         ALOGW("Binder has been finalized when calling linkToDeath() with recip=%p)\n", recipient);
         assert(false);
@@ -1119,7 +1119,7 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
 
     if (!target->localBinder()) {
         DeathRecipientList* list = (DeathRecipientList*)
-                env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
+                env->GetLongField(obj, gBinderProxyOffsets.mOrgue);
         sp<JavaDeathRecipient> jdr = new JavaDeathRecipient(env, recipient, list);
         status_t err = target->linkToDeath(jdr, NULL, flags);
         if (err != NO_ERROR) {
@@ -1141,7 +1141,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
     }
 
     IBinder* target = (IBinder*)
-        env->GetIntField(obj, gBinderProxyOffsets.mObject);
+        env->GetLongField(obj, gBinderProxyOffsets.mObject);
     if (target == NULL) {
         ALOGW("Binder has been finalized when calling linkToDeath() with recip=%p)\n", recipient);
         return JNI_FALSE;
@@ -1154,7 +1154,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 
         // If we find the matching recipient, proceed to unlink using that
         DeathRecipientList* list = (DeathRecipientList*)
-                env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
+                env->GetLongField(obj, gBinderProxyOffsets.mOrgue);
         sp<JavaDeathRecipient> origJDR = list->find(recipient);
         LOGDEATH("   unlink found list %p and JDR %p", list, origJDR.get());
         if (origJDR != NULL) {
@@ -1183,13 +1183,13 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 static void android_os_BinderProxy_destroy(JNIEnv* env, jobject obj)
 {
     IBinder* b = (IBinder*)
-            env->GetIntField(obj, gBinderProxyOffsets.mObject);
+            env->GetLongField(obj, gBinderProxyOffsets.mObject);
     DeathRecipientList* drl = (DeathRecipientList*)
-            env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
+            env->GetLongField(obj, gBinderProxyOffsets.mOrgue);
 
     LOGDEATH("Destroying BinderProxy %p: binder=%p drl=%p\n", obj, b, drl);
-    env->SetIntField(obj, gBinderProxyOffsets.mObject, 0);
-    env->SetIntField(obj, gBinderProxyOffsets.mOrgue, 0);
+    env->SetLongField(obj, gBinderProxyOffsets.mObject, 0);
+    env->SetLongField(obj, gBinderProxyOffsets.mOrgue, 0);
     drl->decStrong((void*)javaObjectForIBinder);
     b->decStrong((void*)javaObjectForIBinder);
 
@@ -1231,13 +1231,13 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
     assert(gBinderProxyOffsets.mSendDeathNotice);
 
     gBinderProxyOffsets.mObject
-        = env->GetFieldID(clazz, "mObject", "I");
+        = env->GetFieldID(clazz, "mObject", "J");
     assert(gBinderProxyOffsets.mObject);
     gBinderProxyOffsets.mSelf
         = env->GetFieldID(clazz, "mSelf", "Ljava/lang/ref/WeakReference;");
     assert(gBinderProxyOffsets.mSelf);
     gBinderProxyOffsets.mOrgue
-        = env->GetFieldID(clazz, "mOrgue", "I");
+        = env->GetFieldID(clazz, "mOrgue", "J");
     assert(gBinderProxyOffsets.mOrgue);
 
     clazz = env->FindClass("java/lang/Class");
