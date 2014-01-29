@@ -19,6 +19,7 @@
 #define SHADOW_SHRINK_SCALE 0.1f
 
 #include <math.h>
+#include <stdlib.h>
 #include <utils/Log.h>
 
 #include "SpotShadow.h"
@@ -128,10 +129,10 @@ int SpotShadow::hull(Vector2* points, int pointsLength, Vector2* retPoly) {
         lUpper[lUpperSize] = points[i];
         lUpperSize++;
 
-        while (lUpperSize > 2 && !rightTurn(
-                (double)lUpper[lUpperSize - 3].x, (double)lUpper[lUpperSize - 3].y,
-                (double)lUpper[lUpperSize - 2].x, (double)lUpper[lUpperSize - 2].y,
-                (double)lUpper[lUpperSize - 1].x, (double)lUpper[lUpperSize - 1].y)) {
+        while (lUpperSize > 2 && !ccw(
+                lUpper[lUpperSize - 3].x, lUpper[lUpperSize - 3].y,
+                lUpper[lUpperSize - 2].x, lUpper[lUpperSize - 2].y,
+                lUpper[lUpperSize - 1].x, lUpper[lUpperSize - 1].y)) {
             // Remove the middle point of the three last
             lUpper[lUpperSize - 2].x = lUpper[lUpperSize - 1].x;
             lUpper[lUpperSize - 2].y = lUpper[lUpperSize - 1].y;
@@ -149,10 +150,10 @@ int SpotShadow::hull(Vector2* points, int pointsLength, Vector2* retPoly) {
         lLower[lLowerSize] = points[i];
         lLowerSize++;
 
-        while (lLowerSize > 2 && !rightTurn(
-                (double)lLower[lLowerSize - 3].x, (double)lLower[lLowerSize - 3].y,
-                (double)lLower[lLowerSize - 2].x, (double)lLower[lLowerSize - 2].y,
-                (double)lLower[lLowerSize - 1].x, (double)lLower[lLowerSize - 1].y)) {
+        while (lLowerSize > 2 && !ccw(
+                lLower[lLowerSize - 3].x, lLower[lLowerSize - 3].y,
+                lLower[lLowerSize - 2].x, lLower[lLowerSize - 2].y,
+                lLower[lLowerSize - 1].x, lLower[lLowerSize - 1].y)) {
             // Remove the middle point of the three last
             lLower[lLowerSize - 2] = lLower[lLowerSize - 1];
             lLowerSize--;
@@ -174,7 +175,7 @@ int SpotShadow::hull(Vector2* points, int pointsLength, Vector2* retPoly) {
 }
 
 /**
- * Test whether the 3 points form a right hand turn
+ * Test whether the 3 points form a counter clockwise turn.
  *
  * @param ax the x coordinate of point a
  * @param ay the y coordinate of point a
@@ -184,7 +185,7 @@ int SpotShadow::hull(Vector2* points, int pointsLength, Vector2* retPoly) {
  * @param cy the y coordinate of point c
  * @return true if a right hand turn
  */
-bool SpotShadow::rightTurn(double ax, double ay, double bx, double by,
+bool SpotShadow::ccw(double ax, double ay, double bx, double by,
         double cx, double cy) {
     return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax) > EPSILON;
 }
@@ -203,6 +204,7 @@ int SpotShadow::intersection(Vector2* poly1, int poly1Length,
         Vector2* poly2, int poly2Length) {
     makeClockwise(poly1, poly1Length);
     makeClockwise(poly2, poly2Length);
+
     Vector2 poly[poly1Length * poly2Length + 2];
     int count = 0;
     int pcount = 0;
@@ -259,7 +261,7 @@ int SpotShadow::intersection(Vector2* poly1, int poly1Length,
                 count++;
             } else {
                 Vector2 delta = poly2[i] - poly1[j];
-                if (delta.lengthSquared() < 0.01) {
+                if (delta.lengthSquared() < EPSILON) {
                     poly[count] = poly2[i];
                     count++;
                 }
@@ -279,20 +281,40 @@ int SpotShadow::intersection(Vector2* poly1, int poly1Length,
     center /= count;
     sort(poly, count, center);
 
-    // TODO: Verify the intersection works correctly, like any random point
-    // inside both poly1 and poly2 should be inside the intersection, and the
-    // result intersection polygon is convex.
+#if DEBUG_SHADOW
+    // Since poly2 is overwritten as the result, we need to save a copy to do
+    // our verification.
+    Vector2 oldPoly2[poly2Length];
+    int oldPoly2Length = poly2Length;
+    memcpy(oldPoly2, poly2, sizeof(Vector2) * poly2Length);
+#endif
 
-    // Merge the vertices if they are too close.
+    // Filter the result out from poly and put it into poly2.
     poly2[0] = poly[0];
-    int resultLength = 1;
+    int lastOutputIndex = 0;
     for (int i = 1; i < count; i++) {
-        Vector2 delta = poly[i] - poly[i - 1];
-        if (delta.lengthSquared() >= 0.01) {
-            poly2[resultLength] = poly[i];
-            resultLength++;
+        Vector2 delta = poly[i] - poly2[lastOutputIndex];
+        if (delta.lengthSquared() >= EPSILON) {
+            poly2[++lastOutputIndex] = poly[i];
+        } else {
+            // If the vertices are too close, pick the inner one, because the
+            // inner one is more likely to be an intersection point.
+            Vector2 delta1 = poly[i] - center;
+            Vector2 delta2 = poly2[lastOutputIndex] - center;
+            if (delta1.lengthSquared() < delta2.lengthSquared()) {
+                poly2[lastOutputIndex] = poly[i];
+            }
         }
     }
+    int resultLength = lastOutputIndex + 1;
+
+#if DEBUG_SHADOW
+    testConvex(poly2, resultLength, "intersection");
+    testConvex(poly1, poly1Length, "input poly1");
+    testConvex(oldPoly2, oldPoly2Length, "input poly2");
+
+    testIntersection(poly1, poly1Length, oldPoly2, oldPoly2Length, poly2, resultLength);
+#endif
 
     return resultLength;
 }
@@ -309,10 +331,12 @@ void SpotShadow::sort(Vector2* poly, int polyLength, const Vector2& center) {
 }
 
 /**
- * Calculate the angle between and x and a y coordinate
+ * Calculate the angle between and x and a y coordinate.
+ * The atan2 range from -PI to PI, if we want to sort the vertices as clockwise,
+ * we just negate the return angle.
  */
 float SpotShadow::angle(const Vector2& point, const Vector2& center) {
-    return -(float)atan2(point.x - center.x, point.y - center.y);
+    return -(float)atan2(point.y - center.y, point.x - center.x);
 }
 
 /**
@@ -830,6 +854,126 @@ float SpotShadow::calculateOpacity(float distRatio, float deltaDist) {
 int SpotShadow::getStripSize(int rays, int layers) {
     return  (2 + rays + ((layers) * 2 * (rays + 1)));
 }
+
+#if DEBUG_SHADOW
+
+#define TEST_POINT_NUMBER 128
+
+/**
+ * Calculate the bounds for generating random test points.
+ */
+void SpotShadow::updateBound(const Vector2 inVector, Vector2& lowerBound,
+        Vector2& upperBound ) {
+    if (inVector.x < lowerBound.x) {
+        lowerBound.x = inVector.x;
+    }
+
+    if (inVector.y < lowerBound.y) {
+        lowerBound.y = inVector.y;
+    }
+
+    if (inVector.x > upperBound.x) {
+        upperBound.x = inVector.x;
+    }
+
+    if (inVector.y > upperBound.y) {
+        upperBound.y = inVector.y;
+    }
+}
+
+/**
+ * For debug purpose, when things go wrong, dump the whole polygon data.
+ */
+static void dumpPolygon(const Vector2* poly, int polyLength, const char* polyName) {
+    for (int i = 0; i < polyLength; i++) {
+        ALOGD("polygon %s i %d x %f y %f", polyName, i, poly[i].x, poly[i].y);
+    }
+}
+
+/**
+ * Test whether the polygon is convex.
+ */
+bool SpotShadow::testConvex(const Vector2* polygon, int polygonLength,
+        const char* name) {
+    bool isConvex = true;
+    for (int i = 0; i < polygonLength; i++) {
+        Vector2 start = polygon[i];
+        Vector2 middle = polygon[(i + 1) % polygonLength];
+        Vector2 end = polygon[(i + 2) % polygonLength];
+
+        double delta = (double(middle.x) - start.x) * (double(end.y) - start.y) -
+                (double(middle.y) - start.y) * (double(end.x) - start.x);
+        bool isCCWOrCoLinear = (delta >= EPSILON);
+
+        if (isCCWOrCoLinear) {
+            ALOGE("(Error Type 2): polygon (%s) is not a convex b/c start (x %f, y %f),"
+                    "middle (x %f, y %f) and end (x %f, y %f) , delta is %f !!!",
+                    name, start.x, start.y, middle.x, middle.y, end.x, end.y, delta);
+            isConvex = false;
+            break;
+        }
+    }
+    return isConvex;
+}
+
+/**
+ * Test whether or not the polygon (intersection) is within the 2 input polygons.
+ * Using Marte Carlo method, we generate a random point, and if it is inside the
+ * intersection, then it must be inside both source polygons.
+ */
+void SpotShadow::testIntersection(const Vector2* poly1, int poly1Length,
+        const Vector2* poly2, int poly2Length,
+        const Vector2* intersection, int intersectionLength) {
+    // Find the min and max of x and y.
+    Vector2 lowerBound(FLT_MAX, FLT_MAX);
+    Vector2 upperBound(-FLT_MAX, -FLT_MAX);
+    for (int i = 0; i < poly1Length; i++) {
+        updateBound(poly1[i], lowerBound, upperBound);
+    }
+    for (int i = 0; i < poly2Length; i++) {
+        updateBound(poly2[i], lowerBound, upperBound);
+    }
+
+    bool dumpPoly = false;
+    for (int k = 0; k < TEST_POINT_NUMBER; k++) {
+        // Generate a random point between minX, minY and maxX, maxY.
+        double randomX = rand() / double(RAND_MAX);
+        double randomY = rand() / double(RAND_MAX);
+
+        Vector2 testPoint;
+        testPoint.x = lowerBound.x + randomX * (upperBound.x - lowerBound.x);
+        testPoint.y = lowerBound.y + randomY * (upperBound.y - lowerBound.y);
+
+        // If the random point is in both poly 1 and 2, then it must be intersection.
+        if (testPointInsidePolygon(testPoint, intersection, intersectionLength)) {
+            if (!testPointInsidePolygon(testPoint, poly1, poly1Length)) {
+                dumpPoly = true;
+                ALOGE("(Error Type 1): one point (%f, %f) in the intersection is"
+                      " not in the poly1",
+                        testPoint.x, testPoint.y);
+            }
+
+            if (!testPointInsidePolygon(testPoint, poly2, poly2Length)) {
+                dumpPoly = true;
+                ALOGE("(Error Type 1): one point (%f, %f) in the intersection is"
+                      " not in the poly2",
+                        testPoint.x, testPoint.y);
+            }
+        }
+    }
+
+    if (dumpPoly) {
+        dumpPolygon(intersection, intersectionLength, "intersection");
+        for (int i = 1; i < intersectionLength; i++) {
+            Vector2 delta = intersection[i] - intersection[i - 1];
+            ALOGD("Intersetion i, %d Vs i-1 is delta %f", i, delta.lengthSquared());
+        }
+
+        dumpPolygon(poly1, poly1Length, "poly 1");
+        dumpPolygon(poly2, poly2Length, "poly 2");
+    }
+}
+#endif
 
 }; // namespace uirenderer
 }; // namespace android
