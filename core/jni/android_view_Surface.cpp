@@ -114,7 +114,8 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         return NULL;
     }
 
-    jobject surfaceObj = env->NewObject(gSurfaceClassInfo.clazz, gSurfaceClassInfo.ctor, surface.get());
+    jobject surfaceObj = env->NewObject(gSurfaceClassInfo.clazz,
+            gSurfaceClassInfo.ctor, (jlong)surface.get());
     if (surfaceObj == NULL) {
         if (env->ExceptionCheck()) {
             ALOGE("Could not create instance of Surface from IGraphicBufferProducer.");
