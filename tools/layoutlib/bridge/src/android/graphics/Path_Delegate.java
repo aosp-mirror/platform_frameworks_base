@@ -474,6 +474,12 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static boolean native_op(long nPath1, long nPath2, int op, int result) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.op() not supported", null);
+        return false;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void finalizer(long nPath) {
         sManager.removeJavaReferenceFor(nPath);
     }
