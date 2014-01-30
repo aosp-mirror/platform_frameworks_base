@@ -743,9 +743,9 @@ public class PropertyValuesHolder implements Cloneable {
     static class IntPropertyValuesHolder extends PropertyValuesHolder {
 
         // Cache JNI functions to avoid looking them up twice
-        private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
-                new HashMap<Class, HashMap<String, Integer>>();
-        int mJniSetter;
+        private static final HashMap<Class, HashMap<String, Long>> sJNISetterPropertyMap =
+                new HashMap<Class, HashMap<String, Long>>();
+        long mJniSetter;
         private IntProperty mIntProperty;
 
         IntKeyframeSet mIntKeyframeSet;
@@ -845,11 +845,11 @@ public class PropertyValuesHolder implements Cloneable {
             // Check new static hashmap<propName, int> for setter method
             try {
                 mPropertyMapLock.writeLock().lock();
-                HashMap<String, Integer> propertyMap = sJNISetterPropertyMap.get(targetClass);
+                HashMap<String, Long> propertyMap = sJNISetterPropertyMap.get(targetClass);
                 if (propertyMap != null) {
-                    Integer mJniSetterInteger = propertyMap.get(mPropertyName);
-                    if (mJniSetterInteger != null) {
-                        mJniSetter = mJniSetterInteger;
+                    Long jniSetter = propertyMap.get(mPropertyName);
+                    if (jniSetter != null) {
+                        mJniSetter = jniSetter;
                     }
                 }
                 if (mJniSetter == 0) {
@@ -857,7 +857,7 @@ public class PropertyValuesHolder implements Cloneable {
                     mJniSetter = nGetIntMethod(targetClass, methodName);
                     if (mJniSetter != 0) {
                         if (propertyMap == null) {
-                            propertyMap = new HashMap<String, Integer>();
+                            propertyMap = new HashMap<String, Long>();
                             sJNISetterPropertyMap.put(targetClass, propertyMap);
                         }
                         propertyMap.put(mPropertyName, mJniSetter);
@@ -880,9 +880,9 @@ public class PropertyValuesHolder implements Cloneable {
     static class FloatPropertyValuesHolder extends PropertyValuesHolder {
 
         // Cache JNI functions to avoid looking them up twice
-        private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
-                new HashMap<Class, HashMap<String, Integer>>();
-        int mJniSetter;
+        private static final HashMap<Class, HashMap<String, Long>> sJNISetterPropertyMap =
+                new HashMap<Class, HashMap<String, Long>>();
+        long mJniSetter;
         private FloatProperty mFloatProperty;
 
         FloatKeyframeSet mFloatKeyframeSet;
@@ -982,11 +982,11 @@ public class PropertyValuesHolder implements Cloneable {
             // Check new static hashmap<propName, int> for setter method
             try {
                 mPropertyMapLock.writeLock().lock();
-                HashMap<String, Integer> propertyMap = sJNISetterPropertyMap.get(targetClass);
+                HashMap<String, Long> propertyMap = sJNISetterPropertyMap.get(targetClass);
                 if (propertyMap != null) {
-                    Integer mJniSetterInteger = propertyMap.get(mPropertyName);
-                    if (mJniSetterInteger != null) {
-                        mJniSetter = mJniSetterInteger;
+                    Long jniSetter = propertyMap.get(mPropertyName);
+                    if (jniSetter != null) {
+                        mJniSetter = jniSetter;
                     }
                 }
                 if (mJniSetter == 0) {
@@ -994,7 +994,7 @@ public class PropertyValuesHolder implements Cloneable {
                     mJniSetter = nGetFloatMethod(targetClass, methodName);
                     if (mJniSetter != 0) {
                         if (propertyMap == null) {
-                            propertyMap = new HashMap<String, Integer>();
+                            propertyMap = new HashMap<String, Long>();
                             sJNISetterPropertyMap.put(targetClass, propertyMap);
                         }
                         propertyMap.put(mPropertyName, mJniSetter);
@@ -1015,8 +1015,8 @@ public class PropertyValuesHolder implements Cloneable {
 
     }
 
-    native static private int nGetIntMethod(Class targetClass, String methodName);
-    native static private int nGetFloatMethod(Class targetClass, String methodName);
-    native static private void nCallIntMethod(Object target, int methodID, int arg);
-    native static private void nCallFloatMethod(Object target, int methodID, float arg);
+    native static private long nGetIntMethod(Class targetClass, String methodName);
+    native static private long nGetFloatMethod(Class targetClass, String methodName);
+    native static private void nCallIntMethod(Object target, long methodID, int arg);
+    native static private void nCallFloatMethod(Object target, long methodID, float arg);
 }
