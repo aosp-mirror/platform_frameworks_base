@@ -53,7 +53,7 @@ public:
     ANDROID_API virtual void run() = 0;
 
     RenderTask* mNext;
-    nsecs_t mRunAt;
+    nsecs_t mRunAt; // nano-seconds on the SYSTEM_TIME_MONOTONIC clock
 };
 
 class SignalingRenderTask : public RenderTask {

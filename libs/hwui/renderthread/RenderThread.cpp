@@ -128,7 +128,8 @@ bool RenderThread::threadLoop() {
         if (nextWakeup == LLONG_MAX) {
             timeoutMillis = -1;
         } else {
-            timeoutMillis = nextWakeup - systemTime(SYSTEM_TIME_MONOTONIC);
+            nsecs_t timeoutNanos = nextWakeup - systemTime(SYSTEM_TIME_MONOTONIC);
+            timeoutMillis = nanoseconds_to_milliseconds(timeoutNanos);
             if (timeoutMillis < 0) {
                 timeoutMillis = 0;
             }
@@ -149,7 +150,7 @@ void RenderThread::queue(RenderTask* task) {
 
 void RenderThread::queueDelayed(RenderTask* task, int delayMs) {
     nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
-    task->mRunAt = now + delayMs;
+    task->mRunAt = now + milliseconds_to_nanoseconds(delayMs);
     queue(task);
 }
 
