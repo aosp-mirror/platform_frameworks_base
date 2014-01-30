@@ -3468,6 +3468,14 @@ public final class Settings {
             "lock_screen_owner_info_enabled";
 
         /**
+         * This preference enables expanding the notification panel even over a securely
+         * locked screen, showing only "public" notifications in this case.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_ALLOW_NOTIFICATIONS =
+                "lock_screen_allow_notifications";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has

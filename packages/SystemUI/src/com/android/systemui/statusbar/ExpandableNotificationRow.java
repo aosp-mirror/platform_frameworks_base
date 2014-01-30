@@ -18,8 +18,11 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import com.android.systemui.R;
 
 public class ExpandableNotificationRow extends FrameLayout {
     private int mRowHeight;
@@ -30,6 +33,8 @@ public class ExpandableNotificationRow extends FrameLayout {
     private boolean mUserExpanded;
     /** is the user touching this row */
     private boolean mUserLocked;
+    /** are we showing the "public" version */
+    private boolean mShowingPublic;
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -75,5 +80,17 @@ public class ExpandableNotificationRow extends FrameLayout {
             lp.height = mRowHeight;
         }
         setLayoutParams(lp);
+    }
+
+    public void setShowingPublic(boolean show) {
+        mShowingPublic = show;
+        final ViewGroup publicLayout = (ViewGroup) findViewById(R.id.expandedPublic);
+
+        // bail out if no public version
+        if (publicLayout.getChildCount() == 0) return;
+
+        // TODO: animation?
+        publicLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.expanded).setVisibility(show ? View.GONE : View.VISIBLE);
     }
 }

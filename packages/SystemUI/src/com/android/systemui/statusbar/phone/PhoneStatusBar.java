@@ -514,7 +514,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mScrollView.setVerticalScrollBarEnabled(false); // less drawing during pulldowns
         if (!mNotificationPanelIsFullScreenWidth) {
             mScrollView.setSystemUiVisibility(
-                    View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER |
                     View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
                     View.STATUS_BAR_DISABLE_CLOCK);
         }
@@ -621,7 +620,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 mQS = new QuickSettings(mContext, mSettingsContainer);
                 if (!mNotificationPanelIsFullScreenWidth) {
                     mSettingsContainer.setSystemUiVisibility(
-                            View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
+                            View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS
                             | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
                 }
                 if (mSettingsPanel != null) {
@@ -1031,7 +1030,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             Entry ent = mNotificationData.get(N-i-1);
             if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
             if (!notificationIsForCurrentUser(ent.notification)) continue;
-            toShow.add(ent.row);
+            final int vis = ent.notification.getNotification().visibility;
+            if (vis != Notification.VISIBILITY_SECRET) {
+                // when isPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
+                ent.row.setShowingPublic(isPublicMode() && vis == Notification.VISIBILITY_PRIVATE);
+                toShow.add(ent.row);
+            }
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
@@ -1082,6 +1086,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (!((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
             if (!notificationIsForCurrentUser(ent.notification)) continue;
+            if (isPublicMode()
+                    && ent.notification.getNotification().visibility
+                            == Notification.VISIBILITY_SECRET) {
+                // in "public" mode (atop a secure keyguard), secret notifs are totally hidden
+                continue;
+            }
             toShow.add(ent.icon);
         }
 
@@ -1243,8 +1253,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "TICKER" : "ticker");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) ? "PRIVATE" : "private");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
@@ -1329,10 +1339,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     .setDuration(175)
                     .start();
             }
-        } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-            if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                haltTicker();
+        } else if ((diff & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) {
+            if ((state & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) {
+                // we are outside a secure keyguard, so we need to switch to "public" mode
+                setPublicMode(true);
+            } else {
+                // user has authenticated the device; full notifications may be shown
+                setPublicMode(false);
             }
+            updateNotificationIcons();
         }
     }
 

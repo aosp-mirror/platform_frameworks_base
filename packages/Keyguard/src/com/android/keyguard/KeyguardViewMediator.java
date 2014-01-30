@@ -149,6 +149,18 @@ public class KeyguardViewMediator {
      */
     private static final boolean ENABLE_INSECURE_STATUS_BAR_EXPAND = true;
 
+    /**
+     * Allow the user to expand the status bar when a SECURE keyguard is engaged
+     * and {@link Settings.Secure#LOCK_SCREEN_ALLOW_NOTIFICATIONS} is set
+     * (private notifications will be masked).
+     */
+    private static final boolean ENABLE_SECURE_STATUS_BAR_EXPAND = true;
+
+    /**
+     * Default value of {@link Settings.Secure#LOCK_SCREEN_ALLOW_NOTIFICATIONS}.
+     */
+    private static final boolean ALLOW_NOTIFICATIONS_DEFAULT = false;
+
     /** The stream type that the lock sounds are tied to. */
     private int mMasterStreamType;
 
@@ -244,6 +256,11 @@ public class KeyguardViewMediator {
     private int mLockSoundId;
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
+
+    /**
+     * Tracks value of {@link Settings.Secure#LOCK_SCREEN_ALLOW_NOTIFICATIONS}.
+     */
+    private boolean mAllowNotificationsWhenSecure;
 
     /**
      * The volume applied to the lock/unlock sounds.
@@ -894,6 +911,13 @@ public class KeyguardViewMediator {
             return;
         }
 
+        // note whether notification access should be allowed
+        mAllowNotificationsWhenSecure = ENABLE_SECURE_STATUS_BAR_EXPAND
+                && 0 != Settings.Secure.getInt(
+                        mContext.getContentResolver(),
+                        Settings.Secure.LOCK_SCREEN_ALLOW_NOTIFICATIONS,
+                        ALLOW_NOTIFICATIONS_DEFAULT ? 1 : 0);
+
         // if the keyguard is already showing, don't bother
         if (mKeyguardViewManager.isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
@@ -1278,13 +1302,15 @@ public class KeyguardViewMediator {
                 // (like recents). Temporary enable/disable (e.g. the "back" button) are
                 // done in KeyguardHostView.
                 flags |= StatusBarManager.DISABLE_RECENT;
-                if (isSecure() || !ENABLE_INSECURE_STATUS_BAR_EXPAND) {
+                if ((isSecure() && !mAllowNotificationsWhenSecure)
+                        || !ENABLE_INSECURE_STATUS_BAR_EXPAND) {
                     // showing secure lockscreen; disable expanding.
                     flags |= StatusBarManager.DISABLE_EXPAND;
                 }
                 if (isSecure()) {
-                    // showing secure lockscreen; disable ticker.
-                    flags |= StatusBarManager.DISABLE_NOTIFICATION_TICKER;
+                    // showing secure lockscreen; disable ticker and switch private notifications
+                    // to show their public versions, if available.
+                    flags |= StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS;
                 }
                 if (!isAssistantAvailable()) {
                     flags |= StatusBarManager.DISABLE_SEARCH;
