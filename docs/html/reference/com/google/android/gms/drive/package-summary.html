@@ -436,11 +436,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -676,8 +671,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div id="jd-content" class="api apilevel-">
 
-
-
+  <div class="jd-descr">
+<p class="caution">
+  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
+  preview</strong>. Applications compiled using this version of the API will
+  continue to operate on devices using future versions of Google Play services;
+  however, changes to the API are expected in future releases.
+</p>
+  </div>
 
 
 
@@ -695,40 +696,64 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Result that contains a Contents reference.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
-              <td class="jd-descrcol" width="100%">Result that contains a DriveId.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.IntentSenderResult.html">DriveApi.IntentSenderResult</a></td>
               <td class="jd-descrcol" width="100%">Result that contains an IntentSender reference.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a></td>
               <td class="jd-descrcol" width="100%">Result that contains a MetadataBuffer.&nbsp;</td>
           </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents(GoogleApiClient, Contents)</a></code> request.&nbsp;</td>
+          </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnNewContentsCallback.html">DriveApi.OnNewContentsCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a OpenContents request.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnSyncFinishCallback.html">DriveApi.OnSyncFinishCallback</a></td>
               <td class="jd-descrcol" width="100%">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#requestSync(com.google.android.gms.common.api.GoogleApiClient)">requestSync(GoogleApiClient)</a></code> request.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></td>
               <td class="jd-descrcol" width="100%">A file in Drive.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.DownloadProgressListener.html">DriveFile.DownloadProgressListener</a></td>
               <td class="jd-descrcol" width="100%">A listener that listens for progress events on an active contents download.&nbsp;</td>
           </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsClosedCallback.html">DriveFile.OnContentsClosedCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">commitAndCloseContents(GoogleApiClient, Contents)</a></code> request.&nbsp;</td>
+          </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.OnContentsOpenedCallback.html">DriveFile.OnContentsOpenedCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a OpenContents request.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></td>
               <td class="jd-descrcol" width="100%">A folder in Drive.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a></td>
               <td class="jd-descrcol" width="100%">A result that contains a DriveFile.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a></td>
               <td class="jd-descrcol" width="100%">A result that contains a DriveFolder.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a get children request.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFileCallback.html">DriveFolder.OnCreateFileCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a create file request.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFolderCallback.html">DriveFolder.OnCreateFolderCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a create folder request.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.html">DriveResource</a></td>
@@ -737,6 +762,14 @@ onkeyup="return search_changed(event, false, '/')" />
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a></td>
               <td class="jd-descrcol" width="100%">Result that is returned in response to metadata requests.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataRetrievedCallback.html">DriveResource.OnMetadataRetrievedCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that provides the result for a get request.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataUpdatedCallback.html">DriveResource.OnMetadataUpdatedCallback</a></td>
+              <td class="jd-descrcol" width="100%">A callback that indicates that the metadata update has completed.&nbsp;</td>
           </tr>
   </table>
     </div>
@@ -765,27 +798,22 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">A canonical identifier for a Drive resource.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveStatusCodes.html">DriveStatusCodes</a></td>
-              <td class="jd-descrcol" width="100%">Drive specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
-&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Metadata.html">Metadata</a></td>
               <td class="jd-descrcol" width="100%">The details of a Drive file or folder.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></td>
               <td class="jd-descrcol" width="100%">A data buffer that points to Metadata entries.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></td>
               <td class="jd-descrcol" width="100%">A collection of metadata changes.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></td>
               <td class="jd-descrcol" width="100%">A builder for creating a new MetadataChangeSet.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/OpenFileActivityBuilder.html">OpenFileActivityBuilder</a></td>
               <td class="jd-descrcol" width="100%">A builder that is used to configure and display the open file activity.&nbsp;</td>
           </tr>

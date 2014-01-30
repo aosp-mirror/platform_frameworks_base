@@ -435,11 +435,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -1348,8 +1343,7 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant is finished with this match.
- Only applies to turn-based match participants.
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant is finished with this match. Only applies to turn-based match participants.
 </p></div>
 
 
@@ -1505,8 +1499,7 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant has not yet been sent an invitation.
- Only applies to turn-based match participants.
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant has not yet been sent an invitation. Only applies to turn-based match participants.
 </p></div>
 
 
@@ -1545,8 +1538,7 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant did not respond to the match in the alloted time.
- Only applies to turn-based match participants.
+  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant did not respond to the match in the alloted time. Only applies to turn-based match participants.
 </p></div>
 
 
@@ -1829,8 +1821,7 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> associated with this participant, if any.
- Only applies to turn-based match participants.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> associated with this participant, if any. Only applies to turn-based match participants.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> for this participant, or null if not applicable.
@@ -1864,15 +1855,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the status of this participant.
- <p>
- Possible status values for room participants are
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_INVITED">STATUS_INVITED</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_JOINED">STATUS_JOINED</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_DECLINED">STATUS_DECLINED</a></code>, and
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_LEFT">STATUS_LEFT</a></code>.
- <p>
- Possible status values for turn-based match participants are all of
- the above, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_NOT_INVITED_YET">STATUS_NOT_INVITED_YET</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_FINISHED">STATUS_FINISHED</a></code>, and
- <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_UNRESPONSIVE">STATUS_UNRESPONSIVE</a></code>.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the status of this participant. Possible values are <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_INVITED">STATUS_INVITED</a></code>,
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_JOINED">STATUS_JOINED</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_DECLINED">STATUS_DECLINED</a></code>, or <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_LEFT">STATUS_LEFT</a></code>.< Possible status values for turn-based match participants are all of the above, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_NOT_INVITED_YET">STATUS_NOT_INVITED_YET</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_FINISHED">STATUS_FINISHED</a></code>, and <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_UNRESPONSIVE">STATUS_UNRESPONSIVE</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Status of this participant.
