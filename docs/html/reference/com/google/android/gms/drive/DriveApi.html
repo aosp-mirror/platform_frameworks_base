@@ -435,11 +435,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -717,9 +712,16 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <h2>Class Overview</h2>
+<p class="caution">
+  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
+  preview</strong>. Applications compiled using this version of the API will
+  continue to operate on devices using future versions of Google Play services;
+  however, changes to the API are expected in future releases.
+</p>
 <p itemprop="articleBody">The main entry point for interacting with Drive. This class provides methods for obtaining
  a reference to a file or folder, or querying across the entire Drive.
 </p>
+
 
 
 
@@ -773,24 +775,12 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
         interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
-      <td class="jd-descrcol" width="100%">Result that contains a DriveId.&nbsp;</td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.IntentSenderResult.html">DriveApi.IntentSenderResult</a></td>
       <td class="jd-descrcol" width="100%">Result that contains an IntentSender reference.&nbsp;</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
 
 
@@ -802,7 +792,31 @@ onkeyup="return search_changed(event, false, '/')" />
     </tr>
 
 
+    <tr class=" api apilevel-" >
+      <td class="jd-typecol"><nobr>
+
+
+
+
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a></td>
+      <td class="jd-descrcol" width="100%">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents(GoogleApiClient, Contents)</a></code> request.&nbsp;</td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+
+
+
+
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnNewContentsCallback.html">DriveApi.OnNewContentsCallback</a></td>
+      <td class="jd-descrcol" width="100%">A callback that provides the result for a OpenContents request.&nbsp;</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
 
 
@@ -854,7 +868,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
@@ -866,24 +880,6 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#fetchDriveId(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">fetchDriveId</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String resourceId)</nobr>
-
-        <div class="jd-descrdiv">Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> object that can be used in further drive api operations (e.g.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -902,7 +898,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -921,7 +917,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -939,14 +935,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnNewContentsCallback.html">DriveApi.OnNewContentsCallback</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#newContents(com.google.android.gms.common.api.GoogleApiClient)">newContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
@@ -958,7 +954,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -978,7 +974,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -996,14 +992,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#query(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)">query</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</nobr>
@@ -1014,14 +1010,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
 
 
 
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnSyncFinishCallback.html">DriveApi.OnSyncFinishCallback</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#requestSync(com.google.android.gms.common.api.GoogleApiClient)">requestSync</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
@@ -1090,7 +1086,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a>&gt;
       </span>
       <span class="sympad">discardContents</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</span>
@@ -1121,54 +1117,6 @@ onkeyup="return search_changed(event, false, '/')" />
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>a PendingResult which can be used to verify the success of the operation.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="fetchDriveId(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a>&gt;
-      </span>
-      <span class="sympad">fetchDriveId</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String resourceId)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> object that can be used in further drive api operations (e.g.
- getFile, getFolder).</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>apiClient</td>
-          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
-        </tr>
-        <tr>
-          <th>resourceId</td>
-          <td>The drive resource id for the DriveId to retrieve.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a PendingResult which can be used to retrieve the DriveId object.
 </li></ul>
   </div>
 
@@ -1309,7 +1257,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnNewContentsCallback.html">DriveApi.OnNewContentsCallback</a>&gt;
       </span>
       <span class="sympad">newContents</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</span>
@@ -1424,7 +1372,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;
       </span>
       <span class="sympad">query</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</span>
@@ -1472,7 +1420,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
         abstract
 
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnSyncFinishCallback.html">DriveApi.OnSyncFinishCallback</a>&gt;
       </span>
       <span class="sympad">requestSync</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</span>
