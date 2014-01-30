@@ -4224,6 +4224,9 @@ package android.app {
     field public static final int PRIORITY_MAX = 2; // 0x2
     field public static final int PRIORITY_MIN = -2; // 0xfffffffe
     field public static final int STREAM_DEFAULT = -1; // 0xffffffff
+    field public static final int VISIBILITY_PRIVATE = 0; // 0x0
+    field public static final int VISIBILITY_PUBLIC = 1; // 0x1
+    field public static final int VISIBILITY_SECRET = -1; // 0xffffffff
     field public android.app.Notification.Action[] actions;
     field public int audioStreamType;
     field public android.widget.RemoteViews bigContentView;
@@ -4242,10 +4245,12 @@ package android.app {
     field public int ledOnMS;
     field public int number;
     field public int priority;
+    field public android.app.Notification publicVersion;
     field public android.net.Uri sound;
     field public java.lang.CharSequence tickerText;
     field public android.widget.RemoteViews tickerView;
     field public long[] vibrate;
+    field public int visibility;
     field public long when;
   }
 
@@ -4299,6 +4304,7 @@ package android.app {
     method public android.app.Notification.Builder setOnlyAlertOnce(boolean);
     method public android.app.Notification.Builder setPriority(int);
     method public android.app.Notification.Builder setProgress(int, int, boolean);
+    method public android.app.Notification.Builder setPublicVersion(android.app.Notification);
     method public android.app.Notification.Builder setShowWhen(boolean);
     method public android.app.Notification.Builder setSmallIcon(int);
     method public android.app.Notification.Builder setSmallIcon(int, int);
@@ -4310,6 +4316,7 @@ package android.app {
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
     method public android.app.Notification.Builder setUsesChronometer(boolean);
     method public android.app.Notification.Builder setVibrate(long[]);
+    method public android.app.Notification.Builder setVisibility(int);
     method public android.app.Notification.Builder setWhen(long);
   }
 
