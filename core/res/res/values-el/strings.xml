@@ -1526,8 +1526,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ξεκλείδωμα κάρτας SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Εσφαλμένος κωδικός PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Πληκτρολογήστε έναν αριθμό PIN που να αποτελείται από 4 έως 8 αριθμούς."</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"Ο κωδικός PUK θα πρέπει να αποτελείται από 8 αριθμούς."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Εισαγάγετε ξανά τον κωδικό PUK. Οι επαναλαμβανόμενες προσπάθειες θα απενεργοποιήσουν οριστικά την κάρτα SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Δεν υπάρχει αντιστοιχία των κωδικών PIN"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Πάρα πολλές προσπάθειες μοτίβου"</string>

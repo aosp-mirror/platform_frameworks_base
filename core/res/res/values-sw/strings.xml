@@ -891,8 +891,8 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Ruwaza imefutwa"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kiini kimeongezwa"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Ruwaza imekamilika"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wiji %2$d ya %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ongeza wiji"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wijeti %2$d ya %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ongeza wijeti."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tupu"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Eneo la kufungua limepanuliwa."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Eneo la kufungua limekunjwa."</string>
@@ -901,7 +901,7 @@
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Hali"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Vidhibiti vya media"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Upangaji upya wa wiji umeanza."</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Upangaji upya wa wijeti umeanza."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Upangaji upya wa wiji umekamilika."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Wiji <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> imefutwa."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Panua eneo la kufungua."</string>
@@ -1526,8 +1526,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Inafungua SIM kadi..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Msimbo wa PIN usio sahihi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Charaza PIN iliyo na tarakimu kati ya 4 na 8."</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (6025069204539532000) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"Msimbo wa PUK lazima uwe na nambari 8."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ingiza upya msimbo sahihi wa PUK. Majaribio yanayorudiwa yatalemaza SIM kabisa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Misimbo ya PIN haifanani"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Majaribio mengi mno ya mchoro"</string>
