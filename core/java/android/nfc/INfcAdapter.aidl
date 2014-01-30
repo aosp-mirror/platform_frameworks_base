@@ -48,6 +48,7 @@ interface INfcAdapter
     void setForegroundDispatch(in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
     void setAppCallback(in IAppCallback callback);
+    void invokeBeam();
 
     void dispatch(in Tag tag);
 
