@@ -744,8 +744,42 @@ public final class ActivityThread {
 
             setCoreSettings(coreSettings);
 
-            // Tell the VMRuntime about the application.
-            VMRuntime.registerAppInfo(appInfo.dataDir, appInfo.processName);
+            /*
+             * Two possible indications that this package could be
+             * sharing its runtime with other packages:
+             *
+             * 1.) the sharedUserId attribute is set in the manifest,
+             *     indicating a request to share a VM with other
+             *     packages with the same sharedUserId.
+             *
+             * 2.) the application element of the manifest has an
+             *     attribute specifying a non-default process name,
+             *     indicating the desire to run in another packages VM.
+             *
+             * If sharing is enabled we do not have a unique application
+             * in a process and therefore cannot rely on the package
+             * name inside the runtime.
+             */
+            IPackageManager pm = getPackageManager();
+            android.content.pm.PackageInfo pi = null;
+            try {
+                pi = pm.getPackageInfo(appInfo.packageName, 0, UserHandle.myUserId());
+            } catch (RemoteException e) {
+            }
+            if (pi != null) {
+                boolean sharedUserIdSet = (pi.sharedUserId != null);
+                boolean processNameNotDefault =
+                (pi.applicationInfo != null &&
+                 !appInfo.packageName.equals(pi.applicationInfo.processName));
+                boolean sharable = (sharedUserIdSet || processNameNotDefault);
+
+                // Tell the VMRuntime about the application, unless it is shared
+                // inside a process.
+                if (!sharable) {
+                    VMRuntime.registerAppInfo(appInfo.packageName, appInfo.dataDir,
+                                            appInfo.processName);
+                }
+            }
 
             AppBindData data = new AppBindData();
             data.processName = processName;
