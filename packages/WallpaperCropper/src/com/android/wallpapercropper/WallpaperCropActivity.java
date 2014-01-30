@@ -285,7 +285,6 @@ public class WallpaperCropActivity extends Activity {
         final Point bounds = cropTask.getImageBounds();
         Runnable onEndCrop = new Runnable() {
             public void run() {
-                updateWallpaperDimensions(bounds.x, bounds.y);
                 if (finishActivityWhenDone) {
                     setResult(Activity.RESULT_OK);
                     finish();
@@ -309,9 +308,6 @@ public class WallpaperCropActivity extends Activity {
                 inSize.x, inSize.y, outSize.x, outSize.y, false);
         Runnable onEndCrop = new Runnable() {
             public void run() {
-                // Passing 0, 0 will cause launcher to revert to using the
-                // default wallpaper size
-                updateWallpaperDimensions(0, 0);
                 if (finishActivityWhenDone) {
                     setResult(Activity.RESULT_OK);
                     finish();
@@ -396,7 +392,6 @@ public class WallpaperCropActivity extends Activity {
 
         Runnable onEndCrop = new Runnable() {
             public void run() {
-                updateWallpaperDimensions(outWidth, outHeight);
                 if (finishActivityWhenDone) {
                     setResult(Activity.RESULT_OK);
                     finish();
@@ -774,37 +769,6 @@ public class WallpaperCropActivity extends Activity {
             if (mOnEndRunnable != null) {
                 mOnEndRunnable.run();
             }
-        }
-    }
-
-    protected void updateWallpaperDimensions(int width, int height) {
-        String spKey = getSharedPreferencesKey();
-        SharedPreferences sp = getSharedPreferences(spKey, Context.MODE_MULTI_PROCESS);
-        SharedPreferences.Editor editor = sp.edit();
-        if (width != 0 && height != 0) {
-            editor.putInt(WALLPAPER_WIDTH_KEY, width);
-            editor.putInt(WALLPAPER_HEIGHT_KEY, height);
-        } else {
-            editor.remove(WALLPAPER_WIDTH_KEY);
-            editor.remove(WALLPAPER_HEIGHT_KEY);
-        }
-        editor.commit();
-
-        suggestWallpaperDimension(getResources(),
-                sp, getWindowManager(), WallpaperManager.getInstance(this));
-    }
-
-    static public void suggestWallpaperDimension(Resources res,
-            final SharedPreferences sharedPrefs,
-            WindowManager windowManager,
-            final WallpaperManager wallpaperManager) {
-        final Point defaultWallpaperSize = getDefaultWallpaperSize(res, windowManager);
-        // If we have saved a wallpaper width/height, use that instead
-        int savedWidth = sharedPrefs.getInt(WALLPAPER_WIDTH_KEY, defaultWallpaperSize.x);
-        int savedHeight = sharedPrefs.getInt(WALLPAPER_HEIGHT_KEY, defaultWallpaperSize.y);
-        if (savedWidth != wallpaperManager.getDesiredMinimumWidth() ||
-                savedHeight != wallpaperManager.getDesiredMinimumHeight()) {
-            wallpaperManager.suggestDesiredDimensions(savedWidth, savedHeight);
         }
     }
 
