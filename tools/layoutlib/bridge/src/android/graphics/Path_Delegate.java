@@ -501,7 +501,7 @@ public final class Path_Delegate {
 
     @LayoutlibDelegate
     private static void native_destroyMeasure(long nPathMeasure) {
-        sPathMeasureManager.removeJavaReferenceFor(nPathMeasure);
+        // Do nothing.
     }
 
     // ---- Private helper methods ----
