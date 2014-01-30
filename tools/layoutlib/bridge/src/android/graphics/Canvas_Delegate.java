@@ -786,7 +786,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPath(long nativeCanvas, int path, long paint) {
+    /*package*/ static void native_drawPath(long nativeCanvas, long path, long paint) {
         final Path_Delegate pathDelegate = Path_Delegate.getDelegate(path);
         if (pathDelegate == null) {
             return;
@@ -975,8 +975,10 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_drawText(long nativeCanvas,
             final char[] text, final int index, final int count,
-            final float startX, final float startY, final int flags, long paint) {
+            final float startX, final float startY, final int flags, long paint,
+            long typeface) {
 
+        // TODO: use typeface.
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
             @Override
@@ -1005,30 +1007,31 @@ public final class Canvas_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_drawText(long nativeCanvas, String text,
-            int start, int end, float x, float y, final int flags, long paint) {
+            int start, int end, float x, float y, final int flags, long paint,
+            long typeface) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
-        native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint);
+        native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint, typeface);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_drawTextRun(long nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, long paint) {
+            float x, float y, int flags, long paint, long typeface) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
-        native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint);
+        native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint, typeface);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_drawTextRun(long nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
-            float x, float y, int flags, long paint) {
-        native_drawText(nativeCanvas, text, start, count, x, y, flags, paint);
+            float x, float y, int flags, long paint, long typeface) {
+        native_drawText(nativeCanvas, text, start, count, x, y, flags, paint, typeface);
     }
 
     @LayoutlibDelegate

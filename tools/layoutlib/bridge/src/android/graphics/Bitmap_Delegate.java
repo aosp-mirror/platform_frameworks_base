@@ -518,7 +518,8 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeSetHasAlpha(long nativeBitmap, boolean hasAlpha) {
+    /*package*/ static void nativeSetAlphaAndPremultiplied(long nativeBitmap, boolean hasAlpha,
+            boolean isPremul) {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {

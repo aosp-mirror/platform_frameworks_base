@@ -401,17 +401,17 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addPath(long nPath, int src, float dx, float dy) {
+    /*package*/ static void native_addPath(long nPath, long src, float dx, float dy) {
         addPath(nPath, src, AffineTransform.getTranslateInstance(dx, dy));
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addPath(long nPath, int src) {
+    /*package*/ static void native_addPath(long nPath, long src) {
         addPath(nPath, src, null /*transform*/);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addPath(long nPath, int src, long matrix) {
+    /*package*/ static void native_addPath(long nPath, long src, long matrix) {
         Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(matrix);
         if (matrixDelegate == null) {
             return;
@@ -474,7 +474,7 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean native_op(long nPath1, long nPath2, int op, int result) {
+    /*package*/ static boolean native_op(long nPath1, long nPath2, int op, long result) {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.op() not supported", null);
         return false;
     }
@@ -484,6 +484,25 @@ public final class Path_Delegate {
         sManager.removeJavaReferenceFor(nPath);
     }
 
+    @LayoutlibDelegate
+    /*package*/ static float[] native_approximate(long nPath, float error) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.approximate() not supported", null);
+        return new float[0];
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static long native_trim(long nPath, long nTargetPath, long nPathMeasure,
+            float trimStart, float trimEnd, float trimOffset) {
+        // TODO: add trim.
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.trim() not supported", null);
+        return nPathMeasure;
+
+    }
+
+    @LayoutlibDelegate
+    private static void native_destroyMeasure(long nPathMeasure) {
+        sPathMeasureManager.removeJavaReferenceFor(nPathMeasure);
+    }
 
     // ---- Private helper methods ----
 

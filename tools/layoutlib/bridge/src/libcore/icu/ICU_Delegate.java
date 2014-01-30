@@ -137,6 +137,11 @@ public class ICU_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static String getDisplayScriptNative(String variantCode, String locale) {
+        return "";
+    }
+
+    @LayoutlibDelegate
     /*package*/ static String getISO3CountryNative(String locale) {
         return "";
     }
@@ -164,6 +169,17 @@ public class ICU_Delegate {
     @LayoutlibDelegate
     /*package*/ static String[] getISOCountriesNative() {
         return Locale.getISOCountries();
+    }
+
+
+    @LayoutlibDelegate
+    /*package*/ static String localeForLanguageTag(String languageTag, boolean strict) {
+        return "";
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static String languageTagForLocale(String locale) {
+        return "";
     }
 
     @LayoutlibDelegate
