@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>Moments.LoadMomentsResult | Android Developers</title>
+<title>DriveResource.OnMetadataUpdatedCallback | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -435,11 +435,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -662,42 +657,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <div class="sum-details-links">
-
-Summary:
-
-
-
-
-
-
-
-
-
-
-
-  <a href="#pubmethods">Methods</a>
-
-
-
-
-  &#124; <a href="#inhmethods">Inherited Methods</a>
-
-&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -717,17 +677,10 @@ Summary:
 
 
     interface
-<h1 itemprop="name">Moments.LoadMomentsResult</h1>
+<h1 itemprop="name">DriveResource.OnMetadataUpdatedCallback</h1>
 
 
 
-
-
-      implements
-
-        <a href="/reference/com/google/android/gms/common/api/Releasable.html">Releasable</a>
-
-        <a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>
 
 
 
@@ -743,7 +696,7 @@ Summary:
 
     <tr>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.Moments.LoadMomentsResult</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DriveResource.OnMetadataUpdatedCallback</td>
     </tr>
 
 
@@ -759,15 +712,18 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Information about the set of moments that was loaded.</p>
+<p class="caution">
+  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
+  preview</strong>. Applications compiled using this version of the API will
+  continue to operate on devices using future versions of Google Play services;
+  however, changes to the API are expected in future releases.
+</p>
+<p itemprop="articleBody">A callback that indicates that the metadata update has completed.  Check the status in
+ the result to ensure it completed successfully.
+</p>
 
 
 
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/Moments.html#load(com.google.android.gms.common.api.GoogleApiClient)">load(GoogleApiClient)</a></code></li>
-      </ul>
-  </div>
 
 
 </div><!-- jd-descr -->
@@ -831,151 +787,21 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html#getMomentBuffer()">getMomentBuffer</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Returns the requested moments.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html#getNextPageToken()">getNextPageToken</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Returns the continuation token, which is used to page through large result sets.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html#getUpdated()">getUpdated</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Returns the time at which this collection of moments was last updated.</div>
-
-  </td></tr>
-
-
-
-</table>
-
-
-
-
-
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Releasable" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.api.Releasable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  <a href="/reference/com/google/android/gms/common/api/Releasable.html">com.google.android.gms.common.api.Releasable</a>
-
-<div id="inherited-methods-com.google.android.gms.common.api.Releasable">
-  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Releasable.html#release()">release</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.OnMetadataUpdatedCallback.html#onMetadataUpdated(com.google.android.gms.drive.DriveResource.MetadataResult)">onMetadataUpdated</a></span>(<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a> result)</nobr>
 
   </td></tr>
 
 
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Result" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.api.Result-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  <a href="/reference/com/google/android/gms/common/api/Result.html">com.google.android.gms.common.api.Result</a>
-
-<div id="inherited-methods-com.google.android.gms.common.api.Result">
-  <div id="inherited-methods-com.google.android.gms.common.api.Result-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-com.google.android.gms.common.api.Result-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Result.html#getStatus()">getStatus</a></span>()</nobr>
-
-  </td></tr>
-
 
 </table>
-  </div>
-</div>
-</td></tr>
 
 
-</table>
+
+
+
 
 
 </div><!-- jd-descr (summary) -->
@@ -1017,7 +843,7 @@ From interface
 
 
 
-<A NAME="getMomentBuffer()"></A>
+<A NAME="onMetadataUpdated(com.google.android.gms.drive.DriveResource.MetadataResult)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1027,10 +853,10 @@ From interface
 
         abstract
 
-        <a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a>
+        void
       </span>
-      <span class="sympad">getMomentBuffer</span>
-      <span class="normal">()</span>
+      <span class="sympad">onMetadataUpdated</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a> result)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1040,70 +866,7 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the requested moments. The listener must close this object when finished.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="getNextPageToken()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        String
-      </span>
-      <span class="sympad">getNextPageToken</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the continuation token, which is used to page through large result sets. Provide
- this value in a subsequent request to return the next page of results.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="getUpdated()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        String
-      </span>
-      <span class="sympad">getUpdated</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the time at which this collection of moments was last updated. Formatted as an
- RFC 3339 timestamp.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>

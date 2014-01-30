@@ -435,11 +435,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -779,6 +774,12 @@ Summary:
 
 
 <h2>Class Overview</h2>
+<p class="caution">
+  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
+  preview</strong>. Applications compiled using this version of the API will
+  continue to operate on devices using future versions of Google Play services;
+  however, changes to the API are expected in future releases.
+</p>
 <p itemprop="articleBody">A canonical identifier for a Drive resource.
 </p>
 
@@ -918,6 +919,24 @@ android.os.Parcelable
             <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveId.html#createFromResourceId(java.lang.String)">createFromResourceId</a></span>(String resourceId)</nobr>
+
+        <div class="jd-descrdiv">Creates a DriveId from the provided remote Drive resource id.</div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString</a></span>(String s)</nobr>
 
         <div class="jd-descrdiv">Decodes the result of <code><a href="/reference/com/google/android/gms/drive/DriveId.html#encodeToString()">encodeToString()</a></code> back into a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>.</div>
@@ -926,7 +945,7 @@ android.os.Parcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -942,7 +961,7 @@ android.os.Parcelable
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -962,7 +981,7 @@ android.os.Parcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -978,7 +997,7 @@ android.os.Parcelable
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -996,7 +1015,7 @@ android.os.Parcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1012,7 +1031,7 @@ android.os.Parcelable
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1028,7 +1047,7 @@ android.os.Parcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1392,6 +1411,36 @@ From interface
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="createFromResourceId(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a>
+      </span>
+      <span class="sympad">createFromResourceId</span>
+      <span class="normal">(String resourceId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a DriveId from the provided remote Drive resource id.
+</p></div>
+
+    </div>
+</div>
 
 
 <A NAME="decodeFromString(java.lang.String)"></A>
