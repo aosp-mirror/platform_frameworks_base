@@ -23954,10 +23954,9 @@ package android.speech.tts {
     field public static final int SUCCESS = 0; // 0x0
   }
 
-  public static final class TextToSpeechClient.UtteranceId {
+  public static class TextToSpeechClient.UtteranceId {
     ctor public TextToSpeechClient.UtteranceId();
-    ctor public TextToSpeechClient.UtteranceId(java.lang.String);
-    method public java.lang.String toUniqueString();
+    method public final java.lang.String toUniqueString();
   }
 
   public abstract class TextToSpeechService extends android.app.Service {
