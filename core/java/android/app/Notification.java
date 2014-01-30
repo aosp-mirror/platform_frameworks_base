@@ -402,6 +402,31 @@ public class Notification implements Parcelable
     @Priority
     public int priority;
 
+
+    /**
+     * Sphere of visibility of this notification, which affects how and when the SystemUI reveals 
+     * the notification's presence and contents in untrusted situations (namely, on the secure 
+     * lockscreen).
+     *
+     * The default level, {@link #VISIBILITY_PRIVATE}, behaves exactly as notifications have always
+     * done on Android: The notification's {@link #icon} and {@link #tickerText} (if available) are
+     * shown in all situations, but the contents are only available if the device is unlocked for
+     * the appropriate user.
+     *
+     * A more permissive policy can be expressed by {@link #VISIBILITY_PUBLIC}; such a notification
+     * can be read even in an "insecure" context (that is, above a secure lockscreen).
+     * To modify the public version of this notification—for example, to redact some portions—see
+     * {@link Builder#setPublicVersion(Notification)}.
+     *
+     * Finally, a notification can be made {@link #VISIBILITY_SECRET}, which will suppress its icon
+     * and ticker until the user has bypassed the lockscreen.
+     */
+    public int visibility;
+
+    public static final int VISIBILITY_PUBLIC = 1;
+    public static final int VISIBILITY_PRIVATE = 0;
+    public static final int VISIBILITY_SECRET = -1;
+
     /**
      * @hide
      * Notification type: incoming call (voice or video) or similar synchronous communication request.
@@ -670,6 +695,13 @@ public class Notification implements Parcelable
     public Action[] actions;
 
     /**
+     * Replacement version of this notification whose content will be shown
+     * in an insecure context such as atop a secure keyguard. See {@link #visibility}
+     * and {@link #VISIBILITY_PUBLIC}.
+     */
+    public Notification publicVersion;
+
+    /**
      * Constructs a Notification object with default values.
      * You might want to consider using {@link Builder} instead.
      */
@@ -768,6 +800,12 @@ public class Notification implements Parcelable
         if (parcel.readInt() != 0) {
             bigContentView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
+
+        visibility = parcel.readInt();
+
+        if (parcel.readInt() != 0) {
+            publicVersion = Notification.CREATOR.createFromParcel(parcel);
+        }
     }
 
     @Override
@@ -851,6 +889,13 @@ public class Notification implements Parcelable
 
         if (heavy && this.bigContentView != null) {
             that.bigContentView = this.bigContentView.clone();
+        }
+
+        that.visibility = this.visibility;
+
+        if (this.publicVersion != null) {
+            that.publicVersion = new Notification();
+            this.publicVersion.cloneInto(that.publicVersion, heavy);
         }
 
         if (!heavy) {
@@ -975,6 +1020,15 @@ public class Notification implements Parcelable
         if (bigContentView != null) {
             parcel.writeInt(1);
             bigContentView.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        parcel.writeInt(visibility);
+
+        if (publicVersion != null) {
+            parcel.writeInt(1);
+            publicVersion.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -1181,6 +1235,8 @@ public class Notification implements Parcelable
         private boolean mUseChronometer;
         private Style mStyle;
         private boolean mShowWhen = true;
+        private int mVisibility = VISIBILITY_PRIVATE;
+        private Notification mPublicVersion = null;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1627,6 +1683,30 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * Specify the value of {@link #visibility}.
+
+         * @param visibility One of {@link #VISIBILITY_PRIVATE} (the default),
+         * {@link #VISIBILITY_SECRET}, or {@link #VISIBILITY_PUBLIC}.
+         *
+         * @return The same Builder.
+         */
+        public Builder setVisibility(int visibility) {
+            mVisibility = visibility;
+            return this;
+        }
+
+        /**
+         * Supply a replacement Notification whose contents should be shown in insecure contexts
+         * (i.e. atop the secure lockscreen). See {@link #visibility} and {@link #VISIBILITY_PUBLIC}.
+         * @param n A replacement notification, presumably with some or all info redacted.
+         * @return The same Builder.
+         */
+        public Builder setPublicVersion(Notification n) {
+            mPublicVersion = n;
+            return this;
+        }
+
         private void setFlag(int mask, boolean value) {
             if (value) {
                 mFlags |= mask;
@@ -1838,6 +1918,12 @@ public class Notification implements Parcelable
             if (mActions.size() > 0) {
                 n.actions = new Action[mActions.size()];
                 mActions.toArray(n.actions);
+            }
+            n.visibility = mVisibility;
+
+            if (mPublicVersion != null) {
+                n.publicVersion = new Notification();
+                mPublicVersion.cloneInto(n.publicVersion, true);
             }
 
             return n;
