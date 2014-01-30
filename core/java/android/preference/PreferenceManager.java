@@ -800,8 +800,10 @@ public class PreferenceManager {
      * Interface definition for a callback to be invoked when a
      * {@link Preference} in the hierarchy rooted at this {@link PreferenceScreen} is
      * clicked.
+     *
+     * @hide
      */
-    interface OnPreferenceTreeClickListener {
+    public interface OnPreferenceTreeClickListener {
         /**
          * Called when a preference in the tree rooted at this
          * {@link PreferenceScreen} has been clicked.
