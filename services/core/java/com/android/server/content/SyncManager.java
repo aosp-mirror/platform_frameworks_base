@@ -3215,6 +3215,7 @@ public class SyncManager {
                 totalLength += maxLength;
                 formats[col] = String.format("%%-%ds", maxLength);
             }
+            formats[mCols - 1] = "%s";
             printRow(out, formats, mTable.get(0));
             totalLength += (mCols - 1) * 2;
             for (int i = 0; i < totalLength; ++i) {
