@@ -98,7 +98,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
     private final int mNotificationId;
     private final NotificationManager mNotificationManager;
-    private final Notification.Builder mNotificationBuilder;
+    private final Notification.Builder mNotificationBuilder, mPublicNotificationBuilder;
     private final File mScreenshotDir;
     private final String mImageFileName;
     private final String mImageFilePath;
@@ -152,17 +152,29 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         mTickerAddSpace = !mTickerAddSpace;
         mNotificationId = nId;
         mNotificationManager = nManager;
+        final long now = System.currentTimeMillis();
+
         mNotificationBuilder = new Notification.Builder(context)
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
             .setContentText(r.getString(R.string.screenshot_saving_text))
             .setSmallIcon(R.drawable.stat_notify_image)
-            .setWhen(System.currentTimeMillis());
+            .setWhen(now);
 
         mNotificationStyle = new Notification.BigPictureStyle()
             .bigPicture(preview);
         mNotificationBuilder.setStyle(mNotificationStyle);
+
+        // For "public" situations we want to show all the same info but
+        // omit the actual screenshot image.
+        mPublicNotificationBuilder = new Notification.Builder(context)
+                .setContentTitle(r.getString(R.string.screenshot_saving_title))
+                .setContentText(r.getString(R.string.screenshot_saving_text))
+                .setSmallIcon(R.drawable.stat_notify_image)
+                .setWhen(now);
+
+        mNotificationBuilder.setPublicVersion(mPublicNotificationBuilder.build());
 
         Notification n = mNotificationBuilder.build();
         n.flags |= Notification.FLAG_NO_CLEAR;
@@ -280,12 +292,24 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             launchIntent.setDataAndType(params.imageUri, "image/png");
             launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+            final long now = System.currentTimeMillis();
+
             mNotificationBuilder
                 .setContentTitle(r.getString(R.string.screenshot_saved_title))
                 .setContentText(r.getString(R.string.screenshot_saved_text))
                 .setContentIntent(PendingIntent.getActivity(params.context, 0, launchIntent, 0))
-                .setWhen(System.currentTimeMillis())
+                .setWhen(now)
                 .setAutoCancel(true);
+
+            // Update the text in the public version as well
+            mPublicNotificationBuilder
+                .setContentTitle(r.getString(R.string.screenshot_saved_title))
+                .setContentText(r.getString(R.string.screenshot_saved_text))
+                .setContentIntent(PendingIntent.getActivity(params.context, 0, launchIntent, 0))
+                .setWhen(now)
+                .setAutoCancel(true);
+
+            mNotificationBuilder.setPublicVersion(mPublicNotificationBuilder.build());
 
             Notification n = mNotificationBuilder.build();
             n.flags &= ~Notification.FLAG_NO_CLEAR;
@@ -669,6 +693,7 @@ class GlobalScreenshot {
             .setContentText(r.getString(R.string.screenshot_failed_text))
             .setSmallIcon(R.drawable.stat_notify_image_error)
             .setWhen(System.currentTimeMillis())
+            .setVisibility(Notification.VISIBILITY_PUBLIC) // ok to show outside lockscreen
             .setAutoCancel(true);
         Notification n =
             new Notification.BigTextStyle(b)
