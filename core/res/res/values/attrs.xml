@@ -5898,16 +5898,16 @@
     <eat-comment />
     <declare-styleable name="GlowPadView">
         <!-- Reference to an array resource that be shown as targets around a circle. -->
-        <attr name="targetDrawables"/>
+        <attr name="targetDrawables" format="reference" />
 
         <!-- Reference to an array resource that be used as description for the targets around the circle. -->
-        <attr name="targetDescriptions"/>
+        <attr name="targetDescriptions" format="reference" />
 
         <!-- Reference to an array resource that be used to announce the directions with targets around the circle. -->
-        <attr name="directionDescriptions"/>
+        <attr name="directionDescriptions" format="reference" />
 
         <!-- Sets a drawable as the center. -->
-        <attr name="handleDrawable"/>
+        <attr name="handleDrawable" format="reference" />
 
         <!-- Drawable to use for wave ripple animation. -->
         <attr name="outerRingDrawable" format="reference"/>
@@ -5919,22 +5919,22 @@
         <attr name="innerRadius"/>
 
         <!-- Outer radius of glow area. Target icons will be drawn on this circle. -->
-        <attr name="outerRadius"/>
+        <attr name="outerRadius" format="dimension" />
 
         <!-- Radius of glow under finger. -->
         <attr name="glowRadius" format="dimension" />
 
         <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
-        <attr name="vibrationDuration"/>
+        <attr name="vibrationDuration" format="integer" />
 
         <!-- How close we need to be before snapping to a target. -->
-        <attr name="snapMargin"/>
+        <attr name="snapMargin" format="dimension" />
 
         <!-- Number of waves/chevrons to show in animation. -->
-        <attr name="feedbackCount"/>
+        <attr name="feedbackCount" format="integer" />
 
         <!-- Used when the handle shouldn't wait to be hit before following the finger -->
-        <attr name="alwaysTrackFinger"/>
+        <attr name="alwaysTrackFinger" format="boolean" />
 
         <!-- Location along the circle of the first item, in degrees.-->
         <attr name="firstItemOffset" format="float" />
@@ -5948,45 +5948,6 @@
             by its parent. If this is set to false, no scaling will occur. If this is set to true
             scaling will occur to fit for any axis in which gravity is set to center. -->
         <attr name="allowScaling" format="boolean" />
-    </declare-styleable>
-
-    <!-- =============================== -->
-    <!-- MultiWaveView class attributes -->
-    <!-- =============================== -->
-    <eat-comment />
-    <declare-styleable name="MultiWaveView">
-        <!-- Reference to an array resource that be shown as targets around a circle. -->
-        <attr name="targetDrawables" format="reference"/>
-
-        <!-- Reference to an array resource that be used as description for the targets around the circle. -->
-        <attr name="targetDescriptions" format="reference"/>
-
-        <!-- Reference to an array resource that be used to announce the directions with targets around the circle. -->
-        <attr name="directionDescriptions" format="reference"/>
-
-        <!-- Sets a drawable as the drag center. -->
-        <attr name="handleDrawable" format="reference" />
-
-        <!-- Drawables to use for chevron animations. May be null. -->
-        <attr name="chevronDrawables" format="reference"/>
-
-        <!-- Drawable to use for wave ripple animation. -->
-        <attr name="waveDrawable" format="reference" />
-
-        <!-- Outer radius of target circle. Icons will be drawn on this circle. -->
-        <attr name="outerRadius" format="dimension" />
-
-        <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
-        <attr name="vibrationDuration" format="integer"/>
-
-        <!-- How close we need to be before snapping to a target. -->
-        <attr name="snapMargin" format="dimension" />
-
-        <!-- Number of waves/chevrons to show in animation. -->
-        <attr name="feedbackCount" format="integer" />
-
-        <!-- Used when the handle shouldn't wait to be hit before following the finger -->
-        <attr name="alwaysTrackFinger" format="boolean" />
     </declare-styleable>
 
     <!-- =============================== -->
