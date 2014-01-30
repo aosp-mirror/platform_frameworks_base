@@ -834,7 +834,7 @@ public class TypedArray {
             }
             return null;
         }
-        return mAssets.getPooledString(cookie, data[index+AssetManager.STYLE_DATA]);
+        return mAssets.getPooledStringForCookie(cookie, data[index+AssetManager.STYLE_DATA]);
     }
 
     /*package*/ TypedArray(Resources resources, int[] data, int[] indices, int len) {

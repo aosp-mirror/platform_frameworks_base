@@ -91,7 +91,7 @@ TEST_F(ObbFileTest, WriteThenRead) {
     EXPECT_EQ(sizeof(salt), saltLen)
             << "salt sizes were not the same";
 
-    for (int i = 0; i < sizeof(salt); i++) {
+    for (size_t i = 0; i < sizeof(salt); i++) {
         EXPECT_EQ(salt[i], newSalt[i])
                 << "salt character " << i << " should be equal";
     }
