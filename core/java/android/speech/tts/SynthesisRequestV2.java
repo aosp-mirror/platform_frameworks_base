@@ -32,6 +32,18 @@ public final class SynthesisRequestV2 implements Parcelable {
     private final Bundle mAudioParams;
 
     /**
+     * Constructor for test purposes.
+     */
+    public SynthesisRequestV2(String text, String utteranceId, String voiceName,
+            Bundle voiceParams, Bundle audioParams) {
+        this.mText = text;
+        this.mUtteranceId = utteranceId;
+        this.mVoiceName = voiceName;
+        this.mVoiceParams = voiceParams;
+        this.mAudioParams = audioParams;
+    }
+
+    /**
      * Parcel based constructor.
      *
      * @hide

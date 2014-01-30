@@ -23798,6 +23798,7 @@ package android.speech.tts {
   }
 
   public final class SynthesisRequestV2 implements android.os.Parcelable {
+    ctor public SynthesisRequestV2(java.lang.String, java.lang.String, java.lang.String, android.os.Bundle, android.os.Bundle);
     method public int describeContents();
     method public android.os.Bundle getAudioParams();
     method public java.lang.String getText();
