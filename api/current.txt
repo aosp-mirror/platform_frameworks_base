@@ -24171,6 +24171,14 @@ package android.speech.tts {
 
 }
 
+package android.telecomm {
+
+  public final class CallState {
+    ctor public CallState();
+  }
+
+}
+
 package android.telephony {
 
   public final class CellIdentityCdma implements android.os.Parcelable {
