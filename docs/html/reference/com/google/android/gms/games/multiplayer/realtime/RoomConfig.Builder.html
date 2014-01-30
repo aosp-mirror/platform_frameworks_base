@@ -435,11 +435,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -977,7 +972,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomConfig.Builder.html#setVariant(int)">setVariant</a></span>(int variant)</nobr>
         
         <div class="jd-descrdiv">Sets the variant for the room when calling
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#create(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">create(GoogleApiClient, RoomConfig)</a></code>.</div>
+ create(GoogleApiClient, RoomConfig).</div>
   
   </td></tr>
 
@@ -1264,7 +1259,7 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Add one or more player IDs to invite to the room. This should be set only when calling
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#create(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">create(GoogleApiClient, RoomConfig)</a></code></p></div>
+ create(GoogleApiClient, RoomConfig)</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1308,7 +1303,7 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Add a list of player IDs to invite to the room. This should be set only when calling
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#create(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">create(GoogleApiClient, RoomConfig)</a></code></p></div>
+ create(GoogleApiClient, RoomConfig)</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1431,7 +1426,7 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Set the ID of the invitation to accept. This is required and should be set only when
- calling <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#join(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">join(GoogleApiClient, RoomConfig)</a></code>.</p></div>
+ calling join(GoogleApiClient, RoomConfig).</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1555,13 +1550,13 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether to enable sockets for sending and receiving data. The socket for each
  participant can be obtained using
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#getSocketForParticipant(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">getSocketForParticipant(GoogleApiClient, String, String)</a></code>. If
+ getSocketForParticipant(GoogleApiClient, String, String). If
  false the
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendUnreliableMessage(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String, java.lang.String)">sendUnreliableMessage(GoogleApiClient, byte[], String, String)</a></code>
+ sendUnreliableMessage(GoogleApiClient, byte[], String, String)
  API should be used to send messages.
  <p>
  Note that for reliable messages, the
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendReliableMessage(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer.ReliableMessageSentCallback, byte[], java.lang.String, java.lang.String)">sendReliableMessage(GoogleApiClient, ReliableMessageSentCallback, byte[], String, String)</a></code>
+ sendReliableMessage(GoogleApiClient, ReliableMessageSentCallback, byte[], String, String)
  API should still be used. Reliable messages will be delivered via the
  <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMessageReceivedListener.html">RealTimeMessageReceivedListener</a></code> registered with
  <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomConfig.Builder.html#setMessageReceivedListener(com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener)">setMessageReceivedListener(RealTimeMessageReceivedListener)</a></code>.</p></div>
@@ -1608,7 +1603,7 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the variant for the room when calling
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#create(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RoomConfig)">create(GoogleApiClient, RoomConfig)</a></code>. This is an optional,
+ create(GoogleApiClient, RoomConfig). This is an optional,
  developer-controlled parameter describing the type of game to play, and is used for
  auto-matching criteria. Must be either a positive integer or
  <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_ANY">ROOM_VARIANT_ANY</a></code> (the default) if not desired.</p></div>
