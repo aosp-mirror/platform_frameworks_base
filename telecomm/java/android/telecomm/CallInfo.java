@@ -31,15 +31,20 @@ import java.util.UUID;
 public final class CallInfo implements Parcelable {
 
     /**
+     * Unique identifier for the call as a UUID string.
+     */
+    private final String mId;
+
+    /**
+     * The state of the call.
+     */
+    private final CallState mState;
+
+    /**
      * Endpoint to which the call is connected.
      * This could be the dialed value for outgoing calls or the caller id of incoming calls.
      */
     private final String mHandle;
-
-    /**
-     * Unique identifier for the call as a UUID string.
-     */
-    private String mId;
 
     // There are 4 timestamps that are important to a call:
     // 1) Created timestamp - The time at which the user explicitly chose to make the call.
@@ -57,19 +62,25 @@ public final class CallInfo implements Parcelable {
      * Persists handle of the other party of this call.
      *
      * @param id The unique ID of the call.
+     * @param state The state of the call.
      * @param handle The handle to the other party in this call.
      */
-    public CallInfo(String id, String handle) {
+    public CallInfo(String id, CallState state, String handle) {
         mId = id;
+        mState = state;
         mHandle = handle;
-    }
-
-    public String getHandle() {
-        return mHandle;
     }
 
     public String getId() {
         return mId;
+    }
+
+    public CallState getState() {
+        return mState;
+    }
+
+    public String getHandle() {
+        return mHandle;
     }
 
     //
@@ -85,9 +96,10 @@ public final class CallInfo implements Parcelable {
         @Override
         public CallInfo createFromParcel(Parcel source) {
             String id = source.readString();
+            CallState state = CallState.valueOf(source.readString());
             String handle = source.readString();
 
-            return new CallInfo(id, handle);
+            return new CallInfo(id, state, handle);
         }
 
         @Override
@@ -110,6 +122,7 @@ public final class CallInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(mId);
+        destination.writeString(mState.name());
         destination.writeString(mHandle);
     }
 }

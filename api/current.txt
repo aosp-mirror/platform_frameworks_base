@@ -24173,8 +24173,13 @@ package android.speech.tts {
 
 package android.telecomm {
 
-  public final class CallState {
-    ctor public CallState();
+  public final class CallState extends java.lang.Enum {
+    method public static android.telecomm.CallState valueOf(java.lang.String);
+    method public static final android.telecomm.CallState[] values();
+    enum_constant public static final android.telecomm.CallState ACTIVE;
+    enum_constant public static final android.telecomm.CallState DIALING;
+    enum_constant public static final android.telecomm.CallState DISCONNECTED;
+    enum_constant public static final android.telecomm.CallState RINGING;
   }
 
 }

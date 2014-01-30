@@ -22,13 +22,15 @@ package android.telecomm;
  * that uses these states should be resilient to unexpected state changes outside of what is
  * considered traditional.
  */
-public final class CallState {
+public enum CallState {
     /**
      * Indicates that a call is new and not connected. This is used as the default state internally
-     * within Telecomm and should not be used between Telecomm and call services.
+     * within Telecomm and should not be used between Telecomm and call services. Call services are
+     * not expected to ever interact with NEW calls so we keep this value hidden as a Telecomm
+     * internal-only value.
      * @hide
      */
-    static final int NEW = 1;
+    NEW,
 
     /**
      * Indicates that a call is outgoing and in the dialing state. A call transitions to this state
@@ -36,7 +38,7 @@ public final class CallState {
      * state usually transition to {@link #ACTIVE} if the call was answered or {@link #DISCONNECTED}
      * if the call was disconnected somehow (e.g., failure or cancellation of the call by the user).
      */
-    static final int DIALING = 2;
+    DIALING,
 
     /**
      * Indicates that a call is incoming and the user still has the option of answering, rejecting,
@@ -44,14 +46,14 @@ public final class CallState {
      * ringtone. Normal transitions are to {@link #ACTIVE} if answered or {@link #DISCONNECTED}
      * otherwise.
      */
-    static final int RINGING = 3;
+    RINGING,
 
     /**
      * Indicates that a call is currently connected to another party and a communication channel is
      * open between them. The normal transition to this state is by the user answering a
      * {@link #DIALING} call or a {@link #RINGING} call being answered by the other party.
      */
-    static final int ACTIVE = 4;
+    ACTIVE,
 
     /**
      * Indicates that a call is currently disconnected. All states can transition to this state
@@ -60,5 +62,5 @@ public final class CallState {
      * the disconnection or communication was lost to the call service currently responsible for
      * this call (e.g., call service crashes).
      */
-    static final int DISCONNECTED = 5;
+    DISCONNECTED;
 }
