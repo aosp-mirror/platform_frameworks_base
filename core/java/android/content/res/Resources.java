@@ -71,16 +71,19 @@ import libcore.icu.NativePluralRules;
  */
 public class Resources {
     static final String TAG = "Resources";
+
     private static final boolean DEBUG_LOAD = false;
     private static final boolean DEBUG_CONFIG = false;
     private static final boolean DEBUG_ATTRIBUTES_CACHE = false;
     private static final boolean TRACE_FOR_PRELOAD = false;
     private static final boolean TRACE_FOR_MISS_PRELOAD = false;
 
+    private static final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigToNative(
+            ActivityInfo.CONFIG_LAYOUT_DIRECTION);
+
     private static final int ID_OTHER = 0x01000004;
 
     private static final Object sSync = new Object();
-    /*package*/ static Resources mSystem = null;
 
     // Information about preloaded resources.  Note that they are not
     // protected by a lock, because while preloading in zygote we are all
@@ -91,32 +94,34 @@ public class Resources {
     private static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
             = new LongSparseArray<ColorStateList>();
 
+    private static Resources mSystem = null;
     private static boolean sPreloaded;
     private static int sPreloadedDensity;
 
     // These are protected by mAccessLock.
 
-    /*package*/ final Object mAccessLock = new Object();
-    /*package*/ final Configuration mTmpConfig = new Configuration();
-    /*package*/ TypedValue mTmpValue = new TypedValue();
-    /*package*/ final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
-            = new LongSparseArray<WeakReference<Drawable.ConstantState> >(0);
-    /*package*/ final LongSparseArray<WeakReference<ColorStateList> > mColorStateListCache
-            = new LongSparseArray<WeakReference<ColorStateList> >(0);
-    /*package*/ final LongSparseArray<WeakReference<Drawable.ConstantState> > mColorDrawableCache
-            = new LongSparseArray<WeakReference<Drawable.ConstantState> >(0);
-    /*package*/ boolean mPreloading;
+    private final Object mAccessLock = new Object();
+    private final Configuration mTmpConfig = new Configuration();
+    private final LongSparseArray<WeakReference<Drawable.ConstantState>> mDrawableCache
+            = new LongSparseArray<WeakReference<Drawable.ConstantState>>(0);
+    private final LongSparseArray<WeakReference<ColorStateList>> mColorStateListCache
+            = new LongSparseArray<WeakReference<ColorStateList>>(0);
+    private final LongSparseArray<WeakReference<Drawable.ConstantState>> mColorDrawableCache
+            = new LongSparseArray<WeakReference<Drawable.ConstantState>>(0);
 
-    /*package*/ TypedArray mCachedStyledAttributes = null;
-    RuntimeException mLastRetrievedAttrs = null;
+    private TypedValue mTmpValue = new TypedValue();
+    private boolean mPreloading;
+
+    private TypedArray mCachedStyledAttributes = null;
+    private RuntimeException mLastRetrievedAttrs = null;
 
     private int mLastCachedXmlBlockIndex = -1;
     private final int[] mCachedXmlBlockIds = { 0, 0, 0, 0 };
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[4];
 
-    /*package*/ final AssetManager mAssets;
+    private final AssetManager mAssets;
     private final Configuration mConfiguration = new Configuration();
-    /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
+    private final DisplayMetrics mMetrics = new DisplayMetrics();
     private NativePluralRules mPluralRule;
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
@@ -2022,9 +2027,6 @@ public class Resources {
         return true;
     }
 
-    static private final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigToNative(
-            ActivityInfo.CONFIG_LAYOUT_DIRECTION);
-
     /*package*/ Drawable loadDrawable(TypedValue value, int id)
             throws NotFoundException {
 
@@ -2363,6 +2365,16 @@ public class Resources {
         throw new NotFoundException(
                 "File " + file + " from xml type " + type + " resource ID #0x"
                 + Integer.toHexString(id));
+    }
+
+    /*package*/ void recycleCachedStyledAttributes(TypedArray attrs) {
+        synchronized (mAccessLock) {
+            final TypedArray cached = mCachedStyledAttributes;
+            if (cached == null || cached.mData.length < attrs.mData.length) {
+                attrs.mXml = null;
+                mCachedStyledAttributes = attrs;
+            }
+        }
     }
 
     private TypedArray getCachedStyledAttributes(int len) {
