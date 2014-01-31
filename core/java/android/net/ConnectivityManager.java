@@ -360,11 +360,17 @@ public class ConnectivityManager {
      */
     public static final int TYPE_MOBILE_IA = 14;
 
-    /** {@hide} */
-    public static final int MAX_RADIO_TYPE   = TYPE_MOBILE_IA;
+    /**
+     * The network that uses proxy to achieve connectivity.
+     * {@hide}
+     */
+    public static final int TYPE_PROXY = 16;
 
     /** {@hide} */
-    public static final int MAX_NETWORK_TYPE = TYPE_MOBILE_IA;
+    public static final int MAX_RADIO_TYPE   = TYPE_PROXY;
+
+    /** {@hide} */
+    public static final int MAX_NETWORK_TYPE = TYPE_PROXY;
 
     /**
      * If you want to set the default network preference,you can directly
@@ -443,6 +449,8 @@ public class ConnectivityManager {
                 return "WIFI_P2P";
             case TYPE_MOBILE_IA:
                 return "MOBILE_IA";
+            case TYPE_PROXY:
+                return "PROXY";
             default:
                 return Integer.toString(type);
         }
