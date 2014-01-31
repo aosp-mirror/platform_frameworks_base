@@ -3538,6 +3538,11 @@ public class Intent implements Parcelable, Cloneable {
      * it will be finished so that the user does not return to them, but
      * instead returns to whatever activity preceeded it.
      *
+     * <p>When this flag is assigned to the root activity all activities up
+     * to, but not including the root activity, will be cleared. This prevents
+     * this flag from being used to finish all activities in a task and thereby
+     * ending the task.
+     *
      * <p>This is useful for cases where you have a logical break in your
      * application.  For example, an e-mail application may have a command
      * to view an attachment, which launches an image view activity to
