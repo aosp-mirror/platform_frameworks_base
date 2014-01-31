@@ -39,9 +39,6 @@ import android.util.DisplayMetrics;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.view.DisplayList;
-import android.view.HardwareCanvas;
-import android.view.HardwareRenderer;
 import android.view.View;
 
 import java.io.IOException;
@@ -142,96 +139,16 @@ public abstract class Drawable {
     private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
     private WeakReference<Callback> mCallback = null;
     private boolean mVisible = true;
-    private DisplayList mDisplayList;
 
     private int mLayoutDirection;
 
     /**
      * Draw in its bounds (set via setBounds) respecting optional effects such
      * as alpha (set via setAlpha) and color filter (set via setColorFilter).
-     * <p>
-     * Overriding this method will prevent caching optimizations. To enable
-     * optimizations, override {@link #onDraw} instead.
      *
      * @param canvas The canvas to draw into
      */
-    public void draw(Canvas canvas) {
-        if (canvas != null && canvas.isHardwareAccelerated() && false) { // temporarily disabled
-            final HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
-            final DisplayList displayList = getDisplayList(hardwareCanvas);
-            if (displayList != null) {
-                final int restoreCount = hardwareCanvas.save(Canvas.MATRIX_SAVE_FLAG);
-                hardwareCanvas.translate(mBounds.left, mBounds.top);
-                hardwareCanvas.drawDisplayList(displayList);
-                hardwareCanvas.restoreToCount(restoreCount);
-                return;
-            }
-        }
-
-        onDraw(canvas);
-    }
-
-    /**
-     * Draw in its bounds (set via setBounds) respecting optional effects such
-     * as alpha (set via setAlpha) and color filter (set via setColorFilter).
-     * <p>
-     * Overriding this method, rather than {@link #draw}, enables caching
-     * optimizations that avoid re-drawing when unnecessary.
-     *
-     * @param canvas The canvas to draw into
-     */
-    protected void onDraw(Canvas canvas) {
-        throw new UnsupportedOperationException(
-                "Drawable subclasses must implement either draw or onDraw");
-    }
-
-    /**
-     * Gets a display list that can be used to draw this drawable again without
-     * invoking its draw method.
-     *
-     * @param hardwareCanvas The hardware canvas.
-     * @return A DisplayList ready to replay, or null if caching is not enabled.
-     * @hide
-     */
-    private DisplayList getDisplayList(HardwareCanvas hardwareCanvas) {
-        DisplayList displayList = mDisplayList;
-        if (displayList != null && displayList.isValid()) {
-            // Note: This code assumes that the display list previously generated
-            // is compatible with the given hardware canvas.  That might not be true
-            // if we start using multiple different types of hardware canvas
-            // in the system someday.
-            return displayList;
-        }
-
-        displayList = DisplayList.create(getClass().getName());
-        mDisplayList = displayList;
-
-        final Rect bounds = mBounds;
-        final int width = bounds.width();
-        final int height = bounds.height();
-        final HardwareCanvas canvas = displayList.start(width, height);
-        canvas.onPreDraw(null);
-
-        // Draw the display list with origin (0,0) so that if the position
-        // changes then we can translate without recreating the display list.
-        final int restoreCount = canvas.save();
-        try {
-            canvas.translate(-bounds.left, -bounds.top);
-            onDraw(canvas);
-        } finally {
-            canvas.restoreToCount(restoreCount);
-            canvas.onPostDraw();
-            displayList.end();
-        }
-
-        displayList.setLeftTopRightBottom(0, 0, width, height);
-        displayList.setClipToBounds(false);
-        return displayList;
-    }
-
-    private void invalidateDisplayList() {
-        mDisplayList = null;
-    }
+    public abstract void draw(Canvas canvas);
 
     /**
      * Specify a bounding rectangle for the Drawable. This is where the drawable
@@ -246,11 +163,10 @@ public abstract class Drawable {
 
         if (oldBounds.left != left || oldBounds.top != top ||
                 oldBounds.right != right || oldBounds.bottom != bottom) {
-            if (oldBounds.right - oldBounds.left != right - left
-                    || oldBounds.bottom - oldBounds.top != bottom - top) {
-                invalidateDisplayList();
+            if (!oldBounds.isEmpty()) {
+                // first invalidate the previous bounds
+                invalidateSelf();
             }
-
             mBounds.set(left, top, right, bottom);
             onBoundsChange(mBounds);
         }
@@ -438,8 +354,6 @@ public abstract class Drawable {
      * @see #setCallback(android.graphics.drawable.Drawable.Callback) 
      */
     public void invalidateSelf() {
-        invalidateDisplayList();
-
         final Callback callback = getCallback();
         if (callback != null) {
             callback.invalidateDrawable(this);

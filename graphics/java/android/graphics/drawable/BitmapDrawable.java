@@ -456,7 +456,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    public void draw(Canvas canvas) {
         Bitmap bitmap = mBitmap;
         if (bitmap != null) {
             final BitmapState state = mBitmapState;
