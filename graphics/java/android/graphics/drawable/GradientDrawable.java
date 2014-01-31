@@ -266,7 +266,7 @@ public class GradientDrawable extends Drawable {
      * @see #setStroke(int, int) 
      */
     public void setStroke(int width, int color, float dashWidth, float dashGap) {
-        mGradientState.setStroke(width, color, dashWidth, dashGap);
+        mGradientState.setStroke(width, ColorStateList.valueOf(color), dashWidth, dashGap);
         setStrokeInternal(width, color, dashWidth, dashGap);
     }
 
@@ -288,15 +288,15 @@ public class GradientDrawable extends Drawable {
      */
     public void setStroke(
             int width, ColorStateList colorStateList, float dashWidth, float dashGap) {
+        mGradientState.setStroke(width, colorStateList, dashWidth, dashGap);
+        final int color;
         if (colorStateList == null) {
-            setStroke(width, Color.TRANSPARENT, dashWidth, dashGap);
+            color = Color.TRANSPARENT;
         } else {
-            mGradientState.setStroke(width, colorStateList, dashWidth, dashGap);
-
             final int[] stateSet = getState();
-            final int color = colorStateList.getColorForState(stateSet, 0);
-            setStrokeInternal(width, color, dashWidth, dashGap);
+            color = colorStateList.getColorForState(stateSet, 0);
         }
+        setStrokeInternal(width, color, dashWidth, dashGap);
     }
 
     private void setStrokeInternal(int width, int color, float dashWidth, float dashGap) {
@@ -529,8 +529,7 @@ public class GradientDrawable extends Drawable {
             mFillPaint.setAlpha(currFillAlpha);
             mFillPaint.setDither(mDither);
             mFillPaint.setColorFilter(mColorFilter);
-            if (mColorFilter != null && !mGradientState.mHasSolidColor
-                    && mGradientState.mColorStateList == null) {
+            if (mColorFilter != null && mGradientState.mColorStateList == null) {
                 mFillPaint.setColor(mAlpha << 24);
             }
             if (haveStroke) {
@@ -672,7 +671,7 @@ public class GradientDrawable extends Drawable {
      * @see #setColors(int[]) 
      */
     public void setColor(int argb) {
-        mGradientState.setSolidColor(argb);
+        mGradientState.setColorStateList(ColorStateList.valueOf(argb));
         mFillPaint.setColor(argb);
         invalidateSelf();
     }
@@ -691,14 +690,16 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      */
     public void setColor(ColorStateList colorStateList) {
+        mGradientState.setColorStateList(colorStateList);
+        final int color;
         if (colorStateList == null) {
-            setColor(Color.TRANSPARENT);
+            color = Color.TRANSPARENT;
         } else {
-            final int color = colorStateList.getColorForState(getState(), 0);
-            mGradientState.setColorStateList(colorStateList);
-            mFillPaint.setColor(color);
-            invalidateSelf();
+            final int[] stateSet = getState();
+            color = colorStateList.getColorForState(stateSet, 0);
         }
+        mFillPaint.setColor(color);
+        invalidateSelf();
     }
 
     @Override
@@ -910,7 +911,7 @@ public class GradientDrawable extends Drawable {
 
                 // If we don't have a solid color, the alpha channel must be
                 // maxed out so that alpha modulation works correctly.
-                if (!st.mHasSolidColor && st.mColorStateList == null) {
+                if (st.mColorStateList == null) {
                     mFillPaint.setColor(Color.BLACK);
                 }
             }
@@ -1202,10 +1203,7 @@ public class GradientDrawable extends Drawable {
         public int[] mTempColors; // no need to copy
         public float[] mTempPositions; // no need to copy
         public float[] mPositions;
-        public boolean mHasSolidColor;
-        public int mSolidColor;
         public int mStrokeWidth = -1;   // if >= 0 use stroking.
-        public int mStrokeColor;
         public float mStrokeDashWidth;
         public float mStrokeDashGap;
         public float mRadius;    // use this if mRadiusArray is null
@@ -1241,10 +1239,8 @@ public class GradientDrawable extends Drawable {
             if (state.mPositions != null) {
                 mPositions = state.mPositions.clone();
             }
-            mHasSolidColor = state.mHasSolidColor;
-            mSolidColor = state.mSolidColor;
+            mStrokeColorStateList = state.mStrokeColorStateList;
             mStrokeWidth = state.mStrokeWidth;
-            mStrokeColor = state.mStrokeColor;
             mStrokeDashWidth = state.mStrokeDashWidth;
             mStrokeDashGap = state.mStrokeDashGap;
             mRadius = state.mRadius;
@@ -1298,22 +1294,12 @@ public class GradientDrawable extends Drawable {
         }
 
         public void setColors(int[] colors) {
-            mHasSolidColor = false;
             mColors = colors;
-            mColorStateList = null;
-            computeOpacity();
-        }
-        
-        public void setSolidColor(int argb) {
-            mHasSolidColor = argb != Color.TRANSPARENT;
-            mSolidColor = argb;
-            mColors = null;
             mColorStateList = null;
             computeOpacity();
         }
 
         public void setColorStateList(ColorStateList colorStateList) {
-            mHasSolidColor = false;
             mColors = null;
             mColorStateList = colorStateList;
             computeOpacity();
@@ -1336,19 +1322,11 @@ public class GradientDrawable extends Drawable {
                         mOpaque = false;
                         return;
                     }
-                } else if (!isOpaque(mStrokeColor)) {
-                    mOpaque = false;
-                    return;
                 }
             }
 
             if (mColorStateList != null && !mColorStateList.isOpaque()) {
                 mOpaque = false;
-                return;
-            }
-
-            if (mHasSolidColor) {
-                mOpaque = isOpaque(mSolidColor);
                 return;
             }
 
@@ -1366,22 +1344,6 @@ public class GradientDrawable extends Drawable {
 
         private static boolean isOpaque(int color) {
             return ((color >> 24) & 0xff) == 0xff;
-        }
-
-        public void setStroke(int width, int color) {
-            mStrokeWidth = width;
-            mStrokeColor = color;
-            mStrokeColorStateList = null;
-            computeOpacity();
-        }
-
-        public void setStroke(int width, int color, float dashWidth, float dashGap) {
-            mStrokeWidth = width;
-            mStrokeColor = color;
-            mStrokeColorStateList = null;
-            mStrokeDashWidth = dashWidth;
-            mStrokeDashGap = dashGap;
-            computeOpacity();
         }
 
         public void setStroke(
@@ -1426,9 +1388,7 @@ public class GradientDrawable extends Drawable {
     }
 
     private void initializeWithState(GradientState state) {
-        if (state.mHasSolidColor) {
-            mFillPaint.setColor(state.mSolidColor);
-        } else if (state.mColorStateList != null) {
+        if (state.mColorStateList != null) {
             final int[] currentState = getState();
             final int stateColor = state.mColorStateList.getColorForState(currentState, 0);
             mFillPaint.setColor(stateColor);
@@ -1451,8 +1411,6 @@ public class GradientDrawable extends Drawable {
                 final int strokeStateColor = state.mStrokeColorStateList.getColorForState(
                         currentState, 0);
                 mStrokePaint.setColor(strokeStateColor);
-            } else {
-                mStrokePaint.setColor(state.mStrokeColor);
             }
 
             if (state.mStrokeDashWidth != 0.0f) {
