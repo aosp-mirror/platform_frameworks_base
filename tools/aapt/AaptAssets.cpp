@@ -2651,7 +2651,7 @@ status_t AaptAssets::addIncludedResources(const sp<AaptFile>& file)
 {
     const ResTable& res = getIncludedResources();
     // XXX dirty!
-    return const_cast<ResTable&>(res).add(file->getData(), file->getSize(), NULL);
+    return const_cast<ResTable&>(res).add(file->getData(), file->getSize());
 }
 
 const ResTable& AaptAssets::getIncludedResources() const
