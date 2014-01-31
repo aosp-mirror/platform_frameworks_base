@@ -2456,8 +2456,6 @@ org.apache.harmony.security.fortress.Engine$ServiceCacheEntry
 org.apache.harmony.security.fortress.Engine$SpiAndProvider
 org.apache.harmony.security.fortress.SecurityAccess
 org.apache.harmony.security.fortress.Services
-org.apache.harmony.security.provider.cert.DRLCertFactory
-org.apache.harmony.security.provider.cert.X509CertImpl
 org.apache.harmony.security.provider.crypto.CryptoProvider
 org.apache.harmony.security.utils.AlgNameMapper
 org.apache.harmony.security.utils.ObjectIdentifier
