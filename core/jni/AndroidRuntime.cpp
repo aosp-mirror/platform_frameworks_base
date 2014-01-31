@@ -107,6 +107,7 @@ extern int register_android_emoji_EmojiFactory(JNIEnv* env);
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
+extern int register_android_graphics_FontFamily(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
 extern int register_android_graphics_Paint(JNIEnv* env);
 extern int register_android_graphics_Path(JNIEnv* env);
@@ -1223,6 +1224,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Canvas),
     REG_JNI(register_android_graphics_ColorFilter),
     REG_JNI(register_android_graphics_DrawFilter),
+    REG_JNI(register_android_graphics_FontFamily),
     REG_JNI(register_android_graphics_Interpolator),
     REG_JNI(register_android_graphics_LayerRasterizer),
     REG_JNI(register_android_graphics_MaskFilter),

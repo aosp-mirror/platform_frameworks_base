@@ -167,6 +167,7 @@ static jfieldID gCanvas_nativeInstanceID;
 
 static jclass   gPaint_class;
 static jfieldID gPaint_nativeInstanceID;
+static jfieldID gPaint_nativeTypefaceID;
 
 static jclass   gPicture_class;
 static jfieldID gPicture_nativeInstanceID;
@@ -330,6 +331,16 @@ SkPaint* GraphicsJNI::getNativePaint(JNIEnv* env, jobject paint) {
     SkASSERT(env->IsInstanceOf(paint, gPaint_class));
     jlong paintHandle = env->GetLongField(paint, gPaint_nativeInstanceID);
     SkPaint* p = reinterpret_cast<SkPaint*>(paintHandle);
+    SkASSERT(p);
+    return p;
+}
+
+android::TypefaceImpl* GraphicsJNI::getNativeTypeface(JNIEnv* env, jobject paint) {
+    SkASSERT(env);
+    SkASSERT(paint);
+    SkASSERT(env->IsInstanceOf(paint, gPaint_class));
+    jlong typefaceHandle = env->GetLongField(paint, gPaint_nativeTypefaceID);
+    android::TypefaceImpl* p = reinterpret_cast<android::TypefaceImpl*>(typefaceHandle);
     SkASSERT(p);
     return p;
 }
@@ -698,6 +709,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gPaint_class = make_globalref(env, "android/graphics/Paint");
     gPaint_nativeInstanceID = getFieldIDCheck(env, gPaint_class, "mNativePaint", "J");
+    gPaint_nativeTypefaceID = getFieldIDCheck(env, gPaint_class, "mNativeTypeface", "J");
 
     gPicture_class = make_globalref(env, "android/graphics/Picture");
     gPicture_nativeInstanceID = getFieldIDCheck(env, gPicture_class, "mNativePicture", "J");

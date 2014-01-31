@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.content.res.AssetManager;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.LongSparseArray;
 
@@ -173,6 +174,22 @@ public class Typeface {
         return new Typeface(nativeCreateFromFile(path));
     }
 
+    /**
+     * Create a new typeface from an array of font families.
+     *
+     * @param families array of font families
+     * @hide
+     */
+    public static Typeface createFromFamilies(FontFamily[] families) {
+        long[] ptrArray = new long[families.length];
+        Log.d("Minikin", "# of families: " + families.length);
+        for (int i = 0; i < families.length; i++) {
+            Log.d("Minikin", "family ptr: " + families[i].mNativePtr);
+            ptrArray[i] = families[i].mNativePtr;
+        }
+        return new Typeface(nativeCreateFromArray(ptrArray));
+    }
+
     // don't allow clients to call this directly
     private Typeface(long ni) {
         if (ni == 0) {
@@ -234,4 +251,5 @@ public class Typeface {
     private static native int  nativeGetStyle(long native_instance);
     private static native long nativeCreateFromAsset(AssetManager mgr, String path);
     private static native long nativeCreateFromFile(String path);
+    private static native long nativeCreateFromArray(long[] familyArray);
 }

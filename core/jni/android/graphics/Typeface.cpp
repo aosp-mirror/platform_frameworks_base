@@ -18,6 +18,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include "GraphicsJNI.h"
+#include <ScopedPrimitiveArray.h>
 #include "SkStream.h"
 #include "SkTypeface.h"
 #include "TypefaceImpl.h"
@@ -62,7 +63,7 @@ static jlong Typeface_create(JNIEnv* env, jobject, jstring name,
 }
 
 static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandle, jint style) {
-    SkTypeface* family = reinterpret_cast<SkTypeface*>(familyHandle);
+    TypefaceImpl* family = reinterpret_cast<TypefaceImpl*>(familyHandle);
     TypefaceImpl* face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)style);
     // Try to find the closest matching font, using the standard heuristic
     if (NULL == face) {
@@ -114,6 +115,11 @@ static jlong Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) {
     return reinterpret_cast<jlong>(TypefaceImpl_createFromFile(str.c_str()));
 }
 
+static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray) {
+    ScopedLongArrayRO families(env, familyArray);
+    return reinterpret_cast<jlong>(TypefaceImpl_createFromFamilies(families.get(), families.size()));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gTypefaceMethods[] = {
@@ -125,6 +131,8 @@ static JNINativeMethod gTypefaceMethods[] = {
                                            (void*)Typeface_createFromAsset },
     { "nativeCreateFromFile",     "(Ljava/lang/String;)J",
                                            (void*)Typeface_createFromFile },
+    { "nativeCreateFromArray",    "([J)J",
+                                           (void*)Typeface_createFromArray },
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)
