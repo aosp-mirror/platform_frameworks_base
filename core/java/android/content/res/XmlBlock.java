@@ -75,7 +75,7 @@ final class XmlBlock {
     }
 
     /*package*/ final class Parser implements XmlResourceParser {
-        Parser(int parseState, XmlBlock block) {
+        Parser(long parseState, XmlBlock block) {
             mParseState = parseState;
             mBlock = block;
             block.mOpenCount++;
@@ -458,7 +458,7 @@ final class XmlBlock {
             return mStrings.get(id);
         }
 
-        /*package*/ int mParseState;
+        /*package*/ long mParseState;
         private final XmlBlock mBlock;
         private boolean mStarted = false;
         private boolean mDecNextDepth = false;
@@ -476,41 +476,41 @@ final class XmlBlock {
      *  are doing!  The given native object must exist for the entire lifetime
      *  of this newly creating XmlBlock.
      */
-    XmlBlock(AssetManager assets, int xmlBlock) {
+    XmlBlock(AssetManager assets, long xmlBlock) {
         mAssets = assets;
         mNative = xmlBlock;
         mStrings = new StringBlock(nativeGetStringBlock(xmlBlock), false);
     }
 
     private final AssetManager mAssets;
-    private final int mNative;
+    private final long mNative;
     /*package*/ final StringBlock mStrings;
     private boolean mOpen = true;
     private int mOpenCount = 1;
 
-    private static final native int nativeCreate(byte[] data,
+    private static final native long nativeCreate(byte[] data,
                                                  int offset,
                                                  int size);
-    private static final native int nativeGetStringBlock(int obj);
+    private static final native long nativeGetStringBlock(long obj);
 
-    private static final native int nativeCreateParseState(int obj);
-    /*package*/ static final native int nativeNext(int state);
-    private static final native int nativeGetNamespace(int state);
-    /*package*/ static final native int nativeGetName(int state);
-    private static final native int nativeGetText(int state);
-    private static final native int nativeGetLineNumber(int state);
-    private static final native int nativeGetAttributeCount(int state);
-    private static final native int nativeGetAttributeNamespace(int state, int idx);
-    private static final native int nativeGetAttributeName(int state, int idx);
-    private static final native int nativeGetAttributeResource(int state, int idx);
-    private static final native int nativeGetAttributeDataType(int state, int idx);
-    private static final native int nativeGetAttributeData(int state, int idx);
-    private static final native int nativeGetAttributeStringValue(int state, int idx);
-    private static final native int nativeGetIdAttribute(int state);
-    private static final native int nativeGetClassAttribute(int state);
-    private static final native int nativeGetStyleAttribute(int state);
-    private static final native int nativeGetAttributeIndex(int state, String namespace, String name);
-    private static final native void nativeDestroyParseState(int state);
+    private static final native long nativeCreateParseState(long obj);
+    /*package*/ static final native int nativeNext(long state);
+    private static final native int nativeGetNamespace(long state);
+    /*package*/ static final native int nativeGetName(long state);
+    private static final native int nativeGetText(long state);
+    private static final native int nativeGetLineNumber(long state);
+    private static final native int nativeGetAttributeCount(long state);
+    private static final native int nativeGetAttributeNamespace(long state, int idx);
+    private static final native int nativeGetAttributeName(long state, int idx);
+    private static final native int nativeGetAttributeResource(long state, int idx);
+    private static final native int nativeGetAttributeDataType(long state, int idx);
+    private static final native int nativeGetAttributeData(long state, int idx);
+    private static final native int nativeGetAttributeStringValue(long state, int idx);
+    private static final native int nativeGetIdAttribute(long state);
+    private static final native int nativeGetClassAttribute(long state);
+    private static final native int nativeGetStyleAttribute(long state);
+    private static final native int nativeGetAttributeIndex(long state, String namespace, String name);
+    private static final native void nativeDestroyParseState(long state);
 
-    private static final native void nativeDestroy(int obj);
+    private static final native void nativeDestroy(long obj);
 }

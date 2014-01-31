@@ -1459,7 +1459,7 @@ public class Resources {
         }
 
         private final AssetManager mAssets;
-        private final int mTheme;
+        private final long mTheme;
     }
 
     /**
