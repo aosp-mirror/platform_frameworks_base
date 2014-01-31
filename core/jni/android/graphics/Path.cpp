@@ -515,54 +515,6 @@ public:
         delete[] approximation;
         return result;
     }
-
-    static jlong trim(JNIEnv* env, jobject clazz, jlong inPathPtr, jlong outPathPtr,
-            jlong pathMeasurePtr, jfloat trimStart, jfloat trimEnd, jfloat trimOffset) {
-        SkPath* inPath = reinterpret_cast<SkPath*>(inPathPtr);
-        SkPath* outPath = reinterpret_cast<SkPath*>(outPathPtr);
-        SkPathMeasure* pathMeasure = reinterpret_cast<SkPathMeasure*>(pathMeasurePtr);
-        if (trimStart == 0 && trimEnd == 1) {
-            if (outPath != NULL) {
-                *outPath = *inPath;
-            }
-            return reinterpret_cast<jlong>(pathMeasure);
-        }
-
-        bool modifyPath = (outPath == NULL);
-        if (modifyPath) {
-            outPath = new SkPath();
-        } else {
-            outPath->reset();
-        }
-        if (pathMeasure == NULL) {
-            pathMeasure = new SkPathMeasure(*inPath, false);
-        }
-        float length = pathMeasure->getLength();
-        float start = (trimStart + trimOffset) * length;
-        float end = (trimEnd + trimOffset) * length;
-
-        if (end > length && start <= length) {
-            pathMeasure->getSegment(start, length, outPath, true);
-            pathMeasure->getSegment(0, end - length, outPath, true);
-        } else {
-            if (start > length) {
-                start -= length;
-                end -= length;
-            }
-            pathMeasure->getSegment(start, end, outPath, true);
-        }
-        if (modifyPath) {
-            delete pathMeasure;
-            pathMeasure = NULL;
-            *inPath = *outPath;
-            delete outPath;
-        }
-        return reinterpret_cast<jlong>(pathMeasure);
-    }
-
-    static void destroyMeasure(JNIEnv* env, jobject clazz, jlong measure) {
-        delete reinterpret_cast<SkPathMeasure*>(measure);
-    }
 };
 
 static JNINativeMethod methods[] = {
@@ -605,8 +557,6 @@ static JNINativeMethod methods[] = {
     {"native_transform","(JJ)V", (void*) SkPathGlue::transform__Matrix},
     {"native_op","(JJIJ)Z", (void*) SkPathGlue::op},
     {"native_approximate", "(JF)[F", (void*) SkPathGlue::approximate},
-    {"native_destroyMeasure","(J)V", (void*) SkPathGlue::destroyMeasure},
-    {"native_trim","(JJJFFF)J", (void*) SkPathGlue::trim},
 };
 
 int register_android_graphics_Path(JNIEnv* env) {
