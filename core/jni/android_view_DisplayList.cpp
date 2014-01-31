@@ -117,6 +117,13 @@ static void android_view_DisplayList_setProjectBackwards(JNIEnv* env,
     displayList->setProjectBackwards(shouldProject);
 }
 
+static void android_view_DisplayList_setOutline(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jlong outlinePathPtr) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    SkPath* outline = reinterpret_cast<SkPath*>(outlinePathPtr);
+    displayList->setOutline(outline);
+}
+
 static void android_view_DisplayList_setAlpha(JNIEnv* env,
         jobject clazz, jlong displayListPtr, float alpha) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
@@ -385,6 +392,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetClipToBounds",      "(JZ)V",  (void*) android_view_DisplayList_setClipToBounds },
     { "nSetIsolatedZVolume",   "(JZ)V",  (void*) android_view_DisplayList_setIsolatedZVolume },
     { "nSetProjectBackwards",  "(JZ)V", (void*) android_view_DisplayList_setProjectBackwards },
+    { "nSetOutline",           "(JJ)V",  (void*) android_view_DisplayList_setOutline },
     { "nSetAlpha",             "(JF)V",  (void*) android_view_DisplayList_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",
             (void*) android_view_DisplayList_setHasOverlappingRendering },
