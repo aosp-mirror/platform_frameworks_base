@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>TurnBasedMultiplayer.CancelMatchResult | Android Developers</title>
+<title>DriveFolder.OnCreateFileCallback | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -435,11 +435,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -662,35 +657,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
-
-Summary:
-
-
-
-
-
-
-
-
-
-
-
-  <a href="#pubmethods">Methods</a>
-
-
-
-
-  &#124; <a href="#inhmethods">Inherited Methods</a>
-
-&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -710,15 +677,10 @@ Summary:
 
 
     interface
-<h1 itemprop="name">TurnBasedMultiplayer.CancelMatchResult</h1>
+<h1 itemprop="name">DriveFolder.OnCreateFileCallback</h1>
 
 
 
-
-
-      implements
-
-        <a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>
 
 
 
@@ -734,7 +696,7 @@ Summary:
 
     <tr>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer.CancelMatchResult</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DriveFolder.OnCreateFileCallback</td>
     </tr>
 
 
@@ -750,24 +712,13 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Result delivered when the match has been canceled. Possible status codes include:
- <ul>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if the match was successfully canceled.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_OPERATION_DEFERRED">STATUS_NETWORK_ERROR_OPERATION_DEFERRED</a></code> if the attempt to leave
- the match resulted in a network error. The operation was stored locally, and will be
- retried the next time the device comes online. No further action is required.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_LOCALLY_MODIFIED">STATUS_MATCH_ERROR_LOCALLY_MODIFIED</a></code> if the match has already been
- modified locally and has changes waiting to be synced to the server. The cancel operation
- was not executed.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION">STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION</a></code> if the server rejected
- the operation.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_DISABLED">STATUS_MULTIPLAYER_DISABLED</a></code> if the game does not support
- multiplayer.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect
- to the service to perform this operation.</li>
- <li><code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
- service.</li>
- </ul>
+<p class="caution">
+  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
+  preview</strong>. Applications compiled using this version of the API will
+  continue to operate on devices using future versions of Google Play services;
+  however, changes to the API are expected in future releases.
+</p>
+<p itemprop="articleBody">A callback that provides the result for a create file request.
 </p>
 
 
@@ -835,10 +786,10 @@ Summary:
 
 
 
-            String</nobr>
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.CancelMatchResult.html#getMatchId()">getMatchId</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.OnCreateFileCallback.html#onCreateFile(com.google.android.gms.drive.DriveFolder.DriveFileResult)">onCreateFile</a></span>(<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a> result)</nobr>
 
   </td></tr>
 
@@ -850,56 +801,6 @@ Summary:
 
 
 
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Result" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.api.Result-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  <a href="/reference/com/google/android/gms/common/api/Result.html">com.google.android.gms.common.api.Result</a>
-
-<div id="inherited-methods-com.google.android.gms.common.api.Result">
-  <div id="inherited-methods-com.google.android.gms.common.api.Result-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-com.google.android.gms.common.api.Result-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Result.html#getStatus()">getStatus</a></span>()</nobr>
-
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -941,7 +842,7 @@ From interface
 
 
 
-<A NAME="getMatchId()"></A>
+<A NAME="onCreateFile(com.google.android.gms.drive.DriveFolder.DriveFileResult)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -951,10 +852,10 @@ From interface
 
         abstract
 
-        String
+        void
       </span>
-      <span class="sympad">getMatchId</span>
-      <span class="normal">()</span>
+      <span class="sympad">onCreateFile</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a> result)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -965,11 +866,6 @@ From interface
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The ID of the canceled match.
-</li></ul>
-  </div>
 
     </div>
 </div>

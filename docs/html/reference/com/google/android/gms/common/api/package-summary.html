@@ -436,11 +436,6 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
-          <span class="en">Drive</span>
-      </a></div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -676,7 +671,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div id="jd-content" class="api apilevel-">
 
-
+  <div class="jd-descr">
+<p class="caution">
+  The GoogleApiClient API is currently in <strong>developer
+  preview</strong>. Applications compiled using this version of the API will
+  continue to operate on devices using future versions of Google Play services;
+  however, changes to the API are expected in future releases.
+</p>
+  </div>
 
 
 
@@ -701,7 +703,7 @@ onkeyup="return search_changed(event, false, '/')" />
  connect the client to the service.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;R&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>&gt;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;R&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>,&nbsp;C&gt;</td>
               <td class="jd-descrcol" width="100%">Represents a pending result from calling an API method in Google Play services.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
@@ -712,11 +714,6 @@ onkeyup="return search_changed(event, false, '/')" />
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Result.html">Result</a></td>
               <td class="jd-descrcol" width="100%">Represents the final result of invoking an API method in Google Play Services.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/ResultCallback.html">ResultCallback</a>&lt;R&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Result.html">Result</a>&gt;</td>
-              <td class="jd-descrcol" width="100%">An interface for receiving a <code><a href="/reference/com/google/android/gms/common/api/Result.html">Result</a></code> from a <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as an asynchronous
- callback.&nbsp;</td>
           </tr>
   </table>
     </div>
@@ -733,22 +730,18 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Describes a section of the Google Play Services API that should be made available.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html">CommonStatusCodes</a></td>
-              <td class="jd-descrcol" width="100%">Common status codes that are often shared across API surfaces.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></td>
               <td class="jd-descrcol" width="100%">The main entry point for Google Play services integration.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></td>
               <td class="jd-descrcol" width="100%">Builder to configure a <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></td>
               <td class="jd-descrcol" width="100%">Describes an OAuth 2.0 scope to request.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></td>
               <td class="jd-descrcol" width="100%">Represents the results of work.&nbsp;</td>
           </tr>
