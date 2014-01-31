@@ -472,7 +472,7 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    public void draw(Canvas canvas) {
         if (!ensureValidRect()) {
             // nothing to draw
             return;
