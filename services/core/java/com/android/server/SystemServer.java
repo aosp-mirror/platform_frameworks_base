@@ -165,7 +165,7 @@ public final class SystemServer {
         // had to fallback to a different runtime because it is
         // running as root and we need to be the system user to set
         // the property. http://b/11463182
-        SystemProperties.set("persist.sys.dalvik.vm.lib", VMRuntime.getRuntime().vmLibrary());
+        SystemProperties.set("persist.sys.dalvik.vm.lib.1", VMRuntime.getRuntime().vmLibrary());
 
         // Enable the sampling profiler.
         if (SamplingProfilerIntegration.isEnabled()) {
