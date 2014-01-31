@@ -191,6 +191,18 @@ public final class PowerManager {
     public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 0x00000020;
 
     /**
+     * Wake lock level: Put the screen in a low power state and allow the CPU to suspend
+     * if no other wake locks are held.
+     * <p>
+     * This is used by the dream manager to implement doze mode.  It currently
+     * has no effect unless the power manager is in the dozing state.
+     * </p>
+     *
+     * {@hide}
+     */
+    public static final int DOZE_WAKE_LOCK = 0x00000040;
+
+    /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.
      *
      * @hide
@@ -418,6 +430,7 @@ public final class PowerManager {
             case SCREEN_BRIGHT_WAKE_LOCK:
             case FULL_WAKE_LOCK:
             case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+            case DOZE_WAKE_LOCK:
                 break;
             default:
                 throw new IllegalArgumentException("Must specify a valid wake lock level.");

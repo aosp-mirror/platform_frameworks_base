@@ -193,6 +193,9 @@ final class DisplayPowerController {
     // The light sensor, or null if not available or needed.
     private Sensor mLightSensor;
 
+    // The doze screen brightness.
+    private final int mScreenBrightnessDozeConfig;
+
     // The dim screen brightness.
     private final int mScreenBrightnessDimConfig;
 
@@ -363,6 +366,9 @@ final class DisplayPowerController {
         mSensorManager = sensorManager;
 
         final Resources resources = context.getResources();
+
+        mScreenBrightnessDozeConfig = clampAbsoluteBrightness(resources.getInteger(
+                com.android.internal.R.integer.config_screenBrightnessDoze));
 
         mScreenBrightnessDimConfig = clampAbsoluteBrightness(resources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDim));
@@ -559,7 +565,7 @@ final class DisplayPowerController {
         final boolean mustNotify;
         boolean mustInitialize = false;
         boolean updateAutoBrightness = mTwilightChanged;
-        boolean wasDim = false;
+        boolean wasDimOrDoze = false;
         mTwilightChanged = false;
 
         synchronized (mLock) {
@@ -579,7 +585,8 @@ final class DisplayPowerController {
                         != mPendingRequestLocked.screenAutoBrightnessAdjustment) {
                     updateAutoBrightness = true;
                 }
-                wasDim = (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM);
+                wasDimOrDoze = (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM
+                        || mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DOZE);
                 mPowerRequest.copyFrom(mPendingRequestLocked);
                 mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
                 mPendingWaitForNegativeProximityLocked = false;
@@ -626,12 +633,12 @@ final class DisplayPowerController {
 
         // Turn on the light sensor if needed.
         if (mLightSensor != null) {
-            setLightSensorEnabled(mPowerRequest.useAutoBrightness
-                    && wantScreenOn(mPowerRequest.screenState), updateAutoBrightness);
+            setLightSensorEnabled(mPowerRequest.wantLightSensorEnabled(),
+                    updateAutoBrightness);
         }
 
         // Set the screen brightness.
-        if (wantScreenOn(mPowerRequest.screenState)) {
+        if (mPowerRequest.wantScreenOnAny()) {
             int target;
             boolean slow;
             if (mScreenAutoBrightness >= 0 && mLightSensorEnabled) {
@@ -648,12 +655,16 @@ final class DisplayPowerController {
                 slow = false;
                 mUsingScreenAutoBrightness = false;
             }
-            if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM) {
+            if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DOZE) {
+                // Dim quickly to the doze state.
+                target = mScreenBrightnessDozeConfig;
+                slow = false;
+            } else if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM) {
                 // Dim quickly by at least some minimum amount.
                 target = Math.min(target - SCREEN_DIM_MINIMUM_REDUCTION,
                         mScreenBrightnessDimConfig);
                 slow = false;
-            } else if (wasDim) {
+            } else if (wasDimOrDoze) {
                 // Brighten quickly.
                 slow = false;
             }
@@ -666,7 +677,7 @@ final class DisplayPowerController {
 
         // Animate the screen on or off.
         if (!mScreenOffBecauseOfProximity) {
-            if (wantScreenOn(mPowerRequest.screenState)) {
+            if (mPowerRequest.wantScreenOnAny()) {
                 // Want screen on.
                 // Wait for previous off animation to complete beforehand.
                 // It is relatively short but if we cancel it and switch to the
@@ -1211,6 +1222,7 @@ final class DisplayPowerController {
 
         pw.println();
         pw.println("Display Controller Configuration:");
+        pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
@@ -1286,15 +1298,6 @@ final class DisplayPowerController {
             default:
                 return Integer.toString(state);
         }
-    }
-
-    private static boolean wantScreenOn(int state) {
-        switch (state) {
-            case DisplayPowerRequest.SCREEN_STATE_BRIGHT:
-            case DisplayPowerRequest.SCREEN_STATE_DIM:
-                return true;
-        }
-        return false;
     }
 
     /**

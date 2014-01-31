@@ -1504,6 +1504,7 @@
   <java-symbol type="integer" name="config_screenBrightnessSettingMaximum" />
   <java-symbol type="integer" name="config_screenBrightnessSettingDefault" />
   <java-symbol type="integer" name="config_screenBrightnessDim" />
+  <java-symbol type="integer" name="config_screenBrightnessDoze" />
   <java-symbol type="integer" name="config_shutdownBatteryTemperature" />
   <java-symbol type="integer" name="config_undockedHdmiRotation" />
   <java-symbol type="integer" name="config_virtualKeyQuietTimeMillis" />
@@ -1608,11 +1609,18 @@
   <java-symbol type="xml" name="storage_list" />
   <java-symbol type="bool" name="config_dreamsSupported" />
   <java-symbol type="bool" name="config_dreamsEnabledByDefault" />
+  <java-symbol type="bool" name="config_dreamsEnabledOnBattery" />
   <java-symbol type="bool" name="config_dreamsActivatedOnDockByDefault" />
   <java-symbol type="bool" name="config_dreamsActivatedOnSleepByDefault" />
+  <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenPowered" />
+  <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenNotPowered" />
+  <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
+  <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
+  <java-symbol type="bool" name="config_powerDecoupleAutoSuspendModeFromDisplay" />
+  <java-symbol type="bool" name="config_powerDecoupleInteractiveModeFromDisplay" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
