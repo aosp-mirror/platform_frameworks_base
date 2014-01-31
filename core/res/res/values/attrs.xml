@@ -4651,6 +4651,13 @@
         <attr name="extraTension" format="float" />
     </declare-styleable>
 
+    <declare-styleable name="PathInterpolator">
+        <attr name="controlX1" format="float" />
+        <attr name="controlY1" format="float" />
+        <attr name="controlX2" format="float" />
+        <attr name="controlY2" format="float" />
+    </declare-styleable>
+
     <!-- ========================== -->
     <!-- Transition attributes -->
     <!-- ========================== -->

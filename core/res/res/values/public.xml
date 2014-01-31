@@ -2100,6 +2100,10 @@
   <public type="attr" name="colorFilterColor" />
   <public type="attr" name="colorFilterMode" />
   <public type="attr" name="isolatedZVolume" />
+  <public type="attr" name="controlX1" />
+  <public type="attr" name="controlY1" />
+  <public type="attr" name="controlX2" />
+  <public type="attr" name="controlY2" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
