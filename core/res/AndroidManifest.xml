@@ -2386,13 +2386,13 @@
          @hide -->
     <permission android:name="android.permission.READ_DREAM_STATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|system" />
 
     <!-- Allows applications to write dream settings, and start or stop dreaming.
          @hide -->
     <permission android:name="android.permission.WRITE_DREAM_STATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|system" />
 
     <!-- Allow an application to read and write the cache partition.
          @hide -->
