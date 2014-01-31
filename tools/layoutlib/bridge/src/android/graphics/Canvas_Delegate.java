@@ -786,7 +786,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPath(long nativeCanvas, int path, long paint) {
+    /*package*/ static void native_drawPath(long nativeCanvas, long path, long paint) {
         final Path_Delegate pathDelegate = Path_Delegate.getDelegate(path);
         if (pathDelegate == null) {
             return;
