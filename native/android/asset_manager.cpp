@@ -76,12 +76,12 @@ AAssetManager* AAssetManager_fromJava(JNIEnv* env, jobject assetManager)
 
         if (gJNIConfigured == false) {
             jclass amClass = env->FindClass("android/content/res/AssetManager");
-            gAssetManagerOffsets.mObject = env->GetFieldID(amClass, "mObject", "I");
+            gAssetManagerOffsets.mObject = env->GetFieldID(amClass, "mObject", "J");
             gJNIConfigured = true;
         }
     }
 
-    return (AAssetManager*) env->GetIntField(assetManager, gAssetManagerOffsets.mObject);
+    return (AAssetManager*) env->GetLongField(assetManager, gAssetManagerOffsets.mObject);
 }
 
 AAsset* AAssetManager_open(AAssetManager* amgr, const char* filename, int mode)
