@@ -4210,6 +4210,7 @@ package android.app {
     field public static final java.lang.String EXTRA_SMALL_ICON = "android.icon";
     field public static final java.lang.String EXTRA_SUB_TEXT = "android.subText";
     field public static final java.lang.String EXTRA_SUMMARY_TEXT = "android.summaryText";
+    field public static final java.lang.String EXTRA_TEMPLATE = "android.template";
     field public static final java.lang.String EXTRA_TEXT = "android.text";
     field public static final java.lang.String EXTRA_TEXT_LINES = "android.textLines";
     field public static final java.lang.String EXTRA_TITLE = "android.title";
