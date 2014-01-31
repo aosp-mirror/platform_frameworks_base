@@ -1279,14 +1279,13 @@ class ResTable
 {
 public:
     ResTable();
-    ResTable(const void* data, size_t size, void* cookie,
+    ResTable(const void* data, size_t size, const int32_t cookie,
              bool copyData=false);
     ~ResTable();
 
-    status_t add(const void* data, size_t size, void* cookie,
-                 bool copyData=false, const void* idmap = NULL);
-    status_t add(Asset* asset, void* cookie,
-                 bool copyData=false, const void* idmap = NULL);
+    status_t add(Asset* asset, const int32_t cookie, bool copyData,
+                 const void* idmap);
+    status_t add(const void *data, size_t size);
     status_t add(ResTable* src);
 
     status_t getError() const;
@@ -1534,7 +1533,7 @@ public:
     // but not the names their entries or types.
     const ResStringPool* getTableStringBlock(size_t index) const;
     // Return unique cookie identifier for the given resource table.
-    void* getTableCookie(size_t index) const;
+    int32_t getTableCookie(size_t index) const;
 
     // Return the configurations (ResTable_config) that we know about
     void getConfigurations(Vector<ResTable_config>* configs) const;
@@ -1569,7 +1568,7 @@ private:
     struct PackageGroup;
     struct bag_set;
 
-    status_t add(const void* data, size_t size, void* cookie,
+    status_t addInternal(const void* data, size_t size, const int32_t cookie,
                  Asset* asset, bool copyData, const Asset* idmap);
 
     ssize_t getResourcePackageIndex(uint32_t resID) const;

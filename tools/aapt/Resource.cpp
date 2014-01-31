@@ -1320,7 +1320,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         }
         
         // Read resources back in,
-        finalResTable.add(resFile->getData(), resFile->getSize(), NULL);
+        finalResTable.add(resFile->getData(), resFile->getSize());
         
 #if 0
         NOISY(
