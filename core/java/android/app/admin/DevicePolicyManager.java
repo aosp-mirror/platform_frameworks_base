@@ -509,6 +509,14 @@ public class DevicePolicyManager {
 
     /**
      * Constant for {@link #setPasswordQuality}: the user must have entered a
+     * password containing at least numeric characters with no repeating (4444)
+     * or ordered (1234, 4321, 2468) sequences.  Note that quality
+     * constants are ordered so that higher values are more restrictive.
+     */
+    public static final int PASSWORD_QUALITY_NUMERIC_COMPLEX = 0x30000;
+
+    /**
+     * Constant for {@link #setPasswordQuality}: the user must have entered a
      * password containing at least alphabetic (or other symbol) characters.
      * Note that quality constants are ordered so that higher values are more
      * restrictive.
@@ -556,8 +564,9 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality.  One of
      * {@link #PASSWORD_QUALITY_UNSPECIFIED}, {@link #PASSWORD_QUALITY_SOMETHING},
-     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_ALPHABETIC},
-     * {@link #PASSWORD_QUALITY_ALPHANUMERIC} or {@link #PASSWORD_QUALITY_COMPLEX}.
+     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX},
+     * {@link #PASSWORD_QUALITY_ALPHABETIC}, {@link #PASSWORD_QUALITY_ALPHANUMERIC}
+     * or {@link #PASSWORD_QUALITY_COMPLEX}.
      */
     public void setPasswordQuality(ComponentName admin, int quality) {
         if (mService != null) {
@@ -600,9 +609,9 @@ public class DevicePolicyManager {
      * take place immediately.  To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.  This
      * constraint is only imposed if the administrator has also requested either
-     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_ALPHABETIC}
-     * {@link #PASSWORD_QUALITY_ALPHANUMERIC}, or {@link #PASSWORD_QUALITY_COMPLEX}
-     * with {@link #setPasswordQuality}.
+     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX},
+     * {@link #PASSWORD_QUALITY_ALPHABETIC}, {@link #PASSWORD_QUALITY_ALPHANUMERIC},
+     * or {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -1008,9 +1017,9 @@ public class DevicePolicyManager {
    * the change does not take place immediately. To prompt the user for a new
    * password, use {@link #ACTION_SET_NEW_PASSWORD} after setting this value.
    * This constraint is only imposed if the administrator has also requested
-   * either {@link #PASSWORD_QUALITY_NUMERIC},
-   * {@link #PASSWORD_QUALITY_ALPHABETIC}, or
-   * {@link #PASSWORD_QUALITY_ALPHANUMERIC} with {@link #setPasswordQuality}.
+   * either {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX}
+   * {@link #PASSWORD_QUALITY_ALPHABETIC}, or {@link #PASSWORD_QUALITY_ALPHANUMERIC}
+   * with {@link #setPasswordQuality}.
    *
    * <p>
    * The calling device admin must have requested

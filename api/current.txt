@@ -5372,6 +5372,7 @@ package android.app.admin {
     field public static final int PASSWORD_QUALITY_BIOMETRIC_WEAK = 32768; // 0x8000
     field public static final int PASSWORD_QUALITY_COMPLEX = 393216; // 0x60000
     field public static final int PASSWORD_QUALITY_NUMERIC = 131072; // 0x20000
+    field public static final int PASSWORD_QUALITY_NUMERIC_COMPLEX = 196608; // 0x30000
     field public static final int PASSWORD_QUALITY_SOMETHING = 65536; // 0x10000
     field public static final int PASSWORD_QUALITY_UNSPECIFIED = 0; // 0x0
     field public static final java.lang.String PROVISIONING_NFC_MIME_TYPE = "application/com.android.managedprovisioning";
