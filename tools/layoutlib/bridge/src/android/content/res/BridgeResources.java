@@ -51,6 +51,7 @@ public final class BridgeResources extends Resources {
     private BridgeContext mContext;
     private IProjectCallback mProjectCallback;
     private boolean[] mPlatformResourceFlag = new boolean[1];
+    private TypedValue mTmpValue = new TypedValue();
 
     /**
      * Simpler wrapper around FileInputStream. This is used when the input stream represent
