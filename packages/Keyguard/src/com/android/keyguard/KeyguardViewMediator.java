@@ -19,6 +19,7 @@ package com.android.keyguard;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardShowCallback;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static com.android.keyguard.analytics.KeyguardAnalytics.SessionTypeAdapter;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
@@ -33,6 +34,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -54,6 +56,10 @@ import android.view.WindowManagerPolicy;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.analytics.Session;
+import com.android.keyguard.analytics.KeyguardAnalytics;
+
+import java.io.File;
 
 
 /**
@@ -100,6 +106,7 @@ import com.android.internal.widget.LockPatternUtils;
 public class KeyguardViewMediator {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     final static boolean DEBUG = false;
+    private static final boolean ENABLE_ANALYTICS = Build.IS_DEBUGGABLE;
     private final static boolean DBG_WAKE = false;
 
     private final static String TAG = "KeyguardViewMediator";
@@ -161,6 +168,11 @@ public class KeyguardViewMediator {
      */
     private static final boolean ALLOW_NOTIFICATIONS_DEFAULT = false;
 
+    /**
+     * Secure setting whether analytics are collected on the keyguard.
+     */
+    private static final String KEYGUARD_ANALYTICS_SETTING = "keyguard_analytics";
+
     /** The stream type that the lock sounds are tied to. */
     private int mMasterStreamType;
 
@@ -193,6 +205,8 @@ public class KeyguardViewMediator {
     private PowerManager.WakeLock mShowKeyguardWakeLock;
 
     private KeyguardViewManager mKeyguardViewManager;
+
+    private final KeyguardAnalytics mKeyguardAnalytics;
 
     // these are protected by synchronized (this)
 
@@ -528,11 +542,24 @@ public class KeyguardViewMediator {
                 && !mLockPatternUtils.isLockScreenDisabled();
 
         WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-
-        mKeyguardViewManager = new KeyguardViewManager(context, wm, mViewMediatorCallback,
-                mLockPatternUtils);
-
         final ContentResolver cr = mContext.getContentResolver();
+
+        if (ENABLE_ANALYTICS && !LockPatternUtils.isSafeModeEnabled() &&
+                Settings.Secure.getInt(cr, KEYGUARD_ANALYTICS_SETTING, 0) == 1) {
+            mKeyguardAnalytics = new KeyguardAnalytics(context, new SessionTypeAdapter() {
+
+                @Override
+                public int getSessionType() {
+                    return mLockPatternUtils.isSecure() ? Session.TYPE_KEYGUARD_SECURE
+                            : Session.TYPE_KEYGUARD_INSECURE;
+                }
+            }, new File(mContext.getCacheDir(), "keyguard_analytics.bin"));
+        } else {
+            mKeyguardAnalytics = null;
+        }
+        mKeyguardViewManager = new KeyguardViewManager(context, wm, mViewMediatorCallback,
+                mLockPatternUtils,
+                mKeyguardAnalytics != null ? mKeyguardAnalytics.getCallback() : null);
 
         mScreenOn = mPM.isScreenOn();
 
@@ -630,6 +657,9 @@ public class KeyguardViewMediator {
                 // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {
                 doKeyguardLocked(null);
+            }
+            if (ENABLE_ANALYTICS && mKeyguardAnalytics != null) {
+                mKeyguardAnalytics.getCallback().onScreenOff();
             }
         }
         KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurndOff(why);
@@ -868,6 +898,9 @@ public class KeyguardViewMediator {
                 mHidden = isHidden;
                 updateActivityLockScreenState();
                 adjustStatusBarLocked();
+            }
+            if (ENABLE_ANALYTICS && mKeyguardAnalytics != null) {
+                mKeyguardAnalytics.getCallback().onSetHidden(isHidden);
             }
         }
     }

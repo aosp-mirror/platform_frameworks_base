@@ -21,11 +21,11 @@ import android.graphics.drawable.BitmapDrawable;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.analytics.KeyguardAnalytics;
 
 import org.xmlpull.v1.XmlPullParser;
 
 import android.app.ActivityManager;
-import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -76,6 +76,7 @@ public class KeyguardViewManager {
     private final Context mContext;
     private final ViewManager mViewManager;
     private final KeyguardViewMediator.ViewMediatorCallback mViewMediatorCallback;
+    private final KeyguardAnalytics.Callback mAnalyticsCallback;
 
     private WindowManager.LayoutParams mWindowLayoutParams;
     private boolean mNeedsInput = false;
@@ -107,11 +108,12 @@ public class KeyguardViewManager {
      */
     public KeyguardViewManager(Context context, ViewManager viewManager,
             KeyguardViewMediator.ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils, KeyguardAnalytics.Callback analyticsCallback) {
         mContext = context;
         mViewManager = viewManager;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
+        mAnalyticsCallback = analyticsCallback;
     }
 
     /**
@@ -120,6 +122,9 @@ public class KeyguardViewManager {
      */
     public synchronized void show(Bundle options) {
         if (DEBUG) Log.d(TAG, "show(); mKeyguardView==" + mKeyguardView);
+        if (mAnalyticsCallback != null) {
+            mAnalyticsCallback.onShow();
+        }
 
         boolean enableScreenRotation = shouldEnableScreenRotation();
 
@@ -261,6 +266,15 @@ public class KeyguardViewManager {
                 }
             }
             return super.dispatchKeyEvent(event);
+        }
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            boolean result = false;
+            if (mAnalyticsCallback != null) {
+                result = mAnalyticsCallback.onTouchEvent(ev, getWidth(), getHeight()) || result;
+            }
+            return super.dispatchTouchEvent(ev) || result;
         }
     }
 
@@ -473,6 +487,9 @@ public class KeyguardViewManager {
                 Slog.w(TAG, "Exception calling onShown():", e);
             }
         }
+        if (mAnalyticsCallback != null) {
+            mAnalyticsCallback.onScreenOn();
+        }
     }
 
     public synchronized void verifyUnlock() {
@@ -486,6 +503,10 @@ public class KeyguardViewManager {
      */
     public synchronized void hide() {
         if (DEBUG) Log.d(TAG, "hide()");
+
+        if (mAnalyticsCallback != null) {
+            mAnalyticsCallback.onHide();
+        }
 
         if (mKeyguardHost != null) {
             mKeyguardHost.setVisibility(View.GONE);

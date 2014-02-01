@@ -1,0 +1,102 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
+syntax = "proto2";
+
+package keyguard;
+
+option java_package = "com.android.keyguard.analytics";
+option java_outer_classname = "KeyguardAnalyticsProtos";
+
+message Session {
+    message TouchEvent {
+        message BoundingBox {
+            optional float width = 1;
+            optional float height = 2;
+        }
+
+        enum Action {
+            // Keep in sync with MotionEvent.
+            DOWN = 0;
+            UP = 1;
+            MOVE = 2;
+            CANCEL = 3;
+            OUTSIDE = 4;
+            POINTER_DOWN = 5;
+            POINTER_UP = 6;
+        }
+
+        message Pointer {
+            optional float x = 1;
+            optional float y = 2;
+            optional float size = 3;
+            optional float pressure = 4;
+            optional int32 id = 5;
+            optional float length = 6;
+            // Bounding box of the pointer. Only set on UP or POINTER_UP event of this pointer.
+            optional BoundingBox boundingBox = 7;
+        }
+
+        optional uint64 timeOffsetNanos = 1;
+        optional Action action = 2;
+        optional int32 actionIndex = 3;
+        repeated Pointer pointers = 4;
+        /* If true, the the x / y coordinates of the touch events were redacted. Retained are the
+           size of the individual and overall bounding boxes and the length of each pointer's
+           gesture. */
+        optional bool redacted = 5;
+        // Bounding box of the whole gesture. Only set on UP event.
+        optional BoundingBox boundingBox = 6;
+    }
+
+    message SensorEvent {
+        enum Type {
+            ACCELEROMETER = 1;
+            GYROSCOPE = 4;
+            LIGHT = 5;
+            PROXIMITY = 8;
+            ROTATION_VECTOR = 11;
+        }
+
+        optional Type type = 1;
+        optional uint64 timeOffsetNanos = 2;
+        repeated float values = 3;
+        optional uint64 timestamp = 4;
+    }
+
+    enum Result {
+        FAILURE = 0;
+        SUCCESS = 1;
+        UNKNOWN = 2;
+    }
+
+    enum Type {
+        KEYGUARD_INSECURE = 0;
+        KEYGUARD_SECURE = 1;
+        RANDOM_WAKEUP = 2;
+    }
+
+    optional uint64 startTimestampMillis = 1;
+    optional uint64 durationMillis = 2;
+    optional string build = 3;
+    optional Result result = 4;
+    repeated TouchEvent touchEvents = 5;
+    repeated SensorEvent sensorEvents = 6;
+
+    optional int32 touchAreaWidth = 9;
+    optional int32 touchAreaHeight = 10;
+    optional Type type = 11;
+}
