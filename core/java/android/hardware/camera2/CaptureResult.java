@@ -965,7 +965,7 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>The desired mode for for the camera device's flash control.</p>
      * <p>This control is only effective when flash unit is available
-     * (<code>{@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} != 0</code>).</p>
+     * (<code>{@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} == true</code>).</p>
      * <p>When this control is used, the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} must be set to ON or OFF.
      * Otherwise, the camera device auto-exposure related flash control (ON_AUTO_FLASH,
      * ON_ALWAYS_FLASH, or ON_AUTO_FLASH_REDEYE) will override this control.</p>

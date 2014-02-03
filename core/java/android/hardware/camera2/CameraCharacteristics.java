@@ -515,8 +515,9 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>Area of raw data which corresponds to only
-     * active pixels; smaller or equal to
-     * pixelArraySize.</p>
+     * active pixels.</p>
+     * <p>It is smaller or equal to
+     * sensor full pixel array, which could include the black calibration pixels.</p>
      */
     public static final Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE =
             new Key<android.graphics.Rect>("android.sensor.info.activeArraySize", android.graphics.Rect.class);
@@ -569,11 +570,11 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>Maximum sensitivity that is implemented
-     * purely through analog gain</p>
+     * purely through analog gain.</p>
      * <p>For {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} values less than or
      * equal to this, all applied gain must be analog. For
-     * values above this, it can be a mix of analog and
-     * digital</p>
+     * values above this, the gain applied can be a mix of analog and
+     * digital.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
