@@ -574,6 +574,7 @@ public class Notification implements Parcelable
      * notifications, each of which was supplied to {@link InboxStyle#addLine(CharSequence)}.
      */
     public static final String EXTRA_TEXT_LINES = "android.textLines";
+    public static final String EXTRA_TEMPLATE = "android.template";
 
     /**
      * {@link #extras} key: An array of people that this notification relates to, specified
@@ -2075,6 +2076,7 @@ public class Notification implements Parcelable
             if (mBigContentTitle != null) {
                 extras.putCharSequence(EXTRA_TITLE_BIG, mBigContentTitle);
             }
+            extras.putString(EXTRA_TEMPLATE, this.getClass().getName());
         }
 
         /**
