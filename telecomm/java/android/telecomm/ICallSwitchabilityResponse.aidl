@@ -19,7 +19,6 @@ package android.telecomm;
 /**
  * Used by {@link ICallServiceSelector}s to return whether or not the relevant
  * call is switchable.
- * @hide
  */
 oneway interface ICallSwitchabilityResponse {
     /**

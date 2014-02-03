@@ -43,7 +43,6 @@ import android.util.Pair;
  * synchronous responses. As a result, most responses are handled by (or have TODOs to handle)
  * response objects instead of return values.
  * TODO(santoscordon): Improve paragraph above once the final design is in place.
- * @hide
  */
 public abstract class CallService extends Service {
     private static final String TAG = CallService.class.getSimpleName();

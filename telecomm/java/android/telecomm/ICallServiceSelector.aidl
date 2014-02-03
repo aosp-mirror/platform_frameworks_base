@@ -60,8 +60,6 @@ import java.util.List;
  * all supported (either for a given call or globally across a given selector) , isSwitchable
  * below can return false blindly to suppress all "select" calls beyond the initial one (that
  * is used to establish outgoing calls).
- *
- * @hide
  */
 oneway interface ICallServiceSelector {
 

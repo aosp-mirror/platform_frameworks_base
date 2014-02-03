@@ -21,7 +21,6 @@ import java.util.List;
 
 /**
  * Used by {@link ICallServiceProvider} to return a list of {@link ICallService} implementations.
- * @hide
  */
 oneway interface ICallServiceLookupResponse {
     /**

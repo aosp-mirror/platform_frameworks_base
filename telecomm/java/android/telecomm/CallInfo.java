@@ -26,7 +26,6 @@ import java.util.UUID;
  * A parcelable holder class of Call information data. This class is intended for transfering call
  * information from Telecomm to call services and thus is read-only.
  * TODO(santoscordon): Need final public-facing comments in this file.
- * @hide
  */
 public final class CallInfo implements Parcelable {
 

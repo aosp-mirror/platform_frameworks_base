@@ -30,7 +30,6 @@ import android.telecomm.ICallServiceLookupResponse;
  * processed by the CallsManager and its helpers (potentially requesting input from the user) to
  * identify the best CallService.  The user should obviously be notified upon zero candidates as
  * well as all (one or more) candidates failing to issue the call.
- * @hide
  */
 oneway interface ICallServiceProvider {
 

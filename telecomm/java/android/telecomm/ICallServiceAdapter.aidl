@@ -21,7 +21,6 @@ import android.telecomm.CallInfo;
 /**
  * Provides methods for ICallService implementations to interact with the system phone app.
  * TODO(santoscordon): Need final public-facing comments in this file.
- * @hide
  */
 oneway interface ICallServiceAdapter {
 

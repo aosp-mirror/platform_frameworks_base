@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * Used by {@link ICallServiceSelector} to return the preferred list of {@link ICallService}
  * implementations with which to connect the corresponding outgoing call.
- * @hide
  */
 oneway interface ICallServiceSelectionResponse {
     /**

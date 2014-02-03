@@ -34,7 +34,6 @@ import android.telecomm.ICallServiceLookupResponse;
  *
  * TODO(santoscordon): Improve paragraph above once the final design is in place. Needs more
  * about how this can be used.
- * @hide
  */
 public abstract class CallServiceProvider extends Service {
 
