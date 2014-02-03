@@ -218,6 +218,7 @@ public class Type extends BaseObj {
     }
 
     /**
+     * @hide
      * Utility function for creating basic 1D types. The type is
      * created without mipmaps enabled.
      *
@@ -241,6 +242,7 @@ public class Type extends BaseObj {
     }
 
     /**
+     * @hide
      * Utility function for creating basic 2D types. The type is
      * created without mipmaps or cubemaps.
      *
@@ -266,6 +268,7 @@ public class Type extends BaseObj {
     }
 
     /**
+     * @hide
      * Utility function for creating basic 3D types. The type is
      * created without mipmaps.
      *
