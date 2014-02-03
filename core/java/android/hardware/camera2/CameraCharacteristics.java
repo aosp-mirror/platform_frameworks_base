@@ -530,19 +530,29 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>Range of valid exposure
-     * times</p>
+     * times used by {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}.</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
     public static final Key<long[]> SENSOR_INFO_EXPOSURE_TIME_RANGE =
             new Key<long[]>("android.sensor.info.exposureTimeRange", long[].class);
 
     /**
      * <p>Maximum possible frame duration (minimum frame
-     * rate)</p>
-     * <p>Minimum duration is a function of resolution,
-     * processing settings. See
-     * android.scaler.availableProcessedMinDurations
-     * android.scaler.availableJpegMinDurations
-     * android.scaler.availableRawMinDurations</p>
+     * rate).</p>
+     * <p>The largest possible android.sensor.frameDuration
+     * that will be accepted by the camera device. Attempting to use
+     * frame durations beyond the maximum will result in the frame duration
+     * being clipped to the maximum. See that control
+     * for a full definition of frame durations.</p>
+     * <p>Refer to
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS android.scaler.availableProcessedMinDurations},
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS android.scaler.availableJpegMinDurations}, and
+     * android.scaler.availableRawMinDurations for the minimum
+     * frame duration values.</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS
+     * @see CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS
      */
     public static final Key<Long> SENSOR_INFO_MAX_FRAME_DURATION =
             new Key<Long>("android.sensor.info.maxFrameDuration", long.class);
