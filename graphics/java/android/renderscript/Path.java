@@ -41,7 +41,7 @@ public class Path extends BaseObj {
     float mQuality;
     boolean mCoverageToAlpha;
 
-    Path(int id, RenderScript rs, Primitive p, Allocation vtx, Allocation loop, float q) {
+    Path(long id, RenderScript rs, Primitive p, Allocation vtx, Allocation loop, float q) {
         super(id, rs);
         mVertexBuffer = vtx;
         mLoopBuffer = loop;
@@ -67,7 +67,7 @@ public class Path extends BaseObj {
 
 
     public static Path createStaticPath(RenderScript rs, Primitive p, float quality, Allocation vtx) {
-        int id = rs.nPathCreate(p.mID, false, vtx.getID(rs), 0, quality);
+        long id = rs.nPathCreate(p.mID, false, vtx.getID(rs), 0, quality);
         Path newPath = new Path(id, rs, p, null, null, quality);
         return newPath;
     }

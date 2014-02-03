@@ -26,7 +26,7 @@ public final class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
     private final float[] mValues = new float[9];
     private Allocation mInput;
 
-    private ScriptIntrinsicConvolve3x3(int id, RenderScript rs) {
+    private ScriptIntrinsicConvolve3x3(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -61,7 +61,7 @@ public final class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
             !e.isCompatible(Element.F32_4(rs))) {
             throw new RSIllegalArgumentException("Unsuported element type.");
         }
-        int id = rs.nScriptIntrinsicCreate(1, e.getID(rs));
+        long id = rs.nScriptIntrinsicCreate(1, e.getID(rs));
         ScriptIntrinsicConvolve3x3 si = new ScriptIntrinsicConvolve3x3(id, rs);
         si.setCoefficients(f);
         return si;

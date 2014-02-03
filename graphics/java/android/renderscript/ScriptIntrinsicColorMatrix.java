@@ -43,7 +43,7 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
     private final Matrix4f mMatrix = new Matrix4f();
     private final Float4 mAdd = new Float4();
 
-    private ScriptIntrinsicColorMatrix(int id, RenderScript rs) {
+    private ScriptIntrinsicColorMatrix(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -75,7 +75,7 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
      * @return ScriptIntrinsicColorMatrix
      */
     public static ScriptIntrinsicColorMatrix create(RenderScript rs) {
-        int id = rs.nScriptIntrinsicCreate(2, 0);
+        long id = rs.nScriptIntrinsicCreate(2, 0);
         return new ScriptIntrinsicColorMatrix(id, rs);
 
     }

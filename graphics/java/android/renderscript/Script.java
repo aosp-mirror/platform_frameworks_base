@@ -36,7 +36,7 @@ public class Script extends BaseObj {
         Script mScript;
         int mSlot;
         int mSig;
-        KernelID(int id, RenderScript rs, Script s, int slot, int sig) {
+        KernelID(long id, RenderScript rs, Script s, int slot, int sig) {
             super(id, rs);
             mScript = s;
             mSlot = slot;
@@ -54,7 +54,7 @@ public class Script extends BaseObj {
             return k;
         }
 
-        int id = mRS.nScriptKernelIDCreate(getID(mRS), slot, sig);
+        long id = mRS.nScriptKernelIDCreate(getID(mRS), slot, sig);
         if (id == 0) {
             throw new RSDriverException("Failed to create KernelID");
         }
@@ -75,7 +75,7 @@ public class Script extends BaseObj {
     public static final class FieldID extends BaseObj {
         Script mScript;
         int mSlot;
-        FieldID(int id, RenderScript rs, Script s, int slot) {
+        FieldID(long id, RenderScript rs, Script s, int slot) {
             super(id, rs);
             mScript = s;
             mSlot = slot;
@@ -92,7 +92,7 @@ public class Script extends BaseObj {
             return f;
         }
 
-        int id = mRS.nScriptFieldIDCreate(getID(mRS), slot);
+        long id = mRS.nScriptFieldIDCreate(getID(mRS), slot);
         if (id == 0) {
             throw new RSDriverException("Failed to create FieldID");
         }
@@ -132,11 +132,11 @@ public class Script extends BaseObj {
             throw new RSIllegalArgumentException(
                 "At least one of ain or aout is required to be non-null.");
         }
-        int in_id = 0;
+        long in_id = 0;
         if (ain != null) {
             in_id = ain.getID(mRS);
         }
-        int out_id = 0;
+        long out_id = 0;
         if (aout != null) {
             out_id = aout.getID(mRS);
         }
@@ -161,11 +161,11 @@ public class Script extends BaseObj {
             forEach(slot, ain, aout, v);
             return;
         }
-        int in_id = 0;
+        long in_id = 0;
         if (ain != null) {
             in_id = ain.getID(mRS);
         }
-        int out_id = 0;
+        long out_id = 0;
         if (aout != null) {
             out_id = aout.getID(mRS);
         }
@@ -176,7 +176,7 @@ public class Script extends BaseObj {
         mRS.nScriptForEachClipped(getID(mRS), slot, in_id, out_id, params, sc.xstart, sc.xend, sc.ystart, sc.yend, sc.zstart, sc.zend);
     }
 
-    Script(int id, RenderScript rs) {
+    Script(long id, RenderScript rs) {
         super(id, rs);
     }
 
