@@ -240,6 +240,7 @@ void DisplayList::init() {
     mClipToBounds = true;
     mIsolatedZVolume = true;
     mProjectBackwards = false;
+    mOutline.rewind();
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
@@ -654,16 +655,15 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
             /* draw shadow with parent matrix applied, passing in the child's total matrix
              *
              * TODO:
-             * -determine and pass background shape (and possibly drawable alpha)
              * -view must opt-in to shadows
-             * -consider shadows for other content
-             * -inform shadow system of ancestor transform (for use in lighting)
+             * -consider depth in more complex scenarios (neg z, added shadow depth)
              */
             mat4 shadowMatrix(childOp->mTransformFromCompositingAncestor);
             childOp->mDisplayList->applyViewPropertyTransforms(shadowMatrix);
+            DisplayList* child = childOp->mDisplayList;
+
             DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix,
-                    childOp->mDisplayList->mAlpha,
-                    childOp->mDisplayList->getWidth(), childOp->mDisplayList->getHeight());
+                    child->mAlpha, &(child->mOutline), child->mWidth, child->mHeight);
             handler(shadowOp, PROPERTY_SAVECOUNT, mClipToBounds);
         }
 

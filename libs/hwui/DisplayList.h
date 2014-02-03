@@ -198,6 +198,14 @@ public:
         mProjectBackwards = shouldProject;
     }
 
+    void setOutline(const SkPath* outline) {
+        if (!outline) {
+            mOutline.reset();
+        } else {
+            mOutline = *outline;
+        }
+    }
+
     void setStaticMatrix(SkMatrix* matrix) {
         delete mStaticMatrix;
         mStaticMatrix = new SkMatrix(*matrix);
@@ -592,6 +600,7 @@ private:
     bool mClipToBounds;
     bool mIsolatedZVolume;
     bool mProjectBackwards;
+    SkPath mOutline;
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;

@@ -1584,27 +1584,33 @@ private:
  */
 class DrawShadowOp : public DrawOp {
 public:
-    DrawShadowOp(const mat4& casterTransform, float casterAlpha, float width, float height)
-            : DrawOp(NULL), mCasterTransform(casterTransform), mCasterAlpha(casterAlpha),
-            mWidth(width), mHeight(height) {}
+    DrawShadowOp(const mat4& transform, float alpha, const SkPath* outline,
+            float fallbackWidth, float fallbackHeight)
+            : DrawOp(NULL), mTransform(transform), mAlpha(alpha), mOutline(outline),
+            mFallbackWidth(fallbackWidth), mFallbackHeight(fallbackHeight) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        SkPath casterOutline; // TODO: drive with path from view
-        casterOutline.addRect(0, 0, mWidth, mHeight);
-        return renderer.drawShadow(mCasterTransform, mCasterAlpha, &casterOutline);
+        if (!mOutline->isEmpty()) {
+            return renderer.drawShadow(mTransform, mAlpha, mOutline);
+        }
+
+        SkPath fakeOutline;
+        fakeOutline.addRect(0, 0, mFallbackWidth, mFallbackHeight);
+        return renderer.drawShadow(mTransform, mAlpha, &fakeOutline);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("DrawShadow of width %.2f, height %.2f", mWidth, mHeight);
+        OP_LOG("DrawShadow of outline %p", mOutline);
     }
 
     virtual const char* name() { return "DrawShadow"; }
 
 private:
-    const mat4 mCasterTransform;
-    const float mCasterAlpha;
-    const float mWidth;
-    const float mHeight;
+    const mat4 mTransform;
+    const float mAlpha;
+    const SkPath* mOutline;
+    const float mFallbackWidth;
+    const float mFallbackHeight;
 };
 
 class DrawLayerOp : public DrawOp {

@@ -32,6 +32,7 @@ import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
@@ -3293,6 +3294,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private ScrollabilityCache mScrollCache;
 
     private int[] mDrawableState = null;
+
+    /**
+     * Stores the outline of the view, passed down to the DisplayList level for shadow shape.
+     */
+    private Path mOutline;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -10624,6 +10630,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
+     */
+    public final void getOutline(Path outline) {
+        if (mOutline == null) {
+            outline.reset();
+        } else {
+            outline.set(mOutline);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void setOutline(Path path) {
+        // always copy the path since caller may reuse
+        if (mOutline == null) {
+            mOutline = new Path(path);
+        } else {
+            mOutline.set(path);
+        }
+
+        if (mDisplayList != null) {
+            mDisplayList.setOutline(path);
+        }
+    }
+
+    /**
      * Hit rectangle in parent's coordinates
      *
      * @param outRect The hit rectangle of the view.
@@ -14266,6 +14299,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 displayList.setIsolatedZVolume(
                         (((ViewGroup) this).mGroupFlags & ViewGroup.FLAG_ISOLATED_Z_VOLUME) != 0);
             }
+            displayList.setOutline(mOutline);
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
                     ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
