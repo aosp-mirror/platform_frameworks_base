@@ -87,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 71 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 75 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -189,9 +189,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     final HistoryItem mHistoryLastWritten = new HistoryItem();
     final HistoryItem mHistoryLastLastWritten = new HistoryItem();
     final HistoryItem mHistoryReadTmp = new HistoryItem();
-    final HashMap<String, Integer> mHistoryStringPool = new HashMap<String, Integer>();
+    final HashMap<HistoryTag, Integer> mHistoryTagPool = new HashMap<HistoryTag, Integer>();
     String[] mReadHistoryStrings;
-    int mNextHistoryStringIdx = 0;
+    int[] mReadHistoryUids;
+    int mReadHistoryChars;
+    int mNextHistoryTagIdx = 0;
+    int mNumHistoryTagChars = 0;
     int mHistoryBufferLastPos = -1;
     boolean mHistoryOverflow = false;
     long mLastHistoryTime = 0;
@@ -1486,18 +1489,43 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBtHeadset = headset;
     }
 
+    private int writeHistoryTag(HistoryTag tag) {
+        Integer idxObj = mHistoryTagPool.get(tag);
+        int idx;
+        if (idxObj != null) {
+            idx = idxObj;
+        } else {
+            idx = mNextHistoryTagIdx;
+            HistoryTag key = new HistoryTag();
+            key.setTo(tag);
+            tag.poolIdx = idx;
+            mHistoryTagPool.put(key, idx);
+            mNextHistoryTagIdx++;
+            mNumHistoryTagChars += key.string.length() + 1;
+        }
+        return idx;
+    }
+
+    private void readHistoryTag(int index, HistoryTag tag) {
+        tag.string = mReadHistoryStrings[index];
+        tag.uid = mReadHistoryUids[index];
+        tag.poolIdx = index;
+    }
+
     // Part of initial delta int that specifies the time delta.
-    static final int DELTA_TIME_MASK = 0x3ffff;
-    static final int DELTA_TIME_ABS = 0x3fffd;    // Following is an entire abs update.
-    static final int DELTA_TIME_INT = 0x3fffe;    // The delta is a following int
-    static final int DELTA_TIME_LONG = 0x3ffff;   // The delta is a following long
+    static final int DELTA_TIME_MASK = 0x1ffff;
+    static final int DELTA_TIME_LONG = 0x1ffff;   // The delta is a following long
+    static final int DELTA_TIME_INT = 0x1fffe;    // The delta is a following int
+    static final int DELTA_TIME_ABS = 0x1fffd;    // Following is an entire abs update.
     // Part of initial delta int holding the command code.
     static final int DELTA_CMD_MASK = 0x3;
-    static final int DELTA_CMD_SHIFT = 18;
+    static final int DELTA_CMD_SHIFT = 17;
     // Flag in delta int: a new battery level int follows.
-    static final int DELTA_BATTERY_LEVEL_FLAG = 1<<20;
+    static final int DELTA_BATTERY_LEVEL_FLAG = 0x00080000;
     // Flag in delta int: a new full state and battery status int follows.
-    static final int DELTA_STATE_FLAG = 1<<21;
+    static final int DELTA_STATE_FLAG = 0x00100000;
+    // Flag in delta int: contains a wakelock tag.
+    static final int DELTA_WAKELOCK_FLAG = 0x00200000;
     static final int DELTA_STATE_MASK = 0xffc00000;
 
     public void writeHistoryDelta(Parcel dest, HistoryItem cur, HistoryItem last) {
@@ -1532,6 +1560,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (stateIntChanged) {
             firstToken |= DELTA_STATE_FLAG;
         }
+        if (cur.wakelockTag != null) {
+            firstToken |= DELTA_WAKELOCK_FLAG;
+        }
         dest.writeInt(firstToken);
         if (DEBUG) Slog.i(TAG, "WRITE DELTA: firstToken=0x" + Integer.toHexString(firstToken)
                 + " deltaTime=" + deltaTime);
@@ -1562,20 +1593,19 @@ public final class BatteryStatsImpl extends BatteryStats {
                     + " batteryPlugType=" + cur.batteryPlugType
                     + " states=0x" + Integer.toHexString(cur.states));
         }
+        if (cur.wakelockTag != null) {
+            int index = writeHistoryTag(cur.wakelockTag);
+            dest.writeInt(index);
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: wakelockTag=#" + cur.wakelockTag.poolIdx
+                + " " + cur.wakelockTag.uid + ":" + cur.wakelockTag.string);
+        }
         if (cur.cmd == HistoryItem.CMD_EVENT) {
-            Integer idxObj = mHistoryStringPool.get(cur.eventName);
-            int codeAndIndex = (cur.eventCode&0xffff);
-            int idx;
-            if (idxObj != null) {
-                idx = idxObj;
-            } else {
-                idx = mNextHistoryStringIdx;
-                mHistoryStringPool.put(cur.eventName, mNextHistoryStringIdx);
-                mNextHistoryStringIdx++;
-            }
-            codeAndIndex |= (idx<<16);
+            int index = writeHistoryTag(cur.eventTag);
+            int codeAndIndex = (cur.eventCode&0xffff) | (index<<16);
             dest.writeInt(codeAndIndex);
-            dest.writeInt(cur.eventUid);
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: event=" + cur.eventCode + " tag=#"
+                    + cur.eventTag.poolIdx + " " + cur.eventTag.uid + ":"
+                    + cur.eventTag.string);
         }
     }
 
@@ -1596,6 +1626,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         int firstToken = src.readInt();
         int deltaTimeToken = firstToken&DELTA_TIME_MASK;
         cur.cmd = (byte)((firstToken>>DELTA_CMD_SHIFT)&DELTA_CMD_MASK);
+        cur.numReadInts = 1;
         if (DEBUG) Slog.i(TAG, "READ DELTA: firstToken=0x" + Integer.toHexString(firstToken)
                 + " deltaTimeToken=" + deltaTimeToken);
 
@@ -1603,16 +1634,20 @@ public final class BatteryStatsImpl extends BatteryStats {
             cur.time += deltaTimeToken;
         } else if (deltaTimeToken == DELTA_TIME_ABS) {
             cur.time = src.readLong();
+            cur.numReadInts += 2;
+            if (DEBUG) Slog.i(TAG, "READ DELTA: ABS time=" + cur.time);
             cur.readFromParcel(src);
             return;
         } else if (deltaTimeToken == DELTA_TIME_INT) {
             int delta = src.readInt();
             cur.time += delta;
+            cur.numReadInts += 1;
             if (DEBUG) Slog.i(TAG, "READ DELTA: time delta=" + delta + " new time=" + cur.time);
         } else {
             long delta = src.readLong();
             if (DEBUG) Slog.i(TAG, "READ DELTA: time delta=" + delta + " new time=" + cur.time);
             cur.time += delta;
+            cur.numReadInts += 2;
         }
 
         if ((firstToken&DELTA_BATTERY_LEVEL_FLAG) != 0) {
@@ -1620,6 +1655,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             cur.batteryLevel = (byte)((batteryLevelInt>>25)&0x7f);
             cur.batteryTemperature = (short)((batteryLevelInt<<7)>>21);
             cur.batteryVoltage = (char)(batteryLevelInt&0x3fff);
+            cur.numReadInts += 1;
             if (DEBUG) Slog.i(TAG, "READ DELTA: batteryToken=0x"
                     + Integer.toHexString(batteryLevelInt)
                     + " batteryLevel=" + cur.batteryLevel
@@ -1633,6 +1669,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             cur.batteryStatus = (byte)((stateInt>>28)&0xf);
             cur.batteryHealth = (byte)((stateInt>>24)&0xf);
             cur.batteryPlugType = (byte)((stateInt>>22)&0x3);
+            cur.numReadInts += 1;
             if (DEBUG) Slog.i(TAG, "READ DELTA: stateToken=0x"
                     + Integer.toHexString(stateInt)
                     + " batteryStatus=" + cur.batteryStatus
@@ -1643,19 +1680,31 @@ public final class BatteryStatsImpl extends BatteryStats {
             cur.states = (firstToken&DELTA_STATE_MASK) | (cur.states&(~DELTA_STATE_MASK));
         }
 
+        if ((firstToken&DELTA_WAKELOCK_FLAG) != 0) {
+            cur.wakelockTag = cur.localWakelockTag;
+            int index = src.readInt();
+            readHistoryTag(index, cur.wakelockTag);
+            cur.numReadInts += 1;
+            if (DEBUG) Slog.i(TAG, "READ DELTA: wakelockTag=#" + cur.wakelockTag.poolIdx
+                + " " + cur.wakelockTag.uid + ":" + cur.wakelockTag.string);
+        } else {
+            cur.wakelockTag = null;
+        }
+
         if (cur.cmd == HistoryItem.CMD_EVENT) {
-            int codeAndIndex = src.readInt();
+            cur.eventTag = cur.localEventTag;
+            final int codeAndIndex = src.readInt();
             cur.eventCode = (codeAndIndex&0xffff);
-            int index = ((codeAndIndex>>16)&0xffff);
-            cur.eventName = mReadHistoryStrings[index];
-            cur.eventNameIdx = index;
-            cur.eventUid = src.readInt();
+            final int index = ((codeAndIndex>>16)&0xffff);
+            readHistoryTag(index, cur.eventTag);
+            cur.numReadInts += 1;
+            if (DEBUG) Slog.i(TAG, "READ DELTA: event=" + cur.eventCode + " tag=#"
+                    + cur.eventTag.poolIdx + " " + cur.eventTag.uid + ":"
+                    + cur.eventTag.string);
         } else {
             cur.eventCode = HistoryItem.EVENT_NONE;
         }
     }
-
-    int mChangedBufferStates = 0;
 
     void addHistoryBufferLocked(long curTime) {
         if (!mHaveBatteryLevel || !mRecordingHistory) {
@@ -1663,35 +1712,46 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         final long timeDiff = (mHistoryBaseTime+curTime) - mHistoryLastWritten.time;
+        final int diffStates = mHistoryLastWritten.states^mHistoryCur.states;
+        final int lastDiffStates = mHistoryLastWritten.states^mHistoryLastLastWritten.states;
+        if (DEBUG) Slog.i(TAG, "ADD: tdelta=" + timeDiff + " diff="
+                + Integer.toHexString(diffStates) + " lastDiff="
+                + Integer.toHexString(lastDiffStates));
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
-                && timeDiff < 2000
-                && ((mHistoryLastWritten.states^mHistoryCur.states)&mChangedBufferStates) == 0) {
-            // If the current is the same as the one before, then we no
-            // longer need the entry.
+                && timeDiff < 1000 && (diffStates&lastDiffStates) == 0
+                && (mHistoryLastWritten.wakelockTag == null || mHistoryCur.wakelockTag == null)
+                && mHistoryLastWritten.batteryLevel == mHistoryCur.batteryLevel
+                && mHistoryLastWritten.batteryStatus == mHistoryCur.batteryStatus
+                && mHistoryLastWritten.batteryHealth == mHistoryCur.batteryHealth
+                && mHistoryLastWritten.batteryPlugType == mHistoryCur.batteryPlugType
+                && mHistoryLastWritten.batteryTemperature == mHistoryCur.batteryTemperature
+                && mHistoryLastWritten.batteryVoltage == mHistoryCur.batteryVoltage) {
+            // We can merge this new change in with the last one.  Merging is
+            // allows as long as only the states have changed, and within those states
+            // as long as no bit has changed both between now and the last entry, as
+            // well as the last entry and the one before it (so we capture any toggles).
+            if (DEBUG) Slog.i(TAG, "ADD: rewinding back to " + mHistoryBufferLastPos);
             mHistoryBuffer.setDataSize(mHistoryBufferLastPos);
             mHistoryBuffer.setDataPosition(mHistoryBufferLastPos);
             mHistoryBufferLastPos = -1;
-            if (mHistoryLastLastWritten.cmd == HistoryItem.CMD_UPDATE
-                    && timeDiff < 500 && mHistoryLastLastWritten.sameNonEvent(mHistoryCur)) {
-                // If this results in us returning to the state written
-                // prior to the last one, then we can just delete the last
-                // written one and drop the new one.  Nothing more to do.
-                mHistoryLastWritten.setTo(mHistoryLastLastWritten);
-                mHistoryLastLastWritten.cmd = HistoryItem.CMD_NULL;
-                return;
-            }
-            mChangedBufferStates |= mHistoryLastWritten.states^mHistoryCur.states;
             curTime = mHistoryLastWritten.time - mHistoryBaseTime;
+            // If the last written history had a wakelock tag, we need to retain it.
+            // Note that the condition above made sure that we aren't in a case where
+            // both it and the current history item have a wakelock tag.
+            if (mHistoryLastWritten.wakelockTag != null) {
+                mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
+                mHistoryCur.wakelockTag.setTo(mHistoryLastWritten.wakelockTag);
+            }
             mHistoryLastWritten.setTo(mHistoryLastLastWritten);
-        } else {
-            mChangedBufferStates = 0;
         }
 
         final int dataSize = mHistoryBuffer.dataSize();
         if (dataSize >= MAX_HISTORY_BUFFER) {
             if (!mHistoryOverflow) {
                 mHistoryOverflow = true;
+                addHistoryBufferLocked(curTime, HistoryItem.CMD_UPDATE);
                 addHistoryBufferLocked(curTime, HistoryItem.CMD_OVERFLOW);
+                return;
             }
 
             // Once we've reached the maximum number of items, we only
@@ -1704,6 +1764,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                                     & HistoryItem.MOST_INTERESTING_STATES) == 0)) {
                 return;
             }
+
+            addHistoryBufferLocked(curTime, HistoryItem.CMD_UPDATE);
+            return;
         }
 
         addHistoryBufferLocked(curTime, HistoryItem.CMD_UPDATE);
@@ -1719,10 +1782,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private void addHistoryBufferLocked(long curTime, byte cmd,
             int eventCode, String eventName, int eventUid) {
-        int origPos = 0;
         if (mIteratingHistory) {
-            origPos = mHistoryBuffer.dataPosition();
-            mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
+            throw new IllegalStateException("Can't do this while iterating history!");
         }
         mHistoryBufferLastPos = mHistoryBuffer.dataPosition();
         mHistoryLastLastWritten.setTo(mHistoryLastWritten);
@@ -1730,12 +1791,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 eventCode, eventUid, eventName, mHistoryCur);
         writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
         mLastHistoryTime = curTime;
+        mHistoryCur.wakelockTag = null;
         if (DEBUG_HISTORY) Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
                 + " now " + mHistoryBuffer.dataPosition()
                 + " size is now " + mHistoryBuffer.dataSize());
-        if (mIteratingHistory) {
-            mHistoryBuffer.setDataPosition(origPos);
-        }
     }
 
     int mChangedStates = 0;
@@ -1845,11 +1904,12 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
-        mHistoryBuffer.setDataCapacity(MAX_HISTORY_BUFFER/2);
+        mHistoryBuffer.setDataCapacity(MAX_HISTORY_BUFFER / 2);
         mHistoryLastLastWritten.cmd = HistoryItem.CMD_NULL;
         mHistoryLastWritten.cmd = HistoryItem.CMD_NULL;
-        mHistoryStringPool.clear();
-        mNextHistoryStringIdx = 0;
+        mHistoryTagPool.clear();
+        mNextHistoryTagIdx = 0;
+        mNumHistoryTagChars = 0;
         mHistoryBufferLastPos = -1;
         mHistoryOverflow = false;
     }
@@ -1914,6 +1974,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.states |= HistoryItem.STATE_WAKE_LOCK_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Start wake lock to: "
                         + Integer.toHexString(mHistoryCur.states));
+                mHistoryCur.wakelockTag = mHistoryCur.localWakelockTag;
+                mHistoryCur.wakelockTag.string = name;
+                mHistoryCur.wakelockTag.uid = uid;
                 addHistoryRecordLocked(SystemClock.elapsedRealtime());
             }
             mWakeLockNesting++;
@@ -2161,7 +2224,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             // Fake a wake lock, so we consider the device waked as long
             // as the screen is on.
-            noteStartWakeLocked(-1, -1, "dummy", WAKE_TYPE_PARTIAL);
+            noteStartWakeLocked(-1, -1, "screen", WAKE_TYPE_PARTIAL);
             
             // Update discharge amounts.
             if (mOnBatteryInternal) {
@@ -4854,11 +4917,14 @@ public final class BatteryStatsImpl extends BatteryStats {
     public boolean startIteratingOldHistoryLocked() {
         if (DEBUG_HISTORY) Slog.i(TAG, "ITERATING: buff size=" + mHistoryBuffer.dataSize()
                 + " pos=" + mHistoryBuffer.dataPosition());
+        if ((mHistoryIterator = mHistory) == null) {
+            return false;
+        }
         mHistoryBuffer.setDataPosition(0);
         mHistoryReadTmp.clear();
         mReadOverflow = false;
         mIteratingHistory = true;
-        return (mHistoryIterator = mHistory) != null;
+        return true;
     }
 
     @Override
@@ -4898,6 +4964,15 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void finishIteratingOldHistoryLocked() {
         mIteratingHistory = false;
         mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
+        mHistoryIterator = null;
+    }
+
+    public int getHistoryTotalSize() {
+        return MAX_HISTORY_BUFFER;
+    }
+
+    public int getHistoryUsedSize() {
+        return mHistoryBuffer.dataSize();
     }
 
     @Override
@@ -4907,9 +4982,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHistoryBuffer.setDataPosition(0);
         mReadOverflow = false;
         mIteratingHistory = true;
-        mReadHistoryStrings = new String[mHistoryStringPool.size()];
-        for (HashMap.Entry<String, Integer> ent : mHistoryStringPool.entrySet()) {
-            mReadHistoryStrings[ent.getValue()] = ent.getKey();
+        mReadHistoryStrings = new String[mHistoryTagPool.size()];
+        mReadHistoryUids = new int[mHistoryTagPool.size()];
+        mReadHistoryChars = 0;
+        for (HashMap.Entry<HistoryTag, Integer> ent : mHistoryTagPool.entrySet()) {
+            final HistoryTag tag = ent.getKey();
+            final int idx = ent.getValue();
+            mReadHistoryStrings[idx] = tag.string;
+            mReadHistoryUids[idx] = tag.uid;
+            mReadHistoryChars += tag.string.length() + 1;
         }
         return mHistoryBuffer.dataSize() > 0;
     }
@@ -4920,8 +5001,20 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
-    public String getHistoryStringPoolItem(int index) {
+    public int getHistoryStringPoolBytes() {
+        // Each entry is a fixed 12 bytes: 4 for index, 4 for uid, 4 for string size
+        // Each string character is 2 bytes.
+        return (mReadHistoryStrings.length * 12) + (mReadHistoryChars * 2);
+    }
+
+    @Override
+    public String getHistoryTagPoolString(int index) {
         return mReadHistoryStrings[index];
+    }
+
+    @Override
+    public int getHistoryTagPoolUid(int index) {
+        return mReadHistoryUids[index];
     }
 
     @Override
@@ -5717,17 +5810,24 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
-        mHistoryStringPool.clear();
-        mNextHistoryStringIdx = 0;
+        mHistoryTagPool.clear();
+        mNextHistoryTagIdx = 0;
+        mNumHistoryTagChars = 0;
 
-        int numStrings = in.readInt();
-        for (int i=0; i<numStrings; i++) {
-            String str = in.readString();
+        int numTags = in.readInt();
+        for (int i=0; i<numTags; i++) {
             int idx = in.readInt();
-            mHistoryStringPool.put(str, idx);
-            if (idx >= mNextHistoryStringIdx) {
-                mNextHistoryStringIdx = idx+1;
+            String str = in.readString();
+            int uid = in.readInt();
+            HistoryTag tag = new HistoryTag();
+            tag.string = str;
+            tag.uid = uid;
+            tag.poolIdx = idx;
+            mHistoryTagPool.put(tag, idx);
+            if (idx >= mNextHistoryTagIdx) {
+                mNextHistoryTagIdx = idx+1;
             }
+            mNumHistoryTagChars += tag.string.length() + 1;
         }
 
         int bufSize = in.readInt();
@@ -5797,10 +5897,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             Slog.i(TAG, sb.toString());
         }
         out.writeLong(mHistoryBaseTime + mLastHistoryTime);
-        out.writeInt(mHistoryStringPool.size());
-        for (HashMap.Entry<String, Integer> ent : mHistoryStringPool.entrySet()) {
-            out.writeString(ent.getKey());
+        out.writeInt(mHistoryTagPool.size());
+        for (HashMap.Entry<HistoryTag, Integer> ent : mHistoryTagPool.entrySet()) {
+            HistoryTag tag = ent.getKey();
             out.writeInt(ent.getValue());
+            out.writeString(tag.string);
+            out.writeInt(tag.uid);
         }
         out.writeInt(mHistoryBuffer.dataSize());
         if (DEBUG_HISTORY) Slog.i(TAG, "***************** WRITING HISTORY: "

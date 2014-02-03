@@ -452,6 +452,56 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    public final static class HistoryTag {
+        public String string;
+        public int uid;
+
+        public int poolIdx;
+
+        public void setTo(HistoryTag o) {
+            string = o.string;
+            uid = o.uid;
+            poolIdx = o.poolIdx;
+        }
+
+        public void setTo(String _string, int _uid) {
+            string = _string;
+            uid = _uid;
+            poolIdx = -1;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(string);
+            dest.writeInt(uid);
+        }
+
+        public void readFromParcel(Parcel src) {
+            string = src.readString();
+            uid = src.readInt();
+            poolIdx = -1;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            HistoryTag that = (HistoryTag) o;
+
+            if (uid != that.uid) return false;
+            if (!string.equals(that.string)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = string.hashCode();
+            result = 31 * result + uid;
+            return result;
+        }
+    }
+
     public final static class HistoryItem implements Parcelable {
         public HistoryItem next;
         
@@ -500,7 +550,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_PHONE_STATE_MASK = 0x7 << STATE_PHONE_STATE_SHIFT;
         // Constants from DATA_CONNECTION_*
         public static final int STATE_DATA_CONNECTION_SHIFT = 9;
-        public static final int STATE_DATA_CONNECTION_MASK = 0x1f;
+        public static final int STATE_DATA_CONNECTION_MASK = 0x1f << STATE_DATA_CONNECTION_SHIFT;
 
         // These states always appear directly in the first int token
         // of a delta change; they should be ones that change relatively
@@ -529,21 +579,30 @@ public abstract class BatteryStats implements Parcelable {
 
         public int states;
 
+        // The wake lock that was acquired at this point.
+        public HistoryTag wakelockTag;
+
         public static final int EVENT_NONE = 0;
         public static final int EVENT_PROC_STARTED = 1;
         public static final int EVENT_PROC_FINISHED = 2;
 
         // For CMD_EVENT.
         public int eventCode;
-        public String eventName;
-        public int eventNameIdx;    // only filled in when iterating.
-        public int eventUid;
+        public HistoryTag eventTag;
+
+        // Meta-data when reading.
+        public int numReadInts;
+
+        // Pre-allocated objects.
+        public final HistoryTag localWakelockTag = new HistoryTag();
+        public final HistoryTag localEventTag = new HistoryTag();
 
         public HistoryItem() {
         }
         
         public HistoryItem(long time, Parcel src) {
             this.time = time;
+            numReadInts = 2;
             readFromParcel(src);
         }
         
@@ -563,14 +622,20 @@ public abstract class BatteryStats implements Parcelable {
                     | ((((int)batteryVoltage)<<16)&0xffff0000);
             dest.writeInt(bat);
             dest.writeInt(states);
+            if (wakelockTag != null) {
+                dest.writeInt(1);
+                wakelockTag.writeToParcel(dest, flags);
+            } else {
+                dest.writeInt(0);
+            }
             if (cmd == CMD_EVENT) {
                 dest.writeInt(eventCode);
-                dest.writeInt(eventUid);
-                dest.writeString(eventName);
+                eventTag.writeToParcel(dest, flags);
             }
         }
 
         public void readFromParcel(Parcel src) {
+            int start = src.dataPosition();
             int bat = src.readInt();
             cmd = (byte)(bat&0xff);
             batteryLevel = (byte)((bat>>8)&0xff);
@@ -581,14 +646,21 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = (short)(bat&0xffff);
             batteryVoltage = (char)((bat>>16)&0xffff);
             states = src.readInt();
+            if (src.readInt() != 0) {
+                wakelockTag = localWakelockTag;
+                wakelockTag.readFromParcel(src);
+            } else {
+                wakelockTag = null;
+            }
             if (cmd == CMD_EVENT) {
                 eventCode = src.readInt();
-                eventUid = src.readInt();
-                eventName = src.readString();
-                eventNameIdx = 0;
+                eventTag = localEventTag;
+                eventTag.readFromParcel(src);
             } else {
                 eventCode = EVENT_NONE;
+                eventTag = null;
             }
+            numReadInts += (src.dataPosition()-start)/4;
         }
 
         public void clear() {
@@ -601,9 +673,9 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = 0;
             batteryVoltage = 0;
             states = 0;
+            wakelockTag = null;
             eventCode = EVENT_NONE;
-            eventUid = 0;
-            eventName = null;
+            eventTag = null;
         }
         
         public void setTo(HistoryItem o) {
@@ -616,10 +688,19 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = o.batteryTemperature;
             batteryVoltage = o.batteryVoltage;
             states = o.states;
+            if (o.wakelockTag != null) {
+                wakelockTag = localWakelockTag;
+                wakelockTag.setTo(o.wakelockTag);
+            } else {
+                wakelockTag = null;
+            }
             eventCode = o.eventCode;
-            eventUid = o.eventUid;
-            eventName = o.eventName;
-            eventNameIdx = o.eventNameIdx;
+            if (o.eventTag != null) {
+                eventTag = localEventTag;
+                eventTag.setTo(o.eventTag);
+            } else {
+                eventTag = null;
+            }
         }
 
         public void setTo(long time, byte cmd, int eventCode, int eventUid, String eventName,
@@ -627,9 +708,12 @@ public abstract class BatteryStats implements Parcelable {
             this.time = time;
             this.cmd = cmd;
             this.eventCode = eventCode;
-            this.eventUid = eventUid;
-            this.eventName = eventName;
-            this.eventNameIdx = 0;
+            if (eventCode != EVENT_NONE) {
+                eventTag = localEventTag;
+                eventTag.setTo(eventName, eventUid);
+            } else {
+                eventTag = null;
+            }
             batteryLevel = o.batteryLevel;
             batteryStatus = o.batteryStatus;
             batteryHealth = o.batteryHealth;
@@ -637,6 +721,12 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = o.batteryTemperature;
             batteryVoltage = o.batteryVoltage;
             states = o.states;
+            if (o.wakelockTag != null) {
+                wakelockTag = localWakelockTag;
+                wakelockTag.setTo(o.wakelockTag);
+            } else {
+                wakelockTag = null;
+            }
         }
 
         public boolean sameNonEvent(HistoryItem o) {
@@ -650,13 +740,26 @@ public abstract class BatteryStats implements Parcelable {
         }
 
         public boolean same(HistoryItem o) {
-            if (!sameNonEvent(o) || eventCode != o.eventCode || eventUid != o.eventUid) {
+            if (!sameNonEvent(o) || eventCode != o.eventCode) {
                 return false;
             }
-            if (eventName == o.eventName) {
-                return true;
+            if (wakelockTag != o.wakelockTag) {
+                if (wakelockTag == null || o.wakelockTag == null) {
+                    return false;
+                }
+                if (!wakelockTag.equals(o.wakelockTag)) {
+                    return false;
+                }
             }
-            return eventName != null && o.eventName != null && eventName.equals(o.eventName);
+            if (eventTag != o.eventTag) {
+                if (eventTag == null || o.eventTag == null) {
+                    return false;
+                }
+                if (!eventTag.equals(o.eventTag)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
     
@@ -688,11 +791,19 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
     
+    public abstract int getHistoryTotalSize();
+
+    public abstract int getHistoryUsedSize();
+
     public abstract boolean startIteratingHistoryLocked();
 
     public abstract int getHistoryStringPoolSize();
 
-    public abstract String getHistoryStringPoolItem(int index);
+    public abstract int getHistoryStringPoolBytes();
+
+    public abstract String getHistoryTagPoolString(int index);
+
+    public abstract int getHistoryTagPoolUid(int index);
 
     public abstract boolean getNextHistoryLocked(HistoryItem out);
 
@@ -1746,14 +1857,14 @@ public abstract class BatteryStats implements Parcelable {
         
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Signal levels: ");
+        sb.append("  Signal levels:");
         didOne = false;
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             final long time = getPhoneSignalStrengthTime(i, batteryRealtime, which);
             if (time == 0) {
                 continue;
             }
-            if (didOne) sb.append(", ");
+            sb.append("\n    ");
             didOne = true;
             sb.append(SignalStrength.SIGNAL_STRENGTH_NAMES[i]);
             sb.append(" ");
@@ -1764,7 +1875,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(getPhoneSignalStrengthCount(i, which));
             sb.append("x");
         }
-        if (!didOne) sb.append("No activity");
+        if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
         sb.setLength(0);
@@ -1775,14 +1886,14 @@ public abstract class BatteryStats implements Parcelable {
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Radio types: ");
+        sb.append("  Radio types:");
         didOne = false;
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             final long time = getPhoneDataConnectionTime(i, batteryRealtime, which);
             if (time == 0) {
                 continue;
             }
-            if (didOne) sb.append(", ");
+            sb.append("\n    ");
             didOne = true;
             sb.append(DATA_CONNECTION_NAMES[i]);
             sb.append(" ");
@@ -1793,7 +1904,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(getPhoneDataConnectionCount(i, which));
             sb.append("x");
         }
-        if (!didOne) sb.append("No activity");
+        if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
         sb.setLength(0);
@@ -2259,21 +2370,30 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    static void printBitDescriptions(PrintWriter pw, int oldval, int newval,
+    static void printBitDescriptions(PrintWriter pw, int oldval, int newval, HistoryTag wakelockTag,
             BitDescription[] descriptions, boolean longNames) {
         int diff = oldval ^ newval;
         if (diff == 0) return;
+        boolean didWake = false;
         for (int i=0; i<descriptions.length; i++) {
             BitDescription bd = descriptions[i];
-            int mask = bd.mask;
-            if (bd.shift > 0) {
-                mask <<= bd.shift;
-            }
-            if ((diff&mask) != 0) {
+            if ((diff&bd.mask) != 0) {
                 pw.print(longNames ? " " : ",");
                 if (bd.shift < 0) {
-                    pw.print((newval&mask) != 0 ? "+" : "-");
+                    pw.print((newval&bd.mask) != 0 ? "+" : "-");
                     pw.print(longNames ? bd.name : bd.shortName);
+                    if (bd.mask == HistoryItem.STATE_WAKE_LOCK_FLAG && wakelockTag != null) {
+                        didWake = true;
+                        pw.print("=");
+                        if (longNames) {
+                            UserHandle.formatUid(pw, wakelockTag.uid);
+                            pw.print(":\"");
+                            pw.print(wakelockTag.string);
+                            pw.print("\"");
+                        } else {
+                            pw.print(wakelockTag.poolIdx);
+                        }
+                    }
                 } else {
                     pw.print(longNames ? bd.name : bd.shortName);
                     pw.print("=");
@@ -2284,6 +2404,17 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print(val);
                     }
                 }
+            }
+        }
+        if (!didWake && wakelockTag != null) {
+            pw.print(longNames ? "wake_lock=" : "w=");
+            if (longNames) {
+                UserHandle.formatUid(pw, wakelockTag.uid);
+                pw.print(":\"");
+                pw.print(wakelockTag.string);
+                pw.print("\"");
+            } else {
+                pw.print(wakelockTag.poolIdx);
             }
         }
     }
@@ -2305,7 +2436,9 @@ public abstract class BatteryStats implements Parcelable {
             if (!checkin) {
                 pw.print("  ");
                 TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
-                pw.print(" ");
+                pw.print(" (");
+                pw.print(rec.numReadInts);
+                pw.print(") ");
             } else {
                 if (lastTime < 0) {
                     pw.print("@");
@@ -2427,7 +2560,7 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(checkin ? ",Bv=" : " volt=");
                     pw.print(oldVolt);
                 }
-                printBitDescriptions(pw, oldState, rec.states,
+                printBitDescriptions(pw, oldState, rec.states, rec.wakelockTag,
                         HISTORY_STATE_DESCRIPTIONS, !checkin);
                 if (rec.eventCode != HistoryItem.EVENT_NONE) {
                     switch (rec.eventCode) {
@@ -2450,21 +2583,45 @@ public abstract class BatteryStats implements Parcelable {
                             break;
                     }
                     if (checkin) {
-                        pw.print(rec.eventUid);
+                        pw.print(rec.eventTag.poolIdx);
                     } else {
-                        UserHandle.formatUid(pw, rec.eventUid);
-                    }
-                    pw.print(":");
-                    if (checkin) {
-                        pw.print(rec.eventNameIdx);
-                    } else {
-                        pw.print(rec.eventName);
+                        UserHandle.formatUid(pw, rec.eventTag.uid);
+                        pw.print(":\"");
+                        pw.print(rec.eventTag.string);
+                        pw.print("\"");
                     }
                 }
                 pw.println();
             }
             oldState = rec.states;
         }
+    }
+
+    private void printSizeValue(PrintWriter pw, long size) {
+        float result = size;
+        String suffix = "";
+        if (result >= 10*1024) {
+            suffix = "KB";
+            result = result / 1024;
+        }
+        if (result >= 10*1024) {
+            suffix = "MB";
+            result = result / 1024;
+        }
+        if (result >= 10*1024) {
+            suffix = "GB";
+            result = result / 1024;
+        }
+        if (result >= 10*1024) {
+            suffix = "TB";
+            result = result / 1024;
+        }
+        if (result >= 10*1024) {
+            suffix = "PB";
+            result = result / 1024;
+        }
+        pw.print((int)result);
+        pw.print(suffix);
     }
 
     /**
@@ -2480,24 +2637,42 @@ public abstract class BatteryStats implements Parcelable {
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
         final HistoryItem rec = new HistoryItem();
+        final long historyTotalSize = getHistoryTotalSize();
+        final long historyUsedSize = getHistoryUsedSize();
         if (startIteratingHistoryLocked()) {
-            pw.println("Battery History:");
-            HistoryPrinter hprinter = new HistoryPrinter();
-            while (getNextHistoryLocked(rec)) {
-                hprinter.printNextItem(pw, rec, now, false);
+            try {
+                pw.print("Battery History (");
+                pw.print((100*historyUsedSize)/historyTotalSize);
+                pw.print("% used, ");
+                printSizeValue(pw, historyUsedSize);
+                pw.print(" used of ");
+                printSizeValue(pw, historyTotalSize);
+                pw.print(", ");
+                pw.print(getHistoryStringPoolSize());
+                pw.print(" strings using ");
+                printSizeValue(pw, getHistoryStringPoolBytes());
+                pw.println("):");
+                HistoryPrinter hprinter = new HistoryPrinter();
+                while (getNextHistoryLocked(rec)) {
+                    hprinter.printNextItem(pw, rec, now, false);
+                }
+                pw.println();
+            } finally {
+                finishIteratingHistoryLocked();
             }
-            finishIteratingHistoryLocked();
-            pw.println("");
         }
 
         if (startIteratingOldHistoryLocked()) {
-            pw.println("Old battery History:");
-            HistoryPrinter hprinter = new HistoryPrinter();
-            while (getNextOldHistoryLocked(rec)) {
-                hprinter.printNextItem(pw, rec, now, false);
+            try {
+                pw.println("Old battery History:");
+                HistoryPrinter hprinter = new HistoryPrinter();
+                while (getNextOldHistoryLocked(rec)) {
+                    hprinter.printNextItem(pw, rec, now, false);
+                }
+                pw.println();
+            } finally {
+                finishIteratingOldHistoryLocked();
             }
-            finishIteratingOldHistoryLocked();
-            pw.println("");
         }
 
         if (historyOnly) {
@@ -2553,21 +2728,26 @@ public abstract class BatteryStats implements Parcelable {
         if (includeHistory || historyOnly) {
             final HistoryItem rec = new HistoryItem();
             if (startIteratingHistoryLocked()) {
-                for (int i=0; i<getHistoryStringPoolSize(); i++) {
-                    pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                    pw.print(HISTORY_STRING_POOL); pw.print(',');
-                    pw.print(i);
-                    pw.print(',');
-                    pw.print(getHistoryStringPoolItem(i));
-                    pw.println();
+                try {
+                    for (int i=0; i<getHistoryStringPoolSize(); i++) {
+                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                        pw.print(HISTORY_STRING_POOL); pw.print(',');
+                        pw.print(i);
+                        pw.print(',');
+                        pw.print(getHistoryTagPoolString(i));
+                        pw.print(',');
+                        pw.print(getHistoryTagPoolUid(i));
+                        pw.println();
+                    }
+                    HistoryPrinter hprinter = new HistoryPrinter();
+                    while (getNextHistoryLocked(rec)) {
+                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                        pw.print(HISTORY_DATA); pw.print(',');
+                        hprinter.printNextItem(pw, rec, now, true);
+                    }
+                } finally {
+                    finishIteratingHistoryLocked();
                 }
-                HistoryPrinter hprinter = new HistoryPrinter();
-                while (getNextHistoryLocked(rec)) {
-                    pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                    pw.print(HISTORY_DATA); pw.print(',');
-                    hprinter.printNextItem(pw, rec, now, true);
-                }
-                finishIteratingHistoryLocked();
             }
         }
 
