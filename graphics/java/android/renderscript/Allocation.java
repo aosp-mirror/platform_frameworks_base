@@ -24,7 +24,6 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Surface;
-import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.util.TypedValue;
 import android.graphics.Canvas;
@@ -127,17 +126,17 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_RENDER_TARGET = 0x0010;
 
     /**
-     * The Allocation will be used as a {@link android.graphics.SurfaceTexture}
-     * consumer.  This usage will cause the Allocation to be created as
-     * read-only.
+     * The Allocation will be used as a {@link android.view.Surface}
+     * consumer.  This usage will cause the Allocation to be created
+     * as read-only.
      *
      */
     public static final int USAGE_IO_INPUT = 0x0020;
 
     /**
-     * The Allocation will be used as a {@link android.graphics.SurfaceTexture}
+     * The Allocation will be used as a {@link android.view.Surface}
      * producer.  The dimensions and format of the {@link
-     * android.graphics.SurfaceTexture} will be forced to those of the
+     * android.view.Surface} will be forced to those of the
      * Allocation.
      *
      */
@@ -1544,13 +1543,6 @@ public class Allocation extends BaseObj {
             throw new RSInvalidStateException("Allocation is not a surface texture.");
         }
         return mRS.nAllocationGetSurface(getID(mRS));
-    }
-
-    /**
-     * @hide
-     */
-    public void setSurfaceTexture(SurfaceTexture st) {
-        setSurface(new Surface(st));
     }
 
     /**
