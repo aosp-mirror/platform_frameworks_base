@@ -5040,7 +5040,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void keepScreenOnStoppedLw() {
         if (mKeyguardDelegate != null && !mKeyguardDelegate.isShowingAndNotHidden()) {
-            long curTime = SystemClock.uptimeMillis();
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
         }
     }
