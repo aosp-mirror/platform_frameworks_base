@@ -94,12 +94,13 @@ public class Resources {
     private static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
             = new LongSparseArray<ColorStateList>();
 
-    private static Resources mSystem = null;
+    // Used by BridgeResources in layoutlib
+    static Resources mSystem = null;
+
     private static boolean sPreloaded;
     private static int sPreloadedDensity;
 
     // These are protected by mAccessLock.
-
     private final Object mAccessLock = new Object();
     private final Configuration mTmpConfig = new Configuration();
     private final LongSparseArray<WeakReference<Drawable.ConstantState>> mDrawableCache
