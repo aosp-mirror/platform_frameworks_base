@@ -837,10 +837,12 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * ({@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}), otherwise, the image may be incorrectly exposed.</p>
      * <p>When set to TORCH, the flash will be on continuously. This mode can be used
      * for use cases such as preview, auto-focus assist, still capture, or video recording.</p>
+     * <p>The flash status will be reported by {@link CaptureResult#FLASH_STATE android.flash.state} in the capture result metadata.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * @see CaptureResult#FLASH_STATE
      * @see #FLASH_MODE_OFF
      * @see #FLASH_MODE_SINGLE
      * @see #FLASH_MODE_TORCH
@@ -913,7 +915,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * to achieve manual exposure control.</p>
      * <p>The requested aperture value may take several frames to reach the
      * requested value; the camera device will report the current (intermediate)
-     * aperture size in capture result metadata while the aperture is changing.</p>
+     * aperture size in capture result metadata while the aperture is changing.
+     * While the aperture is still changing, {@link CaptureResult#LENS_STATE android.lens.state} will be set to MOVING.</p>
      * <p>When this is supported and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is one of
      * the ON modes, this will be overridden by the camera device
      * auto-exposure algorithm, the overridden values are then provided
@@ -921,6 +924,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
+     * @see CaptureResult#LENS_STATE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
@@ -940,8 +944,12 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * in no reduction of the incoming light, and setting this to 2 would
      * mean that the filter is set to reduce incoming light by two stops
      * (allowing 1/4 of the prior amount of light to the sensor).</p>
+     * <p>It may take several frames before the lens filter density changes
+     * to the requested value. While the filter density is still changing,
+     * {@link CaptureResult#LENS_STATE android.lens.state} will be set to MOVING.</p>
      *
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_FILTER_DENSITIES
+     * @see CaptureResult#LENS_STATE
      */
     public static final Key<Float> LENS_FILTER_DENSITY =
             new Key<Float>("android.lens.filterDensity", float.class);
@@ -953,7 +961,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * view of the camera device, and is usually used for optical zoom.</p>
      * <p>Like {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} and {@link CaptureRequest#LENS_APERTURE android.lens.aperture}, this
      * setting won't be applied instantaneously, and it may take several
-     * frames before the lens can move to the requested focal length.
+     * frames before the lens can change to the requested focal length.
      * While the focal length is still changing, {@link CaptureResult#LENS_STATE android.lens.state} will
      * be set to MOVING.</p>
      * <p>This is expected not to be supported on most devices.</p>
@@ -968,8 +976,16 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     /**
      * <p>Distance to plane of sharpest focus,
      * measured from frontmost surface of the lens</p>
-     * <p>0 = infinity focus. Used value should be clamped
-     * to (0,minimum focus distance)</p>
+     * <p>0 means infinity focus. Used value will be clamped
+     * to [0, {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance}].</p>
+     * <p>Like {@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, this setting won't be applied
+     * instantaneously, and it may take several frames before the lens
+     * can move to the requested focus distance. While the lens is still moving,
+     * {@link CaptureResult#LENS_STATE android.lens.state} will be set to MOVING.</p>
+     *
+     * @see CaptureRequest#LENS_FOCAL_LENGTH
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
+     * @see CaptureResult#LENS_STATE
      */
     public static final Key<Float> LENS_FOCUS_DISTANCE =
             new Key<Float>("android.lens.focusDistance", float.class);

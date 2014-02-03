@@ -1372,22 +1372,28 @@ public abstract class CameraMetadata {
     public static final int FLASH_STATE_UNAVAILABLE = 0;
 
     /**
-     * <p>if android.flash.available is true Flash is
+     * <p>if {@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} is true Flash is
      * charging and cannot be fired</p>
+     *
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_CHARGING = 1;
 
     /**
-     * <p>if android.flash.available is true Flash is
+     * <p>if {@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} is true Flash is
      * ready to fire</p>
+     *
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_READY = 2;
 
     /**
-     * <p>if android.flash.available is true Flash fired
+     * <p>if {@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} is true Flash fired
      * for this capture</p>
+     *
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureResult#FLASH_STATE
      */
     public static final int FLASH_STATE_FIRED = 3;
@@ -1397,11 +1403,21 @@ public abstract class CameraMetadata {
     //
 
     /**
+     * <p>The lens parameters ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, android.lens.focusDistance
+     * android.lens.filterDensity and {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) are not changing.</p>
+     *
+     * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FOCAL_LENGTH
      * @see CaptureResult#LENS_STATE
      */
     public static final int LENS_STATE_STATIONARY = 0;
 
     /**
+     * <p>Any of the lens parameters ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, android.lens.focusDistance
+     * android.lens.filterDensity or {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) is changing.</p>
+     *
+     * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FOCAL_LENGTH
      * @see CaptureResult#LENS_STATE
      */
     public static final int LENS_STATE_MOVING = 1;
