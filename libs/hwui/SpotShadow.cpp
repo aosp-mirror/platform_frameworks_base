@@ -743,9 +743,10 @@ void SpotShadow::generateTriangleStrip(const Vector2* penumbra, int penumbraLeng
     int stripSize = getStripSize(rays, layers);
     AlphaVertex* shadowVertices = shadowTriangleStrip.alloc<AlphaVertex>(stripSize);
     int currentIndex = 0;
+    int firstInLayer = 0;
     // Calculate the vertex values in the penumbra area.
     for (int r = 0; r < layers; r++) {
-        int firstInEachLayer = currentIndex;
+        firstInLayer = currentIndex;
         for (int i = 0; i < rays; i++) {
             float dx = sinf(step * i);
             float dy = cosf(step * i);
@@ -755,19 +756,17 @@ void SpotShadow::generateTriangleStrip(const Vector2* penumbra, int penumbraLeng
                 float deltaDist = layerRatio * (umbraDistPerRay[i] - penumbraDistPerRay[i]);
                 float currentDist = penumbraDistPerRay[i] + deltaDist;
                 float op = calculateOpacity(layerRatio, deltaDist);
-                AlphaVertex::set(&shadowVertices[currentIndex],
+                AlphaVertex::set(&shadowVertices[currentIndex++],
                         dx * currentDist + centroid.x,
                         dy * currentDist + centroid.y,
                         layerRatio * op * strength);
-                currentIndex++;
             }
         }
 
         // Duplicate the vertices from one layer to another one to make triangle
         // strip.
-        shadowVertices[currentIndex++] = shadowVertices[firstInEachLayer];
-        firstInEachLayer++;
-        shadowVertices[currentIndex++] = shadowVertices[firstInEachLayer];
+        shadowVertices[currentIndex++] = shadowVertices[firstInLayer + 0];
+        shadowVertices[currentIndex++] = shadowVertices[firstInLayer + 1];
     }
 
     int lastInPenumbra = currentIndex - 1;
@@ -779,23 +778,14 @@ void SpotShadow::generateTriangleStrip(const Vector2* penumbra, int penumbraLeng
     int firstInUmbra = currentIndex;
 
     // traverse the umbra area in a zig zag pattern for strips.
+    const int innerRingStartIndex = firstInLayer + 1;
     for (int k = 0; k < rays; k++) {
         int i = k / 2;
         if ((k & 1) == 1) {
             i = rays - i - 1;
         }
-        float dx = sinf(step * i);
-        float dy = cosf(step * i);
-
-        float ratio = 1.0;
-        float deltaDist = ratio * (umbraDistPerRay[i] - penumbraDistPerRay[i]);
-        float currentDist = penumbraDistPerRay[i] + deltaDist;
-        float op = calculateOpacity(ratio, deltaDist);
-        AlphaVertex::set(&shadowVertices[currentIndex],
-                dx * currentDist + centroid.x, dy * currentDist + centroid.y,
-                ratio * op * strength);
-        currentIndex++;
-
+        // copy already computed values for umbra vertices
+        shadowVertices[currentIndex++] = shadowVertices[innerRingStartIndex + i * 2];
     }
 
     // Back fill the one vertex for jumping from penumbra to umbra.
