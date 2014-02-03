@@ -364,12 +364,12 @@ public class ImageView extends View {
     @android.view.RemotableViewMethod
     public void setImageResource(int resId) {
         if (mUri != null || mResource != resId) {
+            final int oldWidth = mDrawableWidth;
+            final int oldHeight = mDrawableHeight;
+
             updateDrawable(null);
             mResource = resId;
             mUri = null;
-
-            final int oldWidth = mDrawableWidth;
-            final int oldHeight = mDrawableHeight;
 
             resolveUri();
 
