@@ -223,6 +223,9 @@ public class Allocation extends BaseObj {
      *
      */
     public int getBytesSize() {
+        if (mType.mDimYuv != 0) {
+            return (int)Math.ceil(mType.getCount() * mType.getElement().getBytesSize() * 1.5);
+        }
         return mType.getCount() * mType.getElement().getBytesSize();
     }
 
