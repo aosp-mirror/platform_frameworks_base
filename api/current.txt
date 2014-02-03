@@ -10349,6 +10349,7 @@ package android.graphics.drawable {
     ctor public BitmapDrawable(android.content.res.Resources, java.lang.String);
     ctor public deprecated BitmapDrawable(java.io.InputStream);
     ctor public BitmapDrawable(android.content.res.Resources, java.io.InputStream);
+    method public void draw(android.graphics.Canvas);
     method public final android.graphics.Bitmap getBitmap();
     method public final android.graphics.drawable.Drawable.ConstantState getConstantState();
     method public int getGravity();
@@ -10374,6 +10375,7 @@ package android.graphics.drawable {
 
   public class ClipDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public ClipDrawable(android.graphics.drawable.Drawable, int, int);
+    method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
@@ -10387,6 +10389,7 @@ package android.graphics.drawable {
   public class ColorDrawable extends android.graphics.drawable.Drawable {
     ctor public ColorDrawable();
     ctor public ColorDrawable(int);
+    method public void draw(android.graphics.Canvas);
     method public int getColor();
     method public int getOpacity();
     method public void setAlpha(int);
@@ -10405,7 +10408,7 @@ package android.graphics.drawable {
     method public static android.graphics.drawable.Drawable createFromStream(java.io.InputStream, java.lang.String);
     method public static android.graphics.drawable.Drawable createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.graphics.drawable.Drawable createFromXmlInner(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method public void draw(android.graphics.Canvas);
+    method public abstract void draw(android.graphics.Canvas);
     method public int getAlpha();
     method public final android.graphics.Rect getBounds();
     method public android.graphics.drawable.Drawable.Callback getCallback();
@@ -10429,7 +10432,6 @@ package android.graphics.drawable {
     method public void jumpToCurrentState();
     method public android.graphics.drawable.Drawable mutate();
     method protected void onBoundsChange(android.graphics.Rect);
-    method protected void onDraw(android.graphics.Canvas);
     method protected boolean onLevelChange(int);
     method protected boolean onStateChange(int[]);
     method public static int resolveOpacity(int, int);
@@ -10465,6 +10467,7 @@ package android.graphics.drawable {
 
   public class DrawableContainer extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public DrawableContainer();
+    method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
@@ -10505,6 +10508,7 @@ package android.graphics.drawable {
   public class GradientDrawable extends android.graphics.drawable.Drawable {
     ctor public GradientDrawable();
     ctor public GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation, int[]);
+    method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public android.graphics.drawable.GradientDrawable.Orientation getOrientation();
     method public boolean onStateChange(int[]);
@@ -10551,6 +10555,7 @@ package android.graphics.drawable {
   public class InsetDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public InsetDrawable(android.graphics.drawable.Drawable, int);
     ctor public InsetDrawable(android.graphics.drawable.Drawable, int, int, int, int);
+    method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable getDrawable();
     method public int getOpacity();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
@@ -10562,6 +10567,7 @@ package android.graphics.drawable {
 
   public class LayerDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public LayerDrawable(android.graphics.drawable.Drawable[]);
+    method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable findDrawableByLayerId(int);
     method public android.graphics.drawable.Drawable getDrawable(int);
     method public int getId(int);
@@ -10592,6 +10598,7 @@ package android.graphics.drawable {
     ctor public NinePatchDrawable(android.content.res.Resources, android.graphics.Bitmap, byte[], android.graphics.Rect, java.lang.String);
     ctor public deprecated NinePatchDrawable(android.graphics.NinePatch);
     ctor public NinePatchDrawable(android.content.res.Resources, android.graphics.NinePatch);
+    method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public android.graphics.Paint getPaint();
     method public void setAlpha(int);
@@ -10610,6 +10617,7 @@ package android.graphics.drawable {
 
   public class PictureDrawable extends android.graphics.drawable.Drawable {
     ctor public PictureDrawable(android.graphics.Picture);
+    method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public android.graphics.Picture getPicture();
     method public void setAlpha(int);
@@ -10623,6 +10631,7 @@ package android.graphics.drawable {
 
   public class RotateDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public RotateDrawable();
+    method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable getDrawable();
     method public int getOpacity();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
@@ -10634,6 +10643,7 @@ package android.graphics.drawable {
 
   public class ScaleDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public ScaleDrawable(android.graphics.drawable.Drawable, int, float, float);
+    method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable getDrawable();
     method public int getOpacity();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
@@ -10646,6 +10656,7 @@ package android.graphics.drawable {
   public class ShapeDrawable extends android.graphics.drawable.Drawable {
     ctor public ShapeDrawable();
     ctor public ShapeDrawable(android.graphics.drawable.shapes.Shape);
+    method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public android.graphics.Paint getPaint();
     method public android.graphics.drawable.ShapeDrawable.ShaderFactory getShaderFactory();
