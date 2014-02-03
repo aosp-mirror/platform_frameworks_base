@@ -22518,6 +22518,9 @@ package android.renderscript {
   }
 
   public class Type extends android.renderscript.BaseObj {
+    method public static android.renderscript.Type createX(android.renderscript.RenderScript, android.renderscript.Element, int);
+    method public static android.renderscript.Type createXY(android.renderscript.RenderScript, android.renderscript.Element, int, int);
+    method public static android.renderscript.Type createXYZ(android.renderscript.RenderScript, android.renderscript.Element, int, int, int);
     method public int getCount();
     method public android.renderscript.Element getElement();
     method public int getX();
