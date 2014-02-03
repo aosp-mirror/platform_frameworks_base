@@ -17,6 +17,7 @@
 package android.telecomm;
 
 import android.telecomm.CallInfo;
+import android.telecomm.CallServiceInfo;
 import android.telecomm.ICallService;
 import android.telecomm.ICallServiceSelectionResponse;
 import android.telecomm.ICallSwitchabilityResponse;
@@ -74,7 +75,7 @@ oneway interface ICallServiceSelector {
      */
     void select(
             in CallInfo callInfo,
-            in List<String> callServiceIds,
+            in List<CallServiceInfo> callServiceInfos,
             in ICallServiceSelectionResponse response);
 
     /**

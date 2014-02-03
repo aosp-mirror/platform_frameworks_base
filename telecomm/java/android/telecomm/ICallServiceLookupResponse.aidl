@@ -17,6 +17,7 @@
 package android.telecomm;
 
 import android.os.IBinder;
+import android.telecomm.CallServiceInfo;
 import java.util.List;
 
 /**
@@ -24,11 +25,11 @@ import java.util.List;
  */
 oneway interface ICallServiceLookupResponse {
     /**
-     * Forwards the list of {@link ICallService}s as a list of {@link IBinder}s to be processed by
-     * Telecomm which will choose which call service, among potentially many, to place a call.
+     * Forwards the list of {@link ICallService}s as a list of {@link CallServiceInfo}s to be
+     * processed by Telecomm which will choose which call service, among potentially many, to
+     * place a call.
      *
-     * @param callServices List of call services from {@link ICallServiceProvider}.
-     * TODO(gilad): Rename to callServiceBinders.
+     * @param callServices The set of call service descriptors from {@link ICallServiceProvider}.
      */
-    void setCallServices(in List<IBinder> callServices);
+    void setCallServices(in List<CallServiceInfo> callServices);
 }
