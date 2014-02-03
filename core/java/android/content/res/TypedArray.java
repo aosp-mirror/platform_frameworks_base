@@ -37,6 +37,8 @@ import java.util.Arrays;
  */
 public class TypedArray {
     private final Resources mResources;
+    private final DisplayMetrics mMetrics;
+    private final AssetManager mAssets;
     /*package*/ XmlBlock.Parser mXml;
     /*package*/ int[] mRsrcs;
     /*package*/ int[] mData;
@@ -392,7 +394,7 @@ public class TypedArray {
             return defValue;
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimension(
-                data[index+AssetManager.STYLE_DATA], mResources.mMetrics);
+                data[index+AssetManager.STYLE_DATA], mMetrics);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -424,7 +426,7 @@ public class TypedArray {
             return defValue;
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelOffset(
-                data[index+AssetManager.STYLE_DATA], mResources.mMetrics);
+                data[index+AssetManager.STYLE_DATA], mMetrics);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -457,7 +459,7 @@ public class TypedArray {
             return defValue;
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelSize(
-                data[index+AssetManager.STYLE_DATA], mResources.mMetrics);
+                data[index+AssetManager.STYLE_DATA], mMetrics);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -485,7 +487,7 @@ public class TypedArray {
             return data[index+AssetManager.STYLE_DATA];
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelSize(
-                data[index+AssetManager.STYLE_DATA], mResources.mMetrics);
+                data[index+AssetManager.STYLE_DATA], mMetrics);
         }
 
         throw new RuntimeException(getPositionDescription()
@@ -514,7 +516,7 @@ public class TypedArray {
             return data[index+AssetManager.STYLE_DATA];
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelSize(
-                data[index+AssetManager.STYLE_DATA], mResources.mMetrics);
+                data[index+AssetManager.STYLE_DATA], mMetrics);
         }
 
         return defValue;
@@ -687,13 +689,7 @@ public class TypedArray {
      * Give back a previously retrieved array, for later re-use.
      */
     public void recycle() {
-        synchronized (mResources.mAccessLock) {
-            TypedArray cached = mResources.mCachedStyledAttributes;
-            if (cached == null || cached.mData.length < mData.length) {
-                mXml = null;
-                mResources.mCachedStyledAttributes = this;
-            }
-        }
+        mResources.recycleCachedStyledAttributes(this);
     }
 
     private boolean getValueAt(int index, TypedValue outValue) {
@@ -722,18 +718,19 @@ public class TypedArray {
             }
             return null;
         }
-        //System.out.println("Getting pooled from: " + v);
-        return mResources.mAssets.getPooledString(
-            cookie, data[index+AssetManager.STYLE_DATA]);
+        return mAssets.getPooledString(cookie, data[index+AssetManager.STYLE_DATA]);
     }
 
     /*package*/ TypedArray(Resources resources, int[] data, int[] indices, int len) {
         mResources = resources;
+        mMetrics = mResources.getDisplayMetrics();
+        mAssets = mResources.getAssets();
         mData = data;
         mIndices = indices;
         mLength = len;
     }
 
+    @Override
     public String toString() {
         return Arrays.toString(mData);
     }
