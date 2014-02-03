@@ -976,10 +976,12 @@ public final class CaptureResult extends CameraMetadata {
      * ({@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}), otherwise, the image may be incorrectly exposed.</p>
      * <p>When set to TORCH, the flash will be on continuously. This mode can be used
      * for use cases such as preview, auto-focus assist, still capture, or video recording.</p>
+     * <p>The flash status will be reported by {@link CaptureResult#FLASH_STATE android.flash.state} in the capture result metadata.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
+     * @see CaptureResult#FLASH_STATE
      * @see #FLASH_MODE_OFF
      * @see #FLASH_MODE_SINGLE
      * @see #FLASH_MODE_TORCH
@@ -989,7 +991,12 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>Current state of the flash
-     * unit</p>
+     * unit.</p>
+     * <p>When the camera device doesn't have flash unit
+     * (i.e. <code>{@link CameraCharacteristics#FLASH_INFO_AVAILABLE android.flash.info.available} == false</code>), this state will always be UNAVAILABLE.
+     * Other states indicate the current flash status.</p>
+     *
+     * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see #FLASH_STATE_UNAVAILABLE
      * @see #FLASH_STATE_CHARGING
      * @see #FLASH_STATE_READY
@@ -1063,7 +1070,8 @@ public final class CaptureResult extends CameraMetadata {
      * to achieve manual exposure control.</p>
      * <p>The requested aperture value may take several frames to reach the
      * requested value; the camera device will report the current (intermediate)
-     * aperture size in capture result metadata while the aperture is changing.</p>
+     * aperture size in capture result metadata while the aperture is changing.
+     * While the aperture is still changing, {@link CaptureResult#LENS_STATE android.lens.state} will be set to MOVING.</p>
      * <p>When this is supported and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is one of
      * the ON modes, this will be overridden by the camera device
      * auto-exposure algorithm, the overridden values are then provided
@@ -1071,6 +1079,7 @@ public final class CaptureResult extends CameraMetadata {
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
+     * @see CaptureResult#LENS_STATE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
@@ -1090,8 +1099,12 @@ public final class CaptureResult extends CameraMetadata {
      * in no reduction of the incoming light, and setting this to 2 would
      * mean that the filter is set to reduce incoming light by two stops
      * (allowing 1/4 of the prior amount of light to the sensor).</p>
+     * <p>It may take several frames before the lens filter density changes
+     * to the requested value. While the filter density is still changing,
+     * {@link CaptureResult#LENS_STATE android.lens.state} will be set to MOVING.</p>
      *
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_FILTER_DENSITIES
+     * @see CaptureResult#LENS_STATE
      */
     public static final Key<Float> LENS_FILTER_DENSITY =
             new Key<Float>("android.lens.filterDensity", float.class);
@@ -1103,7 +1116,7 @@ public final class CaptureResult extends CameraMetadata {
      * view of the camera device, and is usually used for optical zoom.</p>
      * <p>Like {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} and {@link CaptureRequest#LENS_APERTURE android.lens.aperture}, this
      * setting won't be applied instantaneously, and it may take several
-     * frames before the lens can move to the requested focal length.
+     * frames before the lens can change to the requested focal length.
      * While the focal length is still changing, {@link CaptureResult#LENS_STATE android.lens.state} will
      * be set to MOVING.</p>
      * <p>This is expected not to be supported on most devices.</p>
@@ -1148,7 +1161,35 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Integer>("android.lens.opticalStabilizationMode", int.class);
 
     /**
-     * <p>Current lens status</p>
+     * <p>Current lens status.</p>
+     * <p>For lens parameters {@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance},
+     * {@link CaptureRequest#LENS_FILTER_DENSITY android.lens.filterDensity} and {@link CaptureRequest#LENS_APERTURE android.lens.aperture}, when changes are requested,
+     * they may take several frames to reach the requested values. This state indicates
+     * the current status of the lens parameters.</p>
+     * <p>When the state is STATIONARY, the lens parameters are not changing. This could be
+     * either because the parameters are all fixed, or because the lens has had enough
+     * time to reach the most recently-requested values.
+     * If all these lens parameters are not changable for a camera device, as listed below:</p>
+     * <ul>
+     * <li>Fixed focus (<code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} == 0</code>), which means
+     * {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} parameter will always be 0.</li>
+     * <li>Fixed focal length ({@link CameraCharacteristics#LENS_INFO_AVAILABLE_FOCAL_LENGTHS android.lens.info.availableFocalLengths} contains single value),
+     * which means the optical zoom is not supported.</li>
+     * <li>No ND filter ({@link CameraCharacteristics#LENS_INFO_AVAILABLE_FILTER_DENSITIES android.lens.info.availableFilterDensities} contains only 0).</li>
+     * <li>Fixed aperture ({@link CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES android.lens.info.availableApertures} contains single value).</li>
+     * </ul>
+     * <p>Then this state will always be STATIONARY.</p>
+     * <p>When the state is MOVING, it indicates that at least one of the lens parameters
+     * is changing.</p>
+     *
+     * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FILTER_DENSITY
+     * @see CaptureRequest#LENS_FOCAL_LENGTH
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_FILTER_DENSITIES
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_FOCAL_LENGTHS
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      * @see #LENS_STATE_STATIONARY
      * @see #LENS_STATE_MOVING
      */
