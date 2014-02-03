@@ -759,7 +759,7 @@ public class Element extends BaseObj {
         return rs.mElement_MATRIX_2X2;
     }
 
-    Element(int id, RenderScript rs, Element[] e, String[] n, int[] as) {
+    Element(long id, RenderScript rs, Element[] e, String[] n, int[] as) {
         super(id, rs);
         mSize = 0;
         mVectorSize = 1;
@@ -776,7 +776,7 @@ public class Element extends BaseObj {
         updateVisibleSubElements();
     }
 
-    Element(int id, RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
+    Element(long id, RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
         super(id, rs);
         if ((dt != DataType.UNSIGNED_5_6_5) &&
             (dt != DataType.UNSIGNED_4_4_4_4) &&
@@ -795,13 +795,15 @@ public class Element extends BaseObj {
         mVectorSize = size;
     }
 
-    Element(int id, RenderScript rs) {
+    Element(long id, RenderScript rs) {
         super(id, rs);
     }
 
     @Override
     void updateFromNative() {
         super.updateFromNative();
+
+        // FIXME: updateFromNative is broken in JNI for 64-bit
 
         // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
         int[] dataBuffer = new int[5];
@@ -853,7 +855,7 @@ public class Element extends BaseObj {
         DataKind dk = DataKind.USER;
         boolean norm = false;
         int vecSize = 1;
-        int id = rs.nElementCreate(dt.mID, dk.mID, norm, vecSize);
+        long id = rs.nElementCreate(dt.mID, dk.mID, norm, vecSize);
         return new Element(id, rs, dt, dk, norm, vecSize);
     }
 
@@ -890,7 +892,7 @@ public class Element extends BaseObj {
         case BOOLEAN: {
             DataKind dk = DataKind.USER;
             boolean norm = false;
-            int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+            long id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
             return new Element(id, rs, dt, dk, norm, size);
         }
 
@@ -961,7 +963,7 @@ public class Element extends BaseObj {
         }
 
         boolean norm = true;
-        int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+        long id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
         return new Element(id, rs, dt, dk, norm, size);
     }
 
@@ -1088,11 +1090,12 @@ public class Element extends BaseObj {
             java.lang.System.arraycopy(mElementNames, 0, sin, 0, mCount);
             java.lang.System.arraycopy(mArraySizes, 0, asin, 0, mCount);
 
+            // FIXME: broken for 64-bit
             int[] ids = new int[ein.length];
             for (int ct = 0; ct < ein.length; ct++ ) {
-                ids[ct] = ein[ct].getID(mRS);
+                ids[ct] = (int)ein[ct].getID(mRS);
             }
-            int id = mRS.nElementCreate2(ids, sin, asin);
+            long id = mRS.nElementCreate2(ids, sin, asin);
             return new Element(id, mRS, ein, sin, asin);
         }
     }

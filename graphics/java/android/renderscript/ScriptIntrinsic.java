@@ -25,7 +25,7 @@ package android.renderscript;
  * Not intended for direct use.
  **/
 public abstract class ScriptIntrinsic extends Script {
-    ScriptIntrinsic(int id, RenderScript rs) {
+    ScriptIntrinsic(long id, RenderScript rs) {
         super(id, rs);
     }
 }
