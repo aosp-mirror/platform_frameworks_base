@@ -1526,7 +1526,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Inafungua SIM kadi..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Msimbo wa PIN usio sahihi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Charaza PIN iliyo na tarakimu kati ya 4 na 8."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"Msimbo wa PUK lazima uwe na nambari 8."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"Msimbo wa PUK lazima uwe na tarakimu 8."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ingiza upya msimbo sahihi wa PUK. Majaribio yanayorudiwa yatalemaza SIM kabisa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Misimbo ya PIN haifanani"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Majaribio mengi mno ya mchoro"</string>
