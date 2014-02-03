@@ -1526,7 +1526,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"S\'està desbloquejant la targeta SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Codi PIN incorrecte."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Escriu un PIN que tingui de 4 a 8 números."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"El codi PUK ha de contenir 8 números."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"El codi PUK ha de tenir 8 números."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Torna a introduir el codi PUK correcte. Els intents repetits faran que es desactivi la SIM de manera permanent."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Els codis PIN no coincideixen"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Massa intents incorrectes"</string>
