@@ -15384,6 +15384,7 @@ package android.net.wifi {
     method public int describeContents();
     method public java.lang.String getBSSID();
     method public static android.net.NetworkInfo.DetailedState getDetailedStateOf(android.net.wifi.SupplicantState);
+    method public int getFrequency();
     method public boolean getHiddenSSID();
     method public int getIpAddress();
     method public int getLinkSpeed();
@@ -15393,6 +15394,7 @@ package android.net.wifi {
     method public java.lang.String getSSID();
     method public android.net.wifi.SupplicantState getSupplicantState();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String FREQUENCY_UNITS = "MHz";
     field public static final java.lang.String LINK_SPEED_UNITS = "Mbps";
   }
 
@@ -18362,7 +18364,7 @@ package android.os {
 
   public abstract class CountDownTimer {
     ctor public CountDownTimer(long, long);
-    method public final void cancel();
+    method public final synchronized void cancel();
     method public abstract void onFinish();
     method public abstract void onTick(long);
     method public final synchronized android.os.CountDownTimer start();

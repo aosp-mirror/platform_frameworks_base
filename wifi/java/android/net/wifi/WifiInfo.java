@@ -69,6 +69,10 @@ public class WifiInfo implements Parcelable {
     public static final String LINK_SPEED_UNITS = "Mbps";
     private int mLinkSpeed;
 
+    /** Frequency in MHz */
+    public static final String FREQUENCY_UNITS = "MHz";
+    private int mFrequency;
+
     private InetAddress mIpAddress;
     private String mMacAddress;
 
@@ -86,6 +90,7 @@ public class WifiInfo implements Parcelable {
         mSupplicantState = SupplicantState.UNINITIALIZED;
         mRssi = -9999;
         mLinkSpeed = -1;
+        mFrequency = -1;
     }
 
     /**
@@ -100,6 +105,7 @@ public class WifiInfo implements Parcelable {
             mNetworkId = source.mNetworkId;
             mRssi = source.mRssi;
             mLinkSpeed = source.mLinkSpeed;
+            mFrequency = source.mFrequency;
             mIpAddress = source.mIpAddress;
             mMacAddress = source.mMacAddress;
             mMeteredHint = source.mMeteredHint;
@@ -176,6 +182,20 @@ public class WifiInfo implements Parcelable {
     /** @hide */
     public void setLinkSpeed(int linkSpeed) {
         this.mLinkSpeed = linkSpeed;
+    }
+
+    /**
+     * Returns the current frequency in {@link #FREQUENCY_UNITS}.
+     * @return the frequency.
+     * @see #FREQUENCY_UNITS
+     */
+    public int getFrequency() {
+        return mFrequency;
+    }
+
+    /** @hide */
+    public void setFrequency(int frequency) {
+        this.mFrequency = frequency;
     }
 
     /**
@@ -303,7 +323,8 @@ public class WifiInfo implements Parcelable {
             append(", Supplicant state: ").
             append(mSupplicantState == null ? none : mSupplicantState).
             append(", RSSI: ").append(mRssi).
-            append(", Link speed: ").append(mLinkSpeed).
+            append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS).
+            append(", Frequency: ").append(mFrequency).append(FREQUENCY_UNITS).
             append(", Net ID: ").append(mNetworkId).
             append(", Metered hint: ").append(mMeteredHint);
 
@@ -320,6 +341,7 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mNetworkId);
         dest.writeInt(mRssi);
         dest.writeInt(mLinkSpeed);
+        dest.writeInt(mFrequency);
         if (mIpAddress != null) {
             dest.writeByte((byte)1);
             dest.writeByteArray(mIpAddress.getAddress());
@@ -346,6 +368,7 @@ public class WifiInfo implements Parcelable {
                 info.setNetworkId(in.readInt());
                 info.setRssi(in.readInt());
                 info.setLinkSpeed(in.readInt());
+                info.setFrequency(in.readInt());
                 if (in.readByte() == 1) {
                     try {
                         info.setInetAddress(InetAddress.getByAddress(in.createByteArray()));
