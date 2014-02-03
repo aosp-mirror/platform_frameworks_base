@@ -28,7 +28,6 @@ public class Path {
      * @hide
      */
     public final long mNativePath;
-    private long mNativePathMeasure;
 
     /**
      * @hide
@@ -77,14 +76,6 @@ public class Path {
         final FillType fillType = getFillType();
         native_reset(mNativePath);
         setFillType(fillType);
-        clearMeasure();
-    }
-
-    private void clearMeasure() {
-        if (mNativePathMeasure != 0) {
-            native_destroyMeasure(mNativePathMeasure);
-            mNativePathMeasure = 0;
-        }
     }
 
     /**
@@ -96,7 +87,6 @@ public class Path {
         mLastDirection = null;
         if (rects != null) rects.setEmpty();
         native_rewind(mNativePath);
-        clearMeasure();
     }
 
     /** Replace the contents of this with the contents of src.
@@ -105,7 +95,6 @@ public class Path {
         if (this != src) {
             isSimplePath = src.isSimplePath;
             native_set(mNativePath, src.mNativePath);
-            clearMeasure();
         }
     }
 
@@ -234,7 +223,6 @@ public class Path {
      */
     public void setFillType(FillType ft) {
         native_setFillType(mNativePath, ft.nativeInt);
-        clearMeasure();
     }
     
     /**
@@ -254,7 +242,6 @@ public class Path {
         int ft = native_getFillType(mNativePath);
         ft ^= 2;
         native_setFillType(mNativePath, ft);
-        clearMeasure();
     }
     
     /**
@@ -311,7 +298,6 @@ public class Path {
      */
     public void moveTo(float x, float y) {
         native_moveTo(mNativePath, x, y);
-        clearMeasure();
     }
 
     /**
@@ -326,7 +312,6 @@ public class Path {
      */
     public void rMoveTo(float dx, float dy) {
         native_rMoveTo(mNativePath, dx, dy);
-        clearMeasure();
     }
 
     /**
@@ -340,7 +325,6 @@ public class Path {
     public void lineTo(float x, float y) {
         isSimplePath = false;
         native_lineTo(mNativePath, x, y);
-        clearMeasure();
     }
 
     /**
@@ -356,7 +340,6 @@ public class Path {
     public void rLineTo(float dx, float dy) {
         isSimplePath = false;
         native_rLineTo(mNativePath, dx, dy);
-        clearMeasure();
     }
 
     /**
@@ -372,7 +355,6 @@ public class Path {
     public void quadTo(float x1, float y1, float x2, float y2) {
         isSimplePath = false;
         native_quadTo(mNativePath, x1, y1, x2, y2);
-        clearMeasure();
     }
 
     /**
@@ -392,7 +374,6 @@ public class Path {
     public void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
         isSimplePath = false;
         native_rQuadTo(mNativePath, dx1, dy1, dx2, dy2);
-        clearMeasure();
     }
 
     /**
@@ -411,7 +392,6 @@ public class Path {
                         float x3, float y3) {
         isSimplePath = false;
         native_cubicTo(mNativePath, x1, y1, x2, y2, x3, y3);
-        clearMeasure();
     }
 
     /**
@@ -423,7 +403,6 @@ public class Path {
                          float x3, float y3) {
         isSimplePath = false;
         native_rCubicTo(mNativePath, x1, y1, x2, y2, x3, y3);
-        clearMeasure();
     }
 
     /**
@@ -443,7 +422,6 @@ public class Path {
                       boolean forceMoveTo) {
         isSimplePath = false;
         native_arcTo(mNativePath, oval, startAngle, sweepAngle, forceMoveTo);
-        clearMeasure();
     }
     
     /**
@@ -460,7 +438,6 @@ public class Path {
     public void arcTo(RectF oval, float startAngle, float sweepAngle) {
         isSimplePath = false;
         native_arcTo(mNativePath, oval, startAngle, sweepAngle, false);
-        clearMeasure();
     }
     
     /**
@@ -470,7 +447,6 @@ public class Path {
     public void close() {
         isSimplePath = false;
         native_close(mNativePath);
-        clearMeasure();
     }
 
     /**
@@ -513,7 +489,6 @@ public class Path {
         }
         detectSimplePath(rect.left, rect.top, rect.right, rect.bottom, dir);
         native_addRect(mNativePath, rect, dir.nativeInt);
-        clearMeasure();
     }
 
     /**
@@ -528,7 +503,6 @@ public class Path {
     public void addRect(float left, float top, float right, float bottom, Direction dir) {
         detectSimplePath(left, top, right, bottom, dir);
         native_addRect(mNativePath, left, top, right, bottom, dir.nativeInt);
-        clearMeasure();
     }
 
     /**
@@ -543,7 +517,6 @@ public class Path {
         }
         isSimplePath = false;
         native_addOval(mNativePath, oval, dir.nativeInt);
-        clearMeasure();
     }
 
     /**
@@ -557,7 +530,6 @@ public class Path {
     public void addCircle(float x, float y, float radius, Direction dir) {
         isSimplePath = false;
         native_addCircle(mNativePath, x, y, radius, dir.nativeInt);
-        clearMeasure();
     }
 
     /**
@@ -573,7 +545,6 @@ public class Path {
         }
         isSimplePath = false;
         native_addArc(mNativePath, oval, startAngle, sweepAngle);
-        clearMeasure();
     }
 
     /**
@@ -590,7 +561,6 @@ public class Path {
         }
         isSimplePath = false;
         native_addRoundRect(mNativePath, rect, rx, ry, dir.nativeInt);
-        clearMeasure();
     }
     
     /**
@@ -611,7 +581,6 @@ public class Path {
         }
         isSimplePath = false;
         native_addRoundRect(mNativePath, rect, radii, dir.nativeInt);
-        clearMeasure();
     }
     
     /**
@@ -623,7 +592,6 @@ public class Path {
     public void addPath(Path src, float dx, float dy) {
         isSimplePath = false;
         native_addPath(mNativePath, src.mNativePath, dx, dy);
-        clearMeasure();
     }
 
     /**
@@ -634,7 +602,6 @@ public class Path {
     public void addPath(Path src) {
         isSimplePath = false;
         native_addPath(mNativePath, src.mNativePath);
-        clearMeasure();
     }
 
     /**
@@ -645,7 +612,6 @@ public class Path {
     public void addPath(Path src, Matrix matrix) {
         if (!src.isSimplePath) isSimplePath = false;
         native_addPath(mNativePath, src.mNativePath, matrix.native_instance);
-        clearMeasure();
     }
 
     /**
@@ -663,11 +629,6 @@ public class Path {
             dst.isSimplePath = false;
         }
         native_offset(mNativePath, dx, dy, dstNative);
-        if (dst != null) {
-            dst.clearMeasure();
-        } else {
-            clearMeasure();
-        }
     }
 
     /**
@@ -679,7 +640,6 @@ public class Path {
     public void offset(float dx, float dy) {
         isSimplePath = false;
         native_offset(mNativePath, dx, dy);
-        clearMeasure();
     }
 
     /**
@@ -691,7 +651,6 @@ public class Path {
     public void setLastPoint(float dx, float dy) {
         isSimplePath = false;
         native_setLastPoint(mNativePath, dx, dy);
-        clearMeasure();
     }
 
     /**
@@ -709,11 +668,6 @@ public class Path {
             dstNative = dst.mNativePath;
         }
         native_transform(mNativePath, matrix.native_instance, dstNative);
-        if (dst != null) {
-            dst.clearMeasure();
-        } else {
-            clearMeasure();
-        }
     }
 
     /**
@@ -724,14 +678,10 @@ public class Path {
     public void transform(Matrix matrix) {
         isSimplePath = false;
         native_transform(mNativePath, matrix.native_instance);
-        clearMeasure();
     }
 
     protected void finalize() throws Throwable {
         try {
-            if (mNativePathMeasure != 0) {
-                native_destroyMeasure(mNativePathMeasure);
-            }
             finalizer(mNativePath);
         } finally {
             super.finalize();
@@ -762,70 +712,6 @@ public class Path {
      */
     public float[] approximate(float acceptableError) {
         return native_approximate(mNativePath, acceptableError);
-    }
-
-    /**
-     * Modifies the <code>Path</code> by extracting a portion of it.
-     * The portion of the <code>Path</code> used is between <code>trimStart</code> and
-     * <code>trimEnd</code> with the value offset by <code>trimOffset</code>. When
-     * <code>trimOffset</code> added to <code>trimEnd</code> is greater than 1, the
-     * trimmed portion "wraps" to the start of the <code>Path</code>.
-     * <p>For example, if <code>Path</code> is a circle and <code>trimStart</code> is 0
-     * and <code>trimEnd</code> is 0.5, the resulting <code>Path</code> is the arc of
-     * a semicircle. If <code>trimOffset</code> is set to 0.75, the arc will start at
-     * 3/4 of the circle and continue to the end of the circle, then start again at the
-     * beginning of the circle and end at 1/4 of the way around. It will appear as if
-     * the semicircle arc wrapped around the <code>Path</code> start and end.</p>
-     * @param trimStart A number between 0 and <code>trimEnd</code> indicating the fraction of the
-     *                  <code>Path</code> to start. A value of 0 trims nothing from the start.
-     * @param trimEnd A number between <code>trimStart</code> and 1 indicating the fraction of the
-     *                <code>Path</code> to end. A value of 1 trims nothing from the end.
-     * @param trimOffset A fraction between 0 and 1 indicating the offset of the trimmed
-     *                   portion of the <code>Path</code>.
-     * @see #trim(float, float, float, Path)
-     */
-    public void trim(float trimStart, float trimEnd, float trimOffset) {
-        trim(trimStart, trimEnd, trimOffset, null);
-    }
-
-    /**
-     * Extracts a portion of the <code>Path</code> and writes it to <code>dst</code>.
-     * The portion of the <code>Path</code> used is between <code>trimStart</code> and
-     * <code>trimEnd</code> with the value offset by <code>trimOffset</code>. When
-     * <code>trimOffset</code> added to <code>trimEnd</code> is greater than 1, the
-     * trimmed portion "wraps" to the start of the <code>Path</code>.
-     * <p>For example, if <code>Path</code> is a circle and <code>trimStart</code> is 0
-     * and <code>trimEnd</code> is 0.5, the resulting <code>Path</code> is the arc of
-     * a semicircle. If <code>trimOffset</code> is set to 0.75, the arc will start at
-     * 3/4 of the circle and continue to the end of the circle, then start again at the
-     * beginning of the circle and end at 1/4 of the way around. It will appear as if
-     * the semicircle arc wrapped around the <code>Path</code> start and end.</p>
-     * @param trimStart A number between 0 and <code>trimEnd</code> indicating the fraction of the
-     *                  <code>Path</code> to start. A value of 0 trims nothing from the start.
-     * @param trimEnd A number between <code>trimStart</code> and 1 indicating the fraction of the
-     *                <code>Path</code> to end. A value of 1 trims nothing from the end.
-     * @param trimOffset A fraction between 0 and 1 indicating the offset of the trimmed
-     *                   portion of the <code>Path</code>.
-     * @param dst The trimmed <code>Path</code> is written here. If <code>dst</code> is null,
-     *            then the original <code>Path</code> is modified.
-     * @see #trim(float, float, float)
-     */
-    public void trim(float trimStart, float trimEnd, float trimOffset, Path dst) {
-        if (trimStart > 1 || trimEnd > 1 || trimOffset > 1
-                || trimStart < 0 || trimEnd < 0 || trimOffset < 0) {
-            throw new IllegalArgumentException("trim must be between 0 and 1");
-        }
-        if (trimStart > trimEnd) {
-            throw new IllegalArgumentException("trim end cannot be less than start");
-        }
-        long dstNative = 0;
-        if (dst != null) {
-            dstNative = dst.mNativePath;
-            dst.isSimplePath = false;
-            dst.clearMeasure();
-        }
-        mNativePathMeasure = native_trim(mNativePath, dstNative, mNativePathMeasure,
-                trimStart, trimEnd, trimOffset);
     }
 
     private static native long init1();
@@ -875,7 +761,4 @@ public class Path {
     private static native boolean native_op(long path1, long path2, int op, long result);
     private static native void finalizer(long nPath);
     private static native float[] native_approximate(long nPath, float error);
-    private static native long native_trim(long nPath, long nTargetPath, long nPathMeasure,
-            float trimStart, float trimEnd, float trimOffset);
-    private static native void native_destroyMeasure(long nPathMeasure);
 }
