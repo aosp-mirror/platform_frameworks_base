@@ -107,6 +107,9 @@ import javax.crypto.spec.PBEKeySpec;
 class MountService extends IMountService.Stub
         implements INativeDaemonConnectorCallbacks, Watchdog.Monitor {
 
+    // Static direct instance pointer for the tightly-coupled idle service to use
+    static MountService sSelf = null;
+
     // TODO: listen for user creation/deletion
 
     private static final boolean LOCAL_LOGD = false;
@@ -345,6 +348,7 @@ class MountService extends IMountService.Stub
     private static final int H_UNMOUNT_PM_DONE = 2;
     private static final int H_UNMOUNT_MS = 3;
     private static final int H_SYSTEM_READY = 4;
+    private static final int H_FSTRIM = 5;
 
     private static final int RETRY_UNMOUNT_DELAY = 30; // in ms
     private static final int MAX_UNMOUNT_RETRIES = 4;
@@ -494,6 +498,24 @@ class MountService extends IMountService.Stub
                     }
                     break;
                 }
+                case H_FSTRIM: {
+                    waitForReady();
+                    Slog.i(TAG, "Running fstrim idle maintenance");
+                    try {
+                        // This method must be run on the main (handler) thread,
+                        // so it is safe to directly call into vold.
+                        mConnector.execute("fstrim", "dotrim");
+                        EventLogTags.writeFstrimStart(SystemClock.elapsedRealtime());
+                    } catch (NativeDaemonConnectorException ndce) {
+                        Slog.e(TAG, "Failed to run fstrim!");
+                    }
+                    // invoke the completion callback, if any
+                    Runnable callback = (Runnable) msg.obj;
+                    if (callback != null) {
+                        callback.run();
+                    }
+                    break;
+                }
             }
         }
     };
@@ -608,27 +630,6 @@ class MountService extends IMountService.Stub
         }
     };
 
-    private final BroadcastReceiver mIdleMaintenanceReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            waitForReady();
-            String action = intent.getAction();
-            // Since fstrim will be run on a daily basis we do not expect
-            // fstrim to be too long, so it is not interruptible. We will
-            // implement interruption only in case we see issues.
-            if (Intent.ACTION_IDLE_MAINTENANCE_START.equals(action)) {
-                try {
-                    // This method runs on the handler thread,
-                    // so it is safe to directly call into vold.
-                    mConnector.execute("fstrim", "dotrim");
-                    EventLogTags.writeFstrimStart(SystemClock.elapsedRealtime());
-                } catch (NativeDaemonConnectorException ndce) {
-                    Slog.e(TAG, "Failed to run fstrim!");
-                }
-            }
-        }
-    };
-
     private final class MountServiceBinderListener implements IBinder.DeathRecipient {
         final IMountServiceListener mListener;
 
@@ -644,6 +645,10 @@ class MountService extends IMountService.Stub
                 mListener.asBinder().unlinkToDeath(this, 0);
             }
         }
+    }
+
+    void runIdleMaintenance(Runnable callback) {
+        mHandler.sendMessage(mHandler.obtainMessage(H_FSTRIM, callback));
     }
 
     private void doShareUnshareVolume(String path, String method, boolean enable) {
@@ -1337,6 +1342,8 @@ class MountService extends IMountService.Stub
      * @param context  Binder context for this service
      */
     public MountService(Context context) {
+        sSelf = this;
+
         mContext = context;
 
         synchronized (mVolumesLock) {
@@ -1362,12 +1369,6 @@ class MountService extends IMountService.Stub
             mContext.registerReceiver(
                     mUsbReceiver, new IntentFilter(UsbManager.ACTION_USB_STATE), null, mHandler);
         }
-
-        // Watch for idle maintenance changes
-        IntentFilter idleMaintenanceFilter = new IntentFilter();
-        idleMaintenanceFilter.addAction(Intent.ACTION_IDLE_MAINTENANCE_START);
-        mContext.registerReceiverAsUser(mIdleMaintenanceReceiver, UserHandle.ALL,
-                idleMaintenanceFilter, null, mHandler);
 
         // Add OBB Action Handler to MountService thread.
         mObbActionHandler = new ObbActionHandler(IoThread.get().getLooper());
