@@ -1634,10 +1634,24 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Rational[]>("android.statistics.predictedColorTransform", Rational[].class);
 
     /**
-     * <p>The HAL estimated scene illumination lighting
-     * frequency</p>
-     * <p>Report NONE if there doesn't appear to be flickering
-     * illumination</p>
+     * <p>The camera device estimated scene illumination lighting
+     * frequency.</p>
+     * <p>Many light sources, such as most fluorescent lights, flicker at a rate
+     * that depends on the local utility power standards. This flicker must be
+     * accounted for by auto-exposure routines to avoid artifacts in captured images.
+     * The camera device uses this entry to tell the application what the scene
+     * illuminant frequency is.</p>
+     * <p>When manual exposure control is enabled
+     * (<code>{@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} == OFF</code> or <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == OFF</code>),
+     * the {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} doesn't do the antibanding, and the
+     * application can ensure it selects exposure times that do not cause banding
+     * issues by looking into this metadata field. See android.control.aeAntibandingMode
+     * for more details.</p>
+     * <p>Report NONE if there doesn't appear to be flickering illumination.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
      * @see #STATISTICS_SCENE_FLICKER_NONE
      * @see #STATISTICS_SCENE_FLICKER_50HZ
      * @see #STATISTICS_SCENE_FLICKER_60HZ
