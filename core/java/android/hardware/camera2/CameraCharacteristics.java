@@ -262,13 +262,13 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Integer>("android.control.maxRegions", int.class);
 
     /**
-     * <p>Whether this camera has a
-     * flash</p>
+     * <p>Whether this camera device has a
+     * flash.</p>
      * <p>If no flash, none of the flash controls do
-     * anything. All other metadata should return 0</p>
+     * anything. All other metadata should return 0.</p>
      */
-    public static final Key<Byte> FLASH_INFO_AVAILABLE =
-            new Key<Byte>("android.flash.info.available", byte.class);
+    public static final Key<Boolean> FLASH_INFO_AVAILABLE =
+            new Key<Boolean>("android.flash.info.available", boolean.class);
 
     /**
      * <p>Supported resolutions for the JPEG thumbnail</p>
