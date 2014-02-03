@@ -653,11 +653,9 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
     Vector2 penumbra[k];
     int penumbraLength = hull(shadowRegion, shadowRegionLength, penumbra);
 
-    // no real umbra make a fake one
+    Vector2 fakeUmbra[polyLength];
     if (umbraLength < 3) {
-        // The shadow from the centroid of the light polygon.
-        Vector2 centShadow[polyLength];
-
+        // If there is no real umbra, make a fake one.
         for (int i = 0; i < polyLength; i++) {
             float t = lightCenter.z - poly[i].z;
             if (t == 0) {
@@ -667,23 +665,23 @@ void SpotShadow::computeSpotShadow(const Vector3* lightPoly, int lightPolyLength
             float x = lightCenter.x - t * (lightCenter.x - poly[i].x);
             float y = lightCenter.y - t * (lightCenter.y - poly[i].y);
 
-            centShadow[i].x = x;
-            centShadow[i].y = y;
+            fakeUmbra[i].x = x;
+            fakeUmbra[i].y = y;
         }
 
         // Shrink the centroid's shadow by 10%.
         // TODO: Study the magic number of 10%.
-        Vector2 shadowCentroid = centroid2d(centShadow, polyLength);
+        Vector2 shadowCentroid = centroid2d(fakeUmbra, polyLength);
         for (int i = 0; i < polyLength; i++) {
-            centShadow[i] = shadowCentroid * (1.0f - SHADOW_SHRINK_SCALE) +
-                    centShadow[i] * SHADOW_SHRINK_SCALE;
+            fakeUmbra[i] = shadowCentroid * (1.0f - SHADOW_SHRINK_SCALE) +
+                    fakeUmbra[i] * SHADOW_SHRINK_SCALE;
         }
 #if DEBUG_SHADOW
         ALOGD("No real umbra make a fake one, centroid2d =  %f , %f",
                 shadowCentroid.x, shadowCentroid.y);
 #endif
         // Set the fake umbra, whose size is the same as the original polygon.
-        umbra = centShadow;
+        umbra = fakeUmbra;
         umbraLength = polyLength;
     }
 
