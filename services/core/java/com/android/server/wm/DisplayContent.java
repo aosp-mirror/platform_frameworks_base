@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
-import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 
@@ -116,7 +115,7 @@ class DisplayContent {
 
     /**
      * @param display May not be null.
-     * @param service TODO(cmautner):
+     * @param service You know.
      */
     DisplayContent(Display display, WindowManagerService service) {
         mDisplay = display;
@@ -236,19 +235,16 @@ class DisplayContent {
         return count;
     }
 
-    /** Refer to {@link WindowManagerService#createStack(int, int)} */
-    TaskStack createStack(int stackId) {
-        if (DEBUG_STACK) Slog.d(TAG, "createStack: stackId=" + stackId);
-        TaskStack newStack = new TaskStack(mService, stackId, this);
-        if (stackId == HOME_STACK_ID) {
+    /** Refer to {@link WindowManagerService#attachStack(int, int)} */
+    void attachStack(TaskStack stack) {
+        if (stack.mStackId == HOME_STACK_ID) {
             if (mHomeStack != null) {
-                throw new IllegalArgumentException("createStack: HOME_STACK_ID (0) not first.");
+                throw new IllegalArgumentException("attachStack: HOME_STACK_ID (0) not first.");
             }
-            mHomeStack = newStack;
+            mHomeStack = stack;
         }
-        mStacks.add(newStack);
+        mStacks.add(stack);
         layoutNeeded = true;
-        return newStack;
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
@@ -256,12 +252,15 @@ class DisplayContent {
         mStacks.add(toTop ? mStacks.size() : 0, stack);
     }
 
-    TaskStack removeStack(TaskStack stack) {
-        mStacks.remove(stack);
-        if (!mStacks.isEmpty()) {
-            return mStacks.get(mStacks.size() - 1);
+    void detachStack(TaskStack stack) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mTaskHistory.get(taskNdx);
+            if (task.mStack == stack) {
+                mService.tmpRemoveTaskWindowsLocked(task);
+                mTaskHistory.remove(taskNdx);
+            }
         }
-        return null;
+        mStacks.remove(stack);
     }
 
     /**
