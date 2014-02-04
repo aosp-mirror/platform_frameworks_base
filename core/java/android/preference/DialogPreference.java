@@ -169,7 +169,7 @@ public abstract class DialogPreference extends Preference implements
      * @param dialogIconRes The icon, as a resource ID.
      */
     public void setDialogIcon(int dialogIconRes) {
-        mDialogIcon = getContext().getResources().getDrawable(dialogIconRes);
+        mDialogIcon = getContext().getDrawable(dialogIconRes);
     }
     
     /**

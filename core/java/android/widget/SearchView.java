@@ -1059,7 +1059,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
         SpannableStringBuilder ssb = new SpannableStringBuilder("   "); // for the icon
         ssb.append(hintText);
-        Drawable searchIcon = getContext().getResources().getDrawable(getSearchIconId());
+        Drawable searchIcon = getContext().getDrawable(getSearchIconId());
         int textSize = (int) (mQueryTextView.getTextSize() * 1.25);
         searchIcon.setBounds(0, 0, textSize, textSize);
         ssb.setSpan(new ImageSpan(searchIcon), 1, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

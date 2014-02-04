@@ -15584,7 +15584,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         Drawable d= null;
         if (resid != 0) {
-            d = mResources.getDrawable(resid);
+            d = mContext.getDrawable(resid);
         }
         setBackground(d);
 

@@ -6201,6 +6201,7 @@ package android.content {
     method public abstract android.content.ContentResolver getContentResolver();
     method public abstract java.io.File getDatabasePath(java.lang.String);
     method public abstract java.io.File getDir(java.lang.String, int);
+    method public final android.graphics.drawable.Drawable getDrawable(int);
     method public abstract java.io.File getExternalCacheDir();
     method public abstract java.io.File[] getExternalCacheDirs();
     method public abstract java.io.File getExternalFilesDir(java.lang.String);
@@ -8012,7 +8013,9 @@ package android.content.res {
     method public int getDimensionPixelSize(int) throws android.content.res.Resources.NotFoundException;
     method public android.util.DisplayMetrics getDisplayMetrics();
     method public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
+    method public android.graphics.drawable.Drawable getDrawable(int, android.content.res.Resources.Theme) throws android.content.res.Resources.NotFoundException;
     method public android.graphics.drawable.Drawable getDrawableForDensity(int, int) throws android.content.res.Resources.NotFoundException;
+    method public android.graphics.drawable.Drawable getDrawableForDensity(int, int, android.content.res.Resources.Theme);
     method public float getFraction(int, int, int);
     method public int getIdentifier(java.lang.String, java.lang.String, java.lang.String);
     method public int[] getIntArray(int) throws android.content.res.Resources.NotFoundException;
@@ -8056,6 +8059,7 @@ package android.content.res {
   public final class Resources.Theme {
     method public void applyStyle(int, boolean);
     method public void dump(int, java.lang.String, java.lang.String);
+    method public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
     method public android.content.res.TypedArray obtainStyledAttributes(int[]);
     method public android.content.res.TypedArray obtainStyledAttributes(int, int[]) throws android.content.res.Resources.NotFoundException;
     method public android.content.res.TypedArray obtainStyledAttributes(android.util.AttributeSet, int[], int, int);

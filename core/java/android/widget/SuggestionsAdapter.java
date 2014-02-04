@@ -529,7 +529,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
                 return drawable;
             }
             // Not cached, find it by resource ID
-            drawable = mProviderContext.getResources().getDrawable(resourceId);
+            drawable = mProviderContext.getDrawable(resourceId);
             // Stick it in the cache, using the URI as key
             storeInIconCache(drawableUri, drawable);
             return drawable;
@@ -563,7 +563,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
                 OpenResourceIdResult r =
                     mProviderContext.getContentResolver().getResourceId(uri);
                 try {
-                    return r.r.getDrawable(r.id);
+                    return r.r.getDrawable(r.id, mContext.getTheme());
                 } catch (Resources.NotFoundException ex) {
                     throw new FileNotFoundException("Resource does not exist: " + uri);
                 }

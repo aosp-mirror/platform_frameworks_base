@@ -186,7 +186,7 @@ public abstract class CompoundButton extends Button implements Checkable {
 
         Drawable d = null;
         if (mButtonResource != 0) {
-            d = getResources().getDrawable(mButtonResource);
+            d = getContext().getDrawable(mButtonResource);
         }
         setButtonDrawable(d);
     }

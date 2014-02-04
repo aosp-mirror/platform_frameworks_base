@@ -136,8 +136,8 @@ public class EdgeEffect {
      */
     public EdgeEffect(Context context) {
         final Resources res = context.getResources();
-        mEdge = res.getDrawable(R.drawable.overscroll_edge);
-        mGlow = res.getDrawable(R.drawable.overscroll_glow);
+        mEdge = context.getDrawable(R.drawable.overscroll_edge);
+        mGlow = context.getDrawable(R.drawable.overscroll_glow);
 
         mEdgeHeight = mEdge.getIntrinsicHeight();
         mGlowHeight = mGlow.getIntrinsicHeight();

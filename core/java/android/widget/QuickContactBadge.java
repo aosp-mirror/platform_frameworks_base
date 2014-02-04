@@ -155,7 +155,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
      */
     public void setImageToDefault() {
         if (mDefaultAvatar == null) {
-            mDefaultAvatar = getResources().getDrawable(R.drawable.ic_contact_picture);
+            mDefaultAvatar = mContext.getDrawable(R.drawable.ic_contact_picture);
         }
         setImageDrawable(mDefaultAvatar);
     }

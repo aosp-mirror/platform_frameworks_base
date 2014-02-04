@@ -123,7 +123,7 @@ public class CheckedTextView extends TextView implements Checkable {
 
         Drawable d = null;
         if (mCheckMarkResource != 0) {
-            d = getResources().getDrawable(mCheckMarkResource);
+            d = getContext().getDrawable(mCheckMarkResource);
         }
         setCheckMarkDrawable(d);
     }

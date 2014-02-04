@@ -45,7 +45,8 @@ public class TypedArray {
     /*package*/ int[] mIndices;
     /*package*/ int mLength;
     /*package*/ TypedValue mValue = new TypedValue();
-   
+    /*package*/ Resources.Theme mTheme;
+
     /**
      * Return the number of values in this array.
      */
@@ -600,7 +601,7 @@ public class TypedArray {
                                    + " cookie=" + value.assetCookie);
                 System.out.println("******************************************************************");
             }
-            return mResources.loadDrawable(value, value.resourceId);
+            return mResources.loadDrawable(value, value.resourceId, mTheme);
         }
         return null;
     }
@@ -690,6 +691,10 @@ public class TypedArray {
      */
     public void recycle() {
         mResources.recycleCachedStyledAttributes(this);
+
+        mXml = null;
+        mRsrcs = null;
+        mTheme = null;
     }
 
     private boolean getValueAt(int index, TypedValue outValue) {

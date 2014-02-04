@@ -100,7 +100,7 @@ public class ChooseAccountActivity extends Activity {
             try {
                 AuthenticatorDescription desc = mTypeToAuthDescription.get(accountType);
                 Context authContext = createPackageContext(desc.packageName, 0);
-                icon = authContext.getResources().getDrawable(desc.iconId);
+                icon = authContext.getDrawable(desc.iconId);
             } catch (PackageManager.NameNotFoundException e) {
                 // Nothing we can do much here, just log
                 if (Log.isLoggable(TAG, Log.WARN)) {

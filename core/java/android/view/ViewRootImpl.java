@@ -2592,7 +2592,7 @@ public final class ViewRootImpl implements ViewParent,
                         R.attr.accessibilityFocusedDrawable, value, true);
                 if (resolved) {
                     mAttachInfo.mAccessibilityFocusDrawable =
-                        mView.mContext.getResources().getDrawable(value.resourceId);
+                        mView.mContext.getDrawable(value.resourceId);
                 }
             }
             return mAttachInfo.mAccessibilityFocusDrawable;

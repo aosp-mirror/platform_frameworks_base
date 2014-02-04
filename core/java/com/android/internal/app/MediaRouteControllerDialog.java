@@ -256,13 +256,13 @@ public class MediaRouteControllerDialog extends Dialog {
     private Drawable getIconDrawable() {
         if (mRoute.isConnecting()) {
             if (mMediaRouteConnectingDrawable == null) {
-                mMediaRouteConnectingDrawable = getContext().getResources().getDrawable(
+                mMediaRouteConnectingDrawable = getContext().getDrawable(
                         R.drawable.ic_media_route_connecting_holo_dark);
             }
             return mMediaRouteConnectingDrawable;
         } else {
             if (mMediaRouteOnDrawable == null) {
-                mMediaRouteOnDrawable = getContext().getResources().getDrawable(
+                mMediaRouteOnDrawable = getContext().getDrawable(
                         R.drawable.ic_media_route_on_holo_dark);
             }
             return mMediaRouteOnDrawable;

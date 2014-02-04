@@ -1039,7 +1039,7 @@ public abstract class Window {
      */
     public void setBackgroundDrawableResource(int resid)
     {
-        setBackgroundDrawable(mContext.getResources().getDrawable(resid));
+        setBackgroundDrawable(mContext.getDrawable(resid));
     }
 
     /**

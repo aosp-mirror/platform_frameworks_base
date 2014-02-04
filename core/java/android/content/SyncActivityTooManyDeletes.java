@@ -95,7 +95,7 @@ public class SyncActivityTooManyDeletes extends Activity
 //                try {
 //                    final Context authContext = createPackageContext(desc.packageName, 0);
 //                    ImageView imageView = new ImageView(this);
-//                    imageView.setImageDrawable(authContext.getResources().getDrawable(desc.iconId));
+//                    imageView.setImageDrawable(authContext.getDrawable(desc.iconId));
 //                    ll.addView(imageView, lp);
 //                } catch (PackageManager.NameNotFoundException e) {
 //                }

@@ -1679,7 +1679,7 @@ public class Editor {
 
     private void updateCursorPosition(int cursorIndex, int top, int bottom, float horizontal) {
         if (mCursorDrawable[cursorIndex] == null)
-            mCursorDrawable[cursorIndex] = mTextView.getResources().getDrawable(
+            mCursorDrawable[cursorIndex] = mTextView.getContext().getDrawable(
                     mTextView.mCursorDrawableRes);
 
         if (mTempRect == null) mTempRect = new Rect();
@@ -2969,7 +2969,7 @@ public class Editor {
                 positionY += mContentView.getMeasuredHeight();
 
                 // Assumes insertion and selection handles share the same height
-                final Drawable handle = mTextView.getResources().getDrawable(
+                final Drawable handle = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleRes);
                 positionY += handle.getIntrinsicHeight();
             }
@@ -3546,7 +3546,7 @@ public class Editor {
 
         private InsertionHandleView getHandle() {
             if (mSelectHandleCenter == null) {
-                mSelectHandleCenter = mTextView.getResources().getDrawable(
+                mSelectHandleCenter = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleRes);
             }
             if (mHandle == null) {
@@ -3592,11 +3592,11 @@ public class Editor {
 
         private void initDrawables() {
             if (mSelectHandleLeft == null) {
-                mSelectHandleLeft = mTextView.getContext().getResources().getDrawable(
+                mSelectHandleLeft = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleLeftRes);
             }
             if (mSelectHandleRight == null) {
-                mSelectHandleRight = mTextView.getContext().getResources().getDrawable(
+                mSelectHandleRight = mTextView.getContext().getDrawable(
                         mTextView.mTextSelectHandleRightRes);
             }
         }
