@@ -24516,6 +24516,7 @@ package android.telephony {
     method public boolean hasIccCard();
     method public boolean iccCloseLogicalChannel(int);
     method public int iccOpenLogicalChannel(java.lang.String);
+    method public java.lang.String sendEnvelope(java.lang.String);
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);

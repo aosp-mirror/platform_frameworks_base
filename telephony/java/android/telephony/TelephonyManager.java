@@ -1477,12 +1477,15 @@ public class TelephonyManager {
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return The logical channel id which is negative on error.
      */
     public int iccOpenLogicalChannel(String AID) {
         try {
-          return getITelephony().iccOpenLogicalChannel(AID);
+            return getITelephony().iccOpenLogicalChannel(AID);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -1494,13 +1497,16 @@ public class TelephonyManager {
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *
      * @param channel is the channel id to be closed as retruned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
     public boolean iccCloseLogicalChannel(int channel) {
         try {
-          return getITelephony().iccCloseLogicalChannel(channel);
+            return getITelephony().iccCloseLogicalChannel(channel);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -1511,6 +1517,9 @@ public class TelephonyManager {
      * Transmit an APDU to the ICC card over a logical channel.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
      *
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
@@ -1527,8 +1536,29 @@ public class TelephonyManager {
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
-          return getITelephony().iccTransmitApduLogicalChannel(channel, cla,
-                  instruction, p1, p2, p3, data);
+            return getITelephony().iccTransmitApduLogicalChannel(channel, cla,
+                    instruction, p1, p2, p3, data);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return "";
+    }
+
+    /**
+     * Send ENVELOPE to the SIM, after processing a proactive command sent by
+     * the SIM.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *
+     * @param contents  String containing SAT/USAT response in hexadecimal
+     *                  format starting with command tag. See TS 102 223 for
+     *                  details.
+     * @return The APDU response from the ICC card.
+     */
+    public String sendEnvelope(String content) {
+        try {
+            return getITelephony().sendEnvelope(content);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
