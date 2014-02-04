@@ -105,7 +105,7 @@ public class KeyguardSecurityModel {
                     break;
 
                 default:
-                    throw new IllegalStateException("Unknown unlock mode:" + mode);
+                    throw new IllegalStateException("Unknown security quality:" + security);
             }
         }
         return mode;

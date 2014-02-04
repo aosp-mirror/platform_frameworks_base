@@ -40,6 +40,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.media.RemoteControlClient;
+import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -448,9 +449,9 @@ public class KeyguardHostView extends KeyguardViewBase {
                 || (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0;
     }
 
-    void setLockPatternUtils(LockPatternUtils utils) {
-        mLockPatternUtils = utils;
-        getSecurityContainer().setLockPatternUtils(utils);
+    @Override
+    protected void setLockPatternUtils(LockPatternUtils utils) {
+        super.setLockPatternUtils(utils);
         getSecurityContainer().updateSecurityViews(mViewStateManager.isBouncing());
     }
 
@@ -510,7 +511,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     };
 
-    public void initializeSwitchingUserState(boolean switching) {
+    @Override
+    public void onUserSwitching(boolean switching) {
         if (!switching && mKeyguardMultiUserSelectorView != null) {
             mKeyguardMultiUserSelectorView.finalizeActiveUserView(false);
         }
@@ -1143,8 +1145,20 @@ public class KeyguardHostView extends KeyguardViewBase {
         mViewStateManager.showBouncer(show);
     }
 
-    public void dispatch(MotionEvent event) {
+    @Override
+    public void onExternalMotionEvent(MotionEvent event) {
         mAppWidgetContainer.handleExternalCameraEvent(event);
+    }
+
+    @Override
+    protected void onCreateOptions(Bundle options) {
+        if (options != null) {
+            int widgetToShow = options.getInt(LockPatternUtils.KEYGUARD_SHOW_APPWIDGET,
+                    AppWidgetManager.INVALID_APPWIDGET_ID);
+            if (widgetToShow != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                goToWidget(widgetToShow);
+            }
+        }
     }
 
 }
