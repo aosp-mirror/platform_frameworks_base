@@ -31,13 +31,14 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * <p>A Drawable that can rotate another Drawable based on the current level
- * value. The start and end angles of rotation can be controlled to map any
- * circular arc to the level values range.</p>
- *
- * <p>It can be defined in an XML file with the <code>&lt;rotate></code> element. For more
- * information, see the guide to <a
- * href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
+ * <p>
+ * A Drawable that can rotate another Drawable based on the current level value.
+ * The start and end angles of rotation can be controlled to map any circular
+ * arc to the level values range.
+ * <p>
+ * It can be defined in an XML file with the <code>&lt;rotate&gt;</code> element.
+ * For more information, see the guide to
+ * <a href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.
  *
  * @attr ref android.R.styleable#RotateDrawable_visible
  * @attr ref android.R.styleable#RotateDrawable_fromDegrees
@@ -49,20 +50,21 @@ import java.io.IOException;
 public class RotateDrawable extends Drawable implements Drawable.Callback {
     private static final float MAX_LEVEL = 10000.0f;
 
-    private RotateState mState;
+    private final RotateState mState;
+
     private boolean mMutated;
 
     /**
-     * <p>Create a new rotating drawable with an empty state.</p>
+     * Create a new rotating drawable with an empty state.
      */
     public RotateDrawable() {
         this(null, null);
     }
 
     /**
-     * <p>Create a new rotating drawable with the specified state. A copy of
+     * Create a new rotating drawable with the specified state. A copy of
      * this state is used as the internal state for the newly created
-     * drawable.</p>
+     * drawable.
      *
      * @param rotateState the state for this drawable
      */
@@ -70,28 +72,42 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         mState = new RotateState(rotateState, this, res);
     }
 
+    @Override
     public void draw(Canvas canvas) {
-        int saveCount = canvas.save();
-
-        Rect bounds = mState.mDrawable.getBounds();
-
-        int w = bounds.right - bounds.left;
-        int h = bounds.bottom - bounds.top;
-
         final RotateState st = mState;
-        
-        float px = st.mPivotXRel ? (w * st.mPivotX) : st.mPivotX;
-        float py = st.mPivotYRel ? (h * st.mPivotY) : st.mPivotY;
+        final Drawable d = st.mDrawable;
+        final Rect bounds = d.getBounds();
+        final int w = bounds.right - bounds.left;
+        final int h = bounds.bottom - bounds.top;
+        final float px = st.mPivotXRel ? (w * st.mPivotX) : st.mPivotX;
+        final float py = st.mPivotYRel ? (h * st.mPivotY) : st.mPivotY;
 
+        final int saveCount = canvas.save();
         canvas.rotate(st.mCurrentDegrees, px + bounds.left, py + bounds.top);
-
-        st.mDrawable.draw(canvas);
-
+        d.draw(canvas);
         canvas.restoreToCount(saveCount);
     }
 
     /**
-     * Returns the drawable rotated by this RotateDrawable.
+     * Sets the drawable rotated by this RotateDrawable.
+     *
+     * @param drawable The drawable to rotate
+     */
+    public void setDrawable(Drawable drawable) {
+        final Drawable oldDrawable = mState.mDrawable;
+        if (oldDrawable != drawable) {
+            if (oldDrawable != null) {
+                oldDrawable.setCallback(null);
+            }
+            mState.mDrawable = drawable;
+            if (drawable != null) {
+                drawable.setCallback(this);
+            }
+        }
+    }
+
+    /**
+     * @return The drawable rotated by this RotateDrawable
      */
     public Drawable getDrawable() {
         return mState.mDrawable;
@@ -103,7 +119,8 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
                 | mState.mChangingConfigurations
                 | mState.mDrawable.getChangingConfigurations();
     }
-    
+
+    @Override
     public void setAlpha(int alpha) {
         mState.mDrawable.setAlpha(alpha);
     }
@@ -113,14 +130,149 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         return mState.mDrawable.getAlpha();
     }
 
+    @Override
     public void setColorFilter(ColorFilter cf) {
         mState.mDrawable.setColorFilter(cf);
     }
 
+    @Override
     public int getOpacity() {
         return mState.mDrawable.getOpacity();
     }
 
+    /**
+     * Sets the start angle for rotation.
+     *
+     * @param fromDegrees Starting angle in degrees
+     */
+    public void setFromDegrees(float fromDegrees) {
+        if (mState.mFromDegrees != fromDegrees) {
+            mState.mFromDegrees = fromDegrees;
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * @return The starting angle for rotation in degrees
+     */
+    public float getFromDegrees() {
+        return mState.mFromDegrees;
+    }
+
+    /**
+     * Sets the end angle for rotation.
+     *
+     * @param toDegrees Ending angle in degrees
+     */
+    public void setToDegrees(float toDegrees) {
+        if (mState.mToDegrees != toDegrees) {
+            mState.mToDegrees = toDegrees;
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * @return The ending angle for rotation in degrees
+     */
+    public float getToDegrees() {
+        return mState.mToDegrees;
+    }
+
+    /**
+     * Sets the X position around which the drawable is rotated.
+     *
+     * @param pivotX X position around which to rotate. If the X pivot is
+     *            relative, the position represents a fraction of the drawable
+     *            width. Otherwise, the position represents an absolute value in
+     *            pixels.
+     * @see #setPivotXRelative(boolean)
+     */
+    public void setPivotX(float pivotX) {
+        if (mState.mPivotX == pivotX) {
+            mState.mPivotX = pivotX;
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * @return X position around which to rotate
+     * @see #setPivotX(float)
+     */
+    public float getPivotX() {
+        return mState.mPivotX;
+    }
+
+    /**
+     * Sets whether the X pivot value represents a fraction of the drawable
+     * width or an absolute value in pixels.
+     *
+     * @param relative True if the X pivot represents a fraction of the drawable
+     *            width, or false if it represents an absolute value in pixels
+     */
+    public void setPivotXRelative(boolean relative) {
+        if (mState.mPivotXRel == relative) {
+            mState.mPivotXRel = relative;
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * @return True if the X pivot represents a fraction of the drawable width,
+     *         or false if it represents an absolute value in pixels
+     * @see #setPivotXRelative(boolean)
+     */
+    public boolean isPivotXRelative() {
+        return mState.mPivotXRel;
+    }
+
+    /**
+     * Sets the Y position around which the drawable is rotated.
+     *
+     * @param pivotY Y position around which to rotate. If the Y pivot is
+     *            relative, the position represents a fraction of the drawable
+     *            height. Otherwise, the position represents an absolute value
+     *            in pixels.
+     * @see #setPivotYRelative(boolean)
+     */
+    public void setPivotY(float pivotY) {
+        if (mState.mPivotY == pivotY) {
+            mState.mPivotY = pivotY;
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * @return Y position around which to rotate
+     * @see #setPivotY(float)
+     */
+    public float getPivotY() {
+        return mState.mPivotY;
+    }
+
+    /**
+     * Sets whether the Y pivot value represents a fraction of the drawable
+     * height or an absolute value in pixels.
+     *
+     * @param relative True if the Y pivot represents a fraction of the drawable
+     *            height, or false if it represents an absolute value in pixels
+     */
+    public void setPivotYRelative(boolean relative) {
+        if (mState.mPivotYRel == relative) {
+            mState.mPivotYRel = relative;
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * @return True if the Y pivot represents a fraction of the drawable height,
+     *         or false if it represents an absolute value in pixels
+     * @see #setPivotYRelative(boolean)
+     */
+    public boolean isPivotYRelative() {
+        return mState.mPivotYRel;
+    }
+
+    @Override
     public void invalidateDrawable(Drawable who) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -128,6 +280,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -135,6 +288,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -157,10 +311,10 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     public boolean isStateful() {
         return mState.mDrawable.isStateful();
     }
-    
+
     @Override
     protected boolean onStateChange(int[] state) {
-        boolean changed = mState.mDrawable.setState(state);
+        final boolean changed = mState.mDrawable.setState(state);
         onBoundsChange(getBounds());
         return changed;
     }
@@ -172,7 +326,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
         mState.mCurrentDegrees = mState.mFromDegrees +
                 (mState.mToDegrees - mState.mFromDegrees) *
-                        ((float) level / MAX_LEVEL);
+                        (level / MAX_LEVEL);
 
         invalidateSelf();
         return true;
@@ -206,16 +360,15 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
-
-        TypedArray a = r.obtainAttributes(attrs,
+        final TypedArray a = r.obtainAttributes(attrs,
                 com.android.internal.R.styleable.RotateDrawable);
 
         super.inflateWithAttributes(r, parser, a,
                 com.android.internal.R.styleable.RotateDrawable_visible);
-        
+
         TypedValue tv = a.peekValue(com.android.internal.R.styleable.RotateDrawable_pivotX);
-        boolean pivotXRel;
-        float pivotX;
+        final boolean pivotXRel;
+        final float pivotX;
         if (tv == null) {
             pivotXRel = true;
             pivotX = 0.5f;
@@ -223,10 +376,10 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
             pivotXRel = tv.type == TypedValue.TYPE_FRACTION;
             pivotX = pivotXRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
         }
-        
+
         tv = a.peekValue(com.android.internal.R.styleable.RotateDrawable_pivotY);
-        boolean pivotYRel;
-        float pivotY;
+        final boolean pivotYRel;
+        final float pivotY;
         if (tv == null) {
             pivotYRel = true;
             pivotY = 0.5f;
@@ -235,12 +388,12 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
             pivotY = pivotYRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
         }
 
-        float fromDegrees = a.getFloat(
+        final float fromDegrees = a.getFloat(
                 com.android.internal.R.styleable.RotateDrawable_fromDegrees, 0.0f);
-        float toDegrees = a.getFloat(
+        final float toDegrees = a.getFloat(
                 com.android.internal.R.styleable.RotateDrawable_toDegrees, 360.0f);
 
-        int res = a.getResourceId(
+        final int res = a.getResourceId(
                 com.android.internal.R.styleable.RotateDrawable_drawable, 0);
         Drawable drawable = null;
         if (res > 0) {
@@ -248,8 +401,8 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         }
 
         a.recycle();
-        
-        int outerDepth = parser.getDepth();
+
+        final int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT &&
                (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
@@ -268,13 +421,15 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
             Log.w("drawable", "No drawable specified for <rotate>");
         }
 
-        mState.mDrawable = drawable;
-        mState.mPivotXRel = pivotXRel;
-        mState.mPivotX = pivotX;
-        mState.mPivotYRel = pivotYRel;
-        mState.mPivotY = pivotY;
-        mState.mFromDegrees = mState.mCurrentDegrees = fromDegrees;
-        mState.mToDegrees = toDegrees;
+        final RotateState st = mState;
+        st.mDrawable = drawable;
+        st.mPivotXRel = pivotXRel;
+        st.mPivotX = pivotX;
+        st.mPivotYRel = pivotYRel;
+        st.mPivotY = pivotY;
+        st.mFromDegrees = fromDegrees;
+        st.mCurrentDegrees = fromDegrees;
+        st.mToDegrees = toDegrees;
 
         if (drawable != null) {
             drawable.setCallback(this);
@@ -291,15 +446,15 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * <p>Represents the state of a rotation for a given drawable. The same
+     * Represents the state of a rotation for a given drawable. The same
      * rotate drawable can be invoked with different states to drive several
-     * rotations at the same time.</p>
+     * rotations at the same time.
      */
     final static class RotateState extends Drawable.ConstantState {
         Drawable mDrawable;
 
         int mChangingConfigurations;
-        
+
         boolean mPivotXRel;
         float mPivotX;
         boolean mPivotYRel;
@@ -311,7 +466,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         float mCurrentDegrees;
 
         private boolean mCanConstantState;
-        private boolean mCheckedConstantState;        
+        private boolean mCheckedConstantState;
 
         public RotateState(RotateState source, RotateDrawable owner, Resources res) {
             if (source != null) {
@@ -336,12 +491,12 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         public Drawable newDrawable() {
             return new RotateDrawable(this, null);
         }
-        
+
         @Override
         public Drawable newDrawable(Resources res) {
             return new RotateDrawable(this, res);
         }
-        
+
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
