@@ -255,11 +255,18 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<byte[]>("android.control.awbAvailableModes", byte[].class);
 
     /**
-     * <p>For AE, AWB, and AF, how many individual
-     * regions can be listed for metering?</p>
+     * <p>List of the maximum number of regions that can be used for metering in
+     * auto-exposure (AE), auto-white balance (AWB), and auto-focus (AF);
+     * this corresponds to the the maximum number of elements in
+     * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}, {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions},
+     * and {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
      */
-    public static final Key<Integer> CONTROL_MAX_REGIONS =
-            new Key<Integer>("android.control.maxRegions", int.class);
+    public static final Key<int[]> CONTROL_MAX_REGIONS =
+            new Key<int[]>("android.control.maxRegions", int[].class);
 
     /**
      * <p>Whether this camera device has a
