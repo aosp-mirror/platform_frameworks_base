@@ -27,6 +27,7 @@ page.tags=adb
   </li>
   <li><a href="#logcat">Enabling logcat logging</a></li>
   <li><a href="#stopping">Stopping the adb server</a></li>
+  <li><a href="#wireless">Wireless usage</a></li>
 </ol>
 
 </div>
@@ -1342,3 +1343,100 @@ application and sends 500 pseudo-random events to it.</p>
 You can then restart the server by issuing any other adb command. </p>
 
 
+<h2 id="wireless">Wireless usage</h2>
+
+<p>
+adb is usually used over USB.  However, it is also possible to use over
+Wi-Fi, as described here.
+</p>
+
+<ol>
+
+<li>
+Connect Android device and adb host computer
+to a common Wi-Fi network accessible to both.
+We have found that not all access points
+are suitable; you may need to use an access point
+whose firewall is configured properly to support adb.
+</li>
+
+<li>
+Connect the device with USB cable to host.
+</li>
+
+<li>
+Make sure adb is running in USB mode on host.
+<pre>
+$ adb usb
+restarting in USB mode
+</pre>
+</li>
+
+<li>
+Connect to the device over USB.
+<pre>
+$ adb devices
+List of devices attached
+######## device
+</pre>
+</li>
+
+<li>
+Restart host adb in tcpip mode.
+<pre>
+$ adb tcpip 5555
+restarting in TCP mode port: 5555
+</pre>
+</li>
+
+<li>
+Find out the IP address of the Android device:
+Settings -> About tablet -> Status -> IP address.
+Remember the IP address, of the form <code>#.#.#.#</code>.
+</li>
+
+<li>
+Connect adb host to device:
+<pre>
+$ adb connect #.#.#.#
+connected to #.#.#.#:5555
+</pre>
+</li>
+
+<li>
+Remove USB cable from device, and confirm you can still access device:
+<pre>
+$ adb devices
+List of devices attached
+#.#.#.#:5555 device
+</pre>
+
+</ol>
+
+<p>
+You're now good to go!
+</p>
+
+<p>
+If the adb connection is ever lost:
+</p>
+
+<ol>
+
+<li>
+Make sure that your host is still connected to the same Wi-Fi network your Android device is.
+</li>
+
+<li>
+Reconnect by executing the "adb connect" step again.
+</li>
+
+<li>
+Or if that doesn't work, reset your adb host:
+<pre>
+adb kill-server
+</pre>
+and then start over from the beginning.
+</li>
+
+</ol>
