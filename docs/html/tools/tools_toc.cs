@@ -240,12 +240,6 @@ class="en">Platforms</span></a></li>
 
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot
-?>tools/samples/index.html"><span class="en">Samples</span></a></div>
-  </li>
-
-
-  <li class="nav-section">
     <div class="nav-section-header">
     <a href="<?cs var:toroot ?>tools/adk/index.html">
       <span class="en">ADK</span></a>
