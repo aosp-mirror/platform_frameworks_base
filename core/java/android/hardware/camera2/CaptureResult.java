@@ -212,9 +212,9 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>List of areas to use for
-     * metering</p>
+     * metering.</p>
      * <p>Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight. The rectangle is defined inclusive of the
+     * xmax, ymax, weight. The rectangle is defined to be inclusive of the
      * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
@@ -226,7 +226,7 @@ public final class CaptureResult extends CameraMetadata {
      * needs to be used by the HAL. If the metering region is
      * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
      * should ignore the sections outside the region and output the
-     * used sections in the frame metadata</p>
+     * used sections in the frame metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
@@ -405,9 +405,9 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>List of areas to use for focus
-     * estimation</p>
+     * estimation.</p>
      * <p>Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight. The rectangle is defined inclusive of the
+     * xmax, ymax, weight. The rectangle is defined to be inclusive of the
      * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
@@ -419,7 +419,7 @@ public final class CaptureResult extends CameraMetadata {
      * needs to be used by the HAL. If the focusing region is
      * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
      * should ignore the sections outside the region and output the
-     * used sections in the frame metadata</p>
+     * used sections in the frame metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
@@ -794,10 +794,10 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>List of areas to use for illuminant
-     * estimation</p>
+     * estimation.</p>
      * <p>Only used in AUTO mode.</p>
      * <p>Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight. The rectangle is defined inclusive of the
+     * xmax, ymax, weight. The rectangle is defined to be inclusive of the
      * specified coordinates.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
@@ -809,7 +809,7 @@ public final class CaptureResult extends CameraMetadata {
      * needs to be used by the HAL. If the metering region is
      * outside the current {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, the HAL
      * should ignore the sections outside the region and output the
-     * used sections in the frame metadata</p>
+     * used sections in the frame metadata.</p>
      *
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
