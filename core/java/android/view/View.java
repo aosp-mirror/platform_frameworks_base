@@ -14941,7 +14941,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackgroundSizeChanged) {
             // We should see the background invalidate itself, but just to be
             // careful we're going to clear the display list and force redraw.
-            mBackgroundDisplayList.clear();
+            if (mBackgroundDisplayList != null) {
+                mBackgroundDisplayList.clear();
+            }
+
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
         }
