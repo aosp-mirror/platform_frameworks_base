@@ -45,7 +45,6 @@ class Task {
         if (mAppTokens.size() == 0) {
             EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, taskId,
                     "removeAppToken: last token");
-            mStack.removeTask(this);
             return true;
         }
         return false;

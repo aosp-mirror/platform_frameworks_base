@@ -3125,7 +3125,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         int ret = pir.sendInner(0, fillInIntent, resolvedType, null, null,
-                resultTo, resultWho, requestCode, flagsMask, flagsValues, options);
+                resultTo, resultWho, requestCode, flagsMask, flagsValues, options, null);
         return ret;
     }
 
@@ -3237,7 +3237,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final int startActivityInPackage(int uid, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, Bundle options, int userId) {
+            String resultWho, int requestCode, int startFlags, Bundle options, int userId,
+                    IActivityContainer container) {
 
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityInPackage", null);
@@ -3245,7 +3246,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
-                null, null, null, null, options, userId, null);
+                null, null, null, null, options, userId, container);
         return ret;
     }
 

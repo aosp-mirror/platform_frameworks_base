@@ -150,8 +150,6 @@ class WindowStateAnimator {
     int mAttrFlags;
     int mAttrType;
 
-    final int mLayerStack;
-
     public WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -159,7 +157,7 @@ class WindowStateAnimator {
         mAnimator = service.mAnimator;
         mPolicy = service.mPolicy;
         mContext = service.mContext;
-        final DisplayInfo displayInfo = win.mDisplayContent.getDisplayInfo();
+        final DisplayInfo displayInfo = win.getDisplayContent().getDisplayInfo();
         mAnimDw = displayInfo.appWidth;
         mAnimDh = displayInfo.appHeight;
 
@@ -171,7 +169,6 @@ class WindowStateAnimator {
         mAttrFlags = win.mAttrs.flags;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
-        mLayerStack = win.mDisplayContent.getDisplay().getLayerStack();
     }
 
     public void setAnimation(Animation anim) {
@@ -243,7 +240,8 @@ class WindowStateAnimator {
         // Save the animation state as it was before this step so WindowManagerService can tell if
         // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
         mWasAnimating = mAnimating;
-        if (mService.okToDisplay()) {
+        final DisplayContent displayContent = mWin.getDisplayContent();
+        if (displayContent != null && mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
             if (mWin.isDrawnLw() && mAnimation != null) {
@@ -258,7 +256,7 @@ class WindowStateAnimator {
                         " scale=" + mService.mWindowAnimationScale);
                     mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
                             mAnimDw, mAnimDh);
-                    final DisplayInfo displayInfo = mWin.mDisplayContent.getDisplayInfo();
+                    final DisplayInfo displayInfo = displayContent.getDisplayInfo();
                     mAnimDw = displayInfo.appWidth;
                     mAnimDh = displayInfo.appHeight;
                     mAnimation.setStartTime(currentTime);
@@ -337,7 +335,9 @@ class WindowStateAnimator {
                         + mWin.mPolicyVisibilityAfterAnim);
             }
             mWin.mPolicyVisibility = mWin.mPolicyVisibilityAfterAnim;
-            mWin.mDisplayContent.layoutNeeded = true;
+            if (displayContent != null) {
+                displayContent.layoutNeeded = true;
+            }
             if (!mWin.mPolicyVisibility) {
                 if (mService.mCurrentFocus == mWin) {
                     if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.i(TAG,
@@ -363,11 +363,13 @@ class WindowStateAnimator {
         } else if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.mPolicyVisibility) {
             // Upon completion of a not-visible to visible status bar animation a relayout is
             // required.
-            mWin.mDisplayContent.layoutNeeded = true;
+            if (displayContent != null) {
+                displayContent.layoutNeeded = true;
+            }
         }
 
         finishExit();
-        final int displayId = mWin.mDisplayContent.getDisplayId();
+        final int displayId = mWin.getDisplayId();
         mAnimator.setPendingLayoutChanges(displayId, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats(
                 "WindowStateAnimator", mAnimator.getPendingLayoutChanges(displayId));
@@ -732,7 +734,10 @@ class WindowStateAnimator {
                     mSurfaceY = mWin.mFrame.top + mWin.mYOffset;
                     mSurfaceControl.setPosition(mSurfaceX, mSurfaceY);
                     mSurfaceLayer = mAnimLayer;
-                    mSurfaceControl.setLayerStack(mLayerStack);
+                    final DisplayContent displayContent = mWin.getDisplayContent();
+                    if (displayContent != null) {
+                        mSurfaceControl.setLayerStack(displayContent.getDisplay().getLayerStack());
+                    }
                     mSurfaceControl.setLayer(mAnimLayer);
                     mSurfaceControl.setAlpha(0);
                     mSurfaceShown = false;
@@ -921,8 +926,7 @@ class WindowStateAnimator {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
             //TODO (multidisplay): Magnification is supported only for the default display.
-            if (mService.mDisplayMagnifier != null
-                    && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
                 MagnificationSpec spec = mService.mDisplayMagnifier
                         .getMagnificationSpecForWindowLocked(mWin);
                 if (spec != null && !spec.isNop()) {
@@ -1002,7 +1006,7 @@ class WindowStateAnimator {
                 && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer);
         MagnificationSpec spec = null;
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mDisplayMagnifier != null && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+        if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
             spec = mService.mDisplayMagnifier.getMagnificationSpecForWindowLocked(mWin);
         }
         if (applyUniverseTransformation || spec != null) {
@@ -1080,7 +1084,11 @@ class WindowStateAnimator {
 
     void updateSurfaceWindowCrop(final boolean recoveringMemory) {
         final WindowState w = mWin;
-        DisplayInfo displayInfo = w.mDisplayContent.getDisplayInfo();
+        final DisplayContent displayContent = w.getDisplayContent();
+        if (displayContent == null) {
+            return;
+        }
+        DisplayInfo displayInfo = displayContent.getDisplayInfo();
 
         // Need to recompute a new system decor rect each time.
         if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
@@ -1181,8 +1189,7 @@ class WindowStateAnimator {
                         "SIZE " + width + "x" + height, null);
                 mSurfaceResized = true;
                 mSurfaceControl.setSize(width, height);
-                final int displayId = w.mDisplayContent.getDisplayId();
-                mAnimator.setPendingLayoutChanges(displayId,
+                mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
                     w.getStack().startDimmingIfNeeded(this);
@@ -1444,7 +1451,10 @@ class WindowStateAnimator {
                         // do a layout.  If called from within the transaction
                         // loop, this will cause it to restart with a new
                         // layout.
-                        c.mDisplayContent.layoutNeeded = true;
+                        final DisplayContent displayContent = c.getDisplayContent();
+                        if (displayContent != null) {
+                            displayContent.layoutNeeded = true;
+                        }
                     }
                 }
             }
