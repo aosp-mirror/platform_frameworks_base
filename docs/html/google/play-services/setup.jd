@@ -92,7 +92,10 @@ you can continue development with the Google Play services SDK, but must instead
 <p><b>Using Android Studio:</b></p>
 
 <ol>
-  <li>Open the <code>build.gradle</code> file inside your application directory.</li>
+  <li>Open the <code>build.gradle</code> file inside your application module directory. 
+      <p class="note"><strong>Note:</strong> Android Studio projects contain a top-level 
+      <code>build.gradle</code> file and a <code>build.gradle</code> file for each module. 
+      Be sure to edit the file for your application module.</p></li>
   <li>Add a new build rule under <code>dependencies</code> for the latest version of
 <code>play-services</code>. For example:
 <pre class="no-pretty-print">
