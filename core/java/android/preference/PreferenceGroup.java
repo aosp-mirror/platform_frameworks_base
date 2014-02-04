@@ -151,16 +151,15 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
             }
         }
 
-        int insertionIndex = Collections.binarySearch(mPreferenceList, preference);
-        if (insertionIndex < 0) {
-            insertionIndex = insertionIndex * -1 - 1;
-        }
-
         if (!onPrepareAddPreference(preference)) {
             return false;
         }
 
         synchronized(this) {
+            int insertionIndex = Collections.binarySearch(mPreferenceList, preference);
+            if (insertionIndex < 0) {
+                insertionIndex = insertionIndex * -1 - 1;
+            }
             mPreferenceList.add(insertionIndex, preference);
         }
 
