@@ -591,7 +591,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 icon.setImageDrawable(mIcon);
                 icon.setScaleType(ScaleType.CENTER_CROP);
             } else if (mIconResId != 0) {
-                icon.setImageDrawable(context.getResources().getDrawable(mIconResId));
+                icon.setImageDrawable(context.getDrawable(mIconResId));
             }
             if (mMessage != null) {
                 messageView.setText(mMessage);
@@ -681,7 +681,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
             boolean on = ((mState == State.On) || (mState == State.TurningOn));
             if (icon != null) {
-                icon.setImageDrawable(context.getResources().getDrawable(
+                icon.setImageDrawable(context.getDrawable(
                         (on ? mEnabledIconResId : mDisabledIconResid)));
                 icon.setEnabled(enabled);
             }

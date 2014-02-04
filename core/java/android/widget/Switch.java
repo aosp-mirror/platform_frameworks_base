@@ -417,7 +417,7 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_track
      */
     public void setTrackResource(int resId) {
-        setTrackDrawable(getContext().getResources().getDrawable(resId));
+        setTrackDrawable(getContext().getDrawable(resId));
     }
 
     /**
@@ -453,7 +453,7 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_thumb
      */
     public void setThumbResource(int resId) {
-        setThumbDrawable(getContext().getResources().getDrawable(resId));
+        setThumbDrawable(getContext().getDrawable(resId));
     }
 
     /**

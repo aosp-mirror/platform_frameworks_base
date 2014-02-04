@@ -129,7 +129,7 @@ public class ChooseAccountTypeActivity extends Activity {
             Drawable icon = null;
             try {
                 Context authContext = createPackageContext(desc.packageName, 0);
-                icon = authContext.getResources().getDrawable(desc.iconId);
+                icon = authContext.getDrawable(desc.iconId);
                 final CharSequence sequence = authContext.getResources().getText(desc.labelId);
                 if (sequence != null) {
                     name = sequence.toString();

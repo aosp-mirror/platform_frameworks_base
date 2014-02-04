@@ -1029,7 +1029,7 @@ public class CalendarView extends FrameLayout {
 
         @Override
         public void setSelectedDateVerticalBar(int resourceId) {
-            Drawable drawable = mDelegator.getResources().getDrawable(resourceId);
+            Drawable drawable = mDelegator.getContext().getDrawable(resourceId);
             setSelectedDateVerticalBar(drawable);
         }
 

@@ -642,7 +642,7 @@ public class ImageView extends View {
 
         if (mResource != 0) {
             try {
-                d = rsrc.getDrawable(mResource);
+                d = mContext.getDrawable(mResource);
             } catch (Exception e) {
                 Log.w("ImageView", "Unable to find resource: " + mResource, e);
                 // Don't try again.
@@ -655,7 +655,7 @@ public class ImageView extends View {
                     // Load drawable through Resources, to get the source density information
                     ContentResolver.OpenResourceIdResult r =
                             mContext.getContentResolver().getResourceId(mUri);
-                    d = r.r.getDrawable(r.id);
+                    d = r.r.getDrawable(r.id, mContext.getTheme());
                 } catch (Exception e) {
                     Log.w("ImageView", "Unable to open content: " + mUri, e);
                 }

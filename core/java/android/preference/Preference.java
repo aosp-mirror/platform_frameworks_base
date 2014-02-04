@@ -561,7 +561,7 @@ public class Preference implements Comparable<Preference> {
         if (imageView != null) {
             if (mIconResId != 0 || mIcon != null) {
                 if (mIcon == null) {
-                    mIcon = getContext().getResources().getDrawable(mIconResId);
+                    mIcon = getContext().getDrawable(mIconResId);
                 }
                 if (mIcon != null) {
                     imageView.setImageDrawable(mIcon);
@@ -694,7 +694,7 @@ public class Preference implements Comparable<Preference> {
      */
     public void setIcon(int iconResId) {
         mIconResId = iconResId;
-        setIcon(mContext.getResources().getDrawable(iconResId));
+        setIcon(mContext.getDrawable(iconResId));
     }
 
     /**

@@ -704,7 +704,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // Otherwise, set the normal panel background
                 backgroundResId = st.background;
             }
-            st.decorView.setWindowBackground(getContext().getResources().getDrawable(
+            st.decorView.setWindowBackground(getContext().getDrawable(
                     backgroundResId));
 
             ViewParent shownPanelParent = st.shownPanelView.getParent();
@@ -1289,7 +1289,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (st.resid != resId) {
                 st.resid = resId;
                 st.uri = null;
-                st.local = getContext().getResources().getDrawable(resId);
+                st.local = getContext().getDrawable(resId);
                 updateDrawable(featureId, st, false);
             }
         } else {
@@ -2305,7 +2305,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if (mMenuBackground == null && mFeatureId < 0
                             && getAttributes().height
                             == WindowManager.LayoutParams.MATCH_PARENT) {
-                        mMenuBackground = getContext().getResources().getDrawable(
+                        mMenuBackground = getContext().getDrawable(
                                 com.android.internal.R.drawable.menu_background);
                     }
                     if (mMenuBackground != null) {
@@ -3122,12 +3122,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (getContainer() == null) {
             Drawable drawable = mBackgroundDrawable;
             if (mBackgroundResource != 0) {
-                drawable = getContext().getResources().getDrawable(mBackgroundResource);
+                drawable = getContext().getDrawable(mBackgroundResource);
             }
             mDecor.setWindowBackground(drawable);
             drawable = null;
             if (mFrameResource != 0) {
-                drawable = getContext().getResources().getDrawable(mFrameResource);
+                drawable = getContext().getDrawable(mFrameResource);
             }
             mDecor.setWindowFrame(drawable);
 

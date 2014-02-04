@@ -1604,7 +1604,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void useDefaultSelector() {
-        setSelector(getResources().getDrawable(
+        setSelector(getContext().getDrawable(
                 com.android.internal.R.drawable.list_selector_background));
     }
 
@@ -2616,7 +2616,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @attr ref android.R.styleable#AbsListView_listSelector
      */
     public void setSelector(int resID) {
-        setSelector(getResources().getDrawable(resID));
+        setSelector(getContext().getDrawable(resID));
     }
 
     public void setSelector(Drawable sel) {

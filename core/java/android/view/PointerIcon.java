@@ -140,7 +140,7 @@ public final class PointerIcon implements Parcelable {
         if ((resourceId & 0xff000000) == 0x01000000) {
             icon.mSystemIconResourceId = resourceId;
         } else {
-            icon.loadResource(context.getResources(), resourceId);
+            icon.loadResource(context, context.getResources(), resourceId);
         }
         return icon;
     }
@@ -198,7 +198,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         PointerIcon icon = new PointerIcon(STYLE_CUSTOM);
-        icon.loadResource(resources, resourceId);
+        icon.loadResource(null, resources, resourceId);
         return icon;
     }
 
@@ -224,7 +224,7 @@ public final class PointerIcon implements Parcelable {
 
         PointerIcon result = new PointerIcon(mStyle);
         result.mSystemIconResourceId = mSystemIconResourceId;
-        result.loadResource(context.getResources(), mSystemIconResourceId);
+        result.loadResource(context, context.getResources(), mSystemIconResourceId);
         return result;
     }
 
@@ -373,7 +373,7 @@ public final class PointerIcon implements Parcelable {
         return true;
     }
 
-    private void loadResource(Resources resources, int resourceId) {
+    private void loadResource(Context context, Resources resources, int resourceId) {
         XmlResourceParser parser = resources.getXml(resourceId);
         final int bitmapRes;
         final float hotSpotX;
@@ -397,7 +397,12 @@ public final class PointerIcon implements Parcelable {
             throw new IllegalArgumentException("<pointer-icon> is missing bitmap attribute.");
         }
 
-        Drawable drawable = resources.getDrawable(bitmapRes);
+        Drawable drawable;
+        if (context == null) {
+            drawable = resources.getDrawable(bitmapRes);
+        } else {
+            drawable = context.getDrawable(bitmapRes);
+        }
         if (!(drawable instanceof BitmapDrawable)) {
             throw new IllegalArgumentException("<pointer-icon> bitmap attribute must "
                     + "refer to a bitmap drawable.");

@@ -366,7 +366,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @attr ref android.R.styleable#PopupWindow_popupBackground
      */
     public void setDropDownBackgroundResource(int id) {
-        mPopup.setBackgroundDrawable(getResources().getDrawable(id));
+        mPopup.setBackgroundDrawable(getContext().getDrawable(id));
     }
     
     /**

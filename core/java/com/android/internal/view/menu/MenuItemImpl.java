@@ -385,7 +385,7 @@ public final class MenuItemImpl implements MenuItem {
         }
 
         if (mIconResId != NO_ICON) {
-            Drawable icon =  mMenu.getResources().getDrawable(mIconResId);
+            Drawable icon =  mMenu.getContext().getDrawable(mIconResId);
             mIconResId = NO_ICON;
             mIconDrawable = icon;
             return icon;

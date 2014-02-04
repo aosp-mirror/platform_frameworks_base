@@ -281,7 +281,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * @attr ref android.R.styleable#Spinner_popupBackground
      */
     public void setPopupBackgroundResource(int resId) {
-        setPopupBackgroundDrawable(getContext().getResources().getDrawable(resId));
+        setPopupBackgroundDrawable(getContext().getDrawable(resId));
     }
 
     /**

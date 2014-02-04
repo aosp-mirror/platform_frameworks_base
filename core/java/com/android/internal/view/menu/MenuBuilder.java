@@ -1121,7 +1121,7 @@ public class MenuBuilder implements Menu {
             }
             
             if (iconRes > 0) {
-                mHeaderIcon = r.getDrawable(iconRes);
+                mHeaderIcon = getContext().getDrawable(iconRes);
             } else if (icon != null) {
                 mHeaderIcon = icon;
             }

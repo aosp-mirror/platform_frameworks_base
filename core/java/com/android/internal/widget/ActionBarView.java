@@ -697,7 +697,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setIcon(int resId) {
-        setIcon(resId != 0 ? mContext.getResources().getDrawable(resId) : null);
+        setIcon(resId != 0 ? mContext.getDrawable(resId) : null);
     }
 
     public boolean hasIcon() {
@@ -712,7 +712,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setLogo(int resId) {
-        setLogo(resId != 0 ? mContext.getResources().getDrawable(resId) : null);
+        setLogo(resId != 0 ? mContext.getDrawable(resId) : null);
     }
 
     public boolean hasLogo() {
@@ -1417,7 +1417,7 @@ public class ActionBarView extends AbsActionBarView {
 
         public void setUpIndicator(int resId) {
             mUpIndicatorRes = resId;
-            mUpView.setImageDrawable(resId != 0 ? getResources().getDrawable(resId) : null);
+            mUpView.setImageDrawable(resId != 0 ? getContext().getDrawable(resId) : null);
         }
 
         @Override

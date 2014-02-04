@@ -2073,11 +2073,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setCompoundDrawablesWithIntrinsicBounds(int left, int top, int right, int bottom) {
-        final Resources resources = getContext().getResources();
-        setCompoundDrawablesWithIntrinsicBounds(left != 0 ? resources.getDrawable(left) : null,
-                top != 0 ? resources.getDrawable(top) : null,
-                right != 0 ? resources.getDrawable(right) : null,
-                bottom != 0 ? resources.getDrawable(bottom) : null);
+        final Context context = getContext();
+        setCompoundDrawablesWithIntrinsicBounds(left != 0 ? context.getDrawable(left) : null,
+                top != 0 ? context.getDrawable(top) : null,
+                right != 0 ? context.getDrawable(right) : null,
+                bottom != 0 ? context.getDrawable(bottom) : null);
     }
 
     /**
@@ -2247,12 +2247,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @android.view.RemotableViewMethod
     public void setCompoundDrawablesRelativeWithIntrinsicBounds(int start, int top, int end,
             int bottom) {
-        final Resources resources = getContext().getResources();
+        final Context context = getContext();
         setCompoundDrawablesRelativeWithIntrinsicBounds(
-                start != 0 ? resources.getDrawable(start) : null,
-                top != 0 ? resources.getDrawable(top) : null,
-                end != 0 ? resources.getDrawable(end) : null,
-                bottom != 0 ? resources.getDrawable(bottom) : null);
+                start != 0 ? context.getDrawable(start) : null,
+                top != 0 ? context.getDrawable(top) : null,
+                end != 0 ? context.getDrawable(end) : null,
+                bottom != 0 ? context.getDrawable(bottom) : null);
     }
 
     /**
@@ -4385,8 +4385,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (error == null) {
             setError(null, null);
         } else {
-            Drawable dr = getContext().getResources().
-                getDrawable(com.android.internal.R.drawable.indicator_input_error);
+            Drawable dr = getContext().getDrawable(
+                    com.android.internal.R.drawable.indicator_input_error);
 
             dr.setBounds(0, 0, dr.getIntrinsicWidth(), dr.getIntrinsicHeight());
             setError(error, dr);

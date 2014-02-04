@@ -1081,7 +1081,7 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public Tab setIcon(int resId) {
-            return setIcon(mContext.getResources().getDrawable(resId));
+            return setIcon(mContext.getDrawable(resId));
         }
 
         @Override

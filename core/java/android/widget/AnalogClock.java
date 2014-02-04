@@ -80,17 +80,17 @@ public class AnalogClock extends View {
 
         mDial = a.getDrawable(com.android.internal.R.styleable.AnalogClock_dial);
         if (mDial == null) {
-            mDial = r.getDrawable(com.android.internal.R.drawable.clock_dial);
+            mDial = context.getDrawable(com.android.internal.R.drawable.clock_dial);
         }
 
         mHourHand = a.getDrawable(com.android.internal.R.styleable.AnalogClock_hand_hour);
         if (mHourHand == null) {
-            mHourHand = r.getDrawable(com.android.internal.R.drawable.clock_hand_hour);
+            mHourHand = context.getDrawable(com.android.internal.R.drawable.clock_hand_hour);
         }
 
         mMinuteHand = a.getDrawable(com.android.internal.R.styleable.AnalogClock_hand_minute);
         if (mMinuteHand == null) {
-            mMinuteHand = r.getDrawable(com.android.internal.R.drawable.clock_hand_minute);
+            mMinuteHand = context.getDrawable(com.android.internal.R.drawable.clock_hand_minute);
         }
 
         mCalendar = new Time();

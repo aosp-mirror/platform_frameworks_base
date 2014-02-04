@@ -163,7 +163,7 @@ public class ActionMenuItem implements MenuItem {
 
     public MenuItem setIcon(int iconRes) {
         mIconResId = iconRes;
-        mIconDrawable = mContext.getResources().getDrawable(iconRes);
+        mIconDrawable = mContext.getDrawable(iconRes);
         return this;
     }
 

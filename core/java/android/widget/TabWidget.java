@@ -120,28 +120,27 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         setChildrenDrawingOrderEnabled(true);
 
         final Context context = mContext;
-        final Resources resources = context.getResources();
 
         // Tests the target Sdk version, as set in the Manifest. Could not be set using styles.xml
         // in a values-v? directory which targets the current platform Sdk version instead.
         if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
             // Donut apps get old color scheme
             if (mLeftStrip == null) {
-                mLeftStrip = resources.getDrawable(
+                mLeftStrip = context.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_left_v4);
             }
             if (mRightStrip == null) {
-                mRightStrip = resources.getDrawable(
+                mRightStrip = context.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_right_v4);
             }
         } else {
             // Use modern color scheme for Eclair and beyond
             if (mLeftStrip == null) {
-                mLeftStrip = resources.getDrawable(
+                mLeftStrip = context.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_left);
             }
             if (mRightStrip == null) {
-                mRightStrip = resources.getDrawable(
+                mRightStrip = context.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_right);
             }
         }
@@ -246,7 +245,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * divider.
      */
     public void setDividerDrawable(int resId) {
-        setDividerDrawable(getResources().getDrawable(resId));
+        setDividerDrawable(mContext.getDrawable(resId));
     }
     
     /**
@@ -267,7 +266,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * left strip drawable
      */
     public void setLeftStripDrawable(int resId) {
-        setLeftStripDrawable(getResources().getDrawable(resId));
+        setLeftStripDrawable(mContext.getDrawable(resId));
     }
 
     /**
@@ -288,7 +287,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * right strip drawable
      */
     public void setRightStripDrawable(int resId) {
-        setRightStripDrawable(getResources().getDrawable(resId));
+        setRightStripDrawable(mContext.getDrawable(resId));
     }
 
     /**
