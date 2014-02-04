@@ -141,7 +141,7 @@ public class FileA3D extends BaseObj {
                 return null;
             }
 
-            int objectID = rs.nFileA3DGetEntryByIndex(entry.mID, entry.mIndex);
+            long objectID = rs.nFileA3DGetEntryByIndex(entry.mID, entry.mIndex);
             if(objectID == 0) {
                 return null;
             }
@@ -297,7 +297,7 @@ public class FileA3D extends BaseObj {
 
         long fileId = 0;
         if (is instanceof AssetManager.AssetInputStream) {
-            int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+            long asset = ((AssetManager.AssetInputStream) is).getNativeAsset();
             fileId = rs.nFileA3DCreateFromAssetStream(asset);
         } else {
             throw new RSRuntimeException("Unsupported asset stream");
