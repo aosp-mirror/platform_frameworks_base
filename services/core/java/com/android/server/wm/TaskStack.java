@@ -41,7 +41,7 @@ public class TaskStack {
     private final WindowManagerService mService;
 
     /** The display this stack sits under. */
-    private final DisplayContent mDisplayContent;
+    private DisplayContent mDisplayContent;
 
     /** The Tasks that define this stack. Oldest Tasks are at the bottom. The ordering must match
      * mTaskHistory in the ActivityStack with the same mStackId */
@@ -52,13 +52,13 @@ public class TaskStack {
     Rect mBounds = new Rect();
 
     /** Used to support {@link android.view.WindowManager.LayoutParams#FLAG_DIM_BEHIND} */
-    final DimLayer mDimLayer;
+    DimLayer mDimLayer;
 
     /** The particular window with FLAG_DIM_BEHIND set. If null, hide mDimLayer. */
     WindowStateAnimator mDimWinAnimator;
 
     /** Support for non-zero {@link android.view.animation.Animation#getBackgroundColor()} */
-    final DimLayer mAnimationBackgroundSurface;
+    DimLayer mAnimationBackgroundSurface;
 
     /** The particular window with an Animation with non-zero background color. */
     WindowStateAnimator mAnimationBackgroundAnimator;
@@ -67,12 +67,9 @@ public class TaskStack {
      * then stop any dimming. */
     boolean mDimmingTag;
 
-    TaskStack(WindowManagerService service, int stackId, DisplayContent displayContent) {
+    TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
-        mDisplayContent = displayContent;
-        mDimLayer = new DimLayer(service, this);
-        mAnimationBackgroundSurface = new DimLayer(service, this);
         // TODO: remove bounds from log, they are always 0.
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, mBounds.left, mBounds.top,
                 mBounds.right, mBounds.bottom);
@@ -121,12 +118,16 @@ public class TaskStack {
     }
 
     void getBounds(Rect out) {
-        if (mBounds.isEmpty()) {
-            mDisplayContent.getLogicalDisplayRect(out);
+        if (mDisplayContent != null) {
+            if (mBounds.isEmpty()) {
+                mDisplayContent.getLogicalDisplayRect(out);
+            } else {
+                out.set(mBounds);
+            }
+            out.intersect(mDisplayContent.mContentRect);
         } else {
             out.set(mBounds);
         }
-        out.intersect(mDisplayContent.mContentRect);
     }
 
     boolean isFullscreen() {
@@ -198,22 +199,37 @@ public class TaskStack {
     void removeTask(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
         mTasks.remove(task);
-        mDisplayContent.removeTask(task);
-        if (mTasks.isEmpty()) {
-            mDisplayContent.moveStack(this, false);
+        if (mDisplayContent != null) {
+            mDisplayContent.removeTask(task);
+            if (mTasks.isEmpty()) {
+                mDisplayContent.moveStack(this, false);
+            }
+            mDisplayContent.layoutNeeded = true;
         }
-        mDisplayContent.layoutNeeded = true;
     }
 
-    int remove() {
-        mAnimationBackgroundSurface.destroySurface();
-        mDimLayer.destroySurface();
-        EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
-        TaskStack next = mDisplayContent.removeStack(this);
-        if (next != null) {
-            return next.mStackId;
+    void attachDisplayContent(DisplayContent displayContent) {
+        if (mDisplayContent != null) {
+            throw new IllegalStateException("attachDisplayContent: Already attached");
         }
-        return -1;
+
+        mDisplayContent = displayContent;
+        mDimLayer = new DimLayer(mService, this, displayContent);
+        mAnimationBackgroundSurface = new DimLayer(mService, this, displayContent);
+
+        for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
+            Task task = mTasks.get(taskNdx);
+            displayContent.addTask(task, true);
+        }
+    }
+
+    void detach() {
+        EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
+        mAnimationBackgroundSurface.destroySurface();
+        mAnimationBackgroundSurface = null;
+        mDimLayer.destroySurface();
+        mDimLayer = null;
+        mDisplayContent = null;
     }
 
     void resetAnimationBackgroundAnimator() {

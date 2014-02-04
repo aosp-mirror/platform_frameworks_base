@@ -51,9 +51,9 @@ public class DimLayer {
     /** Owning stack */
     final TaskStack mStack;
 
-    DimLayer(WindowManagerService service, TaskStack stack) {
+    DimLayer(WindowManagerService service, TaskStack stack, DisplayContent displayContent) {
         mStack = stack;
-        mDisplayContent = stack.getDisplayContent();
+        mDisplayContent = displayContent;
         final int displayId = mDisplayContent.getDisplayId();
         if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
         SurfaceControl.openTransaction();

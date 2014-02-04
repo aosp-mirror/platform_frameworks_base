@@ -29,7 +29,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
+import android.os.Debug;
 import android.os.RemoteCallbackList;
+import android.os.SystemClock;
 import android.util.TimeUtils;
 import android.view.IWindowFocusObserver;
 import android.view.IWindowId;
@@ -593,9 +595,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         if (mIsWallpaper && (fw != mFrame.width() || fh != mFrame.height())) {
-            final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-            mService.updateWallpaperOffsetLocked(this,
-                    displayInfo.logicalWidth, displayInfo.logicalHeight, false);
+            final DisplayContent displayContent = getDisplayContent();
+            if (displayContent != null) {
+                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                mService.updateWallpaperOffsetLocked(this,
+                        displayInfo.logicalWidth, displayInfo.logicalHeight, false);
+            }
         }
 
         if (DEBUG_LAYOUT || WindowManagerService.localLOGV) Slog.v(TAG,
@@ -708,8 +713,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged;
     }
 
+    public DisplayContent getDisplayContent() {
+        return mAppToken == null ? mDisplayContent : getStack().getDisplayContent();
+    }
+
     public int getDisplayId() {
-        return mDisplayContent.getDisplayId();
+        final DisplayContent displayContent = getDisplayContent();
+        if (displayContent == null) {
+            return -1;
+        }
+        return displayContent.getDisplayId();
     }
 
     TaskStack getStack() {
@@ -722,7 +735,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 }
                 Slog.e(TAG, "getStack: mStack null for task=" + task);
             } else {
-                Slog.e(TAG, "getStack: couldn't find taskId=" + wtoken.groupId);
+                Slog.e(TAG, "getStack: " + this + " couldn't find taskId=" + wtoken.groupId
+                    + " Callers=" + Debug.getCallers(4));
             }
         }
         return mDisplayContent.getHomeStack();
@@ -1196,7 +1210,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean isDefaultDisplay() {
-        return mDisplayContent.isDefaultDisplay;
+        final DisplayContent displayContent = getDisplayContent();
+        if (displayContent == null) {
+            // Only a window that was on a non-default display can be detached from it.
+            return false;
+        }
+        return getDisplayContent().isDefaultDisplay;
     }
 
     public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
@@ -1213,7 +1232,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && win.mAppToken != null && win.mAppToken.showWhenLocked) {
             // Save some cycles by not calling getDisplayInfo unless it is an application
             // window intended for all users.
-            final DisplayInfo displayInfo = win.mDisplayContent.getDisplayInfo();
+            final DisplayContent displayContent = win.getDisplayContent();
+            if (displayContent == null) {
+                return true;
+            }
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             if (win.mFrame.left <= 0 && win.mFrame.top <= 0
                     && win.mFrame.right >= displayInfo.appWidth
                     && win.mFrame.bottom >= displayInfo.appHeight) {
@@ -1255,7 +1278,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     WindowList getWindowList() {
-        return mDisplayContent.getWindowList();
+        final DisplayContent displayContent = getDisplayContent();
+        return displayContent == null ? null : displayContent.getWindowList();
     }
 
     /**
@@ -1284,6 +1308,43 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    void reportResized() {
+        try {
+            final Rect frame = mFrame;
+            final Rect overscanInsets = mLastOverscanInsets;
+            final Rect contentInsets = mLastContentInsets;
+            final Rect visibleInsets = mLastVisibleInsets;
+            final boolean reportDraw
+                    = mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
+            final Configuration newConfig = isConfigChanged() ? mConfiguration : null;
+            if (mClient instanceof IWindow.Stub) {
+                // To prevent deadlock simulate one-way call if win.mClient is a local object.
+                mService.mH.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mClient.resized(frame, overscanInsets, contentInsets,
+                                    visibleInsets, reportDraw, newConfig);
+                        } catch (RemoteException e) {
+                            // Not a remote call, RemoteException won't be raised.
+                        }
+                    }
+                });
+            } else {
+                mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, reportDraw,
+                        newConfig);
+            }
+            mOverscanInsetsChanged = false;
+            mContentInsetsChanged = false;
+            mVisibleInsetsChanged = false;
+            mWinAnimator.mSurfaceResized = false;
+        } catch (RemoteException e) {
+            mOrientationChanging = false;
+            mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
+                    - mService.mDisplayFreezeTime);
+        }
+    }
+
     public void registerFocusObserver(IWindowFocusObserver observer) {
         synchronized(mService.mWindowMap) {
             if (mFocusCallbacks == null) {
@@ -1308,7 +1369,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        pw.print(prefix); pw.print("mDisplayId="); pw.print(mDisplayContent.getDisplayId());
+        pw.print(prefix); pw.print("mDisplayId="); pw.print(getDisplayId());
                 pw.print(" mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
         pw.print(prefix); pw.print("mOwnerUid="); pw.print(mOwnerUid);

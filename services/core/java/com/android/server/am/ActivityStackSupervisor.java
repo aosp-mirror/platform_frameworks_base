@@ -277,6 +277,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // TODO: Split into two methods isFrontStack for any visible stack and isFrontmostStack for the
     // top of all visible stacks.
     boolean isFrontStack(ActivityStack stack) {
+        final ActivityRecord parent = stack.mActivityContainer.mParentActivity;
+        if (parent != null) {
+            stack = parent.task.stack;
+        }
         ArrayList<ActivityStack> stacks = stack.mStacks;
         if (stacks != null && !stacks.isEmpty()) {
             return stack == stacks.get(stacks.size() - 1);
@@ -508,6 +512,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         return pausing;
+    }
+
+    void pauseChildStacks(ActivityRecord parent, boolean userLeaving, boolean uiSleeping) {
+		// TODO: Put all stacks in supervisor and iterate through them instead.
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = stacks.get(stackNdx);
+                if (stack.mResumedActivity != null &&
+                        stack.mActivityContainer.mParentActivity == parent) {
+                    stack.startPausingLocked(userLeaving, uiSleeping);
+                }
+            }
+        }
     }
 
     void reportActivityVisibleLocked(ActivityRecord r) {
@@ -2914,7 +2932,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mStack.mStacks = activityDisplay.mStacks;
 
             activityDisplay.attachActivities(mStack);
-            mWindowManager.createStack(mStackId, activityDisplay.mDisplayId);
+            mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId);
         }
 
         @Override
@@ -2944,6 +2962,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mActivityDisplay = null;
                 mStack.mDisplayId = -1;
                 mStack.mStacks = null;
+                mWindowManager.detachStack(mStackId);
             }
         }
 
@@ -2956,7 +2975,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         @Override
         public final int startActivity(Intent intent) {
-            mService.enforceNotIsolatedCaller("ActivityContainer");
+            mService.enforceNotIsolatedCaller("ActivityContainer.startActivity");
             int userId = mService.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), mCurrentUser, false, true, "ActivityContainer", null);
             // TODO: Switch to user app stacks here.
@@ -2970,20 +2989,40 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         @Override
+        public final int startActivityIntentSender(IIntentSender intentSender) {
+            mService.enforceNotIsolatedCaller("ActivityContainer.startActivityIntentSender");
+
+            if (!(intentSender instanceof PendingIntentRecord)) {
+                throw new IllegalArgumentException("Bad PendingIntent object");
+            }
+
+            return ((PendingIntentRecord)intentSender).sendInner(0, null, null, null, null, null,
+                    null, 0, 0, 0, null, this);
+        }
+
+        @Override
         public IBinder asBinder() {
             return this;
         }
 
         @Override
         public void attachToSurface(Surface surface, int width, int height, int density) {
-            synchronized (mService) {
-                ActivityDisplay activityDisplay =
-                        new ActivityDisplay(surface, width, height, density);
-                mActivityDisplays.put(activityDisplay.mDisplayId, activityDisplay);
-                attachToDisplayLocked(activityDisplay);
+            mService.enforceNotIsolatedCaller("ActivityContainer.attachToSurface");
+
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mService) {
+                    ActivityDisplay activityDisplay =
+                            new ActivityDisplay(surface, width, height, density);
+                    mActivityDisplays.put(activityDisplay.mDisplayId, activityDisplay);
+                    attachToDisplayLocked(activityDisplay);
+                    mStack.resumeTopActivityLocked(null);
+                }
+                if (DEBUG_STACK) Slog.d(TAG, "attachToSurface: " + this + " to display="
+                        + mActivityDisplay);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            if (DEBUG_STACK) Slog.d(TAG, "attachToSurface: " + this + " to display="
-                    + mActivityDisplay);
         }
 
         ActivityStackSupervisor getOuter() {

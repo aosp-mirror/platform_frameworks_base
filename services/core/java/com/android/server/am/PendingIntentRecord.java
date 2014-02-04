@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.app.ActivityManager;
+import android.app.IActivityContainer;
 import android.content.IIntentSender;
 import android.content.IIntentReceiver;
 import android.app.PendingIntent;
@@ -190,13 +191,13 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     public int send(int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission) {
         return sendInner(code, intent, resolvedType, finishedReceiver,
-                requiredPermission, null, null, 0, 0, 0, null);
+                requiredPermission, null, null, 0, 0, 0, null, null);
     }
     
     int sendInner(int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission,
             IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues, Bundle options) {
+            int flagsMask, int flagsValues, Bundle options, IActivityContainer container) {
         synchronized(owner) {
             if (!canceled) {
                 sent = true;
@@ -251,7 +252,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                             } else {
                                 owner.startActivityInPackage(uid, key.packageName, finalIntent,
                                         resolvedType, resultTo, resultWho, requestCode, 0,
-                                        options, userId);
+                                        options, userId, container);
                             }
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
@@ -302,7 +303,8 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         }
         return ActivityManager.START_CANCELED;
     }
-    
+
+    @Override
     protected void finalize() throws Throwable {
         try {
             if (!canceled) {

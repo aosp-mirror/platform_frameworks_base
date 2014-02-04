@@ -18,6 +18,7 @@ package android.app;
 
 import android.app.IActivityContainerCallback;
 import android.content.Intent;
+import android.content.IIntentSender;
 import android.os.IBinder;
 import android.view.Surface;
 
@@ -27,5 +28,6 @@ interface IActivityContainer {
     void attachToSurface(in Surface surface, int width, int height, int density);
     void detachFromDisplay();
     int startActivity(in Intent intent);
+    int startActivityIntentSender(in IIntentSender intentSender);
     int getDisplayId();
 }

@@ -293,7 +293,11 @@ final class Session extends IWindowSession.Stub
             // !!! FIXME: put all this heavy stuff onto the mH looper, as well as
             // the actual drag event dispatch stuff in the dragstate
 
-            Display display = callingWin.mDisplayContent.getDisplay();
+            final DisplayContent displayContent = callingWin.getDisplayContent();
+            if (displayContent == null) {
+               return false;
+            }
+            Display display = displayContent.getDisplay();
             mService.mDragState.register(display);
             mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
             if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,

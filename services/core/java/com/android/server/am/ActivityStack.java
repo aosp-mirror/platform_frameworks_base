@@ -736,6 +736,12 @@ final class ActivityStack {
             mStackSupervisor.resumeTopActivitiesLocked();
             return;
         }
+
+        if (mActivityContainer.mParentActivity == null) {
+            // Top level stack, not a child. Look for child stacks.
+            mStackSupervisor.pauseChildStacks(prev, userLeaving, uiSleeping);
+        }
+
         if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSING: " + prev);
         else if (DEBUG_PAUSE) Slog.v(TAG, "Start pausing: " + prev);
         mResumedActivity = null;
@@ -1253,6 +1259,13 @@ final class ActivityStack {
 
     final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
         if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
+
+        ActivityRecord parent = mActivityContainer.mParentActivity;
+        if (parent != null && parent.state != ActivityState.RESUMED) {
+            // Do not resume this stack if its parent is not resumed.
+            // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
+            return false;
+        }
 
         // Find the first activity that is not finishing.
         ActivityRecord next = topRunningActivityLocked(null);

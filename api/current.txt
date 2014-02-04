@@ -3084,8 +3084,11 @@ package android.app {
     ctor public ActivityView(android.content.Context);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
+    method public boolean isAttachedToDisplay();
     method protected void onLayout(boolean, int, int, int, int);
     method public void startActivity(android.content.Intent);
+    method public void startActivity(android.content.IntentSender);
+    method public void startActivity(android.app.PendingIntent);
   }
 
   public class AlarmManager {

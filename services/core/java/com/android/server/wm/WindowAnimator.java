@@ -642,11 +642,16 @@ public class WindowAnimator {
     }
 
     int getPendingLayoutChanges(final int displayId) {
+        if (displayId < 0) {
+            return 0;
+        }
         return mService.getDisplayContentLocked(displayId).pendingLayoutChanges;
     }
 
     void setPendingLayoutChanges(final int displayId, final int changes) {
-        mService.getDisplayContentLocked(displayId).pendingLayoutChanges |= changes;
+        if (displayId >= 0) {
+            mService.getDisplayContentLocked(displayId).pendingLayoutChanges |= changes;
+        }
     }
 
     void setAppLayoutChanges(final AppWindowAnimator appAnimator, final int changes, String s) {
@@ -655,7 +660,7 @@ public class WindowAnimator {
         WindowList windows = appAnimator.mAppToken.allAppWindows;
         for (int i = windows.size() - 1; i >= 0; i--) {
             final int displayId = windows.get(i).getDisplayId();
-            if (displays.indexOfKey(displayId) < 0) {
+            if (displayId >= 0 && displays.indexOfKey(displayId) < 0) {
                 setPendingLayoutChanges(displayId, changes);
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
                     mService.debugLayoutRepeats(s, getPendingLayoutChanges(displayId));
@@ -676,10 +681,15 @@ public class WindowAnimator {
     }
 
     void setScreenRotationAnimationLocked(int displayId, ScreenRotationAnimation animation) {
-        getDisplayContentsAnimatorLocked(displayId).mScreenRotationAnimation = animation;
+        if (displayId >= 0) {
+            getDisplayContentsAnimatorLocked(displayId).mScreenRotationAnimation = animation;
+        }
     }
 
     ScreenRotationAnimation getScreenRotationAnimationLocked(int displayId) {
+        if (displayId < 0) {
+            return null;
+        }
         return getDisplayContentsAnimatorLocked(displayId).mScreenRotationAnimation;
     }
 
