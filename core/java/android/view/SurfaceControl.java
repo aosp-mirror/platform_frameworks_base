@@ -177,13 +177,13 @@ public class SurfaceControl {
      * Equivalent to calling hide().
      * Updates the value set during Surface creation (see {@link #HIDDEN}).
      */
-    public static final int SURFACE_HIDDEN = 0x01;
+    private static final int SURFACE_HIDDEN = 0x01;
 
     /**
      * Surface flag: composite without blending when possible.
      * Updates the value set during Surface creation (see {@link #OPAQUE}).
      */
-    public static final int SURFACE_OPAQUE = 0x02;
+    private static final int SURFACE_OPAQUE = 0x02;
 
 
     /* built-in physical display ids (keep in sync with ISurfaceComposer.h)
@@ -191,13 +191,13 @@ public class SurfaceControl {
 
     /**
      * Built-in physical display id: Main display.
-     * Use only with {@link SurfaceControl#getBuiltInDisplay()}.
+     * Use only with {@link SurfaceControl#getBuiltInDisplay(int)}.
      */
     public static final int BUILT_IN_DISPLAY_ID_MAIN = 0;
 
     /**
      * Built-in physical display id: Attached HDMI display.
-     * Use only with {@link SurfaceControl#getBuiltInDisplay()}.
+     * Use only with {@link SurfaceControl#getBuiltInDisplay(int)}.
      */
     public static final int BUILT_IN_DISPLAY_ID_HDMI = 1;
 
@@ -367,18 +367,6 @@ public class SurfaceControl {
     public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
         checkNotReleased();
         nativeSetMatrix(mNativeObject, dsdx, dtdx, dsdy, dtdy);
-    }
-
-    /**
-     * Sets and clears flags, such as {@link #SURFACE_HIDDEN}.  The new value will be:
-     * <p>
-     *   <code>newFlags = (oldFlags & ~mask) | (flags & mask)</code>
-     * <p>
-     * Note this does not take the same set of flags as the constructor.
-     */
-    public void setFlags(int flags, int mask) {
-        checkNotReleased();
-        nativeSetFlags(mNativeObject, flags, mask);
     }
 
     public void setWindowCrop(Rect crop) {
