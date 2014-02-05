@@ -398,42 +398,14 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Byte>("android.quirks.usePartialResult", byte.class);
 
     /**
-     * <p>The maximum numbers of different types of output streams
-     * that can be configured and used simultaneously by a camera device.</p>
-     * <p>This is a 3 element tuple that contains the max number of output simultaneous
-     * streams for raw sensor, processed (and uncompressed), and JPEG formats respectively.
-     * For example, if max raw sensor format output stream number is 1, max YUV streams
-     * number is 3, and max JPEG stream number is 2, then this tuple should be <code>(1, 3, 2)</code>.</p>
-     * <p>This lists the upper bound of the number of output streams supported by
-     * the camera device. Using more streams simultaneously may require more hardware and
-     * CPU resources that will consume more power. The image format for a output stream can
-     * be any supported format provided by {@link CameraCharacteristics#SCALER_AVAILABLE_FORMATS android.scaler.availableFormats}. The formats
-     * defined in {@link CameraCharacteristics#SCALER_AVAILABLE_FORMATS android.scaler.availableFormats} can be catergorized into the 3 stream types
-     * as below:</p>
-     * <ul>
-     * <li>JPEG-compressed format: BLOB.</li>
-     * <li>Raw formats: RAW_SENSOR and RAW_OPAQUE.</li>
-     * <li>processed, uncompressed formats: YCbCr_420_888, YCrCb_420_SP, YV12.</li>
-     * </ul>
-     *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_FORMATS
+     * <p>How many output streams can be allocated at
+     * the same time for each type of stream</p>
+     * <p>Video snapshot with preview callbacks requires 3
+     * processed streams (preview, record, app callbacks) and
+     * one JPEG stream (snapshot)</p>
      */
     public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
-
-    /**
-     * <p>The maximum numbers of any type of input streams
-     * that can be configured and used simultaneously by a camera device.</p>
-     * <p>When set to 0, it means no input stream is supported.</p>
-     * <p>The image format for a input stream can be any supported format provided
-     * by android.scaler.availableInputFormats. When using an input stream, there must be
-     * at least one output stream configured to to receive the reprocessed images.</p>
-     * <p>For example, for Zero Shutter Lag (ZSL) still capture use case, the input
-     * stream image format will be RAW_OPAQUE, the associated output stream image format
-     * should be JPEG.</p>
-     */
-    public static final Key<Integer> REQUEST_MAX_NUM_INPUT_STREAMS =
-            new Key<Integer>("android.request.maxNumInputStreams", int.class);
 
     /**
      * <p>Specifies the number of maximum pipeline stages a frame
