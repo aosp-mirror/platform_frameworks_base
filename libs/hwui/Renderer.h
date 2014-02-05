@@ -146,22 +146,15 @@ public:
     virtual void restore() = 0;
     virtual void restoreToCount(int saveCount) = 0;
 
-    int saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, int flags) {
-        SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode;
-        int alpha = 255;
-        if (paint) {
-            mode = getXfermode(paint->getXfermode());
-            alpha = paint->getAlpha();
-        }
-        return saveLayer(left, top, right, bottom, alpha, mode, flags);
-    }
+    virtual int saveLayer(float left, float top, float right, float bottom,
+            const SkPaint* paint, int flags) = 0;
+
     int saveLayerAlpha(float left, float top, float right, float bottom,
             int alpha, int flags) {
-        return saveLayer(left, top, right, bottom, alpha, SkXfermode::kSrcOver_Mode, flags);
+        SkPaint paint;
+        paint.setAlpha(alpha);
+        return saveLayer(left, top, right, bottom, &paint, flags);
     }
-    virtual int saveLayer(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags) = 0;
 
     // Matrix
     virtual void getMatrix(SkMatrix* outMatrix) const = 0;

@@ -451,8 +451,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             }
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
-                    0, 0, mRight - mLeft, mBottom - mTop,
-                    mAlpha * 255, SkXfermode::kSrcOver_Mode, saveFlags);
+                    0, 0, mRight - mLeft, mBottom - mTop, mAlpha * 255, saveFlags);
             handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
         }
     }

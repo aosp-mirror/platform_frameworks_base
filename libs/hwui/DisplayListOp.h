@@ -327,9 +327,13 @@ private:
 
 class SaveLayerOp : public StateOp {
 public:
-    SaveLayerOp(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags)
-            : mArea(left, top, right, bottom), mAlpha(alpha), mMode(mode), mFlags(flags) {}
+    SaveLayerOp(float left, float top, float right, float bottom, int alpha, int flags)
+            : mArea(left, top, right, bottom), mPaint(&mCachedPaint), mFlags(flags) {
+        mCachedPaint.setAlpha(alpha);
+    }
+
+    SaveLayerOp(float left, float top, float right, float bottom, const SkPaint* paint, int flags)
+            : mArea(left, top, right, bottom), mPaint(paint), mFlags(flags) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
@@ -340,11 +344,11 @@ public:
         // NOTE: don't issue full saveLayer, since that has side effects/is costly. instead just
         // setup the snapshot for deferral, and re-issue the op at flush time
         deferStruct.mRenderer.saveLayerDeferred(mArea.left, mArea.top, mArea.right, mArea.bottom,
-                mAlpha, mMode, mFlags);
+                mPaint, mFlags);
     }
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const {
-        renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom, mAlpha, mMode, mFlags);
+        renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom, mPaint, mFlags);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
@@ -357,21 +361,15 @@ public:
     int getFlags() { return mFlags; }
 
 private:
-    // Special case, reserved for direct DisplayList usage
-    SaveLayerOp() {}
-    DisplayListOp* reinit(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags) {
-        mArea.set(left, top, right, bottom);
-        mAlpha = alpha;
-        mMode = mode;
-        mFlags = flags;
-        return this;
+    bool isSaveLayerAlpha() const {
+        SkXfermode::Mode mode = OpenGLRenderer::getXfermodeDirect(mPaint);
+        int alpha = OpenGLRenderer::getAlphaDirect(mPaint);
+        return alpha < 255 && mode == SkXfermode::kSrcOver_Mode;
     }
 
-    bool isSaveLayerAlpha() const { return mAlpha < 255 && mMode == SkXfermode::kSrcOver_Mode; }
     Rect mArea;
-    int mAlpha;
-    SkXfermode::Mode mMode;
+    const SkPaint* mPaint;
+    SkPaint mCachedPaint;
     int mFlags;
 };
 

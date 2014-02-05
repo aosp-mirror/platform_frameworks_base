@@ -82,7 +82,7 @@ public:
     virtual void restore();
     virtual void restoreToCount(int saveCount);
     virtual int saveLayer(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags);
+            const SkPaint* paint, int flags);
 
     // Matrix
     virtual void translate(float dx, float dy, float dz);

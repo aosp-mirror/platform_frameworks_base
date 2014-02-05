@@ -182,8 +182,9 @@ void DisplayListRenderer::onSnapshotRestored(const Snapshot& removed, const Snap
 }
 
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode, int flags) {
-    addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, alpha, mode, flags));
+        const SkPaint* paint, int flags) {
+    paint = refPaint(paint);
+    addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, paint, flags));
     return StatefulBaseRenderer::save(flags);
 }
 
