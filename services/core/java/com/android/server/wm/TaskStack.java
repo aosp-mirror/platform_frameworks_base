@@ -67,6 +67,9 @@ public class TaskStack {
      * then stop any dimming. */
     boolean mDimmingTag;
 
+    /** Application tokens that are exiting, but still on screen for animations. */
+    final AppTokenList mExitingAppTokens = new AppTokenList();
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
@@ -174,8 +177,8 @@ public class TaskStack {
         mTasks.add(stackNdx, task);
 
         task.mStack = this;
-        mDisplayContent.addTask(task, toTop);
         mDisplayContent.moveStack(this, true);
+        EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.taskId, toTop ? 1 : 0, stackNdx);
     }
 
     void moveTaskToTop(Task task) {
@@ -200,7 +203,6 @@ public class TaskStack {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
         mTasks.remove(task);
         if (mDisplayContent != null) {
-            mDisplayContent.removeTask(task);
             if (mTasks.isEmpty()) {
                 mDisplayContent.moveStack(this, false);
             }
@@ -216,15 +218,13 @@ public class TaskStack {
         mDisplayContent = displayContent;
         mDimLayer = new DimLayer(mService, this, displayContent);
         mAnimationBackgroundSurface = new DimLayer(mService, this, displayContent);
-
-        for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
-            Task task = mTasks.get(taskNdx);
-            displayContent.addTask(task, true);
-        }
     }
 
-    void detach() {
+    void detachDisplay() {
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            mService.tmpRemoveTaskWindowsLocked(mTasks.get(taskNdx));
+        }
         mAnimationBackgroundSurface.destroySurface();
         mAnimationBackgroundSurface = null;
         mDimLayer.destroySurface();
@@ -364,6 +364,17 @@ public class TaskStack {
             pw.print(prefix); pw.println("mDimLayer:");
             mDimLayer.printTo(prefix, pw);
             pw.print(prefix); pw.print("mDimWinAnimator="); pw.println(mDimWinAnimator);
+        }
+        if (!mExitingAppTokens.isEmpty()) {
+            pw.println();
+            pw.println("  Exiting application tokens:");
+            for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
+                WindowToken token = mExitingAppTokens.get(i);
+                pw.print("  Exiting App #"); pw.print(i);
+                pw.print(' '); pw.print(token);
+                pw.println(':');
+                token.dump(pw, "    ");
+            }
         }
     }
 

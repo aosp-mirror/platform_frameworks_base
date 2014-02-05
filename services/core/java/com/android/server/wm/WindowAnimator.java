@@ -151,14 +151,33 @@ public class WindowAnimator {
     }
 
     private void updateAppWindowsLocked(int displayId) {
-        final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
-        final ArrayList<Task> tasks = displayContent.getTasks();
-        final int numTasks = tasks.size();
-        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-            final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-            final int numTokens = tokens.size();
-            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
-                final AppWindowAnimator appAnimator = tokens.get(tokenNdx).mAppAnimator;
+        ArrayList<TaskStack> stacks = mService.getDisplayContentLocked(displayId).getStacks();
+        for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = stacks.get(stackNdx);
+            final ArrayList<Task> tasks = stack.getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                    final AppWindowAnimator appAnimator = tokens.get(tokenNdx).mAppAnimator;
+                    final boolean wasAnimating = appAnimator.animation != null
+                            && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
+                    if (appAnimator.stepAnimationLocked(mCurrentTime)) {
+                        mAnimating = true;
+                    } else if (wasAnimating) {
+                        // stopped animating, do one more pass through the layout
+                        setAppLayoutChanges(appAnimator,
+                                WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
+                                "appToken " + appAnimator.mAppToken + " done");
+                        if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
+                                "updateWindowsApps...: done animating " + appAnimator.mAppToken);
+                    }
+                }
+            }
+
+            final AppTokenList exitingAppTokens = stack.mExitingAppTokens;
+            final int NEAT = exitingAppTokens.size();
+            for (int i = 0; i < NEAT; i++) {
+                final AppWindowAnimator appAnimator = exitingAppTokens.get(i).mAppAnimator;
                 final boolean wasAnimating = appAnimator.animation != null
                         && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
                 if (appAnimator.stepAnimationLocked(mCurrentTime)) {
@@ -166,27 +185,10 @@ public class WindowAnimator {
                 } else if (wasAnimating) {
                     // stopped animating, do one more pass through the layout
                     setAppLayoutChanges(appAnimator, WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                            "appToken " + appAnimator.mAppToken + " done");
+                        "exiting appToken " + appAnimator.mAppToken + " done");
                     if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
-                            "updateWindowsApps...: done animating " + appAnimator.mAppToken);
+                            "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
                 }
-            }
-        }
-
-        final AppTokenList exitingAppTokens = displayContent.mExitingAppTokens;
-        final int NEAT = exitingAppTokens.size();
-        for (int i = 0; i < NEAT; i++) {
-            final AppWindowAnimator appAnimator = exitingAppTokens.get(i).mAppAnimator;
-            final boolean wasAnimating = appAnimator.animation != null
-                    && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
-            if (appAnimator.stepAnimationLocked(mCurrentTime)) {
-                mAnimating = true;
-            } else if (wasAnimating) {
-                // stopped animating, do one more pass through the layout
-                setAppLayoutChanges(appAnimator, WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                    "exiting appToken " + appAnimator.mAppToken + " done");
-                if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
-                        "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
             }
         }
     }
