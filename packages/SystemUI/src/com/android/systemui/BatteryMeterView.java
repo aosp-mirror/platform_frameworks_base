@@ -68,6 +68,7 @@ public class BatteryMeterView extends View implements DemoMode {
 
     private final Path mShapePath = new Path();
     private final Path mClipPath = new Path();
+    private final Path mTextPath = new Path();
 
     private class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -190,9 +191,6 @@ public class BatteryMeterView extends View implements DemoMode {
         colors.recycle();
         mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
                 context.getContentResolver(), "status_bar_show_battery_percent", 0);
-        if (mShowPercent) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
 
         mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -353,6 +351,29 @@ public class BatteryMeterView extends View implements DemoMode {
             }
         }
 
+        // compute percentage text
+        boolean pctOpaque = false;
+        float pctX = 0, pctY = 0;
+        String pctText = null;
+        if (!tracker.plugged && level > EMPTY && mShowPercent
+                && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
+            mTextPaint.setColor(getColorForLevel(level));
+            mTextPaint.setTextSize(height *
+                    (SINGLE_DIGIT_PERCENT ? 0.75f
+                            : (tracker.level == 100 ? 0.38f : 0.5f)));
+            mTextHeight = -mTextPaint.getFontMetrics().ascent;
+            pctText = String.valueOf(SINGLE_DIGIT_PERCENT ? (level/10) : level);
+            pctX = mWidth * 0.5f;
+            pctY = (mHeight + mTextHeight) * 0.47f;
+            pctOpaque = levelTop > pctY;
+            if (!pctOpaque) {
+                mTextPath.reset();
+                mTextPaint.getTextPath(pctText, 0, pctText.length(), pctX, pctY, mTextPath);
+                // cut the percentage text out of the overall shape
+                mShapePath.op(mTextPath, Path.Op.DIFFERENCE);
+            }
+        }
+
         // draw the battery shape background
         c.drawPath(mShapePath, mFramePaint);
 
@@ -369,29 +390,9 @@ public class BatteryMeterView extends View implements DemoMode {
                 final float x = mWidth * 0.5f;
                 final float y = (mHeight + mWarningTextHeight) * 0.48f;
                 c.drawText(mWarningString, x, y, mWarningTextPaint);
-            } else if (mShowPercent && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
+            } else if (pctOpaque) {
                 // draw the percentage text
-                mTextPaint.setColor(getColorForLevel(level));
-                mTextPaint.setTextSize(height *
-                        (SINGLE_DIGIT_PERCENT ? 0.75f
-                                : (tracker.level == 100 ? 0.38f : 0.5f)));
-                mTextHeight = -mTextPaint.getFontMetrics().ascent;
-
-                final String str = String.valueOf(SINGLE_DIGIT_PERCENT ? (level/10) : level);
-                final float x = mWidth * 0.5f;
-                final float y = (mHeight + mTextHeight) * 0.47f;
-
-                boolean opaque = levelTop > y;
-                if (opaque) {
-                    mTextPaint.setXfermode(null);
-                } else {
-                    mTextPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
-                }
-
-                c.drawText(str,
-                        x,
-                        y,
-                        mTextPaint);
+                c.drawText(pctText, pctX, pctY, mTextPaint);
             }
         }
     }
