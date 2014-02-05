@@ -23,6 +23,9 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import com.android.frameworks.downloadmanagertests.DownloadManagerBaseTest;
+import com.android.frameworks.downloadmanagertests.DownloadManagerTestRunner;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -38,14 +41,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
     protected static String LOG_TAG =
             "com.android.frameworks.downloadmanagertests.DownloadManagerTestApp";
 
-    protected static String DOWNLOAD_500K_FILENAME = "External541kb.apk";
-    protected static long DOWNLOAD_500K_FILESIZE = 570927;
-    protected static String DOWNLOAD_1MB_FILENAME = "External1mb.apk";
-    protected static long DOWNLOAD_1MB_FILESIZE = 1041262;
-    protected static String DOWNLOAD_5MB_FILENAME = "External5mb.apk";
-    protected static long DOWNLOAD_5MB_FILESIZE = 5138700;
-    protected static String DOWNLOAD_10MB_FILENAME = "External10mb.apk";
-    protected static long DOWNLOAD_10MB_FILESIZE = 10258741;
+    protected static final String DOWNLOAD_FILENAME = "External93mb.apk";
+    protected static final long DOWNLOAD_FILESIZE = 95251708;
 
     private static final String FILE_CONCURRENT_DOWNLOAD_FILE_PREFIX = "file";
     private static final String FILE_CONCURRENT_DOWNLOAD_FILE_EXTENSION = ".bin";
@@ -126,7 +123,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void initiateDownload() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
+        String filename = DOWNLOAD_FILENAME;
         mContext.deleteFile(DOWNLOAD_STARTED_FLAG);
         FileOutputStream fileOutput = mContext.openFileOutput(DOWNLOAD_STARTED_FLAG, 0);
         DataOutputStream outputFile = null;
@@ -162,8 +159,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void verifyFileDownloadSucceeded() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         long dlRequest = -1;
         boolean rebootMarkerValid = false;
         DataInputStream dataInputFile = null;
@@ -223,8 +220,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runLargeDownloadOverWiFi() throws Exception {
-        String filename = DOWNLOAD_10MB_FILENAME;
-        long filesize = DOWNLOAD_10MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         long dlRequest = -1;
         doCommonDownloadSetup();
 
@@ -265,8 +262,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleSwitching() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         doCommonDownloadSetup();
 
         String localDownloadDirectory = Environment.getExternalStorageDirectory().getPath();
@@ -340,8 +337,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleWiFiEnableDisable() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         doCommonDownloadSetup();
 
         String localDownloadDirectory = Environment.getExternalStorageDirectory().getPath();
@@ -409,8 +406,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void runDownloadMultipleAirplaneModeEnableDisable() throws Exception {
-        String filename = DOWNLOAD_5MB_FILENAME;
-        long filesize = DOWNLOAD_5MB_FILESIZE;
+        String filename = DOWNLOAD_FILENAME;
+        long filesize = DOWNLOAD_FILESIZE;
         // make sure WiFi is enabled, and airplane mode is not on
         doCommonDownloadSetup();
 
