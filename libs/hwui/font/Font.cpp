@@ -404,10 +404,10 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
         // If it's still not valid, we couldn't cache it, so we shouldn't
         // draw garbage; also skip empty glyphs (spaces)
         if (cachedGlyph->mIsValid && cachedGlyph->mCacheTexture) {
-            float penX = x + positions[(glyphsCount << 1)];
-            float penY = y + positions[(glyphsCount << 1) + 1];
+            int penX = x + (int) roundf(positions[(glyphsCount << 1)]);
+            int penY = y + (int) roundf(positions[(glyphsCount << 1) + 1]);
 
-            (*this.*render)(cachedGlyph, roundf(penX), roundf(penY),
+            (*this.*render)(cachedGlyph, penX, penY,
                     bitmap, bitmapW, bitmapH, bounds, positions);
         }
 
