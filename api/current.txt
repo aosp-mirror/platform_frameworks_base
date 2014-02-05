@@ -6115,6 +6115,7 @@ package android.content {
     method public final void unregisterContentObserver(android.database.ContentObserver);
     method public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
     method public static void validateSyncExtrasBundle(android.os.Bundle);
+    field public static final java.lang.String ANY_CURSOR_ITEM_TYPE = "vnd.android.cursor.item/*";
     field public static final java.lang.String CURSOR_DIR_BASE_TYPE = "vnd.android.cursor.dir";
     field public static final java.lang.String CURSOR_ITEM_BASE_TYPE = "vnd.android.cursor.item";
     field public static final java.lang.String SCHEME_ANDROID_RESOURCE = "android.resource";
@@ -21560,6 +21561,8 @@ package android.provider {
     field public static final java.lang.String EXTRA_MEDIA_ALBUM = "android.intent.extra.album";
     field public static final java.lang.String EXTRA_MEDIA_ARTIST = "android.intent.extra.artist";
     field public static final java.lang.String EXTRA_MEDIA_FOCUS = "android.intent.extra.focus";
+    field public static final java.lang.String EXTRA_MEDIA_GENRE = "android.intent.extra.genre";
+    field public static final java.lang.String EXTRA_MEDIA_RADIO_CHANNEL = "android.intent.extra.radio_channel";
     field public static final java.lang.String EXTRA_MEDIA_TITLE = "android.intent.extra.title";
     field public static final java.lang.String EXTRA_OUTPUT = "output";
     field public static final java.lang.String EXTRA_SCREEN_ORIENTATION = "android.intent.extra.screenOrientation";
@@ -21678,6 +21681,7 @@ package android.provider {
     method public static android.net.Uri getContentUriForPath(java.lang.String);
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/audio";
     field public static final java.lang.String DEFAULT_SORT_ORDER = "title_key";
+    field public static final java.lang.String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/audio";
     field public static final android.net.Uri EXTERNAL_CONTENT_URI;
     field public static final java.lang.String EXTRA_MAX_BYTES = "android.provider.MediaStore.extra.MAX_BYTES";
     field public static final android.net.Uri INTERNAL_CONTENT_URI;
@@ -21711,6 +21715,11 @@ package android.provider {
     field public static final java.lang.String DATE_ADDED = "date_added";
     field public static final java.lang.String DATE_MODIFIED = "date_modified";
     field public static final java.lang.String NAME = "name";
+  }
+
+  public static final class MediaStore.Audio.Radio {
+    ctor public MediaStore.Audio.Radio();
+    field public static final java.lang.String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/radio";
   }
 
   public static final class MediaStore.Files {

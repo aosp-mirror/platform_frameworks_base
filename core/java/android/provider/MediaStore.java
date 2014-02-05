@@ -169,6 +169,14 @@ public final class MediaStore {
      */
     public static final String EXTRA_MEDIA_TITLE = "android.intent.extra.title";
     /**
+     * The name of the Intent-extra used to define the genre.
+     */
+    public static final String EXTRA_MEDIA_GENRE = "android.intent.extra.genre";
+    /**
+     * The name of the Intent-extra used to define the radio channel.
+     */
+    public static final String EXTRA_MEDIA_RADIO_CHANNEL = "android.intent.extra.radio_channel";
+    /**
      * The name of the Intent-extra used to define the search focus. The search focus
      * indicates whether the search should be for things related to the artist, album
      * or song that is identified by the other extras.
@@ -1389,6 +1397,11 @@ public final class MediaStore {
             public static final String CONTENT_TYPE = "vnd.android.cursor.dir/audio";
 
             /**
+             * The MIME type for an audio track.
+             */
+            public static final String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/audio";
+
+            /**
              * The default sort order for this table
              */
             public static final String DEFAULT_SORT_ORDER = TITLE_KEY;
@@ -1858,6 +1871,13 @@ public final class MediaStore {
              * The default sort order for this table
              */
             public static final String DEFAULT_SORT_ORDER = ALBUM_KEY;
+        }
+
+        public static final class Radio {
+            /**
+             * The MIME type for entries in this table.
+             */
+            public static final String ENTRY_CONTENT_TYPE = "vnd.android.cursor.item/radio";
         }
     }
 
