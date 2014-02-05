@@ -223,6 +223,13 @@ public final class PowerManager {
     public static final int ON_AFTER_RELEASE = 0x20000000;
 
     /**
+     * Wake lock flag: This wake lock is not important for logging events.  If a later
+     * wake lock is acquired that is important, it will be considered the one to log.
+     * @hide
+     */
+    public static final int UNIMPORTANT_FOR_LOGGING = 0x40000000;
+
+    /**
      * Flag for {@link WakeLock#release release(int)} to defer releasing a
      * {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK} wake lock until the proximity sensor returns
      * a negative value.
@@ -634,8 +641,8 @@ public final class PowerManager {
      * </p>
      */
     public final class WakeLock {
-        private final int mFlags;
-        private final String mTag;
+        private int mFlags;
+        private String mTag;
         private final String mPackageName;
         private final IBinder mToken;
         private int mCount;
@@ -827,6 +834,17 @@ public final class PowerManager {
                     }
                 }
             }
+        }
+
+        /** @hide */
+        public void setTag(String tag) {
+            mTag = tag;
+        }
+
+        /** @hide */
+        public void setUnimportantForLogging(boolean state) {
+            if (state) mFlags |= UNIMPORTANT_FOR_LOGGING;
+            else mFlags &= ~UNIMPORTANT_FOR_LOGGING;
         }
 
         @Override
