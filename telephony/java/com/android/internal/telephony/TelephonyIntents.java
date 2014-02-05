@@ -125,16 +125,14 @@ public class TelephonyIntents {
      * Broadcast Action: The data connection state has changed for any one of the
      * phone's mobile data connections (eg, default, MMS or GPS specific connection).
      * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>phoneName</em> - A string version of the phone name.</li>
-     *   <li><em>state</em> - One of <code>"CONNECTED"</code>
-     *      <code>"CONNECTING"</code> or <code>"DISCONNNECTED"</code></li>
-     *   <li><em>apn</em> - A string that is the APN associated with this
-     *      connection.</li>
-     *   <li><em>apnType</em> - A string array of APN types associated with
-     *      this connection.  The APN type <code>"*"</code> is a special
-     *      type that means this APN services all types.</li>
-     * </ul>
+     * <dl>
+     *   <dt>phoneName</dt><dd>A string version of the phone name.</dd>
+     *   <dt>state</dt><dd>One of {@code CONNECTED}, {@code CONNECTING},
+     *      or {@code DISCONNECTED}.</dd>
+     *   <dt>apn</dt><dd>A string that is the APN associated with this connection.</dd>
+     *   <dt>apnType</dt><dd>A string array of APN types associated with this connection.
+     *      The APN type {@code *} is a special type that means this APN services all types.</dd>
+     * </dl>
      *
      * <p class="note">
      * Requires the READ_PHONE_STATE permission.
@@ -149,16 +147,14 @@ public class TelephonyIntents {
      * Broadcast Action: Occurs when a data connection connects to a provisioning apn
      * and is broadcast by the low level data connection code.
      * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>apn</em> - A string that is the APN associated with this
-     *      connection.</li>
-     *   <li><em>apnType</em> - A string array of APN types associated with
-     *      this connection.  The APN type <code>"*"</code> is a special
-     *      type that means this APN services all types.</li>
-     *   <li><em>linkProperties</em> - The <code>LinkProperties</code> for this APN</li>
-     *   <li><em>linkCapabilities</em> - The <code>linkCapabilities</code> for this APN</li>
-     *   <li><em>iface</em> - A string that is the name of the interface</li>
-     * </ul>
+     * <dl>
+     *   <dt>apn</dt><dd>A string that is the APN associated with this connection.</dd>
+     *   <dt>apnType</dt><dd>A string array of APN types associated with this connection.
+     *      The APN type {@code *} is a special type that means this APN services all types.</dd>
+     *   <dt>linkProperties</dt><dd>{@code LinkProperties} for this APN.</dd>
+     *   <dt>linkCapabilities</dt><dd>The {@code LinkCapabilities} for this APN.</dd>
+     *   <dt>iface</dt><dd>A string that is the name of the interface.</dd>
+     * </dl>
      *
      * <p class="note">
      * Requires the READ_PHONE_STATE permission.
@@ -172,12 +168,11 @@ public class TelephonyIntents {
     /**
      * Broadcast Action: An attempt to establish a data connection has failed.
      * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>phoneName</em> &mdash A string version of the phone name.</li>
-     *   <li><em>state</em> &mdash; One of <code>"CONNECTED"</code>
-     *      <code>"CONNECTING"</code> or <code>"DISCONNNECTED"</code></li>
-     * <li><em>reason</em> &mdash; A string indicating the reason for the failure, if available</li>
-     * </ul>
+     * <dl>
+     *   <dt>phoneName</dt><dd>A string version of the phone name.</dd>
+     *   <dt>state</dt><dd>One of {@code CONNECTED}, {@code CONNECTING}, or {code DISCONNECTED}.</dd>
+     *   <dt>reason</dt><dd>A string indicating the reason for the failure, if available.</dd>
+     * </dl>
      *
      * <p class="note">
      * Requires the READ_PHONE_STATE permission.
@@ -192,16 +187,23 @@ public class TelephonyIntents {
     /**
      * Broadcast Action: The sim card state has changed.
      * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>phoneName</em> - A string version of the phone name.</li>
-     *   <li><em>ss</em> - The sim state.  One of
-     *   <code>"ABSENT"</code> <code>"LOCKED"</code>
-     *   <code>"READY"</code> <code>"ISMI"</code> <code>"LOADED"</code> </li>
-     *   <li><em>reason</em> - The reason while ss is LOCKED, otherwise is null
-     *   <code>"PIN"</code> locked on PIN1
-     *   <code>"PUK"</code> locked on PUK1
-     *   <code>"NETWORK"</code> locked on Network Personalization </li>
-     * </ul>
+     * <dl>
+     *   <dt>phoneName</dt><dd>A string version of the phone name.</dd>
+     *   <dt>ss</dt><dd>The sim state. One of:
+     *     <dl>
+     *       <dt>{@code ABSENT}</dt><dd>SIM card not found</dd>
+     *       <dt>{@code LOCKED}</dt><dd>SIM card locked (see {@code reason})</dd>
+     *       <dt>{@code READY}</dt><dd>SIM card ready</dd>
+     *       <dt>{@code IMSI}</dt><dd>FIXME: what is this state?</dd>
+     *       <dt>{@code LOADED}</dt><dd>SIM card data loaded</dd>
+     *     </dl></dd>
+     *   <dt>reason</dt><dd>The reason why ss is {@code LOCKED}; null otherwise.</dd>
+     *   <dl>
+     *       <dt>{@code PIN}</dt><dd>locked on PIN1</dd>
+     *       <dt>{@code PUK}</dt><dd>locked on PUK1</dd>
+     *       <dt>{@code NETWORK}</dt><dd>locked on network personalization</dd>
+     *   </dl>
+     * </dl>
      *
      * <p class="note">
      * Requires the READ_PHONE_STATE permission.
@@ -272,31 +274,30 @@ public class TelephonyIntents {
     /**
      * A <em>prefix</em> for the MCC/MNC filtering used with {@link #ACTION_CARRIER_SETUP}.
      * The MCC/MNC will be concatenated (zero-padded to 3 digits each) to create a final
-     * string of the form:
-     * <br />
-     * <code>android.intent.category.MCCMNC_310260</code>
+     * string of the form: {@code android.intent.category.MCCMNC_310260}
      */
     public static final String CATEGORY_MCCMNC_PREFIX = "android.intent.category.MCCMNC_";
 
     /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are
-     * of the form *#*#<code>#*#*. The intent will have the data URI:</p>
+     * of the form {@code *#*#<code>#*#*}. The intent will have the data URI:
      *
-     * <p><code>android_secret_code://&lt;code&gt;</code></p>
+     * {@code android_secret_code://<code>}
      */
-    public static final String SECRET_CODE_ACTION =
-            "android.provider.Telephony.SECRET_CODE";
+    public static final String SECRET_CODE_ACTION = "android.provider.Telephony.SECRET_CODE";
 
     /**
      * Broadcast Action: The Service Provider string(s) have been updated.  Activities or
      * services that use these strings should update their display.
      * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>showPlmn</em> - Boolean that indicates whether the PLMN should be shown.</li>
-     *   <li><em>plmn</em> - The operator name of the registered network, as a string.</li>
-     *   <li><em>showSpn</em> - Boolean that indicates whether the SPN should be shown.</li>
-     *   <li><em>spn</em> - The service provider name, as a string.</li>
-     * </ul>
+     *
+     * <dl>
+     *   <dt>showPlmn</dt><dd>Boolean that indicates whether the PLMN should be shown.</dd>
+     *   <dt>plmn</dt><dd>The operator name of the registered network, as a string.</dd>
+     *   <dt>showSpn</dt><dd>Boolean that indicates whether the SPN should be shown.</dd>
+     *   <dt>spn</dt><dd>The service provider name, as a string.</dd>
+     * </dl>
+     *
      * Note that <em>showPlmn</em> may indicate that <em>plmn</em> should be displayed, even
      * though the value for <em>plmn</em> is null.  This can happen, for example, if the phone
      * has not registered to a network yet.  In this case the receiver may substitute an
@@ -305,8 +306,7 @@ public class TelephonyIntents {
      * It is recommended to display <em>plmn</em> before / above <em>spn</em> if
      * both are displayed.
      *
-     * <p>Note this is a protected intent that can only be sent
-     * by the system.
+     * <p>Note: this is a protected intent that can only be sent by the system.
      */
     public static final String SPN_STRINGS_UPDATED_ACTION =
             "android.provider.Telephony.SPN_STRINGS_UPDATED";

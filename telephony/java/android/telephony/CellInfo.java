@@ -76,7 +76,7 @@ public abstract class CellInfo implements Parcelable {
         return mRegistered;
     }
     /** @hide */
-    public void setRegisterd(boolean registered) {
+    public void setRegistered(boolean registered) {
         mRegistered = registered;
     }
 

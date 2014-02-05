@@ -306,18 +306,18 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
                     if (VDBG) {
                         Slog.d(TAG, "TelephonyMgr.DataConnectionStateChanged");
                         if (mNetworkInfo != null) {
-                            Slog.d(TAG, "NetworkInfo = " + mNetworkInfo.toString());
-                            Slog.d(TAG, "subType = " + String.valueOf(mNetworkInfo.getSubtype()));
+                            Slog.d(TAG, "NetworkInfo = " + mNetworkInfo);
+                            Slog.d(TAG, "subType = " + mNetworkInfo.getSubtype());
                             Slog.d(TAG, "subType = " + mNetworkInfo.getSubtypeName());
                         }
                         if (mLinkProperties != null) {
-                            Slog.d(TAG, "LinkProperties = " + mLinkProperties.toString());
+                            Slog.d(TAG, "LinkProperties = " + mLinkProperties);
                         } else {
                             Slog.d(TAG, "LinkProperties = " );
                         }
 
                         if (mLinkCapabilities != null) {
-                            Slog.d(TAG, "LinkCapabilities = " + mLinkCapabilities.toString());
+                            Slog.d(TAG, "LinkCapabilities = " + mLinkCapabilities);
                         } else {
                             Slog.d(TAG, "LinkCapabilities = " );
                         }

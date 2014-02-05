@@ -275,7 +275,7 @@ public class PhoneStateListener {
      * @param otaspMode is integer <code>OTASP_UNKNOWN=1<code>
      *   means the value is currently unknown and the system should wait until
      *   <code>OTASP_NEEDED=2<code> or <code>OTASP_NOT_NEEDED=3<code> is received before
-     *   making the decisision to perform OTASP or not.
+     *   making the decision to perform OTASP or not.
      *
      * @hide
      */
