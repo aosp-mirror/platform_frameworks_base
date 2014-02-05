@@ -816,52 +816,6 @@ android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject 
     ;
 }
 
-static void
-android_media_MediaPlayer_updateProxyConfig(
-        JNIEnv *env, jobject thiz, jobject proxyProps)
-{
-    ALOGV("updateProxyConfig");
-    sp<MediaPlayer> thisplayer = getMediaPlayer(env, thiz);
-    if (thisplayer == NULL) {
-        return;
-    }
-
-    if (proxyProps == NULL) {
-        thisplayer->updateProxyConfig(
-                NULL /* host */, 0 /* port */, NULL /* exclusionList */);
-    } else {
-        jstring hostObj = (jstring)env->CallObjectMethod(
-                proxyProps, fields.proxyConfigGetHost);
-
-        const char *host = env->GetStringUTFChars(hostObj, NULL);
-
-        int port = env->CallIntMethod(proxyProps, fields.proxyConfigGetPort);
-
-        jstring exclusionListObj = (jstring)env->CallObjectMethod(
-                proxyProps, fields.proxyConfigGetExclusionList);
-
-        if (host != NULL && exclusionListObj != NULL) {
-            const char *exclusionList = env->GetStringUTFChars(exclusionListObj, NULL);
-
-            if (exclusionList != NULL) {
-                thisplayer->updateProxyConfig(host, port, exclusionList);
-
-                env->ReleaseStringUTFChars(exclusionListObj, exclusionList);
-                exclusionList = NULL;
-            } else {
-                thisplayer->updateProxyConfig(host, port, "");
-            }
-        } else if (host != NULL) {
-            thisplayer->updateProxyConfig(host, port, "");
-        }
-
-        if (host != NULL) {
-            env->ReleaseStringUTFChars(hostObj, host);
-            host = NULL;
-        }
-    }
-}
-
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -904,7 +858,6 @@ static JNINativeMethod gMethods[] = {
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
-    {"updateProxyConfig", "(Landroid/net/ProxyProperties;)V", (void *)android_media_MediaPlayer_updateProxyConfig},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";
