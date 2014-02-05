@@ -51,12 +51,21 @@ oneway interface ICallServiceAdapter {
     void newIncomingCall(in CallInfo callInfo);
 
     /**
-     * Tells CallsManager of a new outgoing call. Use of this method should always follow
-     * {@link ICallService#call}.
+     * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
+     * TODO(santoscordon): Consider adding a CallState parameter in case this outgoing call is
+     * somehow no longer in the DIALING state.
      *
-     * @param callId The unique ID (via {@link ICallService#call}) of the new outgoing call.
+     * @param callId The ID of the outgoing call.
      */
-    void newOutgoingCall(String callId);
+    void handleSuccessfulOutgoingCall(String callId);
+
+    /**
+     * Tells Telecomm that an attempt to place the specified outgoing call failed.
+     *
+     * @param callId The ID of the outgoing call.
+     * @param errorMessage The error associated with the failed call attempt.
+     */
+    void handleFailedOutgoingCall(String callId, String errorMessage);
 
     /**
      * Sets a call's state to active (e.g., an ongoing call where two parties can actively
