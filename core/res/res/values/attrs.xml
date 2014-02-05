@@ -2250,6 +2250,11 @@
              view with a theme override will inherit the themed context. -->
         <attr name="theme" />
 
+        <!-- Specifies that the shared name of the View to be shared with another Activity.
+             When transitioning between Activities, the name links a UI element in the starting
+             Activity to UI element in the called Activity. Names should be unique in the
+             View hierarchy. -->
+        <attr name="sharedElementName" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
@@ -2336,6 +2341,14 @@
             <!-- Use the children's optical bounds when laying out this container. -->
             <enum name="opticalBounds" value="1" />
         </attr>
+
+        <!-- Sets whether or not this ViewGroup should be treated as a single entity
+             when doing an Activity transition. Typically, the elements inside a
+             ViewGroup are each transitioned from the scene individually. The default
+             for a ViewGroup is false unless it has a background.
+             See {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)}
+             for more information. -->
+        <attr name="transitionGroup" format="boolean" />
     </declare-styleable>
 
     <!-- A {@link android.view.ViewStub} lets you lazily include other XML layouts
