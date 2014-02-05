@@ -373,13 +373,15 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     /**
      * <p>A color transform matrix to use to transform
      * from sensor RGB color space to output linear sRGB color space</p>
-     * <p>This matrix is either set by HAL when the request
+     * <p>This matrix is either set by the camera device when the request
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
-     * <p>In the latter case, the HAL may round the matrix to account
-     * for precision issues; the final rounded matrix should be
-     * reported back in this matrix result metadata.</p>
+     * <p>In the latter case, the camera device may round the matrix to account
+     * for precision issues; the final rounded matrix should be reported back
+     * in this matrix result metadata. The transform should keep the magnitude
+     * of the output color values within <code>[0, 1.0]</code> (assuming input color
+     * values is within the normalized range <code>[0, 1.0]</code>), or clipping may occur.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
@@ -463,10 +465,23 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
     /**
      * <p>Whether AE is currently locked to its latest
-     * calculated values</p>
+     * calculated values.</p>
      * <p>Note that even when AE is locked, the flash may be
-     * fired if the AE mode is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
+     * fired if the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
      * ON_AUTO_FLASH_REDEYE.</p>
+     * <p>If AE precapture is triggered (see {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger})
+     * when AE is already locked, the camera device will not change the exposure time
+     * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}) and sensitivity ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
+     * parameters. The flash may be fired if the android.control.aeMode
+     * is ON_AUTO_FLASH/ON_AUTO_FLASH_REDEYE and the scene is too dark. If the
+     * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_ALWAYS_FLASH, the scene may become overexposed.</p>
+     * <p>See {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE lock related state transition details.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureResult#CONTROL_AE_STATE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     public static final Key<Boolean> CONTROL_AE_LOCK =
             new Key<Boolean>("android.control.aeLock", boolean.class);

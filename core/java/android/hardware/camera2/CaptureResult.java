@@ -126,13 +126,15 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>A color transform matrix to use to transform
      * from sensor RGB color space to output linear sRGB color space</p>
-     * <p>This matrix is either set by HAL when the request
+     * <p>This matrix is either set by the camera device when the request
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is TRANSFORM_MATRIX.</p>
-     * <p>In the latter case, the HAL may round the matrix to account
-     * for precision issues; the final rounded matrix should be
-     * reported back in this matrix result metadata.</p>
+     * <p>In the latter case, the camera device may round the matrix to account
+     * for precision issues; the final rounded matrix should be reported back
+     * in this matrix result metadata. The transform should keep the magnitude
+     * of the output color values within <code>[0, 1.0]</code> (assuming input color
+     * values is within the normalized range <code>[0, 1.0]</code>), or clipping may occur.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
