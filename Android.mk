@@ -260,6 +260,8 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
+	media/java/android/media/IMediaHTTPConnection.aidl \
+	media/java/android/media/IMediaHTTPService.aidl \
 	media/java/android/media/IMediaRouterClient.aidl \
 	media/java/android/media/IMediaRouterService.aidl \
 	media/java/android/media/IMediaScannerListener.aidl \
