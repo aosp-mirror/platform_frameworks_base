@@ -465,7 +465,7 @@ public:
 
     virtual void output(int level, uint32_t logFlags) const {
         if (mMatrix) {
-            OP_LOG("SetMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
+            OP_LOG("SetMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(mMatrix));
         } else {
             OP_LOGS("SetMatrix (reset)");
         }
@@ -487,7 +487,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("ConcatMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
+        OP_LOG("ConcatMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(mMatrix));
     }
 
     virtual const char* name() { return "ConcatMatrix"; }
@@ -848,7 +848,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw bitmap %p matrix " MATRIX_STRING, mBitmap, MATRIX_ARGS(mMatrix));
+        OP_LOG("Draw bitmap %p matrix " SK_MATRIX_STRING, mBitmap, SK_MATRIX_ARGS(mMatrix));
     }
 
     virtual const char* name() { return "DrawBitmapMatrix"; }

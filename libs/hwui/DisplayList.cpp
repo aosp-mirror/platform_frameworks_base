@@ -299,12 +299,13 @@ float DisplayList::getPivotY() {
 
 void DisplayList::updateMatrix() {
     if (mMatrixDirty) {
-        if (!mTransformMatrix) {
-            mTransformMatrix = new SkMatrix();
-        }
-        if (mMatrixFlags == 0 || mMatrixFlags == TRANSLATION) {
-            mTransformMatrix->reset();
-        } else {
+        // NOTE: mTransformMatrix won't be up to date if a DisplayList goes from a complex transform
+        // to a pure translate. This is safe because the matrix isn't read in pure translate cases.
+        if (mMatrixFlags && mMatrixFlags != TRANSLATION) {
+            if (!mTransformMatrix) {
+                // only allocate a matrix if we have a complex transform
+                mTransformMatrix = new Matrix4();
+            }
             if (!mPivotExplicitlySet) {
                 if (mWidth != mPrevWidth || mHeight != mPrevHeight) {
                     mPrevWidth = mWidth;
@@ -313,28 +314,36 @@ void DisplayList::updateMatrix() {
                     mPivotY = mPrevHeight / 2.0f;
                 }
             }
-            if (!Caches::getInstance().propertyEnable3d && (mMatrixFlags & ROTATION_3D) == 0) {
-                mTransformMatrix->setTranslate(mTranslationX, mTranslationY);
-                mTransformMatrix->preRotate(mRotation, mPivotX, mPivotY);
-                mTransformMatrix->preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+            const bool perspectiveEnabled = Caches::getInstance().propertyEnable3d;
+            if (!perspectiveEnabled && (mMatrixFlags & ROTATION_3D) == 0) {
+                mTransformMatrix->loadTranslate(
+                        mPivotX + mTranslationX,
+                        mPivotY + mTranslationY,
+                        0);
+                mTransformMatrix->rotate(mRotation, 0, 0, 1);
+                mTransformMatrix->scale(mScaleX, mScaleY, 1);
+                mTransformMatrix->translate(-mPivotX, -mPivotY);
             } else {
-                if (Caches::getInstance().propertyEnable3d) {
-                    mTransform.loadTranslate(mPivotX + mTranslationX, mPivotY + mTranslationY,
+                if (perspectiveEnabled) {
+                    mTransformMatrix->loadTranslate(
+                            mPivotX + mTranslationX,
+                            mPivotY + mTranslationY,
                             mTranslationZ);
-                    mTransform.rotate(mRotationX, 1, 0, 0);
-                    mTransform.rotate(mRotationY, 0, 1, 0);
-                    mTransform.rotate(mRotation, 0, 0, 1);
-                    mTransform.scale(mScaleX, mScaleY, 1);
-                    mTransform.translate(-mPivotX, -mPivotY);
+                    mTransformMatrix->rotate(mRotationX, 1, 0, 0);
+                    mTransformMatrix->rotate(mRotationY, 0, 1, 0);
+                    mTransformMatrix->rotate(mRotation, 0, 0, 1);
+                    mTransformMatrix->scale(mScaleX, mScaleY, 1);
+                    mTransformMatrix->translate(-mPivotX, -mPivotY);
                 } else {
                     /* TODO: support this old transform approach, based on API level */
                     if (!mTransformCamera) {
                         mTransformCamera = new Sk3DView();
                         mTransformMatrix3D = new SkMatrix();
                     }
-                    mTransformMatrix->reset();
+                    SkMatrix transformMatrix;
+                    transformMatrix.reset();
                     mTransformCamera->save();
-                    mTransformMatrix->preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+                    transformMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
                     mTransformCamera->rotateX(mRotationX);
                     mTransformCamera->rotateY(mRotationY);
                     mTransformCamera->rotateZ(-mRotation);
@@ -342,8 +351,10 @@ void DisplayList::updateMatrix() {
                     mTransformMatrix3D->preTranslate(-mPivotX, -mPivotY);
                     mTransformMatrix3D->postTranslate(mPivotX + mTranslationX,
                             mPivotY + mTranslationY);
-                    mTransformMatrix->postConcat(*mTransformMatrix3D);
+                    transformMatrix.postConcat(*mTransformMatrix3D);
                     mTransformCamera->restore();
+
+                    mTransformMatrix->load(transformMatrix);
                 }
             }
         }
@@ -357,19 +368,20 @@ void DisplayList::outputViewProperties(const int level) {
         ALOGD("%*sTranslate (left, top) %d, %d", level * 2, "", mLeft, mTop);
     }
     if (mStaticMatrix) {
-        ALOGD("%*sConcatMatrix (static) %p: " MATRIX_STRING,
-                level * 2, "", mStaticMatrix, MATRIX_ARGS(mStaticMatrix));
+        ALOGD("%*sConcatMatrix (static) %p: " SK_MATRIX_STRING,
+                level * 2, "", mStaticMatrix, SK_MATRIX_ARGS(mStaticMatrix));
     }
     if (mAnimationMatrix) {
-        ALOGD("%*sConcatMatrix (animation) %p: " MATRIX_STRING,
-                level * 2, "", mAnimationMatrix, MATRIX_ARGS(mAnimationMatrix));
+        ALOGD("%*sConcatMatrix (animation) %p: " SK_MATRIX_STRING,
+                level * 2, "", mAnimationMatrix, SK_MATRIX_ARGS(mAnimationMatrix));
     }
     if (mMatrixFlags != 0) {
         if (mMatrixFlags == TRANSLATION) {
-            ALOGD("%*sTranslate %f, %f", level * 2, "", mTranslationX, mTranslationY);
+            ALOGD("%*sTranslate %.2f, %.2f, %.2f",
+                    level * 2, "", mTranslationX, mTranslationY, mTranslationZ);
         } else {
-            ALOGD("%*sConcatMatrix %p: " MATRIX_STRING,
-                    level * 2, "", mTransformMatrix, MATRIX_ARGS(mTransformMatrix));
+            ALOGD("%*sConcatMatrix %p: " MATRIX_4_STRING,
+                    level * 2, "", mTransformMatrix, MATRIX_4_ARGS(mTransformMatrix));
         }
     }
 
@@ -419,19 +431,11 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
         renderer.concatMatrix(mAnimationMatrix);
     }
     if (mMatrixFlags != 0) {
-        if (Caches::getInstance().propertyEnable3d) {
-            if (mMatrixFlags == TRANSLATION) {
-                renderer.translate(mTranslationX, mTranslationY, mTranslationZ);
-            } else {
-                renderer.concatMatrix(mTransform);
-            }
+        if (mMatrixFlags == TRANSLATION) {
+            renderer.translate(mTranslationX, mTranslationY,
+                    Caches::getInstance().propertyEnable3d ? mTranslationZ : 0.0f); // TODO: necessary?
         } else {
-            // avoid setting translationZ, use SkMatrix
-            if (mMatrixFlags == TRANSLATION) {
-                renderer.translate(mTranslationX, mTranslationY, 0);
-            } else {
-                renderer.concatMatrix(mTransformMatrix);
-            }
+            renderer.concatMatrix(*mTransformMatrix);
         }
     }
     bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
@@ -482,12 +486,7 @@ void DisplayList::applyViewPropertyTransforms(mat4& matrix) {
         if (mMatrixFlags == TRANSLATION) {
             matrix.translate(mTranslationX, mTranslationY, mTranslationZ);
         } else {
-            if (Caches::getInstance().propertyEnable3d) {
-                matrix.multiply(mTransform);
-            } else {
-                mat4 temp(*mTransformMatrix);
-                matrix.multiply(temp);
-            }
+            matrix.multiply(*mTransformMatrix);
         }
     }
 }
