@@ -583,7 +583,7 @@
     <!-- =============================================================== -->
     <eat-comment />
 
-    <!-- Used for permissions that provide access to the user voicemail box. -->
+    <!-- Used for permissions that provide access to device alarms. -->
     <permission-group android:name="android.permission-group.DEVICE_ALARMS"
         android:label="@string/permgrouplab_deviceAlarms"
         android:icon="@drawable/perm_group_device_alarms"
@@ -1061,7 +1061,7 @@
     <!-- =========================================== -->
     <eat-comment />
 
-    <!-- Used for permissions that are associated with accessing and modifyign
+    <!-- Used for permissions that are associated with accessing and modifying
          telephony state: placing calls, intercepting outgoing calls, reading
          and modifying the phone state. -->
     <permission-group android:name="android.permission-group.PHONE_CALLS"

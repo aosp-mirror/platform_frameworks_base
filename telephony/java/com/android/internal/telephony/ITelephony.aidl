@@ -365,4 +365,51 @@ interface ITelephony {
      */
     String iccTransmitApduLogicalChannel(int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
+
+    /**
+     * Read one of the NV items defined in {@link RadioNVItems} / {@code ril_nv_items.h}.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param itemID the ID of the item to read.
+     * @return the NV item as a String, or null on any failure.
+     */
+    String nvReadItem(int itemID);
+
+    /**
+     * Write one of the NV items defined in {@link RadioNVItems} / {@code ril_nv_items.h}.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param itemID the ID of the item to read.
+     * @param itemValue the value to write, as a String.
+     * @return true on success; false on any failure.
+     */
+    boolean nvWriteItem(int itemID, String itemValue);
+
+    /**
+     * Update the CDMA Preferred Roaming List (PRL) in the radio NV storage.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param preferredRoamingList byte array containing the new PRL.
+     * @return true on success; false on any failure.
+     */
+    boolean nvWriteCdmaPrl(in byte[] preferredRoamingList);
+
+    /**
+     * Perform the specified type of NV config reset.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @param resetType the type of reset to perform (1 == factory reset; 2 == NV-only reset).
+     * @return true on success; false on any failure.
+     */
+    boolean nvResetConfig(int resetType);
+
+    /**
+     * Change the radio to the specified mode.
+     * Used for device configuration by some operators.
+     *
+     * @param radioMode is 0 for offline mode, 1 for online mode, 2 for low-power mode,
+     *                  or 3 to reset the radio.
+     * @return true on success; false on any failure.
+     */
+    boolean setRadioMode(int radioMode);
 }

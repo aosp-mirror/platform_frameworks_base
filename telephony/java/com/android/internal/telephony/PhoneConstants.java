@@ -63,11 +63,11 @@ public class PhoneConstants {
     public static final int LTE_ON_CDMA_FALSE = RILConstants.LTE_ON_CDMA_FALSE;
     public static final int LTE_ON_CDMA_TRUE = RILConstants.LTE_ON_CDMA_TRUE;
 
-    // Number presentation type for caller id display (From internal/Conneciton.java)
-    public static int PRESENTATION_ALLOWED = 1;    // normal
-    public static int PRESENTATION_RESTRICTED = 2; // block by user
-    public static int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
-    public static int PRESENTATION_PAYPHONE = 4;   // show pay phone info
+    // Number presentation type for caller id display (From internal/Connection.java)
+    public static final int PRESENTATION_ALLOWED = 1;    // normal
+    public static final int PRESENTATION_RESTRICTED = 2; // block by user
+    public static final int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
+    public static final int PRESENTATION_PAYPHONE = 4;   // show pay phone info
 
 
     public static final String PHONE_NAME_KEY = "phoneName";
