@@ -102,6 +102,10 @@ class DisplayContent {
 
     final WindowManagerService mService;
 
+    static final int DEFER_DETACH = 1;
+    static final int DEFER_REMOVAL = 2;
+    int mDeferredActions;
+
     /**
      * @param display May not be null.
      * @param service You know.

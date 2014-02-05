@@ -137,6 +137,21 @@ public class TaskStack {
         return mBounds.isEmpty();
     }
 
+    boolean isAnimating() {
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
+                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                    if (windows.get(winNdx).mWinAnimator.isAnimating()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     void resizeBounds(float oldWidth, float oldHeight, float newWidth, float newHeight) {
         if (oldWidth == newWidth && oldHeight == newHeight) {
             return;
@@ -349,6 +364,19 @@ public class TaskStack {
     void close() {
         mDimLayer.mDimSurface.destroy();
         mAnimationBackgroundSurface.mDimSurface.destroy();
+    }
+
+    void checkForDeferredDetach() {
+        if (mDisplayContent != null &&
+                (mDisplayContent.mDeferredActions & DisplayContent.DEFER_DETACH) != 0 &&
+                !isAnimating()) {
+            mDisplayContent.mDeferredActions &= ~DisplayContent.DEFER_DETACH;
+            mService.detachStack(mStackId);
+            if ((mDisplayContent.mDeferredActions & DisplayContent.DEFER_REMOVAL) != 0) {
+                mDisplayContent.mDeferredActions &= ~DisplayContent.DEFER_REMOVAL;
+                mService.onDisplayRemoved(mDisplayContent.getDisplayId());
+            }
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
