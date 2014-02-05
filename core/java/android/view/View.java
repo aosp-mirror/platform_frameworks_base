@@ -15363,18 +15363,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void invalidateDrawable(Drawable drawable) {
         if (verifyDrawable(drawable)) {
             if (drawable == mBackground && mBackgroundDisplayList != null) {
-                // If we're using a background display list, we only need to
-                // invalidate the display list and notify the parent to redraw.
+                // We'll need to redraw the display list.
                 mBackgroundDisplayList.clear();
-                invalidateViewProperty(true, false);
-            } else {
-                final Rect dirty = drawable.getBounds();
-                final int scrollX = mScrollX;
-                final int scrollY = mScrollY;
-
-                invalidate(dirty.left + scrollX, dirty.top + scrollY,
-                        dirty.right + scrollX, dirty.bottom + scrollY);
             }
+
+            final Rect dirty = drawable.getBounds();
+            final int scrollX = mScrollX;
+            final int scrollY = mScrollY;
+
+            invalidate(dirty.left + scrollX, dirty.top + scrollY,
+                    dirty.right + scrollX, dirty.bottom + scrollY);
         }
     }
 
@@ -15386,6 +15384,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param when the time at which the action must occur. Uses the
      *        {@link SystemClock#uptimeMillis} timebase.
      */
+    @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
         if (verifyDrawable(who) && what != null) {
             final long delay = when - SystemClock.uptimeMillis();
@@ -15405,6 +15404,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param who the recipient of the action
      * @param what the action to cancel
      */
+    @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
         if (verifyDrawable(who) && what != null) {
             if (mAttachInfo != null) {
