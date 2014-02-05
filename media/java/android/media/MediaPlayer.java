@@ -27,6 +27,7 @@ import android.net.ProxyProperties;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -989,8 +990,18 @@ public class MediaPlayer implements SubtitleController.Listener
         }
     }
 
-    private native void _setDataSource(
+    private void _setDataSource(
         String path, String[] keys, String[] values)
+        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        nativeSetDataSource(
+                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
+                path,
+                keys,
+                values);
+    }
+
+    private native void nativeSetDataSource(
+        IBinder httpServiceBinder, String path, String[] keys, String[] values)
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     /**

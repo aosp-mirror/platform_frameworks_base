@@ -20,6 +20,7 @@
 #include "utils/Log.h"
 
 #include <media/mediaplayer.h>
+#include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
 #include <stdio.h>
 #include <assert.h>
@@ -45,6 +46,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 
+#include "android_util_Binder.h"
 // ----------------------------------------------------------------------------
 
 using namespace android;
@@ -183,7 +185,7 @@ static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStat
 
 static void
 android_media_MediaPlayer_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jstring path,
+        JNIEnv *env, jobject thiz, jobject httpServiceBinderObj, jstring path,
         jobjectArray keys, jobjectArray values) {
 
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -214,8 +216,15 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
         return;
     }
 
+    sp<IMediaHTTPService> httpService;
+    if (httpServiceBinderObj != NULL) {
+        sp<IBinder> binder = ibinderForJavaObject(env, httpServiceBinderObj);
+        httpService = interface_cast<IMediaHTTPService>(binder);
+    }
+
     status_t opStatus =
         mp->setDataSource(
+                httpService,
                 pathStr,
                 headersVector.size() > 0? &headersVector : NULL);
 
@@ -726,7 +735,8 @@ static void android_media_MediaPlayer_attachAuxEffect(JNIEnv *env,  jobject thiz
 }
 
 static jint
-android_media_MediaPlayer_pullBatteryData(JNIEnv *env, jobject thiz, jobject java_reply)
+android_media_MediaPlayer_pullBatteryData(
+        JNIEnv *env, jobject /* thiz */, jobject java_reply)
 {
     sp<IBinder> binder = defaultServiceManager()->getService(String16("media.player"));
     sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
@@ -856,8 +866,9 @@ android_media_MediaPlayer_updateProxyConfig(
 
 static JNINativeMethod gMethods[] = {
     {
-        "_setDataSource",
-        "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+        "nativeSetDataSource",
+        "(Landroid/os/IBinder;Ljava/lang/String;[Ljava/lang/String;"
+        "[Ljava/lang/String;)V",
         (void *)android_media_MediaPlayer_setDataSourceAndHeaders
     },
 
@@ -911,6 +922,7 @@ extern int register_android_media_Drm(JNIEnv *env);
 extern int register_android_media_MediaCodec(JNIEnv *env);
 extern int register_android_media_MediaExtractor(JNIEnv *env);
 extern int register_android_media_MediaCodecList(JNIEnv *env);
+extern int register_android_media_MediaHTTPConnection(JNIEnv *env);
 extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaMuxer(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
@@ -922,7 +934,7 @@ extern int register_android_mtp_MtpDatabase(JNIEnv *env);
 extern int register_android_mtp_MtpDevice(JNIEnv *env);
 extern int register_android_mtp_MtpServer(JNIEnv *env);
 
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
+jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
     JNIEnv* env = NULL;
     jint result = -1;
@@ -1015,6 +1027,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_Drm(env) < 0) {
         ALOGE("ERROR: MediaDrm native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MediaHTTPConnection(env) < 0) {
+        ALOGE("ERROR: MediaHTTPConnection native registration failed");
         goto bail;
     }
 
