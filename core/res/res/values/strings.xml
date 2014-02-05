@@ -1178,7 +1178,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindIdleService">bind to idle services</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindIdleService">Allows the app to interact with application-defined idle services.</string>
+    <string name="permdesc_bindIdleService">This permission allows the Android system to bind to an application\'s idle services.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
