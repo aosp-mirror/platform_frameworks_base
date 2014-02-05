@@ -423,6 +423,58 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public boolean supportsHotspots() {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            if (array[i].mDrawable.supportsHotspots()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setHotspot(int id, float x, float y) {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            array[i].mDrawable.setHotspot(id, x, y);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void removeHotspot(int id) {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            array[i].mDrawable.removeHotspot(id);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void clearHotspots() {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i = 0; i < N; i++) {
+            array[i].mDrawable.clearHotspots();
+        }
+    }
+
     private void computeStackedPadding(Rect padding) {
         padding.left = 0;
         padding.top = 0;
