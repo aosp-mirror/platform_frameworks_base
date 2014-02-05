@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -1374,8 +1375,41 @@ public abstract class Window {
     /**
      * Set options that can affect the transition behavior within this window.
      * @param options Options to set or null for none
+     * @hide
      */
-    public void setTransitionOptions(Bundle options) {
-        throw new UnsupportedOperationException();
+    public void setTransitionOptions(ActivityOptions options, SceneTransitionListener listener) {
+    }
+
+    /**
+     * A callback for Activity transitions to be told when the shared element is ready to be shown
+     * and start the transition to its target location.
+     * @hide
+     */
+    public interface SceneTransitionListener {
+        void enterSharedElement(Bundle transitionArgs);
+        void nullPendingTransition();
+        void convertFromTranslucent();
+        void convertToTranslucent();
+    }
+
+    /**
+     * Controls how the background fade is triggered. If fadeEarly is true, the Window background
+     * will fade in as soon as the shared elements are ready to switch. If fadeEarly is false,
+     * the background will fade only after the calling Activity's exit transition completes.
+     * By default, the Window will fade in when the calling Activity's exit transition completes.
+     *
+     * @param fadeEarly Set to true to fade out the exiting Activity as soon as the shared elements
+     *                  are transferred. Set to false to fade out the exiting Activity as soon as
+     *                  the shared element is transferred.
+     * @hide
+     */
+    public void setEarlyBackgroundTransition(boolean fadeEarly) {
+    }
+
+    /**
+     * Start the exit transition.
+     * @hide
+     */
+    public void startExitTransition(ActivityOptions activityOptions) {
     }
 }

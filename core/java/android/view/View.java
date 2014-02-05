@@ -665,6 +665,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_scrollbarTrackVertical
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawHorizontalTrack
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
+ * @attr ref android.R.styleable#View_sharedElementName
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
  * @attr ref android.R.styleable#View_textAlignment
@@ -4037,6 +4038,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_accessibilityLiveRegion:
                     setAccessibilityLiveRegion(a.getInt(attr, ACCESSIBILITY_LIVE_REGION_DEFAULT));
+                    break;
+                case R.styleable.View_sharedElementName:
+                    setSharedElementName(a.getString(attr));
                     break;
             }
         }
@@ -18869,6 +18873,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAnimator = new ViewPropertyAnimator(this);
         }
         return mAnimator;
+    }
+
+    /**
+     * Specifies that the shared name of the View to be shared with another Activity.
+     * When transitioning between Activities, the name links a UI element in the starting
+     * Activity to UI element in the called Activity. Names should be unique in the
+     * View hierarchy.
+     *
+     * @param sharedElementName The cross-Activity View identifier. The called Activity will use
+     *                 the name to match the location with a View in its layout.
+     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
+     */
+    public void setSharedElementName(String sharedElementName) {
+        setTagInternal(com.android.internal.R.id.shared_element_name, sharedElementName);
+    }
+
+    /**
+     * Returns the shared name of the View to be shared with another Activity.
+     * When transitioning between Activities, the name links a UI element in the starting
+     * Activity to UI element in the called Activity. Names should be unique in the
+     * View hierarchy.
+     *
+     * <p>This returns null if the View is not a shared element or the name if it is.</p>
+     *
+     * @return The name used for this View for cross-Activity transitions or null if
+     * this View has not been identified as shared.
+     */
+    public String getSharedElementName() {
+        return (String) getTag(com.android.internal.R.id.shared_element_name);
     }
 
     /**

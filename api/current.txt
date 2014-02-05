@@ -543,6 +543,7 @@ package android {
     field public static final int fromAlpha = 16843210; // 0x10101ca
     field public static final int fromDegrees = 16843187; // 0x10101b3
     field public static final int fromScene = 16843741; // 0x10103dd
+    field public static final int fromSceneName = 16843774; // 0x10103fe
     field public static final int fromXDelta = 16843206; // 0x10101c6
     field public static final int fromXScale = 16843202; // 0x10101c2
     field public static final int fromYDelta = 16843208; // 0x10101c8
@@ -960,6 +961,7 @@ package android {
     field public static final int shadowRadius = 16843108; // 0x1010164
     field public static final int shape = 16843162; // 0x101019a
     field public static final int shareInterpolator = 16843195; // 0x10101bb
+    field public static final int sharedElementName = 16843776; // 0x1010400
     field public static final int sharedUserId = 16842763; // 0x101000b
     field public static final int sharedUserLabel = 16843361; // 0x1010261
     field public static final int shouldDisableView = 16843246; // 0x10101ee
@@ -1142,6 +1144,7 @@ package android {
     field public static final int toAlpha = 16843211; // 0x10101cb
     field public static final int toDegrees = 16843188; // 0x10101b4
     field public static final int toScene = 16843742; // 0x10103de
+    field public static final int toSceneName = 16843775; // 0x10103ff
     field public static final int toXDelta = 16843207; // 0x10101c7
     field public static final int toXScale = 16843203; // 0x10101c3
     field public static final int toYDelta = 16843209; // 0x10101c9
@@ -1157,6 +1160,7 @@ package android {
     field public static final int transformPivotX = 16843552; // 0x1010320
     field public static final int transformPivotY = 16843553; // 0x1010321
     field public static final int transition = 16843743; // 0x10103df
+    field public static final int transitionGroup = 16843777; // 0x1010401
     field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
@@ -1514,6 +1518,7 @@ package android {
     field public static final int selectAll = 16908319; // 0x102001f
     field public static final int selectTextMode = 16908333; // 0x102002d
     field public static final int selectedIcon = 16908302; // 0x102000e
+    field public static final int shared_element_name = 16908334; // 0x102002e
     field public static final int startSelectingText = 16908328; // 0x1020028
     field public static final int stopSelectingText = 16908329; // 0x1020029
     field public static final int summary = 16908304; // 0x1020010
@@ -3035,6 +3040,7 @@ package android.app {
     method public int getTaskId();
     method public final java.lang.CharSequence getTitle();
     method public final int getTitleColor();
+    method public android.os.Bundle getTransitionArgs();
     method public final int getVolumeControlStream();
     method public android.view.Window getWindow();
     method public android.view.WindowManager getWindowManager();
@@ -3130,6 +3136,7 @@ package android.app {
     method public void setContentView(android.view.View);
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public final void setDefaultKeyMode(int);
+    method public void setEarlyBackgroundTransition(boolean);
     method public final void setFeatureDrawable(int, android.graphics.drawable.Drawable);
     method public final void setFeatureDrawableAlpha(int, int);
     method public final void setFeatureDrawableResource(int, int);
@@ -3170,6 +3177,7 @@ package android.app {
     method public boolean startNextMatchingActivity(android.content.Intent);
     method public boolean startNextMatchingActivity(android.content.Intent, android.os.Bundle);
     method public void startSearch(java.lang.String, boolean, android.os.Bundle, boolean);
+    method protected void startSharedElementTransition(android.os.Bundle);
     method public deprecated void stopManagingCursor(android.database.Cursor);
     method public void takeKeyEvents(boolean);
     method public void triggerSearch(java.lang.String, android.os.Bundle);
@@ -3340,6 +3348,7 @@ package android.app {
   public class ActivityOptions {
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
+    method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.os.Bundle);
     method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
@@ -18378,7 +18387,7 @@ package android.os {
 
   public abstract class CountDownTimer {
     ctor public CountDownTimer(long, long);
-    method public final void cancel();
+    method public final synchronized void cancel();
     method public abstract void onFinish();
     method public abstract void onTick(long);
     method public final synchronized android.os.CountDownTimer start();
@@ -26688,6 +26697,7 @@ package android.transition {
     method public android.transition.Transition addListener(android.transition.Transition.TransitionListener);
     method public android.transition.Transition addTarget(int);
     method public android.transition.Transition addTarget(android.view.View);
+    method public boolean canRemoveViews();
     method public abstract void captureEndValues(android.transition.TransitionValues);
     method public abstract void captureStartValues(android.transition.TransitionValues);
     method public android.transition.Transition clone();
@@ -28752,6 +28762,7 @@ package android.view {
     method public int getScrollBarStyle();
     method public final int getScrollX();
     method public final int getScrollY();
+    method public java.lang.String getSharedElementName();
     method public int getSolidColor();
     method protected int getSuggestedMinimumHeight();
     method protected int getSuggestedMinimumWidth();
@@ -29005,6 +29016,7 @@ package android.view {
     method public void setScrollY(int);
     method public void setScrollbarFadingEnabled(boolean);
     method public void setSelected(boolean);
+    method public void setSharedElementName(java.lang.String);
     method public void setSoundEffectsEnabled(boolean);
     method public void setSystemUiVisibility(int);
     method public void setTag(java.lang.Object);
@@ -29391,6 +29403,7 @@ package android.view {
     method protected boolean isChildrenDrawingOrderEnabled();
     method protected boolean isChildrenDrawnWithCacheEnabled();
     method public boolean isMotionEventSplittingEnabled();
+    method public boolean isTransitionGroup();
     method public final void layout(int, int, int, int);
     method protected void measureChild(android.view.View, int, int);
     method protected void measureChildWithMargins(android.view.View, int, int, int, int);
@@ -29436,6 +29449,7 @@ package android.view {
     method public void setOnHierarchyChangeListener(android.view.ViewGroup.OnHierarchyChangeListener);
     method public void setPersistentDrawingCache(int);
     method protected void setStaticTransformationsEnabled(boolean);
+    method public void setTransitionGroup(boolean);
     method public boolean shouldDelayChildPressedState();
     method public boolean showContextMenuForChild(android.view.View);
     method public android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback);
@@ -29730,7 +29744,6 @@ package android.view {
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract deprecated void setTitleColor(int);
     method public void setTransitionManager(android.transition.TransitionManager);
-    method public void setTransitionOptions(android.os.Bundle);
     method public void setType(int);
     method public void setUiOptions(int);
     method public void setUiOptions(int, int);
