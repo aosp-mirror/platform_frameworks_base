@@ -359,8 +359,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Huruhusu programu kubadilisha kasi ya uhuishaji kijumla (uhuisho wa haraka zaidi au wa polepole zaidi) wakati wowote."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"Dhibiti shuhuda za programu"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Inaruhusu programu kuunda na kudhibiti shuhuda zake, kukwepa mipangilio yao ya kawaida. Haitahitajika kamwe na programu za kawaida."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"lemaza skrini"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Inaruhusu programu kulemaza kwa muda skrini kwa ajili ya mpito kamili wa skrinimaombi kwa muda kufungia screen kwa ajili ya mpito full-screen."</string>
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"fanya skrini isisonge"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Huruhusu programu kufanya skrini isisonge kwa muda ili kuruhusu kubadilisha hadi skrini nzima."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"bonyeza vitufe na vitufe vya kudhibiti"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Huruhusu programu kuwasilisha matukio yake ya ingizo (mibonyezo ya vitufe, nk.) kwa programu zingine. programu hasidi zinaweza kutumia hii ili kutawala kompyuta kibao."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Inaruhusu programu kuwasilisha matukio yake ya ingizo (mibonyezo ya kitufe, nk.)kwa programu zingine.Programu hasidi zinaweza kutumia hii kutawala simu."</string>
@@ -423,6 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Huruhusu programu kutumia vyombo vyovyote vya habari vilivyosakinishwa ili kusimbua kwa ajili ya kucheza tena."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"dhibiti vitambulisho vinavyoaminika"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Huruhusu programu kusakinisha na kusanidua vyeti vya CA kama vitambulisho vinavyoaminika."</string>
+    <string name="permlab_bindIdleService" msgid="7521398788076342815">"funga kwenye huduma zisizofanya kitu"</string>
+    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Huruhusu programu kuwasiliana na huduma zisizofanya kitu zilizobainishwa na programu."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"soma/andika kwa vyanzo vinavyomilikiwa na diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Inaruhusu programu kusoma na kuandika kwa chanzo chochote kinachomilikiwa na kikundi cha diag; kwa mfano, faili katika /dev. Hii inaweza kuathiri udhabiti na usalama wa mfumo. Hii inapaswa kutumiwa TU kwa utambuzi mahsusi wa maunzi na mtengenezaji au opareta."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"wezesha au lemeza vijenzi vya programu"</string>

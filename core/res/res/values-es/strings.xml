@@ -423,6 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite que la aplicación use cualquier decodificador de archivos multimedia instalado para la reproducción."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrar credenciales de confianza"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que la aplicación instale y desinstale certificados de CA como credenciales de confianza."</string>
+    <string name="permlab_bindIdleService" msgid="7521398788076342815">"ocultar para servicios inactivos"</string>
+    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Permite que la aplicación interactúe con servicios inactivos definidos por la aplicación."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer/escribir en los recursos propiedad del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite que la aplicación consulte y escriba en cualquier recurso del grupo de diagnóstico como, por ejemplo, archivos en /dev. Este permiso podría afectar a la seguridad y estabilidad del sistema. SOLO se debe usar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"habilitar o inhabilitar componentes de la aplicación"</string>
@@ -1526,7 +1528,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Desbloqueando tarjeta SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Código PIN incorrecto"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Introduce un código PIN con una longitud comprendida entre cuatro y ocho dígitos."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"El código PUK debe tener ocho números."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"El código PUK debe tener 8 números."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Vuelve a introducir el código PUK correcto. Si introduces un código incorrecto varias veces, se inhabilitará la tarjeta SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Los códigos PIN no coinciden."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Demasiados intentos incorrectos de crear el patrón"</string>

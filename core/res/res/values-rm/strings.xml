@@ -678,6 +678,10 @@
     <skip />
     <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
     <skip />
+    <!-- no translation found for permlab_bindIdleService (7521398788076342815) -->
+    <skip />
+    <!-- no translation found for permdesc_bindIdleService (3062157929989572890) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leger/scriver en resursas che appartegnan a diagnostics"</string>
     <!-- no translation found for permdesc_diagnostic (6608295692002452283) -->
     <skip />
