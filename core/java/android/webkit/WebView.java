@@ -845,8 +845,8 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Loads the URL with postData using "POST" method into this WebView. If url
-     * is not a network URL, it will be loaded with {link
-     * {@link #loadUrl(String)} instead.
+     * is not a network URL, it will be loaded with {@link #loadUrl(String)}
+     * instead, ignoring the postData param.
      *
      * @param url the URL of the resource to load
      * @param postData the data will be passed to "POST" request, which must be
@@ -855,7 +855,11 @@ public class WebView extends AbsoluteLayout
     public void postUrl(String url, byte[] postData) {
         checkThread();
         if (DebugFlags.TRACE_API) Log.d(LOGTAG, "postUrl=" + url);
-        mProvider.postUrl(url, postData);
+        if (URLUtil.isNetworkUrl(url)) {
+            mProvider.postUrl(url, postData);
+        } else {
+            mProvider.loadUrl(url);
+        }
     }
 
     /**
