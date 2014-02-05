@@ -83,6 +83,8 @@
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DISABLED" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_ENABLED" />
+    <protected-broadcast android:name="android.appwidget.action.APPWIDGET_HOST_RESTORED" />
+    <protected-broadcast android:name="android.appwidget.action.APPWIDGET_RESTORED" />
 
     <protected-broadcast android:name="android.backup.intent.RUN" />
     <protected-broadcast android:name="android.backup.intent.CLEAR" />

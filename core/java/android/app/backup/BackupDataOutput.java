@@ -17,6 +17,7 @@
 package android.app.backup;
 
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -76,13 +77,19 @@ public class BackupDataOutput {
     /**
      * Mark the beginning of one record in the backup data stream. This must be called before
      * {@link #writeEntityData}.
-     * @param key A string key that uniquely identifies the data record within the application
+     * @param key A string key that uniquely identifies the data record within the application.
+     *    Keys whose first character is \uFF00 or higher are not valid.
      * @param dataSize The size in bytes of this record's data.  Passing a dataSize
      *    of -1 indicates that the record under this key should be deleted.
      * @return The number of bytes written to the backup stream
      * @throws IOException if the write failed
      */
     public int writeEntityHeader(String key, int dataSize) throws IOException {
+        if (key != null && key.charAt(0) >= 0xff00) {
+            if (Process.myUid() != Process.SYSTEM_UID) {
+                throw new IllegalArgumentException("Invalid key " + key);
+            }
+        }
         int result = writeEntityHeader_native(mBackupWriter, key, dataSize);
         if (result >= 0) {
             return result;

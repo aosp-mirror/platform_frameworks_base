@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import libcore.io.ErrnoException;
 import libcore.io.Libcore;
@@ -55,20 +57,24 @@ public class LocalTransport extends IBackupTransport.Stub {
     private static final String TRANSPORT_DESTINATION_STRING
             = "Backing up to debug-only private cache";
 
-    // The single hardcoded restore set always has the same (nonzero!) token
-    private static final long RESTORE_TOKEN = 1;
+    // The currently-active restore set always has the same (nonzero!) token
+    private static final long CURRENT_SET_TOKEN = 1;
 
     private Context mContext;
     private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
+    private File mCurrentSetDir = new File(mDataDir, Long.toString(CURRENT_SET_TOKEN));
+
     private PackageInfo[] mRestorePackages = null;
     private int mRestorePackage = -1;  // Index into mRestorePackages
+    private File mRestoreDataDir;
+    private long mRestoreToken;
 
 
     public LocalTransport(Context context) {
         mContext = context;
-        mDataDir.mkdirs();
-        if (!SELinux.restorecon(mDataDir)) {
-            Log.e(TAG, "SELinux restorecon failed for " + mDataDir);
+        mCurrentSetDir.mkdirs();
+        if (!SELinux.restorecon(mCurrentSetDir)) {
+            Log.e(TAG, "SELinux restorecon failed for " + mCurrentSetDir);
         }
     }
 
@@ -96,7 +102,7 @@ public class LocalTransport extends IBackupTransport.Stub {
 
     public int initializeDevice() {
         if (DEBUG) Log.v(TAG, "wiping all data");
-        deleteContents(mDataDir);
+        deleteContents(mCurrentSetDir);
         return BackupConstants.TRANSPORT_OK;
     }
 
@@ -112,7 +118,7 @@ public class LocalTransport extends IBackupTransport.Stub {
             }
         }
 
-        File packageDir = new File(mDataDir, packageInfo.packageName);
+        File packageDir = new File(mCurrentSetDir, packageInfo.packageName);
         packageDir.mkdirs();
 
         // Each 'record' in the restore set is kept in its own file, named by
@@ -193,7 +199,7 @@ public class LocalTransport extends IBackupTransport.Stub {
     public int clearBackupData(PackageInfo packageInfo) {
         if (DEBUG) Log.v(TAG, "clearBackupData() pkg=" + packageInfo.packageName);
 
-        File packageDir = new File(mDataDir, packageInfo.packageName);
+        File packageDir = new File(mCurrentSetDir, packageInfo.packageName);
         final File[] fileset = packageDir.listFiles();
         if (fileset != null) {
             for (File f : fileset) {
@@ -210,22 +216,38 @@ public class LocalTransport extends IBackupTransport.Stub {
     }
 
     // Restore handling
+    static final long[] POSSIBLE_SETS = { 2, 3, 4, 5, 6, 7, 8, 9 }; 
     public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
-        // one hardcoded restore set
-        RestoreSet set = new RestoreSet("Local disk image", "flash", RESTORE_TOKEN);
-        RestoreSet[] array = { set };
-        return array;
+        long[] existing = new long[POSSIBLE_SETS.length + 1];
+        int num = 0;
+
+        // see which possible non-current sets exist, then put the current set at the end
+        for (long token : POSSIBLE_SETS) {
+            if ((new File(mDataDir, Long.toString(token))).exists()) {
+                existing[num++] = token;
+            }
+        }
+        // and always the currently-active set last
+        existing[num++] = CURRENT_SET_TOKEN;
+
+        RestoreSet[] available = new RestoreSet[num];
+        for (int i = 0; i < available.length; i++) {
+            available[i] = new RestoreSet("Local disk image", "flash", existing[i]);
+        }
+        return available;
     }
 
     public long getCurrentRestoreSet() {
-        // The hardcoded restore set always has the same token
-        return RESTORE_TOKEN;
+        // The current restore set always has the same token
+        return CURRENT_SET_TOKEN;
     }
 
     public int startRestore(long token, PackageInfo[] packages) {
         if (DEBUG) Log.v(TAG, "start restore " + token);
         mRestorePackages = packages;
         mRestorePackage = -1;
+        mRestoreToken = token;
+        mRestoreDataDir = new File(mDataDir, Long.toString(token));
         return BackupConstants.TRANSPORT_OK;
     }
 
@@ -234,7 +256,7 @@ public class LocalTransport extends IBackupTransport.Stub {
         while (++mRestorePackage < mRestorePackages.length) {
             String name = mRestorePackages[mRestorePackage].packageName;
             // skip packages where we have a data dir but no actual contents
-            String[] contents = (new File(mDataDir, name)).list();
+            String[] contents = (new File(mRestoreDataDir, name)).list();
             if (contents != null && contents.length > 0) {
                 if (DEBUG) Log.v(TAG, "  nextRestorePackage() = " + name);
                 return name;
@@ -248,29 +270,32 @@ public class LocalTransport extends IBackupTransport.Stub {
     public int getRestoreData(ParcelFileDescriptor outFd) {
         if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
         if (mRestorePackage < 0) throw new IllegalStateException("nextRestorePackage not called");
-        File packageDir = new File(mDataDir, mRestorePackages[mRestorePackage].packageName);
+        File packageDir = new File(mRestoreDataDir, mRestorePackages[mRestorePackage].packageName);
 
         // The restore set is the concatenation of the individual record blobs,
-        // each of which is a file in the package's directory
-        File[] blobs = packageDir.listFiles();
+        // each of which is a file in the package's directory.  We return the
+        // data in lexical order sorted by key, so that apps which use synthetic
+        // keys like BLOB_1, BLOB_2, etc will see the date in the most obvious
+        // order.
+        ArrayList<DecodedFilename> blobs = contentsByKey(packageDir);
         if (blobs == null) {  // nextRestorePackage() ensures the dir exists, so this is an error
-            Log.e(TAG, "Error listing directory: " + packageDir);
+            Log.e(TAG, "No keys for package: " + packageDir);
             return BackupConstants.TRANSPORT_ERROR;
         }
 
         // We expect at least some data if the directory exists in the first place
-        if (DEBUG) Log.v(TAG, "  getRestoreData() found " + blobs.length + " key files");
+        if (DEBUG) Log.v(TAG, "  getRestoreData() found " + blobs.size() + " key files");
         BackupDataOutput out = new BackupDataOutput(outFd.getFileDescriptor());
         try {
-            for (File f : blobs) {
+            for (DecodedFilename keyEntry : blobs) {
+                File f = keyEntry.file;
                 FileInputStream in = new FileInputStream(f);
                 try {
                     int size = (int) f.length();
                     byte[] buf = new byte[size];
                     in.read(buf);
-                    String key = new String(Base64.decode(f.getName()));
-                    if (DEBUG) Log.v(TAG, "    ... key=" + key + " size=" + size);
-                    out.writeEntityHeader(key, size);
+                    if (DEBUG) Log.v(TAG, "    ... key=" + keyEntry.key + " size=" + size);
+                    out.writeEntityHeader(keyEntry.key, size);
                     out.writeEntityData(buf, size);
                 } finally {
                     in.close();
@@ -281,6 +306,39 @@ public class LocalTransport extends IBackupTransport.Stub {
             Log.e(TAG, "Unable to read backup records", e);
             return BackupConstants.TRANSPORT_ERROR;
         }
+    }
+
+    static class DecodedFilename implements Comparable<DecodedFilename> {
+        public File file;
+        public String key;
+
+        public DecodedFilename(File f) {
+            file = f;
+            key = new String(Base64.decode(f.getName()));
+        }
+
+        @Override
+        public int compareTo(DecodedFilename other) {
+            // sorts into ascending lexical order by decoded key
+            return key.compareTo(other.key);
+        }
+    }
+
+    // Return a list of the files in the given directory, sorted lexically by
+    // the Base64-decoded file name, not by the on-disk filename
+    private ArrayList<DecodedFilename> contentsByKey(File dir) {
+        File[] allFiles = dir.listFiles();
+        if (allFiles == null || allFiles.length == 0) {
+            return null;
+        }
+
+        // Decode the filenames into keys then sort lexically by key
+        ArrayList<DecodedFilename> contents = new ArrayList<DecodedFilename>();
+        for (File f : allFiles) {
+            contents.add(new DecodedFilename(f));
+        }
+        Collections.sort(contents);
+        return contents;
     }
 
     public void finishRestore() {

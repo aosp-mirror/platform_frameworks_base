@@ -167,7 +167,7 @@ interface IBackupManager {
      *     are to be backed up.  The <code>allApps</code> parameter supersedes this.
      */
     void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
-            boolean includeShared, boolean allApps, boolean allIncludesSystem,
+            boolean includeShared, boolean doWidgets, boolean allApps, boolean allIncludesSystem,
             in String[] packageNames);
 
     /**

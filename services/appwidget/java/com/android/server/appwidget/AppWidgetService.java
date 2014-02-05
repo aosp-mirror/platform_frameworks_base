@@ -23,7 +23,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,18 +37,19 @@ import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.AppWidgetBackupBridge;
+import com.android.server.WidgetBackupProvider;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Locale;
 
 
 /**
  * SystemService that publishes an IAppWidgetService.
  */
-public class AppWidgetService extends SystemService {
+public class AppWidgetService extends SystemService implements WidgetBackupProvider {
 
     static final String TAG = "AppWidgetService";
 
@@ -72,6 +72,7 @@ public class AppWidgetService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.APPWIDGET_SERVICE, mServiceImpl);
+        AppWidgetBackupBridge.register(this);
     }
 
     @Override
@@ -81,13 +82,40 @@ public class AppWidgetService extends SystemService {
         }
     }
 
+
+    // backup <-> app widget service bridge surface
+    @Override
+    public List<String> getWidgetParticipants(int userId) {
+        return mServiceImpl.getWidgetParticipants(userId);
+    }
+
+    @Override
+    public byte[] getWidgetState(String packageName, int userId) {
+        return mServiceImpl.getWidgetState(packageName, userId);
+    }
+
+    @Override
+    public void restoreStarting(int userId) {
+        mServiceImpl.restoreStarting(userId);
+    }
+
+    @Override
+    public void restoreWidgetState(String packageName, byte[] restoredState, int userId) {
+        mServiceImpl.restoreWidgetState(packageName, restoredState, userId);
+    }
+
+    @Override
+    public void restoreFinished(int userId) {
+        mServiceImpl.restoreFinished(userId);
+    }
+
+
+    // implementation entry point and binder service
     private final AppWidgetServiceStub mServiceImpl = new AppWidgetServiceStub();
 
-    private class AppWidgetServiceStub extends IAppWidgetService.Stub {
+    class AppWidgetServiceStub extends IAppWidgetService.Stub {
 
         private boolean mSafeMode;
-        private Locale mLocale;
-        private PackageManager mPackageManager;
 
         public void systemRunning(boolean safeMode) {
             mSafeMode = safeMode;
@@ -226,6 +254,29 @@ public class AppWidgetService extends SystemService {
                 }
             }
         }
+
+
+        // support of the widget/backup bridge
+        public List<String> getWidgetParticipants(int userId) {
+            return getImplForUser(userId).getWidgetParticipants();
+        }
+
+        public byte[] getWidgetState(String packageName, int userId) {
+            return getImplForUser(userId).getWidgetState(packageName);
+        }
+
+        public void restoreStarting(int userId) {
+            getImplForUser(userId).restoreStarting();
+        }
+
+        public void restoreWidgetState(String packageName, byte[] restoredState, int userId) {
+            getImplForUser(userId).restoreWidgetState(packageName, restoredState);
+        }
+
+        public void restoreFinished(int userId) {
+            getImplForUser(userId).restoreFinished();
+        }
+
 
         private void checkPermission(int userId) {
             int realUserId = ActivityManager.handleIncomingUser(
