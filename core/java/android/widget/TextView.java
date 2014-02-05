@@ -4814,6 +4814,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public void invalidateDrawable(Drawable drawable) {
+        boolean handled = false;
+
         if (verifyDrawable(drawable)) {
             final Rect dirty = drawable.getBounds();
             int scrollX = mScrollX;
@@ -4831,6 +4833,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     scrollX += mPaddingLeft;
                     scrollY += compoundPaddingTop + (vspace - drawables.mDrawableHeightLeft) / 2;
+                    handled = true;
                 } else if (drawable == drawables.mDrawableRight) {
                     final int compoundPaddingTop = getCompoundPaddingTop();
                     final int compoundPaddingBottom = getCompoundPaddingBottom();
@@ -4838,6 +4841,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     scrollX += (mRight - mLeft - mPaddingRight - drawables.mDrawableSizeRight);
                     scrollY += compoundPaddingTop + (vspace - drawables.mDrawableHeightRight) / 2;
+                    handled = true;
                 } else if (drawable == drawables.mDrawableTop) {
                     final int compoundPaddingLeft = getCompoundPaddingLeft();
                     final int compoundPaddingRight = getCompoundPaddingRight();
@@ -4845,6 +4849,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     scrollX += compoundPaddingLeft + (hspace - drawables.mDrawableWidthTop) / 2;
                     scrollY += mPaddingTop;
+                    handled = true;
                 } else if (drawable == drawables.mDrawableBottom) {
                     final int compoundPaddingLeft = getCompoundPaddingLeft();
                     final int compoundPaddingRight = getCompoundPaddingRight();
@@ -4852,11 +4857,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     scrollX += compoundPaddingLeft + (hspace - drawables.mDrawableWidthBottom) / 2;
                     scrollY += (mBottom - mTop - mPaddingBottom - drawables.mDrawableSizeBottom);
+                    handled = true;
                 }
             }
 
-            invalidate(dirty.left + scrollX, dirty.top + scrollY,
-                    dirty.right + scrollX, dirty.bottom + scrollY);
+            if (handled) {
+                invalidate(dirty.left + scrollX, dirty.top + scrollY,
+                        dirty.right + scrollX, dirty.bottom + scrollY);
+            }
+        }
+
+        if (!handled) {
+            super.invalidateDrawable(drawable);
         }
     }
 
