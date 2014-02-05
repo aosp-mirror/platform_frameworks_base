@@ -141,7 +141,8 @@ JNIEnv* JNISurfaceTextureContext::getJNIEnv(bool* needsDetach) {
     *needsDetach = false;
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     if (env == NULL) {
-        JavaVMAttachArgs args = {JNI_VERSION_1_4, NULL, NULL};
+        JavaVMAttachArgs args = {
+            JNI_VERSION_1_4, "JNISurfaceTextureContext", NULL };
         JavaVM* vm = AndroidRuntime::getJavaVM();
         int result = vm->AttachCurrentThread(&env, (void*) &args);
         if (result != JNI_OK) {
