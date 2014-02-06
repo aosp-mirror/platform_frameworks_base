@@ -575,7 +575,8 @@ public class Paint_Delegate {
             return 0;
         }
 
-        return delegate.measureText(text, index, count, isRtl(bidiFlags));
+        RectF bounds = delegate.measureText(text, index, count, isRtl(bidiFlags));
+        return bounds.right - bounds.left;
     }
 
     @LayoutlibDelegate
@@ -614,7 +615,8 @@ public class Paint_Delegate {
             }
 
             // measure from start to end
-            float res = delegate.measureText(text, start, end - start + 1, isRtl(bidiFlags));
+            RectF bounds = delegate.measureText(text, start, end - start + 1, isRtl(bidiFlags));
+            float res = bounds.right - bounds.left;
 
             if (measuredWidth != null) {
                 measuredWidth[measureIndex] = res;
@@ -991,8 +993,9 @@ public class Paint_Delegate {
         boolean isRtl = isRtl(flags);
 
         int limit = index + count;
-        return new BidiRenderer(null, delegate, text).renderText(
+        RectF bounds = new BidiRenderer(null, delegate, text).renderText(
                 index, limit, isRtl, advances, advancesIndex, false, 0, 0);
+        return bounds.right - bounds.left;
     }
 
     @LayoutlibDelegate
@@ -1058,9 +1061,7 @@ public class Paint_Delegate {
         if (delegate == null || delegate.mFonts == null || delegate.mFonts.size() == 0) {
             return;
         }
-        int w = (int) delegate.measureText(text, index, count, isRtl(bidiFlags));
-        int h= delegate.getFonts().get(0).mMetrics.getHeight();
-        bounds.set(0, 0, w, h);
+        delegate.measureText(text, index, count, isRtl(bidiFlags)).roundOut(bounds);
     }
 
     @LayoutlibDelegate
@@ -1154,7 +1155,7 @@ public class Paint_Delegate {
         }
     }
 
-    /*package*/ float measureText(char[] text, int index, int count, boolean isRtl) {
+    /*package*/ RectF measureText(char[] text, int index, int count, boolean isRtl) {
         return new BidiRenderer(null, this, text).renderText(
                 index, index + count, isRtl, null, 0, false, 0, 0);
     }
