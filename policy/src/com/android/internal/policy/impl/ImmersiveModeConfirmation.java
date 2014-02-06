@@ -117,7 +117,7 @@ public class ImmersiveModeConfirmation {
     }
 
     public void immersiveModeChanged(String pkg, boolean isImmersiveMode) {
-        if (pkg == null) {
+        if (pkg == null || PolicyControl.disableImmersiveConfirmation(pkg)) {
             return;
         }
         mHandler.removeMessages(H.SHOW);
