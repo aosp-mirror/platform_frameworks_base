@@ -26,6 +26,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import android.app.ActivityManager;
 import android.appwidget.AppWidgetManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -41,6 +42,7 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -69,7 +71,6 @@ public class KeyguardViewManager {
 
     // Timeout used for keypresses
     static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
-    private static final int HOST_LAYOUT = R.layout.keyguard_simple_host_view;
 
     private final Context mContext;
     private final ViewManager mViewManager;
@@ -263,6 +264,7 @@ public class KeyguardViewManager {
     }
 
     SparseArray<Parcelable> mStateContainer = new SparseArray<Parcelable>();
+    private int mCurrentLayout;
 
     private void maybeCreateKeyguardLocked(boolean enableScreenRotation, boolean force,
             Bundle options) {
@@ -310,7 +312,14 @@ public class KeyguardViewManager {
         if (force || mKeyguardView == null) {
             mKeyguardHost.setCustomBackground(null);
             mKeyguardHost.removeAllViews();
-            inflateKeyguardView(options);
+            int layout = allowNotificationsOnSecureKeyguard()
+                    ? R.layout.keyguard_simple_host_view
+                    : R.layout.keyguard_host_view;
+            if (mCurrentLayout != layout) {
+                mStateContainer.clear(); // don't restore to the wrong view hierarchy
+                mCurrentLayout = layout;
+            }
+            mKeyguardView = inflateKeyguardView(options, layout);
             mKeyguardView.requestFocus();
         }
         updateUserActivityTimeoutInWindowLayoutParams();
@@ -319,31 +328,24 @@ public class KeyguardViewManager {
         mKeyguardHost.restoreHierarchyState(mStateContainer);
     }
 
-    private void inflateKeyguardView(Bundle options) {
+    private boolean allowNotificationsOnSecureKeyguard() {
+        ContentResolver cr = mContext.getContentResolver();
+        return Settings.Secure.getInt(cr, Settings.Secure.LOCK_SCREEN_ALLOW_NOTIFICATIONS, 0) == 1;
+    }
+
+    private KeyguardViewBase inflateKeyguardView(Bundle options, int layoutId) {
         View v = mKeyguardHost.findViewById(R.id.keyguard_host_view);
         if (v != null) {
             mKeyguardHost.removeView(v);
         }
         final LayoutInflater inflater = LayoutInflater.from(mContext);
-        View view = inflater.inflate(HOST_LAYOUT, mKeyguardHost, true);
-        mKeyguardView = (KeyguardViewBase) view.findViewById(R.id.keyguard_host_view);
-        mKeyguardView.setLockPatternUtils(mLockPatternUtils);
-        mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
-        mKeyguardView.onUserSwitching(options != null && options.getBoolean(IS_SWITCHING_USER));
-
-        // HACK
-        // The keyguard view will have set up window flags in onFinishInflate before we set
-        // the view mediator callback. Make sure it knows the correct IME state.
-        if (mViewMediatorCallback != null) {
-            KeyguardPasswordView kpv = (KeyguardPasswordView) mKeyguardView.findViewById(
-                    R.id.keyguard_password_view);
-
-            if (kpv != null) {
-                mViewMediatorCallback.setNeedsInput(kpv.needsInput());
-            }
-        }
-
-        mKeyguardView.onCreateOptions(options);
+        View view = inflater.inflate(layoutId, mKeyguardHost, true);
+        KeyguardViewBase keyguard = (KeyguardViewBase) view.findViewById(R.id.keyguard_host_view);
+        keyguard.setLockPatternUtils(mLockPatternUtils);
+        keyguard.setViewMediatorCallback(mViewMediatorCallback);
+        keyguard.onUserSwitching(options != null && options.getBoolean(IS_SWITCHING_USER));
+        keyguard.onCreateOptions(options);
+        return keyguard;
     }
 
     public void updateUserActivityTimeout() {

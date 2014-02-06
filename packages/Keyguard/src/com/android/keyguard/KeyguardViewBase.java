@@ -56,7 +56,7 @@ import java.io.File;
  * Handles intercepting of media keys that still work when the keyguard is
  * showing.
  */
-public abstract class KeyguardViewBase extends FrameLayout {
+public abstract class KeyguardViewBase extends FrameLayout implements SecurityCallback {
 
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
@@ -104,22 +104,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
                 (KeyguardSecurityContainer) findViewById(R.id.keyguard_security_container);
         mLockPatternUtils = new LockPatternUtils(mContext);
         mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
-        mSecurityContainer.setSecurityCallback(new SecurityCallback() {
-            @Override
-            public void userActivity(long timeout) {
-                KeyguardViewBase.this.userActivity(timeout);
-            }
-
-            @Override
-            public void dismiss(boolean authenticated) {
-                KeyguardViewBase.this.dismiss(authenticated);
-            }
-
-            @Override
-            public void finish() {
-                KeyguardViewBase.this.finish();
-            }
-        });
+        mSecurityContainer.setSecurityCallback(this);
         mSecurityContainer.showPrimarySecurityScreen(false);
         // mSecurityContainer.updateSecurityViews(false /* not bouncing */);
         setBackButtonEnabled(false);
@@ -138,14 +123,6 @@ public abstract class KeyguardViewBase extends FrameLayout {
      */
     public void dismiss() {
         dismiss(false);
-    }
-
-    protected boolean dismiss(boolean authenticated) {
-        boolean finished = getSecurityContainer().showNextSecurityScreenOrFinish(authenticated);
-        if (!finished) {
-            updateAfterSecuritySelection();
-        }
-        return finished;
     }
 
     private void setBackButtonEnabled(boolean enabled) {
@@ -180,27 +157,31 @@ public abstract class KeyguardViewBase extends FrameLayout {
         mSecurityContainer.announceCurrentSecurityMethod();
     }
 
-    private void updateAfterSecuritySelection() {
-        // Enable or disable the back button based on security mode
-        if (getSecurityContainer().getSecurityMode() == SecurityMode.Account
-                && !mLockPatternUtils.isPermanentlyLocked()) {
-            // we're showing account as a backup, provide a way to get back to primary
-            setBackButtonEnabled(true);
-        }
+    protected KeyguardSecurityContainer getSecurityContainer() {
+        return mSecurityContainer;
+    }
 
+    /**
+     * Extend display timeout
+     * @param timeout duration to delay timeout, in ms.
+     */
+    @Override
+    public void userActivity(long timeout) {
         if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.setNeedsInput(getSecurityContainer().needsInput());
+            mViewMediatorCallback.userActivity(timeout);
         }
     }
 
-    protected KeyguardSecurityContainer getSecurityContainer() {
-        return mSecurityContainer;
+    @Override
+    public boolean dismiss(boolean authenticated) {
+        return mSecurityContainer.showNextSecurityScreenOrFinish(authenticated);
     }
 
     /**
      * Authentication has happened and it's time to dismiss keyguard. This function
      * should clean up and inform KeyguardViewMediator.
      */
+    @Override
     public void finish() {
         // If the alternate unlock was suppressed, it can now be safely
         // enabled because the user has left keyguard.
@@ -222,17 +203,20 @@ public abstract class KeyguardViewBase extends FrameLayout {
         }
     }
 
-    /**
-     * Extend display timeout
-     * @param timeout duration to delay timeout, in ms.
-     */
-    protected void userActivity(long timeout) {
+    @Override
+    public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
+        // Enable or disable the back button based on security mode
+        if (securityMode == SecurityMode.Account && !mLockPatternUtils.isPermanentlyLocked()) {
+            // we're showing account as a backup, provide a way to get back to primary
+            setBackButtonEnabled(true);
+        }
+
         if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.userActivity(timeout);
+            mViewMediatorCallback.setNeedsInput(needsInput);
         }
     }
 
-    protected void userActivity() {
+    public void userActivity() {
         if (mViewMediatorCallback != null) {
             mViewMediatorCallback.userActivity();
         }
@@ -281,7 +265,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
      * The result will be propogated back via {@link KeyguardViewCallback#keyguardDone(boolean)}
      */
     public void verifyUnlock() {
-        SecurityMode securityMode = getSecurityContainer().getSecurityMode();
+        SecurityMode securityMode = mSecurityContainer.getSecurityMode();
         if (securityMode == KeyguardSecurityModel.SecurityMode.None) {
             if (mViewMediatorCallback != null) {
                 mViewMediatorCallback.keyguardDone(true);
@@ -452,6 +436,8 @@ public abstract class KeyguardViewBase extends FrameLayout {
     public void setViewMediatorCallback(
             KeyguardViewMediator.ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
+        // Update ViewMediator with the current input method requirements
+        mViewMediatorCallback.setNeedsInput(mSecurityContainer.needsInput());
     }
 
     protected KeyguardActivityLauncher getActivityLauncher() {
