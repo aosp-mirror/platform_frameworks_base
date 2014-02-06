@@ -64,7 +64,7 @@ public class WindowAnimator {
     Object mLastWindowFreezeSource;
 
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators =
-            new SparseArray<WindowAnimator.DisplayContentsAnimator>(2);
+            new SparseArray<DisplayContentsAnimator>(2);
 
     boolean mInitialized = false;
 
@@ -451,11 +451,6 @@ public class WindowAnimator {
         }
     }
 
-    private void performAnimationsLocked(final int displayId) {
-        updateWindowsLocked(displayId);
-        updateWallpaperLocked(displayId);
-    }
-
 
     /** Locked on mService.mWindowMap. */
     private void animateLocked() {
@@ -496,7 +491,8 @@ public class WindowAnimator {
 
                 // Update animations of all applications, including those
                 // associated with exiting/removed apps
-                performAnimationsLocked(displayId);
+                updateWindowsLocked(displayId);
+                updateWallpaperLocked(displayId);
 
                 final WindowList windows = mService.getWindowListLocked(displayId);
                 final int N = windows.size();
