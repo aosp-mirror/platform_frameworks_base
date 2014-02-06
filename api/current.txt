@@ -28632,6 +28632,7 @@ package android.view {
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo();
     method public void createContextMenu(android.view.ContextMenu);
     method public void destroyDrawingCache();
+    method public android.view.WindowInsets dispatchApplyWindowInsets(android.view.WindowInsets);
     method public void dispatchConfigurationChanged(android.content.res.Configuration);
     method public void dispatchDisplayHint(int);
     method public boolean dispatchDragEvent(android.view.DragEvent);
@@ -28663,7 +28664,7 @@ package android.view {
     method public final android.view.View findViewById(int);
     method public final android.view.View findViewWithTag(java.lang.Object);
     method public void findViewsWithText(java.util.ArrayList<android.view.View>, java.lang.CharSequence, int);
-    method protected boolean fitSystemWindows(android.graphics.Rect);
+    method protected deprecated boolean fitSystemWindows(android.graphics.Rect);
     method public android.view.View focusSearch(int);
     method public void forceLayout();
     method public static int generateViewId();
@@ -28849,6 +28850,7 @@ package android.view {
     method public void offsetTopAndBottom(int);
     method protected void onAnimationEnd();
     method protected void onAnimationStart();
+    method public android.view.WindowInsets onApplyWindowInsets(android.view.WindowInsets);
     method protected void onAttachedToWindow();
     method public void onCancelPendingInputEvents();
     method public boolean onCheckIsTextEditor();
@@ -28915,7 +28917,8 @@ package android.view {
     method public boolean removeCallbacks(java.lang.Runnable);
     method public void removeOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener);
     method public void removeOnLayoutChangeListener(android.view.View.OnLayoutChangeListener);
-    method public void requestFitSystemWindows();
+    method public void requestApplyInsets();
+    method public deprecated void requestFitSystemWindows();
     method public final boolean requestFocus();
     method public final boolean requestFocus(int);
     method public boolean requestFocus(int, android.graphics.Rect);
@@ -28979,6 +28982,7 @@ package android.view {
     method public void setNextFocusLeftId(int);
     method public void setNextFocusRightId(int);
     method public void setNextFocusUpId(int);
+    method public void setOnApplyWindowInsetsListener(android.view.View.OnApplyWindowInsetsListener);
     method public void setOnClickListener(android.view.View.OnClickListener);
     method public void setOnCreateContextMenuListener(android.view.View.OnCreateContextMenuListener);
     method public void setOnDragListener(android.view.View.OnDragListener);
@@ -29198,6 +29202,10 @@ package android.view {
     field public static final int AT_MOST = -2147483648; // 0x80000000
     field public static final int EXACTLY = 1073741824; // 0x40000000
     field public static final int UNSPECIFIED = 0; // 0x0
+  }
+
+  public static abstract interface View.OnApplyWindowInsetsListener {
+    method public abstract android.view.WindowInsets onApplyWindowInsets(android.view.View, android.view.WindowInsets);
   }
 
   public static abstract interface View.OnAttachStateChangeListener {
@@ -29817,6 +29825,27 @@ package android.view {
     ctor public WindowId.FocusObserver();
     method public abstract void onFocusGained(android.view.WindowId);
     method public abstract void onFocusLost(android.view.WindowId);
+  }
+
+  public class WindowInsets {
+    ctor public WindowInsets(android.view.WindowInsets);
+    method public android.view.WindowInsets cloneWithSystemWindowInsets(int, int, int, int);
+    method public android.view.WindowInsets cloneWithSystemWindowInsetsConsumed();
+    method public android.view.WindowInsets cloneWithSystemWindowInsetsConsumed(boolean, boolean, boolean, boolean);
+    method public android.view.WindowInsets cloneWithWindowDecorInsets(int, int, int, int);
+    method public android.view.WindowInsets cloneWithWindowDecorInsetsConsumed();
+    method public android.view.WindowInsets cloneWithWindowDecorInsetsConsumed(boolean, boolean, boolean, boolean);
+    method public int getSystemWindowInsetBottom();
+    method public int getSystemWindowInsetLeft();
+    method public int getSystemWindowInsetRight();
+    method public int getSystemWindowInsetTop();
+    method public int getWindowDecorInsetBottom();
+    method public int getWindowDecorInsetLeft();
+    method public int getWindowDecorInsetRight();
+    method public int getWindowDecorInsetTop();
+    method public boolean hasInsets();
+    method public boolean hasSystemWindowInsets();
+    method public boolean hasWindowDecorInsets();
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {
