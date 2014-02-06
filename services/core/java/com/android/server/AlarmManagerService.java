@@ -39,8 +39,10 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -53,9 +55,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.TimeZone;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
@@ -313,7 +313,22 @@ class AlarmManagerService extends SystemService {
             return 0;
         }
     }
-    
+
+    final Comparator<Alarm> mAlarmDispatchComparator = new Comparator<Alarm>() {
+        @Override
+        public int compare(Alarm lhs, Alarm rhs) {
+            if (lhs.wakeup != rhs.wakeup) {
+                return lhs.wakeup ? -1 : 1;
+            }
+            if (lhs.whenElapsed < rhs.whenElapsed) {
+                return -1;
+            } else if (lhs.whenElapsed > rhs.whenElapsed) {
+                return 1;
+            }
+            return 0;
+        }
+    };
+
     // minimum recurrence period or alarm futurity for us to be able to fuzz it
     static final long MIN_FUZZABLE_INTERVAL = 10000;
     static final BatchTimeOrder sBatchOrder = new BatchTimeOrder();
@@ -442,6 +457,7 @@ class AlarmManagerService extends SystemService {
     }
     
     static final class BroadcastStats {
+        final int mUid;
         final String mPackageName;
 
         long aggregateTime;
@@ -449,16 +465,17 @@ class AlarmManagerService extends SystemService {
         int numWakeup;
         long startTime;
         int nesting;
-        final HashMap<Pair<String, ComponentName>, FilterStats> filterStats
-                = new HashMap<Pair<String, ComponentName>, FilterStats>();
+        final ArrayMap<Pair<String, ComponentName>, FilterStats> filterStats
+                = new ArrayMap<Pair<String, ComponentName>, FilterStats>();
 
-        BroadcastStats(String packageName) {
+        BroadcastStats(int uid, String packageName) {
+            mUid = uid;
             mPackageName = packageName;
         }
     }
     
-    final HashMap<String, BroadcastStats> mBroadcastStats
-            = new HashMap<String, BroadcastStats>();
+    final SparseArray<ArrayMap<String, BroadcastStats>> mBroadcastStats
+            = new SparseArray<ArrayMap<String, BroadcastStats>>();
     
     @Override
     public void onStart() {
@@ -470,7 +487,7 @@ class AlarmManagerService extends SystemService {
         setTimeZoneImpl(SystemProperties.get(TIMEZONE_PROPERTY));
 
         PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*alarm*");
         
         mTimeTickSender = PendingIntent.getBroadcastAsUser(getContext(), 0,
                 new Intent(Intent.ACTION_TIME_TICK).addFlags(
@@ -743,24 +760,26 @@ class AlarmManagerService extends SystemService {
                 }
             };
             int len = 0;
-            for (Map.Entry<String, BroadcastStats> be : mBroadcastStats.entrySet()) {
-                BroadcastStats bs = be.getValue();
-                for (Map.Entry<Pair<String, ComponentName>, FilterStats> fe
-                        : bs.filterStats.entrySet()) {
-                    FilterStats fs = fe.getValue();
-                    int pos = len > 0
-                            ? Arrays.binarySearch(topFilters, 0, len, fs, comparator) : 0;
-                    if (pos < 0) {
-                        pos = -pos - 1;
-                    }
-                    if (pos < topFilters.length) {
-                        int copylen = topFilters.length - pos - 1;
-                        if (copylen > 0) {
-                            System.arraycopy(topFilters, pos, topFilters, pos+1, copylen);
+            for (int iu=0; iu<mBroadcastStats.size(); iu++) {
+                ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.valueAt(iu);
+                for (int ip=0; ip<uidStats.size(); ip++) {
+                    BroadcastStats bs = uidStats.valueAt(ip);
+                    for (int is=0; is<bs.filterStats.size(); is++) {
+                        FilterStats fs = bs.filterStats.valueAt(is);
+                        int pos = len > 0
+                                ? Arrays.binarySearch(topFilters, 0, len, fs, comparator) : 0;
+                        if (pos < 0) {
+                            pos = -pos - 1;
                         }
-                        topFilters[pos] = fs;
-                        if (len < topFilters.length) {
-                            len++;
+                        if (pos < topFilters.length) {
+                            int copylen = topFilters.length - pos - 1;
+                            if (copylen > 0) {
+                                System.arraycopy(topFilters, pos, topFilters, pos+1, copylen);
+                            }
+                            topFilters[pos] = fs;
+                            if (len < topFilters.length) {
+                                len++;
+                            }
                         }
                     }
                 }
@@ -774,7 +793,8 @@ class AlarmManagerService extends SystemService {
                     TimeUtils.formatDuration(fs.aggregateTime, pw);
                     pw.print(" running, "); pw.print(fs.numWakeup);
                     pw.print(" wakeups, "); pw.print(fs.count);
-                    pw.print(" alarms: "); pw.print(fs.mBroadcastStats.mPackageName);
+                    pw.print(" alarms: "); UserHandle.formatUid(pw, fs.mBroadcastStats.mUid);
+                    pw.print(":"); pw.print(fs.mBroadcastStats.mPackageName);
                     pw.println();
                     pw.print("      ");
                     if (fs.mTarget.first != null) {
@@ -790,35 +810,39 @@ class AlarmManagerService extends SystemService {
             pw.println(" ");
             pw.println("  Alarm Stats:");
             final ArrayList<FilterStats> tmpFilters = new ArrayList<FilterStats>();
-            for (Map.Entry<String, BroadcastStats> be : mBroadcastStats.entrySet()) {
-                BroadcastStats bs = be.getValue();
-                pw.print("  ");
-                if (bs.nesting > 0) pw.print("*ACTIVE* ");
-                pw.print(be.getKey());
-                pw.print(" "); TimeUtils.formatDuration(bs.aggregateTime, pw);
-                        pw.print(" running, "); pw.print(bs.numWakeup);
-                        pw.println(" wakeups:");
-                tmpFilters.clear();
-                for (Map.Entry<Pair<String, ComponentName>, FilterStats> fe
-                        : bs.filterStats.entrySet()) {
-                    tmpFilters.add(fe.getValue());
-                }
-                Collections.sort(tmpFilters, comparator);
-                for (int i=0; i<tmpFilters.size(); i++) {
-                    FilterStats fs = tmpFilters.get(i);
-                    pw.print("    ");
-                            if (fs.nesting > 0) pw.print("*ACTIVE* ");
-                            TimeUtils.formatDuration(fs.aggregateTime, pw);
-                            pw.print(" "); pw.print(fs.numWakeup);
-                            pw.print(" wakes " ); pw.print(fs.count);
-                            pw.print(" alarms:");
-                            if (fs.mTarget.first != null) {
-                                pw.print(" act="); pw.print(fs.mTarget.first);
-                            }
-                            if (fs.mTarget.second != null) {
-                                pw.print(" cmp="); pw.print(fs.mTarget.second.toShortString());
-                            }
-                            pw.println();
+            for (int iu=0; iu<mBroadcastStats.size(); iu++) {
+                ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.valueAt(iu);
+                for (int ip=0; ip<uidStats.size(); ip++) {
+                    BroadcastStats bs = uidStats.valueAt(ip);
+                    pw.print("  ");
+                    if (bs.nesting > 0) pw.print("*ACTIVE* ");
+                    UserHandle.formatUid(pw, bs.mUid);
+                    pw.print(":");
+                    pw.print(bs.mPackageName);
+                    pw.print(" "); TimeUtils.formatDuration(bs.aggregateTime, pw);
+                            pw.print(" running, "); pw.print(bs.numWakeup);
+                            pw.println(" wakeups:");
+                    tmpFilters.clear();
+                    for (int is=0; is<bs.filterStats.size(); is++) {
+                        tmpFilters.add(bs.filterStats.valueAt(is));
+                    }
+                    Collections.sort(tmpFilters, comparator);
+                    for (int i=0; i<tmpFilters.size(); i++) {
+                        FilterStats fs = tmpFilters.get(i);
+                        pw.print("    ");
+                                if (fs.nesting > 0) pw.print("*ACTIVE* ");
+                                TimeUtils.formatDuration(fs.aggregateTime, pw);
+                                pw.print(" "); pw.print(fs.numWakeup);
+                                pw.print(" wakes " ); pw.print(fs.count);
+                                pw.print(" alarms:");
+                                if (fs.mTarget.first != null) {
+                                    pw.print(" act="); pw.print(fs.mTarget.first);
+                                }
+                                if (fs.mTarget.second != null) {
+                                    pw.print(" cmp="); pw.print(fs.mTarget.second.toShortString());
+                                }
+                                pw.println();
+                    }
                 }
             }
 
@@ -1037,7 +1061,8 @@ class AlarmManagerService extends SystemService {
     private native int waitForAlarm(long nativeData);
     private native int setKernelTimezone(long nativeData, int minuteswest);
 
-    void triggerAlarmsLocked(ArrayList<Alarm> triggerList, long nowELAPSED, long nowRTC) {
+    void triggerAlarmsLocked(ArrayList<Alarm> triggerList, final long nowELAPSED,
+            final long nowRTC) {
         // batches are temporally sorted, so we need only pull from the
         // start of the list until we either empty it or hit a batch
         // that is not yet deliverable
@@ -1076,6 +1101,14 @@ class AlarmManagerService extends SystemService {
 
             }
         }
+
+        Collections.sort(triggerList, mAlarmDispatchComparator);
+
+        if (localLOGV) {
+            for (int i=0; i<triggerList.size(); i++) {
+                Slog.v(TAG, "Triggering alarm #" + i + ": " + triggerList.get(i));
+            }
+        }
     }
 
     /**
@@ -1096,7 +1129,8 @@ class AlarmManagerService extends SystemService {
     }
     
     private static class Alarm {
-        public int type;
+        public final int type;
+        public final boolean wakeup;
         public int count;
         public long when;
         public long windowLength;
@@ -1109,6 +1143,8 @@ class AlarmManagerService extends SystemService {
         public Alarm(int _type, long _when, long _whenElapsed, long _windowLength, long _maxWhen,
                 long _interval, PendingIntent _op, WorkSource _ws) {
             type = _type;
+            wakeup = _type == AlarmManager.ELAPSED_REALTIME_WAKEUP
+                    || _type == AlarmManager.RTC_WAKEUP;
             when = _when;
             whenElapsed = _whenElapsed;
             windowLength = _windowLength;
@@ -1126,6 +1162,8 @@ class AlarmManagerService extends SystemService {
             sb.append(Integer.toHexString(System.identityHashCode(this)));
             sb.append(" type ");
             sb.append(type);
+            sb.append(" when ");
+            sb.append(when);
             sb.append(" ");
             sb.append(operation.getTargetPackage());
             sb.append('}');
@@ -1231,6 +1269,15 @@ class AlarmManagerService extends SystemService {
                             // we have an active broadcast so stay awake.
                             if (mBroadcastRefCount == 0) {
                                 setWakelockWorkSource(alarm.operation, alarm.workSource);
+                                mWakeLock.setUnimportantForLogging(
+                                        alarm.operation == mTimeTickSender);
+                                // XXX debugging
+                                /*
+                                Intent intent = alarm.operation.getIntent();
+                                mWakeLock.setTag(intent.getAction() != null ? intent.getAction()
+                                        : (intent.getComponent() != null
+                                                ? intent.getComponent().toShortString() : TAG));
+                                */
                                 mWakeLock.acquire();
                             }
                             final InFlight inflight = new InFlight(AlarmManagerService.this,
@@ -1450,7 +1497,14 @@ class AlarmManagerService extends SystemService {
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkg : pkgList) {
                         removeLocked(pkg);
-                        mBroadcastStats.remove(pkg);
+                        for (int i=mBroadcastStats.size()-1; i>=0; i--) {
+                            ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.valueAt(i);
+                            if (uidStats.remove(pkg) != null) {
+                                if (uidStats.size() <= 0) {
+                                    mBroadcastStats.removeAt(i);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1458,11 +1512,17 @@ class AlarmManagerService extends SystemService {
     }
     
     private final BroadcastStats getStatsLocked(PendingIntent pi) {
-        String pkg = pi.getTargetPackage();
-        BroadcastStats bs = mBroadcastStats.get(pkg);
+        String pkg = pi.getCreatorPackage();
+        int uid = pi.getCreatorUid();
+        ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.get(uid);
+        if (uidStats == null) {
+            uidStats = new ArrayMap<String, BroadcastStats>();
+            mBroadcastStats.put(uid, uidStats);
+        }
+        BroadcastStats bs = uidStats.get(pkg);
         if (bs == null) {
-            bs = new BroadcastStats(pkg);
-            mBroadcastStats.put(pkg, bs);
+            bs = new BroadcastStats(uid, pkg);
+            uidStats.put(pkg, bs);
         }
         return bs;
     }

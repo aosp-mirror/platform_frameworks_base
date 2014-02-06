@@ -126,10 +126,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteStartWakelock(int uid, int pid, String name, int type) {
+    public void noteStartWakelock(int uid, int pid, String name, int type,
+            boolean unimportantForLogging) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartWakeLocked(uid, pid, name, type);
+            mStats.noteStartWakeLocked(uid, pid, name, type, unimportantForLogging);
         }
     }
 
@@ -140,10 +141,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteStartWakelockFromSource(WorkSource ws, int pid, String name, int type) {
+    public void noteStartWakelockFromSource(WorkSource ws, int pid, String name, int type,
+            boolean unimportantForLogging) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartWakeFromSourceLocked(ws, pid, name, type);
+            mStats.noteStartWakeFromSourceLocked(ws, pid, name, type, unimportantForLogging);
         }
     }
 
@@ -557,7 +559,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                     isUnpluggedOnly = true;
                 } else if ("--reset".equals(arg)) {
                     synchronized (mStats) {
-                        mStats.resetAllStatsLocked();
+                        mStats.resetAllStatsCmdLocked();
                         pw.println("Battery stats reset.");
                         noOutput = true;
                     }
