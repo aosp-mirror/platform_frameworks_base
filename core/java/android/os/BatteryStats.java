@@ -507,10 +507,7 @@ public abstract class BatteryStats implements Parcelable {
         
         public long time;
 
-        // The command codes 0-3 can be written with delta updates; all others require
-        // that a full entry be written.
-        public static final byte CMD_UPDATE = 0;
-        public static final byte CMD_EVENT = 1;
+        public static final byte CMD_UPDATE = 0;        // These can be written as deltas
         public static final byte CMD_NULL = -1;
         public static final byte CMD_START = 4;
         public static final byte CMD_OVERFLOW = 5;
@@ -520,15 +517,8 @@ public abstract class BatteryStats implements Parcelable {
         /**
          * Return whether the command code is a delta data update.
          */
-        public static boolean isDeltaData(byte cmd) {
-            return cmd >= 0 && cmd <= 3;
-        }
-
-        /**
-         * Return whether the command code is a delta data update.
-         */
         public boolean isDeltaData() {
-            return cmd >= 0 && cmd <= 3;
+            return cmd == CMD_UPDATE;
         }
 
         public byte batteryLevel;
@@ -555,16 +545,16 @@ public abstract class BatteryStats implements Parcelable {
         // These states always appear directly in the first int token
         // of a delta change; they should be ones that change relatively
         // frequently.
-        public static final int STATE_WAKE_LOCK_FLAG = 1<<30;
-        public static final int STATE_SENSOR_ON_FLAG = 1<<29;
-        public static final int STATE_GPS_ON_FLAG = 1<<28;
-        public static final int STATE_PHONE_SCANNING_FLAG = 1<<27;
-        public static final int STATE_WIFI_RUNNING_FLAG = 1<<26;
-        public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<25;
-        public static final int STATE_WIFI_SCAN_FLAG = 1<<24;
-        public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<23;
+        public static final int STATE_WAKE_LOCK_FLAG = 1<<31;
+        public static final int STATE_SENSOR_ON_FLAG = 1<<30;
+        public static final int STATE_GPS_ON_FLAG = 1<<29;
+        public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<28;
+        public static final int STATE_WIFI_SCAN_FLAG = 1<<29;
+        public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<26;
         // These are on the lower bits used for the command; if they change
         // we need to write another int of data.
+        public static final int STATE_WIFI_RUNNING_FLAG = 1<<24;
+        public static final int STATE_PHONE_SCANNING_FLAG = 1<<23;
         public static final int STATE_AUDIO_ON_FLAG = 1<<22;
         public static final int STATE_VIDEO_ON_FLAG = 1<<21;
         public static final int STATE_SCREEN_ON_FLAG = 1<<20;
@@ -628,7 +618,8 @@ public abstract class BatteryStats implements Parcelable {
             } else {
                 dest.writeInt(0);
             }
-            if (cmd == CMD_EVENT) {
+            dest.writeInt(eventCode);
+            if (eventCode != EVENT_NONE) {
                 dest.writeInt(eventCode);
                 eventTag.writeToParcel(dest, flags);
             }
@@ -652,13 +643,10 @@ public abstract class BatteryStats implements Parcelable {
             } else {
                 wakelockTag = null;
             }
-            if (cmd == CMD_EVENT) {
-                eventCode = src.readInt();
+            eventCode = src.readInt();
+            if (eventCode != EVENT_NONE) {
                 eventTag = localEventTag;
                 eventTag.readFromParcel(src);
-            } else {
-                eventCode = EVENT_NONE;
-                eventTag = null;
             }
             numReadInts += (src.dataPosition()-start)/4;
         }
@@ -681,6 +669,16 @@ public abstract class BatteryStats implements Parcelable {
         public void setTo(HistoryItem o) {
             time = o.time;
             cmd = o.cmd;
+            setToCommon(o);
+        }
+
+        public void setTo(long time, byte cmd, HistoryItem o) {
+            this.time = time;
+            this.cmd = cmd;
+            setToCommon(o);
+        }
+
+        private void setToCommon(HistoryItem o) {
             batteryLevel = o.batteryLevel;
             batteryStatus = o.batteryStatus;
             batteryHealth = o.batteryHealth;
@@ -700,32 +698,6 @@ public abstract class BatteryStats implements Parcelable {
                 eventTag.setTo(o.eventTag);
             } else {
                 eventTag = null;
-            }
-        }
-
-        public void setTo(long time, byte cmd, int eventCode, int eventUid, String eventName,
-                HistoryItem o) {
-            this.time = time;
-            this.cmd = cmd;
-            this.eventCode = eventCode;
-            if (eventCode != EVENT_NONE) {
-                eventTag = localEventTag;
-                eventTag.setTo(eventName, eventUid);
-            } else {
-                eventTag = null;
-            }
-            batteryLevel = o.batteryLevel;
-            batteryStatus = o.batteryStatus;
-            batteryHealth = o.batteryHealth;
-            batteryPlugType = o.batteryPlugType;
-            batteryTemperature = o.batteryTemperature;
-            batteryVoltage = o.batteryVoltage;
-            states = o.states;
-            if (o.wakelockTag != null) {
-                wakelockTag = localWakelockTag;
-                wakelockTag.setTo(o.wakelockTag);
-            } else {
-                wakelockTag = null;
             }
         }
 
@@ -938,36 +910,36 @@ public abstract class BatteryStats implements Parcelable {
     
     public static final BitDescription[] HISTORY_STATE_DESCRIPTIONS
             = new BitDescription[] {
-        new BitDescription(HistoryItem.STATE_BATTERY_PLUGGED_FLAG, "plugged", "BP"),
-        new BitDescription(HistoryItem.STATE_SCREEN_ON_FLAG, "screen", "S"),
+        new BitDescription(HistoryItem.STATE_WAKE_LOCK_FLAG, "wake_lock", "w"),
+        new BitDescription(HistoryItem.STATE_SENSOR_ON_FLAG, "sensor", "s"),
         new BitDescription(HistoryItem.STATE_GPS_ON_FLAG, "gps", "g"),
-        new BitDescription(HistoryItem.STATE_PHONE_IN_CALL_FLAG, "phone_in_call", "Pcl"),
-        new BitDescription(HistoryItem.STATE_PHONE_SCANNING_FLAG, "phone_scanning", "Psc"),
-        new BitDescription(HistoryItem.STATE_WIFI_ON_FLAG, "wifi", "W"),
-        new BitDescription(HistoryItem.STATE_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
         new BitDescription(HistoryItem.STATE_WIFI_FULL_LOCK_FLAG, "wifi_full_lock", "Wl"),
         new BitDescription(HistoryItem.STATE_WIFI_SCAN_FLAG, "wifi_scan", "Ws"),
         new BitDescription(HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG, "wifi_multicast", "Wm"),
-        new BitDescription(HistoryItem.STATE_BLUETOOTH_ON_FLAG, "bluetooth", "b"),
+        new BitDescription(HistoryItem.STATE_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
+        new BitDescription(HistoryItem.STATE_PHONE_SCANNING_FLAG, "phone_scanning", "Psc"),
         new BitDescription(HistoryItem.STATE_AUDIO_ON_FLAG, "audio", "a"),
         new BitDescription(HistoryItem.STATE_VIDEO_ON_FLAG, "video", "v"),
-        new BitDescription(HistoryItem.STATE_WAKE_LOCK_FLAG, "wake_lock", "w"),
-        new BitDescription(HistoryItem.STATE_SENSOR_ON_FLAG, "sensor", "s"),
-        new BitDescription(HistoryItem.STATE_BRIGHTNESS_MASK,
-                HistoryItem.STATE_BRIGHTNESS_SHIFT, "brightness", "Sb",
-                SCREEN_BRIGHTNESS_NAMES, SCREEN_BRIGHTNESS_SHORT_NAMES),
+        new BitDescription(HistoryItem.STATE_SCREEN_ON_FLAG, "screen", "S"),
+        new BitDescription(HistoryItem.STATE_BATTERY_PLUGGED_FLAG, "plugged", "BP"),
+        new BitDescription(HistoryItem.STATE_PHONE_IN_CALL_FLAG, "phone_in_call", "Pcl"),
+        new BitDescription(HistoryItem.STATE_WIFI_ON_FLAG, "wifi", "W"),
+        new BitDescription(HistoryItem.STATE_BLUETOOTH_ON_FLAG, "bluetooth", "b"),
+        new BitDescription(HistoryItem.STATE_DATA_CONNECTION_MASK,
+                HistoryItem.STATE_DATA_CONNECTION_SHIFT, "data_conn", "Pcn",
+                DATA_CONNECTION_NAMES, DATA_CONNECTION_NAMES),
+        new BitDescription(HistoryItem.STATE_PHONE_STATE_MASK,
+                HistoryItem.STATE_PHONE_STATE_SHIFT, "phone_state", "Pst",
+                new String[] {"in", "out", "emergency", "off"},
+                new String[] {"in", "out", "em", "off"}),
         new BitDescription(HistoryItem.STATE_SIGNAL_STRENGTH_MASK,
                 HistoryItem.STATE_SIGNAL_STRENGTH_SHIFT, "signal_strength", "Pss",
                 SignalStrength.SIGNAL_STRENGTH_NAMES, new String[] {
                     "0", "1", "2", "3", "4"
         }),
-        new BitDescription(HistoryItem.STATE_PHONE_STATE_MASK,
-                HistoryItem.STATE_PHONE_STATE_SHIFT, "phone_state", "Pst",
-                new String[] {"in", "out", "emergency", "off"},
-                new String[] {"in", "out", "em", "off"}),
-        new BitDescription(HistoryItem.STATE_DATA_CONNECTION_MASK,
-                HistoryItem.STATE_DATA_CONNECTION_SHIFT, "data_conn", "Pcn",
-                DATA_CONNECTION_NAMES, DATA_CONNECTION_NAMES),
+        new BitDescription(HistoryItem.STATE_BRIGHTNESS_MASK,
+                HistoryItem.STATE_BRIGHTNESS_SHIFT, "brightness", "Sb",
+                SCREEN_BRIGHTNESS_NAMES, SCREEN_BRIGHTNESS_SHORT_NAMES),
     };
 
     /**
@@ -2464,7 +2436,8 @@ public abstract class BatteryStats implements Parcelable {
                     else if (rec.batteryLevel < 100) pw.print("0");
                     pw.print(rec.batteryLevel);
                     pw.print(" ");
-                    if (rec.states < 0x10) pw.print("0000000");
+                    if (rec.states < 0) ;
+                    else if (rec.states < 0x10) pw.print("0000000");
                     else if (rec.states < 0x100) pw.print("000000");
                     else if (rec.states < 0x1000) pw.print("00000");
                     else if (rec.states < 0x10000) pw.print("0000");

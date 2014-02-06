@@ -536,6 +536,14 @@ final class DisplayPowerController {
 
         mScreenBrightnessRampAnimator = new RampAnimator<DisplayPowerState>(
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS);
+
+        // Initialize screen on state.
+        if (mPowerState.isScreenOn()) {
+            mNotifier.onScreenOn();
+        } else {
+            mNotifier.onScreenOff();
+        }
+        mNotifier.onScreenBrightness(mPowerState.getScreenBrightness());
     }
 
     private final Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {

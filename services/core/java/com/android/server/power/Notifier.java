@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -139,10 +140,14 @@ final class Notifier {
 
         try {
             final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+            boolean unimportantForLogging = (flags&PowerManager.UNIMPORTANT_FOR_LOGGING) != 0
+                    && ownerUid == Process.SYSTEM_UID;
             if (workSource != null) {
-                mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag, monitorType);
+                mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag, monitorType,
+                        unimportantForLogging);
             } else {
-                mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, monitorType);
+                mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, monitorType,
+                        unimportantForLogging);
                 // XXX need to deal with disabled operations.
                 mAppOps.startOperation(AppOpsManager.getToken(mAppOps),
                         AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
