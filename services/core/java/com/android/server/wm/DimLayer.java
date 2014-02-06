@@ -170,7 +170,7 @@ public class DimLayer {
             dw = mBounds.width();
             dh = mBounds.height();
             xPos = mBounds.left;
-            yPos = mBounds.right;
+            yPos = mBounds.top;
         } else {
             // Set surface size to screen size.
             final DisplayInfo info = mDisplayContent.getDisplayInfo();

@@ -22,12 +22,10 @@ import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.util.EventLog;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
-import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -49,7 +47,7 @@ class DisplayContent {
 
     /** Z-ordered (bottom-most first) list of all Window objects. Assigned to an element
      * from mDisplayWindows; */
-    private WindowList mWindows = new WindowList();
+    private final WindowList mWindows = new WindowList();
 
     // This protects the following display size properties, so that
     // getDisplaySize() doesn't need to acquire the global lock.  This is
@@ -79,21 +77,12 @@ class DisplayContent {
     int pendingLayoutChanges;
     final boolean isDefaultDisplay;
 
-    /**
-     * Window tokens that are in the process of exiting, but still
-     * on screen for animations.
-     */
+    /** Window tokens that are in the process of exiting, but still on screen for animations. */
     final ArrayList<WindowToken> mExitingTokens = new ArrayList<WindowToken>();
-
-    /**
-     * Application tokens that are in the process of exiting, but still
-     * on screen for animations.
-     */
-    final AppTokenList mExitingAppTokens = new AppTokenList();
 
     /** Array containing all TaskStacks on this display.  Array
      * is stored in display order with the current bottom stack at 0. */
-    private ArrayList<TaskStack> mStacks = new ArrayList<TaskStack>();
+    private final ArrayList<TaskStack> mStacks = new ArrayList<TaskStack>();
 
     /** A special TaskStack with id==HOME_STACK_ID that moves to the bottom whenever any TaskStack
      * (except a future lockscreen TaskStack) moves to the top. */
@@ -105,11 +94,11 @@ class DisplayContent {
     /** Detect user tapping outside of current focused stack bounds .*/
     Region mTouchExcludeRegion = new Region();
 
-    /** Save allocating when retrieving tasks */
-    private ArrayList<Task> mTaskHistory = new ArrayList<Task>();
-
     /** Save allocating when calculating rects */
     Rect mTmpRect = new Rect();
+
+    /** For gathering Task objects in order. */
+    final ArrayList<Task> mTmpTaskHistory = new ArrayList<Task>();
 
     final WindowManagerService mService;
 
@@ -152,41 +141,21 @@ class DisplayContent {
         return (mDisplay.getFlags() & Display.FLAG_PRIVATE) != 0;
     }
 
+    ArrayList<TaskStack> getStacks() {
+        return mStacks;
+    }
+
     /**
      * Retrieve the tasks on this display in stack order from the bottommost TaskStack up.
      * @return All the Tasks, in order, on this display.
      */
     ArrayList<Task> getTasks() {
-        return mTaskHistory;
-    }
-
-    void addTask(Task task, boolean toTop) {
-        mTaskHistory.remove(task);
-
-        final int userId = task.mUserId;
-        int taskNdx;
-        final int numTasks = mTaskHistory.size();
-        if (toTop) {
-            for (taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
-                if (mTaskHistory.get(taskNdx).mUserId == userId) {
-                    break;
-                }
-            }
-            ++taskNdx;
-        } else {
-            for (taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-                if (mTaskHistory.get(taskNdx).mUserId == userId) {
-                    break;
-                }
-            }
+        mTmpTaskHistory.clear();
+        final int numStacks = mStacks.size();
+        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            mTmpTaskHistory.addAll(mStacks.get(stackNdx).getTasks());
         }
-
-        mTaskHistory.add(taskNdx, task);
-        EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.taskId, toTop ? 1 : 0, taskNdx);
-    }
-
-    void removeTask(Task task) {
-        mTaskHistory.remove(task);
+        return mTmpTaskHistory;
     }
 
     TaskStack getHomeStack() {
@@ -226,15 +195,6 @@ class DisplayContent {
         out.set(left, top, left + width, top + height);
     }
 
-    /** @return The number of tokens in all of the Tasks on this display. */
-    int numTokens() {
-        int count = 0;
-        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            count += mTaskHistory.get(taskNdx).mAppTokens.size();
-        }
-        return count;
-    }
-
     /** Refer to {@link WindowManagerService#attachStack(int, int)} */
     void attachStack(TaskStack stack) {
         if (stack.mStackId == HOME_STACK_ID) {
@@ -253,13 +213,6 @@ class DisplayContent {
     }
 
     void detachStack(TaskStack stack) {
-        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mTaskHistory.get(taskNdx);
-            if (task.mStack == stack) {
-                mService.tmpRemoveTaskWindowsLocked(task);
-                mTaskHistory.remove(taskNdx);
-            }
-        }
         mStacks.remove(stack);
     }
 
@@ -269,17 +222,6 @@ class DisplayContent {
      */
     void resize(Rect contentRect) {
         mContentRect.set(contentRect);
-    }
-
-    boolean getStackBounds(int stackId, Rect bounds) {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mStacks.get(stackNdx);
-            if (stackId == stack.mStackId) {
-                bounds.set(stack.mBounds);
-                return true;
-            }
-        }
-        return false;
     }
 
     int stackIdFromPoint(int x, int y) {
@@ -307,7 +249,7 @@ class DisplayContent {
         }
     }
 
-    void switchUserStacks(int oldUserId, int newUserId) {
+    void switchUserStacks(int newUserId) {
         final WindowList windows = getWindowList();
         for (int i = 0; i < windows.size(); i++) {
             final WindowState win = windows.get(i);
@@ -393,22 +335,27 @@ class DisplayContent {
             pw.print(prefix); pw.print("mStacks[" + stackNdx + "]"); pw.println(stack.mStackId);
             stack.dump(prefix + "  ", pw);
         }
-        int ndx = numTokens();
-        if (ndx > 0) {
-            pw.println();
-            pw.println("  Application tokens in Z order:");
-            getTasks();
-            for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-                AppTokenList tokens = mTaskHistory.get(taskNdx).mAppTokens;
+        pw.println();
+        pw.println("  Application tokens in bottom up Z order:");
+        int ndx = 0;
+        final int numStacks = mStacks.size();
+        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
                 for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    pw.print("  App #"); pw.print(ndx--);
+                    pw.print("  App #"); pw.print(ndx++);
                             pw.print(' '); pw.print(wtoken); pw.println(":");
                     wtoken.dump(pw, "    ");
                 }
             }
         }
-        if (mExitingTokens.size() > 0) {
+        if (ndx == 0) {
+            pw.println("    None");
+        }
+        pw.println();
+        if (!mExitingTokens.isEmpty()) {
             pw.println();
             pw.println("  Exiting tokens:");
             for (int i=mExitingTokens.size()-1; i>=0; i--) {
@@ -417,17 +364,6 @@ class DisplayContent {
                 pw.print(' '); pw.print(token);
                 pw.println(':');
                 token.dump(pw, "    ");
-            }
-        }
-        if (mExitingAppTokens.size() > 0) {
-            pw.println();
-            pw.println("  Exiting application tokens:");
-            for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
-                WindowToken token = mExitingAppTokens.get(i);
-                pw.print("  Exiting App #"); pw.print(i);
-                  pw.print(' '); pw.print(token);
-                  pw.println(':');
-                  token.dump(pw, "    ");
             }
         }
         pw.println();
