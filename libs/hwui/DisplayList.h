@@ -614,13 +614,20 @@ private:
     bool mPivotExplicitlySet;
     bool mMatrixDirty;
     bool mMatrixIsIdentity;
+
+    /**
+     * Stores the total transformation of the DisplayList based upon its scalar
+     * translate/rotate/scale properties.
+     *
+     * In the common translation-only case, the matrix isn't allocated and the mTranslation
+     * properties are used directly.
+     */
+    Matrix4* mTransformMatrix;
     uint32_t mMatrixFlags;
-    SkMatrix* mTransformMatrix;
     Sk3DView* mTransformCamera;
     SkMatrix* mTransformMatrix3D;
     SkMatrix* mStaticMatrix;
     SkMatrix* mAnimationMatrix;
-    Matrix4 mTransform;
     bool mCaching;
 
     /**
