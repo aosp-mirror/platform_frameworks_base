@@ -140,7 +140,7 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file3", 2 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file4", 3 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file5", 4 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 3, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 3, DAY_IN_MILLIS));
         assertDirContents("file1", "file2", "file3");
     }
 
@@ -148,13 +148,13 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file1", -HOUR_IN_MILLIS);
         touch("file2", HOUR_IN_MILLIS);
         touch("file3", WEEK_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
         assertDirContents("file1", "file2");
 
         touch("file1", -HOUR_IN_MILLIS);
         touch("file2", HOUR_IN_MILLIS);
         touch("file3", WEEK_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
         assertDirContents("file1", "file2");
     }
 
@@ -164,7 +164,8 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file3", 2 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file4", 3 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file5", 4 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
+        assertFalse(FileUtils.deleteOlderFiles(mDir, 0, DAY_IN_MILLIS));
         assertDirContents("file1");
     }
 
@@ -174,7 +175,8 @@ public class FileUtilsTest extends AndroidTestCase {
         touch("file3", 2 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file4", 3 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
         touch("file5", 4 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
-        FileUtils.deleteOlderFiles(mDir, 2, 0);
+        assertTrue(FileUtils.deleteOlderFiles(mDir, 2, 0));
+        assertFalse(FileUtils.deleteOlderFiles(mDir, 2, 0));
         assertDirContents("file1", "file2");
     }
 

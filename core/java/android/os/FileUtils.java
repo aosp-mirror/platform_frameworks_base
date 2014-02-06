@@ -326,14 +326,15 @@ public class FileUtils {
      *
      * @param minCount Always keep at least this many files.
      * @param minAge Always keep files younger than this age.
+     * @return if any files were deleted.
      */
-    public static void deleteOlderFiles(File dir, int minCount, long minAge) {
+    public static boolean deleteOlderFiles(File dir, int minCount, long minAge) {
         if (minCount < 0 || minAge < 0) {
             throw new IllegalArgumentException("Constraints must be positive or 0");
         }
 
         final File[] files = dir.listFiles();
-        if (files == null) return;
+        if (files == null) return false;
 
         // Sort with newest files first
         Arrays.sort(files, new Comparator<File>() {
@@ -344,16 +345,20 @@ public class FileUtils {
         });
 
         // Keep at least minCount files
+        boolean deleted = false;
         for (int i = minCount; i < files.length; i++) {
             final File file = files[i];
 
             // Keep files newer than minAge
             final long age = System.currentTimeMillis() - file.lastModified();
             if (age > minAge) {
-                Log.d(TAG, "Deleting old file " + file);
-                file.delete();
+                if (file.delete()) {
+                    Log.d(TAG, "Deleted old file " + file);
+                    deleted = true;
+                }
             }
         }
+        return deleted;
     }
 
     /**
