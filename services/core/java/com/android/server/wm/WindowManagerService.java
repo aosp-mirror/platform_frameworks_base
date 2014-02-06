@@ -9300,22 +9300,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Don't remove this window until rotation has completed.
                 continue;
             }
-            final WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
-                    "Reporting new frame to " + win + ": " + win.mCompatFrame);
-            int diff = 0;
-            boolean configChanged = win.isConfigChanged();
-            if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
-                    && configChanged) {
-                Slog.i(TAG, "Sending new config to window " + win + ": "
-                        + winAnimator.mSurfaceW + "x" + winAnimator.mSurfaceH
-                        + " / " + mCurConfiguration + " / 0x"
-                        + Integer.toHexString(diff));
-            }
-            win.setConfiguration(mCurConfiguration);
-            if (DEBUG_ORIENTATION &&
-                    winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
-                    TAG, "Resizing " + win + " WITH DRAW PENDING");
             win.reportResized();
             mResizingWindows.remove(i);
         }
