@@ -4915,6 +4915,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (stack != null) {
                 final DisplayContent displayContent = stack.getDisplayContent();
                 if (displayContent != null) {
+                    if (stack.isAnimating()) {
+                        displayContent.mDeferredActions |= DisplayContent.DEFER_DETACH;
+                        return;
+                    }
                     displayContent.detachStack(stack);
                     stack.detachDisplay();
                 }
@@ -10852,6 +10856,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private void handleDisplayRemovedLocked(int displayId) {
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         if (displayContent != null) {
+            if ((displayContent.mDeferredActions & DisplayContent.DEFER_DETACH) != 0) {
+                displayContent.mDeferredActions |= DisplayContent.DEFER_REMOVAL;
+                return;
+            }
             mDisplayContents.delete(displayId);
             displayContent.close();
             if (displayId == Display.DEFAULT_DISPLAY) {

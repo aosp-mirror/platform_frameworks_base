@@ -416,6 +416,7 @@ class WindowStateAnimator {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
         }
+        mWin.getStack().checkForDeferredDetach();
         mAnimator.hideWallpapersLocked(mWin);
     }
 
