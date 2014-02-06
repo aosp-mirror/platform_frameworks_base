@@ -228,6 +228,20 @@ public abstract class Drawable {
     }
 
     /**
+     * Return the drawable's dirty bounds Rect. Note: for efficiency, the
+     * returned object may be the same object stored in the drawable (though
+     * this is not guaranteed).
+     * <p>
+     * By default, this returns the full drawable bounds. Custom drawables may
+     * override this method to perform more precise invalidation.
+     *
+     * @hide
+     */
+    public Rect getDirtyBounds() {
+        return getBounds();
+    }
+
+    /**
      * Set a mask of the configuration parameters for which this drawable
      * may change, requiring that it be re-created.
      *
@@ -506,6 +520,15 @@ public abstract class Drawable {
      * @hide until hotspot APIs are finalized
      */
     public void clearHotspots() {}
+
+    /**
+     * Whether this drawable requests projection.
+     *
+     * @hide
+     */
+    public boolean isProjected() {
+        return false;
+    }
 
     /**
      * Indicates whether this view will change its appearance based on state.
@@ -962,6 +985,8 @@ public abstract class Drawable {
             drawable = new TransitionDrawable();
         } else if (name.equals("reveal")) {
             drawable = new RevealDrawable();
+        } else if (name.equals("touch-feedback")) {
+            drawable = new TouchFeedbackDrawable();
         } else if (name.equals("color")) {
             drawable = new ColorDrawable();
         } else if (name.equals("shape")) {
