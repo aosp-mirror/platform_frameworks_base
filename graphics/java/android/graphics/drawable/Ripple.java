@@ -251,4 +251,13 @@ class Ripple {
 
         return false;
     }
+
+    public void getBounds(Rect bounds) {
+        final int x = (int) mX;
+        final int y = (int) mY;
+        final int dX = Math.max(x, mBounds.right - x);
+        final int dY = Math.max(x, mBounds.bottom - y);
+        final int maxRadius = (int) Math.ceil(Math.sqrt(dX * dX + dY * dY));
+        bounds.set(x - maxRadius, y - maxRadius, x + maxRadius, y + maxRadius);
+    }
 }

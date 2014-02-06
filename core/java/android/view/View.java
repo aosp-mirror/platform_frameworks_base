@@ -14983,7 +14983,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param displayList Valid display list for the background drawable
      */
     private void setBackgroundDisplayListProperties(DisplayList displayList) {
-        displayList.setProjectBackwards((mPrivateFlags3 & PFLAG3_PROJECT_BACKGROUND) != 0);
         displayList.setTranslationX(mScrollX);
         displayList.setTranslationY(mScrollY);
     }
@@ -15014,6 +15013,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Set up drawable properties that are view-independent.
         displayList.setLeftTopRightBottom(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        displayList.setProjectBackwards(drawable.isProjected());
         displayList.setClipToBounds(false);
         return displayList;
     }
@@ -15367,7 +15367,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mBackgroundDisplayList.clear();
             }
 
-            final Rect dirty = drawable.getBounds();
+            final Rect dirty = drawable.getDirtyBounds();
             final int scrollX = mScrollX;
             final int scrollY = mScrollY;
 
