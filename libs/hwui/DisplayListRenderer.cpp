@@ -173,14 +173,6 @@ void DisplayListRenderer::restoreToCount(int saveCount) {
     StatefulBaseRenderer::restoreToCount(saveCount);
 }
 
-void DisplayListRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {
-    bool restoreProjection = removed.flags & Snapshot::kFlagProjectionTarget;
-    if (restoreProjection) {
-        mDisplayListData->projectionIndex = mDisplayListData->displayListOps.size() - 1;
-        mDisplayListData->projectionTransform.load(*currentTransform());
-    }
-}
-
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
         int alpha, SkXfermode::Mode mode, int flags) {
     addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, alpha, mode, flags));
@@ -254,6 +246,9 @@ status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
             flags, *currentTransform());
     addDrawOp(op);
     mDisplayListData->children.push(op);
+    if (displayList->isProjectionReceiver()) {
+        mDisplayListData->projectionReceiveIndex = mDisplayListData->displayListOps.size() - 1;
+    }
 
     return DrawGlInfo::kStatusDone;
 }

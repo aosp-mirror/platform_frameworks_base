@@ -112,7 +112,7 @@ public:
  */
 class DisplayListData : public LightRefBase<DisplayListData> {
 public:
-    DisplayListData() : projectionIndex(-1) {}
+    DisplayListData() : projectionReceiveIndex(-1) {}
     // allocator into which all ops were allocated
     LinearAllocator allocator;
 
@@ -123,8 +123,7 @@ public:
     Vector<DrawDisplayListOp*> children;
 
     // index of DisplayListOp restore, after which projected descendents should be drawn
-    int projectionIndex;
-    Matrix4 projectionTransform;
+    int projectionReceiveIndex;
 };
 
 /**
@@ -196,6 +195,14 @@ public:
 
     void setProjectBackwards(bool shouldProject) {
         mProjectBackwards = shouldProject;
+    }
+
+    void setProjectionReceiver(bool shouldRecieve) {
+        mProjectionReceiver = shouldRecieve;
+    }
+
+    bool isProjectionReceiver() {
+        return mProjectionReceiver;
     }
 
     void setOutline(const SkPath* outline) {
@@ -600,6 +607,7 @@ private:
     bool mClipToBounds;
     bool mIsolatedZVolume;
     bool mProjectBackwards;
+    bool mProjectionReceiver;
     SkPath mOutline;
     float mAlpha;
     bool mHasOverlappingRendering;

@@ -75,13 +75,7 @@ public:
          * Indicates that this snapshot or an ancestor snapshot is
          * an FBO layer.
          */
-        kFlagFboTarget = 0x10,
-        /**
-         * Indicates that the save/restore pair encapsulates a
-         * projection target, and that after the restore any projected
-         * descendents should be drawn.
-         */
-        kFlagProjectionTarget = 0x20
+        kFlagFboTarget = 0x10
     };
 
     /**

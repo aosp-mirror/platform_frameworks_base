@@ -431,6 +431,17 @@ public class DisplayList {
     }
 
     /**
+     * Sets whether the display list is a projection receiver - that its parent
+     * DisplayList should draw any descendent DisplayLists with
+     * ProjectBackwards=true directly on top of it. Default value is false.
+     */
+    public void setProjectionReceiver(boolean shouldRecieve) {
+        if (hasNativeDisplayList()) {
+            nSetProjectionReceiver(mFinalizer.mNativeDisplayList, shouldRecieve);
+        }
+    }
+
+    /**
      * Sets the outline, defining the shape that casts a shadow.
      *
      * Deep copies the native path to simplify reference ownership.
@@ -1065,6 +1076,7 @@ public class DisplayList {
     private static native void nSetCaching(long displayList, boolean caching);
     private static native void nSetClipToBounds(long displayList, boolean clipToBounds);
     private static native void nSetProjectBackwards(long displayList, boolean shouldProject);
+    private static native void nSetProjectionReceiver(long displayList, boolean shouldRecieve);
     private static native void nSetIsolatedZVolume(long displayList, boolean isolateZVolume);
     private static native void nSetOutline(long displayList, long nativePath);
     private static native void nSetAlpha(long displayList, float alpha);

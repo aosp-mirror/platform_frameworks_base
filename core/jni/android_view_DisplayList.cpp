@@ -117,6 +117,12 @@ static void android_view_DisplayList_setProjectBackwards(JNIEnv* env,
     displayList->setProjectBackwards(shouldProject);
 }
 
+static void android_view_DisplayList_setProjectionReceiver(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jboolean shouldRecieve) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    displayList->setProjectionReceiver(shouldRecieve);
+}
+
 static void android_view_DisplayList_setOutline(JNIEnv* env,
         jobject clazz, jlong displayListPtr, jlong outlinePathPtr) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
@@ -391,7 +397,8 @@ static JNINativeMethod gMethods[] = {
     { "nSetAnimationMatrix",   "(JJ)V",  (void*) android_view_DisplayList_setAnimationMatrix },
     { "nSetClipToBounds",      "(JZ)V",  (void*) android_view_DisplayList_setClipToBounds },
     { "nSetIsolatedZVolume",   "(JZ)V",  (void*) android_view_DisplayList_setIsolatedZVolume },
-    { "nSetProjectBackwards",  "(JZ)V", (void*) android_view_DisplayList_setProjectBackwards },
+    { "nSetProjectBackwards",  "(JZ)V",  (void*) android_view_DisplayList_setProjectBackwards },
+    { "nSetProjectionReceiver","(JZ)V",  (void*) android_view_DisplayList_setProjectionReceiver },
     { "nSetOutline",           "(JJ)V",  (void*) android_view_DisplayList_setOutline },
     { "nSetAlpha",             "(JF)V",  (void*) android_view_DisplayList_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",
