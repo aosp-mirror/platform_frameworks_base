@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
+import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -1677,6 +1678,90 @@ public class DevicePolicyManager {
                 return mService.getDeviceOwnerName();
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to get device owner");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     * Sets the given package as the profile owner of the given user profile. The package must
+     * already be installed and there shouldn't be an existing profile owner registered for this
+     * user. Also, this method must be called before the user has been used for the first time.
+     * @param packageName the package name of the application to be registered as profile owner.
+     * @param ownerName the human readable name of the organisation associated with this DPM.
+     * @return whether the package was successfully registered as the profile owner.
+     * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
+     *         the user has already been set up.
+     */
+    public boolean setProfileOwner(String packageName, String ownerName)
+            throws IllegalArgumentException {
+        if (mService != null) {
+            try {
+                return mService.setProfileOwner(packageName, ownerName,
+                        Process.myUserHandle().getIdentifier());
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to set profile owner", re);
+                throw new IllegalArgumentException("Couldn't set profile owner.", re);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Used to determine if a particular package is registered as the Profile Owner for the
+     * current user. A profile owner is a special device admin that has additional priviledges
+     * within the managed profile.
+     *
+     * @param packageName The package name of the app to compare with the registered profile owner.
+     * @return Whether or not the package is registered as the profile owner.
+     */
+    public boolean isProfileOwnerApp(String packageName) {
+        if (mService != null) {
+            try {
+                String profileOwnerPackage = mService.getProfileOwner(
+                        Process.myUserHandle().getIdentifier());
+                return profileOwnerPackage != null && profileOwnerPackage.equals(packageName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to check profile owner");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     * @return the packageName of the owner of the given user profile or null if no profile
+     * owner has been set for that user.
+     * @throws IllegalArgumentException if the userId is invalid.
+     */
+    public String getProfileOwner() throws IllegalArgumentException {
+        if (mService != null) {
+            try {
+                return mService.getProfileOwner(Process.myUserHandle().getIdentifier());
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get profile owner");
+                throw new IllegalArgumentException(
+                        "Requested profile owner for invalid userId", re);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     * @return the human readable name of the organisation associated with this DPM or null if
+     *         one is not set.
+     * @throws IllegalArgumentException if the userId is invalid.
+     */
+    public String getProfileOwnerName() throws IllegalArgumentException {
+        if (mService != null) {
+            try {
+                return mService.getProfileOwnerName(Process.myUserHandle().getIdentifier());
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get profile owner");
+                throw new IllegalArgumentException(
+                        "Requested profile owner for invalid userId", re);
             }
         }
         return null;
