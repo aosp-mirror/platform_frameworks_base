@@ -52,7 +52,6 @@ import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.SystemService;
-import com.android.server.devicepolicy.DevicePolicyManagerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

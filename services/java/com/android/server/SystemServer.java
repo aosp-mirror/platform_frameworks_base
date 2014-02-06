@@ -51,7 +51,6 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
-import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.BatteryStatsService;
@@ -478,8 +477,8 @@ public final class SystemServer {
 
                 try {
                     Slog.i(TAG, "Accessibility Manager");
-                    ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
-                            new AccessibilityManagerService(context));
+                    ServiceManager.addService(Context.ACCESSIBILITY_SERVICE, (IBinder)
+                            getClass().getClassLoader().loadClass("com.android.server.accessibility.AccessibilityManagerService").getConstructor(Context.class).newInstance(context));
                 } catch (Throwable e) {
                     reportWtf("starting Accessibility Manager", e);
                 }
@@ -532,8 +531,10 @@ public final class SystemServer {
                 }
 
                 try {
-                    Slog.i(TAG, "Device Policy");
-                    mSystemServiceManager.startServiceIfExists(DEVICE_POLICY_MANAGER_SERVICE_CLASS);
+                    if (pm.hasSystemFeature("android.software.device_admin")) {
+                        mSystemServiceManager.startServiceIfExists(
+                                DEVICE_POLICY_MANAGER_SERVICE_CLASS);
+                    }
                 } catch (Throwable e) {
                     reportWtf("starting DevicePolicyService", e);
                 }
@@ -780,15 +781,17 @@ public final class SystemServer {
 
             if (!disableNonCoreServices) {
                 try {
-                    Slog.i(TAG, "Backup Service");
-                    mSystemServiceManager.startServiceIfExists(BACKUP_MANAGER_SERVICE_CLASS);
+                    if (pm.hasSystemFeature("android.software.backup")) {
+                        mSystemServiceManager.startServiceIfExists(BACKUP_MANAGER_SERVICE_CLASS);
+                    }
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting Backup Service", e);
                 }
 
                 try {
-                    Slog.i(TAG, "AppWidget Service");
-                    mSystemServiceManager.startServiceIfExists(APPWIDGET_SERVICE_CLASS);
+                    if (pm.hasSystemFeature("android.software.app_widgets")) {
+                        mSystemServiceManager.startServiceIfExists(APPWIDGET_SERVICE_CLASS);
+                    }
                 } catch (Throwable e) {
                     reportWtf("starting AppWidget Service", e);
                 }
@@ -848,7 +851,7 @@ public final class SystemServer {
                 }
             }
 
-            if (!disableNonCoreServices && 
+            if (!disableNonCoreServices &&
                 context.getResources().getBoolean(R.bool.config_dreamsSupported)) {
                 try {
                     Slog.i(TAG, "Dreams Service");
@@ -878,8 +881,9 @@ public final class SystemServer {
             }
 
             try {
-                Slog.i(TAG, "Print Service");
-                mSystemServiceManager.startServiceIfExists(PRINT_MANAGER_SERVICE_CLASS);
+                if (pm.hasSystemFeature("android.software.print")) {
+                    mSystemServiceManager.startServiceIfExists(PRINT_MANAGER_SERVICE_CLASS);
+                }
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
             }
