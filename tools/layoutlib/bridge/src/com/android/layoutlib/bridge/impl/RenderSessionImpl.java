@@ -334,7 +334,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 backgroundView = backgroundLayout;
                 backgroundLayout.setOrientation(LinearLayout.VERTICAL);
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                        LayoutParams.MATCH_PARENT, 0);
                 layoutParams.weight = 1;
                 backgroundLayout.setLayoutParams(layoutParams);
                 topLayout.addView(backgroundLayout);
@@ -369,7 +369,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // content frame
                 mContentRoot = new FrameLayout(context);
                 layoutParams = new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                        LayoutParams.MATCH_PARENT, 0);
                 layoutParams.weight = 1;
                 mContentRoot.setLayoutParams(layoutParams);
                 backgroundLayout.addView(mContentRoot);
