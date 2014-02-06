@@ -109,9 +109,7 @@ public class GLRenderer extends HardwareRenderer {
 
     private static final String[] OVERDRAW = {
             OVERDRAW_PROPERTY_SHOW,
-            OVERDRAW_PROPERTY_COUNT
     };
-    private static final int OVERDRAW_TYPE_COUNT = 1;
     private static final int GL_VERSION = 2;
 
     static EGL10 sEgl;
@@ -160,8 +158,6 @@ public class GLRenderer extends HardwareRenderer {
 
     boolean mDebugDirtyRegions;
     int mDebugOverdraw = -1;
-    HardwareLayer mDebugOverdrawLayer;
-    Paint mDebugOverdrawPaint;
 
     final boolean mTranslucent;
 
@@ -495,14 +491,6 @@ public class GLRenderer extends HardwareRenderer {
         return new GLES20RenderLayer(width, height, isOpaque);
     }
 
-    void countOverdraw(HardwareCanvas canvas) {
-        ((GLES20Canvas) canvas).setCountOverdrawEnabled(true);
-    }
-
-    float getOverdraw(HardwareCanvas canvas) {
-        return ((GLES20Canvas) canvas).getOverdraw();
-    }
-
     @Override
     public SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
         return ((GLES20TextureLayer) layer).getSurfaceTexture();
@@ -706,14 +694,6 @@ public class GLRenderer extends HardwareRenderer {
         if (debugOverdraw != mDebugOverdraw) {
             changed = true;
             mDebugOverdraw = debugOverdraw;
-
-            if (mDebugOverdraw != OVERDRAW_TYPE_COUNT) {
-                if (mDebugOverdrawLayer != null) {
-                    mDebugOverdrawLayer.destroy();
-                    mDebugOverdrawLayer = null;
-                    mDebugOverdrawPaint = null;
-                }
-            }
         }
 
         if (loadProperties()) {
@@ -1182,7 +1162,6 @@ public class GLRenderer extends HardwareRenderer {
                     if (mDrawDelta > 0) {
                         mFrameCount++;
 
-                        debugOverdraw(attachInfo, dirty, canvas, displayList);
                         debugDirtyRegions(dirty, canvas);
                         drawProfileData(attachInfo);
                     }
@@ -1199,55 +1178,6 @@ public class GLRenderer extends HardwareRenderer {
                 attachInfo.mIgnoreDirtyState = false;
             }
         }
-    }
-
-    private void debugOverdraw(View.AttachInfo attachInfo, Rect dirty,
-            HardwareCanvas canvas, DisplayList displayList) {
-
-        if (mDebugOverdraw == OVERDRAW_TYPE_COUNT) {
-            if (mDebugOverdrawLayer == null) {
-                mDebugOverdrawLayer = createHardwareLayer(mWidth, mHeight, true);
-            } else if (mDebugOverdrawLayer.getWidth() != mWidth ||
-                    mDebugOverdrawLayer.getHeight() != mHeight) {
-                mDebugOverdrawLayer.resize(mWidth, mHeight);
-            }
-
-            if (!mDebugOverdrawLayer.isValid()) {
-                mDebugOverdraw = -1;
-                return;
-            }
-
-            HardwareCanvas layerCanvas = mDebugOverdrawLayer.start(canvas, dirty);
-            countOverdraw(layerCanvas);
-            final int restoreCount = layerCanvas.save();
-            layerCanvas.drawDisplayList(displayList, null, DisplayList.FLAG_CLIP_CHILDREN);
-            layerCanvas.restoreToCount(restoreCount);
-            mDebugOverdrawLayer.end(canvas);
-
-            float overdraw = getOverdraw(layerCanvas);
-            DisplayMetrics metrics = attachInfo.mRootView.getResources().getDisplayMetrics();
-
-            drawOverdrawCounter(canvas, overdraw, metrics.density);
-        }
-    }
-
-    private void drawOverdrawCounter(HardwareCanvas canvas, float overdraw, float density) {
-        final String text = String.format("%.2fx", overdraw);
-        final Paint paint = setupPaint(density);
-        // HSBtoColor will clamp the values in the 0..1 range
-        paint.setColor(Color.HSBtoColor(0.28f - 0.28f * overdraw / 3.5f, 0.8f, 1.0f));
-
-        canvas.drawText(text, density * 4.0f, mHeight - paint.getFontMetrics().bottom, paint);
-    }
-
-    private Paint setupPaint(float density) {
-        if (mDebugOverdrawPaint == null) {
-            mDebugOverdrawPaint = new Paint();
-            mDebugOverdrawPaint.setAntiAlias(true);
-            mDebugOverdrawPaint.setShadowLayer(density * 3.0f, 0.0f, 0.0f, 0xff000000);
-            mDebugOverdrawPaint.setTextSize(density * 20.0f);
-        }
-        return mDebugOverdrawPaint;
     }
 
     private DisplayList buildDisplayList(View view, HardwareCanvas canvas) {

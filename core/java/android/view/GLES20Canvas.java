@@ -284,18 +284,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nGetStencilSize();
 
-    void setCountOverdrawEnabled(boolean enabled) {
-        nSetCountOverdrawEnabled(mRenderer, enabled);
-    }
-
-    static native void nSetCountOverdrawEnabled(long renderer, boolean enabled);
-
-    float getOverdraw() {
-        return nGetOverdraw(mRenderer);
-    }
-
-    static native float nGetOverdraw(long renderer);
-
     ///////////////////////////////////////////////////////////////////////////
     // Functor
     ///////////////////////////////////////////////////////////////////////////

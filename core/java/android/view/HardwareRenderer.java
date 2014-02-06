@@ -153,14 +153,6 @@ public abstract class HardwareRenderer {
     public static final String OVERDRAW_PROPERTY_SHOW = "show";
 
     /**
-     * Value for {@link #DEBUG_OVERDRAW_PROPERTY}. When the property is set to this
-     * value, an overdraw counter will be shown on screen.
-     *
-     * @hide
-     */
-    public static final String OVERDRAW_PROPERTY_COUNT = "count";
-
-    /**
      * Turn on to debug non-rectangular clip operations.
      *
      * Possible values:
