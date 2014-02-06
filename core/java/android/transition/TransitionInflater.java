@@ -285,46 +285,27 @@ public class TransitionInflater {
                 com.android.internal.R.styleable.TransitionManager);
         int transitionId = a.getResourceId(
                 com.android.internal.R.styleable.TransitionManager_transition, -1);
-        Scene fromScene = null, toScene = null;
         int fromId = a.getResourceId(
                 com.android.internal.R.styleable.TransitionManager_fromScene, -1);
-        if (fromId >= 0) fromScene = Scene.getSceneForLayout(sceneRoot, fromId, mContext);
+        Scene fromScene = (fromId < 0) ? null: Scene.getSceneForLayout(sceneRoot, fromId, mContext);
         int toId = a.getResourceId(
                 com.android.internal.R.styleable.TransitionManager_toScene, -1);
-        if (toId >= 0) toScene = Scene.getSceneForLayout(sceneRoot, toId, mContext);
-        String fromName = a.getString(
-                com.android.internal.R.styleable.TransitionManager_fromSceneName);
-        String toName = a.getString(
-                com.android.internal.R.styleable.TransitionManager_toSceneName);
+        Scene toScene = (toId < 0) ? null : Scene.getSceneForLayout(sceneRoot, toId, mContext);
+
         if (transitionId >= 0) {
             Transition transition = inflateTransition(transitionId);
             if (transition != null) {
-                if (fromScene != null) {
-                    boolean hasDest = false;
-                    if (toScene != null) {
-                        transitionManager.setTransition(fromScene, toScene, transition);
-                        hasDest = true;
-                    }
-
-                    if (!TextUtils.isEmpty(toName)) {
-                        transitionManager.setTransition(fromScene, toName, transition);
-                        hasDest = true;
-                    }
-
-                    if (!hasDest) {
-                        throw new RuntimeException("No matching toScene or toSceneName for given " +
-                                "fromScene for transition ID " + transitionId);
-                    }
-                } else if (toId >= 0) {
-                    transitionManager.setTransition(toScene, transition);
-                }
-                if (fromName != null) {
-                    if (toScene != null) {
-                        transitionManager.setTransition(fromName, toScene, transition);
-                    } else {
-                        throw new RuntimeException("No matching toScene for given fromSceneName " +
+                if (fromScene == null) {
+                    if (toScene == null) {
+                        throw new RuntimeException("No matching fromScene or toScene " +
                                 "for transition ID " + transitionId);
+                    } else {
+                        transitionManager.setTransition(toScene, transition);
                     }
+                } else if (toScene == null) {
+                    transitionManager.setExitTransition(fromScene, transition);
+                } else {
+                    transitionManager.setTransition(fromScene, toScene, transition);
                 }
             }
         }

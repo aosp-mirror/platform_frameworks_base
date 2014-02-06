@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -50,6 +51,8 @@ import com.android.internal.util.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
@@ -2300,14 +2303,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * individually during the transition.
      * @return True if the ViewGroup should be acted on together during an Activity transition.
      * The default value is false when the background is null and true when the background
-     * is not null.
-     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
+     * is not null or if {@link #getSharedElementName()} is not null.
      */
     public boolean isTransitionGroup() {
         if ((mGroupFlags & FLAG_IS_TRANSITION_GROUP_SET) != 0) {
             return ((mGroupFlags & FLAG_IS_TRANSITION_GROUP) != 0);
         } else {
-            return getBackground() != null;
+            return getBackground() != null || getSharedElementName() != null;
         }
     }
 
@@ -2318,7 +2320,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *                          in Activity transitions. If false, the ViewGroup won't transition,
      *                          only its children. If true, the entire ViewGroup will transition
      *                          together.
-     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
      */
     public void setTransitionGroup(boolean isTransitionGroup) {
         mGroupFlags |= FLAG_IS_TRANSITION_GROUP_SET;
@@ -5878,6 +5879,37 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /** @hide */
     protected void onSetLayoutParams(View child, LayoutParams layoutParams) {
+    }
+
+    /** @hide */
+    @Override
+    public void captureTransitioningViews(List<View> transitioningViews) {
+        if (getVisibility() != View.VISIBLE) {
+            return;
+        }
+        if (isTransitionGroup()) {
+            transitioningViews.add(this);
+        } else {
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                View child = getChildAt(i);
+                child.captureTransitioningViews(transitioningViews);
+            }
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void findSharedElements(Map<String, View> sharedElements) {
+        if (getVisibility() != VISIBLE) {
+            return;
+        }
+        super.findSharedElements(sharedElements);
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            View child = getChildAt(i);
+            child.findSharedElements(sharedElements);
+        }
     }
 
     /**

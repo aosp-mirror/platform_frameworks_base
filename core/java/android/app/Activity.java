@@ -18,8 +18,10 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.transition.Scene;
+import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.SuperNotCalledException;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
@@ -93,6 +95,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -3446,7 +3449,53 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      */
     public void startActivityForResult(Intent intent, int requestCode) {
-        startActivityForResult(intent, requestCode, null);
+        ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
+
+        if (mActionBar != null) {
+            mActionBar.captureSharedElements(sharedElements);
+        }
+        Bundle opts = mWindow.startExitTransition(sharedElements);
+        startActivityForResult(intent, requestCode, opts);
+    }
+
+    /**
+     * Same as {@link #startActivityForResult(android.content.Intent, int)} except that
+     * shared element state is passed to the called Activity during the Activity Scene Transition.
+     * The Activity must have a TransitionManager with a Transition associated with exiting
+     * the current Scene.
+     * @param intent The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param sharedElements Views to be transitioned to the called Activity and their
+     *                       names as used in the called Activity.
+     *                       Views must not have null shared element name, however, if the
+     *                       Pair has a null name, the shared element name will be reused
+     *                       for the launched Activity's shared element name.
+     * @see android.transition.TransitionManager#setExitTransition(android.transition.Scene, android.transition.Transition)
+     * @see View#setSharedElementName(String)
+     */
+    public void startActivityForResult(Intent intent, int requestCode,
+            Pair<View, String>... sharedElements) {
+        ArrayMap<String, View> sharedElementMap = new ArrayMap<String, View>();
+        if (sharedElements != null) {
+            for (Pair<View, String> sharedElement: sharedElements) {
+                View view = sharedElement.first;
+                String sharedElementName = view.getSharedElementName();
+                if (sharedElementName == null) {
+                    throw new IllegalArgumentException("sharedElement must have a non-null "
+                            + "sharedElementName");
+                }
+                String name = sharedElement.second == null
+                        ? sharedElementName : sharedElement.second;
+                sharedElementMap.put(name, view);
+            }
+        }
+        if (mActionBar != null) {
+            mActionBar.captureSharedElements(sharedElementMap);
+        }
+
+        Bundle options = mWindow.startExitTransition(sharedElementMap);
+        startActivityForResult(intent, requestCode, options);
     }
 
     /**
@@ -3484,14 +3533,6 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      */
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
-        TransitionManager tm = getContentTransitionManager();
-        if (tm != null && options != null) {
-            ActivityOptions activityOptions = new ActivityOptions(options);
-            if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
-                getWindow().startExitTransition(activityOptions);
-                options = activityOptions.toBundle();
-            }
-        }
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
@@ -3664,7 +3705,25 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public void startActivity(Intent intent) {
-        startActivity(intent, null);
+        startActivity(intent, (Pair<View, String>[]) null);
+    }
+
+    /**
+     * Same as {@link #startActivity(android.content.Intent)} except that shared element
+     * state is passed to the called Activity during the Activity Scene Transition.
+     * The Activity must have a TransitionManager with a Transition associated with exiting
+     * the current Scene.
+     * @param intent The intent to start.
+     * @param sharedElements Views to be transitioned to the called Activity and their
+     *                       names as used in the called Activity.
+     *                       Views must not have null shared element name, however, if the
+     *                       Pair has a null name, the shared element name will be reused
+     *                       for the launched Activity's shared element name.
+     * @see android.transition.TransitionManager#setExitTransition(android.transition.Scene, android.transition.Transition)
+     * @see View#setSharedElementName(String)
+     */
+    public void startActivity(Intent intent, Pair<View, String>... sharedElements) {
+        startActivityForResult(intent, -1, sharedElements);
     }
 
     /**
@@ -4720,7 +4779,8 @@ public class Activity extends ContextThemeWrapper
      */
     public final void setProgressBarIndeterminate(boolean indeterminate) {
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS,
-                indeterminate ? Window.PROGRESS_INDETERMINATE_ON : Window.PROGRESS_INDETERMINATE_OFF);
+                indeterminate ? Window.PROGRESS_INDETERMINATE_ON
+                        : Window.PROGRESS_INDETERMINATE_OFF);
     }
     
     /**
@@ -5330,12 +5390,6 @@ public class Activity extends ContextThemeWrapper
                 mTransitionActivityOptions = activityOptions;
                 sceneTransitionListener = new Window.SceneTransitionListener() {
                     @Override
-                    public void enterSharedElement(Bundle transitionArgs) {
-                        startSharedElementTransition(transitionArgs);
-                        mTransitionActivityOptions = null;
-                    }
-
-                    @Override
                     public void nullPendingTransition() {
                         overridePendingTransition(0, 0);
                     }
@@ -5348,6 +5402,16 @@ public class Activity extends ContextThemeWrapper
                     @Override
                     public void convertToTranslucent() {
                         Activity.this.convertToTranslucent(null);
+                    }
+
+                    @Override
+                    public void sharedElementStart(Transition transition) {
+                        Activity.this.onCaptureSharedElementStart(transition);
+                    }
+
+                    @Override
+                    public void sharedElementEnd() {
+                        Activity.this.onCaptureSharedElementEnd();
                     }
                 };
 
@@ -5542,53 +5606,23 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Gets the entering Activity transition args. Will be null if
-     * {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)} was
-     * not used to pass a Bundle to startActivity. The Bundle passed to that method in the
-     * calling Activity is returned here.
-     * <p>After startSharedElementTransition is called, this method will return null.</p>
+     * Called when setting up Activity Scene transitions when the start state for shared
+     * elements has been captured. Override this method to modify the start position of shared
+     * elements for the entry Transition.
      *
-     * @return The Bundle passed into Bundle parameter of
-     *         {@link android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)}
-     *         in the calling Activity.
+     * @param transition The <code>Transition</code> being used to change
+     *                   bounds of shared elements in the source Activity to
+     *                   the bounds defined by the entering Scene.
      */
-    public Bundle getTransitionArgs() {
-        if (mTransitionActivityOptions == null) {
-            return null;
-        }
-        return mTransitionActivityOptions.getSceneTransitionArgs();
+    public void onCaptureSharedElementStart(Transition transition) {
     }
 
     /**
-     * Override to transfer a shared element from a calling Activity to this Activity.
-     * Shared elements will be made VISIBLE before this call. The Activity is responsible
-     * for transitioning the shared elements from their location to the eventual destination.
-     * The shared element will be laid out a the destination when this method is called.
-     *
-     * @param transitionArgs The same as returned from {@link #getTransitionArgs()}, this should
-     *                       contain information from the calling Activity to tell where the
-     *                       shared element should be placed.
+     * Called when setting up Activity Scene transitions when the final state for
+     * shared elements state has been captured. Override this method to modify the destination
+     * position of shared elements for the entry Transition.
      */
-    protected void startSharedElementTransition(Bundle transitionArgs) {
-    }
-
-    /**
-     * Controls how the background fade is triggered when there is an entering Activity transition.
-     * If fadeEarly is true, the Window background will fade in as soon as the shared elements are
-     * ready to switch. If fadeEarly is false, the background will fade only after the calling
-     * Activity's exit transition completes. By default, the Window will fade in when the calling
-     * Activity's exit transition completes.
-     *
-     * @param fadeEarly Set to true to fade out the exiting Activity as soon as the shared elements
-     *                  are transferred. Set to false to fade out the exiting Activity as soon as
-     *                  the shared element is transferred.
-     * @see android.app.ActivityOptions#makeSceneTransitionAnimation(android.os.Bundle)
-     */
-    public void setEarlyBackgroundTransition(boolean fadeEarly) {
-        if (mTransitionActivityOptions == null) {
-            return;
-        }
-        mWindow.setEarlyBackgroundTransition(fadeEarly);
+    public void onCaptureSharedElementEnd() {
     }
 
     /**
