@@ -20,6 +20,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.net.DhcpInfo;
+import android.net.wifi.ScanSettings;
+import android.net.wifi.WifiChannel;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Handler;
@@ -763,6 +765,22 @@ public class WifiManager {
     }
 
     /**
+     * Get a list of available channels for customized scan.
+     *
+     * @see {@link WifiChannel}
+     *
+     * @return the channel list, or null if not available
+     * @hide
+     */
+    public List<WifiChannel> getChannelList() {
+        try {
+            return mService.getChannelList();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Request a scan for access points. Returns immediately. The availability
      * of the results is made known later by means of an asynchronous event sent
      * on completion of the scan.
@@ -770,8 +788,7 @@ public class WifiManager {
      */
     public boolean startScan() {
         try {
-            final WorkSource workSource = null;
-            mService.startScan(workSource);
+            mService.startScan(null, null);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -781,7 +798,42 @@ public class WifiManager {
     /** @hide */
     public boolean startScan(WorkSource workSource) {
         try {
-            mService.startScan(workSource);
+            mService.startScan(null, workSource);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Request a scan for access points in specified channel list. Each channel is specified by its
+     * frequency in MHz, e.g. "5500" (do NOT include "DFS" even though it is). The availability of
+     * the results is made known later in the same way as {@link #startScan}.
+     *
+     * Note:
+     *
+     * 1. Customized scan is for non-connection purposes, i.e. it won't trigger a wifi connection
+     *    even though it finds some known networks.
+     *
+     * 2. Customized scan result may include access points that is not specified in the channel
+     *    list. An app will need to do frequency filtering if it wants to get pure results for the
+     *    channel list it specified.
+     *
+     * @hide
+     */
+    public boolean startCustomizedScan(ScanSettings requested) {
+        try {
+            mService.startScan(requested, null);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /** @hide */
+    public boolean startCustomizedScan(ScanSettings requested, WorkSource workSource) {
+        try {
+            mService.startScan(requested, workSource);
             return true;
         } catch (RemoteException e) {
             return false;
