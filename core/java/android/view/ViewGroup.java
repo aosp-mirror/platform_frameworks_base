@@ -5514,21 +5514,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-
     @Override
-    protected boolean fitSystemWindows(Rect insets) {
-        boolean done = super.fitSystemWindows(insets);
-        if (!done) {
-            final int count = mChildrenCount;
-            final View[] children = mChildren;
+    public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
+        insets = super.dispatchApplyWindowInsets(insets);
+        if (insets.hasInsets()) {
+            final int count = getChildCount();
             for (int i = 0; i < count; i++) {
-                done = children[i].fitSystemWindows(insets);
-                if (done) {
+                insets = getChildAt(i).dispatchApplyWindowInsets(insets);
+                if (!insets.hasInsets()) {
                     break;
                 }
             }
         }
-        return done;
+        return insets;
     }
 
     /**
