@@ -19,15 +19,16 @@
 
 #include <input/Input.h>
 #include <input/InputTransport.h>
+#include <ui/Rect.h>
+#include <ui/Region.h>
 #include <utils/RefBase.h>
 #include <utils/Timers.h>
 #include <utils/String8.h>
 
-#include <SkRegion.h>
-
 #include "InputApplication.h"
 
 namespace android {
+
 
 /*
  * Describes the properties of a window that can receive input.
@@ -125,7 +126,7 @@ struct InputWindowInfo {
     int32_t frameRight;
     int32_t frameBottom;
     float scaleFactor;
-    SkRegion touchableRegion;
+    Region touchableRegion;
     bool visible;
     bool canReceiveKeys;
     bool hasFocus;
@@ -136,6 +137,8 @@ struct InputWindowInfo {
     int32_t ownerUid;
     int32_t inputFeatures;
     int32_t displayId;
+
+    void addTouchableRegion(const Rect& region);
 
     bool touchableRegionContainsPoint(int32_t x, int32_t y) const;
     bool frameContainsPoint(int32_t x, int32_t y) const;

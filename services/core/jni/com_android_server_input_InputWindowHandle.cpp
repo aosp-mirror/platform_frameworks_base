@@ -23,6 +23,7 @@
 
 #include <android_view_InputChannel.h>
 #include <android/graphics/Region.h>
+#include <ui/Region.h>
 
 #include "com_android_server_input_InputWindowHandle.h"
 #include "com_android_server_input_InputApplicationHandle.h"
@@ -86,6 +87,8 @@ bool NativeInputWindowHandle::updateInfo() {
 
     if (!mInfo) {
         mInfo = new InputWindowInfo();
+    } else {
+        mInfo->touchableRegion.clear();
     }
 
     jobject inputChannelObj = env->GetObjectField(obj,
@@ -131,10 +134,11 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.touchableRegion);
     if (regionObj) {
         SkRegion* region = android_graphics_Region_getSkRegion(env, regionObj);
-        mInfo->touchableRegion.set(*region);
+        for (SkRegion::Iterator it(*region); !it.done(); it.next()) {
+            const SkIRect& rect = it.rect();
+            mInfo->addTouchableRegion(Rect(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom));
+        }
         env->DeleteLocalRef(regionObj);
-    } else {
-        mInfo->touchableRegion.setEmpty();
     }
 
     mInfo->visible = env->GetBooleanField(obj,
