@@ -16,8 +16,11 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
+import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
+import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
@@ -372,19 +375,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mAttachedWindow.mChildWindows.add(this);
             } else {
                 for (int i = 0; i < children_size; i++) {
-                    WindowState child = (WindowState)mAttachedWindow.mChildWindows.get(i);
-                    if (this.mSubLayer < child.mSubLayer) {
+                    WindowState child = mAttachedWindow.mChildWindows.get(i);
+                    if (mSubLayer < child.mSubLayer) {
                         mAttachedWindow.mChildWindows.add(i, this);
                         break;
-                    } else if (this.mSubLayer > child.mSubLayer) {
+                    } else if (mSubLayer > child.mSubLayer) {
                         continue;
                     }
 
-                    if (this.mBaseLayer <= child.mBaseLayer) {
+                    if (mBaseLayer <= child.mBaseLayer) {
                         mAttachedWindow.mChildWindows.add(i, this);
                         break;
-                    } else {
-                        continue;
                     }
                 }
                 if (children_size == mAttachedWindow.mChildWindows.size()) {
@@ -1310,13 +1311,24 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void reportResized() {
         try {
+            if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
+                    + ": " + mCompatFrame);
+            boolean configChanged = isConfigChanged();
+            if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
+                Slog.i(TAG, "Sending new config to window " + this + ": "
+                        + mWinAnimator.mSurfaceW + "x" + mWinAnimator.mSurfaceH
+                        + " / " + mService.mCurConfiguration);
+            }
+            setConfiguration(mService.mCurConfiguration);
+            if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING)
+                Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
+
             final Rect frame = mFrame;
             final Rect overscanInsets = mLastOverscanInsets;
             final Rect contentInsets = mLastContentInsets;
             final Rect visibleInsets = mLastVisibleInsets;
-            final boolean reportDraw
-                    = mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
-            final Configuration newConfig = isConfigChanged() ? mConfiguration : null;
+            final boolean reportDraw = mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
+            final Configuration newConfig = configChanged ? mConfiguration : null;
             if (mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
                 mService.mH.post(new Runnable() {
