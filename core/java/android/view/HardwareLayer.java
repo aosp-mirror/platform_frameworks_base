@@ -17,10 +17,10 @@
 package android.view;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 
 /**
  * A hardware layer can be used to render graphics operations into a hardware
@@ -28,38 +28,35 @@ import android.graphics.Rect;
  * would use a Frame Buffer Object (FBO.) The hardware layer can be used as
  * a drawing cache when a complex set of graphics operations needs to be
  * drawn several times.
+ *
+ * @hide
  */
-abstract class HardwareLayer {
-    /**
-     * Indicates an unknown dimension (width or height.)
-     */
-    static final int DIMENSION_UNDEFINED = -1;
-    
-    int mWidth;
-    int mHeight;
-    DisplayList mDisplayList;
+final class HardwareLayer {
+    private static final int LAYER_TYPE_TEXTURE = 1;
+    private static final int LAYER_TYPE_RENDER = 2;
 
-    boolean mOpaque;
+    private HardwareRenderer mRenderer;
+    private Finalizer mFinalizer;
+    private DisplayList mDisplayList;
+    private final int mLayerType;
 
-    /**
-     * Creates a new hardware layer with undefined dimensions.
-     */
-    HardwareLayer() {
-        this(DIMENSION_UNDEFINED, DIMENSION_UNDEFINED, false);
+    private HardwareLayer(HardwareRenderer renderer, long deferredUpdater, int type) {
+        if (renderer == null || deferredUpdater == 0) {
+            throw new IllegalArgumentException("Either hardware renderer: " + renderer
+                    + " or deferredUpdater: " + deferredUpdater + " is invalid");
+        }
+        mRenderer = renderer;
+        mLayerType = type;
+        mFinalizer = new Finalizer(deferredUpdater);
+
+        // Layer is considered initialized at this point, notify the HardwareRenderer
+        mRenderer.onLayerCreated(this);
     }
 
-    /**
-     * Creates a new hardware layer at least as large as the supplied
-     * dimensions.
-     * 
-     * @param width The minimum width of the layer
-     * @param height The minimum height of the layer
-     * @param isOpaque Whether the layer should be opaque or not
-     */
-    HardwareLayer(int width, int height, boolean isOpaque) {
-        mWidth = width;
-        mHeight = height;
-        mOpaque = isOpaque;
+    private void assertType(int type) {
+        if (mLayerType != type) {
+            throw new IllegalAccessError("Method not appropriate for this layer type! " + mLayerType);
+        }
     }
 
     /**
@@ -68,158 +65,225 @@ abstract class HardwareLayer {
      * @param paint The paint used when the layer is drawn into the destination canvas.
      * @see View#setLayerPaint(android.graphics.Paint)
      */
-    void setLayerPaint(Paint paint) { }
-
-    /**
-     * Returns the minimum width of the layer.
-     * 
-     * @return The minimum desired width of the hardware layer 
-     */
-    int getWidth() {
-        return mWidth;
+    public void setLayerPaint(Paint paint) {
+        nSetLayerPaint(mFinalizer.mDeferredUpdater, paint.mNativePaint,
+                paint.getColorFilter() != null ? paint.getColorFilter().native_instance : 0);
     }
-
-    /**
-     * Returns the minimum height of the layer.
-     * 
-     * @return The minimum desired height of the hardware layer 
-     */
-    int getHeight() {
-        return mHeight;
-    }
-
-    /**
-     * Returns the DisplayList for the layer.
-     *
-     * @return The DisplayList of the hardware layer
-     */
-    DisplayList getDisplayList() {
-        return mDisplayList;
-    }
-
-    /**
-     * Sets the DisplayList for the layer.
-     *
-     * @param displayList The new DisplayList for this layer
-     */
-    void setDisplayList(DisplayList displayList) {
-        mDisplayList = displayList;
-    }
-
-    /**
-     * Returns whether or not this layer is opaque.
-     * 
-     * @return True if the layer is opaque, false otherwise
-     */
-    boolean isOpaque() {
-        return mOpaque;
-    }
-
-    /**
-     * Sets whether or not this layer should be considered opaque.
-     * 
-     * @param isOpaque True if the layer is opaque, false otherwise
-     */
-    abstract void setOpaque(boolean isOpaque);
 
     /**
      * Indicates whether this layer can be rendered.
-     * 
+     *
      * @return True if the layer can be rendered into, false otherwise
      */
-    abstract boolean isValid();
+    public boolean isValid() {
+        return mFinalizer != null && mFinalizer.mDeferredUpdater != 0;
+    }
 
     /**
-     * Resize the layer, if necessary, to be at least as large
-     * as the supplied dimensions.
-     * 
-     * @param width The new desired minimum width for this layer
-     * @param height The new desired minimum height for this layer
-     * @return True if the resulting layer is valid, false otherwise
+     * Destroys resources without waiting for a GC.
      */
-    abstract boolean resize(int width, int height);
+    public void destroy() {
+        if (!isValid()) {
+            // Already destroyed
+            return;
+        }
+
+        if (mDisplayList != null) {
+            mDisplayList.reset();
+            mDisplayList = null;
+        }
+        if (mRenderer != null) {
+            mRenderer.onLayerDestroyed(this);
+            mRenderer = null;
+        }
+        doDestroyLayerUpdater();
+    }
 
     /**
-     * Returns a hardware canvas that can be used to render onto
-     * this layer.
-     * 
-     * @return A hardware canvas, or null if a canvas cannot be created
+     * Destroys the deferred layer updater but not the backing layer. The
+     * backing layer is instead returned and is the caller's responsibility
+     * to destroy/recycle as appropriate.
      *
-     * @see #start(android.graphics.Canvas)
-     * @see #end(android.graphics.Canvas)
+     * It is safe to call this in onLayerDestroyed only
      */
-    abstract HardwareCanvas getCanvas();
+    public long detachBackingLayer() {
+        long backingLayer = nDetachBackingLayer(mFinalizer.mDeferredUpdater);
+        doDestroyLayerUpdater();
+        return backingLayer;
+    }
 
-    /**
-     * Destroys resources without waiting for a GC. 
-     */
-    abstract void destroy();
+    private void doDestroyLayerUpdater() {
+        if (mFinalizer != null) {
+            mFinalizer.destroy();
+            mFinalizer = null;
+        }
+    }
 
-    /**
-     * This must be invoked before drawing onto this layer.
-     *
-     * @param currentCanvas The canvas whose rendering needs to be interrupted
-     */
-    abstract HardwareCanvas start(Canvas currentCanvas);
+    public DisplayList startRecording() {
+        assertType(LAYER_TYPE_RENDER);
 
-    /**
-     * This must be invoked before drawing onto this layer.
-     *
-     * @param dirty The dirty area to repaint
-     * @param currentCanvas The canvas whose rendering needs to be interrupted
-     */
-    abstract HardwareCanvas start(Canvas currentCanvas, Rect dirty);
+        if (mDisplayList == null) {
+            mDisplayList = DisplayList.create("HardwareLayer");
+        }
+        return mDisplayList;
+    }
 
-    /**
-     * This must be invoked after drawing onto this layer.
-     *
-     * @param currentCanvas The canvas whose rendering needs to be resumed
-     */
-    abstract void end(Canvas currentCanvas);
+    public void endRecording(Rect dirtyRect) {
+        nUpdateRenderLayer(mFinalizer.mDeferredUpdater, mDisplayList.getNativeDisplayList(),
+                dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
+        mRenderer.pushLayerUpdate(this);
+    }
 
     /**
      * Copies this layer into the specified bitmap.
-     * 
+     *
      * @param bitmap The bitmap to copy they layer into
-     * 
+     *
      * @return True if the copy was successful, false otherwise
      */
-    abstract boolean copyInto(Bitmap bitmap);
+    public boolean copyInto(Bitmap bitmap) {
+        return mRenderer.copyLayerInto(this, bitmap);
+    }
 
     /**
-     * Update the layer's properties. This method should be used
-     * when the underlying storage is modified by an external entity.
-     * To change the underlying storage, use the {@link #resize(int, int)}
-     * method instead.
-     * 
+     * Update the layer's properties. Note that after calling this isValid() may
+     * return false if the requested width/height cannot be satisfied
+     *
      * @param width The new width of this layer
      * @param height The new height of this layer
      * @param isOpaque Whether this layer is opaque
+     *
+     * @return true if the layer's properties will change, false if they already
+     *         match the desired values.
      */
-    void update(int width, int height, boolean isOpaque) {
-        mWidth = width;
-        mHeight = height;
-        mOpaque = isOpaque;
+    public boolean prepare(int width, int height, boolean isOpaque) {
+        return nPrepare(mFinalizer.mDeferredUpdater, width, height, isOpaque);
     }
 
     /**
      * Sets an optional transform on this layer.
-     * 
+     *
      * @param matrix The transform to apply to the layer.
      */
-    abstract void setTransform(Matrix matrix);
+    public void setTransform(Matrix matrix) {
+        nSetTransform(mFinalizer.mDeferredUpdater, matrix.native_instance);
+    }
 
     /**
-     * Specifies the display list to use to refresh the layer.
-     *
-     * @param displayList The display list containing the drawing commands to
-     *                    execute in this layer
-     * @param dirtyRect The dirty region of the layer that needs to be redrawn
+     * Indicates that this layer has lost its texture.
      */
-    abstract void redrawLater(DisplayList displayList, Rect dirtyRect);
+    public void onTextureDestroyed() {
+        assertType(LAYER_TYPE_TEXTURE);
+        nOnTextureDestroyed(mFinalizer.mDeferredUpdater);
+    }
 
     /**
-     * Indicates that this layer has lost its underlying storage.
+     * This exists to minimize impact into the current HardwareLayer paths as
+     * some of the specifics of how to handle error cases in the fully
+     * deferred model will work
      */
-    abstract void clearStorage();
+    @Deprecated
+    public void flushChanges() {
+        if (HardwareRenderer.sUseRenderThread) {
+            // Not supported, don't try.
+            return;
+        }
+
+        boolean success = nFlushChanges(mFinalizer.mDeferredUpdater);
+        if (!success) {
+            destroy();
+        }
+    }
+
+    public long getLayer() {
+        return nGetLayer(mFinalizer.mDeferredUpdater);
+    }
+
+    public void setSurfaceTexture(SurfaceTexture surface) {
+        assertType(LAYER_TYPE_TEXTURE);
+        nSetSurfaceTexture(mFinalizer.mDeferredUpdater, surface, false);
+    }
+
+    public void updateSurfaceTexture() {
+        assertType(LAYER_TYPE_TEXTURE);
+        nUpdateSurfaceTexture(mFinalizer.mDeferredUpdater);
+    }
+
+    /**
+     * This should only be used by HardwareRenderer! Do not call directly
+     */
+    SurfaceTexture createSurfaceTexture() {
+        assertType(LAYER_TYPE_TEXTURE);
+        SurfaceTexture st = new SurfaceTexture(nGetTexName(mFinalizer.mDeferredUpdater));
+        nSetSurfaceTexture(mFinalizer.mDeferredUpdater, st, true);
+        return st;
+    }
+
+    /**
+     * This should only be used by HardwareRenderer! Do not call directly
+     */
+    static HardwareLayer createTextureLayer(HardwareRenderer renderer) {
+        return new HardwareLayer(renderer, nCreateTextureLayer(), LAYER_TYPE_TEXTURE);
+    }
+
+    /**
+     * This should only be used by HardwareRenderer! Do not call directly
+     */
+    static HardwareLayer createRenderLayer(HardwareRenderer renderer,
+            int width, int height) {
+        return new HardwareLayer(renderer, nCreateRenderLayer(width, height), LAYER_TYPE_RENDER);
+    }
+
+    /** This also creates the underlying layer */
+    private static native long nCreateTextureLayer();
+    private static native long nCreateRenderLayer(int width, int height);
+
+    private static native void nOnTextureDestroyed(long layerUpdater);
+    private static native long nDetachBackingLayer(long layerUpdater);
+
+    /** This also destroys the underlying layer if it is still attached.
+     *  Note it does not recycle the underlying layer, but instead queues it
+     *  for deferred deletion.
+     *  The HardwareRenderer should use detachBackingLayer() in the
+     *  onLayerDestroyed() callback to do recycling if desired.
+     */
+    private static native void nDestroyLayerUpdater(long layerUpdater);
+
+    private static native boolean nPrepare(long layerUpdater, int width, int height, boolean isOpaque);
+    private static native void nSetLayerPaint(long layerUpdater, long paint, long colorFilter);
+    private static native void nSetTransform(long layerUpdater, long matrix);
+    private static native void nSetSurfaceTexture(long layerUpdater,
+            SurfaceTexture surface, boolean isAlreadyAttached);
+    private static native void nUpdateSurfaceTexture(long layerUpdater);
+    private static native void nUpdateRenderLayer(long layerUpdater, long displayList,
+            int left, int top, int right, int bottom);
+
+    private static native boolean nFlushChanges(long layerUpdater);
+
+    private static native long nGetLayer(long layerUpdater);
+    private static native int nGetTexName(long layerUpdater);
+
+    private static class Finalizer {
+        private long mDeferredUpdater;
+
+        public Finalizer(long deferredUpdater) {
+            mDeferredUpdater = deferredUpdater;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                destroy();
+            } finally {
+                super.finalize();
+            }
+        }
+
+        void destroy() {
+            if (mDeferredUpdater != 0) {
+                nDestroyLayerUpdater(mDeferredUpdater);
+                mDeferredUpdater = 0;
+            }
+        }
+    }
 }
