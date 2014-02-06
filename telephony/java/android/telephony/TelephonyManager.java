@@ -1823,10 +1823,11 @@ public class TelephonyManager {
     }
 
     /**
-     * Perform the specified type of NV config reset.
-     * Used for device configuration by some CDMA operators.
+     * Perform the specified type of NV config reset. The radio will be taken offline
+     * and the device must be rebooted after the operation. Used for device
+     * configuration by some CDMA operators.
      *
-     * @param resetType the type of reset to perform (1 == factory reset; 2 == NV-only reset).
+     * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
      * @return true on success; false on any failure.
      * @hide
      */
@@ -1837,26 +1838,6 @@ public class TelephonyManager {
             Rlog.e(TAG, "nvResetConfig RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "nvResetConfig NPE", ex);
-        }
-        return false;
-    }
-
-    /**
-     * Change the radio to the specified mode.
-     * Used for device configuration by some operators.
-     *
-     * @param radioMode is 0 for offline mode, 1 for online mode, 2 for low-power mode,
-     *                  or 3 to reset the radio.
-     * @return true on success; false on any failure.
-     * @hide
-     */
-    public boolean setRadioMode(int radioMode) {
-        try {
-            return getITelephony().setRadioMode(radioMode);
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "setRadioMode RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "setRadioMode NPE", ex);
         }
         return false;
     }

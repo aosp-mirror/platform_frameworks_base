@@ -172,9 +172,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final String TAG = "ConnectivityService";
 
     private static final boolean DBG = true;
-    private static final boolean VDBG = true;
+    private static final boolean VDBG = false;
 
-    private static final boolean LOGD_RULES = true;
+    private static final boolean LOGD_RULES = false;
 
     // TODO: create better separation between radio types and network types
 
@@ -4569,7 +4569,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * @param seconds
          */
         private static void sleep(int seconds) {
-            log("XXXXX sleeping for " + seconds + " sec");
             long stopTime = System.nanoTime() + (seconds * 1000000000);
             long sleepTime;
             while ((sleepTime = stopTime - System.nanoTime()) > 0) {
@@ -4578,7 +4577,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 } catch (InterruptedException ignored) {
                 }
             }
-            log("XXXXX returning from sleep");
         }
 
         private static void log(String s) {

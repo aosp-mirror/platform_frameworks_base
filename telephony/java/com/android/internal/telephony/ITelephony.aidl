@@ -395,21 +395,12 @@ interface ITelephony {
     boolean nvWriteCdmaPrl(in byte[] preferredRoamingList);
 
     /**
-     * Perform the specified type of NV config reset.
-     * Used for device configuration by some CDMA operators.
+     * Perform the specified type of NV config reset. The radio will be taken offline
+     * and the device must be rebooted after the operation. Used for device
+     * configuration by some CDMA operators.
      *
      * @param resetType the type of reset to perform (1 == factory reset; 2 == NV-only reset).
      * @return true on success; false on any failure.
      */
     boolean nvResetConfig(int resetType);
-
-    /**
-     * Change the radio to the specified mode.
-     * Used for device configuration by some operators.
-     *
-     * @param radioMode is 0 for offline mode, 1 for online mode, 2 for low-power mode,
-     *                  or 3 to reset the radio.
-     * @return true on success; false on any failure.
-     */
-    boolean setRadioMode(int radioMode);
 }
