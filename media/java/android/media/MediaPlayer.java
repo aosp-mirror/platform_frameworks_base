@@ -22,8 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
-import android.net.Proxy;
-import android.net.ProxyProperties;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -882,8 +880,6 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     public void setDataSource(Context context, Uri uri, Map<String, String> headers)
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        disableProxyListener();
-
         String scheme = uri.getScheme();
         if(scheme == null || scheme.equals("file")) {
             setDataSource(uri.getPath());
@@ -917,11 +913,6 @@ public class MediaPlayer implements SubtitleController.Listener
         Log.d(TAG, "Couldn't open file on client side, trying server side");
 
         setDataSource(uri.toString(), headers);
-
-        if (scheme.equalsIgnoreCase("http")
-                || scheme.equalsIgnoreCase("https")) {
-            setupProxyListener(context);
-        }
     }
 
     /**
@@ -972,8 +963,6 @@ public class MediaPlayer implements SubtitleController.Listener
 
     private void setDataSource(String path, String[] keys, String[] values)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        disableProxyListener();
-
         final Uri uri = Uri.parse(path);
         if ("file".equals(uri.getScheme())) {
             path = uri.getPath();
@@ -1029,7 +1018,6 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException {
-        disableProxyListener();
         _setDataSource(fd, offset, length);
     }
 
@@ -1401,8 +1389,6 @@ public class MediaPlayer implements SubtitleController.Listener
         if (mEventHandler != null) {
             mEventHandler.removeCallbacksAndMessages(null);
         }
-
-        disableProxyListener();
     }
 
     private native void _reset();
@@ -2749,59 +2735,6 @@ public class MediaPlayer implements SubtitleController.Listener
         return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
                 mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
     }
-
-    private Context mProxyContext = null;
-    private ProxyReceiver mProxyReceiver = null;
-
-    private void setupProxyListener(Context context) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Proxy.PROXY_CHANGE_ACTION);
-        mProxyReceiver = new ProxyReceiver();
-        mProxyContext = context;
-
-        Intent currentProxy =
-            context.getApplicationContext().registerReceiver(mProxyReceiver, filter);
-
-        if (currentProxy != null) {
-            handleProxyBroadcast(currentProxy);
-        }
-    }
-
-    private void disableProxyListener() {
-        if (mProxyReceiver == null) {
-            return;
-        }
-
-        Context appContext = mProxyContext.getApplicationContext();
-        if (appContext != null) {
-            appContext.unregisterReceiver(mProxyReceiver);
-        }
-
-        mProxyReceiver = null;
-        mProxyContext = null;
-    }
-
-    private void handleProxyBroadcast(Intent intent) {
-        ProxyProperties props =
-            (ProxyProperties)intent.getExtra(Proxy.EXTRA_PROXY_INFO);
-
-        if (props == null || props.getHost() == null) {
-            updateProxyConfig(null);
-        } else {
-            updateProxyConfig(props);
-        }
-    }
-
-    private class ProxyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Proxy.PROXY_CHANGE_ACTION)) {
-                handleProxyBroadcast(intent);
-            }
-        }
-    }
-
-    private native void updateProxyConfig(ProxyProperties props);
 
     /** @hide */
     static class TimeProvider implements MediaPlayer.OnSeekCompleteListener,
