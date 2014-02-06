@@ -2371,6 +2371,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG3_CALLED_SUPER = 0x10;
 
     /**
+     * Flag indicating that an view will be clipped to its outline.
+     */
+    static final int PFLAG3_CLIP_TO_OUTLINE = 0x20;
+
+    /**
      * Flag indicating that we're in the process of applying window insets.
      */
     static final int PFLAG3_APPLYING_INSETS = 0x40;
@@ -3327,7 +3332,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int[] mDrawableState = null;
 
     /**
-     * Stores the outline of the view, passed down to the DisplayList level for shadow shape.
+     * Stores the outline of the view, passed down to the DisplayList level for
+     * defining shadow shape and clipping.
      */
     private Path mOutline;
 
@@ -6128,7 +6134,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return {@code true} if this view applied the insets and it should not
      * continue propagating further down the hierarchy, {@code false} otherwise.
      * @see #getFitsSystemWindows()
-     * @see #setFitsSystemWindows(boolean) 
+     * @see #setFitsSystemWindows(boolean)
      * @see #setSystemUiVisibility(int)
      *
      * @deprecated As of API XX use {@link #dispatchApplyWindowInsets(WindowInsets)} to apply
@@ -10820,6 +10826,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
+     */
+    public void setClipToOutline(boolean clipToOutline) {
+        // TODO : Add a fast invalidation here.
+        if (getClipToOutline() != clipToOutline) {
+            if (clipToOutline) {
+                mPrivateFlags3 |= PFLAG3_CLIP_TO_OUTLINE;
+            } else {
+                mPrivateFlags3 &= ~PFLAG3_CLIP_TO_OUTLINE;
+            }
+            if (mDisplayList != null) {
+                mDisplayList.setClipToOutline(clipToOutline);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final boolean getClipToOutline() {
+        return ((mPrivateFlags3 & PFLAG3_CLIP_TO_OUTLINE) != 0);
+    }
+
+    /**
      * Hit rectangle in parent's coordinates
      *
      * @param outRect The hit rectangle of the view.
@@ -14471,6 +14501,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         (((ViewGroup) this).mGroupFlags & ViewGroup.FLAG_ISOLATED_Z_VOLUME) != 0);
             }
             displayList.setOutline(mOutline);
+            displayList.setClipToOutline(getClipToOutline());
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
                     ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {

@@ -213,6 +213,10 @@ public:
         }
     }
 
+    void setClipToOutline(bool clipToOutline) {
+        mClipToOutline = clipToOutline;
+    }
+
     void setStaticMatrix(SkMatrix* matrix) {
         delete mStaticMatrix;
         mStaticMatrix = new SkMatrix(*matrix);
@@ -609,6 +613,7 @@ private:
     bool mProjectBackwards;
     bool mProjectionReceiver;
     SkPath mOutline;
+    bool mClipToOutline;
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;
