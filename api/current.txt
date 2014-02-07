@@ -11272,6 +11272,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FILTER_DENSITIES;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FOCAL_LENGTHS;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_FOCUS_DISTANCE_CALIBRATION;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_HYPERFOCAL_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
@@ -11458,6 +11459,9 @@ package android.hardware.camera2 {
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0; // 0x0
     field public static final int LENS_FACING_BACK = 1; // 0x1
     field public static final int LENS_FACING_FRONT = 0; // 0x0
+    field public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE = 1; // 0x1
+    field public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED = 2; // 0x2
+    field public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED = 0; // 0x0
     field public static final int LENS_OPTICAL_STABILIZATION_MODE_OFF = 0; // 0x0
     field public static final int LENS_OPTICAL_STABILIZATION_MODE_ON = 1; // 0x1
     field public static final int LENS_STATE_MOVING = 1; // 0x1
