@@ -72,33 +72,6 @@ public class ProjectionActivity extends Activity {
         }
     }
 
-    public static class ProjecteeLayout extends LinearLayout {
-        private final Paint mPaint = new Paint();
-        private final RectF mRectF = new RectF();
-
-        public ProjecteeLayout(Context context) {
-            this(context, null);
-        }
-
-        public ProjecteeLayout(Context context, AttributeSet attrs) {
-            this(context, attrs, 0);
-        }
-
-        public ProjecteeLayout(Context context, AttributeSet attrs, int defStyle) {
-            super(context, attrs, defStyle);
-        }
-
-        @Override
-        protected void dispatchDraw(Canvas canvas) {
-            canvas.save(0x20); // secret save flag
-            mRectF.set(0, 0, getWidth(), getHeight());
-            mPaint.setColor(0x5f000000);
-            canvas.drawOval(mRectF, mPaint);
-            canvas.restore();
-            super.dispatchDraw(canvas);
-        }
-    }
-
     static View container;
 
     @Override
