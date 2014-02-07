@@ -3178,7 +3178,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *         inherited Z ordering volume.
      */
     public void setIsolatedZVolume(boolean isolateZVolume) {
-        boolean previousValue = (mGroupFlags & FLAG_ISOLATED_Z_VOLUME) == FLAG_ISOLATED_Z_VOLUME;
+        boolean previousValue = (mGroupFlags & FLAG_ISOLATED_Z_VOLUME) != 0;
         if (isolateZVolume != previousValue) {
             setBooleanFlag(FLAG_ISOLATED_Z_VOLUME, isolateZVolume);
             if (mDisplayList != null) {

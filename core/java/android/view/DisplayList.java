@@ -468,6 +468,29 @@ public class DisplayList {
     }
 
     /**
+     * Set whether the DisplayList should cast a shadow.
+     *
+     * The shape of the shadow casting area is defined by the outline of the display list, if set
+     * and non-empty, otherwise it will be the bounds rect.
+     */
+    public void setCastsShadow(boolean castsShadow) {
+        if (hasNativeDisplayList()) {
+            nSetCastsShadow(mFinalizer.mNativeDisplayList, castsShadow);
+        }
+    }
+
+    /**
+     * Sets whether the DisplayList should be drawn with perspective applied from the global camera.
+     *
+     * If set to true, camera distance will be ignored. Defaults to false.
+     */
+    public void setSharesGlobalCamera(boolean sharesGlobalCamera) {
+        if (hasNativeDisplayList()) {
+            nSetSharesGlobalCamera(mFinalizer.mNativeDisplayList, sharesGlobalCamera);
+        }
+    }
+
+    /**
      * Set the static matrix on the display list. The specified matrix is combined with other
      * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
      *
@@ -1092,6 +1115,8 @@ public class DisplayList {
     private static native void nSetIsolatedZVolume(long displayList, boolean isolateZVolume);
     private static native void nSetOutline(long displayList, long nativePath);
     private static native void nSetClipToOutline(long displayList, boolean clipToOutline);
+    private static native void nSetCastsShadow(long displayList, boolean castsShadow);
+    private static native void nSetSharesGlobalCamera(long displayList, boolean sharesGlobalCamera);
     private static native void nSetAlpha(long displayList, float alpha);
     private static native void nSetHasOverlappingRendering(long displayList,
             boolean hasOverlappingRendering);

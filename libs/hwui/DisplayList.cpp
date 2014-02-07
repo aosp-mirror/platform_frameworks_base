@@ -243,6 +243,8 @@ void DisplayList::init() {
     mProjectionReceiver = false;
     mOutline.rewind();
     mClipToOutline = false;
+    mCastsShadow = false;
+    mSharesGlobalCamera = false;
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
@@ -670,16 +672,13 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
         if (mode == kPositiveZChildren && zValue < 0.0f) continue;
         if (mode == kNegativeZChildren && zValue > 0.0f) break;
 
-        if (mode == kPositiveZChildren && zValue > 0.0f) {
+        DisplayList* child = childOp->mDisplayList;
+        if (mode == kPositiveZChildren && zValue > 0.0f && child->mCastsShadow) {
             /* draw shadow with parent matrix applied, passing in the child's total matrix
-             *
-             * TODO:
-             * -view must opt-in to shadows
-             * -consider depth in more complex scenarios (neg z, added shadow depth)
+             * TODO: consider depth in more complex scenarios (neg z, added shadow depth)
              */
             mat4 shadowMatrix(childOp->mTransformFromCompositingAncestor);
-            childOp->mDisplayList->applyViewPropertyTransforms(shadowMatrix);
-            DisplayList* child = childOp->mDisplayList;
+            child->applyViewPropertyTransforms(shadowMatrix);
 
             DisplayListOp* shadowOp  = new (alloc) DrawShadowOp(shadowMatrix,
                     child->mAlpha, &(child->mOutline), child->mWidth, child->mHeight);

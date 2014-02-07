@@ -193,6 +193,14 @@ public:
         mIsolatedZVolume = shouldIsolate;
     }
 
+    void setCastsShadow(bool castsShadow) {
+        mCastsShadow = castsShadow;
+    }
+
+    void setSharesGlobalCamera(bool sharesGlobalCamera) {
+        mSharesGlobalCamera = sharesGlobalCamera;
+    }
+
     void setProjectBackwards(bool shouldProject) {
         mProjectBackwards = shouldProject;
     }
@@ -614,6 +622,8 @@ private:
     bool mProjectionReceiver;
     SkPath mOutline;
     bool mClipToOutline;
+    bool mCastsShadow;
+    bool mSharesGlobalCamera; // TODO: respect value when rendering
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;

@@ -136,6 +136,18 @@ static void android_view_DisplayList_setClipToOutline(JNIEnv* env,
     displayList->setClipToOutline(clipToOutline);
 }
 
+static void android_view_DisplayList_setCastsShadow(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jboolean castsShadow) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    displayList->setCastsShadow(castsShadow);
+}
+
+static void android_view_DisplayList_setSharesGlobalCamera(JNIEnv* env,
+        jobject clazz, jlong displayListPtr, jboolean sharesGlobalCamera) {
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
+    displayList->setSharesGlobalCamera(sharesGlobalCamera);
+}
+
 static void android_view_DisplayList_setAlpha(JNIEnv* env,
         jobject clazz, jlong displayListPtr, float alpha) {
     DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
@@ -407,6 +419,8 @@ static JNINativeMethod gMethods[] = {
     { "nSetProjectionReceiver","(JZ)V",  (void*) android_view_DisplayList_setProjectionReceiver },
     { "nSetOutline",           "(JJ)V",  (void*) android_view_DisplayList_setOutline },
     { "nSetClipToOutline",     "(JZ)V",  (void*) android_view_DisplayList_setClipToOutline },
+    { "nSetCastsShadow",       "(JZ)V",  (void*) android_view_DisplayList_setCastsShadow },
+    { "nSetSharesGlobalCamera","(JZ)V",  (void*) android_view_DisplayList_setSharesGlobalCamera },
     { "nSetAlpha",             "(JF)V",  (void*) android_view_DisplayList_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)V",
             (void*) android_view_DisplayList_setHasOverlappingRendering },
