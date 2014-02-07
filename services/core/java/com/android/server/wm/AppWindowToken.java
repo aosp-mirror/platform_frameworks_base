@@ -105,6 +105,8 @@ class AppWindowToken extends WindowToken {
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
+    boolean mDeferRemoval;
+
     AppWindowToken(WindowManagerService _service, IApplicationToken _token) {
         super(_service, _token.asBinder(),
                 WindowManager.LayoutParams.TYPE_APPLICATION, true);

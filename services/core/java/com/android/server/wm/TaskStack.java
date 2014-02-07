@@ -366,7 +366,7 @@ public class TaskStack {
         mAnimationBackgroundSurface.mDimSurface.destroy();
     }
 
-    void checkForDeferredDetach() {
+    void checkForDeferredActions() {
         if (mDisplayContent != null &&
                 (mDisplayContent.mDeferredActions & DisplayContent.DEFER_DETACH) != 0 &&
                 !isAnimating()) {
@@ -375,6 +375,21 @@ public class TaskStack {
             if ((mDisplayContent.mDeferredActions & DisplayContent.DEFER_REMOVAL) != 0) {
                 mDisplayContent.mDeferredActions &= ~DisplayContent.DEFER_REMOVAL;
                 mService.onDisplayRemoved(mDisplayContent.getDisplayId());
+            }
+        }
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mTasks.get(taskNdx);
+            AppTokenList tokens = task.mAppTokens;
+            for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                AppWindowToken wtoken = tokens.get(tokenNdx);
+                if (wtoken.mDeferRemoval) {
+                    wtoken.mDeferRemoval = false;
+                    mService.removeAppFromTaskLocked(wtoken);
+                }
+            }
+            if (task.mDeferRemoval) {
+                task.mDeferRemoval = false;
+                mService.removeTaskLocked(task);
             }
         }
     }
