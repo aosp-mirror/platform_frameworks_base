@@ -17,9 +17,11 @@
 
 #define LOG_TAG "AudioTrack-JNI"
 
-#include <jni.h>
 #include <JNIHelp.h>
+#include <JniConstants.h>
 #include <android_runtime/AndroidRuntime.h>
+
+#include "ScopedBytes.h"
 
 #include <utils/Log.h>
 #include <media/AudioSystem.h>
@@ -503,13 +505,13 @@ static void android_media_AudioTrack_finalize(JNIEnv *env,  jobject thiz) {
 }
 
 // ----------------------------------------------------------------------------
-jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
-                  jint offsetInBytes, jint sizeInBytes) {
+jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const jbyte* data,
+                  jint offsetInBytes, jint sizeInBytes, bool blocking = true) {
     // give the data to the native AudioTrack object (the data starts at the offset)
     ssize_t written = 0;
     // regular write() or copy the data to the AudioTrack's shared memory?
     if (track->sharedBuffer() == 0) {
-        written = track->write(data + offsetInBytes, sizeInBytes);
+        written = track->write(data + offsetInBytes, sizeInBytes, blocking);
         // for compatibility with earlier behavior of write(), return 0 in this case
         if (written == (ssize_t) WOULD_BLOCK) {
             written = 0;
@@ -563,7 +565,8 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
 static jint android_media_AudioTrack_write_byte(JNIEnv *env,  jobject thiz,
                                                   jbyteArray javaAudioData,
                                                   jint offsetInBytes, jint sizeInBytes,
-                                                  jint javaAudioFormat) {
+                                                  jint javaAudioFormat,
+                                                  jboolean isWriteBlocking) {
     //ALOGV("android_media_AudioTrack_write_byte(offset=%d, sizeInBytes=%d) called",
     //    offsetInBytes, sizeInBytes);
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
@@ -590,7 +593,8 @@ static jint android_media_AudioTrack_write_byte(JNIEnv *env,  jobject thiz,
         return 0;
     }
 
-    jint written = writeToTrack(lpTrack, javaAudioFormat, cAudioData, offsetInBytes, sizeInBytes);
+    jint written = writeToTrack(lpTrack, javaAudioFormat, cAudioData, offsetInBytes, sizeInBytes,
+            isWriteBlocking == JNI_TRUE /* blocking */);
 
     env->ReleaseByteArrayElements(javaAudioData, cAudioData, 0);
 
@@ -601,6 +605,31 @@ static jint android_media_AudioTrack_write_byte(JNIEnv *env,  jobject thiz,
 
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject thiz,
+        jbyteArray javaBytes, jint byteOffset, jint offsetInBytes, jint sizeInBytes,
+        jint javaAudioFormat, jboolean isWriteBlocking) {
+    //ALOGV("android_media_AudioTrack_write_native_bytes(offset=%d, sizeInBytes=%d) called",
+    //    offsetInBytes, sizeInBytes);
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Unable to retrieve AudioTrack pointer for write()");
+        return 0;
+    }
+
+    ScopedBytesRO bytes(env, javaBytes);
+    if (bytes.get() == NULL) {
+        ALOGE("Error retrieving source of audio data to play, can't play");
+        return AUDIOTRACK_ERROR_BAD_VALUE;
+    }
+
+    jint written = writeToTrack(lpTrack, javaAudioFormat, bytes.get() + byteOffset, offsetInBytes,
+            sizeInBytes, isWriteBlocking == JNI_TRUE /* blocking */);
+
+    return written;
+}
+
+// ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_write_short(JNIEnv *env,  jobject thiz,
                                                   jshortArray javaAudioData,
                                                   jint offsetInShorts, jint sizeInShorts,
@@ -608,7 +637,8 @@ static jint android_media_AudioTrack_write_short(JNIEnv *env,  jobject thiz,
     jint written = android_media_AudioTrack_write_byte(env, thiz,
                                                  (jbyteArray) javaAudioData,
                                                  offsetInShorts*2, sizeInShorts*2,
-                                                 javaAudioFormat);
+                                                 javaAudioFormat,
+                                                 JNI_TRUE /*blocking write, legacy behavior*/);
     if (written > 0) {
         written /= 2;
     }
@@ -890,7 +920,10 @@ static JNINativeMethod gMethods[] = {
                                          (void *)android_media_AudioTrack_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioTrack_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
-    {"native_write_byte",    "([BIII)I", (void *)android_media_AudioTrack_write_byte},
+    {"native_write_byte",    "([BIIIZ)I",(void *)android_media_AudioTrack_write_byte},
+    {"native_write_native_bytes",
+                             "(Ljava/lang/Object;IIIIZ)I",
+                                         (void *)android_media_AudioTrack_write_native_bytes},
     {"native_write_short",   "([SIII)I", (void *)android_media_AudioTrack_write_short},
     {"native_setVolume",     "(FF)V",    (void *)android_media_AudioTrack_set_volume},
     {"native_get_native_frame_count",
