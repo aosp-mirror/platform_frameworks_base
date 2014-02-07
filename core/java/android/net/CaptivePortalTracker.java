@@ -421,6 +421,13 @@ public class CaptivePortalTracker extends StateMachine {
             case ConnectivityManager.TYPE_WIFI:
                 WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
                 if (currentWifiInfo != null) {
+                    // NOTE: getSSID()'s behavior changed in API 17; before that, SSIDs were not
+                    // surrounded by double quotation marks (thus violating the Javadoc), but this
+                    // was changed to match the Javadoc in API 17. Since clients may have started
+                    // sanitizing the output of this method since API 17 was released, we should
+                    // not change it here as it would become impossible to tell whether the SSID is
+                    // simply being surrounded by quotes due to the API, or whether those quotes
+                    // are actually part of the SSID.
                     latencyBroadcast.putExtra(EXTRA_SSID, currentWifiInfo.getSSID());
                     latencyBroadcast.putExtra(EXTRA_BSSID, currentWifiInfo.getBSSID());
                 } else {
