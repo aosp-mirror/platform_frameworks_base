@@ -731,11 +731,11 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
 ///////////////////////////////////////////////////////////////////////////////
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode, int flags) {
+        const SkPaint* paint, int flags) {
     const int count = saveSnapshot(flags);
 
     if (!currentSnapshot()->isIgnored()) {
-        createLayer(left, top, right, bottom, alpha, mode, flags);
+        createLayer(left, top, right, bottom, paint, flags);
     }
 
     return count;
@@ -786,7 +786,7 @@ void OpenGLRenderer::updateSnapshotIgnoreForLayer(const Rect& bounds, const Rect
 }
 
 int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode, int flags) {
+        const SkPaint* paint, int flags) {
     const int count = saveSnapshot(flags);
 
     if (!currentSnapshot()->isIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
@@ -797,7 +797,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         Rect bounds(left, top, right, bottom);
         Rect clip;
         calculateLayerBoundsAndClip(bounds, clip, true);
-        updateSnapshotIgnoreForLayer(bounds, clip, true, alpha);
+        updateSnapshotIgnoreForLayer(bounds, clip, true, getAlphaDirect(paint));
 
         if (!currentSnapshot()->isIgnored()) {
             mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
@@ -862,11 +862,14 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
  *     something actually gets drawn are the layers regions cleared.
  */
 bool OpenGLRenderer::createLayer(float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode, int flags) {
+        const SkPaint* paint, int flags) {
     LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
     const bool fboLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
+
+    SkXfermode::Mode mode = getXfermodeDirect(paint);
+    int alpha = getAlphaDirect(paint);
 
     // Window coordinates of the layer
     Rect clip;
@@ -889,6 +892,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     layer->layer.set(bounds);
     layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->getHeight()),
             bounds.getWidth() / float(layer->getWidth()), 0.0f);
+
     layer->setColorFilter(mDrawModifiers.mColorFilter);
     layer->setBlend(true);
     layer->setDirty(false);
