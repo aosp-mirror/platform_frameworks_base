@@ -17,17 +17,33 @@
 package com.android.keyguard;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.FrameLayout;
+
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+
+import java.io.File;
 
 /**
  * Base class for keyguard view.  {@link #reset} is where you should
@@ -43,11 +59,17 @@ public abstract class KeyguardViewBase extends FrameLayout {
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
     protected KeyguardViewMediator.ViewMediatorCallback mViewMediatorCallback;
+    protected LockPatternUtils mLockPatternUtils;
+    private OnDismissAction mDismissAction;
 
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
     private static final boolean KEYGUARD_MANAGES_VOLUME = true;
+    private static final boolean DEBUG = false;
+    private static final String TAG = "KeyguardViewBase";
+
+    private KeyguardSecurityContainer mSecurityContainer;
 
     public KeyguardViewBase(Context context) {
         this(context, null);
@@ -57,20 +79,196 @@ public abstract class KeyguardViewBase extends FrameLayout {
         super(context, attrs);
     }
 
-    /**
-     * Called when the screen turned off.
-     */
-    abstract public void onScreenTurnedOff();
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.keyguardDoneDrawing();
+        }
+    }
 
     /**
-     * Called when the screen turned on.
+     * Sets an action to run when keyguard finishes.
+     *
+     * @param action
      */
-    abstract public void onScreenTurnedOn();
+    public void setOnDismissAction(OnDismissAction action) {
+        mDismissAction = action;
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        mSecurityContainer =
+                (KeyguardSecurityContainer) findViewById(R.id.keyguard_security_container);
+        mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
+        mSecurityContainer.setSecurityCallback(new SecurityCallback() {
+            @Override
+            public void userActivity(long timeout) {
+                KeyguardViewBase.this.userActivity(timeout);
+            }
+
+            @Override
+            public void dismiss(boolean authenticated) {
+                KeyguardViewBase.this.dismiss(authenticated);
+            }
+
+            @Override
+            public void finish() {
+                KeyguardViewBase.this.finish();
+            }
+        });
+        mSecurityContainer.showPrimarySecurityScreen(false);
+        // mSecurityContainer.updateSecurityViews(false /* not bouncing */);
+        setBackButtonEnabled(false);
+    }
 
     /**
      * Called when the view needs to be shown.
      */
-    abstract public void show();
+    public void show() {
+        if (DEBUG) Log.d(TAG, "show()");
+        mSecurityContainer.showPrimarySecurityScreen(false);
+    }
+
+    /**
+     *  Dismisses the keyguard by going to the next screen or making it gone.
+     */
+    public void dismiss() {
+        dismiss(false);
+    }
+
+    protected boolean dismiss(boolean authenticated) {
+        boolean finished = getSecurityContainer().showNextSecurityScreenOrFinish(authenticated);
+        if (!finished) {
+            updateAfterSecuritySelection();
+        }
+        return finished;
+    }
+
+    private void setBackButtonEnabled(boolean enabled) {
+        setSystemUiVisibility(enabled ?
+                getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_BACK :
+                getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
+    }
+
+    protected void showBouncer(boolean show) {
+        CharSequence what = getContext().getResources().getText(
+                show ? R.string.keyguard_accessibility_show_bouncer
+                        : R.string.keyguard_accessibility_hide_bouncer);
+        announceForAccessibility(what);
+        announceCurrentSecurityMethod();
+    }
+
+    public boolean handleBackKey() {
+        if (mSecurityContainer.getCurrentSecuritySelection() == SecurityMode.Account) {
+            // go back to primary screen and re-disable back
+            setBackButtonEnabled(false);
+            mSecurityContainer.showPrimarySecurityScreen(false /*turningOff*/);
+            return true;
+        }
+        if (mSecurityContainer.getCurrentSecuritySelection() != SecurityMode.None) {
+            mSecurityContainer.dismiss(false);
+            return true;
+        }
+        return false;
+    }
+
+    protected void announceCurrentSecurityMethod() {
+        mSecurityContainer.announceCurrentSecurityMethod();
+    }
+
+    private void updateAfterSecuritySelection() {
+        // Enable or disable the back button based on security mode
+        if (getSecurityContainer().getSecurityMode() == SecurityMode.Account
+                && !mLockPatternUtils.isPermanentlyLocked()) {
+            // we're showing account as a backup, provide a way to get back to primary
+            setBackButtonEnabled(true);
+        }
+
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.setNeedsInput(getSecurityContainer().needsInput());
+        }
+    }
+
+    protected KeyguardSecurityContainer getSecurityContainer() {
+        return mSecurityContainer;
+    }
+
+    /**
+     * Authentication has happened and it's time to dismiss keyguard. This function
+     * should clean up and inform KeyguardViewMediator.
+     */
+    public void finish() {
+        // If the alternate unlock was suppressed, it can now be safely
+        // enabled because the user has left keyguard.
+        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
+
+        // If there's a pending runnable because the user interacted with a widget
+        // and we're leaving keyguard, then run it.
+        boolean deferKeyguardDone = false;
+        if (mDismissAction != null) {
+            deferKeyguardDone = mDismissAction.onDismiss();
+            mDismissAction = null;
+        }
+        if (mViewMediatorCallback != null) {
+            if (deferKeyguardDone) {
+                mViewMediatorCallback.keyguardDonePending();
+            } else {
+                mViewMediatorCallback.keyguardDone(true);
+            }
+        }
+    }
+
+    /**
+     * Extend display timeout
+     * @param timeout duration to delay timeout, in ms.
+     */
+    protected void userActivity(long timeout) {
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.userActivity(timeout);
+        }
+    }
+
+    protected void userActivity() {
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.userActivity();
+        }
+    }
+
+    protected void onUserActivityTimeoutChanged() {
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.onUserActivityTimeoutChanged();
+        }
+    }
+
+    /**
+     * Called when the screen turned off.
+     */
+    protected void onScreenTurnedOff() {
+        if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
+                Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
+        // Once the screen turns off, we no longer consider this to be first boot and we want the
+        // biometric unlock to start next time keyguard is shown.
+        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
+        mSecurityContainer.showPrimarySecurityScreen(true);
+        mSecurityContainer.onPause();
+        clearFocus();
+    }
+
+    /**
+     * Called when the screen turned on.
+     */
+    protected void onScreenTurnedOn() {
+        if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
+        mSecurityContainer.showPrimarySecurityScreen(false);
+        mSecurityContainer.onResume(KeyguardSecurityView.SCREEN_ON);
+
+        // This is a an attempt to fix bug 7137389 where the device comes back on but the entire
+        // layout is blank but forcing a layout causes it to reappear (e.g. with with
+        // hierarchyviewer).
+        requestLayout();
+        requestFocus();
+    }
 
     /**
      * Verify that the user can get past the keyguard securely.  This is called,
@@ -79,7 +277,24 @@ public abstract class KeyguardViewBase extends FrameLayout {
      *
      * The result will be propogated back via {@link KeyguardViewCallback#keyguardDone(boolean)}
      */
-    abstract public void verifyUnlock();
+    public void verifyUnlock() {
+        SecurityMode securityMode = getSecurityContainer().getSecurityMode();
+        if (securityMode == KeyguardSecurityModel.SecurityMode.None) {
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.keyguardDone(true);
+            }
+        } else if (securityMode != KeyguardSecurityModel.SecurityMode.Pattern
+                && securityMode != KeyguardSecurityModel.SecurityMode.PIN
+                && securityMode != KeyguardSecurityModel.SecurityMode.Password) {
+            // can only verify unlock when in pattern/password mode
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.keyguardDone(false);
+            }
+        } else {
+            // otherwise, go to the unlock screen, see if they can verify it
+            mSecurityContainer.verifyUnlock();
+        }
+    }
 
     /**
      * Called before this view is being removed.
@@ -183,7 +398,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
         return false;
     }
 
-    void handleMediaKeyEvent(KeyEvent keyEvent) {
+    private void handleMediaKeyEvent(KeyEvent keyEvent) {
         IAudioService audioService = IAudioService.Stub.asInterface(
                 ServiceManager.checkService(Context.AUDIO_SERVICE));
         if (audioService != null) {
@@ -206,8 +421,78 @@ public abstract class KeyguardViewBase extends FrameLayout {
         }
     }
 
+    /**
+     * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
+     * some cases where we wish to disable it, notably when the menu button placement or technology
+     * is prone to false positives.
+     *
+     * @return true if the menu key should be enabled
+     */
+    private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
+    private boolean shouldEnableMenuKey() {
+        final Resources res = getResources();
+        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+        final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
+        final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
+        return !configDisabled || isTestHarness || fileOverride;
+    }
+
+    public boolean handleMenuKey() {
+        // The following enables the MENU key to work for testing automation
+        if (shouldEnableMenuKey()) {
+            dismiss();
+            return true;
+        }
+        return false;
+    }
+
     public void setViewMediatorCallback(
             KeyguardViewMediator.ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
     }
+
+    protected KeyguardActivityLauncher getActivityLauncher() {
+        return mActivityLauncher;
+    }
+
+    private final KeyguardActivityLauncher mActivityLauncher = new KeyguardActivityLauncher() {
+        @Override
+        Context getContext() {
+            return mContext;
+        }
+
+        @Override
+        void setOnDismissAction(OnDismissAction action) {
+            KeyguardViewBase.this.setOnDismissAction(action);
+        }
+
+        @Override
+        LockPatternUtils getLockPatternUtils() {
+            return mLockPatternUtils;
+        }
+
+        @Override
+        void requestDismissKeyguard() {
+            KeyguardViewBase.this.dismiss(false);
+        }
+    };
+
+    public void showAssistant() {
+        final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+          .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
+
+        if (intent == null) return;
+
+        final ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
+                R.anim.keyguard_action_assist_enter, R.anim.keyguard_action_assist_exit,
+                getHandler(), null);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mActivityLauncher.launchActivityWithAnimation(intent, false, opts.toBundle(), null, null);
+    }
+
+    public void launchCamera() {
+        mActivityLauncher.launchCamera(getHandler(), null);
+    }
+
 }

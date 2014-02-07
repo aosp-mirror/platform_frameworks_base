@@ -17,15 +17,14 @@
 package com.android.keyguard;
 
 import android.nfc.NfcUnlock;
+
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.KeyguardUpdateMonitor.DisplayClientState;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetHost;
@@ -39,7 +38,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
-import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.media.RemoteControlClient;
 import android.os.Looper;
@@ -51,12 +49,9 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
-
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.RemoteViews.OnClickHandler;
 
 import java.io.File;
@@ -65,6 +60,8 @@ import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardHostView";
+    public static boolean DEBUG = KeyguardViewMediator.DEBUG;
+    public static boolean DEBUGXPORT = true; // debug music transport control
 
     // Transport control states.
     static final int TRANSPORT_GONE = 0;
@@ -73,13 +70,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private int mTransportState = TRANSPORT_GONE;
 
-    // Use this to debug all of keyguard
-    public static boolean DEBUG = KeyguardViewMediator.DEBUG;
-    public static boolean DEBUGXPORT = true; // debug music transport control
-
     // Found in KeyguardAppWidgetPickActivity.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
-
     private final int MAX_WIDGETS = 5;
 
     private AppWidgetHost mAppWidgetHost;
@@ -89,18 +81,13 @@ public class KeyguardHostView extends KeyguardViewBase {
     private int mAppWidgetToShow;
 
     protected int mFailedAttempts;
-    private LockPatternUtils mLockPatternUtils;
 
     private KeyguardViewStateManager mViewStateManager;
 
     private Rect mTempRect = new Rect();
-
     private int mDisabledFeatures;
-
     private boolean mCameraDisabled;
-
     private boolean mSafeModeEnabled;
-
     private boolean mUserSetupCompleted;
 
     // User for whom this host view was created.  Final because we should never change the
@@ -118,8 +105,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private MyOnClickHandler mOnClickHandler = new MyOnClickHandler(this);
 
     private Runnable mPostBootCompletedRunnable;
-
-    private OnDismissAction mDismissAction;
 
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
@@ -309,25 +294,16 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private SlidingChallengeLayout mSlidingChallengeLayout;
     private MultiPaneChallengeLayout mMultiPaneChallengeLayout;
-    private KeyguardSecurityContainer mSecurityContainer;
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         boolean result = super.onTouchEvent(ev);
         mTempRect.set(0, 0, 0, 0);
-        offsetRectIntoDescendantCoords(mSecurityContainer, mTempRect);
+        offsetRectIntoDescendantCoords(getSecurityContainer(), mTempRect);
         ev.offsetLocation(mTempRect.left, mTempRect.top);
-        result = mSecurityContainer.dispatchTouchEvent(ev) || result;
+        result = getSecurityContainer().dispatchTouchEvent(ev) || result;
         ev.offsetLocation(-mTempRect.left, -mTempRect.top);
         return result;
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-        if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.keyguardDoneDrawing();
-        }
     }
 
     private int getWidgetPosition(int id) {
@@ -347,6 +323,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
+
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
         View deleteDropTarget = findViewById(R.id.keyguard_widget_pager_delete_target);
@@ -372,49 +350,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mViewStateManager.setPagedView(mAppWidgetContainer);
         mViewStateManager.setChallengeLayout(challenge);
 
-        mSecurityContainer =
-                (KeyguardSecurityContainer) findViewById(R.id.keyguard_security_container);
-        mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
-        mSecurityContainer.setSecurityCallback(new SecurityCallback() {
-            @Override
-            public void userActivity(long timeout) {
-                if (mViewMediatorCallback != null) {
-                    mViewMediatorCallback.userActivity(timeout);
-                }
-            }
-
-            @Override
-            public void dismiss(boolean authenticated) {
-                KeyguardHostView.this.dismiss(authenticated);
-            }
-
-            @Override
-            public void finish() {
-
-                // If the alternate unlock was suppressed, it can now be safely
-                // enabled because the user has left keyguard.
-                KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
-
-                // If there's a pending runnable because the user interacted with a widget
-                // and we're leaving keyguard, then run it.
-                boolean deferKeyguardDone = false;
-                if (mDismissAction != null) {
-                    deferKeyguardDone = mDismissAction.onDismiss();
-                    mDismissAction = null;
-                }
-                if (mViewMediatorCallback != null) {
-                    if (deferKeyguardDone) {
-                        mViewMediatorCallback.keyguardDonePending();
-                    } else {
-                        mViewMediatorCallback.keyguardDone(true);
-                    }
-                }
-            }
-        });
-
-        mViewStateManager.setSecurityViewContainer(mSecurityContainer);
-
-        setBackButtonEnabled(false);
+        mViewStateManager.setSecurityViewContainer(getSecurityContainer());
 
         if (KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
             updateAndAddWidgets();
@@ -429,8 +365,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             };
         }
 
-        mSecurityContainer.showPrimarySecurityScreen(false);
-        mSecurityContainer.updateSecurityViews(mViewStateManager.isBouncing());
+        getSecurityContainer().updateSecurityViews(mViewStateManager.isBouncing());
         enableUserSelectorIfNecessary();
     }
 
@@ -459,15 +394,36 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    private void setBackButtonEnabled(boolean enabled) {
-        if (mContext instanceof Activity) return;  // always enabled in activity mode
-        setSystemUiVisibility(enabled ?
-                getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_BACK :
-                getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
-    }
-
     private boolean shouldEnableAddWidget() {
         return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
+    }
+
+    @Override
+    protected boolean dismiss(boolean authenticated) {
+        // TODO Auto-generated method stub
+        boolean finished = super.dismiss(authenticated);
+        if (!finished) {
+            mViewStateManager.showBouncer(true);
+
+            // Enter full screen mode if we're in SIM or Account screen
+            SecurityMode securityMode = getSecurityContainer().getSecurityMode();
+            boolean isFullScreen = getResources().getBoolean(R.bool.kg_sim_puk_account_full_screen);
+            boolean isSimOrAccount = securityMode == SecurityMode.SimPin
+                    || securityMode == SecurityMode.SimPuk
+                    || securityMode == SecurityMode.Account;
+            mAppWidgetContainer.setVisibility(
+                    isSimOrAccount && isFullScreen ? View.GONE : View.VISIBLE);
+
+            // Don't show camera or search in navbar when SIM or Account screen is showing
+            setSystemUiVisibility(isSimOrAccount ?
+                    (getSystemUiVisibility() | View.STATUS_BAR_DISABLE_SEARCH)
+                    : (getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_SEARCH));
+
+            if (mSlidingChallengeLayout != null) {
+                mSlidingChallengeLayout.setChallengeInteractive(!isFullScreen);
+            }
+        }
+        return finished;
     }
 
     private int getDisabledFeatures(DevicePolicyManager dpm) {
@@ -494,8 +450,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
-        mSecurityContainer.setLockPatternUtils(utils);
-        mSecurityContainer.updateSecurityViews(mViewStateManager.isBouncing());
+        getSecurityContainer().setLockPatternUtils(utils);
+        getSecurityContainer().updateSecurityViews(mViewStateManager.isBouncing());
     }
 
     @Override
@@ -582,8 +538,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         return -1;
     }
 
-
-
     private static class MyOnClickHandler extends OnClickHandler {
 
         // weak reference to the hostView to avoid keeping a live reference
@@ -641,73 +595,29 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void onScreenTurnedOn() {
-        if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
-        mSecurityContainer.showPrimarySecurityScreen(false);
-        mSecurityContainer.onResume(KeyguardSecurityView.SCREEN_ON);
-
-        // This is a an attempt to fix bug 7137389 where the device comes back on but the entire
-        // layout is blank but forcing a layout causes it to reappear (e.g. with with
-        // hierarchyviewer).
-        requestLayout();
-
+        super.onScreenTurnedOn();
         if (mViewStateManager != null) {
             mViewStateManager.showUsabilityHints();
         }
-
-        requestFocus();
     }
 
     @Override
     public void onScreenTurnedOff() {
-        if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
-                Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
-        // Once the screen turns off, we no longer consider this to be first boot and we want the
-        // biometric unlock to start next time keyguard is shown.
-        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
+        super.onScreenTurnedOff();
         // We use mAppWidgetToShow to show a particular widget after you add it-- once the screen
         // turns off we reset that behavior
         clearAppWidgetToShow();
         if (KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
             checkAppWidgetConsistency();
         }
-        mSecurityContainer.showPrimarySecurityScreen(true);
-        mSecurityContainer.onPause();
         CameraWidgetFrame cameraPage = findCameraPage();
         if (cameraPage != null) {
             cameraPage.onScreenTurnedOff();
         }
-
-        clearFocus();
     }
 
     public void clearAppWidgetToShow() {
         mAppWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
-    }
-
-    @Override
-    public void show() {
-        if (DEBUG) Log.d(TAG, "show()");
-        mSecurityContainer.showPrimarySecurityScreen(false);
-    }
-
-    @Override
-    public void verifyUnlock() {
-        SecurityMode securityMode = mSecurityContainer.getSecurityMode();
-        if (securityMode == KeyguardSecurityModel.SecurityMode.None) {
-            if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.keyguardDone(true);
-            }
-        } else if (securityMode != KeyguardSecurityModel.SecurityMode.Pattern
-                && securityMode != KeyguardSecurityModel.SecurityMode.PIN
-                && securityMode != KeyguardSecurityModel.SecurityMode.Password) {
-            // can only verify unlock when in pattern/password mode
-            if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.keyguardDone(false);
-            }
-        } else {
-            // otherwise, go to the unlock screen, see if they can verify it
-            mSecurityContainer.verifyUnlock();
-        }
     }
 
     private boolean addWidget(int appId, int pageIndex, boolean updateDbIfFailed) {
@@ -757,28 +667,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         };
 
-    private final KeyguardActivityLauncher mActivityLauncher = new KeyguardActivityLauncher() {
-        @Override
-        Context getContext() {
-            return mContext;
-        }
-
-        @Override
-        void setOnDismissAction(OnDismissAction action) {
-            mDismissAction = action;
-        }
-
-        @Override
-        LockPatternUtils getLockPatternUtils() {
-            return mLockPatternUtils;
-        }
-
-        @Override
-        void requestDismissKeyguard() {
-            KeyguardHostView.this.dismiss(false);
-        }
-    };
-
     private int numWidgets() {
         final int childCount = mAppWidgetContainer.getChildCount();
         int widgetCount = 0;
@@ -800,7 +688,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 @Override
                 public void onClick(View v) {
                     // Pass in an invalid widget id... the picker will allocate an ID for us
-                    mActivityLauncher.launchWidgetPicker(AppWidgetManager.INVALID_APPWIDGET_ID);
+                    getActivityLauncher().launchWidgetPicker(AppWidgetManager.INVALID_APPWIDGET_ID);
                 }
             });
         }
@@ -810,8 +698,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         // inflate system-provided camera?
         if (!mSafeModeEnabled && !cameraDisabledByDpm() && mUserSetupCompleted
                 && mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
-            View cameraWidget =
-                    CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks, mActivityLauncher);
+            View cameraWidget = CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks,
+                    getActivityLauncher());
             if (cameraWidget != null) {
                 mAppWidgetContainer.addWidget(cameraWidget);
             }
@@ -1198,18 +1086,18 @@ public class KeyguardHostView extends KeyguardViewBase {
                 UserSwitcherCallback callback = new UserSwitcherCallback() {
                     @Override
                     public void hideSecurityView(int duration) {
-                        mSecurityContainer.animate().alpha(0).setDuration(duration);
+                        getSecurityContainer().animate().alpha(0).setDuration(duration);
                     }
 
                     @Override
                     public void showSecurityView() {
-                        mSecurityContainer.setAlpha(1.0f);
+                        getSecurityContainer().setAlpha(1.0f);
                     }
 
                     @Override
                     public void showUnlockHint() {
-                        if (mSecurityContainer != null) {
-                            mSecurityContainer.showUsabilityHint();
+                        if (getSecurityContainer() != null) {
+                            getSecurityContainer().showUsabilityHint();
                         }
                     }
 
@@ -1244,124 +1132,19 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    /**
-     * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
-     * some cases where we wish to disable it, notably when the menu button placement or technology
-     * is prone to false positives.
-     *
-     * @return true if the menu key should be enabled
-     */
-    private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
-    private boolean shouldEnableMenuKey() {
-        final Resources res = getResources();
-        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
-        final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
-        final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
-        return !configDisabled || isTestHarness || fileOverride;
-    }
-
     public void goToWidget(int appWidgetId) {
         mAppWidgetToShow = appWidgetId;
         mSwitchPageRunnable.run();
     }
 
-    public boolean handleMenuKey() {
-        // The following enables the MENU key to work for testing automation
-        if (shouldEnableMenuKey()) {
-            dismiss();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean handleBackKey() {
-        if (mSecurityContainer.getCurrentSecuritySelection() == SecurityMode.Account) {
-            // go back to primary screen and re-disable back
-            setBackButtonEnabled(false);
-            mSecurityContainer.showPrimarySecurityScreen(false /*turningOff*/);
-            return true;
-        }
-        if (mSecurityContainer.getCurrentSecuritySelection() != SecurityMode.None) {
-            mSecurityContainer.dismiss(false);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     *  Dismisses the keyguard by going to the next screen or making it gone.
-     */
-    public void dismiss() {
-        dismiss(false);
-    }
-
-    private void dismiss(boolean authenticated) {
-        boolean finished = mSecurityContainer.showNextSecurityScreenOrFinish(authenticated);
-        if (!finished) {
-            updateAfterSecuritySelection();
-            mViewStateManager.showBouncer(true);
-        }
-    }
-
-    void setOnDismissAction(OnDismissAction action) {
-        mDismissAction = action;
-    }
-
-    public void announceCurrentSecurityMethod() {
-        mSecurityContainer.announceCurrentSecurityMethod();
-    }
-
-    private void updateAfterSecuritySelection() {
-        // Enable or disable the back button based on security mode
-        if (mSecurityContainer.getSecurityMode() == SecurityMode.Account
-                && !mLockPatternUtils.isPermanentlyLocked()) {
-            // we're showing account as a backup, provide a way to get back to primary
-            setBackButtonEnabled(true);
-        }
-
-        // Enter full screen mode if we're in SIM or Account screen
-        SecurityMode securityMode = mSecurityContainer.getSecurityMode();
-        boolean isFullScreen = getResources().getBoolean(R.bool.kg_sim_puk_account_full_screen);
-        boolean isSimOrAccount = securityMode == SecurityMode.SimPin
-                || securityMode == SecurityMode.SimPuk
-                || securityMode == SecurityMode.Account;
-        mAppWidgetContainer.setVisibility(
-                isSimOrAccount && isFullScreen ? View.GONE : View.VISIBLE);
-
-        // Don't show camera or search in navbar when SIM or Account screen is showing
-        setSystemUiVisibility(isSimOrAccount ?
-                (getSystemUiVisibility() | View.STATUS_BAR_DISABLE_SEARCH)
-                : (getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_SEARCH));
-
-        if (mSlidingChallengeLayout != null) {
-            mSlidingChallengeLayout.setChallengeInteractive(!isFullScreen);
-        }
-
-        if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.setNeedsInput(mSecurityContainer.needsInput());
-        }
-    }
-
-    public void showAssistant() {
-        final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-          .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
-
-        if (intent == null) return;
-
-        final ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                R.anim.keyguard_action_assist_enter, R.anim.keyguard_action_assist_exit,
-                getHandler(), null);
-
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mActivityLauncher.launchActivityWithAnimation(intent, false, opts.toBundle(), null, null);
+    @Override
+    protected void showBouncer(boolean show) {
+        super.showBouncer(show);
+        mViewStateManager.showBouncer(show);
     }
 
     public void dispatch(MotionEvent event) {
         mAppWidgetContainer.handleExternalCameraEvent(event);
-    }
-
-    public void launchCamera() {
-        mActivityLauncher.launchCamera(getHandler(), null);
     }
 
 }
