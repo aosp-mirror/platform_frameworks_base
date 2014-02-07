@@ -18,6 +18,7 @@ package android.app;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.SurfaceTexture;
@@ -42,6 +43,10 @@ public class ActivityView extends ViewGroup {
     private int mWidth;
     private int mHeight;
     private Surface mSurface;
+
+    // Only one IIntentSender or Intent may be queued at a time. Most recent one wins.
+    IIntentSender mQueuedPendingIntent;
+    Intent mQueuedIntent;
 
     public ActivityView(Context context) {
         this(context, null);
@@ -118,28 +123,38 @@ public class ActivityView extends ViewGroup {
             } catch (RemoteException e) {
                 throw new IllegalStateException("ActivityView: Unable to startActivity. " + e);
             }
+        } else {
+            mQueuedIntent = intent;
+            mQueuedPendingIntent = null;
+        }
+    }
+
+    private void startActivityIntentSender(IIntentSender iIntentSender) {
+        try {
+            mActivityContainer.startActivityIntentSender(iIntentSender);
+        } catch (RemoteException e) {
+            throw new IllegalStateException(
+                    "ActivityView: Unable to startActivity from IntentSender. " + e);
         }
     }
 
     public void startActivity(IntentSender intentSender) {
+        final IIntentSender iIntentSender = intentSender.getTarget();
         if (mSurface != null) {
-            try {
-                mActivityContainer.startActivityIntentSender(intentSender.getTarget());
-            } catch (RemoteException e) {
-                throw new IllegalStateException(
-                        "ActivityView: Unable to startActivity from IntentSender. " + e);
-            }
+            startActivityIntentSender(iIntentSender);
+        } else {
+            mQueuedPendingIntent = iIntentSender;
+            mQueuedIntent = null;
         }
     }
 
     public void startActivity(PendingIntent pendingIntent) {
+        final IIntentSender iIntentSender = pendingIntent.getTarget();
         if (mSurface != null) {
-            try {
-                mActivityContainer.startActivityIntentSender(pendingIntent.getTarget());
-            } catch (RemoteException e) {
-                throw new IllegalStateException(
-                        "ActivityView: Unable to startActivity from PendingIntent. " + e);
-            }
+            startActivityIntentSender(iIntentSender);
+        } else {
+            mQueuedPendingIntent = iIntentSender;
+            mQueuedIntent = null;
         }
     }
 
@@ -162,6 +177,14 @@ public class ActivityView extends ViewGroup {
             mSurface = null;
             throw new IllegalStateException(
                     "ActivityView: Unable to create ActivityContainer. " + e);
+        }
+
+        if (mQueuedIntent != null) {
+            startActivity(mQueuedIntent);
+            mQueuedIntent = null;
+        } else if (mQueuedPendingIntent != null) {
+            startActivityIntentSender(mQueuedPendingIntent);
+            mQueuedPendingIntent = null;
         }
     }
 
