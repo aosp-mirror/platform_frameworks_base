@@ -614,6 +614,17 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
 
     /**
+     * <p>A fixed black level offset for each of the color filter arrangement
+     * (CFA) mosaic channels.</p>
+     * <p>This tag specifies the zero light value for each of the CFA mosaic
+     * channels in the camera sensor.</p>
+     * <p>The values are given in row-column scan order, with the first value
+     * corresponding to the element of the CFA in row=0, column=0.</p>
+     */
+    public static final Key<int[]> SENSOR_BLACK_LEVEL_PATTERN =
+            new Key<int[]>("android.sensor.blackLevelPattern", int[].class);
+
+    /**
      * <p>Maximum sensitivity that is implemented
      * purely through analog gain.</p>
      * <p>For {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} values less than or
