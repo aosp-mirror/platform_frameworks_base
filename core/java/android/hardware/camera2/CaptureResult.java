@@ -1440,6 +1440,16 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Float>("android.sensor.temperature", float.class);
 
     /**
+     * <p>The estimated white balance at the time of capture.</p>
+     * <p>The estimated white balance encoded as the RGB values of the
+     * perfectly neutral color point in the linear native sensor color space.
+     * The order of the values is R, G, B; where R is in the lowest index.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    public static final Key<Rational[]> SENSOR_NEUTRAL_COLOR_POINT =
+            new Key<Rational[]>("android.sensor.neutralColorPoint", Rational[].class);
+
+    /**
      * <p>When enabled, the sensor sends a test pattern instead of
      * doing a real exposure from the camera.</p>
      * <p>When a test pattern is enabled, all manual sensor controls specified
