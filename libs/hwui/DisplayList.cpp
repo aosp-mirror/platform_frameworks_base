@@ -240,6 +240,7 @@ void DisplayList::init() {
     mClipToBounds = true;
     mIsolatedZVolume = true;
     mProjectBackwards = false;
+    mProjectionReceiver = false;
     mOutline.rewind();
     mAlpha = 1;
     mHasOverlappingRendering = true;
@@ -523,6 +524,7 @@ void DisplayList::computeOrderingImpl(
         const mat4* transformFromProjectionSurface) {
     m3dNodes.clear();
     mProjectedNodes.clear();
+    if (mDisplayListData == NULL || mSize == 0) return;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
@@ -552,32 +554,46 @@ void DisplayList::computeOrderingImpl(
         opState->mSkipInOrderDraw = false;
     }
 
-    if (mIsolatedZVolume) {
-        // create a new 3d space for descendents by collecting them
-        compositedChildrenOf3dRoot = &m3dNodes;
-        transformFrom3dRoot = &mat4::identity();
-    } else {
-        applyViewPropertyTransforms(localTransformFrom3dRoot);
-        transformFrom3dRoot = &localTransformFrom3dRoot;
-    }
+    if (mDisplayListData->children.size() > 0) {
+        if (mIsolatedZVolume) {
+            // create a new 3d space for descendents by collecting them
+            compositedChildrenOf3dRoot = &m3dNodes;
+            transformFrom3dRoot = &mat4::identity();
+        } else {
+            applyViewPropertyTransforms(localTransformFrom3dRoot);
+            transformFrom3dRoot = &localTransformFrom3dRoot;
+        }
 
-    if (mDisplayListData != NULL && mDisplayListData->projectionIndex >= 0) {
-        // create a new projection surface for descendents by collecting them
-        compositedChildrenOfProjectionSurface = &mProjectedNodes;
-        transformFromProjectionSurface = &mat4::identity();
-    } else {
-        applyViewPropertyTransforms(localTransformFromProjectionSurface);
-        transformFromProjectionSurface = &localTransformFromProjectionSurface;
-    }
-
-    if (mDisplayListData != NULL && mDisplayListData->children.size() > 0) {
+        const bool isProjectionReceiver = mDisplayListData->projectionReceiveIndex >= 0;
+        bool haveAppliedPropertiesToProjection = false;
         for (unsigned int i = 0; i < mDisplayListData->children.size(); i++) {
             DrawDisplayListOp* childOp = mDisplayListData->children[i];
-            childOp->mDisplayList->computeOrderingImpl(childOp,
+            DisplayList* child = childOp->mDisplayList;
+
+            Vector<DrawDisplayListOp*>* projectionChildren = NULL;
+            const mat4* projectionTransform = NULL;
+            if (isProjectionReceiver && !child->mProjectBackwards) {
+                // if receiving projections, collect projecting descendent
+
+                // Note that if a direct descendent is projecting backwards, we pass it's
+                // grandparent projection collection, since it shouldn't project onto it's
+                // parent, where it will already be drawing.
+                projectionChildren = &mProjectedNodes;
+                projectionTransform = &mat4::identity();
+            } else {
+                if (!haveAppliedPropertiesToProjection) {
+                    applyViewPropertyTransforms(localTransformFromProjectionSurface);
+                    haveAppliedPropertiesToProjection = true;
+                }
+                projectionChildren = compositedChildrenOfProjectionSurface;
+                projectionTransform = &localTransformFromProjectionSurface;
+            }
+            child->computeOrderingImpl(childOp,
                     compositedChildrenOf3dRoot, transformFrom3dRoot,
-                    compositedChildrenOfProjectionSurface, transformFromProjectionSurface);
+                    projectionChildren, projectionTransform);
         }
     }
+
 }
 
 class DeferOperationHandler {
@@ -637,11 +653,11 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
         return;
     }
 
+    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     LinearAllocator& alloc = handler.allocator();
     ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
             SkRegion::kIntersect_Op); // clip to 3d root bounds for now
     handler(clipOp, PROPERTY_SAVECOUNT, mClipToBounds);
-    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
     for (size_t i = 0; i < m3dNodes.size(); i++) {
         const float zValue = m3dNodes[i].key;
@@ -676,18 +692,22 @@ void DisplayList::iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& ren
 
 template <class T>
 void DisplayList::iterateProjectedChildren(OpenGLRenderer& renderer, T& handler, const int level) {
+    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     LinearAllocator& alloc = handler.allocator();
     ClipRectOp* clipOp = new (alloc) ClipRectOp(0, 0, mWidth, mHeight,
             SkRegion::kReplace_Op); // clip to projection surface root bounds
     handler(clipOp, PROPERTY_SAVECOUNT, mClipToBounds);
-    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
         DrawDisplayListOp* childOp = mProjectedNodes[i];
+
+        // matrix save, concat, and restore can be done safely without allocating operations
+        int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
         renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, mClipToBounds);
         childOp->mSkipInOrderDraw = true;
+        renderer.restoreToCount(restoreTo);
     }
     handler(new (alloc) RestoreToCountOp(rootRestoreTo), PROPERTY_SAVECOUNT, mClipToBounds);
 }
@@ -739,7 +759,7 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
 
         DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
         const int saveCountOffset = renderer.getSaveCount() - 1;
-        const int projectionIndex = mDisplayListData->projectionIndex;
+        const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
         for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
             DisplayListOp *op = mDisplayListData->displayListOps[i];
 
@@ -750,7 +770,7 @@ void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level)
             logBuffer.writeCommand(level, op->name());
             handler(op, saveCountOffset, mClipToBounds);
 
-            if (CC_UNLIKELY(i == projectionIndex && mProjectedNodes.size() > 0)) {
+            if (CC_UNLIKELY(i == projectionReceiveIndex && mProjectedNodes.size() > 0)) {
                 iterateProjectedChildren(renderer, handler, level);
             }
         }

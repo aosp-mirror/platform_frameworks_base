@@ -2335,7 +2335,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                               1   PFLAG3_IS_LAID_OUT
      *                              1    PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT
      *                             1     PFLAG3_CALLED_SUPER
-     *                            1      PFLAG3_PROJECT_BACKGROUND
      * |-------|-------|-------|-------|
      */
 
@@ -2370,12 +2369,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the superclass implementation as required by the API spec.
      */
     static final int PFLAG3_CALLED_SUPER = 0x10;
-
-    /**
-     * Flag indicating that the background of this view will be drawn into a
-     * display list and projected onto the closest parent projection surface.
-     */
-    static final int PFLAG3_PROJECT_BACKGROUND = 0x20;
 
     /**
      * Flag indicating that we're in the process of applying window insets.
@@ -15148,6 +15141,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Set up drawable properties that are view-independent.
         displayList.setLeftTopRightBottom(bounds.left, bounds.top, bounds.right, bounds.bottom);
         displayList.setProjectBackwards(drawable.isProjected());
+        displayList.setProjectionReceiver(true);
         displayList.setClipToBounds(false);
         return displayList;
     }
