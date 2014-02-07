@@ -112,6 +112,16 @@ public class LinkProperties implements Parcelable {
         return Collections.unmodifiableCollection(mLinkAddresses);
     }
 
+    /**
+     * Replaces the LinkAddresses on this link with the given collection of addresses
+     */
+    public void setLinkAddresses(Collection<LinkAddress> addresses) {
+        mLinkAddresses.clear();
+        for (LinkAddress address: addresses) {
+            addLinkAddress(address);
+        }
+    }
+
     public void addDns(InetAddress dns) {
         if (dns != null) mDnses.add(dns);
     }
@@ -125,6 +135,16 @@ public class LinkProperties implements Parcelable {
     }
     public Collection<RouteInfo> getRoutes() {
         return Collections.unmodifiableCollection(mRoutes);
+    }
+
+    /**
+     * Replaces the RouteInfos on this link with the given collection of RouteInfos.
+     */
+    public void setRoutes(Collection<RouteInfo> routes) {
+        mRoutes.clear();
+        for (RouteInfo route : routes) {
+            addRoute(route);
+        }
     }
 
     public void setHttpProxy(ProxyProperties proxy) {
