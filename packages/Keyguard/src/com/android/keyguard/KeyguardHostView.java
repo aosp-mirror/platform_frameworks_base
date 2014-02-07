@@ -400,8 +400,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     @Override
-    protected boolean dismiss(boolean authenticated) {
-        // TODO Auto-generated method stub
+    public boolean dismiss(boolean authenticated) {
         boolean finished = super.dismiss(authenticated);
         if (!finished) {
             mViewStateManager.showBouncer(true);

@@ -44,8 +44,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
-        public void dismiss(boolean authenticated);
+        public boolean dismiss(boolean authenticated);
         public void userActivity(long timeout);
+        public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
         public void finish();
     }
 
@@ -293,18 +294,12 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         showSecurityScreen(backup);
     }
 
-    private boolean showNextSecurityScreenIfPresent() {
-        SecurityMode securityMode = mSecurityModel.getSecurityMode();
-        // Allow an alternate, such as biometric unlock
-        securityMode = mSecurityModel.getAlternateFor(securityMode);
-        if (SecurityMode.None == securityMode) {
-            return false;
-        } else {
-            showSecurityScreen(securityMode); // switch to the alternate security view
-            return true;
-        }
-    }
-
+    /**
+     * Shows the next security screen if there is one.
+     * @param authenticated true if the user entered the correct authentication
+     * @param authenticated
+     * @return true if keyguard is done
+     */
     boolean showNextSecurityScreenOrFinish(boolean authenticated) {
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         boolean finish = false;
@@ -386,6 +381,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         mCurrentSecuritySelection = securityMode;
+        mSecurityCallback.onSecurityModeChanged(securityMode, newView.needsInput());
     }
 
     private KeyguardSecurityViewFlipper getFlipper() {
