@@ -442,7 +442,8 @@ public class DisplayList {
     }
 
     /**
-     * Sets the outline, defining the shape that casts a shadow.
+     * Sets the outline, defining the shape that casts a shadow, and the path to
+     * be clipped if setClipToOutline is set.
      *
      * Deep copies the native path to simplify reference ownership.
      *
@@ -452,6 +453,17 @@ public class DisplayList {
         if (hasNativeDisplayList()) {
             long nativePath = (outline == null) ? 0 : outline.mNativePath;
             nSetOutline(mFinalizer.mNativeDisplayList, nativePath);
+        }
+    }
+
+    /**
+     * Enables or disables clipping to the outline.
+     *
+     * @param clipToOutline true if clipping to the outline.
+     */
+    public void setClipToOutline(boolean clipToOutline) {
+        if (hasNativeDisplayList()) {
+            nSetClipToOutline(mFinalizer.mNativeDisplayList, clipToOutline);
         }
     }
 
@@ -1079,6 +1091,7 @@ public class DisplayList {
     private static native void nSetProjectionReceiver(long displayList, boolean shouldRecieve);
     private static native void nSetIsolatedZVolume(long displayList, boolean isolateZVolume);
     private static native void nSetOutline(long displayList, long nativePath);
+    private static native void nSetClipToOutline(long displayList, boolean clipToOutline);
     private static native void nSetAlpha(long displayList, float alpha);
     private static native void nSetHasOverlappingRendering(long displayList,
             boolean hasOverlappingRendering);

@@ -242,6 +242,7 @@ void DisplayList::init() {
     mProjectBackwards = false;
     mProjectionReceiver = false;
     mOutline.rewind();
+    mClipToOutline = false;
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;
@@ -463,6 +464,10 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
     if (clipToBoundsNeeded) {
         ClipRectOp* op = new (handler.allocator()) ClipRectOp(0, 0,
                 mRight - mLeft, mBottom - mTop, SkRegion::kIntersect_Op);
+        handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
+    }
+    if (CC_UNLIKELY(mClipToOutline && !mOutline.isEmpty())) {
+        ClipPathOp* op = new (handler.allocator()) ClipPathOp(&mOutline, SkRegion::kIntersect_Op);
         handler(op, PROPERTY_SAVECOUNT, mClipToBounds);
     }
 }
