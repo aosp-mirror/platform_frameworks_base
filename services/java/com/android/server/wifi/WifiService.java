@@ -35,6 +35,7 @@ import android.net.wifi.WifiWatchdogStateMachine;
 import android.net.DhcpInfo;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.os.Binder;
@@ -470,6 +471,17 @@ public final class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
+        // Until we have better UI so the user knows what's up we can't support undisplayable
+        // things (it's a security hole).  Even when we can support it we probably need
+        // to lock down who can modify what.  TODO - remove this when addOrUpdateNetwork
+        // restricts callers AND when the UI in settings lets users view the data AND
+        // when the VPN code is immune to specific routes.
+        if (config != null) {
+            LinkProperties lp = config.linkProperties;
+            if (lp == null || lp.equals(WifiConfiguration.stripUndisplayableConfig(lp)) == false) {
+                return -1;
+            }
+        }
         if (mWifiStateMachineChannel != null) {
             return mWifiStateMachine.syncAddOrUpdateNetwork(mWifiStateMachineChannel, config);
         } else {
