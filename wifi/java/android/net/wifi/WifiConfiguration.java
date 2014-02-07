@@ -16,11 +16,16 @@
 
 package android.net.wifi;
 
+import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * A class representing a configured Wi-Fi network, including the
@@ -592,6 +597,44 @@ public class WifiConfiguration implements Parcelable {
             proxySettings = source.proxySettings;
             linkProperties = new LinkProperties(source.linkProperties);
         }
+    }
+
+    /**
+     * We don't want to use routes other than the first default and
+     * correct direct-connect route, or addresses beyond the first as
+     * the user can't see them in the UI and malicious apps
+     * can do malicious things with them.  In particular specific routes
+     * circumvent VPNs of this era.
+     *
+     * @hide
+     */
+    public static LinkProperties stripUndisplayableConfig(LinkProperties lp) {
+        if (lp == null) return lp;
+
+        LinkProperties newLp = new LinkProperties(lp);
+        Iterator<LinkAddress> i = lp.getLinkAddresses().iterator();
+        RouteInfo directConnectRoute = null;
+        if (i.hasNext()) {
+            LinkAddress addr = i.next();
+            Collection<LinkAddress> newAddresses = new ArrayList<LinkAddress>(1);
+            newAddresses.add(addr);
+            newLp.setLinkAddresses(newAddresses);
+            directConnectRoute = new RouteInfo(addr,null);
+        }
+        boolean defaultAdded = false;
+        Collection<RouteInfo> routes = lp.getRoutes();
+        Collection<RouteInfo> newRoutes = new ArrayList<RouteInfo>(2);
+        for (RouteInfo route : routes) {
+            if (defaultAdded == false && route.isDefaultRoute()) {
+                newRoutes.add(route);
+                defaultAdded = true;
+            }
+            if (route.equals(directConnectRoute)) {
+                newRoutes.add(route);
+            }
+        }
+        newLp.setRoutes(newRoutes);
+        return newLp;
     }
 
     /** Implement the Parcelable interface {@hide} */
