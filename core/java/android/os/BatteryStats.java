@@ -551,9 +551,9 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<28;
         public static final int STATE_WIFI_SCAN_FLAG = 1<<29;
         public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<26;
+        public static final int STATE_WIFI_RUNNING_FLAG = 1<<24;
         // These are on the lower bits used for the command; if they change
         // we need to write another int of data.
-        public static final int STATE_WIFI_RUNNING_FLAG = 1<<24;
         public static final int STATE_PHONE_SCANNING_FLAG = 1<<23;
         public static final int STATE_AUDIO_ON_FLAG = 1<<22;
         public static final int STATE_VIDEO_ON_FLAG = 1<<21;
@@ -572,9 +572,26 @@ public abstract class BatteryStats implements Parcelable {
         // The wake lock that was acquired at this point.
         public HistoryTag wakelockTag;
 
-        public static final int EVENT_NONE = 0;
-        public static final int EVENT_PROC_STARTED = 1;
-        public static final int EVENT_PROC_FINISHED = 2;
+        public static final int EVENT_FLAG_START = 0x8000;
+        public static final int EVENT_FLAG_FINISH = 0x4000;
+
+        // No event in this item.
+        public static final int EVENT_NONE = 0x0000;
+        // Event is about a process that is running.
+        public static final int EVENT_PROC = 0x0001;
+        // Event is about an application package that is in the foreground.
+        public static final int EVENT_FOREGROUND = 0x0002;
+        // Event is about an application package that is at the top of the screen.
+        public static final int EVENT_TOP = 0x0003;
+        // Number of event types.
+        public static final int EVENT_COUNT = 0x0004;
+
+        public static final int EVENT_PROC_START = EVENT_PROC | EVENT_FLAG_START;
+        public static final int EVENT_PROC_FINISH = EVENT_PROC | EVENT_FLAG_FINISH;
+        public static final int EVENT_FOREGROUND_START = EVENT_FOREGROUND | EVENT_FLAG_START;
+        public static final int EVENT_FOREGROUND_FINISH = EVENT_FOREGROUND | EVENT_FLAG_FINISH;
+        public static final int EVENT_TOP_START = EVENT_TOP | EVENT_FLAG_START;
+        public static final int EVENT_TOP_FINISH = EVENT_TOP | EVENT_FLAG_FINISH;
 
         // For CMD_EVENT.
         public int eventCode;
@@ -940,6 +957,14 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE_BRIGHTNESS_MASK,
                 HistoryItem.STATE_BRIGHTNESS_SHIFT, "brightness", "Sb",
                 SCREEN_BRIGHTNESS_NAMES, SCREEN_BRIGHTNESS_SHORT_NAMES),
+    };
+
+    public static final String[] HISTORY_EVENT_NAMES = new String[] {
+            "null", "proc", "fg", "top"
+    };
+
+    public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
+            "Nl", "Pr", "Fg", "Tp"
     };
 
     /**
@@ -2497,6 +2522,9 @@ public abstract class BatteryStats implements Parcelable {
                         case BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
                             pw.print(checkin ? "f" : "failure");
                             break;
+                        case BatteryManager.BATTERY_HEALTH_COLD:
+                            pw.print(checkin ? "c" : "cold");
+                            break;
                         default:
                             pw.print(oldHealth);
                             break;
@@ -2536,25 +2564,23 @@ public abstract class BatteryStats implements Parcelable {
                 printBitDescriptions(pw, oldState, rec.states, rec.wakelockTag,
                         HISTORY_STATE_DESCRIPTIONS, !checkin);
                 if (rec.eventCode != HistoryItem.EVENT_NONE) {
-                    switch (rec.eventCode) {
-                        case HistoryItem.EVENT_PROC_STARTED:
-                            pw.print(checkin ? ",PrSt=" : " procstart=");
-                            break;
-                        case HistoryItem.EVENT_PROC_FINISHED:
-                            pw.print(checkin ? ",PrFn=" : " procfin=");
-                            break;
-                        default:
-                            if (checkin) {
-                                pw.print(",?cmd_");
-                                pw.print(rec.eventCode);
-                                pw.print("=");
-                            } else {
-                                pw.print(" cmd_");
-                                pw.print(rec.eventCode);
-                                pw.print("=");
-                            }
-                            break;
+                    pw.print(checkin ? "," : " ");
+                    if ((rec.eventCode&HistoryItem.EVENT_FLAG_START) != 0) {
+                        pw.print("+");
+                    } else if ((rec.eventCode&HistoryItem.EVENT_FLAG_FINISH) != 0) {
+                        pw.print("-");
                     }
+                    String[] eventNames = checkin ? HISTORY_EVENT_CHECKIN_NAMES
+                            : HISTORY_EVENT_NAMES;
+                    int idx = rec.eventCode & ~(HistoryItem.EVENT_FLAG_START
+                            | HistoryItem.EVENT_FLAG_FINISH);
+                    if (idx >= 0 && idx < eventNames.length) {
+                        pw.print(eventNames[idx]);
+                    } else {
+                        pw.print(checkin ? "Ev" : "event");
+                        pw.print(idx);
+                    }
+                    pw.print("=");
                     if (checkin) {
                         pw.print(rec.eventTag.poolIdx);
                     } else {

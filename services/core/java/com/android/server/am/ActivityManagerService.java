@@ -51,7 +51,6 @@ import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ServiceThread;
-import com.android.server.SystemServer;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -922,9 +921,23 @@ public final class ActivityManagerService extends ActivityManagerNative
     long mLowRamTimeSinceLastIdle = 0;
 
     /**
-     * If RAM is currently low, when that horrible situatin started.
+     * If RAM is currently low, when that horrible situation started.
      */
     long mLowRamStartTime = 0;
+
+    /**
+     * For reporting to battery stats the current top application.
+     */
+    private String mCurResumedPackage = null;
+    private int mCurResumedUid = -1;
+
+    /**
+     * For reporting to battery stats the apps currently running foreground
+     * service.  The ProcessMap is package/uid tuples; each of these contain
+     * an array of the currently foreground processes.
+     */
+    final ProcessMap<ArrayList<ProcessRecord>> mForegroundPackages
+            = new ProcessMap<ArrayList<ProcessRecord>>();
 
     /**
      * This is set if we had to do a delayed dexopt of an app before launching
@@ -2768,7 +2781,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.sendMessageDelayed(msg, startResult.usingWrapper
                         ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_STARTED,
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_START,
                     app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
@@ -4728,7 +4741,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISHED,
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISH,
                     app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
@@ -4773,7 +4786,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mHeavyWeightProcess.userId, 0));
                 mHeavyWeightProcess = null;
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISHED,
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISH,
                     app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
@@ -4862,7 +4875,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.curAdj = app.setAdj = -100;
         app.curSchedGroup = app.setSchedGroup = Process.THREAD_GROUP_DEFAULT;
         app.forcingToForeground = null;
-        app.foregroundServices = false;
+        updateProcessForegroundLocked(app, false, false);
         app.hasShownUi = false;
         app.debugging = false;
         app.cached = false;
@@ -5565,7 +5578,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 pr.forcingToForeground = null;
-                pr.foregroundServices = false;
+                updateProcessForegroundLocked(pr, false, false);
             }
             updateOomAdjLocked();
         }
@@ -12116,7 +12129,25 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (!brief) {
                 if (!isCompact) {
                     pw.print("Total RAM: "); pw.print(memInfo.getTotalSizeKb());
-                    pw.println(" kB");
+                    pw.print(" kB (status ");
+                    switch (mLastMemoryLevel) {
+                        case ProcessStats.ADJ_MEM_FACTOR_NORMAL:
+                            pw.println("normal)");
+                            break;
+                        case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
+                            pw.println("moderate)");
+                            break;
+                        case ProcessStats.ADJ_MEM_FACTOR_LOW:
+                            pw.println("low)");
+                            break;
+                        case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
+                            pw.println("critical)");
+                            break;
+                        default:
+                            pw.print(mLastMemoryLevel);
+                            pw.println(")");
+                            break;
+                    }
                     pw.print(" Free RAM: "); pw.print(cachedPss + memInfo.getCachedSizeKb()
                             + memInfo.getFreeSizeKb()); pw.print(" kB (");
                             pw.print(cachedPss); pw.print(" cached pss + ");
@@ -12331,7 +12362,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.unlinkDeathRecipient();
         app.makeInactive(mProcessStats);
         app.forcingToForeground = null;
-        app.foregroundServices = false;
+        updateProcessForegroundLocked(app, false, false);
         app.foregroundActivities = false;
         app.hasShownUi = false;
         app.hasAboveClient = false;
@@ -12465,7 +12496,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(app.pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISHED,
+            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISH,
                     app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
@@ -15286,8 +15317,66 @@ public final class ActivityManagerService extends ActivityManagerNative
                 reportingProcessState, now);
     }
 
+    final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
+            boolean oomAdj) {
+        if (isForeground != proc.foregroundServices) {
+            proc.foregroundServices = isForeground;
+            ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
+                    proc.info.uid);
+            if (isForeground) {
+                if (curProcs == null) {
+                    curProcs = new ArrayList<ProcessRecord>();
+                    mForegroundPackages.put(proc.info.packageName, proc.info.uid, curProcs);
+                }
+                if (!curProcs.contains(proc)) {
+                    curProcs.add(proc);
+                    mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_FOREGROUND_START,
+                            proc.info.packageName, proc.info.uid);
+                }
+            } else {
+                if (curProcs != null) {
+                    if (curProcs.remove(proc)) {
+                        mBatteryStatsService.noteEvent(
+                                BatteryStats.HistoryItem.EVENT_FOREGROUND_FINISH,
+                                proc.info.packageName, proc.info.uid);
+                        if (curProcs.size() <= 0) {
+                            mForegroundPackages.remove(proc.info.packageName, proc.info.uid);
+                        }
+                    }
+                }
+            }
+            if (oomAdj) {
+                updateOomAdjLocked();
+            }
+        }
+    }
+
     private final ActivityRecord resumedAppLocked() {
-        return mStackSupervisor.resumedAppLocked();
+        ActivityRecord act = mStackSupervisor.resumedAppLocked();
+        String pkg;
+        int uid;
+        if (act != null) {
+            pkg = act.packageName;
+            uid = act.info.applicationInfo.uid;
+        } else {
+            pkg = null;
+            uid = -1;
+        }
+        // Has the UID or resumed package name changed?
+        if (uid != mCurResumedUid || (pkg != mCurResumedPackage
+                && (pkg == null || !pkg.equals(mCurResumedPackage)))) {
+            if (mCurResumedPackage != null) {
+                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_FINISH,
+                        mCurResumedPackage, mCurResumedUid);
+            }
+            mCurResumedPackage = pkg;
+            mCurResumedUid = uid;
+            if (mCurResumedPackage != null) {
+                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_START,
+                        mCurResumedPackage, mCurResumedUid);
+            }
+        }
+        return act;
     }
 
     final boolean updateOomAdjLocked(ProcessRecord app) {

@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
@@ -595,12 +596,7 @@ public final class ActiveServices {
                 break;
             }
         }
-        if (anyForeground != proc.foregroundServices) {
-            proc.foregroundServices = anyForeground;
-            if (oomAdj) {
-                mAm.updateOomAdjLocked();
-            }
-        }
+        mAm.updateProcessForegroundLocked(proc, anyForeground, oomAdj);
     }
 
     private boolean updateServiceClientActivitiesLocked(ProcessRecord proc,
