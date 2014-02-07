@@ -45,6 +45,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 
@@ -77,7 +78,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class BatteryStatsImpl extends BatteryStats {
     private static final String TAG = "BatteryStatsImpl";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_HISTORY = false;
     private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
@@ -87,7 +88,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 77 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 79 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -177,6 +178,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     final ArrayList<Unpluggable> mUnpluggables = new ArrayList<Unpluggable>();
 
     boolean mShuttingDown;
+
+    HashMap<String, SparseBooleanArray>[] mActiveEvents
+            = (HashMap<String, SparseBooleanArray>[]) new HashMap[HistoryItem.EVENT_COUNT];
 
     long mHistoryBaseTime;
     boolean mHaveBatteryLevel = false;
@@ -1521,15 +1525,25 @@ public final class BatteryStatsImpl extends BatteryStats {
     static final int DELTA_TIME_INT = 0xffffe;    // The delta is a following int
     static final int DELTA_TIME_ABS = 0xffffd;    // Following is an entire abs update.
     // Flag in delta int: a new battery level int follows.
-    static final int DELTA_BATTERY_LEVEL_FLAG   = 0x00400000;
+    static final int DELTA_BATTERY_LEVEL_FLAG   = 0x00100000;
     // Flag in delta int: a new full state and battery status int follows.
-    static final int DELTA_STATE_FLAG           = 0x00800000;
+    static final int DELTA_STATE_FLAG           = 0x00200000;
     // Flag in delta int: contains a wakelock tag.
-    static final int DELTA_WAKELOCK_FLAG        = 0x01000000;
+    static final int DELTA_WAKELOCK_FLAG        = 0x00400000;
     // Flag in delta int: contains an event description.
-    static final int DELTA_EVENT_FLAG           = 0x02000000;
+    static final int DELTA_EVENT_FLAG           = 0x00800000;
     // These upper bits are the frequently changing state bits.
-    static final int DELTA_STATE_MASK           = 0xfc000000;
+    static final int DELTA_STATE_MASK           = 0xff000000;
+
+    // These are the pieces of battery state that are packed in to the upper bits of
+    // the state int that have been packed in to the first delta int.  They must fit
+    // in DELTA_STATE_MASK.
+    static final int STATE_BATTERY_STATUS_MASK  = 0x00000007;
+    static final int STATE_BATTERY_STATUS_SHIFT = 29;
+    static final int STATE_BATTERY_HEALTH_MASK  = 0x00000007;
+    static final int STATE_BATTERY_HEALTH_SHIFT = 26;
+    static final int STATE_BATTERY_PLUG_MASK    = 0x00000003;
+    static final int STATE_BATTERY_PLUG_SHIFT   = 24;
 
     public void writeHistoryDelta(Parcel dest, HistoryItem cur, HistoryItem last) {
         if (last == null || cur.cmd != HistoryItem.CMD_UPDATE) {
@@ -1620,9 +1634,17 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     private int buildStateInt(HistoryItem h) {
-        return ((((int)h.batteryStatus)<<28)&0xf0000000)
-                | ((((int)h.batteryHealth)<<24)&0x0f000000)
-                | ((((int)h.batteryPlugType)<<22)&0x00c00000)
+        int plugType = 0;
+        if ((h.batteryPlugType&BatteryManager.BATTERY_PLUGGED_AC) != 0) {
+            plugType = 1;
+        } else if ((h.batteryPlugType&BatteryManager.BATTERY_PLUGGED_USB) != 0) {
+            plugType = 2;
+        } else if ((h.batteryPlugType&BatteryManager.BATTERY_PLUGGED_WIRELESS) != 0) {
+            plugType = 3;
+        }
+        return ((h.batteryStatus&STATE_BATTERY_STATUS_MASK)<<STATE_BATTERY_STATUS_SHIFT)
+                | ((h.batteryHealth&STATE_BATTERY_HEALTH_MASK)<<STATE_BATTERY_HEALTH_SHIFT)
+                | ((plugType&STATE_BATTERY_PLUG_MASK)<<STATE_BATTERY_PLUG_SHIFT)
                 | (h.states&(~DELTA_STATE_MASK));
     }
 
@@ -1670,9 +1692,23 @@ public final class BatteryStatsImpl extends BatteryStats {
         if ((firstToken&DELTA_STATE_FLAG) != 0) {
             int stateInt = src.readInt();
             cur.states = (firstToken&DELTA_STATE_MASK) | (stateInt&(~DELTA_STATE_MASK));
-            cur.batteryStatus = (byte)((stateInt>>28)&0xf);
-            cur.batteryHealth = (byte)((stateInt>>24)&0xf);
-            cur.batteryPlugType = (byte)((stateInt>>22)&0x3);
+            cur.batteryStatus = (byte)((stateInt>>STATE_BATTERY_STATUS_SHIFT)
+                    & STATE_BATTERY_STATUS_MASK);
+            cur.batteryHealth = (byte)((stateInt>>STATE_BATTERY_HEALTH_SHIFT)
+                    & STATE_BATTERY_HEALTH_MASK);
+            cur.batteryPlugType = (byte)((stateInt>>STATE_BATTERY_PLUG_SHIFT)
+                    & STATE_BATTERY_PLUG_MASK);
+            switch (cur.batteryPlugType) {
+                case 1:
+                    cur.batteryPlugType = BatteryManager.BATTERY_PLUGGED_AC;
+                    break;
+                case 2:
+                    cur.batteryPlugType = BatteryManager.BATTERY_PLUGGED_USB;
+                    break;
+                case 3:
+                    cur.batteryPlugType = BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                    break;
+            }
             cur.numReadInts += 1;
             if (DEBUG) Slog.i(TAG, "READ DELTA: stateToken=0x"
                     + Integer.toHexString(stateInt)
@@ -1968,6 +2004,45 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void noteEventLocked(int code, String name, int uid) {
         uid = mapUid(uid);
+        if ((code&HistoryItem.EVENT_FLAG_START) != 0) {
+            int idx = code&~HistoryItem.EVENT_FLAG_START;
+            HashMap<String, SparseBooleanArray> active = mActiveEvents[idx];
+            if (active == null) {
+                active = new HashMap<String, SparseBooleanArray>();
+                mActiveEvents[idx] = active;
+            }
+            SparseBooleanArray uids = active.get(name);
+            if (uids == null) {
+                uids = new SparseBooleanArray();
+                active.put(name, uids);
+            }
+            if (uids.get(uid)) {
+                // Already set, nothing to do!
+                return;
+            }
+            uids.put(uid, true);
+        } else if ((code&HistoryItem.EVENT_FLAG_FINISH) != 0) {
+            int idx = code&~HistoryItem.EVENT_FLAG_FINISH;
+            HashMap<String, SparseBooleanArray> active = mActiveEvents[idx];
+            if (active == null) {
+                // not currently active, nothing to do.
+                return;
+            }
+            SparseBooleanArray uids = active.get(name);
+            if (uids == null) {
+                // not currently active, nothing to do.
+                return;
+            }
+            idx = uids.indexOfKey(uid);
+            if (idx < 0 || !uids.valueAt(idx)) {
+                // not currently active, nothing to do.
+                return;
+            }
+            uids.removeAt(idx);
+            if (uids.size() <= 0) {
+                active.remove(name);
+            }
+        }
         addHistoryEventLocked(SystemClock.elapsedRealtime(), code, name, uid);
     }
 
@@ -5125,6 +5200,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeAmountScreenOn = 0;
             mDischargeAmountScreenOff = 0;
         }
+        initActiveHistoryEventsLocked(mSecRealtime);
     }
 
     private void resetAllStatsLocked() {
@@ -5170,6 +5246,23 @@ public final class BatteryStatsImpl extends BatteryStats {
         initDischarge();
 
         clearHistoryLocked();
+    }
+
+    private void initActiveHistoryEventsLocked(long nowRealtime) {
+        for (int i=0; i<HistoryItem.EVENT_COUNT; i++) {
+            HashMap<String, SparseBooleanArray> active = mActiveEvents[i];
+            if (active == null) {
+                continue;
+            }
+            for (HashMap.Entry<String, SparseBooleanArray> ent : active.entrySet()) {
+                SparseBooleanArray uids = ent.getValue();
+                for (int j=0; j<uids.size(); j++) {
+                    if (uids.valueAt(j)) {
+                        addHistoryEventLocked(nowRealtime, i, ent.getKey(), uids.keyAt(j));
+                    }
+                }
+            }
+        }
     }
 
     void updateDischargeScreenLevelsLocked(boolean oldScreenOn, boolean newScreenOn) {
@@ -5221,12 +5314,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             // battery was last full, or the level is at 100, or
             // we have gone through a significant charge (from a very low
             // level to a now very high level).
+            boolean reset = false;
             if (oldStatus == BatteryManager.BATTERY_STATUS_FULL
                     || level >= 90
                     || (mDischargeCurrentLevel < 20 && level >= 80)) {
                 doWrite = true;
                 resetAllStatsLocked();
                 mDischargeStartLevel = level;
+                reset = true;
             }
             pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
@@ -5249,6 +5344,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeAmountScreenOn = 0;
             mDischargeAmountScreenOff = 0;
             doUnplugLocked(realtime, mUnpluggedBatteryUptime, mUnpluggedBatteryRealtime);
+            if (reset) {
+                initActiveHistoryEventsLocked(mSecRealtime);
+            }
         } else {
             pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
