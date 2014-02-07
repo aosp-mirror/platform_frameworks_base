@@ -42,7 +42,9 @@
         <attr name="decayTime" format="integer" />
         <attr name="orientation" />
     </declare-styleable>
-
+    <declare-styleable name="BatteryMeterView">
+        <attr name="frameColor" format="color" />
+    </declare-styleable>
     <attr name="orientation">
         <enum name="horizontal" value="0" />
         <enum name="vertical" value="1" />

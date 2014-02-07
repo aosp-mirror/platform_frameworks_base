@@ -178,6 +178,10 @@ public class BatteryMeterView extends View implements DemoMode {
         super(context, attrs, defStyle);
 
         final Resources res = context.getResources();
+        TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
+                defStyle, 0);
+        final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
+                res.getColor(R.color.batterymeter_frame_color));
         TypedArray levels = res.obtainTypedArray(R.array.batterymeter_color_levels);
         TypedArray colors = res.obtainTypedArray(R.array.batterymeter_color_values);
 
@@ -189,12 +193,13 @@ public class BatteryMeterView extends View implements DemoMode {
         }
         levels.recycle();
         colors.recycle();
+        atts.recycle();
         mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
                 context.getContentResolver(), "status_bar_show_battery_percent", 0);
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
 
         mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mFramePaint.setColor(res.getColor(R.color.batterymeter_frame_color));
+        mFramePaint.setColor(frameColor);
         mFramePaint.setDither(true);
         mFramePaint.setStrokeWidth(0);
         mFramePaint.setStyle(Paint.Style.FILL_AND_STROKE);
