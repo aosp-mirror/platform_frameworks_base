@@ -210,7 +210,7 @@ static jint android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject cl
 }
 
 static void android_view_GLES20Canvas_detachFunctor(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jint functorPtr) {
+        jobject clazz, jlong rendererPtr, jlong functorPtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
     renderer->detachFunctor(functor);
