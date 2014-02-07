@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.media.IAudioService;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -35,6 +36,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -100,6 +102,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
     protected void onFinishInflate() {
         mSecurityContainer =
                 (KeyguardSecurityContainer) findViewById(R.id.keyguard_security_container);
+        mLockPatternUtils = new LockPatternUtils(mContext);
         mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
         mSecurityContainer.setSecurityCallback(new SecurityCallback() {
             @Override
@@ -494,5 +497,16 @@ public abstract class KeyguardViewBase extends FrameLayout {
     public void launchCamera() {
         mActivityLauncher.launchCamera(getHandler(), null);
     }
+
+    protected void setLockPatternUtils(LockPatternUtils utils) {
+        mLockPatternUtils = utils;
+        mSecurityContainer.setLockPatternUtils(utils);
+    }
+
+    protected abstract void onUserSwitching(boolean switching);
+
+    protected abstract void onCreateOptions(Bundle options);
+
+    protected abstract void onExternalMotionEvent(MotionEvent event);
 
 }

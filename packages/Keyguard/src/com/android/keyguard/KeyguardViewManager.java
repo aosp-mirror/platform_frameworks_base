@@ -18,8 +18,11 @@ package com.android.keyguard;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
+
+import org.xmlpull.v1.XmlPullParser;
 
 import android.app.ActivityManager;
 import android.appwidget.AppWidgetManager;
@@ -66,6 +69,7 @@ public class KeyguardViewManager {
 
     // Timeout used for keypresses
     static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
+    private static final int HOST_LAYOUT = R.layout.keyguard_simple_host_view;
 
     private final Context mContext;
     private final ViewManager mViewManager;
@@ -75,7 +79,7 @@ public class KeyguardViewManager {
     private boolean mNeedsInput = false;
 
     private ViewManagerHost mKeyguardHost;
-    private KeyguardHostView mKeyguardView;
+    private KeyguardViewBase mKeyguardView;
 
     private boolean mScreenOn = false;
     private LockPatternUtils mLockPatternUtils;
@@ -321,12 +325,11 @@ public class KeyguardViewManager {
             mKeyguardHost.removeView(v);
         }
         final LayoutInflater inflater = LayoutInflater.from(mContext);
-        View view = inflater.inflate(R.layout.keyguard_host_view, mKeyguardHost, true);
-        mKeyguardView = (KeyguardHostView) view.findViewById(R.id.keyguard_host_view);
+        View view = inflater.inflate(HOST_LAYOUT, mKeyguardHost, true);
+        mKeyguardView = (KeyguardViewBase) view.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
-        mKeyguardView.initializeSwitchingUserState(options != null &&
-                options.getBoolean(IS_SWITCHING_USER));
+        mKeyguardView.onUserSwitching(options != null && options.getBoolean(IS_SWITCHING_USER));
 
         // HACK
         // The keyguard view will have set up window flags in onFinishInflate before we set
@@ -340,13 +343,7 @@ public class KeyguardViewManager {
             }
         }
 
-        if (options != null) {
-            int widgetToShow = options.getInt(LockPatternUtils.KEYGUARD_SHOW_APPWIDGET,
-                    AppWidgetManager.INVALID_APPWIDGET_ID);
-            if (widgetToShow != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                mKeyguardView.goToWidget(widgetToShow);
-            }
-        }
+        mKeyguardView.onCreateOptions(options);
     }
 
     public void updateUserActivityTimeout() {
@@ -541,7 +538,7 @@ public class KeyguardViewManager {
 
     public void dispatch(MotionEvent event) {
         if (mKeyguardView != null) {
-            mKeyguardView.dispatch(event);
+            mKeyguardView.onExternalMotionEvent(event);
         }
     }
 
