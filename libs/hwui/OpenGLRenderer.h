@@ -154,21 +154,11 @@ public:
     ANDROID_API void clearLayerUpdates();
     ANDROID_API void flushLayerUpdates();
 
-    ANDROID_API int saveLayer(float left, float top, float right, float bottom,
-            SkPaint* paint, int flags) {
-        SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode;
-        if (paint) mode = getXfermode(paint->getXfermode());
-        return saveLayer(left, top, right, bottom, paint ? paint->getAlpha() : 255, mode, flags);
-    }
-    ANDROID_API int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, int flags) {
-        return saveLayer(left, top, right, bottom, alpha, SkXfermode::kSrcOver_Mode, flags);
-    }
-    virtual int saveLayer(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags);
+    ANDROID_API virtual int saveLayer(float left, float top, float right, float bottom,
+            const SkPaint* paint, int flags);
 
     int saveLayerDeferred(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags);
+            const SkPaint* paint, int flags);
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t replayFlags = 1);
     virtual status_t drawLayer(Layer* layer, float x, float y);
@@ -538,7 +528,7 @@ private:
      * @return True if the layer was successfully created, false otherwise
      */
     bool createLayer(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags);
+            const SkPaint* paint, int flags);
 
     /**
      * Creates a new layer stored in the specified snapshot as an FBO.
