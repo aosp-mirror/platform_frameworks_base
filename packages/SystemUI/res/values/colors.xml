@@ -35,6 +35,7 @@
     <color name="batterymeter_frame_color">#66FFFFFF</color><!-- 40% white -->
     <color name="batterymeter_charge_color">#FFFFFFFF</color>
     <color name="batterymeter_bolt_color">#FFFFFFFF</color>
+    <color name="qs_batterymeter_frame_color">#FF404040</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <drawable name="notification_item_background_color">#ff111111</drawable>
     <drawable name="notification_item_background_color_pressed">#ff454545</drawable>
