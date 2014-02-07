@@ -103,6 +103,20 @@ public class RenderScript {
 
     static File mCacheDir;
 
+    // this should be a monotonically increasing ID
+    // used in conjunction with the API version of a device
+    static final long sMinorID = 1;
+
+    /**
+     * Returns an identifier that can be used to identify a particular
+     * minor version of RS.
+     *
+     * @hide
+     */
+    public static long getMinorID() {
+        return sMinorID;
+    }
+
      /**
      * Sets the directory to use as a persistent storage for the
      * renderscript object file cache.
