@@ -94,6 +94,11 @@ public final class KeyChain {
     private static final String ACTION_CHOOSER = "com.android.keychain.CHOOSER";
 
     /**
+     * Package name for the Certificate Installer.
+     */
+    private static final String CERT_INSTALLER_PACKAGE = "com.android.certinstaller";
+
+    /**
      * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
@@ -201,7 +206,7 @@ public final class KeyChain {
      */
     public static Intent createInstallIntent() {
         Intent intent = new Intent(ACTION_INSTALL);
-        intent.setClassName("com.android.certinstaller",
+        intent.setClassName(CERT_INSTALLER_PACKAGE,
                             "com.android.certinstaller.CertInstallerMain");
         return intent;
     }
@@ -267,6 +272,7 @@ public final class KeyChain {
             throw new NullPointerException("response == null");
         }
         Intent intent = new Intent(ACTION_CHOOSER);
+        intent.setPackage(CERT_INSTALLER_PACKAGE);
         intent.putExtra(EXTRA_RESPONSE, new AliasResponse(response));
         intent.putExtra(EXTRA_HOST, host);
         intent.putExtra(EXTRA_PORT, port);
