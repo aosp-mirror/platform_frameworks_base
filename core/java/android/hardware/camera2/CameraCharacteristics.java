@@ -675,6 +675,20 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Integer>("android.sensor.orientation", int.class);
 
     /**
+     * <p>The number of input samples for each dimension of
+     * {@link CaptureResult#SENSOR_PROFILE_HUE_SAT_MAP android.sensor.profileHueSatMap}.</p>
+     * <p>The number of input samples for the hue, saturation, and value
+     * dimension of {@link CaptureResult#SENSOR_PROFILE_HUE_SAT_MAP android.sensor.profileHueSatMap}. The order of the
+     * dimensions given is hue, saturation, value; where hue is the 0th
+     * element.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#SENSOR_PROFILE_HUE_SAT_MAP
+     */
+    public static final Key<int[]> SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS =
+            new Key<int[]>("android.sensor.profileHueSatMapDimensions", int[].class);
+
+    /**
      * <p>Optional. Defaults to [OFF]. Lists the supported test
      * pattern modes for android.test.patternMode.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
