@@ -91,6 +91,8 @@ interface IConnectivityManager
 
     String[] getTetherableIfaces();
 
+    String[] getTetheredDhcpRanges();
+
     String[] getTetheredIfaces();
 
     String[] getTetheringErroredIfaces();

@@ -929,6 +929,23 @@ public class ConnectivityManager {
     }
 
     /**
+     * Get the set of tethered dhcp ranges.
+     *
+     * @return an array of 0 or more Strings of tethered dhcp ranges.
+     *
+     * <p>This method requires the call to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     * {@hide}
+     */
+    public String[] getTetheredDhcpRanges() {
+        try {
+            return mService.getTetheredDhcpRanges();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
+    /**
      * Get the set of tethered interfaces.
      *
      * @return an array of 0 or more String of currently tethered interface names.
