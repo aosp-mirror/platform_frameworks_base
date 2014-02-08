@@ -1446,6 +1446,43 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Float>("android.sensor.temperature", float.class);
 
     /**
+     * <p>A per-device calibration transform matrix to be applied after the
+     * color space transform when rendering the raw image buffer.</p>
+     * <p>This matrix is expressed as a 3x3 matrix in row-major-order, and
+     * contains a per-device calibration transform that maps colors
+     * from reference camera color space (i.e. the "golden module"
+     * colorspace) into this camera device's linear native sensor color
+     * space for the current scene illumination and white balance choice.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    public static final Key<Rational[]> SENSOR_CALIBRATION_TRANSFORM =
+            new Key<Rational[]>("android.sensor.calibrationTransform", Rational[].class);
+
+    /**
+     * <p>A matrix that transforms color values from CIE XYZ color space to
+     * reference camera color space when rendering the raw image buffer.</p>
+     * <p>This matrix is expressed as a 3x3 matrix in row-major-order, and
+     * contains a color transform matrix that maps colors from the CIE
+     * XYZ color space to the reference camera raw color space (i.e. the
+     * "golden module" colorspace) for the current scene illumination and
+     * white balance choice.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    public static final Key<Rational[]> SENSOR_COLOR_TRANSFORM =
+            new Key<Rational[]>("android.sensor.colorTransform", Rational[].class);
+
+    /**
+     * <p>A matrix that transforms white balanced camera colors to the CIE XYZ
+     * colorspace with a D50 whitepoint.</p>
+     * <p>This matrix is expressed as a 3x3 matrix in row-major-order, and contains
+     * a color transform matrix that maps a unit vector in the linear native
+     * sensor color space to the D50 whitepoint in CIE XYZ color space.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    public static final Key<Rational[]> SENSOR_FORWARD_MATRIX =
+            new Key<Rational[]>("android.sensor.forwardMatrix", Rational[].class);
+
+    /**
      * <p>The estimated white balance at the time of capture.</p>
      * <p>The estimated white balance encoded as the RGB values of the
      * perfectly neutral color point in the linear native sensor color space.
