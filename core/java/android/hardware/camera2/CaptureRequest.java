@@ -639,10 +639,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
     /**
      * <p>Whether AWB is currently locked to its
-     * latest calculated values</p>
+     * latest calculated values.</p>
      * <p>Note that AWB lock is only meaningful for AUTO
      * mode; in other modes, AWB is already fixed to a specific
-     * setting</p>
+     * setting.</p>
      */
     public static final Key<Boolean> CONTROL_AWB_LOCK =
             new Key<Boolean>("android.control.awbLock", boolean.class);
@@ -763,11 +763,17 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
      * as it wishes. The camera device scene mode 3A settings are provided by
      * android.control.sceneModeOverrides.</p>
+     * <p>When set to OFF_KEEP_STATE, it is similar to OFF mode, the only difference
+     * is that this frame will not be used by camera device background 3A statistics
+     * update, as if this frame is never captured. This mode can be used in the scenario
+     * where the application doesn't want a 3A manual control capture to affect
+     * the subsequent auto 3A capture results.</p>
      *
      * @see CaptureRequest#CONTROL_AF_MODE
      * @see #CONTROL_MODE_OFF
      * @see #CONTROL_MODE_AUTO
      * @see #CONTROL_MODE_USE_SCENE_MODE
+     * @see #CONTROL_MODE_OFF_KEEP_STATE
      */
     public static final Key<Integer> CONTROL_MODE =
             new Key<Integer>("android.control.mode", int.class);
