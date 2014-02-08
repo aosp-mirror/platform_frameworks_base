@@ -64,14 +64,10 @@ project number. For example, <strong>Project Number: 670330094152</strong>.</p><
 
  <li>Under <strong>Public API access</strong>, click <strong>Create new key</strong>.</li>
 
-<li>In the <strong>Create a new key</strong> dialog, click <strong>Android key</strong>.</li>
+<li>In the <strong>Create a new key</strong> dialog, click <strong>Server key</strong>.</li>
 
-<li>In the resulting configuration dialog, supply one SHA1 fingerprint and
-the package name for your app, separated by a semicolon. For example,
-{@code 45:B5:E4:6F:36:AD:0A:98:94:B4:02:66:2B:12:17:F2:56:26:A0:E0;com.myexample}.
-<p>To get the value for the SHA1 fingerprint, follow the instructions in the
-<a href="http://developers.google.com/console/help/new/#installedapplications">console
-help</a>.</p></li>
+<li>In the resulting configuration dialog, supply your server's IP address. For testing
+purposes, you can use {@code 0.0.0.0/0}.</p></li>
 <li>Click <strong>Create</strong>.</li>
 
 <li>In the refreshed page, copy the
@@ -102,4 +98,3 @@ Implementing GCM Server</a>.</li>
 <li>Write your client app. This is the GCM-enabled Android application that runs
 on a device. See <a href="client.html">Implementing GCM Client</a> for more information.</li>
 </ol>
-
