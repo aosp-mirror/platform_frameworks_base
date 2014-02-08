@@ -259,6 +259,156 @@ public abstract class CameraMetadata {
     public static final int LENS_FACING_BACK = 1;
 
     //
+    // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+    //
+
+    /**
+     * <p>The minimal set of capabilities that every camera
+     * device (regardless of {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel})
+     * will support.</p>
+     * <p>The full set of features supported by this capability makes
+     * the camera2 api backwards compatible with the camera1
+     * (android.hardware.Camera) API.</p>
+     * <p>TODO: @hide this. Doesn't really mean anything except
+     * act as a catch-all for all the 'base' functionality.</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0;
+
+    /**
+     * <p>This is a catch-all capability to include all other
+     * tags or functionality not encapsulated by one of the other
+     * capabilities.</p>
+     * <p>A typical example is all tags marked 'optional'.</p>
+     * <p>TODO: @hide. We may not need this if we @hide all the optional
+     * tags not belonging to a capability.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL = 1;
+
+    /**
+     * <p>The camera device can be manually controlled (3A algorithms such
+     * as auto exposure, and auto focus can be
+     * bypassed), this includes but is not limited to:</p>
+     * <ul>
+     * <li>Manual exposure control<ul>
+     * <li>{@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
+     * </ul>
+     * </li>
+     * <li>Manual sensitivity control<ul>
+     * <li>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_BASE_GAIN_FACTOR android.sensor.baseGainFactor}</li>
+     * </ul>
+     * </li>
+     * <li>Manual lens control<ul>
+     * <li>android.lens.*</li>
+     * </ul>
+     * </li>
+     * <li>Manual flash control<ul>
+     * <li>android.flash.*</li>
+     * </ul>
+     * </li>
+     * <li>Manual black level locking<ul>
+     * <li>{@link CaptureRequest#BLACK_LEVEL_LOCK android.blackLevel.lock}</li>
+     * </ul>
+     * </li>
+     * </ul>
+     * <p>If any of the above 3A algorithms are enabled, then the camera
+     * device will accurately report the values applied by 3A in the
+     * result.</p>
+     *
+     * @see CaptureRequest#BLACK_LEVEL_LOCK
+     * @see CameraCharacteristics#SENSOR_BASE_GAIN_FACTOR
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2;
+
+    /**
+     * <p>TODO: This should be @hide</p>
+     * <ul>
+     * <li>Manual tonemap control<ul>
+     * <li>{@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}</li>
+     * <li>{@link CaptureRequest#TONEMAP_CURVE_GREEN android.tonemap.curveGreen}</li>
+     * <li>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}</li>
+     * <li>{@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}</li>
+     * <li>{@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</li>
+     * </ul>
+     * </li>
+     * <li>Manual white balance control<ul>
+     * <li>{@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}</li>
+     * <li>{@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}</li>
+     * </ul>
+     * </li>
+     * <li>Lens shading map information<ul>
+     * <li>{@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap}</li>
+     * <li>{@link CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE android.lens.info.shadingMapSize}</li>
+     * </ul>
+     * </li>
+     * </ul>
+     * <p>If auto white balance is enabled, then the camera device
+     * will accurately report the values applied by AWB in the result.</p>
+     * <p>The camera device will also support everything in MANUAL_SENSOR
+     * except manual lens control and manual flash control.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CameraCharacteristics#LENS_INFO_SHADING_MAP_SIZE
+     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
+     * @see CaptureRequest#TONEMAP_CURVE_BLUE
+     * @see CaptureRequest#TONEMAP_CURVE_GREEN
+     * @see CaptureRequest#TONEMAP_CURVE_RED
+     * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
+     * @see CaptureRequest#TONEMAP_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_GCAM = 3;
+
+    /**
+     * <p>The camera device supports the Zero Shutter Lag use case.</p>
+     * <ul>
+     * <li>At least one input stream can be used.</li>
+     * <li>RAW_OPAQUE is supported as an output/input format</li>
+     * <li>Using RAW_OPAQUE does not cause a frame rate drop
+     * relative to the sensor's maximum capture rate (at that
+     * resolution).</li>
+     * <li>RAW_OPAQUE will be reprocessable into both YUV_420_888
+     * and JPEG formats.</li>
+     * <li>The maximum available resolution for RAW_OPAQUE streams
+     * (both input/output) will match the maximum available
+     * resolution of JPEG streams.</li>
+     * </ul>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
+
+    /**
+     * <p>The camera device supports outputting RAW buffers that can be
+     * saved offline into a DNG format. It can reprocess DNG
+     * files (produced from the same camera device) back into YUV.</p>
+     * <ul>
+     * <li>At least one input stream can be used.</li>
+     * <li>RAW16 is supported as output/input format.</li>
+     * <li>RAW16 is reprocessable into both YUV_420_888 and JPEG
+     * formats.</li>
+     * <li>The maximum available resolution for RAW16 streams (both
+     * input/output) will match the value in
+     * android.sensor.info.pixelArraySize.</li>
+     * <li>All DNG-related optional metadata entries are provided
+     * by the camera device.</li>
+     * </ul>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5;
+
+    //
     // Enumeration values for CameraCharacteristics#LED_AVAILABLE_LEDS
     //
 

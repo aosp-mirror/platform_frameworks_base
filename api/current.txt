@@ -11276,6 +11276,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_HYPERFOCAL_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
     field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_AVAILABLE_CAPABILITIES;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_INPUT_STREAMS;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PARTIAL_RESULT_COUNT;
@@ -11470,6 +11471,9 @@ package android.hardware.camera2 {
     field public static final int NOISE_REDUCTION_MODE_FAST = 1; // 0x1
     field public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int NOISE_REDUCTION_MODE_OFF = 0; // 0x0
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5; // 0x5
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2; // 0x2
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4; // 0x4
     field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS = 2; // 0x2
     field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY = 3; // 0x3
     field public static final int SENSOR_TEST_PATTERN_MODE_CUSTOM1 = 256; // 0x100
