@@ -18,6 +18,52 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
                 <!-- set explicit widths as needed to prevent overflow issues -->
 
                 <li class="item carousel-home">
+                    <div class="content-left col-11" style="padding-top:65px;">
+                      <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+                      <div style="box-shadow: 3px 10px 18px 1px #999;width:600px;height:336px">
+                        <div id="ytapiplayer">
+                          <a href="http://www.youtube.com/watch?v=WWArLD6nqrk"><img width=600 src="{@docRoot}images/video-kiwi.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
+                        </div>
+                        <script type="text/javascript">
+                            var params = { allowScriptAccess: "always" };
+                            var atts = { id: "ytapiplayer" };
+                            swfobject.embedSWF("//www.youtube.com/v/WWArLD6nqrk?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+                              "ytapiplayer", "600", "336", "8", null, null, params, atts);
+
+                            // Callback used to pause/resume carousel based on video state
+                            function onytplayerStateChange(newState) {
+                               var isPaused = $("#pauseButton").hasClass("paused");
+                               if ((newState == 1) || (newState == 3)) {
+                               // if playing or buffering, pause the carousel
+                                 if (!isPaused) {
+                                    $("#pauseButton").click();
+                                 }
+                               } else {
+                               // otherwise, make sure carousel is running
+                                 if (isPaused) {
+                                    $("#pauseButton").click();
+                                 }
+                               }
+                            }
+
+                            // Callback received when YouTube player loads to setup callback (above)
+                            function onYouTubePlayerReady(playerId) {
+                              var ytplayer = document.getElementById("ytapiplayer");
+                              ytplayer.addEventListener("onStateChange", "onytplayerStateChange");
+                            }
+
+                        </script>
+                      </div>
+                    </div>
+                    <div class="content-right col-4">
+                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />Kiwi, Inc.</h1>
+                    <p>Game developer Kiwi has five of the top 25 grossing titles on Google Play. Hear how Google Play
+                      has helped them double revenue every six months.</p>
+                      <p><a href="{@docRoot}distribute/googleplay/spotlight/index.html" class="button">Watch more videos </a></p>
+                    </div>
+                </li>
+
+                <li class="item carousel-home">
                   <div class="content-left col-7" style="width:400px;">
                     <a href="{@docRoot}about/versions/kitkat.html">
                       <img src="{@docRoot}images/home/kk-hero.jpg" width="242" style="padding-top:72px;">
