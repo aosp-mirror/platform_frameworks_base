@@ -436,6 +436,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -691,29 +701,61 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Data interface for leaderboard metadata.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.html">Leaderboards</a></td>
+              <td class="jd-descrcol" width="100%">Entry point for leaderboard functionality.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LeaderboardMetadataResult.html">Leaderboards.LeaderboardMetadataResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when leaderboard metadata has been loaded.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadPlayerScoreResult.html">Leaderboards.LoadPlayerScoreResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when a player's leaderboard score has been loaded.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadScoresResult.html">Leaderboards.LoadScoresResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when leaderboard scores have been loaded.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when a leaderboard score has been submitted.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScore.html">LeaderboardScore</a></td>
               <td class="jd-descrcol" width="100%">Data interface representing a single score on a leaderboard.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html">LeaderboardVariant</a></td>
               <td class="jd-descrcol" width="100%">Data interface for a specific variant of a leaderboard; a variant is defined by the combination
  of the leaderboard's collection (public or social) and time span (daily, weekly, or all-time).&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when leaderboard metadata has been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when leaderboard scores have been loaded.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LeaderboardMetadataResult.html">Leaderboards.LeaderboardMetadataResult</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/OnPlayerLeaderboardScoreLoadedListener.html">OnPlayerLeaderboardScoreLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when a player's leaderboard score was loaded.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardScoresLoadedListener.html">OnLeaderboardScoresLoadedListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadScoresResult.html">Leaderboards.LoadScoresResult</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/OnPlayerLeaderboardScoreLoadedListener.html">OnPlayerLeaderboardScoreLoadedListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadPlayerScoreResult.html">Leaderboards.LoadPlayerScoreResult</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for getting status back after submitting a score to a leaderboard.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/leaderboard/SubmitScoreResult.html">SubmitScoreResult</a></code>.
+</em>&nbsp;</td>
           </tr>
   </table>
     </div>
@@ -734,8 +776,19 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/SubmitScoreResult.html">SubmitScoreResult</a></td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/ScoreSubmissionData.html">ScoreSubmissionData</a></td>
               <td class="jd-descrcol" width="100%">Data object representing the result of submitting a score to a leaderboard.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/ScoreSubmissionData.Result.html">ScoreSubmissionData.Result</a></td>
+              <td class="jd-descrcol" width="100%">Simple data class containing the result data for a particular time span.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/SubmitScoreResult.html">SubmitScoreResult</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/leaderboard/ScoreSubmissionData.html">ScoreSubmissionData</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/SubmitScoreResult.Result.html">SubmitScoreResult.Result</a></td>

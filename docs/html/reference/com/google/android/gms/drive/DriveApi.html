@@ -129,7 +129,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
             <img src="/assets/images/dac_logo.png" width="123" height="25" alt="Android Developers" />
           </a>
           <div class="btn-quicknav" id="btn-quicknav">
-		<a href="#" class="arrow-inactive">Quicknav</a>
+          	<a href="#" class="arrow-inactive">Quicknav</a>
 			      <a href="#" class="arrow-active">Quicknav</a>
           </div>
           </div>
@@ -141,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Проектирование"
                   ko-lang="디자인"
                   ja-lang="設計"
-                  es-lang="Diseñar"
+                  es-lang="Diseñar"               
                   >Design</a></li>
                 <li class="develop"><a href="/develop/index.html"
                   zh-tw-lang="開發"
@@ -149,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Разработка"
                   ko-lang="개발"
                   ja-lang="開発"
-                  es-lang="Desarrollar"
+                  es-lang="Desarrollar"               
                   >Develop</a></li>
                 <li class="distribute last"><a href="/distribute/index.html"
                   zh-tw-lang="發佈"
@@ -157,10 +157,10 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Распространение"
                   ko-lang="배포"
                   ja-lang="配布"
-                  es-lang="Distribuir"
+                  es-lang="Distribuir"               
                   >Distribute</a></li>
             </ul>
-
+            
             <!-- New Search -->
             <div class="menu-container">
             <div class="moremenu">
@@ -181,9 +181,9 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
         <li class="active"><a>Android Developers</a></li>
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
-
-
-
+      
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -201,8 +201,8 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
 
 
       <br class="clearfix" />
@@ -216,7 +216,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
       <form onsubmit="return submit_search()">
         <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
 onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
-onkeydown="return search_changed(event, true, '/')"
+onkeydown="return search_changed(event, true, '/')" 
 onkeyup="return search_changed(event, false, '/')" />
       </form>
       <div class="right"></div>
@@ -257,8 +257,8 @@ onkeyup="return search_changed(event, false, '/')" />
 
   </div>
   <!-- /New Search>
-
-
+          
+          
           <!-- Expanded quicknav -->
            <div id="quicknav" class="col-9">
                 <ul>
@@ -280,7 +280,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Курсы"
                           ko-lang="교육"
                           ja-lang="トレーニング"
-                          es-lang="Capacitación"
+                          es-lang="Capacitación"               
                           >Training</a></li>
                         <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
@@ -288,7 +288,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Руководства по API"
                           ko-lang="API 가이드"
                           ja-lang="API ガイド"
-                          es-lang="Guías de la API"
+                          es-lang="Guías de la API"               
                           >API Guides</a></li>
                         <li><a href="/reference/packages.html"
                           zh-tw-lang="參考資源"
@@ -296,7 +296,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Справочник"
                           ko-lang="참조문서"
                           ja-lang="リファレンス"
-                          es-lang="Referencia"
+                          es-lang="Referencia"               
                           >Reference</a></li>
                         <li><a href="/tools/index.html"
                           zh-tw-lang="相關工具"
@@ -304,16 +304,16 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Инструменты"
                           ko-lang="도구"
                           ja-lang="ツール"
-                          es-lang="Herramientas"
+                          es-lang="Herramientas"               
                           >Tools</a>
                           <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
-
+                        
                           <li><a href="/samples/index.html">Samples</a>
                           </li>
-
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -332,15 +332,15 @@ onkeyup="return search_changed(event, false, '/')" />
         </div>
     </div>
     <!-- /Header -->
-
-
+    
+    
   <div id="searchResults" class="wrap" style="display:none;">
           <h2 id="searchTitle">Results</h2>
           <div id="leftSearchControl" class="search-control">Loading...</div>
   </div>
-
-
-
+    
+    
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap">
@@ -351,7 +351,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Курсы"
                   ko-lang="교육"
                   ja-lang="トレーニング"
-                  es-lang="Capacitación"
+                  es-lang="Capacitación"               
                   >Training</a></li>
                 <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
@@ -359,7 +359,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Руководства по API"
                   ko-lang="API 가이드"
                   ja-lang="API ガイド"
-                  es-lang="Guías de la API"
+                  es-lang="Guías de la API"               
                   >API Guides</a></li>
                 <li class="reference"><a href="/reference/packages.html"
                   zh-tw-lang="參考資源"
@@ -367,7 +367,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Справочник"
                   ko-lang="참조문서"
                   ja-lang="リファレンス"
-                  es-lang="Referencia"
+                  es-lang="Referencia"               
                   >Reference</a></li>
                 <li class="tools"><a href="/tools/index.html"
                   zh-tw-lang="相關工具"
@@ -380,25 +380,25 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
-
+        
     </div>
     <!-- /Sendondary x-nav -->
+  
 
 
 
 
+  
 
 
-
-
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -432,6 +432,16 @@ onkeyup="return search_changed(event, false, '/')" />
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
           <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -631,12 +641,12 @@ onkeyup="return search_changed(event, false, '/')" />
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -646,7 +656,7 @@ onkeyup="return search_changed(event, false, '/')" />
     </script>
 
 
-
+     
 
 
 
@@ -661,9 +671,9 @@ onkeyup="return search_changed(event, false, '/')" />
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -673,17 +683,17 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     interface
 <h1 itemprop="name">DriveApi</h1>
 
 
 
-
-
-
+  
+  
+  
 
 
 </div><!-- end header -->
@@ -695,10 +705,10 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
     <tr>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DriveApi</td>
     </tr>
-
+    
 
 </table>
 
@@ -712,16 +722,9 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <h2>Class Overview</h2>
-<p class="caution">
-  <strong>Note:</strong> The Google Drive Android API is currently in <strong>developer
-  preview</strong>. Applications compiled using this version of the API will
-  continue to operate on devices using future versions of Google Play services;
-  however, changes to the API are expected in future releases.
-</p>
 <p itemprop="articleBody">The main entry point for interacting with Drive. This class provides methods for obtaining
  a reference to a file or folder, or querying across the entire Drive.
 </p>
-
 
 
 
@@ -755,79 +758,67 @@ onkeyup="return search_changed(event, false, '/')" />
 <table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
 
 
-
+  
     <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a></td>
       <td class="jd-descrcol" width="100%">Result that contains a Contents reference.&nbsp;</td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a></td>
+      <td class="jd-descrcol" width="100%">Result that contains a DriveId.&nbsp;</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.IntentSenderResult.html">DriveApi.IntentSenderResult</a></td>
       <td class="jd-descrcol" width="100%">Result that contains an IntentSender reference.&nbsp;</td>
     </tr>
-
-
-    <tr class="alt-color api apilevel-" >
+    
+    
+    <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a></td>
       <td class="jd-descrcol" width="100%">Result that contains a MetadataBuffer.&nbsp;</td>
     </tr>
-
-
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents(GoogleApiClient, Contents)</a></code> request.&nbsp;</td>
-    </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnNewContentsCallback.html">DriveApi.OnNewContentsCallback</a></td>
-      <td class="jd-descrcol" width="100%">A callback that provides the result for a OpenContents request.&nbsp;</td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveApi.OnSyncFinishCallback.html">DriveApi.OnSyncFinishCallback</a></td>
       <td class="jd-descrcol" width="100%">A callback that provides the result for a <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#requestSync(com.google.android.gms.common.api.GoogleApiClient)">requestSync(GoogleApiClient)</a></code> request.&nbsp;</td>
     </tr>
-
-
+    
+    
 
 
 
@@ -860,171 +851,189 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a>&gt;</nobr>
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
-
+        
         <div class="jd-descrdiv">Closes the provided contents without saving the results.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#fetchDriveId(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">fetchDriveId</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String resourceId)</nobr>
+        
+        <div class="jd-descrdiv">Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> object that can be used in further drive api operations (e.g.</div>
+  
+  </td></tr>
 
 
-
-
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#getFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.DriveId)">getFile</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a> id)</nobr>
-
+        
         <div class="jd-descrdiv">Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code> object that can be used to interact with the file specified by
  the provided DriveId.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="alt-color api apilevel-" >
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#getFolder(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.DriveId)">getFolder</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a> id)</nobr>
-
+        
         <div class="jd-descrdiv">Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code> object that can be used to interact with the folder specified
  by the provided DriveId.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class=" api apilevel-" >
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#getRootFolder(com.google.android.gms.common.api.GoogleApiClient)">getRootFolder</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
-
+        
         <div class="jd-descrdiv">Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code> object that can be used to interact with the root folder.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnNewContentsCallback.html">DriveApi.OnNewContentsCallback</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#newContents(com.google.android.gms.common.api.GoogleApiClient)">newContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
-
-        <div class="jd-descrdiv">Retrieves a new contents instance that can be used to provide initial contents for a new
- file.</div>
-
-  </td></tr>
-
-
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#newContents(com.google.android.gms.common.api.GoogleApiClient)">newContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+        
+        <div class="jd-descrdiv">Retrieves a new contents instance that can be used to provide initial contents for a new
+ file.</div>
+  
+  </td></tr>
 
 
-
-
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html">CreateFileActivityBuilder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#newCreateFileActivityBuilder()">newCreateFileActivityBuilder</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Creates a builder for a Create File activity where a user can select a file name and
  destination for a new file in their Drive with the contents and additional metadata provided
  in the builder.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="alt-color api apilevel-" >
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/drive/OpenFileActivityBuilder.html">OpenFileActivityBuilder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#newOpenFileActivityBuilder()">newOpenFileActivityBuilder</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Creates a builder for an Open File activity that allows user selection of a Drive file.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#query(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)">query</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</nobr>
-
-        <div class="jd-descrdiv">Retrieves a collection of metadata for the files and folders that match the specified query.</div>
-
-  </td></tr>
-
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#query(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)">query</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</nobr>
+        
+        <div class="jd-descrdiv">Retrieves a collection of metadata for the files and folders that match the specified query.</div>
+  
+  </td></tr>
 
 
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnSyncFinishCallback.html">DriveApi.OnSyncFinishCallback</a>&gt;</nobr>
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveApi.html#requestSync(com.google.android.gms.common.api.GoogleApiClient)">requestSync</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
-
+        
         <div class="jd-descrdiv">Requests synchronization a <code>PendingResult</code> that is ready when synchronization has
  completed.</div>
-
+  
   </td></tr>
 
 
@@ -1078,27 +1087,27 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnContentsDiscardedCallback.html">DriveApi.OnContentsDiscardedCallback</a>&gt;
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">discardContents</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Closes the provided contents without saving the results.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1124,16 +1133,64 @@ onkeyup="return search_changed(event, false, '/')" />
 </div>
 
 
-<A NAME="getFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.DriveId)"></A>
+<A NAME="fetchDriveId(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.DriveIdResult.html">DriveApi.DriveIdResult</a>&gt;
+      </span>
+      <span class="sympad">fetchDriveId</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String resourceId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> object that can be used in further drive api operations (e.g.
+ getFile, getFolder).</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>resourceId</td>
+          <td>The drive resource id for the DriveId to retrieve.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a PendingResult which can be used to retrieve the DriveId object.
+</li></ul>
+  </div>
+
+    </div>
+</div>
 
 
-        abstract
+<A NAME="getFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.DriveId)"></A>
 
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a>
       </span>
       <span class="sympad">getFile</span>
@@ -1141,12 +1198,12 @@ onkeyup="return search_changed(event, false, '/')" />
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code> object that can be used to interact with the file specified by
  the provided DriveId.</p></div>
   <div class="jd-tagdata">
@@ -1167,14 +1224,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="getFolder(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.DriveId)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a>
       </span>
       <span class="sympad">getFolder</span>
@@ -1182,12 +1239,12 @@ onkeyup="return search_changed(event, false, '/')" />
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code> object that can be used to interact with the folder specified
  by the provided DriveId.</p></div>
   <div class="jd-tagdata">
@@ -1208,14 +1265,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="getRootFolder(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a>
       </span>
       <span class="sympad">getRootFolder</span>
@@ -1223,12 +1280,12 @@ onkeyup="return search_changed(event, false, '/')" />
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code> object that can be used to interact with the root folder.
  This method will return synchronously, and is safe to invoke from the UI thread.</p></div>
   <div class="jd-tagdata">
@@ -1249,27 +1306,27 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="newContents(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnNewContentsCallback.html">DriveApi.OnNewContentsCallback</a>&gt;
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.ContentsResult.html">DriveApi.ContentsResult</a>&gt;
       </span>
       <span class="sympad">newContents</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a new contents instance that can be used to provide initial contents for a new
  file.  Write the initial contents to the Contents object returned by this request
  using the file APIs provided in <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code>.
@@ -1300,14 +1357,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="newCreateFileActivityBuilder()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/drive/CreateFileActivityBuilder.html">CreateFileActivityBuilder</a>
       </span>
       <span class="sympad">newCreateFileActivityBuilder</span>
@@ -1315,12 +1372,12 @@ onkeyup="return search_changed(event, false, '/')" />
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates a builder for a Create File activity where a user can select a file name and
  destination for a new file in their Drive with the contents and additional metadata provided
  in the builder.
@@ -1332,14 +1389,14 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="newOpenFileActivityBuilder()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/drive/OpenFileActivityBuilder.html">OpenFileActivityBuilder</a>
       </span>
       <span class="sympad">newOpenFileActivityBuilder</span>
@@ -1347,12 +1404,12 @@ onkeyup="return search_changed(event, false, '/')" />
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates a builder for an Open File activity that allows user selection of a Drive file.
  Upon completion, the result Intent will contain the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> for the selected file.
  This activity will authorize the requesting app to interact with the selected file.
@@ -1364,27 +1421,27 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="query(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveFolder.OnChildrenRetrievedCallback.html">DriveFolder.OnChildrenRetrievedCallback</a>&gt;
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;
       </span>
       <span class="sympad">query</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a collection of metadata for the files and folders that match the specified query.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1412,27 +1469,27 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <A NAME="requestSync(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>,&nbsp;<a href="/reference/com/google/android/gms/drive/DriveApi.OnSyncFinishCallback.html">DriveApi.OnSyncFinishCallback</a>&gt;
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">requestSync</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Requests synchronization a <code>PendingResult</code> that is ready when synchronization has
  completed.</p></div>
   <div class="jd-tagdata">
@@ -1462,17 +1519,17 @@ onkeyup="return search_changed(event, false, '/')" />
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1480,7 +1537,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -1493,7 +1550,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

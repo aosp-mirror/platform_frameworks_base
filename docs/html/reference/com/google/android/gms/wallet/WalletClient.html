@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -766,7 +776,12 @@ Summary:
 
 
 <div class="jd-descr">
+<p>
+  <p class="caution"><strong>
+      This class is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> and <code><a href="/reference/com/google/android/gms/wallet/Wallet.html">Wallet</a></code> instead.
 
+  </p>
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">The main entry point for Google Wallet integration.
@@ -798,8 +813,7 @@ Summary:
  We recommend that you apply for API access at
  <a href="http://getinstantbuy.withgoogle.com/">http://getinstantbuy.withgoogle.com/</a>
  before starting development. During development, use the sandbox environment by specifying
- <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></code> in the constructor.
-</p>
+ <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></code> in the constructor.</p>
 
 
 
