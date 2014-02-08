@@ -120,7 +120,6 @@ have an  application server that meets the following criteria:</p>
   <li>Able to store the API key and client registration IDs. The
 API key is included in the header of POST requests that send
 messages.</li>
- <li>Able to store the API key and client registration IDs.</li>
  <li>Able to generate message IDs to uniquely identify each message it sends.</li>
 </ul>
 
