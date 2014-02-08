@@ -495,7 +495,7 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>The list of image formats that are supported by this
-     * camera device.</p>
+     * camera device for output streams.</p>
      * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
      * <p>When set to YUV_420_888, application can access the YUV420 data directly.</p>
      */
@@ -568,6 +568,60 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.scaler.availableProcessedSizes", android.hardware.camera2.Size[].class);
+
+    /**
+     * <p>The mapping of image formats that are supported by this
+     * camera device for input streams, to their corresponding output formats.</p>
+     * <p>All camera devices with at least 1
+     * android.request.request.maxNumInputStreams will have at least one
+     * available input format.</p>
+     * <p>The camera device will support the following map of formats,
+     * if its dependent capability is supported:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="left">Input Format</th>
+     * <th align="left">Output Format</th>
+     * <th align="left">Capability</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="left">RAW_OPAQUE</td>
+     * <td align="left">JPEG</td>
+     * <td align="left">ZSL</td>
+     * </tr>
+     * <tr>
+     * <td align="left">RAW_OPAQUE</td>
+     * <td align="left">YUV_420_888</td>
+     * <td align="left">ZSL</td>
+     * </tr>
+     * <tr>
+     * <td align="left">RAW_OPAQUE</td>
+     * <td align="left">RAW16</td>
+     * <td align="left">DNG</td>
+     * </tr>
+     * <tr>
+     * <td align="left">RAW16</td>
+     * <td align="left">YUV_420_888</td>
+     * <td align="left">DNG</td>
+     * </tr>
+     * <tr>
+     * <td align="left">RAW16</td>
+     * <td align="left">JPEG</td>
+     * <td align="left">DNG</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>For ZSL-capable camera devices, using the RAW_OPAQUE format
+     * as either input or output will never hurt maximum frame rate (i.e.
+     * android.scaler.availableStallDurations will not have RAW_OPAQUE).</p>
+     * <p>Attempting to configure an input stream with output streams not
+     * listed as available in this map is not valid.</p>
+     * <p>TODO: Add java type mapping for this property.</p>
+     */
+    public static final Key<int[]> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =
+            new Key<int[]>("android.scaler.availableInputOutputFormatsMap", int[].class);
 
     /**
      * <p>Area of raw data which corresponds to only
