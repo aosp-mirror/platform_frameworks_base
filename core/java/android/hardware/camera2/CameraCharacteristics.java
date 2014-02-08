@@ -348,19 +348,22 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<byte[]>("android.lens.info.availableOpticalStabilization", byte[].class);
 
     /**
-     * <p>Hyperfocal distance for this lens; set to
-     * 0 if fixed focus</p>
-     * <p>The hyperfocal distance is used for the old
-     * API's 'fixed' setting</p>
+     * <p>Optional. Hyperfocal distance for this lens.</p>
+     * <p>If the lens is fixed focus, the camera device will report 0.</p>
+     * <p>If the lens is not fixed focus, the camera device will report this
+     * field when {@link CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION android.lens.info.focusDistanceCalibration} is APPROXIMATE or CALIBRATED.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      */
     public static final Key<Float> LENS_INFO_HYPERFOCAL_DISTANCE =
             new Key<Float>("android.lens.info.hyperfocalDistance", float.class);
 
     /**
      * <p>Shortest distance from frontmost surface
-     * of the lens that can be focused correctly</p>
+     * of the lens that can be focused correctly.</p>
      * <p>If the lens is fixed-focus, this should be
-     * 0</p>
+     * 0.</p>
      */
     public static final Key<Float> LENS_INFO_MINIMUM_FOCUS_DISTANCE =
             new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
@@ -372,6 +375,24 @@ public final class CameraCharacteristics extends CameraMetadata {
      */
     public static final Key<android.hardware.camera2.Size> LENS_INFO_SHADING_MAP_SIZE =
             new Key<android.hardware.camera2.Size>("android.lens.info.shadingMapSize", android.hardware.camera2.Size.class);
+
+    /**
+     * <p>The lens focus distance calibration quality.</p>
+     * <p>The lens focus distance calibration quality determines the reliability of
+     * focus related metadata entries, i.e. {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance},
+     * {@link CaptureResult#LENS_FOCUS_RANGE android.lens.focusRange}, {@link CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE android.lens.info.hyperfocalDistance}, and
+     * {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance}.</p>
+     *
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
+     * @see CaptureResult#LENS_FOCUS_RANGE
+     * @see CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
+     * @see #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED
+     * @see #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE
+     * @see #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED
+     */
+    public static final Key<Integer> LENS_INFO_FOCUS_DISTANCE_CALIBRATION =
+            new Key<Integer>("android.lens.info.focusDistanceCalibration", int.class);
 
     /**
      * <p>Direction the camera faces relative to

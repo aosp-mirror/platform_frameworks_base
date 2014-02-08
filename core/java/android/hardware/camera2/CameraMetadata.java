@@ -206,6 +206,45 @@ public abstract class CameraMetadata {
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
     //
+    // Enumeration values for CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
+    //
+
+    /**
+     * <p>The lens focus distance is not accurate, and the units used for
+     * {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} do not correspond to any physical units.
+     * Setting the lens to the same focus distance on separate occasions may
+     * result in a different real focus distance, depending on factors such
+     * as the orientation of the device, the age of the focusing mechanism,
+     * and the device temperature. The focus distance value will still be
+     * in the range of <code>[0, {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance}]</code>, where 0
+     * represents the farthest focus.</p>
+     *
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
+     * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
+     * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
+     */
+    public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED = 0;
+
+    /**
+     * <p>The lens focus distance is measured in diopters. However, setting the lens
+     * to the same focus distance on separate occasions may result in a
+     * different real focus distance, depending on factors such as the
+     * orientation of the device, the age of the focusing mechanism, and
+     * the device temperature.</p>
+     * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
+     */
+    public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE = 1;
+
+    /**
+     * <p>The lens focus distance is measured in diopters. The lens mechanism is
+     * calibrated so that setting the same focus distance is repeatable on
+     * multiple occasions with good accuracy, and the focus distance corresponds
+     * to the real physical distance to the plane of best focus.</p>
+     * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
+     */
+    public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED = 2;
+
+    //
     // Enumeration values for CameraCharacteristics#LENS_FACING
     //
 
