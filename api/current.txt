@@ -11281,6 +11281,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PARTIAL_RESULT_COUNT;
     field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_PIPELINE_MAX_DEPTH;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
