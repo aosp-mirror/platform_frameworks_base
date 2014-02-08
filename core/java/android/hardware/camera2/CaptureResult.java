@@ -1014,6 +1014,31 @@ public final class CaptureResult extends CameraMetadata {
             new Key<Integer>("android.flash.state", int.class);
 
     /**
+     * <p>List of <code>(x, y)</code> coordinates of hot/defective pixels on the
+     * sensor, where <code>(x, y)</code> lies between <code>(0, 0)</code>, which is the top-left
+     * of the pixel array, and the width,height of the pixel array given in
+     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.  This may include hot pixels
+     * that lie outside of the active array bounds given by
+     * android.sensor.activeArraySize.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     */
+    public static final Key<int[]> HOT_PIXEL_MAP =
+            new Key<int[]>("android.hotPixel.map", int[].class);
+
+    /**
+     * <p>Set operational mode for hot pixel correction.</p>
+     * <p>Hotpixel correction interpolates out, or otherwise removes, pixels
+     * that do not accurately encode the incoming light (i.e. pixels that
+     * are stuck at an arbitrary value).</p>
+     * @see #HOT_PIXEL_MODE_OFF
+     * @see #HOT_PIXEL_MODE_FAST
+     * @see #HOT_PIXEL_MODE_HIGH_QUALITY
+     */
+    public static final Key<Integer> HOT_PIXEL_MODE =
+            new Key<Integer>("android.hotPixel.mode", int.class);
+
+    /**
      * <p>GPS coordinates to include in output JPEG
      * EXIF</p>
      */

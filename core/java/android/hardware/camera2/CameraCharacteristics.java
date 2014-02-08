@@ -622,6 +622,16 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<float[]>("android.sensor.info.physicalSize", float[].class);
 
     /**
+     * <p>Dimensions of full pixel array, possibly
+     * including black calibration pixels.</p>
+     * <p>Maximum output resolution for raw format must
+     * match this in
+     * android.scaler.info.availableSizesPerFormat.</p>
+     */
+    public static final Key<android.hardware.camera2.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
+            new Key<android.hardware.camera2.Size>("android.sensor.info.pixelArraySize", android.hardware.camera2.Size.class);
+
+    /**
      * <p>Gain factor from electrons to raw units when
      * ISO=100</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>

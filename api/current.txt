@@ -11293,6 +11293,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_EXPOSURE_TIME_RANGE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_MAX_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PHYSICAL_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PIXEL_ARRAY_SIZE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_SENSITIVITY_RANGE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_MAX_ANALOG_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
@@ -11457,6 +11458,9 @@ package android.hardware.camera2 {
     field public static final int FLASH_STATE_FIRED = 3; // 0x3
     field public static final int FLASH_STATE_READY = 2; // 0x2
     field public static final int FLASH_STATE_UNAVAILABLE = 0; // 0x0
+    field public static final int HOT_PIXEL_MODE_FAST = 1; // 0x1
+    field public static final int HOT_PIXEL_MODE_HIGH_QUALITY = 2; // 0x2
+    field public static final int HOT_PIXEL_MODE_OFF = 0; // 0x0
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1; // 0x1
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0; // 0x0
     field public static final int LENS_FACING_BACK = 1; // 0x1
@@ -11538,6 +11542,7 @@ package android.hardware.camera2 {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final android.hardware.camera2.CameraMetadata.Key EDGE_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key FLASH_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key HOT_PIXEL_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_COORDINATES;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_PROCESSING_METHOD;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_TIMESTAMP;
@@ -11595,6 +11600,8 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key EDGE_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key FLASH_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key FLASH_STATE;
+    field public static final android.hardware.camera2.CameraMetadata.Key HOT_PIXEL_MAP;
+    field public static final android.hardware.camera2.CameraMetadata.Key HOT_PIXEL_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_COORDINATES;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_PROCESSING_METHOD;
     field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_TIMESTAMP;

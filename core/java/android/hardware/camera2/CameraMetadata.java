@@ -1025,6 +1025,34 @@ public abstract class CameraMetadata {
     public static final int FLASH_MODE_TORCH = 2;
 
     //
+    // Enumeration values for CaptureRequest#HOT_PIXEL_MODE
+    //
+
+    /**
+     * <p>The frame rate must not be reduced relative to sensor raw output
+     * for this option.</p>
+     * <p>No hot pixel correction is applied.</p>
+     * @see CaptureRequest#HOT_PIXEL_MODE
+     */
+    public static final int HOT_PIXEL_MODE_OFF = 0;
+
+    /**
+     * <p>The frame rate must not be reduced relative to sensor raw output
+     * for this option.</p>
+     * <p>Hot pixel correction is applied.</p>
+     * @see CaptureRequest#HOT_PIXEL_MODE
+     */
+    public static final int HOT_PIXEL_MODE_FAST = 1;
+
+    /**
+     * <p>The frame rate may be reduced relative to sensor raw output
+     * for this option.</p>
+     * <p>A high-quality hot pixel correction is applied.</p>
+     * @see CaptureRequest#HOT_PIXEL_MODE
+     */
+    public static final int HOT_PIXEL_MODE_HIGH_QUALITY = 2;
+
+    //
     // Enumeration values for CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
     //
 
