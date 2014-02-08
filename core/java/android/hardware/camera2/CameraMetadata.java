@@ -841,6 +841,14 @@ public abstract class CameraMetadata {
      */
     public static final int CONTROL_MODE_USE_SCENE_MODE = 2;
 
+    /**
+     * <p>Same as OFF mode, except that this capture will not be
+     * used by camera device background auto-exposure, auto-white balance and
+     * auto-focus algorithms to update their statistics.</p>
+     * @see CaptureRequest#CONTROL_MODE
+     */
+    public static final int CONTROL_MODE_OFF_KEEP_STATE = 3;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_SCENE_MODE
     //

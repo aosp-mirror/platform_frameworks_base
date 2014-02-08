@@ -11427,6 +11427,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_EFFECT_MODE_WHITEBOARD = 6; // 0x6
     field public static final int CONTROL_MODE_AUTO = 1; // 0x1
     field public static final int CONTROL_MODE_OFF = 0; // 0x0
+    field public static final int CONTROL_MODE_OFF_KEEP_STATE = 3; // 0x3
     field public static final int CONTROL_MODE_USE_SCENE_MODE = 2; // 0x2
     field public static final int CONTROL_SCENE_MODE_ACTION = 2; // 0x2
     field public static final int CONTROL_SCENE_MODE_BARCODE = 16; // 0x10
