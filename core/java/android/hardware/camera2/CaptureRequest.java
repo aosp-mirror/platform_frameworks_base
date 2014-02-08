@@ -1141,62 +1141,45 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * largest requested stream resolution.</li>
      * <li>Using more than one output stream in a request does not affect the
      * frame duration.</li>
-     * <li>JPEG streams act like processed YUV streams in requests for which
-     * they are not included; in requests in which they are directly
-     * referenced, they act as JPEG streams. This is because supporting a
-     * JPEG stream requires the underlying YUV data to always be ready for
-     * use by a JPEG encoder, but the encoder will only be used (and impact
-     * frame duration) on requests that actually reference a JPEG stream.</li>
-     * <li>The JPEG processor can run concurrently to the rest of the camera
-     * pipeline, but cannot process more than 1 capture at a time.</li>
+     * <li>Certain format-streams may need to do additional background processing
+     * before data is consumed/produced by that stream. These processors
+     * can run concurrently to the rest of the camera pipeline, but
+     * cannot process more than 1 capture at a time.</li>
      * </ul>
      * <p>The necessary information for the application, given the model above,
-     * is provided via the android.scaler.available*MinDurations fields.
+     * is provided via the {@link CameraCharacteristics#SCALER_AVAILABLE_MIN_FRAME_DURATIONS android.scaler.availableMinFrameDurations} field.
      * These are used to determine the maximum frame rate / minimum frame
      * duration that is possible for a given stream configuration.</p>
      * <p>Specifically, the application can use the following rules to
-     * determine the minimum frame duration it can request from the HAL
+     * determine the minimum frame duration it can request from the camera
      * device:</p>
      * <ol>
-     * <li>Given the application's currently configured set of output
-     * streams, <code>S</code>, divide them into three sets: streams in a JPEG format
-     * <code>SJ</code>, streams in a raw sensor format <code>SR</code>, and the rest ('processed')
-     * <code>SP</code>.</li>
-     * <li>For each subset of streams, find the largest resolution (by pixel
-     * count) in the subset. This gives (at most) three resolutions <code>RJ</code>,
-     * <code>RR</code>, and <code>RP</code>.</li>
-     * <li>If <code>RJ</code> is greater than <code>RP</code>, set <code>RP</code> equal to <code>RJ</code>. If there is
-     * no exact match for <code>RP == RJ</code> (in particular there isn't an available
-     * processed resolution at the same size as <code>RJ</code>), then set <code>RP</code> equal
-     * to the smallest processed resolution that is larger than <code>RJ</code>. If
-     * there are no processed resolutions larger than <code>RJ</code>, then set <code>RJ</code> to
-     * the processed resolution closest to <code>RJ</code>.</li>
-     * <li>If <code>RP</code> is greater than <code>RR</code>, set <code>RR</code> equal to <code>RP</code>. If there is
-     * no exact match for <code>RR == RP</code> (in particular there isn't an available
-     * raw resolution at the same size as <code>RP</code>), then set <code>RR</code> equal to
-     * or to the smallest raw resolution that is larger than <code>RP</code>. If
-     * there are no raw resolutions larger than <code>RP</code>, then set <code>RR</code> to
-     * the raw resolution closest to <code>RP</code>.</li>
-     * <li>Look up the matching minimum frame durations in the property lists
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS android.scaler.availableJpegMinDurations},
-     * android.scaler.availableRawMinDurations, and
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS android.scaler.availableProcessedMinDurations}.  This gives three
-     * minimum frame durations <code>FJ</code>, <code>FR</code>, and <code>FP</code>.</li>
-     * <li>If a stream of requests do not use a JPEG stream, then the minimum
-     * supported frame duration for each request is <code>max(FR, FP)</code>.</li>
-     * <li>If a stream of requests all use the JPEG stream, then the minimum
-     * supported frame duration for each request is <code>max(FR, FP, FJ)</code>.</li>
-     * <li>If a mix of JPEG-using and non-JPEG-using requests is submitted by
-     * the application, then the HAL will have to delay JPEG-using requests
-     * whenever the JPEG encoder is still busy processing an older capture.
-     * This will happen whenever a JPEG-using request starts capture less
-     * than <code>FJ</code> <em>ns</em> after a previous JPEG-using request. The minimum
-     * supported frame duration will vary between the values calculated in
-     * #6 and #7.</li>
+     * <li>Let the set of currently configured input/output streams
+     * be called <code>S</code>.</li>
+     * <li>Find the minimum frame durations for each stream in <code>S</code>, by
+     * looking it up in {@link CameraCharacteristics#SCALER_AVAILABLE_MIN_FRAME_DURATIONS android.scaler.availableMinFrameDurations} (with
+     * its respective size/format). Let this set of frame durations be called
+     * <code>F</code>.</li>
+     * <li>For any given request <code>R</code>, the minimum frame duration allowed
+     * for <code>R</code> is the maximum out of all values in <code>F</code>. Let the streams
+     * used in <code>R</code> be called <code>S_r</code>.</li>
      * </ol>
+     * <p>If none of the streams in <code>S_r</code> have a stall time (listed in
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS android.scaler.availableStallDurations}), then the frame duration in
+     * <code>F</code> determines the steady state frame rate that the application will
+     * get if it uses <code>R</code> as a repeating request. Let this special kind
+     * of request be called <code>Rsimple</code>.</p>
+     * <p>A repeating request <code>Rsimple</code> can be <em>occasionally</em> interleaved
+     * by a single capture of a new request <code>Rstall</code> (which has at least
+     * one in-use stream with a non-0 stall time) and if <code>Rstall</code> has the
+     * same minimum frame duration this will not cause a frame rate loss
+     * if all buffers from the previous <code>Rstall</code> have already been
+     * delivered.</p>
+     * <p>For more details about stalling, see
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS android.scaler.availableStallDurations}.</p>
      *
-     * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS
-     * @see CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS
+     * @see CameraCharacteristics#SCALER_AVAILABLE_MIN_FRAME_DURATIONS
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS
      */
     public static final Key<Long> SENSOR_FRAME_DURATION =
             new Key<Long>("android.sensor.frameDuration", long.class);
