@@ -494,6 +494,98 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<Integer>("android.request.partialResultCount", int.class);
 
     /**
+     * <p>List of capabilities that the camera device
+     * advertises as fully supporting.</p>
+     * <p>A capability is a contract that the camera device makes in order
+     * to be able to satisfy one or more use cases.</p>
+     * <p>Listing a capability guarantees that the whole set of features
+     * required to support a common use will all be available.</p>
+     * <p>Using a subset of the functionality provided by an unsupported
+     * capability may be possible on a specific camera device implementation;
+     * to do this query each of android.request.availableRequestKeys,
+     * android.request.availableResultKeys,
+     * android.request.availableCharacteristicsKeys.</p>
+     * <p>XX: Maybe these should go into android.info.supportedHardwareLevel
+     * as a table instead?</p>
+     * <p>The following capabilities are guaranteed to be available on
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL devices:</p>
+     * <ul>
+     * <li>MANUAL_SENSOR</li>
+     * <li>ZSL</li>
+     * </ul>
+     * <p>Other capabilities may be available on either FULL or LIMITED
+     * devices, but the app. should query this field to be sure.</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_GCAM
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_ZSL
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_DNG
+     */
+    public static final Key<Integer> REQUEST_AVAILABLE_CAPABILITIES =
+            new Key<Integer>("android.request.availableCapabilities", int.class);
+
+    /**
+     * <p>A list of all keys that the camera device has available
+     * to use with CaptureRequest.</p>
+     * <p>Attempting to set a key into a CaptureRequest that is not
+     * listed here will result in an invalid request and will be rejected
+     * by the camera device.</p>
+     * <p>This field can be used to query the feature set of a camera device
+     * at a more granular level than capabilities. This is especially
+     * important for optional keys that are not listed under any capability
+     * in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>TODO: This should be used by #getAvailableCaptureRequestKeys.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @hide
+     */
+    public static final Key<int[]> REQUEST_AVAILABLE_REQUEST_KEYS =
+            new Key<int[]>("android.request.availableRequestKeys", int[].class);
+
+    /**
+     * <p>A list of all keys that the camera device has available
+     * to use with CaptureResult.</p>
+     * <p>Attempting to get a key from a CaptureResult that is not
+     * listed here will always return a <code>null</code> value. Getting a key from
+     * a CaptureResult that is listed here must never return a <code>null</code>
+     * value.</p>
+     * <p>The following keys may return <code>null</code> unless they are enabled:</p>
+     * <ul>
+     * <li>{@link CaptureResult#STATISTICS_LENS_SHADING_MAP android.statistics.lensShadingMap} (non-null iff {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} == ON)</li>
+     * </ul>
+     * <p>(Those sometimes-null keys should nevertheless be listed here
+     * if they are available.)</p>
+     * <p>This field can be used to query the feature set of a camera device
+     * at a more granular level than capabilities. This is especially
+     * important for optional keys that are not listed under any capability
+     * in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>TODO: This should be used by #getAvailableCaptureResultKeys.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CaptureResult#STATISTICS_LENS_SHADING_MAP
+     * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
+     * @hide
+     */
+    public static final Key<int[]> REQUEST_AVAILABLE_RESULT_KEYS =
+            new Key<int[]>("android.request.availableResultKeys", int[].class);
+
+    /**
+     * <p>A list of all keys that the camera device has available
+     * to use with CameraCharacteristics.</p>
+     * <p>This entry follows the same rules as
+     * android.request.availableResultKeys (except that it applies for
+     * CameraCharacteristics instead of CaptureResult). See above for more
+     * details.</p>
+     * <p>TODO: This should be used by CameraCharacteristics#getKeys.</p>
+     * @hide
+     */
+    public static final Key<int[]> REQUEST_AVAILABLE_CHARACTERISTICS_KEYS =
+            new Key<int[]>("android.request.availableCharacteristicsKeys", int[].class);
+
+    /**
      * <p>The list of image formats that are supported by this
      * camera device for output streams.</p>
      * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
@@ -800,14 +892,20 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<int[]>("android.led.availableLeds", int[].class);
 
     /**
-     * <p>The camera 3 HAL device can implement one of two possible
-     * operational modes; limited and full. Full support is
-     * expected from new higher-end devices. Limited mode has
-     * hardware requirements roughly in line with those for a
-     * camera HAL device v1 implementation, and is expected from
-     * older or inexpensive devices. Full is a strict superset of
-     * limited, and they share the same essential operational flow.</p>
-     * <p>For full details refer to "S3. Operational Modes" in camera3.h</p>
+     * <p>Generally classifies the overall set of the camera device functionality.</p>
+     * <p>Camera devices will come in two flavors: LIMITED and FULL.</p>
+     * <p>A FULL device has the most support possible and will enable the
+     * widest range of use cases such as:</p>
+     * <ul>
+     * <li>30 FPS at maximum resolution (== sensor resolution)</li>
+     * <li>Per frame control</li>
+     * <li>Manual sensor control</li>
+     * <li>Zero Shutter Lag (ZSL)</li>
+     * </ul>
+     * <p>A LIMITED device may have some or none of the above characteristics.
+     * To find out more refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      */
