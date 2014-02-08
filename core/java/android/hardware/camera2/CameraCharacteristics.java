@@ -641,6 +641,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * channels in the camera sensor.</p>
      * <p>The values are given in row-column scan order, with the first value
      * corresponding to the element of the CFA in row=0, column=0.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
     public static final Key<int[]> SENSOR_BLACK_LEVEL_PATTERN =
             new Key<int[]>("android.sensor.blackLevelPattern", int[].class);
