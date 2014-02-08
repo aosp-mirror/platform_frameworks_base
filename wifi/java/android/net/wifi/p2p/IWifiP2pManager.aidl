@@ -26,6 +26,7 @@ import android.os.Messenger;
 interface IWifiP2pManager
 {
     Messenger getMessenger();
+    Messenger getP2pStateMachineMessenger();
     void setMiracastMode(int mode);
 }
 

@@ -13784,6 +13784,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Make sure that the user who is receiving this broadcast is started.
         // If not, we will just skip it.
+
+
         if (userId != UserHandle.USER_ALL && mStartedUsers.get(userId) == null) {
             if (callingUid != Process.SYSTEM_UID || (intent.getFlags()
                     & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
@@ -13799,8 +13801,8 @@ public final class ActivityManagerService extends ActivityManagerNative
          */
         int callingAppId = UserHandle.getAppId(callingUid);
         if (callingAppId == Process.SYSTEM_UID || callingAppId == Process.PHONE_UID
-                || callingAppId == Process.SHELL_UID || callingAppId == Process.BLUETOOTH_UID
-                || callingUid == 0) {
+            || callingAppId == Process.SHELL_UID || callingAppId == Process.BLUETOOTH_UID
+            || callingAppId == Process.NFC_UID || callingUid == 0) {
             // Always okay.
         } else if (callerApp == null || !callerApp.persistent) {
             try {

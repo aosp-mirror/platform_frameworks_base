@@ -156,16 +156,12 @@
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
     <protected-broadcast android:name="android.btopp.intent.action.INCOMING_FILE_NOTIFICATION" />
-    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_HANDOVER_STARTED" />
-    <protected-broadcast android:name="android.btopp.intent.action.TRANSFER_COMPLETE" />
     <protected-broadcast android:name="android.btopp.intent.action.USER_CONFIRMATION_TIMEOUT" />
-    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_TRANSFER_PROGRESS" />
     <protected-broadcast android:name="android.btopp.intent.action.LIST" />
     <protected-broadcast android:name="android.btopp.intent.action.OPEN_OUTBOUND" />
     <protected-broadcast android:name="android.btopp.intent.action.HIDE_COMPLETE" />
     <protected-broadcast android:name="android.btopp.intent.action.CONFIRM" />
     <protected-broadcast android:name="android.btopp.intent.action.HIDE" />
-    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_TRANSFER_DONE" />
     <protected-broadcast android:name="android.btopp.intent.action.RETRY" />
     <protected-broadcast android:name="android.btopp.intent.action.OPEN" />
     <protected-broadcast android:name="android.btopp.intent.action.OPEN_INBOUND" />
@@ -284,7 +280,13 @@
     <protected-broadcast
         android:name="android.intent.action.PERMISSION_RESPONSE_RECEIVED" />
     <!-- Defined in RestrictionsManager -->
+
     <protected-broadcast android:name="android.intent.action.REQUEST_PERMISSION" />
+    <protected-broadcast android:name="android.nfc.handover.intent.action.HANDOVER_STARTED" />
+    <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_DONE" />
+    <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_PROGRESS" />
+    <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_DONE" />
+
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
@@ -862,6 +864,14 @@
     <permission android:name="android.permission.LOOP_RADIO"
 	android:permissionGroup="android.permission-group.NETWORK"
 	android:protectionLevel="signature|system" />
+
+    <!-- Allows sending and receiving handover transfer status from Wifi and Bluetooth
+         @hide
+    -->
+    <permission android:name="android.permission.NFC_HANDOVER_STATUS"
+                android:label="@string/permlab_handoverStatus"
+                android:description="@string/permdesc_handoverStatus"
+                android:protectionLevel="signature|system" />
 
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
