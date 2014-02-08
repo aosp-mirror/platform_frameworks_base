@@ -11286,8 +11286,11 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MIN_FRAME_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_SIZES;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_STALL_DURATIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_STREAM_CONFIGURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_AVAILABLE_TEST_PATTERN_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BLACK_LEVEL_PATTERN;
@@ -11480,6 +11483,8 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5; // 0x5
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4; // 0x4
+    field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT = 1; // 0x1
+    field public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT = 0; // 0x0
     field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS = 2; // 0x2
     field public static final int SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY = 3; // 0x3
     field public static final int SENSOR_TEST_PATTERN_MODE_CUSTOM1 = 256; // 0x100

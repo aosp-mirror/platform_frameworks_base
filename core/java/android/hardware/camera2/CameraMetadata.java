@@ -409,6 +409,20 @@ public abstract class CameraMetadata {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5;
 
     //
+    // Enumeration values for CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+    //
+
+    /**
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+     */
+    public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT = 0;
+
+    /**
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+     */
+    public static final int SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT = 1;
+
+    //
     // Enumeration values for CameraCharacteristics#LED_AVAILABLE_LEDS
     //
 
