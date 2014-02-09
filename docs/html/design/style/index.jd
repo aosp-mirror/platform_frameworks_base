@@ -18,7 +18,8 @@ footer.hide=1
 
 <div id="landing-graphic-container">
   <div id="text-overlay">
-    Build visually compelling apps that look great on any device. 
+    <span itemprop="description">Build visually compelling apps that look great on any
+    device.</span>
     <br><br>
     <a href="{@docRoot}design/style/devices-displays.html" class="landing-page-link">Devices and Displays</a>
   </div>
