@@ -599,9 +599,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slog.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
                 return;
             }
-
-            mDeviceOwner.removeProfileOwner(userHandle);
-            mDeviceOwner.writeOwnerFile();
+            if (mDeviceOwner != null) {
+                mDeviceOwner.removeProfileOwner(userHandle);
+                mDeviceOwner.writeOwnerFile();
+            }
 
             DevicePolicyData policy = mUserData.get(userHandle);
             if (policy != null) {
