@@ -140,30 +140,32 @@ public class PolicyControl {
         sImmersiveStatusFilter = null;
         sImmersiveNavigationFilter = null;
         sImmersivePreconfirmationsFilter = null;
-        String[] nvps = value.split(":");
-        for (String nvp : nvps) {
-            int i = nvp.indexOf('=');
-            if (i == -1) continue;
-            String n = nvp.substring(0, i);
-            String v = nvp.substring(i + 1);
-            if (n.equals(NAME_IMMERSIVE_FULL)) {
-                Filter f = Filter.parse(v);
-                sImmersiveStatusFilter = sImmersiveNavigationFilter = f;
-                if (sImmersivePreconfirmationsFilter == null) {
+        if (value != null) {
+            String[] nvps = value.split(":");
+            for (String nvp : nvps) {
+                int i = nvp.indexOf('=');
+                if (i == -1) continue;
+                String n = nvp.substring(0, i);
+                String v = nvp.substring(i + 1);
+                if (n.equals(NAME_IMMERSIVE_FULL)) {
+                    Filter f = Filter.parse(v);
+                    sImmersiveStatusFilter = sImmersiveNavigationFilter = f;
+                    if (sImmersivePreconfirmationsFilter == null) {
+                        sImmersivePreconfirmationsFilter = f;
+                    }
+                } else if (n.equals(NAME_IMMERSIVE_STATUS)) {
+                    Filter f = Filter.parse(v);
+                    sImmersiveStatusFilter = f;
+                } else if (n.equals(NAME_IMMERSIVE_NAVIGATION)) {
+                    Filter f = Filter.parse(v);
+                    sImmersiveNavigationFilter = f;
+                    if (sImmersivePreconfirmationsFilter == null) {
+                        sImmersivePreconfirmationsFilter = f;
+                    }
+                } else if (n.equals(NAME_IMMERSIVE_PRECONFIRMATIONS)) {
+                    Filter f = Filter.parse(v);
                     sImmersivePreconfirmationsFilter = f;
                 }
-            } else if (n.equals(NAME_IMMERSIVE_STATUS)) {
-                Filter f = Filter.parse(v);
-                sImmersiveStatusFilter = f;
-            } else if (n.equals(NAME_IMMERSIVE_NAVIGATION)) {
-                Filter f = Filter.parse(v);
-                sImmersiveNavigationFilter = f;
-                if (sImmersivePreconfirmationsFilter == null) {
-                    sImmersivePreconfirmationsFilter = f;
-                }
-            } else if (n.equals(NAME_IMMERSIVE_PRECONFIRMATIONS)) {
-                Filter f = Filter.parse(v);
-                sImmersivePreconfirmationsFilter = f;
             }
         }
         if (DEBUG) {
