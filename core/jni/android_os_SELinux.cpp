@@ -411,7 +411,7 @@ static jboolean native_restorecon(JNIEnv *env, jobject, jstring pathnameStr) {
 
     ScopedUtfChars pathname(env, pathnameStr);
     if (pathname.c_str() == NULL) {
-        ALOGV("restorecon(%p) => threw exception", pathname);
+        ALOGV("restorecon(%p) => threw exception", pathnameStr);
         return false;
     }
 
