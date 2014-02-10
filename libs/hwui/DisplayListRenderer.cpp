@@ -53,10 +53,6 @@ void DisplayListRenderer::reset() {
         mCaches.resourceCache.decrementRefcountLocked(mOwnedBitmapResources.itemAt(i));
     }
 
-    for (size_t i = 0; i < mFilterResources.size(); i++) {
-        mCaches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
-    }
-
     for (size_t i = 0; i < mPatchResources.size(); i++) {
         mCaches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
     }
@@ -77,7 +73,6 @@ void DisplayListRenderer::reset() {
 
     mBitmapResources.clear();
     mOwnedBitmapResources.clear();
-    mFilterResources.clear();
     mPatchResources.clear();
     mSourcePaths.clear();
 
@@ -455,15 +450,6 @@ void DisplayListRenderer::resetShader() {
 void DisplayListRenderer::setupShader(SkiaShader* shader) {
     shader = refShader(shader);
     addStateOp(new (alloc()) SetupShaderOp(shader));
-}
-
-void DisplayListRenderer::resetColorFilter() {
-    addStateOp(new (alloc()) ResetColorFilterOp());
-}
-
-void DisplayListRenderer::setupColorFilter(SkiaColorFilter* filter) {
-    filter = refColorFilter(filter);
-    addStateOp(new (alloc()) SetupColorFilterOp(filter));
 }
 
 void DisplayListRenderer::resetShadow() {

@@ -21,6 +21,8 @@
 #include <GLES2/gl2ext.h>
 
 #include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <SkColorFilter.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkRegion.h>
@@ -43,7 +45,6 @@
 #include "Rect.h"
 #include "Renderer.h"
 #include "StatefulBaseRenderer.h"
-#include "SkiaColorFilter.h"
 #include "Snapshot.h"
 #include "UvMapper.h"
 #include "Vertex.h"
@@ -68,7 +69,6 @@ struct DrawModifiers {
     }
 
     SkiaShader* mShader;
-    SkiaColorFilter* mColorFilter;
     float mOverrideLayerAlpha;
 
     // Drop shadow
@@ -208,9 +208,6 @@ public:
 
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
-
-    virtual void resetColorFilter();
-    virtual void setupColorFilter(SkiaColorFilter* filter);
 
     virtual void resetShadow();
     virtual void setupShadow(float radius, float dx, float dy, int color);
@@ -432,18 +429,14 @@ protected:
      *
      * @param layer The layer from which the alpha is extracted
      */
-    inline float getLayerAlpha(Layer* layer) const;
+    inline float getLayerAlpha(const Layer* layer) const;
 
     /**
-     * Safely retrieves the mode from the specified xfermode. If the specified
-     * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
+     * Safely retrieves the ColorFilter from the given Paint. If the paint is
+     * null then null is returned.
      */
-    static inline SkXfermode::Mode getXfermode(SkXfermode* mode) {
-        SkXfermode::Mode resultMode;
-        if (!SkXfermode::AsMode(mode, &resultMode)) {
-            resultMode = SkXfermode::kSrcOver_Mode;
-        }
-        return resultMode;
+    static inline SkColorFilter* getColorFilter(const SkPaint* paint) {
+        return paint ? paint->getColorFilter() : NULL;
     }
 
     /**
@@ -584,12 +577,11 @@ private:
      * @param top The top coordinate of the rectangle
      * @param right The right coordinate of the rectangle
      * @param bottom The bottom coordinate of the rectangle
-     * @param color The rectangle's ARGB color, defined as a packed 32 bits word
-     * @param mode The Skia xfermode to use
+     * @param paint The paint containing the color, blending mode, etc.
      * @param ignoreTransform True if the current transform should be ignored
      */
     void drawColorRect(float left, float top, float right, float bottom,
-            int color, SkXfermode::Mode mode, bool ignoreTransform = false);
+            const SkPaint* paint, bool ignoreTransform = false);
 
     /**
      * Draws a series of colored rectangles with the specified color. The specified
@@ -598,15 +590,13 @@ private:
      *
      * @param rects A list of rectangles, 4 floats (left, top, right, bottom)
      *              per rectangle
-     * @param color The rectangles' ARGB color, defined as a packed 32 bits word
-     * @param mode The Skia xfermode to use
+     * @param paint The paint containing the color, blending mode, etc.
      * @param ignoreTransform True if the current transform should be ignored
      * @param dirty True if calling this method should dirty the current layer
      * @param clip True if the rects should be clipped, false otherwise
      */
-    status_t drawColorRects(const float* rects, int count, int color,
-            SkXfermode::Mode mode, bool ignoreTransform = false,
-            bool dirty = true, bool clip = true);
+    status_t drawColorRects(const float* rects, int count, const SkPaint* paint,
+            bool ignoreTransform = false, bool dirty = true, bool clip = true);
 
     /**
      * Draws the shape represented by the specified path texture.
@@ -658,22 +648,6 @@ private:
      * @param top The top coordinate of the rectangle
      * @param right The right coordinate of the rectangle
      * @param bottom The bottom coordinate of the rectangle
-     * @param texture The texture name to map onto the rectangle
-     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
-     * @param mode The blending mode
-     * @param blend True if the texture contains an alpha channel
-     */
-    void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend);
-
-    /**
-     * Draws a textured rectangle with the specified texture. The specified coordinates
-     * are transformed by the current snapshot's transform matrix.
-     *
-     * @param left The left coordinate of the rectangle
-     * @param top The top coordinate of the rectangle
-     * @param right The right coordinate of the rectangle
-     * @param bottom The bottom coordinate of the rectangle
      * @param texture The texture to use
      * @param paint The paint containing the alpha, blending mode, etc.
      */
@@ -690,8 +664,7 @@ private:
      * @param right The right coordinate of the rectangle
      * @param bottom The bottom coordinate of the rectangle
      * @param texture The texture name to map onto the rectangle
-     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
-     * @param mode The blending mode
+     * @param paint The paint containing the alpha, blending mode, colorFilter, etc.
      * @param blend True if the texture contains an alpha channel
      * @param vertices The vertices that define the mesh
      * @param texCoords The texture coordinates of each vertex
@@ -703,19 +676,19 @@ private:
      * @param dirty True if calling this method should dirty the current layer
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend,
+            const SkPaint* paint, bool blend,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
             ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale, bool dirty = true);
 
     void drawIndexedTextureMesh(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend,
+            const SkPaint* paint, bool blend,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
             ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale, bool dirty = true);
 
     void drawAlpha8TextureMesh(float left, float top, float right, float bottom,
-            GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
+            GLuint texture, const SkPaint* paint,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
             bool ignoreTransform, ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale,
             bool dirty = true);
@@ -749,12 +722,11 @@ private:
      * @param positions The x, y positions of individual glyphs (or NULL)
      * @param fontRenderer The font renderer object
      * @param alpha The alpha value for drawing the shadow
-     * @param mode The xfermode for drawing the shadow
      * @param x The x coordinate where the shadow will be drawn
      * @param y The y coordinate where the shadow will be drawn
      */
     void drawTextShadow(const SkPaint* paint, const char* text, int bytesCount, int count,
-            const float* positions, FontRenderer& fontRenderer, int alpha, SkXfermode::Mode mode,
+            const float* positions, FontRenderer& fontRenderer, int alpha,
             float x, float y);
 
     /**
@@ -839,11 +811,9 @@ private:
     void setupDrawAlpha8Color(int color, int alpha);
     void setupDrawTextGamma(const SkPaint* paint);
     void setupDrawShader();
-    void setupDrawColorFilter();
-    void setupDrawBlending(SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode,
-            bool swapSrcDst = false);
-    void setupDrawBlending(bool blend = true, SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode,
-            bool swapSrcDst = false);
+    void setupDrawColorFilter(const SkColorFilter* filter);
+    void setupDrawBlending(const Layer* layer, bool swapSrcDst = false);
+    void setupDrawBlending(const SkPaint* paint, bool blend = true, bool swapSrcDst = false);
     void setupDrawProgram();
     void setupDrawDirtyRegionsDisabled();
 
@@ -867,7 +837,7 @@ private:
     void setupDrawColorUniforms();
     void setupDrawPureColorUniforms();
     void setupDrawShaderUniforms(bool ignoreTransform = false);
-    void setupDrawColorFilterUniforms();
+    void setupDrawColorFilterUniforms(const SkColorFilter* paint);
     void setupDrawSimpleMesh();
     void setupDrawTexture(GLuint texture);
     void setupDrawExternalTexture(GLuint texture);
@@ -896,8 +866,7 @@ private:
      * Renders the specified region as a series of rectangles. The region
      * must be in screen-space coordinates.
      */
-    void drawRegionRects(const SkRegion& region, int color, SkXfermode::Mode mode,
-            bool dirty = false);
+    void drawRegionRects(const SkRegion& region, const SkPaint& paint, bool dirty = false);
 
     /**
      * Draws the current clip region if any. Only when DEBUG_CLIP_REGIONS

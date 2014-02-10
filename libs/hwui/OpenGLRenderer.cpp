@@ -893,7 +893,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->getHeight()),
             bounds.getWidth() / float(layer->getWidth()), 0.0f);
 
-    layer->setColorFilter(mDrawModifiers.mColorFilter);
+    layer->setColorFilter(getColorFilter(paint));
     layer->setBlend(true);
     layer->setDirty(false);
 
@@ -1011,8 +1011,13 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     }
 
     if (!fboLayer && layer->getAlpha() < 255) {
-        drawColorRect(rect.left, rect.top, rect.right, rect.bottom,
-                layer->getAlpha() << 24, SkXfermode::kDstIn_Mode, true);
+        // TODO: this seems to point to the fact that the layer should store the paint
+        SkPaint layerPaint;
+        layerPaint.setAlpha(layer->getAlpha());
+        layerPaint.setXfermodeMode(SkXfermode::kDstIn_Mode);
+        layerPaint.setColorFilter(layer->getColorFilter());
+
+        drawColorRect(rect.left, rect.top, rect.right, rect.bottom, &layerPaint, true);
         // Required below, composeLayerRect() will divide by 255
         layer->setAlpha(255);
     }
@@ -1025,13 +1030,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     // drawing only the dirty region
     if (fboLayer) {
         dirtyLayer(rect.left, rect.top, rect.right, rect.bottom, *restored.transform);
-        if (layer->getColorFilter()) {
-            setupColorFilter(layer->getColorFilter());
-        }
         composeLayerRegion(layer, rect);
-        if (layer->getColorFilter()) {
-            resetColorFilter();
-        }
     } else if (!rect.isEmpty()) {
         dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
 
@@ -1063,11 +1062,11 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     }
     setupDrawTextureTransform();
     setupDrawColor(alpha, alpha, alpha, alpha);
-    setupDrawColorFilter();
-    setupDrawBlending(layer->isBlend() || alpha < 1.0f, layer->getMode());
+    setupDrawColorFilter(layer->getColorFilter());
+    setupDrawBlending(layer);
     setupDrawProgram();
     setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(layer->getColorFilter());
     if (layer->getRenderTarget() == GL_TEXTURE_2D) {
         setupDrawTexture(layer->getTexture());
     } else {
@@ -1117,10 +1116,14 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
             layer->setFilter(GL_LINEAR, true);
         }
 
-        float alpha = getLayerAlpha(layer);
-        bool blend = layer->isBlend() || alpha < 1.0f;
+        SkPaint layerPaint;
+        layerPaint.setAlpha(getLayerAlpha(layer) * 255);
+        layerPaint.setXfermodeMode(layer->getMode());
+        layerPaint.setColorFilter(layer->getColorFilter());
+
+        bool blend = layer->isBlend() || getLayerAlpha(layer) < 1.0f;
         drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
-                layer->getTexture(), alpha, layer->getMode(), blend,
+                layer->getTexture(), &layerPaint, blend,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, gMeshCount, swap, swap || simpleTransform);
 
@@ -1185,12 +1188,12 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 
         setupDrawWithTexture();
         setupDrawColor(alpha, alpha, alpha, alpha);
-        setupDrawColorFilter();
-        setupDrawBlending(layer->isBlend() || alpha < 1.0f, layer->getMode(), false);
+        setupDrawColorFilter(layer->getColorFilter());
+        setupDrawBlending(layer);
         setupDrawProgram();
         setupDrawDirtyRegionsDisabled();
         setupDrawPureColorUniforms();
-        setupDrawColorFilterUniforms();
+        setupDrawColorFilterUniforms(layer->getColorFilter());
         setupDrawTexture(layer->getTexture());
         if (currentTransform()->isPureTranslate()) {
             const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
@@ -1262,15 +1265,15 @@ void OpenGLRenderer::drawRegionRectsDebug(const Region& region) {
             top = rects[i].top;
         }
 
+        SkPaint paint;
+        paint.setColor(colors[offset + (i & 0x1)]);
         Rect r(rects[i].left, rects[i].top, rects[i].right, rects[i].bottom);
-        drawColorRect(r.left, r.top, r.right, r.bottom, colors[offset + (i & 0x1)],
-                SkXfermode::kSrcOver_Mode);
+        drawColorRect(r.left, r.top, r.right, r.bottom, paint);
     }
 }
 #endif
 
-void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
-        SkXfermode::Mode mode, bool dirty) {
+void OpenGLRenderer::drawRegionRects(const SkRegion& region, const SkPaint& paint, bool dirty) {
     Vector<float> rects;
 
     SkRegion::Iterator it(region);
@@ -1283,7 +1286,7 @@ void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
         it.next();
     }
 
-    drawColorRects(rects.array(), rects.size(), color, mode, true, dirty, false);
+    drawColorRects(rects.array(), rects.size(), &paint, true, dirty, false);
 }
 
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
@@ -1360,9 +1363,12 @@ void OpenGLRenderer::clearLayerRegions() {
         // the same thing again
         mLayers.clear();
 
+        SkPaint clearPaint;
+        clearPaint.setXfermodeMode(SkXfermode::kClear_Mode);
+
         setupDraw(false);
         setupDrawColor(0.0f, 0.0f, 0.0f, 1.0f);
-        setupDrawBlending(true, SkXfermode::kClear_Mode);
+        setupDrawBlending(&clearPaint, true);
         setupDrawProgram();
         setupDrawPureColorUniforms();
         setupDrawModelView(kModelViewMode_Translate, false,
@@ -1521,22 +1527,26 @@ void OpenGLRenderer::setStencilFromClip() {
             mCaches.stencil.clear();
             if (resetScissor) mCaches.disableScissor();
 
+            SkPaint paint;
+            paint.setColor(0xff000000);
+            paint.setXfermodeMode(SkXfermode::kSrc_Mode);
+
             // NOTE: We could use the region contour path to generate a smaller mesh
             //       Since we are using the stencil we could use the red book path
             //       drawing technique. It might increase bandwidth usage though.
 
             // The last parameter is important: we are not drawing in the color buffer
             // so we don't want to dirty the current layer, if any
-            drawRegionRects(*(currentSnapshot()->clipRegion),
-                    0xff000000, SkXfermode::kSrc_Mode, false);
+            drawRegionRects(*(currentSnapshot()->clipRegion), paint, false);
 
             mCaches.stencil.enableTest();
 
             // Draw the region used to generate the stencil if the appropriate debug
             // mode is enabled
             if (mCaches.debugStencilClip == Caches::kStencilShowRegion) {
-                drawRegionRects(*(currentSnapshot()->clipRegion),
-                        0x7f0000ff, SkXfermode::kSrcOver_Mode);
+                paint.setColor(0x7f0000ff);
+                paint.setXfermodeMode(SkXfermode::kSrcOver_Mode);
+                drawRegionRects(*(currentSnapshot()->clipRegion), paint);
             }
         } else {
             mCaches.stencil.disable();
@@ -1577,7 +1587,10 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
 void OpenGLRenderer::debugClip() {
 #if DEBUG_CLIP_REGIONS
     if (!isRecording() && !currentSnapshot()->clipRegion->isEmpty()) {
-        drawRegionRects(*(currentSnapshot()->clipRegion), 0x7f00ff00, SkXfermode::kSrcOver_Mode);
+        SkPaint paint;
+        paint.setColor(0x7f00ff00);
+        drawRegionRects(*(currentSnapshot()->clipRegion, paint);
+
     }
 #endif
 }
@@ -1676,9 +1689,17 @@ void OpenGLRenderer::setupDrawShader() {
     }
 }
 
-void OpenGLRenderer::setupDrawColorFilter() {
-    if (mDrawModifiers.mColorFilter) {
-        mDrawModifiers.mColorFilter->describe(mDescription, mExtensions);
+void OpenGLRenderer::setupDrawColorFilter(const SkColorFilter* filter) {
+    if (filter == NULL) {
+        return;
+    }
+
+    SkXfermode::Mode mode;
+    if (filter->asColorMode(NULL, &mode)) {
+        mDescription.colorOp = ProgramDescription::kColorBlend;
+        mDescription.colorMode = mode;
+    } else if (filter->asColorMatrix(NULL)) {
+        mDescription.colorOp = ProgramDescription::kColorMatrix;
     }
 }
 
@@ -1690,22 +1711,26 @@ void OpenGLRenderer::accountForClear(SkXfermode::Mode mode) {
     }
 }
 
-void OpenGLRenderer::setupDrawBlending(SkXfermode::Mode mode, bool swapSrcDst) {
+void OpenGLRenderer::setupDrawBlending(const Layer* layer, bool swapSrcDst) {
+    SkXfermode::Mode mode = layer->getMode();
     // When the blending mode is kClear_Mode, we need to use a modulate color
     // argb=1,0,0,0
     accountForClear(mode);
-    bool blend = (mColorSet && mColorA < 1.0f) ||
-            (mDrawModifiers.mShader && mDrawModifiers.mShader->blend());
+    bool blend = layer->isBlend() || getLayerAlpha(layer) < 1.0f ||
+            (mColorSet && mColorA < 1.0f) ||
+            (mDrawModifiers.mShader && mDrawModifiers.mShader->blend()) ||
+            layer->getColorFilter();
     chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
-void OpenGLRenderer::setupDrawBlending(bool blend, SkXfermode::Mode mode, bool swapSrcDst) {
+void OpenGLRenderer::setupDrawBlending(const SkPaint* paint, bool blend, bool swapSrcDst) {
+    SkXfermode::Mode mode = getXfermodeDirect(paint);
     // When the blending mode is kClear_Mode, we need to use a modulate color
     // argb=1,0,0,0
     accountForClear(mode);
     blend |= (mColorSet && mColorA < 1.0f) ||
             (mDrawModifiers.mShader && mDrawModifiers.mShader->blend()) ||
-            (mDrawModifiers.mColorFilter && mDrawModifiers.mColorFilter->blend());
+            (paint && paint->getColorFilter());
     chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
@@ -1762,10 +1787,47 @@ void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
     }
 }
 
-void OpenGLRenderer::setupDrawColorFilterUniforms() {
-    if (mDrawModifiers.mColorFilter) {
-        mDrawModifiers.mColorFilter->setupProgram(mCaches.currentProgram);
+void OpenGLRenderer::setupDrawColorFilterUniforms(const SkColorFilter* filter) {
+    if (NULL == filter) {
+        return;
     }
+
+    SkColor color;
+    SkXfermode::Mode mode;
+    if (filter->asColorMode(&color, &mode)) {
+        const int alpha = SkColorGetA(color);
+        const GLfloat a = alpha / 255.0f;
+        const GLfloat r = a * SkColorGetR(color) / 255.0f;
+        const GLfloat g = a * SkColorGetG(color) / 255.0f;
+        const GLfloat b = a * SkColorGetB(color) / 255.0f;
+        glUniform4f(mCaches.currentProgram->getUniform("colorBlend"), r, g, b, a);
+        return;
+    }
+
+    SkScalar srcColorMatrix[20];
+    if (filter->asColorMatrix(srcColorMatrix)) {
+
+        float colorMatrix[16];
+        memcpy(colorMatrix, srcColorMatrix, 4 * sizeof(float));
+        memcpy(&colorMatrix[4], &srcColorMatrix[5], 4 * sizeof(float));
+        memcpy(&colorMatrix[8], &srcColorMatrix[10], 4 * sizeof(float));
+        memcpy(&colorMatrix[12], &srcColorMatrix[15], 4 * sizeof(float));
+
+        // Skia uses the range [0..255] for the addition vector, but we need
+        // the [0..1] range to apply the vector in GLSL
+        float colorVector[4];
+        colorVector[0] = srcColorMatrix[4] / 255.0f;
+        colorVector[1] = srcColorMatrix[9] / 255.0f;
+        colorVector[2] = srcColorMatrix[14] / 255.0f;
+        colorVector[3] = srcColorMatrix[19] / 255.0f;
+
+        glUniformMatrix4fv(mCaches.currentProgram->getUniform("colorMatrix"), 1,
+                GL_FALSE, colorMatrix);
+        glUniform4fv(mCaches.currentProgram->getUniform("colorMatrixVector"), 1, colorVector);
+        return;
+    }
+
+    // it is an error if we ever get here
 }
 
 void OpenGLRenderer::setupDrawTextGammaUniforms() {
@@ -1900,10 +1962,6 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
 }
 
 void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, const SkPaint* paint) {
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
     int color = paint != NULL ? paint->getColor() : 0;
 
     float x = left;
@@ -1925,7 +1983,7 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, co
     // No need to check for a UV mapper on the texture object, only ARGB_8888
     // bitmaps get packed in the atlas
     drawAlpha8TextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
-            paint != NULL, color, alpha, mode, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
+            paint, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
             GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
 }
 
@@ -1943,26 +2001,19 @@ status_t OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* 
 
     const AutoTexture autoCleanup(texture);
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
     texture->setFilter(pureTranslate ? GL_NEAREST : FILTER(paint), true);
 
     const float x = (int) floorf(bounds.left + 0.5f);
     const float y = (int) floorf(bounds.top + 0.5f);
     if (CC_UNLIKELY(bitmap->config() == SkBitmap::kA8_Config)) {
-        int color = paint != NULL ? paint->getColor() : 0;
         drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
-                texture->id, paint != NULL, color, alpha, mode,
-                &vertices[0].x, &vertices[0].u,
+                texture->id, paint, &vertices[0].x, &vertices[0].u,
                 GL_TRIANGLES, bitmapCount * 6, true,
                 kModelViewMode_Translate, false);
     } else {
         drawTextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
-                texture->id, alpha / 255.0f, mode, texture->blend,
-                &vertices[0].x, &vertices[0].u,
+                texture->id, paint, texture->blend, &vertices[0].x, &vertices[0].u,
                 GL_TRIANGLES, bitmapCount * 6, false, true, 0,
                 kModelViewMode_Translate, false);
     }
@@ -2142,14 +2193,14 @@ status_t OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, i
     setupDraw();
     setupDrawWithTextureAndColor();
     setupDrawColor(a, a, a, a);
-    setupDrawColorFilter();
-    setupDrawBlending(true, mode, false);
+    setupDrawColorFilter(getColorFilter(paint));
+    setupDrawBlending(paint, true);
     setupDrawProgram();
     setupDrawDirtyRegionsDisabled();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false, 0.0f, 0.0f, 1.0f, 1.0f);
     setupDrawTexture(texture->id);
     setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawMesh(&mesh[0].x, &mesh[0].u, &mesh[0].r);
 
     glDrawArrays(GL_TRIANGLES, 0, count);
@@ -2189,10 +2240,6 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
 
     mCaches.unbindMeshBuffer();
     resetDrawTextureTexCoords(u1, v1, u2, v2);
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
@@ -2235,14 +2282,13 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
     }
 
     if (CC_UNLIKELY(bitmap->config() == SkBitmap::kA8_Config)) {
-        int color = paint ? paint->getColor() : 0;
         drawAlpha8TextureMesh(dstLeft, dstTop, dstRight, dstBottom,
-                texture->id, paint != NULL, color, alpha, mode,
+                texture->id, paint,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
     } else {
         drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom,
-                texture->id, alpha / 255.0f, mode, texture->blend,
+                texture->id, paint, texture->blend,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, gMeshCount, false, ignoreTransform);
     }
@@ -2285,10 +2331,6 @@ status_t OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
         texture->setWrap(GL_CLAMP_TO_EDGE, true);
         texture->setFilter(GL_LINEAR, true);
 
-        int alpha;
-        SkXfermode::Mode mode;
-        getAlphaAndMode(paint, &alpha, &mode);
-
         const bool pureTranslate = currentTransform()->isPureTranslate();
         // Mark the current layer dirty where we are going to draw the patch
         if (hasLayer() && mesh->hasEmptyQuads) {
@@ -2319,8 +2361,8 @@ status_t OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
             top = y;
             ignoreTransform = true;
         }
-        drawIndexedTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
-                mode, texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
+        drawIndexedTextureMesh(left, top, right, bottom, texture->id, paint,
+                texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
                 GL_TRIANGLES, mesh->indexCount, false, ignoreTransform,
                 mCaches.patchCache.getMeshBuffer(), kModelViewMode_Translate, !mesh->hasEmptyQuads);
     }
@@ -2343,12 +2385,8 @@ status_t OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
     texture->setFilter(GL_LINEAR, true);
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    drawIndexedTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
-            mode, texture->blend, &vertices[0].x, &vertices[0].u,
+    drawIndexedTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, paint,
+            texture->blend, &vertices[0].x, &vertices[0].u,
             GL_TRIANGLES, indexCount, false, true, 0, kModelViewMode_Translate, false);
 
     return DrawGlInfo::kStatusDrew;
@@ -2364,20 +2402,19 @@ status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, cons
     }
 
     int color = paint->getColor();
-    SkXfermode::Mode mode = getXfermode(paint->getXfermode());
     bool isAA = paint->isAntiAlias();
 
     setupDraw();
     setupDrawNoTexture();
     if (isAA) setupDrawAA();
     setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
-    setupDrawColorFilter();
+    setupDrawColorFilter(getColorFilter(paint));
     setupDrawShader();
-    setupDrawBlending(isAA, mode);
+    setupDrawBlending(paint, isAA);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_Translate, useOffset, 0, 0, 0, 0);
     setupDrawColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms();
 
     const void* vertices = vertexBuffer.getBuffer();
@@ -2486,7 +2523,11 @@ status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     Rect clip(*currentClipRect());
     clip.snapToPixelBoundaries();
 
-    drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
+    SkPaint paint;
+    paint.setColor(color);
+    paint.setXfermodeMode(mode);
+
+    drawColorRect(clip.left, clip.top, clip.right, clip.bottom, &paint, true);
 
     return DrawGlInfo::kStatusDrew;
 }
@@ -2642,14 +2683,14 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
         path.addRect(left, top, right, bottom);
         return drawConvexPath(path, p);
     } else {
-        drawColorRect(left, top, right, bottom, p->getColor(), getXfermode(p->getXfermode()));
+        drawColorRect(left, top, right, bottom, p);
         return DrawGlInfo::kStatusDrew;
     }
 }
 
 void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
         int bytesCount, int count, const float* positions,
-        FontRenderer& fontRenderer, int alpha, SkXfermode::Mode mode, float x, float y) {
+        FontRenderer& fontRenderer, int alpha, float x, float y) {
     mCaches.activeTexture(0);
 
     // NOTE: The drop shadow will not perform gamma correction
@@ -2674,15 +2715,15 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     setupDraw();
     setupDrawWithTexture(true);
     setupDrawAlpha8Color(shadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
-    setupDrawColorFilter();
+    setupDrawColorFilter(getColorFilter(paint));
     setupDrawShader();
-    setupDrawBlending(true, mode);
+    setupDrawBlending(paint, true);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false,
             sx, sy, sx + shadow->width, sy + shadow->height);
     setupDrawTexture(shadow->id);
     setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms();
     setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
@@ -2724,7 +2765,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
 
     if (CC_UNLIKELY(mDrawModifiers.mHasShadow)) {
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
-                alpha, mode, 0.0f, 0.0f);
+                alpha, 0.0f, 0.0f);
     }
 
     // Pick the appropriate texture filtering
@@ -2802,7 +2843,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     if (CC_UNLIKELY(mDrawModifiers.mHasShadow)) {
         fontRenderer.setFont(paint, mat4::identity());
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
-                alpha, mode, oldX, oldY);
+                alpha, oldX, oldY);
     }
 
     const bool hasActiveLayer = hasLayer();
@@ -2938,22 +2979,20 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
     mCaches.activeTexture(0);
 
     if (CC_LIKELY(!layer->region.isEmpty())) {
-        SkiaColorFilter* oldFilter = mDrawModifiers.mColorFilter;
-        mDrawModifiers.mColorFilter = layer->getColorFilter();
-
         if (layer->region.isRect()) {
             DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
                     composeLayerRect(layer, layer->regionRect));
         } else if (layer->mesh) {
+
             const float a = getLayerAlpha(layer);
             setupDraw();
             setupDrawWithTexture();
             setupDrawColor(a, a, a, a);
-            setupDrawColorFilter();
-            setupDrawBlending(layer->isBlend() || a < 1.0f, layer->getMode(), false);
+            setupDrawColorFilter(layer->getColorFilter());
+            setupDrawBlending(layer);
             setupDrawProgram();
             setupDrawPureColorUniforms();
-            setupDrawColorFilterUniforms();
+            setupDrawColorFilterUniforms(layer->getColorFilter());
             setupDrawTexture(layer->getTexture());
             if (CC_LIKELY(currentTransform()->isPureTranslate())) {
                 int tx = (int) floorf(x + currentTransform()->getTranslateX() + 0.5f);
@@ -2989,12 +3028,12 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
 #endif
         }
 
-        mDrawModifiers.mColorFilter = oldFilter;
-
         if (layer->debugDrawUpdate) {
             layer->debugDrawUpdate = false;
-            drawColorRect(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight(),
-                    0x7f00ff00, SkXfermode::kSrcOver_Mode);
+
+            SkPaint paint;
+            paint.setColor(0x7f00ff00);
+            drawColorRect(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight(), &paint);
         }
     }
     layer->hasDrawnSinceUpdate = true;
@@ -3019,18 +3058,6 @@ void OpenGLRenderer::setupShader(SkiaShader* shader) {
     if (mDrawModifiers.mShader) {
         mDrawModifiers.mShader->setCaches(mCaches);
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Color filters
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::resetColorFilter() {
-    mDrawModifiers.mColorFilter = NULL;
-}
-
-void OpenGLRenderer::setupColorFilter(SkiaColorFilter* filter) {
-    mDrawModifiers.mColorFilter = filter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3106,15 +3133,15 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
     setupDraw();
     setupDrawWithTexture(true);
     setupDrawAlpha8Color(paint->getColor(), alpha);
-    setupDrawColorFilter();
+    setupDrawColorFilter(getColorFilter(paint));
     setupDrawShader();
-    setupDrawBlending(true, mode);
+    setupDrawBlending(paint, true);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false,
             x, y, x + texture->width, y + texture->height);
     setupDrawTexture(texture->id);
     setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms();
     setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
@@ -3176,14 +3203,7 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, const SkPaint*
         return DrawGlInfo::kStatusDone;
     }
 
-    int color = paint->getColor();
-    // If a shader is set, preserve only the alpha
-    if (mDrawModifiers.mShader) {
-        color |= 0x00ffffff;
-    }
-    SkXfermode::Mode mode = getXfermode(paint->getXfermode());
-
-    return drawColorRects(rects, count, color, mode);
+    return drawColorRects(rects, count, paint, false, true, true);
 }
 
 status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlpha,
@@ -3235,10 +3255,16 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,
-        SkXfermode::Mode mode, bool ignoreTransform, bool dirty, bool clip) {
+status_t OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint* paint,
+        bool ignoreTransform, bool dirty, bool clip) {
     if (count == 0) {
         return DrawGlInfo::kStatusDone;
+    }
+
+    int color = paint->getColor();
+    // If a shader is set, preserve only the alpha
+    if (mDrawModifiers.mShader) {
+        color |= 0x00ffffff;
     }
 
     float left = FLT_MAX;
@@ -3274,15 +3300,15 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     setupDrawNoTexture();
     setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
     setupDrawShader();
-    setupDrawColorFilter();
-    setupDrawBlending(mode);
+    setupDrawColorFilter(getColorFilter(paint));
+    setupDrawBlending(paint);
     setupDrawProgram();
     setupDrawDirtyRegionsDisabled();
     setupDrawModelView(kModelViewMode_Translate, false,
             0.0f, 0.0f, 0.0f, 0.0f, ignoreTransform);
     setupDrawColorUniforms();
     setupDrawShaderUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
 
     if (dirty && hasLayer()) {
         dirtyLayer(left, top, right, bottom, *currentTransform());
@@ -3294,7 +3320,8 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
 }
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
-        int color, SkXfermode::Mode mode, bool ignoreTransform) {
+        const SkPaint* paint, bool ignoreTransform) {
+    int color = paint->getColor();
     // If a shader is set, preserve only the alpha
     if (mDrawModifiers.mShader) {
         color |= 0x00ffffff;
@@ -3304,14 +3331,14 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     setupDrawNoTexture();
     setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
     setupDrawShader();
-    setupDrawColorFilter();
-    setupDrawBlending(mode);
+    setupDrawColorFilter(getColorFilter(paint));
+    setupDrawBlending(paint);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false,
             left, top, right, bottom, ignoreTransform);
     setupDrawColorUniforms();
     setupDrawShaderUniforms(ignoreTransform);
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawSimpleMesh();
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -3319,10 +3346,6 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
         Texture* texture, const SkPaint* paint) {
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
     GLvoid* vertices = (GLvoid*) NULL;
@@ -3344,11 +3367,11 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
         texture->setFilter(GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
-                alpha / 255.0f, mode, texture->blend, vertices, texCoords,
+                paint, texture->blend, vertices, texCoords,
                 GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
         texture->setFilter(FILTER(paint), true);
-        drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
+        drawTextureMesh(left, top, right, bottom, texture->id, paint,
                 texture->blend, vertices, texCoords, GL_TRIANGLE_STRIP, gMeshCount);
     }
 
@@ -3357,75 +3380,84 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     }
 }
 
-void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend) {
-    drawTextureMesh(left, top, right, bottom, texture, alpha, mode, blend,
-            (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount);
-}
-
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
-        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
+        GLuint texture, const SkPaint* paint, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
         bool swapSrcDst, bool ignoreTransform, GLuint vbo,
         ModelViewMode modelViewMode, bool dirty) {
 
+    int a;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &a, &mode);
+    const float alpha = a / 255.0f;
+
     setupDraw();
     setupDrawWithTexture();
     setupDrawColor(alpha, alpha, alpha, alpha);
-    setupDrawColorFilter();
-    setupDrawBlending(blend, mode, swapSrcDst);
+    setupDrawColorFilter(getColorFilter(paint));
+    setupDrawBlending(paint, blend, swapSrcDst);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
     setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawMesh(vertices, texCoords, vbo);
 
     glDrawArrays(drawMode, 0, elementsCount);
 }
 
 void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, float bottom,
-        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
+        GLuint texture, const SkPaint* paint, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
         bool swapSrcDst, bool ignoreTransform, GLuint vbo,
         ModelViewMode modelViewMode, bool dirty) {
 
+    int a;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &a, &mode);
+    const float alpha = a / 255.0f;
+
     setupDraw();
     setupDrawWithTexture();
     setupDrawColor(alpha, alpha, alpha, alpha);
-    setupDrawColorFilter();
-    setupDrawBlending(blend, mode, swapSrcDst);
+    setupDrawColorFilter(getColorFilter(paint));
+    setupDrawBlending(paint, blend, swapSrcDst);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
     setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawMeshIndices(vertices, texCoords, vbo);
 
     glDrawElements(drawMode, elementsCount, GL_UNSIGNED_SHORT, NULL);
 }
 
 void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, float bottom,
-        GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
+        GLuint texture, const SkPaint* paint,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
         bool ignoreTransform, ModelViewMode modelViewMode, bool dirty) {
 
+    int color = paint != NULL ? paint->getColor() : 0;
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
     setupDraw();
     setupDrawWithTexture(true);
-    if (hasColor) {
+    if (paint != NULL) {
         setupDrawAlpha8Color(color, alpha);
     }
-    setupDrawColorFilter();
+    setupDrawColorFilter(getColorFilter(paint));
     setupDrawShader();
-    setupDrawBlending(true, mode);
+    setupDrawBlending(paint, true);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
     setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
+    setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms(ignoreTransform);
     setupDrawMesh(vertices, texCoords);
 
@@ -3516,7 +3548,7 @@ void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermod
     *alpha *= currentSnapshot()->alpha;
 }
 
-float OpenGLRenderer::getLayerAlpha(Layer* layer) const {
+float OpenGLRenderer::getLayerAlpha(const Layer* layer) const {
     float alpha;
     if (mDrawModifiers.mOverrideLayerAlpha < 1.0f) {
         alpha = mDrawModifiers.mOverrideLayerAlpha;

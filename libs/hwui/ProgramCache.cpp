@@ -148,15 +148,12 @@ const char* gFS_Uniforms_GradientSampler[2] = {
 };
 const char* gFS_Uniforms_BitmapSampler =
         "uniform sampler2D bitmapSampler;\n";
-const char* gFS_Uniforms_ColorOp[4] = {
+const char* gFS_Uniforms_ColorOp[3] = {
         // None
         "",
         // Matrix
         "uniform mat4 colorMatrix;\n"
         "uniform vec4 colorMatrixVector;\n",
-        // Lighting
-        "uniform vec4 lightingMul;\n"
-        "uniform vec4 lightingAdd;\n",
         // PorterDuff
         "uniform vec4 colorBlend;\n"
 };
@@ -311,17 +308,13 @@ const char* gFS_Main_FragColor_Blend =
         "    gl_FragColor = blendFramebuffer(fragColor, gl_LastFragColor);\n";
 const char* gFS_Main_FragColor_Blend_Swap =
         "    gl_FragColor = blendFramebuffer(gl_LastFragColor, fragColor);\n";
-const char* gFS_Main_ApplyColorOp[4] = {
+const char* gFS_Main_ApplyColorOp[3] = {
         // None
         "",
         // Matrix
         "    fragColor *= colorMatrix;\n"
         "    fragColor += colorMatrixVector;\n"
         "    fragColor.rgb *= fragColor.a;\n",
-        // Lighting
-        "    float lightingAlpha = fragColor.a;\n"
-        "    fragColor = min(fragColor * lightingMul + (lightingAdd * lightingAlpha), lightingAlpha);\n"
-        "    fragColor.a = lightingAlpha;\n",
         // PorterDuff
         "    fragColor = blendColors(colorBlend, fragColor);\n"
 };

@@ -72,9 +72,9 @@ status_t TextSetupFunctor::operator ()(int what, void* data) {
             break;
         }
     }
-    renderer->setupDrawColorFilter();
+    renderer->setupDrawColorFilter(paint->getColorFilter());
     renderer->setupDrawShader();
-    renderer->setupDrawBlending(true, mode);
+    renderer->setupDrawBlending(paint);
     renderer->setupDrawProgram();
     renderer->setupDrawModelView(kModelViewMode_Translate, false,
             0.0f, 0.0f, 0.0f, 0.0f, pureTranslate);
@@ -84,7 +84,7 @@ status_t TextSetupFunctor::operator ()(int what, void* data) {
     // needed
     renderer->setupDrawTexture(0);
     renderer->setupDrawPureColorUniforms();
-    renderer->setupDrawColorFilterUniforms();
+    renderer->setupDrawColorFilterUniforms(paint->getColorFilter());
     renderer->setupDrawShaderUniforms(pureTranslate);
     renderer->setupDrawTextGammaUniforms();
 

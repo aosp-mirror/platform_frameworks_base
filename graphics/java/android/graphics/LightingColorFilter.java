@@ -99,11 +99,9 @@ public class LightingColorFilter extends ColorFilter {
     }
 
     private void update() {
-        destroyFilter(native_instance, nativeColorFilter);
+        destroyFilter(native_instance);
         native_instance = native_CreateLightingFilter(mMul, mAdd);
-        nativeColorFilter = nCreateLightingFilter(native_instance, mMul, mAdd);
     }
 
     private static native long native_CreateLightingFilter(int mul, int add);
-    private static native long nCreateLightingFilter(long nativeFilter, int mul, int add);
 }

@@ -178,9 +178,6 @@ public:
     virtual void resetShader() = 0;
     virtual void setupShader(SkiaShader* shader) = 0;
 
-    virtual void resetColorFilter() = 0;
-    virtual void setupColorFilter(SkiaColorFilter* filter) = 0;
-
     virtual void resetShadow() = 0;
     virtual void setupShadow(float radius, float dx, float dy, int color) = 0;
 

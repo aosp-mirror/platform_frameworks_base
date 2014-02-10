@@ -39,7 +39,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		RenderBufferCache.cpp \
 		ResourceCache.cpp \
 		ShadowTessellator.cpp \
-		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
 		Snapshot.cpp \
 		SpotShadow.cpp \

@@ -114,11 +114,9 @@ public class ColorMatrixColorFilter extends ColorFilter {
 
     private void update() {
         final float[] colorMatrix = mMatrix.getArray();
-        destroyFilter(native_instance, nativeColorFilter);
+        destroyFilter(native_instance);
         native_instance = nativeColorMatrixFilter(colorMatrix);
-        nativeColorFilter = nColorMatrixFilter(native_instance, colorMatrix);
     }
 
     private static native long nativeColorMatrixFilter(float[] array);
-    private static native long nColorMatrixFilter(long nativeFilter, float[] array);
 }
