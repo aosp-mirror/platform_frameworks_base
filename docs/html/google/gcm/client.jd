@@ -75,7 +75,7 @@ If you're using Android Studio, this is the string to add to the
 {@code dependency} section of your application's {@code build.gradle} file:</p>
 
 <pre>dependencies {
-   compile: "com.google.android.gms:play-services:3.1.+"
+  compile "com.google.android.gms:play-services:3.1.+"
 }
 </pre>
 
