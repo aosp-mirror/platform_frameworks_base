@@ -2385,6 +2385,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_FITTING_SYSTEM_WINDOWS = 0x80;
 
+    /**
+     * Flag indicating that an view will cast a shadow onto the Z=0 plane if elevated.
+     */
+    static final int PFLAG3_CASTS_SHADOW = 0x100;
+
+    /**
+     * Flag indicating that view will be transformed by the global camera if rotated in 3d, or given
+     * a non-0 Z translation.
+     */
+    static final int PFLAG3_SHARES_GLOBAL_CAMERA = 0x200;
+
     /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
@@ -10828,6 +10839,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    public final boolean getClipToOutline() {
+        return ((mPrivateFlags3 & PFLAG3_CLIP_TO_OUTLINE) != 0);
+    }
+
+    /**
+     * @hide
+     */
     public void setClipToOutline(boolean clipToOutline) {
         // TODO : Add a fast invalidation here.
         if (getClipToOutline() != clipToOutline) {
@@ -10845,8 +10863,49 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    public final boolean getClipToOutline() {
-        return ((mPrivateFlags3 & PFLAG3_CLIP_TO_OUTLINE) != 0);
+    public final boolean getCastsShadow() {
+        return ((mPrivateFlags3 & PFLAG3_CASTS_SHADOW) != 0);
+    }
+
+    /**
+     * @hide
+     */
+    public void setCastsShadow(boolean castsShadow) {
+        // TODO : Add a fast invalidation here.
+        if (getCastsShadow() != castsShadow) {
+            if (castsShadow) {
+                mPrivateFlags3 |= PFLAG3_CASTS_SHADOW;
+            } else {
+                mPrivateFlags3 &= ~PFLAG3_CASTS_SHADOW;
+            }
+            if (mDisplayList != null) {
+                mDisplayList.setCastsShadow(castsShadow);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final boolean getSharesGlobalCamera() {
+        return ((mPrivateFlags3 & PFLAG3_SHARES_GLOBAL_CAMERA) != 0);
+    }
+
+    /**
+     * @hide
+     */
+    public void setSharesGlobalCamera(boolean sharesGlobalCamera) {
+        // TODO : Add a fast invalidation here.
+        if (getSharesGlobalCamera() != sharesGlobalCamera) {
+            if (sharesGlobalCamera) {
+                mPrivateFlags3 |= PFLAG3_SHARES_GLOBAL_CAMERA;
+            } else {
+                mPrivateFlags3 &= ~PFLAG3_SHARES_GLOBAL_CAMERA;
+            }
+            if (mDisplayList != null) {
+                mDisplayList.setSharesGlobalCamera(sharesGlobalCamera);
+            }
+        }
     }
 
     /**
@@ -14502,6 +14561,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             displayList.setOutline(mOutline);
             displayList.setClipToOutline(getClipToOutline());
+            displayList.setCastsShadow(getCastsShadow());
+            displayList.setSharesGlobalCamera(getSharesGlobalCamera());
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
                     ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
