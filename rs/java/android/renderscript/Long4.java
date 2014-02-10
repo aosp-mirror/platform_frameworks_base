@@ -505,7 +505,7 @@ public class Long4 {
      * @param data
      * @param offset
      */
-    public void copyTo(Long[] data, int offset) {
+    public void copyTo(long[] data, int offset) {
         data[offset] = (long)(x);
         data[offset + 1] = (long)(y);
         data[offset + 2] = (long)(z);
