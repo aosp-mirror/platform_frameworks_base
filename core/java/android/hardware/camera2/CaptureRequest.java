@@ -472,7 +472,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * <p>If AE precapture is triggered (see {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger})
      * when AE is already locked, the camera device will not change the exposure time
      * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}) and sensitivity ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
-     * parameters. The flash may be fired if the android.control.aeMode
+     * parameters. The flash may be fired if the {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}
      * is ON_AUTO_FLASH/ON_AUTO_FLASH_REDEYE and the scene is too dark. If the
      * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is ON_ALWAYS_FLASH, the scene may become overexposed.</p>
      * <p>See {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE lock related state transition details.</p>
@@ -581,9 +581,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * mode it is set to</p>
      * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO.</p>
      * <p>If the lens is controlled by the camera device auto-focus algorithm,
-     * the camera device will report the current AF status in android.control.afState
+     * the camera device will report the current AF status in {@link CaptureResult#CONTROL_AF_STATE android.control.afState}
      * in result metadata.</p>
      *
+     * @see CaptureResult#CONTROL_AF_STATE
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AF_MODE_OFF
      * @see #CONTROL_AF_MODE_AUTO
@@ -658,7 +659,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
      * <p>When set to the OFF mode, the camera device's auto white balance
      * routine is disabled. The applicantion manually controls the white
-     * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, android.colorCorrection.gains
+     * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}
      * and {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
      * <p>When set to any other modes, the camera device's auto white balance
      * routine is disabled. The camera device uses each particular illumination
@@ -944,7 +945,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * one of the values listed in {@link CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES android.lens.info.availableApertures}.</p>
      * <p>When this is supported and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is OFF,
      * this can be set along with {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
-     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and android.sensor.frameDuration
+     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}
      * to achieve manual exposure control.</p>
      * <p>The requested aperture value may take several frames to reach the
      * requested value; the camera device will report the current (intermediate)
@@ -959,6 +960,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureResult#LENS_STATE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     public static final Key<Float> LENS_APERTURE =
@@ -1091,9 +1093,11 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * for raw output, where only a few fixed scales may be
      * possible. The width and height of the crop region cannot
      * be set to be smaller than floor( activeArraySize.width /
-     * android.scaler.maxDigitalZoom ) and floor(
-     * activeArraySize.height / android.scaler.maxDigitalZoom),
-     * respectively.</p>
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom} ) and floor(
+     * activeArraySize.height /
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom}), respectively.</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
      */
     public static final Key<android.graphics.Rect> SCALER_CROP_REGION =
             new Key<android.graphics.Rect>("android.scaler.cropRegion", android.graphics.Rect.class);

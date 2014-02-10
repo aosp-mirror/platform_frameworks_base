@@ -391,9 +391,10 @@ public final class CaptureResult extends CameraMetadata {
      * mode it is set to</p>
      * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO.</p>
      * <p>If the lens is controlled by the camera device auto-focus algorithm,
-     * the camera device will report the current AF status in android.control.afState
+     * the camera device will report the current AF status in {@link CaptureResult#CONTROL_AF_STATE android.control.afState}
      * in result metadata.</p>
      *
+     * @see CaptureResult#CONTROL_AF_STATE
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AF_MODE_OFF
      * @see #CONTROL_AF_MODE_AUTO
@@ -771,7 +772,7 @@ public final class CaptureResult extends CameraMetadata {
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
      * <p>When set to the OFF mode, the camera device's auto white balance
      * routine is disabled. The applicantion manually controls the white
-     * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, android.colorCorrection.gains
+     * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}
      * and {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
      * <p>When set to any other modes, the camera device's auto white balance
      * routine is disabled. The camera device uses each particular illumination
@@ -1019,8 +1020,9 @@ public final class CaptureResult extends CameraMetadata {
      * of the pixel array, and the width,height of the pixel array given in
      * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.  This may include hot pixels
      * that lie outside of the active array bounds given by
-     * android.sensor.activeArraySize.</p>
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
      *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      */
     public static final Key<int[]> HOT_PIXEL_MAP =
@@ -1099,7 +1101,7 @@ public final class CaptureResult extends CameraMetadata {
      * one of the values listed in {@link CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES android.lens.info.availableApertures}.</p>
      * <p>When this is supported and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is OFF,
      * this can be set along with {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
-     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and android.sensor.frameDuration
+     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}
      * to achieve manual exposure control.</p>
      * <p>The requested aperture value may take several frames to reach the
      * requested value; the camera device will report the current (intermediate)
@@ -1114,6 +1116,7 @@ public final class CaptureResult extends CameraMetadata {
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_APERTURES
      * @see CaptureResult#LENS_STATE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     public static final Key<Float> LENS_APERTURE =
@@ -1325,9 +1328,11 @@ public final class CaptureResult extends CameraMetadata {
      * for raw output, where only a few fixed scales may be
      * possible. The width and height of the crop region cannot
      * be set to be smaller than floor( activeArraySize.width /
-     * android.scaler.maxDigitalZoom ) and floor(
-     * activeArraySize.height / android.scaler.maxDigitalZoom),
-     * respectively.</p>
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom} ) and floor(
+     * activeArraySize.height /
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM android.scaler.availableMaxDigitalZoom}), respectively.</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
      */
     public static final Key<android.graphics.Rect> SCALER_CROP_REGION =
             new Key<android.graphics.Rect>("android.scaler.cropRegion", android.graphics.Rect.class);
@@ -1738,7 +1743,7 @@ public final class CaptureResult extends CameraMetadata {
      * (<code>{@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} == OFF</code> or <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == OFF</code>),
      * the {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} doesn't do the antibanding, and the
      * application can ensure it selects exposure times that do not cause banding
-     * issues by looking into this metadata field. See android.control.aeAntibandingMode
+     * issues by looking into this metadata field. See {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode}
      * for more details.</p>
      * <p>Report NONE if there doesn't appear to be flickering illumination.</p>
      *
