@@ -193,6 +193,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libui \
 	libgui \
 	libinput \
+	libinputflinger \
 	libcamera_client \
 	libcamera_metadata \
 	libskia \
