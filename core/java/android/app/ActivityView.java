@@ -77,7 +77,7 @@ public class ActivityView extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        mTextureView.layout(l, t, r, b);
+        mTextureView.layout(0, 0, r - l, b - t);
     }
 
     @Override
