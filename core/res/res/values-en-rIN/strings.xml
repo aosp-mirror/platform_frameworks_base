@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"manage trusted credentials"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Allows the app to install and uninstall CA certificates as trusted credentials."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"bind to idle services"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Allows the app to interact with application-defined idle services."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"This permission allows the Android system to bind to an application\'s idle services."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"read/write to resources owned by diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Allows the app to read and write to any resource owned by the diag group; for example, files in /dev. This could potentially affect system stability and security. This should ONLY be used for hardware-specific diagnostics by the manufacturer or operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"enable or disable app components"</string>

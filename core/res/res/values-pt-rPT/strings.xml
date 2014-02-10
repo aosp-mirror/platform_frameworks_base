@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gerir credenciais fidedignas"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que a aplicação instale e desinstale certificados da AC (Autoridade de certificação) como credenciais fidedignas."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"associar a serviços inativos"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Permite que a aplicação interaja com serviços inativos definidos pela aplicação."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Esta autorização permite que o sistema Android seja vinculado aos serviços inativos de uma aplicação."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ler/escrever em recursos propriedade de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite à aplicação ler e escrever em qualquer recurso que seja propriedade do grupo diag; por exemplo, ficheiros em /dev. Isto pode potencialmente afetar a estabilidade e a segurança do sistema e deve ser utilizado APENAS para diagnósticos específicos do hardware pelo fabricante ou pelo operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ativar ou desativar componentes da aplicação"</string>

@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"správa důvěryhodných identifikačních údajů"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Umožňuje aplikaci instalovat a odinstalovat certifikáty CA jako důvěryhodné identifikační údaje."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"napojit se na nečinné služby"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Umožňuje aplikaci ovlivňovat nečinné služby definované aplikacemi."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Toto oprávnění umožní systému Android vázat se na nečinné služby aplikace."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat POUZE výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivace či deaktivace komponent aplikací"</string>

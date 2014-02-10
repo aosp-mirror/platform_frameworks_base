@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"vertrouwde inloggegevens beheren"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Hiermee kan de app CA-certificaten installeren en verwijderen als vertrouwde inloggegevens."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"koppelen aan inactieve services"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Staat interactie toe tussen de app en door de app gedefinieerde inactieve services."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Met deze toestemming kan het Android-systeem koppelen aan de inactieve services van een app."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lezen/schrijven naar bronnen van diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Hiermee kan de app lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of provider."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"componenten van apps in- of uitschakelen"</string>
@@ -1493,7 +1493,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Draadloze weergave"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Media-uitvoer"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Verbinding maken met apparaat"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Scherm sturen naar apparaat"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Scherm casten naar apparaat"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Zoeken naar apparaten…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Instellingen"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Verbinding verbreken"</string>

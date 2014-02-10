@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Mengizinkan apl menggunakan pengawasandi media apa pun yang terpasang guna mengawasandikan media untuk diputar."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"kelola kredensial tepercaya"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Izinkan aplikasi memasang dan mencopot pemasangan sertifikat CA sebagai kredensial tepercaya."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"mengikat ke layanan nganggur"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Memungkinkan aplikasi berinteraksi dengan layanan nganggur yang ditetapkan oleh aplikasi."</string>
+    <string name="permlab_bindIdleService" msgid="7521398788076342815">"mengikat ke layanan yang sedang menganggur"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Izin ini memungkinkan sistem Android mengikat layanan waktu menganggur aplikasi."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"baca/tulis ke sumber daya yang dimiliki oleh diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Mengizinkan apl membaca dan menulis ke sumber daya apa pun yang dimiliki oleh grup diag; misalnya, file dalam /dev. Izin ini berpotensi memengaruhi kestabilan dan keamanan sistem. Sebaiknya ini HANYA digunakan untuk diagnosis khusus perangkat keras oleh pabrikan atau operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"mengaktifkan atau menonaktifkan komponen apl"</string>

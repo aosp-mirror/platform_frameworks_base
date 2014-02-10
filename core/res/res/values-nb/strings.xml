@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrer pålitelig legitimasjon"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Lar appen installere og avinstallere CA-sertifikater som pålitelig legitimasjon."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"knytt til inaktive tjenester"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Lar appen samhandle med app-definerte inaktive apptjenester."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Denne tillatelsen gjør at Android-systemet kan binde seg til appers inaktive tjenester."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lar appen lese og skrive til alle ressurser som eies av gruppen «diag», som for eksempel filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør BARE brukes av produsenten eller operatøren til maskinvarespesifikk diagnostikk."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>

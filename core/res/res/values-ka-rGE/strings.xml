@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"აპს დასაკრავად შეეძლება გამოიყენოს ნებისმიერი დაყენებული მედია დეკოდერი."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"სანდო მტკიცებულებების მართვა"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"აპისთვის ნების დართვა, მოახდინოს CA სერტიფიკატების სანდო მტკიცებულებებად ინსტალაცია და დეინსტალაცია."</string>
-    <!-- no translation found for permlab_bindIdleService (7521398788076342815) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (3062157929989572890) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="7521398788076342815">"უქმე სერვისებზე მიბმა"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"ეს უფლება საშუალებას აძლევს Android-ის სისტემას, განახორციელოს აპლიკაციის უქმე სერვისების მიბმა."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"სისტემის დიაგნოსტიკის რესურსებში წაკითხვა/ჩაწერის უფლება"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"აპს შეეძლება, წაიკითხოს ან ჩაწეროს ნებისმიერ რესურსში, რომელიც დიაგნოსტიკის ჯგუფს ეკუთვნის, მაგალითად, ფაილები /dev-ში. ამან შესაძლოა იმოქმედოს სისტემის სტაბილურობასა და უსაფრთხოებაზე. მისი გამოყენება მხოლოდ მწარმოებლის ან ოპერატორის მიერ ტექნიკის სპეციფიკური დიაგნოსტიკისთვის უნდა მოხდეს."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"აპის კომპონენტების ჩართვა ან გამორთვა"</string>

@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"信頼できる認証情報の管理"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"CA証明書を信頼できる認証情報としてインストールしたりアンインストールしたりすることをアプリに許可します。"</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"アイドルサービスへのバインディング"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"アプリ定義のアイドルサービスとの通信をアプリに許可します。"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"この許可により、Androidシステムはアプリのアイドルサービスにバインディングできるようになります。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diagが所有するリソースの読み書き"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"diagグループが所有するリソース（/dev内のファイルなど）の読み書きをアプリに許可します。許可すると、システムの安定性とセキュリティに影響が生じる可能性があります。メーカー/通信事業者によるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"アプリのコンポーネントの有効/無効化"</string>

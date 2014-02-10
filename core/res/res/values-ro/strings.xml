@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite aplicaţiei să utilizeze orice decodor media instalat pentru a decodifica redarea."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestionarea acreditărilor de încredere"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite aplicației să instaleze și să dezinstaleze certificate CA ca acreditări de încredere."</string>
-    <!-- no translation found for permlab_bindIdleService (7521398788076342815) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (3062157929989572890) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="7521398788076342815">"asociați cu serviciile inactive"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Această autorizare permite sistemului Android să se conecteze la serviciile inactive ale unei aplicații."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite aplicaţiei să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată NUMAI de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>

@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"megbízható tanúsítványok kezelése"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Lehetővé teszi az alkalmazás számára a CA tanúsítványok telepítését és eltávolítását."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"csatolás tétlen szolgáltatásokhoz"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Engedélyezi az alkalmazás kommunikációját az alkalmazás által meghatározott, tétlen szolgáltatásokkal."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Ez az engedély lehetővé teszi az Android számára, hogy összekapcsolódjon egy alkalmazás tétlen szolgáltatásaival."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"a diag tulajdonában lévő erőforrások olvasása és írása"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lehetővé teszi egy alkalmazás számára, hogy olvassa és írja a diagnosztikai csoport minden erőforrását, például a /dev könyvtárban lévő fájlokat. Ez potenciálisan befolyásolhatja a rendszer stabilitását és biztonságát, ezért CSAK a gyártó vagy a szolgáltató használhatja hardverspecifikus diagnosztizálásra."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"alkalmazáskomponensek be- és kikapcsolása"</string>

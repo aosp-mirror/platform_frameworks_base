@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"신뢰할 수 있는 자격증명 관리"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"앱에서 CA 인증서를 신뢰할 수 있는 자격증명으로 설치 및 제거하도록 허용합니다."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"유휴 서비스에 연결"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"애플리케이션 정의 유휴 서비스와 앱이 상호작용하도록 허용합니다."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"이 권한을 부여하면 Android 시스템이 애플리케이션의 유휴 서비스에 연결할 수 있습니다."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"앱이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 허용합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"앱 구성요소 사용 또는 사용 안함"</string>

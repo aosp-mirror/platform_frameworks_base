@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"tvarkyti patikimus prisijungimo duomenis"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Programoje galima įdiegti ir iš jos pašalinti CA sertifikatus kaip patikimus prisijungimo duomenis."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"susaistyti su neaktyviomis paslaugomis"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Programai leidžiama sąveikauti su programoje apibrėžtomis neaktyviomis paslaugomis."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Šiuo leidimu „Android“ sistemai leidžiama susaistyti su programos neaktyviomis paslaugomis."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"skaityti / rašyti ištekliuose, priklausančiuose diagnostikai"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Leidžiama programai skaityti ir rašyti visuose diagnostikos grupei priklausančiuose ištekliuose, pvz., failuose, esančiuose /dev. Tai gali paveikti sistemos stabilumą ir saugą. Tai turėtų būti naudojama TIK gamintojui ar operatoriui atliekant aparatinės įrangos diagnostiką."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>

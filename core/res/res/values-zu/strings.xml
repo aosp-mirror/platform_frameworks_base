@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"phatha ukuqinisekisa okuthenjiwe"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Ivumela uhlelo lokusebenza ukuthi lifake liphinde likhiphe izitifiketi ze-CA njengokuqinisekiswa okuthenjiwe."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"bophezela kumasevisi angenzi lutho"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Ivumela uhlelo lokusebenza ukuthi luhlanganyele nohlelo lokusebenza oluchaziwe lwamasevisi angenzi lutho."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Le mvume ivumela isistimu ye-Android ukuthi ibophezeleke kumasevisi angenzi lutho wohlelo lokusebenza."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"funda/bhalela emithombweni ephethwe idayegi"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ivumela uhlelo lokusebenza ukufunda nokubhala kunoma yimuphi umthombo weqembu ledayegi; ngokwesibonelo, amafayela akwi/dev. Lokhu kungase kuthinte kakhulu ukuba nokuphepha kohlelo. Lokhu kumele kusebenziselwe KUPHELA ukuhlola ihadiwe okucacile ngumkhiqizi noma u-opheretha."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"vumela noma vimbela izingxenye zensiza"</string>

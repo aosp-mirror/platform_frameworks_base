@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"bestuur vertroude eiebewyse"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Laat die program CA-sertifikate as vertroude eiebewyse installeer en deïnstalleer."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"bind aan ledige dienste"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Laat die program met programgedefinieerde ledige dienste omgaan."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Hierdie toestemming laat die Android-stelsel toe om aan \'n program se ledige dienste te bind."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lees/skryf na bronne wat diag besit"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Laat die program toe om na enige hulpbron wat deur die diag-groep besit word, te skryf, byvoorbeeld lêers in /dev. Dit kan potensieel stelselstabiliteit en sekuriteit affekteer. Dit moet NET gebruik word vir hardewarespesifieke diagnose deur die vervaardiger of operateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktiveer of deaktiveer programkomponente"</string>
