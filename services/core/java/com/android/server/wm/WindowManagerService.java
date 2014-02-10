@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
 import android.app.AppOpsManager;
+import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.view.IWindowId;
 
@@ -361,6 +362,11 @@ public class WindowManagerService extends IWindowManager.Stub
      * Windows whose animations have ended and now must be removed.
      */
     final ArrayList<WindowState> mPendingRemove = new ArrayList<WindowState>();
+
+    /**
+     * Stacks whose animations have ended and whose tasks, apps, selves may now be removed.
+     */
+    final ArraySet<TaskStack> mPendingStacksRemove = new ArraySet<TaskStack>();
 
     /**
      * Used when processing mPendingRemove to avoid working on the original array.
@@ -3425,6 +3431,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private Task createTask(int taskId, int stackId, int userId, AppWindowToken atoken) {
+        if (DEBUG_STACK) Slog.i(TAG, "createTask: taskId=" + taskId + " stackId=" + stackId
+                + " atoken=" + atoken);
         final TaskStack stack = mStackIdToStack.get(stackId);
         if (stack == null) {
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
@@ -3507,7 +3515,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             final Task oldTask = mTaskIdToTask.get(atoken.groupId);
-            removeAppFromTask(atoken);
+            removeAppFromTaskLocked(atoken);
 
             atoken.groupId = groupId;
             Task newTask = mTaskIdToTask.get(groupId);
@@ -4525,11 +4533,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void removeAppFromTask(AppWindowToken wtoken) {
+    void removeAppFromTaskLocked(AppWindowToken wtoken) {
         final Task task = mTaskIdToTask.get(wtoken.groupId);
-        if (task != null && task.removeAppToken(wtoken)) {
-            task.mStack.removeTask(task);
-            mTaskIdToTask.delete(wtoken.groupId);
+        if (!wtoken.mDeferRemoval && task != null && task.removeAppToken(wtoken)) {
+            removeTaskLocked(task);
         }
     }
 
@@ -4571,17 +4578,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                             "removeAppToken make exiting: " + wtoken);
                     stack.mExitingAppTokens.add(wtoken);
+                    wtoken.mDeferRemoval = true;
                 } else {
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
                     // soon as their animations are complete
                     wtoken.mAppAnimator.clearAnimation();
                     wtoken.mAppAnimator.animating = false;
+                    removeAppFromTaskLocked(wtoken);
                 }
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                         "removeAppToken: " + wtoken);
 
-                removeAppFromTask(wtoken);
 
                 wtoken.removed = true;
                 if (wtoken.startingData != null) {
@@ -4926,6 +4934,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void removeTaskLocked(Task task) {
+        final int taskId = task.taskId;
+        final TaskStack stack = task.mStack;
+        if (stack.isAnimating()) {
+            if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + taskId);
+            task.mDeferRemoval = true;
+            return;
+        }
+        if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + taskId);
+        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
+        task.mDeferRemoval = false;
+        task.mStack.removeTask(task);
+        mTaskIdToTask.delete(task.taskId);
+    }
+
     public void removeTask(int taskId) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
@@ -4933,14 +4956,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_STACK) Slog.i(TAG, "removeTask: could not find taskId=" + taskId);
                 return;
             }
-            final TaskStack stack = task.mStack;
-            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
-            stack.removeTask(task);
+            removeTaskLocked(task);
         }
     }
 
     public void addTask(int taskId, int stackId, boolean toTop) {
         synchronized (mWindowMap) {
+            if (DEBUG_STACK) Slog.i(TAG, "addTask: adding taskId=" + taskId
+                    + " to " + (toTop ? "top" : "bottom"));
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
                 return;
@@ -9365,7 +9388,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     token.mAppAnimator.animating = false;
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                             "performLayout: App token exiting now removed" + token);
-                    removeAppFromTask(token);
+                    removeAppFromTaskLocked(token);
                     exitingAppTokens.remove(i);
                 }
             }
@@ -9456,6 +9479,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 assignLayersLocked(displayContent.getWindowList());
                 displayContent.layoutNeeded = true;
             }
+        }
+
+        // Remove all deferred Stacks, tasks, and activities.
+        for (int stackNdx = mPendingStacksRemove.size() - 1; stackNdx >= 0; --stackNdx) {
+            mPendingStacksRemove.removeAt(stackNdx).checkForDeferredActions();
         }
 
         setFocusedStackFrame();

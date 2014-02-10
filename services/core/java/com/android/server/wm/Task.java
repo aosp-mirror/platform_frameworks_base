@@ -24,6 +24,7 @@ class Task {
     final AppTokenList mAppTokens = new AppTokenList();
     final int taskId;
     final int mUserId;
+    boolean mDeferRemoval = false;
 
     Task(AppWindowToken wtoken, TaskStack stack, int userId) {
         taskId = wtoken.groupId;
