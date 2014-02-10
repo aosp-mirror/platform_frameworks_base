@@ -15,17 +15,24 @@
  */
 
 #define LOG_TAG "InputWindow"
+#define LOG_NDEBUG 0
 
 #include "InputWindow.h"
 
 #include <cutils/log.h>
 
+#include <ui/Rect.h>
+#include <ui/Region.h>
+
 namespace android {
 
 // --- InputWindowInfo ---
+void InputWindowInfo::addTouchableRegion(const Rect& region) {
+    touchableRegion.orSelf(region);
+}
 
 bool InputWindowInfo::touchableRegionContainsPoint(int32_t x, int32_t y) const {
-    return touchableRegion.contains(x, y);
+    return touchableRegion.contains(x,y);
 }
 
 bool InputWindowInfo::frameContainsPoint(int32_t x, int32_t y) const {

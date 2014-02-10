@@ -48,6 +48,7 @@
 #include <utils/Trace.h>
 #include <cutils/log.h>
 #include <androidfw/PowerManager.h>
+#include <ui/Region.h>
 
 #include <stddef.h>
 #include <unistd.h>
@@ -172,21 +173,23 @@ static bool isMainDisplay(int32_t displayId) {
     return displayId == ADISPLAY_ID_DEFAULT || displayId == ADISPLAY_ID_NONE;
 }
 
-static void dumpRegion(String8& dump, const SkRegion& region) {
+static void dumpRegion(String8& dump, const Region& region) {
     if (region.isEmpty()) {
         dump.append("<empty>");
         return;
     }
 
     bool first = true;
-    for (SkRegion::Iterator it(region); !it.done(); it.next()) {
+    Region::const_iterator cur = region.begin();
+    Region::const_iterator const tail = region.end();
+    while (cur != tail) {
         if (first) {
             first = false;
         } else {
             dump.append("|");
         }
-        const SkIRect& rect = it.rect();
-        dump.appendFormat("[%d,%d][%d,%d]", rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
+        dump.appendFormat("[%d,%d][%d,%d]", cur->left, cur->top, cur->right, cur->bottom);
+        cur++;
     }
 }
 
