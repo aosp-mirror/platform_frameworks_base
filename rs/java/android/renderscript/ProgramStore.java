@@ -146,7 +146,7 @@ public class ProgramStore extends BaseObj {
     BlendDstFunc mBlendDst;
     boolean mDither;
 
-    ProgramStore(int id, RenderScript rs) {
+    ProgramStore(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -421,7 +421,7 @@ public class ProgramStore extends BaseObj {
         */
         public ProgramStore create() {
             mRS.validate();
-            int id = mRS.nProgramStoreCreate(mColorMaskR, mColorMaskG, mColorMaskB, mColorMaskA,
+            long id = mRS.nProgramStoreCreate(mColorMaskR, mColorMaskG, mColorMaskB, mColorMaskA,
                                              mDepthMask, mDither,
                                              mBlendSrc.mID, mBlendDst.mID, mDepthFunc.mID);
             ProgramStore programStore = new ProgramStore(id, mRS);

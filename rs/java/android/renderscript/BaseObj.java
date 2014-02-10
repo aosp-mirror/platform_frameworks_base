@@ -32,7 +32,7 @@ public class BaseObj {
         mDestroyed = false;
     }
 
-    void setID(int id) {
+    void setID(long id) {
         if (mID != 0) {
             throw new RSRuntimeException("Internal Error, reset of object ID.");
         }

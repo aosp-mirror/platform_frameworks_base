@@ -506,8 +506,8 @@ public class RenderScript {
         rsnAllocationResize1D(mContext, id, dimX);
     }
 
-    native long rsnFileA3DCreateFromAssetStream(long con, int assetStream);
-    synchronized long nFileA3DCreateFromAssetStream(int assetStream) {
+    native long rsnFileA3DCreateFromAssetStream(long con, long assetStream);
+    synchronized long nFileA3DCreateFromAssetStream(long assetStream) {
         validate();
         return rsnFileA3DCreateFromAssetStream(mContext, assetStream);
     }
@@ -531,24 +531,24 @@ public class RenderScript {
         validate();
         rsnFileA3DGetIndexEntries(mContext, fileA3D, numEntries, IDs, names);
     }
-    native int  rsnFileA3DGetEntryByIndex(long con, long fileA3D, int index);
-    synchronized int nFileA3DGetEntryByIndex(long fileA3D, int index) {
+    native long rsnFileA3DGetEntryByIndex(long con, long fileA3D, int index);
+    synchronized long nFileA3DGetEntryByIndex(long fileA3D, int index) {
         validate();
         return rsnFileA3DGetEntryByIndex(mContext, fileA3D, index);
     }
 
-    native int  rsnFontCreateFromFile(long con, String fileName, float size, int dpi);
-    synchronized int nFontCreateFromFile(String fileName, float size, int dpi) {
+    native long rsnFontCreateFromFile(long con, String fileName, float size, int dpi);
+    synchronized long nFontCreateFromFile(String fileName, float size, int dpi) {
         validate();
         return rsnFontCreateFromFile(mContext, fileName, size, dpi);
     }
-    native int  rsnFontCreateFromAssetStream(long con, String name, float size, int dpi, int assetStream);
-    synchronized int nFontCreateFromAssetStream(String name, float size, int dpi, int assetStream) {
+    native long rsnFontCreateFromAssetStream(long con, String name, float size, int dpi, long assetStream);
+    synchronized long nFontCreateFromAssetStream(String name, float size, int dpi, long assetStream) {
         validate();
         return rsnFontCreateFromAssetStream(mContext, name, size, dpi, assetStream);
     }
-    native int  rsnFontCreateFromAsset(long con, AssetManager mgr, String path, float size, int dpi);
-    synchronized int nFontCreateFromAsset(AssetManager mgr, String path, float size, int dpi) {
+    native long rsnFontCreateFromAsset(long con, AssetManager mgr, String path, float size, int dpi);
+    synchronized long nFontCreateFromAsset(AssetManager mgr, String path, float size, int dpi) {
         validate();
         return rsnFontCreateFromAsset(mContext, mgr, path, size, dpi);
     }
@@ -665,9 +665,9 @@ public class RenderScript {
         rsnScriptSetVarObj(mContext, id, slot, val);
     }
 
-    native int  rsnScriptCCreate(long con, String resName, String cacheDir,
+    native long rsnScriptCCreate(long con, String resName, String cacheDir,
                                  byte[] script, int length);
-    synchronized int nScriptCCreate(String resName, String cacheDir, byte[] script, int length) {
+    synchronized long nScriptCCreate(String resName, String cacheDir, byte[] script, int length) {
         validate();
         return rsnScriptCCreate(mContext, resName, cacheDir, script, length);
     }
@@ -714,18 +714,18 @@ public class RenderScript {
         rsnScriptGroupExecute(mContext, group);
     }
 
-    native int  rsnSamplerCreate(long con, int magFilter, int minFilter,
+    native long  rsnSamplerCreate(long con, int magFilter, int minFilter,
                                  int wrapS, int wrapT, int wrapR, float aniso);
-    synchronized int nSamplerCreate(int magFilter, int minFilter,
+    synchronized long nSamplerCreate(int magFilter, int minFilter,
                                  int wrapS, int wrapT, int wrapR, float aniso) {
         validate();
         return rsnSamplerCreate(mContext, magFilter, minFilter, wrapS, wrapT, wrapR, aniso);
     }
 
-    native int  rsnProgramStoreCreate(long con, boolean r, boolean g, boolean b, boolean a,
+    native long rsnProgramStoreCreate(long con, boolean r, boolean g, boolean b, boolean a,
                                       boolean depthMask, boolean dither,
                                       int srcMode, int dstMode, int depthFunc);
-    synchronized int nProgramStoreCreate(boolean r, boolean g, boolean b, boolean a,
+    synchronized long nProgramStoreCreate(boolean r, boolean g, boolean b, boolean a,
                                          boolean depthMask, boolean dither,
                                          int srcMode, int dstMode, int depthFunc) {
         validate();
@@ -791,8 +791,8 @@ public class RenderScript {
         rsnMeshGetIndices(mContext, id, idxIds, primitives, vtxIdCount);
     }
 
-    native long rsnPathCreate(long con, int prim, boolean isStatic, long vtx, int loop, float q);
-    synchronized long nPathCreate(int prim, boolean isStatic, long vtx, int loop, float q) {
+    native long rsnPathCreate(long con, int prim, boolean isStatic, long vtx, long loop, float q);
+    synchronized long nPathCreate(int prim, boolean isStatic, long vtx, long loop, float q) {
         validate();
         return rsnPathCreate(mContext, prim, isStatic, vtx, loop, q);
     }
