@@ -151,7 +151,7 @@ public class Font extends BaseObj {
         return "DroidSans.ttf";
     }
 
-    Font(int id, RenderScript rs) {
+    Font(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -162,7 +162,7 @@ public class Font extends BaseObj {
     static public Font createFromFile(RenderScript rs, Resources res, String path, float pointSize) {
         rs.validate();
         int dpi = res.getDisplayMetrics().densityDpi;
-        int fontId = rs.nFontCreateFromFile(path, pointSize, dpi);
+        long fontId = rs.nFontCreateFromFile(path, pointSize, dpi);
 
         if(fontId == 0) {
             throw new RSRuntimeException("Unable to create font from file " + path);
@@ -187,7 +187,7 @@ public class Font extends BaseObj {
         AssetManager mgr = res.getAssets();
         int dpi = res.getDisplayMetrics().densityDpi;
 
-        int fontId = rs.nFontCreateFromAsset(mgr, path, pointSize, dpi);
+        long fontId = rs.nFontCreateFromAsset(mgr, path, pointSize, dpi);
         if(fontId == 0) {
             throw new RSRuntimeException("Unable to create font from asset " + path);
         }
@@ -211,9 +211,9 @@ public class Font extends BaseObj {
 
         int dpi = res.getDisplayMetrics().densityDpi;
 
-        int fontId = 0;
+        long fontId = 0;
         if (is instanceof AssetManager.AssetInputStream) {
-            int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+            long asset = ((AssetManager.AssetInputStream) is).getNativeAsset();
             fontId = rs.nFontCreateFromAssetStream(name, pointSize, dpi, asset);
         } else {
             throw new RSRuntimeException("Unsupported asset stream created");

@@ -60,7 +60,7 @@ public class Sampler extends BaseObj {
     Value mWrapR;
     float mAniso;
 
-    Sampler(int id, RenderScript rs) {
+    Sampler(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -347,7 +347,7 @@ public class Sampler extends BaseObj {
 
         public Sampler create() {
             mRS.validate();
-            int id = mRS.nSamplerCreate(mMag.mID, mMin.mID,
+            long id = mRS.nSamplerCreate(mMag.mID, mMin.mID,
                                         mWrapS.mID, mWrapT.mID, mWrapR.mID, mAniso);
             Sampler sampler = new Sampler(id, mRS);
             sampler.mMin = mMin;
