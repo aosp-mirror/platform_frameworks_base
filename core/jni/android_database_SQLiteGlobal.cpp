@@ -39,7 +39,7 @@ static void sqliteLogCallback(void* data, int iErrCode, const char* zMsg) {
     bool verboseLog = !!data;
     if (iErrCode == 0 || iErrCode == SQLITE_CONSTRAINT || iErrCode == SQLITE_SCHEMA) {
         if (verboseLog) {
-            ALOGV(LOG_VERBOSE, SQLITE_LOG_TAG, "(%d) %s\n", iErrCode, zMsg);
+            ALOG(LOG_VERBOSE, SQLITE_LOG_TAG, "(%d) %s\n", iErrCode, zMsg);
         }
     } else {
         ALOG(LOG_ERROR, SQLITE_LOG_TAG, "(%d) %s\n", iErrCode, zMsg);
