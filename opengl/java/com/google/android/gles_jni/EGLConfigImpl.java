@@ -19,13 +19,13 @@ package com.google.android.gles_jni;
 import javax.microedition.khronos.egl.*;
 
 public class EGLConfigImpl extends EGLConfig {
-    private int mEGLConfig;
+    private long mEGLConfig;
 
-    EGLConfigImpl(int config) {
+    EGLConfigImpl(long config) {
         mEGLConfig = config;
     }
     
-    int get() {
+    long get() {
         return mEGLConfig;
     }
 }

@@ -19,13 +19,13 @@ package com.google.android.gles_jni;
 import javax.microedition.khronos.egl.*;
 
 public class EGLSurfaceImpl extends EGLSurface {
-    int mEGLSurface;
-    private int mNativePixelRef;
+    long mEGLSurface;
+    private long mNativePixelRef;
     public EGLSurfaceImpl() {
         mEGLSurface = 0;
         mNativePixelRef = 0;
     }
-    public EGLSurfaceImpl(int surface) {
+    public EGLSurfaceImpl(long surface) {
         mEGLSurface = surface;
         mNativePixelRef = 0;
     }
@@ -43,6 +43,12 @@ public class EGLSurfaceImpl extends EGLSurface {
 
     @Override
     public int hashCode() {
-        return mEGLSurface;
+        /*
+         * Based on the algorithm suggested in
+         * http://developer.android.com/reference/java/lang/Object.html
+         */
+        int result = 17;
+        result = 31 * result + (int) (mEGLSurface ^ (mEGLSurface >>> 32));
+        return result;
     }
 }
