@@ -66,13 +66,13 @@ import java.util.Set;
  */
 
 public final class PrintManagerService extends SystemService {
+    private final PrintManagerImpl mPrintManagerImpl;
 
-    private PrintManagerImpl mPrintManagerImpl;
-
-    @Override
-    public void onCreate(Context context) {
+    public PrintManagerService(Context context) {
+        super(context);
         mPrintManagerImpl = new PrintManagerImpl(context);
     }
+
     @Override
     public void onStart() {
         publishBinderService(Context.PRINT_SERVICE, mPrintManagerImpl);

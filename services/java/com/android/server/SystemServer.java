@@ -104,9 +104,9 @@ public final class SystemServer {
      * them from the build system somehow.
      */
     private static final String BACKUP_MANAGER_SERVICE_CLASS =
-            "com.android.server.backup.BackupManagerSystemService";
+            "com.android.server.backup.BackupManagerService$Lifecycle";
     private static final String DEVICE_POLICY_MANAGER_SERVICE_CLASS =
-            "com.android.server.devicepolicy.DevicePolicyManagerSystemService";
+            "com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
     private static final String PRINT_MANAGER_SERVICE_CLASS =
@@ -209,6 +209,7 @@ public final class SystemServer {
 
         // Create the system service manager.
         mSystemServiceManager = new SystemServiceManager(mSystemContext);
+        LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
 
         // Start services.
         try {

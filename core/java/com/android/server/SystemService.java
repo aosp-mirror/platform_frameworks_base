@@ -23,24 +23,24 @@ import android.os.ServiceManager;
 /**
  * The base class for services running in the system process. Override and implement
  * the lifecycle event callback methods as needed.
- *
+ * <p>
  * The lifecycle of a SystemService:
- *
- * {@link #onCreate(android.content.Context)} is called to initialize the
- * service.
- *
- * {@link #onStart()} is called to get the service running. It is common
- * for services to publish their Binder interface at this point. All required
- * dependencies are also assumed to be ready to use.
- *
- * Then {@link #onBootPhase(int)} is called as many times as there are boot phases
+ * </p><ul>
+ * <li>The constructor is called and provided with the system {@link Context}
+ * to initialize the system service.
+ * <li>{@link #onStart()} is called to get the service running.  The service should
+ * publish its binder interface at this point using
+ * {@link #publishBinderService(String, IBinder)}.  It may also publish additional
+ * local interfaces that other services within the system server may use to access
+ * privileged internal functions.
+ * <li>Then {@link #onBootPhase(int)} is called as many times as there are boot phases
  * until {@link #PHASE_BOOT_COMPLETE} is sent, which is the last boot phase. Each phase
  * is an opportunity to do special work, like acquiring optional service dependencies,
  * waiting to see if SafeMode is enabled, or registering with a service that gets
  * started after this one.
- *
- * NOTE: All lifecycle methods are called from the same thread that created the
- * SystemService.
+ * </ul><p>
+ * NOTE: All lifecycle methods are called from the system server's main looper thread.
+ * </p>
  *
  * {@hide}
  */
@@ -54,17 +54,34 @@ public abstract class SystemService {
     public static final int PHASE_THIRD_PARTY_APPS_CAN_START = 600;
     public static final int PHASE_BOOT_COMPLETE = 1000;
 
-    private SystemServiceManager mManager;
-    private Context mContext;
+    private final Context mContext;
 
-    final void init(Context context, SystemServiceManager manager) {
+    /**
+     * Initializes the system service.
+     * <p>
+     * Subclasses must define a single argument constructor that accepts the context
+     * and passes it to super.
+     * </p>
+     *
+     * @param context The system server context.
+     */
+    public SystemService(Context context) {
         mContext = context;
-        mManager = manager;
-        onCreate(context);
     }
 
+    /**
+     * Gets the system context.
+     */
+    public final Context getContext() {
+        return mContext;
+    }
+
+    /**
+     * Returns true if the system is running in safe mode.
+     * TODO: we should define in which phase this becomes valid
+     */
     public final boolean isSafeMode() {
-        return mManager.isSafeMode();
+        return getManager().isSafeMode();
     }
 
     /**
@@ -126,8 +143,8 @@ public abstract class SystemService {
         return LocalServices.getService(type);
     }
 
-    public final Context getContext() {
-        return mContext;
+    private SystemServiceManager getManager() {
+        return LocalServices.getService(SystemServiceManager.class);
     }
 
 //    /**

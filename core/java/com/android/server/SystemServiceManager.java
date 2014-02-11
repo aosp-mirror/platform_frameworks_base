@@ -17,14 +17,15 @@
 package com.android.server;
 
 import android.content.Context;
-import android.util.Log;
 import android.util.Slog;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 /**
  * Manages creating, starting, and other lifecycle events of
- * {@link com.android.server.SystemService}s.
+ * {@link com.android.server.SystemService system services}.
  *
  * {@hide}
  */
@@ -68,24 +69,43 @@ public class SystemServiceManager {
      */
     @SuppressWarnings("unchecked")
     public <T extends SystemService> T startService(Class<T> serviceClass) {
-        final T serviceInstance = (T)createInstance(serviceClass);
+        final String name = serviceClass.getName();
+        Slog.i(TAG, "Starting " + name);
+
+        // Create the service.
+        if (!SystemService.class.isAssignableFrom(serviceClass)) {
+            throw new RuntimeException("Failed to create " + name
+                    + ": service must extend " + SystemService.class.getName());
+        }
+        final T service;
         try {
-            Slog.i(TAG, "Creating " + serviceClass.getSimpleName());
-            serviceInstance.init(mContext, this);
-        } catch (Throwable e) {
-            throw new RuntimeException("Failed to create service " + serviceClass.getName(), e);
+            Constructor<T> constructor = serviceClass.getConstructor(Context.class);
+            service = constructor.newInstance(mContext);
+        } catch (InstantiationException ex) {
+            throw new RuntimeException("Failed to create service " + name
+                    + ": service could not be instantiated", ex);
+        } catch (IllegalAccessException ex) {
+            throw new RuntimeException("Failed to create service " + name
+                    + ": service must have a public constructor with a Context argument", ex);
+        } catch (NoSuchMethodException ex) {
+            throw new RuntimeException("Failed to create service " + name
+                    + ": service must have a public constructor with a Context argument", ex);
+        } catch (InvocationTargetException ex) {
+            throw new RuntimeException("Failed to create service " + name
+                    + ": service constructor threw an exception", ex);
         }
 
-        mServices.add(serviceInstance);
+        // Register it.
+        mServices.add(service);
 
+        // Start it.
         try {
-            Slog.i(TAG, "Starting " + serviceClass.getSimpleName());
-            serviceInstance.onStart();
-        } catch (Throwable e) {
-            throw new RuntimeException("Failed to start service " + serviceClass.getName(), e);
+            service.onStart();
+        } catch (RuntimeException ex) {
+            throw new RuntimeException("Failed to start service " + name
+                    + ": onStart threw an exception", ex);
         }
-
-        return serviceInstance;
+        return service;
     }
 
     /**
@@ -107,9 +127,11 @@ public class SystemServiceManager {
             final SystemService service = mServices.get(i);
             try {
                 service.onBootPhase(mCurrentPhase);
-            } catch (Throwable e) {
-                reportWtf("Service " + service.getClass().getName() +
-                        " threw an Exception processing boot phase " + mCurrentPhase, e);
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to boot service "
+                        + service.getClass().getName()
+                        + ": onBootPhase threw an exception during phase "
+                        + mCurrentPhase, ex);
             }
         }
     }
@@ -143,35 +165,5 @@ public class SystemServiceManager {
         }
 
         Slog.e(TAG, builder.toString());
-    }
-
-    private SystemService createInstance(Class<?> clazz) {
-        // Make sure it's a type we expect
-        if (!SystemService.class.isAssignableFrom(clazz)) {
-            reportWtf("Class " + clazz.getName() + " does not extend " +
-                    SystemService.class.getName());
-        }
-
-        try {
-            return (SystemService) clazz.newInstance();
-        } catch (InstantiationException e) {
-            reportWtf("Class " + clazz.getName() + " is abstract", e);
-        } catch (IllegalAccessException e) {
-            reportWtf("Class " + clazz.getName() +
-                    " must have a public no-arg constructor", e);
-        }
-        return null;
-    }
-
-    private static void reportWtf(String message) {
-        reportWtf(message, null);
-    }
-
-    private static void reportWtf(String message, Throwable e) {
-        Slog.i(TAG, "******************************");
-        Log.wtf(TAG, message, e);
-
-        // Make sure we die
-        throw new RuntimeException(message, e);
     }
 }

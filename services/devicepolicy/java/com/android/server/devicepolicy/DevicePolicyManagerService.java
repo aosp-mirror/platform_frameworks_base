@@ -25,6 +25,7 @@ import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.org.conscrypt.TrustedCertificateStore;
+import com.android.server.SystemService;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
@@ -138,6 +139,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     private boolean mHasFeature;
 
+    public static final class Lifecycle extends SystemService {
+        private DevicePolicyManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new DevicePolicyManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.DEVICE_POLICY_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == PHASE_LOCK_SETTINGS_READY) {
+                mService.systemReady();
+            }
+        }
+    }
     public static class DevicePolicyData {
         int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         int mActivePasswordLength = 0;
