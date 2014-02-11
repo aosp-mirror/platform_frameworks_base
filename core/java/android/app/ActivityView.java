@@ -27,6 +27,9 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
@@ -110,6 +113,29 @@ public class ActivityView extends ViewGroup {
         } else {
             detach();
         }
+    }
+
+    private boolean injectInputEvent(InputEvent event) {
+        try {
+            return mActivityContainer != null && mActivityContainer.injectEvent(event);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return injectInputEvent(event) || super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+            if (injectInputEvent(event)) {
+                return true;
+            }
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     public boolean isAttachedToDisplay() {
