@@ -408,6 +408,27 @@ public class UserManager {
     }
 
     /**
+     * Creates a user with the specified name and options.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param name the user's name
+     * @param flags flags that identify the type of user and other properties.
+     * @see UserInfo
+     * @param relatedUserId new user will be related to this user id.
+     *
+     * @return the UserInfo object for the created user, or null if the user could not be created.
+     * @hide
+     */
+    public UserInfo createRelatedUser(String name, int flags, int relatedUserId) {
+        try {
+            return mService.createRelatedUser(name, flags, relatedUserId);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not create a user", re);
+            return null;
+        }
+    }
+
+    /**
      * Return the number of users currently created on the device.
      */
     public int getUserCount() {
@@ -424,6 +445,22 @@ public class UserManager {
     public List<UserInfo> getUsers() {
         try {
             return mService.getUsers(false);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get user list", re);
+            return null;
+        }
+    }
+
+    /**
+     * Returns information for all users related to userId
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param userHandle users related to this user id will be returned.
+     * @return the list of related users.
+     * @hide
+     */
+    public List<UserInfo> getRelatedUsers(int userHandle) {
+        try {
+            return mService.getRelatedUsers(userHandle);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
             return null;

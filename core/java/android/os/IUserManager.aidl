@@ -28,11 +28,13 @@ import android.graphics.Bitmap;
  */
 interface IUserManager {
     UserInfo createUser(in String name, int flags);
+    UserInfo createRelatedUser(in String name, int flags, int relatedUserId);
     boolean removeUser(int userHandle);
     void setUserName(int userHandle, String name);
     void setUserIcon(int userHandle, in Bitmap icon);
     Bitmap getUserIcon(int userHandle);
     List<UserInfo> getUsers(boolean excludeDying);
+    List<UserInfo> getRelatedUsers(int userHandle);
     UserInfo getUserInfo(int userHandle);
     boolean isRestricted();
     void setGuestEnabled(boolean enable);
