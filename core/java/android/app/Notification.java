@@ -348,6 +348,13 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_HIGH_PRIORITY      = 0x00000080;
 
+    /**
+     * Bit to be bitswise-ored into the {@link #flags} field that should be
+     * set if this notification is relevant to the current device only
+     * and it is not recommended that it bridge to other devices.
+     */
+    public static final int FLAG_LOCAL_ONLY         = 0x00000100;
+
     public int flags;
 
     /**
@@ -1532,6 +1539,17 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Set whether or not this notification should not bridge to other devices.
+         *
+         * <p>Some notifications can be bridged to other devices for remote display.
+         * This hint can be set to recommend this notification not be bridged.
+         */
+        public Builder setLocalOnly(boolean localOnly) {
+            setFlag(FLAG_LOCAL_ONLY, localOnly);
+            return this;
+        }
+
+        /**
          * Set which notification properties will be inherited from system defaults.
          * <p>
          * The value should be one or more of the following fields combined with
@@ -1900,8 +1918,7 @@ public class Notification implements Parcelable
      * An object that can apply a rich notification style to a {@link Notification.Builder}
      * object.
      */
-    public static abstract class Style
-    {
+    public static abstract class Style {
         private CharSequence mBigContentTitle;
         private CharSequence mSummaryText = null;
         private boolean mSummaryTextSet = false;
