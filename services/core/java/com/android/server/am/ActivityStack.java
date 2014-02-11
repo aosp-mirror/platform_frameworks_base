@@ -2734,15 +2734,6 @@ final class ActivityStack {
             here.fillInStackTrace();
             Slog.i(TAG, "Removing activity " + r + " from stack");
         }
-        final TaskRecord task = r.task;
-        if (task != null && task.removeActivity(r)) {
-            if (DEBUG_STACK) Slog.i(TAG,
-                    "removeActivityFromHistoryLocked: last activity removed from " + this);
-            if (mStackSupervisor.isFrontStack(this) && task == topTask() && task.mOnTopOfHome) {
-                mStackSupervisor.moveHomeToTop();
-            }
-            removeTask(task);
-        }
         r.takeFromHistory();
         removeTimeoutsForActivityLocked(r);
         if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r + " (removed from history)");
@@ -2752,6 +2743,15 @@ final class ActivityStack {
         mWindowManager.removeAppToken(r.appToken);
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
+        }
+        final TaskRecord task = r.task;
+        if (task != null && task.removeActivity(r)) {
+            if (DEBUG_STACK) Slog.i(TAG,
+                    "removeActivityFromHistoryLocked: last activity removed from " + this);
+            if (mStackSupervisor.isFrontStack(this) && task == topTask() && task.mOnTopOfHome) {
+                mStackSupervisor.moveHomeToTop();
+            }
+            removeTask(task);
         }
         cleanUpActivityServicesLocked(r);
         r.removeUriPermissionsLocked();

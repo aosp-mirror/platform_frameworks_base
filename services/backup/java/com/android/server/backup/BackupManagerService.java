@@ -83,6 +83,7 @@ import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
 import com.android.server.EventLogTags;
+import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 
 import java.io.BufferedInputStream;
@@ -276,6 +277,20 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // Watch the device provisioning operation during setup
     ContentObserver mProvisionedObserver;
+
+    public static final class Lifecycle extends SystemService {
+        private final BackupManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new BackupManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.BACKUP_SERVICE, mService);
+        }
+    }
 
     class ProvisionedObserver extends ContentObserver {
         public ProvisionedObserver(Handler handler) {

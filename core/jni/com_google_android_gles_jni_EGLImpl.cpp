@@ -50,36 +50,41 @@ static jfieldID gBitmap_NativeBitmapFieldID;
 
 static inline EGLDisplay getDisplay(JNIEnv* env, jobject o) {
     if (!o) return EGL_NO_DISPLAY;
-    return (EGLDisplay)env->GetIntField(o, gDisplay_EGLDisplayFieldID);
+    return (EGLDisplay)env->GetLongField(o, gDisplay_EGLDisplayFieldID);
 }
 static inline EGLSurface getSurface(JNIEnv* env, jobject o) {
     if (!o) return EGL_NO_SURFACE;
-    return (EGLSurface)env->GetIntField(o, gSurface_EGLSurfaceFieldID);
+    return (EGLSurface)env->GetLongField(o, gSurface_EGLSurfaceFieldID);
 }
 static inline EGLContext getContext(JNIEnv* env, jobject o) {
     if (!o) return EGL_NO_CONTEXT;
-    return (EGLContext)env->GetIntField(o, gContext_EGLContextFieldID);
+    return (EGLContext)env->GetLongField(o, gContext_EGLContextFieldID);
 }
 static inline EGLConfig getConfig(JNIEnv* env, jobject o) {
     if (!o) return 0;
-    return (EGLConfig)env->GetIntField(o, gConfig_EGLConfigFieldID);
+    return (EGLConfig)env->GetLongField(o, gConfig_EGLConfigFieldID);
 }
+
+static inline jboolean EglBoolToJBool(EGLBoolean eglBool) {
+    return eglBool == EGL_TRUE ? JNI_TRUE : JNI_FALSE;
+}
+
 static void nativeClassInit(JNIEnv *_env, jclass eglImplClass)
 {
     jclass config_class = _env->FindClass("com/google/android/gles_jni/EGLConfigImpl");
     gConfig_class = (jclass) _env->NewGlobalRef(config_class);
-    gConfig_ctorID = _env->GetMethodID(gConfig_class,  "<init>", "(I)V");
-    gConfig_EGLConfigFieldID = _env->GetFieldID(gConfig_class,  "mEGLConfig",  "I");
+    gConfig_ctorID = _env->GetMethodID(gConfig_class,  "<init>", "(J)V");
+    gConfig_EGLConfigFieldID = _env->GetFieldID(gConfig_class,  "mEGLConfig",  "J");
 
     jclass display_class = _env->FindClass("com/google/android/gles_jni/EGLDisplayImpl");
-    gDisplay_EGLDisplayFieldID = _env->GetFieldID(display_class, "mEGLDisplay", "I");
+    gDisplay_EGLDisplayFieldID = _env->GetFieldID(display_class, "mEGLDisplay", "J");
 
     jclass context_class = _env->FindClass("com/google/android/gles_jni/EGLContextImpl");
-    gContext_EGLContextFieldID = _env->GetFieldID(context_class, "mEGLContext", "I");
+    gContext_EGLContextFieldID = _env->GetFieldID(context_class, "mEGLContext", "J");
 
     jclass surface_class = _env->FindClass("com/google/android/gles_jni/EGLSurfaceImpl");
-    gSurface_EGLSurfaceFieldID = _env->GetFieldID(surface_class, "mEGLSurface", "I");
-    gSurface_NativePixelRefFieldID = _env->GetFieldID(surface_class, "mNativePixelRef", "I");
+    gSurface_EGLSurfaceFieldID = _env->GetFieldID(surface_class, "mEGLSurface", "J");
+    gSurface_NativePixelRefFieldID = _env->GetFieldID(surface_class, "mNativePixelRef", "J");
 
     jclass bitmap_class = _env->FindClass("android/graphics/Bitmap");
     gBitmap_NativeBitmapFieldID = _env->GetFieldID(bitmap_class, "mNativeBitmap", "J");
@@ -123,7 +128,7 @@ static jboolean jni_eglInitialize(JNIEnv *_env, jobject _this, jobject display,
     }
 
     EGLDisplay dpy = getDisplay(_env, display);
-    jboolean success = eglInitialize(dpy, NULL, NULL);
+    EGLBoolean success = eglInitialize(dpy, NULL, NULL);
     if (success && major_minor) {
         int len = _env->GetArrayLength(major_minor);
         if (len) {
@@ -134,7 +139,7 @@ static jboolean jni_eglInitialize(JNIEnv *_env, jobject _this, jobject display,
             _env->ReleasePrimitiveArrayCritical(major_minor, base, JNI_ABORT);
         }
     }
-    return success;
+    return EglBoolToJBool(success);
 }
 
 static jboolean jni_eglQueryContext(JNIEnv *_env, jobject _this, jobject display,
@@ -146,14 +151,14 @@ static jboolean jni_eglQueryContext(JNIEnv *_env, jobject _this, jobject display
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLContext ctx = getContext(_env, context);
-    jboolean success = JNI_FALSE;
+    EGLBoolean success = EGL_FALSE;
     int len = _env->GetArrayLength(value);
     if (len) {
         jint* base = (jint *)_env->GetPrimitiveArrayCritical(value, (jboolean *)0);
         success = eglQueryContext(dpy, ctx, attribute, base);
         _env->ReleasePrimitiveArrayCritical(value, base, JNI_ABORT);
     }
-    return success;
+    return EglBoolToJBool(success);
 }
 
 static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display,
@@ -166,14 +171,14 @@ static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display
     EGLDisplay dpy = getDisplay(_env, display);
     EGLContext sur = getSurface(_env, surface);
 
-    jboolean success = JNI_FALSE;
+    EGLBoolean success = EGL_FALSE;
     int len = _env->GetArrayLength(value);
     if (len) {
         jint* base = (jint *)_env->GetPrimitiveArrayCritical(value, (jboolean *)0);
         success = eglQuerySurface(dpy, sur, attribute, base);
         _env->ReleasePrimitiveArrayCritical(value, base, JNI_ABORT);
     }
-    return success;
+    return EglBoolToJBool(success);
 }
 
 static jint jni_getInitCount(JNIEnv *_env, jobject _clazz, jobject display) {
@@ -183,7 +188,7 @@ static jint jni_getInitCount(JNIEnv *_env, jobject _clazz, jobject display) {
 }
 
 static jboolean jni_eglReleaseThread(JNIEnv *_env, jobject _this) {
-    return eglReleaseThread();
+    return EglBoolToJBool(eglReleaseThread());
 }
 
 static jboolean jni_eglChooseConfig(JNIEnv *_env, jobject _this, jobject display,
@@ -196,7 +201,7 @@ static jboolean jni_eglChooseConfig(JNIEnv *_env, jobject _this, jobject display
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
-    jboolean success = JNI_FALSE;
+    EGLBoolean success = EGL_FALSE;
 
     if (configs == NULL) {
         config_size = 0;
@@ -214,14 +219,14 @@ static jboolean jni_eglChooseConfig(JNIEnv *_env, jobject _this, jobject display
 
     if (success && configs!=NULL) {
         for (int i=0 ; i<num ; i++) {
-            jobject obj = _env->NewObject(gConfig_class, gConfig_ctorID, (jint)nativeConfigs[i]);
+            jobject obj = _env->NewObject(gConfig_class, gConfig_ctorID, reinterpret_cast<jlong>(nativeConfigs[i]));
             _env->SetObjectArrayElement(configs, i, obj);
         }
     }
-    return success;
+    return EglBoolToJBool(success);
 }
 
-static jint jni_eglCreateContext(JNIEnv *_env, jobject _this, jobject display,
+static jlong jni_eglCreateContext(JNIEnv *_env, jobject _this, jobject display,
         jobject config, jobject share_context, jintArray attrib_list) {
     if (display == NULL || config == NULL || share_context == NULL
         || !validAttribList(_env, attrib_list)) {
@@ -234,10 +239,10 @@ static jint jni_eglCreateContext(JNIEnv *_env, jobject _this, jobject display,
     jint* base = beginNativeAttribList(_env, attrib_list);
     EGLContext ctx = eglCreateContext(dpy, cnf, shr, base);
     endNativeAttributeList(_env, attrib_list, base);
-    return (jint)ctx;
+    return reinterpret_cast<jlong>(ctx);
 }
 
-static jint jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject display,
+static jlong jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject display,
         jobject config, jintArray attrib_list) {
     if (display == NULL || config == NULL
         || !validAttribList(_env, attrib_list)) {
@@ -249,7 +254,7 @@ static jint jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject dis
     jint* base = beginNativeAttribList(_env, attrib_list);
     EGLSurface sur = eglCreatePbufferSurface(dpy, cnf, base);
     endNativeAttributeList(_env, attrib_list, base);
-    return (jint)sur;
+    return reinterpret_cast<jlong>(sur);
 }
 
 static PixelFormat convertPixelFormat(SkBitmap::Config format)
@@ -300,15 +305,15 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
     endNativeAttributeList(_env, attrib_list, base);
 
     if (sur != EGL_NO_SURFACE) {
-        _env->SetIntField(out_sur, gSurface_EGLSurfaceFieldID, (int)sur);
-        _env->SetIntField(out_sur, gSurface_NativePixelRefFieldID, (int)ref);
+        _env->SetLongField(out_sur, gSurface_EGLSurfaceFieldID, reinterpret_cast<jlong>(sur));
+        _env->SetLongField(out_sur, gSurface_NativePixelRefFieldID, reinterpret_cast<jlong>(ref));
     } else {
         ref->unlockPixels();
         SkSafeUnref(ref);
     }
 }
 
-static jint jni_eglCreateWindowSurface(JNIEnv *_env, jobject _this, jobject display,
+static jlong jni_eglCreateWindowSurface(JNIEnv *_env, jobject _this, jobject display,
         jobject config, jobject native_window, jintArray attrib_list) {
     if (display == NULL || config == NULL
         || !validAttribList(_env, attrib_list)) {
@@ -332,15 +337,15 @@ not_valid_surface:
     jint* base = beginNativeAttribList(_env, attrib_list);
     EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window.get(), base);
     endNativeAttributeList(_env, attrib_list, base);
-    return (jint)sur;
+    return reinterpret_cast<jlong>(sur);
 }
 
-static jint jni_eglCreateWindowSurfaceTexture(JNIEnv *_env, jobject _this, jobject display,
+static jlong jni_eglCreateWindowSurfaceTexture(JNIEnv *_env, jobject _this, jobject display,
         jobject config, jobject native_window, jintArray attrib_list) {
     if (display == NULL || config == NULL
         || !validAttribList(_env, attrib_list)) {
         jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
-        return JNI_FALSE;
+        return 0;
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLContext cnf = getConfig(_env, config);
@@ -360,7 +365,7 @@ not_valid_surface:
     jint* base = beginNativeAttribList(_env, attrib_list);
     EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window.get(), base);
     endNativeAttributeList(_env, attrib_list, base);
-    return (jint)sur;
+    return reinterpret_cast<jlong>(sur);
 }
 
 static jboolean jni_eglGetConfigAttrib(JNIEnv *_env, jobject _this, jobject display,
@@ -372,13 +377,13 @@ static jboolean jni_eglGetConfigAttrib(JNIEnv *_env, jobject _this, jobject disp
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLContext cnf = getConfig(_env, config);
-    jboolean success = JNI_FALSE;
+    EGLBoolean success = EGL_FALSE;
     jint localValue;
     success = eglGetConfigAttrib(dpy, cnf, attribute, &localValue);
     if (success) {
         _env->SetIntArrayRegion(value, 0, 1, &localValue);
     }
-    return success;
+    return EglBoolToJBool(success);
 }
 
 static jboolean jni_eglGetConfigs(JNIEnv *_env, jobject _this, jobject display,
@@ -389,7 +394,7 @@ static jboolean jni_eglGetConfigs(JNIEnv *_env, jobject _this, jobject display,
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
-    jboolean success = JNI_FALSE;
+    EGLBoolean success = EGL_FALSE;
     if (configs == NULL) {
         config_size = 0;
     }
@@ -401,11 +406,11 @@ static jboolean jni_eglGetConfigs(JNIEnv *_env, jobject _this, jobject display,
     }
     if (success && configs) {
         for (int i=0 ; i<num ; i++) {
-            jobject obj = _env->NewObject(gConfig_class, gConfig_ctorID, (jint)nativeConfigs[i]);
+            jobject obj = _env->NewObject(gConfig_class, gConfig_ctorID, reinterpret_cast<jlong>(nativeConfigs[i]));
             _env->SetObjectArrayElement(configs, i, obj);
         }
     }
-    return success;
+    return EglBoolToJBool(success);
 }
 
 static jint jni_eglGetError(JNIEnv *_env, jobject _this) {
@@ -413,20 +418,20 @@ static jint jni_eglGetError(JNIEnv *_env, jobject _this) {
     return error;
 }
 
-static jint jni_eglGetCurrentContext(JNIEnv *_env, jobject _this) {
-    return (jint)eglGetCurrentContext();
+static jlong jni_eglGetCurrentContext(JNIEnv *_env, jobject _this) {
+    return reinterpret_cast<jlong>(eglGetCurrentContext());
 }
 
-static jint jni_eglGetCurrentDisplay(JNIEnv *_env, jobject _this) {
-    return (jint)eglGetCurrentDisplay();
+static jlong jni_eglGetCurrentDisplay(JNIEnv *_env, jobject _this) {
+    return reinterpret_cast<jlong>(eglGetCurrentDisplay());
 }
 
-static jint jni_eglGetCurrentSurface(JNIEnv *_env, jobject _this, jint readdraw) {
+static jlong jni_eglGetCurrentSurface(JNIEnv *_env, jobject _this, jint readdraw) {
     if ((readdraw != EGL_READ) && (readdraw != EGL_DRAW)) {
         jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return 0;
     }
-    return (jint)eglGetCurrentSurface(readdraw);
+    return reinterpret_cast<jlong>(eglGetCurrentSurface(readdraw));
 }
 
 static jboolean jni_eglDestroyContext(JNIEnv *_env, jobject _this, jobject display, jobject context) {
@@ -436,7 +441,7 @@ static jboolean jni_eglDestroyContext(JNIEnv *_env, jobject _this, jobject displ
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLContext ctx = getContext(_env, context);
-    return eglDestroyContext(dpy, ctx);
+    return EglBoolToJBool(eglDestroyContext(dpy, ctx));
 }
 
 static jboolean jni_eglDestroySurface(JNIEnv *_env, jobject _this, jobject display, jobject surface) {
@@ -448,18 +453,18 @@ static jboolean jni_eglDestroySurface(JNIEnv *_env, jobject _this, jobject displ
     EGLSurface sur = getSurface(_env, surface);
 
     if (sur) {
-        SkPixelRef* ref = (SkPixelRef*)(_env->GetIntField(surface,
+        SkPixelRef* ref = (SkPixelRef*)(_env->GetLongField(surface,
                 gSurface_NativePixelRefFieldID));
         if (ref) {
             ref->unlockPixels();
             SkSafeUnref(ref);
         }
     }
-    return eglDestroySurface(dpy, sur);
+    return EglBoolToJBool(eglDestroySurface(dpy, sur));
 }
 
-static jint jni_eglGetDisplay(JNIEnv *_env, jobject _this, jobject native_display) {
-    return (jint)eglGetDisplay(EGL_DEFAULT_DISPLAY);
+static jlong jni_eglGetDisplay(JNIEnv *_env, jobject _this, jobject native_display) {
+    return reinterpret_cast<jlong>(eglGetDisplay(EGL_DEFAULT_DISPLAY));
 }
 
 static jboolean jni_eglMakeCurrent(JNIEnv *_env, jobject _this, jobject display, jobject draw, jobject read, jobject context) {
@@ -471,7 +476,7 @@ static jboolean jni_eglMakeCurrent(JNIEnv *_env, jobject _this, jobject display,
     EGLSurface sdr = getSurface(_env, draw);
     EGLSurface srd = getSurface(_env, read);
     EGLContext ctx = getContext(_env, context);
-    return eglMakeCurrent(dpy, sdr, srd, ctx);
+    return EglBoolToJBool(eglMakeCurrent(dpy, sdr, srd, ctx));
 }
 
 static jstring jni_eglQueryString(JNIEnv *_env, jobject _this, jobject display, jint name) {
@@ -491,7 +496,7 @@ static jboolean jni_eglSwapBuffers(JNIEnv *_env, jobject _this, jobject display,
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLSurface sur = getSurface(_env, surface);
-    return eglSwapBuffers(dpy, sur);
+    return EglBoolToJBool(eglSwapBuffers(dpy, sur));
 }
 
 static jboolean jni_eglTerminate(JNIEnv *_env, jobject _this, jobject display) {
@@ -500,7 +505,7 @@ static jboolean jni_eglTerminate(JNIEnv *_env, jobject _this, jobject display) {
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
-    return eglTerminate(dpy);
+    return EglBoolToJBool(eglTerminate(dpy));
 }
 
 static jboolean jni_eglCopyBuffers(JNIEnv *_env, jobject _this, jobject display,
@@ -514,11 +519,11 @@ static jboolean jni_eglCopyBuffers(JNIEnv *_env, jobject _this, jobject display,
 }
 
 static jboolean jni_eglWaitGL(JNIEnv *_env, jobject _this) {
-    return eglWaitGL();
+    return EglBoolToJBool(eglWaitGL());
 }
 
 static jboolean jni_eglWaitNative(JNIEnv *_env, jobject _this, jint engine, jobject bindTarget) {
-    return eglWaitNative(engine);
+    return EglBoolToJBool(eglWaitNative(engine));
 }
 
 
@@ -540,21 +545,21 @@ static JNINativeMethod methods[] = {
 {"eglReleaseThread","()Z", (void*)jni_eglReleaseThread },
 {"getInitCount",    "(" DISPLAY ")I", (void*)jni_getInitCount },
 {"eglChooseConfig", "(" DISPLAY "[I[" CONFIG "I[I)Z", (void*)jni_eglChooseConfig },
-{"_eglCreateContext","(" DISPLAY CONFIG CONTEXT "[I)I", (void*)jni_eglCreateContext },
+{"_eglCreateContext","(" DISPLAY CONFIG CONTEXT "[I)J", (void*)jni_eglCreateContext },
 {"eglGetConfigs",   "(" DISPLAY "[" CONFIG "I[I)Z", (void*)jni_eglGetConfigs },
 {"eglTerminate",    "(" DISPLAY ")Z", (void*)jni_eglTerminate },
 {"eglCopyBuffers",  "(" DISPLAY SURFACE OBJECT ")Z", (void*)jni_eglCopyBuffers },
 {"eglWaitNative",   "(I" OBJECT ")Z", (void*)jni_eglWaitNative },
 {"eglGetError",     "()I", (void*)jni_eglGetError },
 {"eglGetConfigAttrib", "(" DISPLAY CONFIG "I[I)Z", (void*)jni_eglGetConfigAttrib },
-{"_eglGetDisplay",   "(" OBJECT ")I", (void*)jni_eglGetDisplay },
-{"_eglGetCurrentContext",  "()I", (void*)jni_eglGetCurrentContext },
-{"_eglGetCurrentDisplay",  "()I", (void*)jni_eglGetCurrentDisplay },
-{"_eglGetCurrentSurface",  "(I)I", (void*)jni_eglGetCurrentSurface },
-{"_eglCreatePbufferSurface","(" DISPLAY CONFIG "[I)I", (void*)jni_eglCreatePbufferSurface },
+{"_eglGetDisplay",   "(" OBJECT ")J", (void*)jni_eglGetDisplay },
+{"_eglGetCurrentContext",  "()J", (void*)jni_eglGetCurrentContext },
+{"_eglGetCurrentDisplay",  "()J", (void*)jni_eglGetCurrentDisplay },
+{"_eglGetCurrentSurface",  "(I)J", (void*)jni_eglGetCurrentSurface },
+{"_eglCreatePbufferSurface","(" DISPLAY CONFIG "[I)J", (void*)jni_eglCreatePbufferSurface },
 {"_eglCreatePixmapSurface", "(" SURFACE DISPLAY CONFIG OBJECT "[I)V", (void*)jni_eglCreatePixmapSurface },
-{"_eglCreateWindowSurface", "(" DISPLAY CONFIG OBJECT "[I)I", (void*)jni_eglCreateWindowSurface },
-{"_eglCreateWindowSurfaceTexture", "(" DISPLAY CONFIG OBJECT "[I)I", (void*)jni_eglCreateWindowSurfaceTexture },
+{"_eglCreateWindowSurface", "(" DISPLAY CONFIG OBJECT "[I)J", (void*)jni_eglCreateWindowSurface },
+{"_eglCreateWindowSurfaceTexture", "(" DISPLAY CONFIG OBJECT "[I)J", (void*)jni_eglCreateWindowSurfaceTexture },
 {"eglDestroyContext",      "(" DISPLAY CONTEXT ")Z", (void*)jni_eglDestroyContext },
 {"eglDestroySurface",      "(" DISPLAY SURFACE ")Z", (void*)jni_eglDestroySurface },
 {"eglMakeCurrent",         "(" DISPLAY SURFACE SURFACE CONTEXT")Z", (void*)jni_eglMakeCurrent },

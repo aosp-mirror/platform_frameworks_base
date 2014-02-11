@@ -19,9 +19,9 @@ package com.google.android.gles_jni;
 import javax.microedition.khronos.egl.*;
 
 public class EGLDisplayImpl extends EGLDisplay {
-    int mEGLDisplay;
+    long mEGLDisplay;
 
-    public EGLDisplayImpl(int dpy) {
+    public EGLDisplayImpl(long dpy) {
         mEGLDisplay = dpy;
     }
 
@@ -38,6 +38,12 @@ public class EGLDisplayImpl extends EGLDisplay {
 
     @Override
     public int hashCode() {
-        return mEGLDisplay;
+        /*
+         * Based on the algorithm suggested in
+         * http://developer.android.com/reference/java/lang/Object.html
+         */
+        int result = 17;
+        result = 31 * result + (int) (mEGLDisplay ^ (mEGLDisplay >>> 32));
+        return result;
     }
 }

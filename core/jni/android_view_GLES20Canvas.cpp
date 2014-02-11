@@ -923,6 +923,7 @@ static void android_view_GLES20Canvas_resume(JNIEnv* env, jobject clazz,
     renderer->resume();
 }
 
+<<<<<<< HEAD
 static jint android_view_GLES20Canvas_createLayerRenderer(JNIEnv* env,
         jobject clazz, jlong layerPtr) {
     Layer* layer = reinterpret_cast<Layer*>(layerPtr);
@@ -1257,27 +1258,12 @@ static JNINativeMethod gMethods[] = {
     { "nInterrupt",              "(J)V",       (void*) android_view_GLES20Canvas_interrupt },
     { "nResume",                 "(J)V",       (void*) android_view_GLES20Canvas_resume },
 
-    { "nCreateLayerRenderer",    "(J)J",       (void*) android_view_GLES20Canvas_createLayerRenderer },
-    { "nCreateLayer",            "(IIZ[I)J",   (void*) android_view_GLES20Canvas_createLayer },
-    { "nResizeLayer",            "(JII[I)Z" ,  (void*) android_view_GLES20Canvas_resizeLayer },
-    { "nSetLayerPaint",          "(JJ)V",      (void*) android_view_GLES20Canvas_setLayerPaint },
-    { "nSetLayerColorFilter",    "(JJ)V",      (void*) android_view_GLES20Canvas_setLayerColorFilter },
-    { "nSetOpaqueLayer",         "(JZ)V",      (void*) android_view_GLES20Canvas_setOpaqueLayer },
-    { "nCreateTextureLayer",     "(Z[I)J",     (void*) android_view_GLES20Canvas_createTextureLayer },
-    { "nUpdateTextureLayer",     "(JIIZLandroid/graphics/SurfaceTexture;)V",
-            (void*) android_view_GLES20Canvas_updateTextureLayer },
-    { "nUpdateRenderLayer",      "(JJJIIII)V", (void*) android_view_GLES20Canvas_updateRenderLayer },
-    { "nClearLayerTexture",      "(J)V",       (void*) android_view_GLES20Canvas_clearLayerTexture },
-    { "nDestroyLayer",           "(J)V",       (void*) android_view_GLES20Canvas_destroyLayer },
-    { "nDestroyLayerDeferred",   "(J)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nDrawLayer",              "(JJFF)V",    (void*) android_view_GLES20Canvas_drawLayer },
     { "nCopyLayer",              "(JJ)Z",      (void*) android_view_GLES20Canvas_copyLayer },
     { "nClearLayerUpdates",      "(J)V",       (void*) android_view_GLES20Canvas_clearLayerUpdates },
     { "nFlushLayerUpdates",      "(J)V",       (void*) android_view_GLES20Canvas_flushLayerUpdates },
     { "nPushLayerUpdate",        "(JJ)V",      (void*) android_view_GLES20Canvas_pushLayerUpdate },
     { "nCancelLayerUpdate",      "(JJ)V",      (void*) android_view_GLES20Canvas_cancelLayerUpdate },
-
-    { "nSetTextureLayerTransform", "(JJ)V",    (void*) android_view_GLES20Canvas_setTextureLayerTransform },
 
     { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_GLES20Canvas_getMaxTextureWidth },
     { "nGetMaximumTextureHeight", "()I",       (void*) android_view_GLES20Canvas_getMaxTextureHeight },

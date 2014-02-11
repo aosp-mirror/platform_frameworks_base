@@ -54,7 +54,7 @@ public final class EmojiFactory {
     }
     
     // A pointer to native EmojiFactory object.
-    private int mNativeEmojiFactory;
+    private long mNativeEmojiFactory;
     private String mName;
     // Cache.
     private Map<Integer, WeakReference<Bitmap>> mCache;
@@ -68,7 +68,7 @@ public final class EmojiFactory {
      *
      * This can be called from JNI code.
      */
-    private EmojiFactory(int nativeEmojiFactory, String name) {
+    private EmojiFactory(long nativeEmojiFactory, String name) {
         mNativeEmojiFactory = nativeEmojiFactory;
         mName = name;
         mCache = new CustomLinkedHashMap<Integer, WeakReference<Bitmap>>();
@@ -272,18 +272,18 @@ public final class EmojiFactory {
     
     // native methods
     
-    private native void nativeDestructor(int factory);
-    private native Bitmap nativeGetBitmapFromAndroidPua(int nativeEmojiFactory, int AndroidPua);
-    private native int nativeGetAndroidPuaFromVendorSpecificSjis(int nativeEmojiFactory,
+    private native void nativeDestructor(long nativeEmojiFactory);
+    private native Bitmap nativeGetBitmapFromAndroidPua(long nativeEmojiFactory, int AndroidPua);
+    private native int nativeGetAndroidPuaFromVendorSpecificSjis(long nativeEmojiFactory,
             char sjis);
-    private native int nativeGetVendorSpecificSjisFromAndroidPua(int nativeEmojiFactory,
+    private native int nativeGetVendorSpecificSjisFromAndroidPua(long nativeEmojiFactory,
             int pua);
-    private native int nativeGetAndroidPuaFromVendorSpecificPua(int nativeEmojiFactory,
+    private native int nativeGetAndroidPuaFromVendorSpecificPua(long nativeEmojiFactory,
             int vsp);
-    private native int nativeGetVendorSpecificPuaFromAndroidPua(int nativeEmojiFactory,
+    private native int nativeGetVendorSpecificPuaFromAndroidPua(long nativeEmojiFactory,
             int pua);
-    private native int nativeGetMaximumVendorSpecificPua(int nativeEmojiFactory);
-    private native int nativeGetMinimumVendorSpecificPua(int nativeEmojiFactory);
-    private native int nativeGetMaximumAndroidPua(int nativeEmojiFactory);
-    private native int nativeGetMinimumAndroidPua(int nativeEmojiFactory);
+    private native int nativeGetMaximumVendorSpecificPua(long nativeEmojiFactory);
+    private native int nativeGetMinimumVendorSpecificPua(long nativeEmojiFactory);
+    private native int nativeGetMaximumAndroidPua(long nativeEmojiFactory);
+    private native int nativeGetMinimumAndroidPua(long nativeEmojiFactory);
 }

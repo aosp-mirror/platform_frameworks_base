@@ -124,7 +124,7 @@ public final class DisplayManagerService extends SystemService {
     private static final int DISPLAY_BLANK_STATE_BLANKED = 1;
     private static final int DISPLAY_BLANK_STATE_UNBLANKED = 2;
 
-    private Context mContext;
+    private final Context mContext;
     private final DisplayManagerHandler mHandler;
     private final Handler mUiHandler;
     private final DisplayAdapterListener mDisplayAdapterListener;
@@ -208,16 +208,13 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayViewport mTempDefaultViewport = new DisplayViewport();
     private final DisplayViewport mTempExternalTouchViewport = new DisplayViewport();
 
-    public DisplayManagerService() {
+    public DisplayManagerService(Context context) {
+        super(context);
+        mContext = context;
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
-    }
-
-    @Override
-    public void onCreate(Context context) {
-        mContext = context;
     }
 
     @Override
