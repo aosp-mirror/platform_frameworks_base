@@ -12,6 +12,7 @@ trainingnavtop=true
 <!-- table of contents -->
 <h2>This lesson teaches you to</h2>
 <ol>
+  <li><a href="#tradeoffs">Understand the Trade-offs</a></li>
   <li><a href="#set">Set a Repeating Alarm</a></li>
   <li><a href="#cancel">Cancel an Alarm</a></li>
   <li><a href="#boot">Start an Alarm When the Device Boots</a></li>
@@ -27,6 +28,21 @@ class="button">Download the sample</a>
 
 </div>
 </div>
+
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=yxW29JVXCqc">
+<div>
+    <h3>Video</h3>
+    <p>The App Clinic: Cricket</p>
+</div>
+</a>
+
+<a class="notice-developers-video wide"
+href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-VJS9WQlj9xM_ygPopZ-Qd">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Efficient Data Transfers</p>
+</div>
+</a>
 
 <p>Alarms (based on the {@link android.app.AlarmManager} class) give you a way to perform
 time-based operations outside the lifetime of your application.
@@ -55,6 +71,76 @@ instead consider using the {@link android.os.Handler} class in conjunction with
 {@link java.util.Timer} and {@link java.lang.Thread}. This approach gives Android better
 control over system resources.</p>
 
+<h2 id="tradeoffs">Understand the Trade-offs</h2>
+
+<p>A repeating alarm is a relatively simple mechanism with limited flexibility.
+It may
+not be the best choice for your app, particularly if you need to trigger network
+operations. A poorly designed alarm can cause battery drain and put a significant load on
+servers.</p>
+
+<p>A common scenario for triggering an operation outside the lifetime of your app is
+syncing data with a server. This is a case where you might be tempted to use a
+repeating alarm. But if you own the server that is hosting your app's
+data, using <a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> (GCM)
+in conjunction with <a href="{@docRoot}training/sync-adapters/index.html">sync adapter</a>
+is a better solution than {@link android.app.AlarmManager}. A sync adapter gives you all
+the same scheduling options as {@link android.app.AlarmManager}, but it offers
+you significantly more flexibility. For example,
+a sync could be based on a "new data" message from the server/device (see
+<a href="{@docRoot}training/sync-adapters/running-sync-adapter.html">Running a Sync
+Adapter</a> for details), the user's activity (or inactivity), the time of day, and so on.
+See the linked videos at the top of this page for a detailed discussion of when and how
+to use GCM and sync adapter.</p>
+
+<h3>Best practices</h3>
+
+<p>Every choice you make in designing your repeating alarm can have consequences in how your
+app uses (or abuses) system resources. For example, imagine a popular app that
+syncs with a server. If the sync operation is based on clock time and every instance of the
+app syncs at 11:00 p.m., the load on the server could result in high latency or even
+"denial of service." Follow these best practices in using alarms:</p>
+
+<ul>
+<li>Add randomness (jitter) to any network requests that
+trigger as a result of a repeating alarm:
+<ul>
+<li>Do any local work when the alarm triggers. "Local work" means anything that doesn't
+hit a server or require the data from the server.</li>
+<li>At the same time, schedule the alarm that contains the network requests to fire at some
+random period of time.</li> </ul></li>
+
+
+<li>Keep your alarm frequency to a minimum.</li>
+<li>Don't wake up the device unnecessarily (this behavior is determined by the alarm type,
+as described in <a href="#type">Choose an alarm type</a>).</li>
+<li>Don't make your alarm's trigger time any more precise than it has to be.
+
+
+<p>Use {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()} instead
+of {@link android.app.AlarmManager#setRepeating setRepeating()}.
+When you use {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()},
+Android synchronizes repeating alarms from multiple apps and fires
+them at the same time. This reduces the total number of times the system must wake the
+device, thus reducing drain on the battery. As of Android 4.4
+(API Level 19), all repeating alarms are inexact. Note that while
+{@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()} is an
+improvement over {@link android.app.AlarmManager#setRepeating setRepeating()}, it can
+still overwhelm a server if every instance of an app hits the server around the same time.
+Therefore, for network requests, add some randomness to your alarms, as discussed above.</p>
+</li>
+
+<li>Avoid basing your alarm on clock time if possible.
+
+<p>Repeating alarms that are based on a precise trigger time don't scale well.
+Use {@link android.app.AlarmManager#ELAPSED_REALTIME} if you can. The different alarm
+types are described in more detail in the following section.</p>
+
+</li>
+
+</ul>
+
+
 <h2 id="set">Set a Repeating Alarm</h2>
 
 <p>As described above, repeating alarms are a good choice for scheduling regular events or
@@ -69,29 +155,6 @@ immediately.</li>
 that uses the same pending intent, it replaces the original alarm.</li>
 </ul>
 
-<p>Every choice you make in designing your repeating alarm can have consequences in how your
-app uses (or abuses) system resources. Even a carefully managed alarm can have a major impact
-on battery life. Follow these guidelines as you design your app:</p>
-
-<ul>
-<li>Keep your alarm frequency to a minimum.</li>
-<li>Don't wake up the device unnecessarily (this behavior is determined by the alarm type,
-as described in <a href="#type">Choose an alarm type</a>).</li>
-<li>Don't make your alarm's trigger time any more precise than it has to be:
-
-<ul>
-<li>Use {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()} instead
-of {@link android.app.AlarmManager#setRepeating setRepeating()} whenever possible.
-When you use {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()},
-Android synchronizes multiple inexact repeating alarms and fires
-them at the same time. This reduces the drain on the battery.</li>
-<li>If your alarm's behavior is based on an interval (for example, your alarm
-fires once an hour) rather than a precise trigger time (for example, your alarm fires at
-7 a.m. sharp and every 20 minutes after that), use an {@code ELAPSED_REALTIME}
-alarm type.</li>
-</ul></li>
-
-</ul>
 
 <h3 id="type">Choose an alarm type</h3>
 
@@ -119,7 +182,9 @@ hour), use one of the elapsed real time types. In general, this is the better ch
 <p>If you need your alarm to fire at a particular time of day,
 then choose one of the clock-based real time clock types. Note, however, that this approach can
 have some drawbacks&mdash;the app may not translate well to other locales, and if the user
-changes the device's time setting, it could cause unexpected behavior in your app.</p>
+changes the device's time setting, it could cause unexpected behavior in your app. Using a
+real time clock alarm type also does not scale well, as discussed above. We recommend
+that you use a "elapsed real time" alarm if you can.</p>
 
 <p>Here is the list of types:</p>
 
