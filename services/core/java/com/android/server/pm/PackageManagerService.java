@@ -6111,6 +6111,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         public final void addProvider(PackageParser.Provider p) {
+            if (mProviders.containsKey(p.getComponentName())) {
+                Slog.w(TAG, "Provider " + p.getComponentName() + " already defined; ignoring");
+                return;
+            }
+
             mProviders.put(p.getComponentName(), p);
             if (DEBUG_SHOW_INFO) {
                 Log.v(TAG, "  "
