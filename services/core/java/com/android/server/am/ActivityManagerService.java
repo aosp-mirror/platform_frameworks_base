@@ -1866,11 +1866,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public static class Lifecycle extends SystemService {
-        private ActivityManagerService mService;
+    public static final class Lifecycle extends SystemService {
+        private final ActivityManagerService mService;
 
-        @Override
-        public void onCreate(Context context) {
+        public Lifecycle(Context context) {
+            super(context);
             mService = new ActivityManagerService(context);
         }
 

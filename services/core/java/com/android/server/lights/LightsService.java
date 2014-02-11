@@ -156,8 +156,9 @@ public class LightsService extends SystemService {
         }
     };
 
-    @Override
-    public void onCreate(Context context) {
+    public LightsService(Context context) {
+        super(context);
+
         mNativePointer = init_native();
 
         for (int i = 0; i < LightsManager.LIGHT_ID_COUNT; i++) {
@@ -182,6 +183,7 @@ public class LightsService extends SystemService {
         }
     };
 
+    @Override
     protected void finalize() throws Throwable {
         finalize_native(mNativePointer);
         super.finalize();

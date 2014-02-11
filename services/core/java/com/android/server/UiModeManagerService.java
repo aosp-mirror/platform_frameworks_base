@@ -88,6 +88,10 @@ final class UiModeManagerService extends SystemService {
 
     private PowerManager.WakeLock mWakeLock;
 
+    public UiModeManagerService(Context context) {
+        super(context);
+    }
+
     private static Intent buildHomeIntent(String category) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(category);

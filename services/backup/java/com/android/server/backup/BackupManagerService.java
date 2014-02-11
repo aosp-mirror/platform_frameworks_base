@@ -274,6 +274,20 @@ public class BackupManagerService extends IBackupManager.Stub {
     // Watch the device provisioning operation during setup
     ContentObserver mProvisionedObserver;
 
+    public static final class Lifecycle extends SystemService {
+        private final BackupManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new BackupManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.BACKUP_SERVICE, mService);
+        }
+    }
+
     class ProvisionedObserver extends ContentObserver {
         public ProvisionedObserver(Handler handler) {
             super(handler);

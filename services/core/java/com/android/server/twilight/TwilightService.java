@@ -65,6 +65,10 @@ public final class TwilightService extends SystemService {
 
     TwilightState mTwilightState;
 
+    public TwilightService(Context context) {
+        super(context);
+    }
+
     @Override
     public void onStart() {
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
