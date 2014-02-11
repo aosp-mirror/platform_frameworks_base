@@ -242,7 +242,7 @@ bool AssetManager::addAssetPath(const String8& path, int32_t* cookie)
 }
 
 bool AssetManager::createIdmap(const char* targetApkPath, const char* overlayApkPath,
-        uint32_t targetCrc, uint32_t overlayCrc, uint32_t** outData, uint32_t* outSize)
+        uint32_t targetCrc, uint32_t overlayCrc, uint32_t** outData, size_t* outSize)
 {
     AutoMutex _l(mLock);
     const String8 paths[2] = { String8(targetApkPath), String8(overlayApkPath) };
@@ -257,7 +257,7 @@ bool AssetManager::createIdmap(const char* targetApkPath, const char* overlayApk
             ALOGW("failed to find resources.arsc in %s\n", ap.path.string());
             return false;
         }
-        tables[i].add(ass, (void*)1, false);
+        tables[i].add(ass, 1, false);
     }
 
     return tables[0].createIdmap(tables[1], targetCrc, overlayCrc,

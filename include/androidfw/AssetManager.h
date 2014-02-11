@@ -224,7 +224,7 @@ public:
      * corresponding overlay package.
      */
     bool createIdmap(const char* targetApkPath, const char* overlayApkPath,
-        uint32_t targetCrc, uint32_t overlayCrc, uint32_t** outData, uint32_t* outSize);
+        uint32_t targetCrc, uint32_t overlayCrc, uint32_t** outData, size_t* outSize);
 
 private:
     struct asset_path
