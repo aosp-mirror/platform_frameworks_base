@@ -53,13 +53,13 @@ public class AppWidgetService extends SystemService {
 
     static final String TAG = "AppWidgetService";
 
-    Context mContext;
-    Handler mSaveStateHandler;
+    final Context mContext;
+    final Handler mSaveStateHandler;
 
-    SparseArray<AppWidgetServiceImpl> mAppWidgetServices;
+    final SparseArray<AppWidgetServiceImpl> mAppWidgetServices;
 
-    @Override
-    public void onCreate(Context context) {
+    public AppWidgetService(Context context) {
+        super(context);
         mContext = context;
 
         mSaveStateHandler = BackgroundThread.getHandler();

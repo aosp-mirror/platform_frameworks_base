@@ -1118,6 +1118,10 @@ public class NotificationManagerService extends SystemService {
         return out;
     }
 
+    public NotificationManagerService(Context context) {
+        super(context);
+    }
+
     @Override
     public void onStart() {
         mAm = ActivityManagerNative.getDefault();

@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import com.android.server.SystemService;
 
+import android.content.Context;
 import android.content.pm.PackageStats;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
@@ -38,6 +39,10 @@ public final class Installer extends SystemService {
 
     byte buf[] = new byte[1024];
     int buflen = 0;
+
+    public Installer(Context context) {
+        super(context);
+    }
 
     @Override
     public void onStart() {
