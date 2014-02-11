@@ -89,11 +89,11 @@ public class DeviceStorageMonitorService extends SystemService {
     private long mLastReportedFreeMemTime;
     boolean mLowMemFlag=false;
     private boolean mMemFullFlag=false;
-    private ContentResolver mResolver;
-    private long mTotalMemory;  // on /data
-    private StatFs mDataFileStats;
-    private StatFs mSystemFileStats;
-    private StatFs mCacheFileStats;
+    private final ContentResolver mResolver;
+    private final long mTotalMemory;  // on /data
+    private final StatFs mDataFileStats;
+    private final StatFs mSystemFileStats;
+    private final StatFs mCacheFileStats;
 
     private static final File DATA_PATH = Environment.getDataDirectory();
     private static final File SYSTEM_PATH = Environment.getRootDirectory();
@@ -102,10 +102,10 @@ public class DeviceStorageMonitorService extends SystemService {
     private long mThreadStartTime = -1;
     boolean mClearSucceeded = false;
     boolean mClearingCache;
-    private Intent mStorageLowIntent;
-    private Intent mStorageOkIntent;
-    private Intent mStorageFullIntent;
-    private Intent mStorageNotFullIntent;
+    private final Intent mStorageLowIntent;
+    private final Intent mStorageOkIntent;
+    private final Intent mStorageFullIntent;
+    private final Intent mStorageNotFullIntent;
     private CachePackageDataObserver mClearCacheObserver;
     private CacheFileDeletedObserver mCacheFileDeletedObserver;
     private static final int _TRUE = 1;
@@ -134,7 +134,7 @@ public class DeviceStorageMonitorService extends SystemService {
     * Handler that checks the amount of disk space on the device and sends a
     * notification if the device runs low on disk space
     */
-    private Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             //don't handle an invalid message
@@ -310,12 +310,8 @@ public class DeviceStorageMonitorService extends SystemService {
                 delay);
     }
 
-    /**
-    * Constructor to run service. initializes the disk space threshold value
-    * and posts an empty message to kickstart the process.
-    */
-    @Override
-    public void onCreate(Context context) {
+    public DeviceStorageMonitorService(Context context) {
+        super(context);
         mLastReportedFreeMemTime = 0;
         mResolver = context.getContentResolver();
         //create StatFs object
@@ -335,6 +331,10 @@ public class DeviceStorageMonitorService extends SystemService {
         mStorageNotFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     }
 
+    /**
+    * Initializes the disk space threshold value and posts an empty message to
+    * kickstart the process.
+    */
     @Override
     public void onStart() {
         // cache storage thresholds
