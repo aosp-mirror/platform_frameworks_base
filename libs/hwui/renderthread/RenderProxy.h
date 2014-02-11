@@ -62,6 +62,8 @@ public:
     ANDROID_API void attachFunctor(Functor* functor);
     ANDROID_API void detachFunctor(Functor* functor);
 
+    ANDROID_API void runWithGlContext(RenderTask* task);
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
