@@ -1284,7 +1284,7 @@ public:
     ~ResTable();
 
     status_t add(Asset* asset, const int32_t cookie, bool copyData,
-                 const void* idmap);
+                 const void* idmap = NULL);
     status_t add(const void *data, size_t size);
     status_t add(ResTable* src);
 
@@ -1551,7 +1551,7 @@ public:
     status_t createIdmap(const ResTable& overlay,
             uint32_t targetCrc, uint32_t overlayCrc,
             const char* targetPath, const char* overlayPath,
-            void** outData, uint32_t* outSize) const
+            void** outData, size_t* outSize) const
     {
         (void)targetPath;
         (void)overlayPath;
