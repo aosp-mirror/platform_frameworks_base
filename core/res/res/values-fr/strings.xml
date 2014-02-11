@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gérer les certificats de confiance"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permet à l\'application d\'installer et de désinstaller les certificats CA en tant que certificats de confiance."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"associer aux services d\'inactivité"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Permettre à l\'application d\'interagir avec les services d\'inactivité définis par des applications"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Cette autorisation permet à la plate-forme Android de se lier aux services inactifs d\'une application."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lecture/écriture dans les ressources appartenant aux diagnostics"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet à l\'application d\'obtenir des droits en lecture/écriture concernant toute ressource appartenant au groupe de diagnostics (par exemple, les fichiers du répertoire /dev). Ceci peut affecter la stabilité et la sécurité du système. Cette fonctionnalité est UNIQUEMENT réservée aux diagnostics matériels effectués par le fabricant ou l\'opérateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activer ou désactiver les composants de l\'application"</string>
@@ -1493,7 +1493,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Affichage sans fil"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortie multimédia"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexion à l\'appareil"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Diffuser l\'écran sur l\'appareil"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Caster l\'écran sur l\'appareil"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Recherche d\'appareils en cours…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Paramètres"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Déconnecter"</string>

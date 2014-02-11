@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"Vertrauenswürdige Anmeldedaten verwalten"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Ermöglicht der App, CA-Zertifikate als vertrauenswürdige Anmeldedaten zu installieren und zu deinstallieren."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"An inaktive Dienste binden"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Ermöglicht der App, mit anwendungsdefinierten inaktiven Diensten zu interagieren"</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Mit dieser Berechtigung kann sich das Android-System an die inaktiven Dienste einer App binden."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lese-/Schreibberechtigung für zu Diagnosegruppe gehörige Elemente"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ermöglicht der App, alle Elemente in der Diagnosegruppe zu lesen und zu bearbeiten, etwa Dateien in \"/dev\". Dies könnte eine potenzielle Gefährdung für die Stabilität und Sicherheit des Systems darstellen und sollte NUR für hardwarespezifische Diagnosen des Herstellers oder Mobilfunkanbieters verwendet werden."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"App-Komponenten aktivieren oder deaktivieren"</string>
@@ -1427,7 +1427,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Löschen"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fertig"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"App auswählen"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>

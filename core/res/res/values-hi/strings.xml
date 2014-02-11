@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"विश्वसनीय क्रेडेंशियल प्रबंधित करें"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"ऐप्स  को CA प्रमाणपत्रों को विश्वसनीय क्रेडेंशियल के रूप में इंस्टॉल और अनइंस्टॉल करने दें"</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"निष्क्रिय सेवाओं से आबद्ध करें"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"ऐप्स को एप्लिकेशन-परिभाषित निष्क्रिय सेवाओं के साथ सहभागिता करने की अनुमति देता है."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"यह अनुमति Android सिस्टम को किसी एप्लिकेशन की निष्क्रिय सेवाओं से आबद्ध होने देती है."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"निदान के स्‍वामित्‍व वाले संसाधनों को पढ़ें/लिखें"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ऐप्स को diag समूह के स्‍वामित्‍व वाले किसी संसाधन को पढ़ने और उसमें लिखने देता है; उदाहरण के लिए, /dev की फ़ाइलें. यह सिस्‍टम की स्‍थिरता और सुरक्षा को संभावित रूप से प्रभावित कर सकता है. इसका उपयोग निर्माता या ऑपरेटर द्वारा केवल हार्डवेयर-विशिष्ट निदान के लिए किया जाना चाहिए."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ऐप्स घटकों को सक्षम या अक्षम करें"</string>

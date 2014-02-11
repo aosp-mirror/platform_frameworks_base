@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrar credenciales de confianza"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que la aplicación instale y desinstale certificados de CA como credenciales de confianza."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"ocultar para servicios inactivos"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Permite que la aplicación interactúe con servicios inactivos definidos por la aplicación."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Esto permite que el sistema Android enlace con servicios inactivos de una aplicación."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer/escribir en los recursos propiedad del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite que la aplicación consulte y escriba en cualquier recurso del grupo de diagnóstico como, por ejemplo, archivos en /dev. Este permiso podría afectar a la seguridad y estabilidad del sistema. SOLO se debe usar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"habilitar o inhabilitar componentes de la aplicación"</string>

@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestiona les credencials de confiança"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permet que l\'aplicació instal·li i desinstal·li certificats de CA com a credencials de confiança."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"vincula als serveis inactius"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Permet que l\'aplicació interaccioni amb els serveis inactius definits per l\'aplicació."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Amb aquest permís, el sistema Android podrà vincular-se amb els serveis inactius d\'una aplicació."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"llegir/escriure recursos propietat de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet que l\'aplicació llegeixi i escrigui a qualsevol recurs propietat del grup diag; per exemple, els fitxers de /dev. Això podria afectar l\'estabilitat i la seguretat del sistema. NOMÉS l\'hauria d\'utilitzar el fabricant o l\'operador per a diagnòstics específics de maquinari."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activa o desactiva els components de l\'aplicació"</string>

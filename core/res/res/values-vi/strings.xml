@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"quản lý thông tin xác thực đáng tin cậy"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Cho phép ứng dụng cài đặt và gỡ cài đặt chứng chỉ CA dưới dạng thông tin xác thực đáng tin cậy."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"liên kết với dịch vụ không dùng đến"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Cho phép ứng dụng tương tác với dịch vụ không dùng đến được xác định cho ứng dụng."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Quyền này cho phép hệ thống Android liên kết với các dịch vụ ở trạng thái rảnh của ứng dụng."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"đọc/ghi vào tài nguyên do chẩn đoán sở hữu"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Cho phép ứng dụng đọc và ghi vào bất kỳ tài nguyên nào do nhóm chẩn đoán sở hữu; ví dụ: các tệp trong /dev. Quyền này có thể ảnh hưởng đến sự ổn định và tính bảo mật của hệ thống. CHỈ nên sử dụng quyền này cho các chẩn đoán phần cứng cụ thể của nhà sản xuất hoặc nhà cung cấp."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"bật hoặc tắt cấu phần ứng dụng"</string>

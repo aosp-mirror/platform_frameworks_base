@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"upravljanje pouzdanim vjerodajnicama"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Omogućuje aplikaciji instaliranje i deinstaliranje CA certifikata kao pouzdanih vjerodajnica."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"veži uz usluge u mirovanju"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Omogućuje aplikaciji interakciju s uslugama u mirovanju definiranim aplikacijom."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"To dopuštenje omogućuje sustavu Android da se veže uz aplikacijine usluge u mirovanju."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"pisanje/čitanje u resursima čije je vlasnik dijagnostika"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Aplikaciji omogućuje čitanje i pisanje na bilo koji resurs u vlasništvu dijag. grupe; na primjer, datoteke u sustavu /dev. To bi moglo utjecati na stabilnost sustava i sigurnost. Dozvolu bi trebao upotrebljavati proizvođač ili operater SAMO za dijagnostiku koja se odnosi na hardver."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogućavanje ili onemogućavanje komponenti aplikacije"</string>

@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"mga pinamamahalaang pinagkakatiwalaang kredensyal"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Pinapayagan ang app na mag-install at mag-uninstall ng mga CA certificate bilang mga pinagkakatiwalaang kredensyal."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"sumailalim sa mga idle na serbisyo"</string>
-    <string name="permdesc_bindIdleService" msgid="3062157929989572890">"Pinapayagan ang app na makipag-ugnayan sa mga idle na serbisyong partikular sa application."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Nagbibigay-daan ang pahintulot na ito sa Android system na sumailalim sa mga idle na serbisyo ng isang application."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"magbasa/magsulat sa mga mapagkukunang pag-aari ng diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Pinapayagan ang app na magbasa at magsulat sa anumang mapagkukunang pag-aari ng pangkat ng diag; halimbawa, mga file sa /dev. Maaaring potensyal na maapektuhan nito ang katatagan at seguridad ng system. Dapat LAMANG itong gamitin para sa diagnostics na tukoy sa hardware ng tagagawa o operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"paganahin o huwag paganahin ang mga bahagi ng app"</string>
