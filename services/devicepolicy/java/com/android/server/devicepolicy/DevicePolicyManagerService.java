@@ -2830,6 +2830,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        if (um.getUserInfo(userHandle) == null) {
+            // User doesn't exist.
+            throw new IllegalArgumentException(
+                    "Attempted to set profile owner for invalid userId: " + userHandle);
+        }
+
         if (packageName == null
                 || !DeviceOwner.isInstalledForUser(packageName, userHandle)) {
             throw new IllegalArgumentException("Package name " + packageName

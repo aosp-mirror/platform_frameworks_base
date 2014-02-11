@@ -1690,16 +1690,16 @@ public class DevicePolicyManager {
      * user. Also, this method must be called before the user has been used for the first time.
      * @param packageName the package name of the application to be registered as profile owner.
      * @param ownerName the human readable name of the organisation associated with this DPM.
+     * @param userHandle the userId to set the profile owner for.
      * @return whether the package was successfully registered as the profile owner.
      * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
      *         the user has already been set up.
      */
-    public boolean setProfileOwner(String packageName, String ownerName)
+    public boolean setProfileOwner(String packageName, String ownerName, int userHandle)
             throws IllegalArgumentException {
         if (mService != null) {
             try {
-                return mService.setProfileOwner(packageName, ownerName,
-                        Process.myUserHandle().getIdentifier());
+                return mService.setProfileOwner(packageName, ownerName, userHandle);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set profile owner", re);
                 throw new IllegalArgumentException("Couldn't set profile owner.", re);
