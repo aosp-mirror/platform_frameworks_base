@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <bool name="config_automatic_brightness_available">true</bool>
-    <string name="phoneTypeCar">Automobile</string>
-    <integer-array name="config_scrollBarrierVibePattern">
-        <item>100</item>
-        <item>200</item>
-        <item>300</item>
-    </integer-array>
-    <!-- The following integer does not exist in the original package. Idmap
-         generation should therefore ignore it. -->
-    <integer name="integer_not_in_original_package">0</integer>
+    <bool name="config_annoy_dianne">false</bool>
 </resources>

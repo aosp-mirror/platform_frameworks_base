@@ -2,6 +2,6 @@ package com.android.overlaytest;
 
 public class WithOverlayTest extends OverlayBaseTest {
     public WithOverlayTest() {
-        mWithOverlay = true;
+        mMode = MODE_SINGLE_OVERLAY;
     }
 }
