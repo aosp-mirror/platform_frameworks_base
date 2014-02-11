@@ -17,7 +17,7 @@
 #ifndef _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H
 #define _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H
 
-#include <input/InputApplication.h>
+#include <inputflinger/InputApplication.h>
 
 #include "JNIHelp.h"
 #include "jni.h"

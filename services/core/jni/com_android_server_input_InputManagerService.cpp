@@ -35,9 +35,10 @@
 #include <utils/Looper.h>
 #include <utils/threads.h>
 
-#include <input/InputManager.h>
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
+
+#include <inputflinger/InputManager.h>
 
 #include <android_os_MessageQueue.h>
 #include <android_view_InputDevice.h>

@@ -17,30 +17,23 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    EventHub.cpp \
-    InputApplication.cpp \
-    InputDispatcher.cpp \
-    InputListener.cpp \
-    InputManager.cpp \
-    InputReader.cpp \
-    InputWindow.cpp \
     PointerController.cpp \
     SpriteController.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     liblog \
-    libandroidfw \
     libutils \
-    libhardware \
-    libhardware_legacy \
     libskia \
     libgui \
     libui \
-    libinput
+	libinput \
+	libinputflinger
 
 LOCAL_C_INCLUDES := \
-    external/skia/include/core
+    external/skia/include/core \
+    frameworks/native/services
+
 
 LOCAL_CFLAGS += -Wno-unused-parameter
 

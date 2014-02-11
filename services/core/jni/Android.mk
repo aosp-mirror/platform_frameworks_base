@@ -2,6 +2,8 @@
 # files
 LOCAL_REL_DIR := core/jni
 
+LOCAL_CFLAGS += -Wno-unused-parameter
+
 LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_AlarmManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_AssetAtlasService.cpp \
@@ -45,6 +47,7 @@ LOCAL_SHARED_LIBRARIES += \
     libutils \
     libui \
     libinput \
+    libinputflinger \
     libinputservice \
     libsensorservice \
     libskia \
