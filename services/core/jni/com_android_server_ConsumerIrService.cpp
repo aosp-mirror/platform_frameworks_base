@@ -29,7 +29,7 @@
 
 namespace android {
 
-static jint halOpen(JNIEnv *env, jobject obj) {
+static jlong halOpen(JNIEnv *env, jobject obj) {
     hw_module_t const* module;
     consumerir_device_t *dev;
     int err;
@@ -47,10 +47,10 @@ static jint halOpen(JNIEnv *env, jobject obj) {
         return 0;
     }
 
-    return reinterpret_cast<jint>(dev);
+    return reinterpret_cast<jlong>(dev);
 }
 
-static jint halTransmit(JNIEnv *env, jobject obj, jint halObject,
+static jint halTransmit(JNIEnv *env, jobject obj, jlong halObject,
    jint carrierFrequency, jintArray pattern) {
     int ret;
 
@@ -67,8 +67,8 @@ static jint halTransmit(JNIEnv *env, jobject obj, jint halObject,
 }
 
 static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject obj,
-    jint halObject) {
-    consumerir_device_t *dev = (consumerir_device_t *) halObject;
+    jlong halObject) {
+    consumerir_device_t *dev = reinterpret_cast<consumerir_device_t*>(halObject);
     consumerir_freq_range_t *ranges;
     int len;
 
@@ -101,9 +101,9 @@ static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject obj,
 }
 
 static JNINativeMethod method_table[] = {
-    { "halOpen", "()I", (void *)halOpen },
-    { "halTransmit", "(II[I)I", (void *)halTransmit },
-    { "halGetCarrierFrequencies", "(I)[I", (void *)halGetCarrierFrequencies},
+    { "halOpen", "()J", (void *)halOpen },
+    { "halTransmit", "(JI[I)I", (void *)halTransmit },
+    { "halGetCarrierFrequencies", "(J)[I", (void *)halGetCarrierFrequencies},
 };
 
 int register_android_server_ConsumerIrService(JNIEnv *env) {
