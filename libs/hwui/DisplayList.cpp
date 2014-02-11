@@ -232,7 +232,7 @@ void DisplayList::init() {
     mOutline.rewind();
     mClipToOutline = false;
     mCastsShadow = false;
-    mSharesGlobalCamera = false;
+    mUsesGlobalCamera = false;
     mAlpha = 1;
     mHasOverlappingRendering = true;
     mTranslationX = 0;

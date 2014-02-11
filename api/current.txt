@@ -345,6 +345,7 @@ package android {
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
+    field public static final int castsShadow = 16843778; // 0x1010402
     field public static final int category = 16843752; // 0x10103e8
     field public static final int centerBright = 16842956; // 0x10100cc
     field public static final int centerColor = 16843275; // 0x101020b
@@ -28711,7 +28712,9 @@ package android.view {
     method protected float getBottomFadingEdgeStrength();
     method protected int getBottomPaddingOffset();
     method public float getCameraDistance();
+    method public final boolean getCastsShadow();
     method public android.graphics.Rect getClipBounds();
+    method public final boolean getClipToOutline();
     method public java.lang.CharSequence getContentDescription();
     method public final android.content.Context getContext();
     method protected android.view.ContextMenu.ContextMenuInfo getContextMenuInfo();
@@ -28763,6 +28766,7 @@ package android.view {
     method public int getNextFocusRightId();
     method public int getNextFocusUpId();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
+    method public final void getOutline(android.graphics.Path);
     method public int getOverScrollMode();
     method public android.view.ViewOverlay getOverlay();
     method public int getPaddingBottom();
@@ -28978,8 +28982,10 @@ package android.view {
     method public void setBackgroundResource(int);
     method public final void setBottom(int);
     method public void setCameraDistance(float);
+    method public void setCastsShadow(boolean);
     method public void setClickable(boolean);
     method public void setClipBounds(android.graphics.Rect);
+    method public void setClipToOutline(boolean);
     method public void setContentDescription(java.lang.CharSequence);
     method public void setDrawingCacheBackgroundColor(int);
     method public void setDrawingCacheEnabled(boolean);
@@ -29025,6 +29031,7 @@ package android.view {
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);
     method public void setOnTouchListener(android.view.View.OnTouchListener);
+    method public void setOutline(android.graphics.Path);
     method public void setOverScrollMode(int);
     method public void setPadding(int, int, int, int);
     method public void setPaddingRelative(int, int, int, int);
