@@ -334,6 +334,10 @@ class AlarmManagerService extends SystemService {
     static final BatchTimeOrder sBatchOrder = new BatchTimeOrder();
     final ArrayList<Batch> mAlarmBatches = new ArrayList<Batch>();
 
+    public AlarmManagerService(Context context) {
+        super(context);
+    }
+
     static long convertToElapsed(long when, int type) {
         final boolean isRtc = (type == RTC || type == RTC_WAKEUP);
         if (isRtc) {

@@ -168,7 +168,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     // effectively and terminate the dream.
     private static final int DREAM_BATTERY_LEVEL_DRAIN_CUTOFF = 5;
 
-    private Context mContext;
+    private final Context mContext;
     private LightsManager mLightsManager;
     private BatteryService mBatteryService;
     private DisplayManagerInternal mDisplayManagerInternal;
@@ -374,7 +374,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
 
-    public PowerManagerService() {
+    public PowerManagerService(Context context) {
+        super(context);
+        mContext = context;
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
             mDisplaySuspendBlocker = createSuspendBlockerLocked("PowerManagerService.Display");
@@ -388,11 +390,6 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         nativeInit();
         nativeSetPowerState(true, true);
-    }
-
-    @Override
-    public void onCreate(Context context) {
-        mContext = context;
     }
 
     @Override
