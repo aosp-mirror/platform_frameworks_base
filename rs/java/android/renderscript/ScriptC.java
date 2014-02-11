@@ -38,7 +38,17 @@ public class ScriptC extends Script {
     protected ScriptC(int id, RenderScript rs) {
         super(id, rs);
     }
-
+    /**
+     * Only intended for use by the generated derived classes.
+     *
+     * @param id
+     * @param rs
+     *
+     * @hide
+     */
+    protected ScriptC(long id, RenderScript rs) {
+        super(id, rs);
+    }
     /**
      * Only intended for use by the generated derived classes.
      *
@@ -49,7 +59,7 @@ public class ScriptC extends Script {
      */
     protected ScriptC(RenderScript rs, Resources resources, int resourceID) {
         super(0, rs);
-        int id = internalCreate(rs, resources, resourceID);
+        long id = internalCreate(rs, resources, resourceID);
         if (id == 0) {
             throw new RSRuntimeException("Loading of ScriptC script failed.");
         }
@@ -63,7 +73,7 @@ public class ScriptC extends Script {
 
     static String mCachePath;
 
-    private static synchronized int internalCreate(RenderScript rs, Resources resources, int resourceID) {
+    private static synchronized long internalCreate(RenderScript rs, Resources resources, int resourceID) {
         byte[] pgm;
         int pgmLength;
         InputStream is = resources.openRawResource(resourceID);
