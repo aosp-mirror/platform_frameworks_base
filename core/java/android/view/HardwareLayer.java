@@ -66,8 +66,7 @@ final class HardwareLayer {
      * @see View#setLayerPaint(android.graphics.Paint)
      */
     public void setLayerPaint(Paint paint) {
-        nSetLayerPaint(mFinalizer.mDeferredUpdater, paint.mNativePaint,
-                paint.getColorFilter() != null ? paint.getColorFilter().native_instance : 0);
+        nSetLayerPaint(mFinalizer.mDeferredUpdater, paint.mNativePaint);
     }
 
     /**
@@ -250,7 +249,7 @@ final class HardwareLayer {
     private static native void nDestroyLayerUpdater(long layerUpdater);
 
     private static native boolean nPrepare(long layerUpdater, int width, int height, boolean isOpaque);
-    private static native void nSetLayerPaint(long layerUpdater, long paint, long colorFilter);
+    private static native void nSetLayerPaint(long layerUpdater, long paint);
     private static native void nSetTransform(long layerUpdater, long matrix);
     private static native void nSetSurfaceTexture(long layerUpdater,
             SurfaceTexture surface, boolean isAlreadyAttached);
