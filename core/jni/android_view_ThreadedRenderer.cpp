@@ -131,6 +131,13 @@ static void android_view_ThreadedRenderer_detachFunctor(JNIEnv* env, jobject cla
     proxy->detachFunctor(functor);
 }
 
+static void android_view_ThreadedRenderer_runWithGlContext(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jobject jrunnable) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderTask* task = new JavaTask(env, jrunnable);
+    proxy->runWithGlContext(task);
+}
+
 #endif
 
 // ----------------------------------------------------------------------------
@@ -151,6 +158,7 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyCanvas", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvas},
     { "nAttachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_attachFunctor},
     { "nDetachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_detachFunctor},
+    { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
 #endif
 };
 

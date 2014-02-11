@@ -170,6 +170,18 @@ void RenderProxy::detachFunctor(Functor* functor) {
     post(task);
 }
 
+CREATE_BRIDGE2(runWithGlContext, CanvasContext* context, RenderTask* task) {
+    args->context->runWithGlContext(args->task);
+    return NULL;
+}
+
+void RenderProxy::runWithGlContext(RenderTask* gltask) {
+    SETUP_TASK(runWithGlContext);
+    args->context = mContext;
+    args->task = gltask;
+    postAndWait(task);
+}
+
 MethodInvokeRenderTask* RenderProxy::createTask(RunnableMethod method) {
     // TODO: Consider having a small pool of these to avoid alloc churn
     return new MethodInvokeRenderTask(method);
