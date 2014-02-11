@@ -7755,22 +7755,27 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public void removeContentProvider(IBinder connection, boolean stable) {
         enforceNotIsolatedCaller("removeContentProvider");
-        synchronized (this) {
-            ContentProviderConnection conn;
-            try {
-                conn = (ContentProviderConnection)connection;
-            } catch (ClassCastException e) {
-                String msg ="removeContentProvider: " + connection
-                        + " not a ContentProviderConnection";
-                Slog.w(TAG, msg);
-                throw new IllegalArgumentException(msg);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                ContentProviderConnection conn;
+                try {
+                    conn = (ContentProviderConnection)connection;
+                } catch (ClassCastException e) {
+                    String msg ="removeContentProvider: " + connection
+                            + " not a ContentProviderConnection";
+                    Slog.w(TAG, msg);
+                    throw new IllegalArgumentException(msg);
+                }
+                if (conn == null) {
+                    throw new NullPointerException("connection is null");
+                }
+                if (decProviderCountLocked(conn, null, null, stable)) {
+                    updateOomAdjLocked();
+                }
             }
-            if (conn == null) {
-                throw new NullPointerException("connection is null");
-            }
-            if (decProviderCountLocked(conn, null, null, stable)) {
-                updateOomAdjLocked();
-            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
