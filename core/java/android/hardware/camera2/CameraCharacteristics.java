@@ -167,7 +167,9 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>Maximum and minimum exposure compensation
      * setting, in counts of
-     * android.control.aeCompensationStepSize</p>
+     * {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep}.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
      */
     public static final Key<int[]> CONTROL_AE_COMPENSATION_RANGE =
             new Key<int[]>("android.control.aeCompensationRange", int[].class);
@@ -446,12 +448,16 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>The maximum numbers of any type of input streams
      * that can be configured and used simultaneously by a camera device.</p>
      * <p>When set to 0, it means no input stream is supported.</p>
-     * <p>The image format for a input stream can be any supported format provided
-     * by android.scaler.availableInputFormats. When using an input stream, there must be
-     * at least one output stream configured to to receive the reprocessed images.</p>
+     * <p>The image format for a input stream can be any supported
+     * format provided by
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP android.scaler.availableInputOutputFormatsMap}. When using an
+     * input stream, there must be at least one output stream
+     * configured to to receive the reprocessed images.</p>
      * <p>For example, for Zero Shutter Lag (ZSL) still capture use case, the input
      * stream image format will be RAW_OPAQUE, the associated output stream image format
      * should be JPEG.</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP
      */
     public static final Key<Integer> REQUEST_MAX_NUM_INPUT_STREAMS =
             new Key<Integer>("android.request.maxNumInputStreams", int.class);
@@ -505,7 +511,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * to do this query each of android.request.availableRequestKeys,
      * android.request.availableResultKeys,
      * android.request.availableCharacteristicsKeys.</p>
-     * <p>XX: Maybe these should go into android.info.supportedHardwareLevel
+     * <p>XX: Maybe these should go into {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}
      * as a table instead?</p>
      * <p>The following capabilities are guaranteed to be available on
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL devices:</p>
@@ -665,7 +671,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>The mapping of image formats that are supported by this
      * camera device for input streams, to their corresponding output formats.</p>
      * <p>All camera devices with at least 1
-     * android.request.request.maxNumInputStreams will have at least one
+     * {@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} will have at least one
      * available input format.</p>
      * <p>The camera device will support the following map of formats,
      * if its dependent capability is supported:</p>
@@ -712,6 +718,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      * listed as available in this map is not valid.</p>
      * <p>TODO: Add java type mapping for this property.</p>
      *
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @see CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS
      */
     public static final Key<int[]> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =
@@ -885,11 +892,12 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <li>IMPLEMENTATION_DEFINED</li>
      * </ul>
      * <p>All other formats may or may not have an allowed stall duration on
-     * a per-capability basis; refer to android.request.availableCapabilities
+     * a per-capability basis; refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
      * for more details.</p>
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} for more information about
      * calculating the max frame rate (absent stalls).</p>
      *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      */
     public static final Key<long[]> SCALER_AVAILABLE_STALL_DURATIONS =
@@ -922,7 +930,7 @@ public final class CameraCharacteristics extends CameraMetadata {
     /**
      * <p>Maximum possible frame duration (minimum frame
      * rate).</p>
-     * <p>The largest possible android.sensor.frameDuration
+     * <p>The largest possible {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}
      * that will be accepted by the camera device. Attempting to use
      * frame durations beyond the maximum will result in the frame duration
      * being clipped to the maximum. See that control
@@ -935,6 +943,7 @@ public final class CameraCharacteristics extends CameraMetadata {
      *
      * @see CameraCharacteristics#SCALER_AVAILABLE_JPEG_MIN_DURATIONS
      * @see CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
      */
     public static final Key<Long> SENSOR_INFO_MAX_FRAME_DURATION =
             new Key<Long>("android.sensor.info.maxFrameDuration", long.class);
@@ -952,7 +961,9 @@ public final class CameraCharacteristics extends CameraMetadata {
      * including black calibration pixels.</p>
      * <p>Maximum output resolution for raw format must
      * match this in
-     * android.scaler.info.availableSizesPerFormat.</p>
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS android.scaler.availableStreamConfigurations}.</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
      */
     public static final Key<android.hardware.camera2.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
             new Key<android.hardware.camera2.Size>("android.sensor.info.pixelArraySize", android.hardware.camera2.Size.class);
@@ -1026,8 +1037,10 @@ public final class CameraCharacteristics extends CameraMetadata {
 
     /**
      * <p>Optional. Defaults to [OFF]. Lists the supported test
-     * pattern modes for android.test.patternMode.</p>
+     * pattern modes for {@link CaptureRequest#SENSOR_TEST_PATTERN_MODE android.sensor.testPatternMode}.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
     public static final Key<Byte> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
             new Key<Byte>("android.sensor.availableTestPatternModes", byte.class);

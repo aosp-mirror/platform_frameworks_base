@@ -400,10 +400,12 @@ public abstract class CameraMetadata {
      * formats.</li>
      * <li>The maximum available resolution for RAW16 streams (both
      * input/output) will match the value in
-     * android.sensor.info.pixelArraySize.</li>
+     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.</li>
      * <li>All DNG-related optional metadata entries are provided
      * by the camera device.</li>
      * </ul>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5;
@@ -783,10 +785,11 @@ public abstract class CameraMetadata {
 
     /**
      * <p>The camera device's auto white balance routine is active;
-     * the application's values for android.colorCorrection.transform
+     * the application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
      * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_AUTO = 1;
@@ -1031,10 +1034,11 @@ public abstract class CameraMetadata {
      * this should still operate correctly (but will not return
      * face detection statistics to the framework).</p>
      * <p>Unlike the other scene modes, {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
-     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and android.control.afMode
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}
      * remain active when FACE_PRIORITY is set.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AF_MODE
      * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @see CaptureRequest#CONTROL_SCENE_MODE
@@ -1429,7 +1433,7 @@ public abstract class CameraMetadata {
 
     /**
      * <p>Use the tone mapping curve specified in
-     * android.tonemap.curve.</p>
+     * the android.tonemap.curve* entries.</p>
      * <p>All color enhancement and tonemapping must be disabled, except
      * for applying the tonemapping curve specified by
      * {@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed}, {@link CaptureRequest#TONEMAP_CURVE_BLUE android.tonemap.curveBlue}, or
@@ -1642,21 +1646,25 @@ public abstract class CameraMetadata {
     //
 
     /**
-     * <p>The lens parameters ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, android.lens.focusDistance
-     * android.lens.filterDensity and {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) are not changing.</p>
+     * <p>The lens parameters ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance},
+     * {@link CaptureRequest#LENS_FILTER_DENSITY android.lens.filterDensity} and {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) are not changing.</p>
      *
      * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FILTER_DENSITY
      * @see CaptureRequest#LENS_FOCAL_LENGTH
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CaptureResult#LENS_STATE
      */
     public static final int LENS_STATE_STATIONARY = 0;
 
     /**
-     * <p>Any of the lens parameters ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, android.lens.focusDistance
-     * android.lens.filterDensity or {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) is changing.</p>
+     * <p>Any of the lens parameters ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance},
+     * {@link CaptureRequest#LENS_FILTER_DENSITY android.lens.filterDensity} or {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) is changing.</p>
      *
      * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FILTER_DENSITY
      * @see CaptureRequest#LENS_FOCAL_LENGTH
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CaptureResult#LENS_STATE
      */
     public static final int LENS_STATE_MOVING = 1;
