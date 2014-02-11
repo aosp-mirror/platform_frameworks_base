@@ -47,7 +47,6 @@
 #include <LayerRenderer.h>
 #include <OpenGLRenderer.h>
 #include <SkiaShader.h>
-#include <SkiaColorFilter.h>
 #include <Stencil.h>
 #include <Rect.h>
 
@@ -81,7 +80,6 @@ using namespace uirenderer;
 
 #define MODIFIER_SHADOW 1
 #define MODIFIER_SHADER 2
-#define MODIFIER_COLOR_FILTER 4
 
 // ----------------------------------------------------------------------------
 
@@ -638,7 +636,6 @@ static void android_view_GLES20Canvas_resetModifiers(JNIEnv* env, jobject clazz,
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     if (modifiers & MODIFIER_SHADOW) renderer->resetShadow();
     if (modifiers & MODIFIER_SHADER) renderer->resetShader();
-    if (modifiers & MODIFIER_COLOR_FILTER) renderer->resetColorFilter();
 }
 
 static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject clazz,
@@ -648,12 +645,6 @@ static void android_view_GLES20Canvas_setupShader(JNIEnv* env, jobject clazz,
     renderer->setupShader(shader);
 }
 
-static void android_view_GLES20Canvas_setupColorFilter(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong colorFilterPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    SkiaColorFilter* colorFilter = reinterpret_cast<SkiaColorFilter*>(colorFilterPtr);
-    renderer->setupColorFilter(colorFilter);
-}
 
 static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jfloat radius, jfloat dx, jfloat dy, jint color) {
@@ -923,148 +914,6 @@ static void android_view_GLES20Canvas_resume(JNIEnv* env, jobject clazz,
     renderer->resume();
 }
 
-<<<<<<< HEAD
-static jint android_view_GLES20Canvas_createLayerRenderer(JNIEnv* env,
-        jobject clazz, jlong layerPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    if (layer) {
-        OpenGLRenderer* renderer = new LayerRenderer(layer);
-        renderer->initProperties();
-        return reinterpret_cast<jint>(renderer);
-    }
-    return NULL;
-}
-
-static jlong android_view_GLES20Canvas_createTextureLayer(JNIEnv* env, jobject clazz,
-        jboolean isOpaque, jintArray layerInfo) {
-    Layer* layer = LayerRenderer::createTextureLayer(isOpaque);
-
-    if (layer) {
-        jint* storage = env->GetIntArrayElements(layerInfo, NULL);
-        storage[0] = layer->getTexture();
-        env->ReleaseIntArrayElements(layerInfo, storage, 0);
-    }
-
-    return reinterpret_cast<jlong>(layer);
-}
-
-static jlong android_view_GLES20Canvas_createLayer(JNIEnv* env, jobject clazz,
-        jint width, jint height, jboolean isOpaque, jintArray layerInfo) {
-    Layer* layer = LayerRenderer::createLayer(width, height, isOpaque);
-
-    if (layer) {
-        jint* storage = env->GetIntArrayElements(layerInfo, NULL);
-        storage[0] = layer->getWidth();
-        storage[1] = layer->getHeight();
-        env->ReleaseIntArrayElements(layerInfo, storage, 0);
-    }
-
-    return reinterpret_cast<jlong>(layer);
-}
-
-static jboolean android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jint width, jint height, jintArray layerInfo) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    if (LayerRenderer::resizeLayer(layer, width, height)) {
-        jint* storage = env->GetIntArrayElements(layerInfo, NULL);
-        storage[0] = layer->getWidth();
-        storage[1] = layer->getHeight();
-        env->ReleaseIntArrayElements(layerInfo, storage, 0);
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-static void android_view_GLES20Canvas_setLayerPaint(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jlong paintPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    if (layer) {
-        SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
-        layer->setPaint(paint);
-    }
-}
-
-static void android_view_GLES20Canvas_setLayerColorFilter(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jlong colorFilterPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    if (layer) {
-        SkiaColorFilter* colorFilter = reinterpret_cast<SkiaColorFilter*>(colorFilterPtr);
-        layer->setColorFilter(colorFilter);
-    }
-}
-
-static void android_view_GLES20Canvas_setOpaqueLayer(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jboolean isOpaque) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    if (layer) {
-        layer->setBlend(!isOpaque);
-    }
-}
-
-static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jint width, jint height, jboolean isOpaque, jobject surface) {
-    float transform[16];
-    sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
-
-    if (surfaceTexture->updateTexImage() == NO_ERROR) {
-        int64_t frameNumber = surfaceTexture->getFrameNumber();
-        // If the GLConsumer queue is in synchronous mode, need to discard all
-        // but latest frame, using the frame number to tell when we no longer
-        // have newer frames to target. Since we can't tell which mode it is in,
-        // do this unconditionally.
-        int dropCounter = 0;
-        while (surfaceTexture->updateTexImage() == NO_ERROR) {
-            int64_t newFrameNumber = surfaceTexture->getFrameNumber();
-            if (newFrameNumber == frameNumber) break;
-            frameNumber = newFrameNumber;
-            dropCounter++;
-        }
-        #if DEBUG_RENDERER
-        if (dropCounter > 0) {
-            RENDERER_LOGD("Dropped %d frames on texture layer update", dropCounter);
-        }
-        #endif
-        surfaceTexture->getTransformMatrix(transform);
-        GLenum renderTarget = surfaceTexture->getCurrentTextureTarget();
-
-        Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-        LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, renderTarget, transform);
-    }
-}
-
-static void android_view_GLES20Canvas_updateRenderLayer(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jlong rendererPtr, jlong displayListPtr,
-        jint left, jint top, jint right, jint bottom) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
-    layer->updateDeferred(renderer, displayList, left, top, right, bottom);
-}
-
-static void android_view_GLES20Canvas_clearLayerTexture(JNIEnv* env, jobject clazz,
-        jlong layerPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    layer->clearTexture();
-}
-
-static void android_view_GLES20Canvas_setTextureLayerTransform(JNIEnv* env, jobject clazz,
-        jlong layerPtr, jlong matrixPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
-    layer->getTransform().load(*matrix);
-}
-
-static void android_view_GLES20Canvas_destroyLayer(JNIEnv* env, jobject clazz, jlong layerPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    LayerRenderer::destroyLayer(layer);
-}
-
-static void android_view_GLES20Canvas_destroyLayerDeferred(JNIEnv* env,
-        jobject clazz, jlong layerPtr) {
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
-    LayerRenderer::destroyLayerDeferred(layer);
-}
-
 static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong layerPtr, jfloat x, jfloat y) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
@@ -1223,7 +1072,6 @@ static JNINativeMethod gMethods[] = {
 
     { "nResetModifiers",    "(JI)V",           (void*) android_view_GLES20Canvas_resetModifiers },
     { "nSetupShader",       "(JJ)V",           (void*) android_view_GLES20Canvas_setupShader },
-    { "nSetupColorFilter",  "(JJ)V",           (void*) android_view_GLES20Canvas_setupColorFilter },
     { "nSetupShadow",       "(JFFFI)V",        (void*) android_view_GLES20Canvas_setupShadow },
 
     { "nSetupPaintFilter",  "(JII)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },
