@@ -462,6 +462,16 @@ void CanvasContext::queueFunctorsTask(int delayMs) {
     mRenderThread.queueDelayed(&mInvokeFunctorsTask, delayMs);
 }
 
+void CanvasContext::runWithGlContext(RenderTask* task) {
+    if (mEglSurface != EGL_NO_SURFACE) {
+        mGlobalContext->makeCurrent(mEglSurface);
+    } else {
+        mGlobalContext->usePBufferSurface();
+    }
+
+    task->run();
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
