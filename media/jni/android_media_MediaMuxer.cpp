@@ -132,7 +132,7 @@ static void android_media_MediaMuxer_writeSampleData(
 }
 
 // Constructor counterpart.
-static jint android_media_MediaMuxer_native_setup(
+static jlong android_media_MediaMuxer_native_setup(
         JNIEnv *env, jclass clazz, jobject fileDescriptor,
         jint format) {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
@@ -142,7 +142,7 @@ static jint android_media_MediaMuxer_native_setup(
         static_cast<MediaMuxer::OutputFormat>(format);
     sp<MediaMuxer> muxer = new MediaMuxer(fd, fileFormat);
     muxer->incStrong(clazz);
-    return int(muxer.get());
+    return reinterpret_cast<jlong>(muxer.get());
 }
 
 static void android_media_MediaMuxer_setOrientationHint(
