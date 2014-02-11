@@ -4231,6 +4231,7 @@ package android.app {
     field public static final int FLAG_FOREGROUND_SERVICE = 64; // 0x40
     field public static final deprecated int FLAG_HIGH_PRIORITY = 128; // 0x80
     field public static final int FLAG_INSISTENT = 4; // 0x4
+    field public static final int FLAG_LOCAL_ONLY = 256; // 0x100
     field public static final int FLAG_NO_CLEAR = 32; // 0x20
     field public static final int FLAG_ONGOING_EVENT = 2; // 0x2
     field public static final int FLAG_ONLY_ALERT_ONCE = 8; // 0x8
@@ -4316,6 +4317,7 @@ package android.app {
     method public android.app.Notification.Builder setFullScreenIntent(android.app.PendingIntent, boolean);
     method public android.app.Notification.Builder setLargeIcon(android.graphics.Bitmap);
     method public android.app.Notification.Builder setLights(int, int, int);
+    method public android.app.Notification.Builder setLocalOnly(boolean);
     method public android.app.Notification.Builder setNumber(int);
     method public android.app.Notification.Builder setOngoing(boolean);
     method public android.app.Notification.Builder setOnlyAlertOnce(boolean);
