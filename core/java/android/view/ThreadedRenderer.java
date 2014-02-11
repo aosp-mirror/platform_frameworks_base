@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.SystemClock;
@@ -155,7 +156,12 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void cancelLayerUpdate(HardwareLayer layer) {
+    void onLayerCreated(HardwareLayer layer) {
+        throw new NoSuchMethodError();
+    }
+
+    @Override
+    void onLayerDestroyed(HardwareLayer layer) {
         throw new NoSuchMethodError();
     }
 
@@ -197,12 +203,12 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    HardwareLayer createHardwareLayer(boolean isOpaque) {
+    HardwareLayer createTextureLayer() {
         throw new NoSuchMethodError();
     }
 
     @Override
-    HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque) {
+    HardwareLayer createDisplayListLayer(int width, int height) {
         throw new NoSuchMethodError();
     }
 
@@ -212,7 +218,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setSurfaceTexture(HardwareLayer layer, SurfaceTexture surfaceTexture) {
+    boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap) {
         throw new NoSuchMethodError();
     }
 

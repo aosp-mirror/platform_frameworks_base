@@ -184,7 +184,7 @@ void LayerRenderer::generateMesh() {
 // Layers management
 ///////////////////////////////////////////////////////////////////////////////
 
-Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque) {
+Layer* LayerRenderer::createRenderLayer(uint32_t width, uint32_t height) {
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     Caches& caches = Caches::getInstance();
@@ -221,7 +221,6 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
     layer->texCoords.set(0.0f, height / float(layer->getHeight()),
             width / float(layer->getWidth()), 0.0f);
     layer->setAlpha(255, SkXfermode::kSrcOver_Mode);
-    layer->setBlend(!isOpaque);
     layer->setColorFilter(NULL);
     layer->setDirty(true);
     layer->region.clear();
@@ -270,13 +269,12 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
     return true;
 }
 
-Layer* LayerRenderer::createTextureLayer(bool isOpaque) {
+Layer* LayerRenderer::createTextureLayer() {
     LAYER_RENDERER_LOGD("Creating new texture layer");
 
     Layer* layer = new Layer(0, 0);
     layer->setCacheable(false);
     layer->setTextureLayer(true);
-    layer->setBlend(!isOpaque);
     layer->setEmpty(true);
     layer->setFbo(0);
     layer->setAlpha(255, SkXfermode::kSrcOver_Mode);

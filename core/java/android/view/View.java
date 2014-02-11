@@ -87,7 +87,6 @@ import static java.lang.Math.max;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -13629,16 +13628,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 || mHardwareLayer == null) {
             if (mHardwareLayer == null) {
-                mHardwareLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
-                        width, height, isOpaque());
+                mHardwareLayer = mAttachInfo.mHardwareRenderer.createDisplayListLayer(
+                        width, height);
                 mLocalDirtyRect.set(0, 0, width, height);
-            } else {
-                if (mHardwareLayer.getWidth() != width || mHardwareLayer.getHeight() != height) {
-                    if (mHardwareLayer.resize(width, height)) {
-                        mLocalDirtyRect.set(0, 0, width, height);
-                    }
-                }
-
+            } else if (mHardwareLayer.isValid()) {
                 // This should not be necessary but applications that change
                 // the parameters of their background drawable without calling
                 // this.setBackground(Drawable) can leave the view in a bad state
@@ -13646,23 +13639,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // not opaque.)
                 computeOpaqueFlags();
 
-                final boolean opaque = isOpaque();
-                if (mHardwareLayer.isValid() && mHardwareLayer.isOpaque() != opaque) {
-                    mHardwareLayer.setOpaque(opaque);
+                if (mHardwareLayer.prepare(width, height, isOpaque())) {
                     mLocalDirtyRect.set(0, 0, width, height);
                 }
             }
 
             // The layer is not valid if the underlying GPU resources cannot be allocated
+            mHardwareLayer.flushChanges();
             if (!mHardwareLayer.isValid()) {
                 return null;
             }
 
             mHardwareLayer.setLayerPaint(mLayerPaint);
-            mHardwareLayer.redrawLater(getHardwareLayerDisplayList(mHardwareLayer), mLocalDirtyRect);
-            ViewRootImpl viewRoot = getViewRootImpl();
-            if (viewRoot != null) viewRoot.pushHardwareLayerUpdate(mHardwareLayer);
-
+            DisplayList displayList = mHardwareLayer.startRecording();
+            if (getDisplayList(displayList, true) != displayList) {
+                throw new IllegalStateException("getDisplayList() didn't return"
+                        + " the input displaylist for a hardware layer!");
+            }
+            mHardwareLayer.endRecording(mLocalDirtyRect);
             mLocalDirtyRect.setEmpty();
         }
 
@@ -13679,18 +13673,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     boolean destroyLayer(boolean valid) {
         if (mHardwareLayer != null) {
-            AttachInfo info = mAttachInfo;
-            if (info != null && info.mHardwareRenderer != null &&
-                    info.mHardwareRenderer.isEnabled() &&
-                    (valid || info.mHardwareRenderer.validate())) {
+            mHardwareLayer.destroy();
+            mHardwareLayer = null;
 
-                info.mHardwareRenderer.cancelLayerUpdate(mHardwareLayer);
-                mHardwareLayer.destroy();
-                mHardwareLayer = null;
-
-                invalidate(true);
-                invalidateParentCaches();
-            }
+            invalidate(true);
+            invalidateParentCaches();
             return true;
         }
         return false;
@@ -13909,19 +13896,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         return displayList;
     }
-
-    /**
-     * Get the DisplayList for the HardwareLayer
-     *
-     * @param layer The HardwareLayer whose DisplayList we want
-     * @return A DisplayList fopr the specified HardwareLayer
-     */
-    private DisplayList getHardwareLayerDisplayList(HardwareLayer layer) {
-        DisplayList displayList = getDisplayList(layer.getDisplayList(), true);
-        layer.setDisplayList(displayList);
-        return displayList;
-    }
-
 
     /**
      * <p>Returns a display list that can be used to draw this view again

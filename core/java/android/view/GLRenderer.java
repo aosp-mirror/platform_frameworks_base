@@ -40,7 +40,7 @@ import static javax.microedition.khronos.egl.EGL10.EGL_WIDTH;
 import static javax.microedition.khronos.egl.EGL10.EGL_WINDOW_BIT;
 
 import android.content.ComponentCallbacks2;
-import android.graphics.Color;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -62,6 +62,8 @@ import android.view.Surface.OutOfResourcesException;
 import com.google.android.gles_jni.EGLImpl;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -176,6 +178,8 @@ public class GLRenderer extends HardwareRenderer {
 
     private static EGLSurface sPbuffer;
     private static final Object[] sPbufferLock = new Object[0];
+
+    private List<HardwareLayer> mAttachedLayers = new ArrayList<HardwareLayer>();
 
     private static class GLRendererEglContext extends ManagedEGLContext {
         final Handler mHandler = new Handler();
@@ -472,33 +476,40 @@ public class GLRenderer extends HardwareRenderer {
     }
 
     @Override
-    void cancelLayerUpdate(HardwareLayer layer) {
-        mGlCanvas.cancelLayerUpdate(layer);
-    }
-
-    @Override
     void flushLayerUpdates() {
         mGlCanvas.flushLayerUpdates();
     }
 
     @Override
-    HardwareLayer createHardwareLayer(boolean isOpaque) {
-        return new GLES20TextureLayer(isOpaque);
+    HardwareLayer createTextureLayer() {
+        return HardwareLayer.createTextureLayer(this);
     }
 
     @Override
-    public HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque) {
-        return new GLES20RenderLayer(width, height, isOpaque);
+    public HardwareLayer createDisplayListLayer(int width, int height) {
+        return HardwareLayer.createRenderLayer(this, width, height);
+    }
+
+    @Override
+    void onLayerCreated(HardwareLayer hardwareLayer) {
+        mAttachedLayers.add(hardwareLayer);
+    }
+
+    @Override
+    void onLayerDestroyed(HardwareLayer layer) {
+        mGlCanvas.cancelLayerUpdate(layer);
+        mAttachedLayers.remove(layer);
     }
 
     @Override
     public SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
-        return ((GLES20TextureLayer) layer).getSurfaceTexture();
+        return layer.createSurfaceTexture();
     }
 
     @Override
-    void setSurfaceTexture(HardwareLayer layer, SurfaceTexture surfaceTexture) {
-        ((GLES20TextureLayer) layer).setSurfaceTexture(surfaceTexture);
+    boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap) {
+        layer.flushChanges();
+        return GLES20Canvas.nCopyLayer(layer.getLayer(), bitmap.mNativeBitmap);
     }
 
     @Override
@@ -1127,6 +1138,8 @@ public class GLRenderer extends HardwareRenderer {
 
                 DisplayList displayList = buildDisplayList(view, canvas);
 
+                flushLayerChanges();
+
                 // buildDisplayList() calls into user code which can cause
                 // an eglMakeCurrent to happen with a different surface/context.
                 // We must therefore check again here.
@@ -1176,6 +1189,20 @@ public class GLRenderer extends HardwareRenderer {
                 }
 
                 attachInfo.mIgnoreDirtyState = false;
+            }
+        }
+    }
+
+    private void flushLayerChanges() {
+        // Loop through and apply any pending layer changes
+        for (int i = 0; i < mAttachedLayers.size(); i++) {
+            HardwareLayer layer = mAttachedLayers.get(i);
+            layer.flushChanges();
+            if (!layer.isValid()) {
+                // The layer was removed from mAttachedLayers, rewind i by 1
+                // Note that this shouldn't actually happen as View.getHardwareLayer()
+                // is already flushing for error checking reasons
+                i--;
             }
         }
     }

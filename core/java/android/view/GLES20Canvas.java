@@ -31,7 +31,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
-import android.graphics.SurfaceTexture;
 import android.graphics.TemporaryBuffer;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
@@ -87,15 +86,6 @@ class GLES20Canvas extends HardwareCanvas {
     GLES20Canvas(boolean translucent) {
         this(false, translucent);
     }
-
-    /**
-     * Creates a canvas to render into an FBO.
-     */
-    GLES20Canvas(long layer, boolean translucent) {
-        mOpaque = !translucent;
-        mRenderer = nCreateLayerRenderer(layer);
-        setupFinalizer();
-    }
     
     protected GLES20Canvas(boolean record, boolean translucent) {
         mOpaque = !translucent;
@@ -122,7 +112,6 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native long nCreateRenderer();
-    private static native long nCreateLayerRenderer(long layer);
     private static native long nCreateDisplayListRenderer();
     private static native void nResetDisplayListRenderer(long renderer);
     private static native void nDestroyRenderer(long renderer);
@@ -156,12 +145,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     void pushLayerUpdate(HardwareLayer layer) {
-        nPushLayerUpdate(mRenderer, ((GLES20RenderLayer) layer).mLayer);
+        nPushLayerUpdate(mRenderer, layer.getLayer());
     }
 
     @Override
     void cancelLayerUpdate(HardwareLayer layer) {
-        nCancelLayerUpdate(mRenderer, ((GLES20RenderLayer) layer).mLayer);
+        nCancelLayerUpdate(mRenderer, layer.getLayer());
     }
 
     @Override
@@ -174,22 +163,7 @@ class GLES20Canvas extends HardwareCanvas {
         nClearLayerUpdates(mRenderer);
     }
 
-    static native long nCreateTextureLayer(boolean opaque, int[] layerInfo);
-    static native long nCreateLayer(int width, int height, boolean isOpaque, int[] layerInfo);
-    static native boolean nResizeLayer(long layerId, int width, int height, int[] layerInfo);
-    static native void nSetOpaqueLayer(long layerId, boolean isOpaque);
-    static native void nSetLayerPaint(long layerId, long nativePaint);
-    static native void nSetLayerColorFilter(long layerId, long nativeColorFilter);
-    static native void nUpdateTextureLayer(long layerId, int width, int height, boolean opaque,
-            SurfaceTexture surface);
-    static native void nClearLayerTexture(long layerId);
-    static native void nSetTextureLayerTransform(long layerId, long matrix);
-    static native void nDestroyLayer(long layerId);
-    static native void nDestroyLayerDeferred(long layerId);
-    static native void nUpdateRenderLayer(long layerId, long renderer, long displayList,
-            int left, int top, int right, int bottom);
     static native boolean nCopyLayer(long layerId, long bitmap);
-
     private static native void nClearLayerUpdates(long renderer);
     private static native void nFlushLayerUpdates(long renderer);
     private static native void nPushLayerUpdate(long renderer, long layer);
@@ -408,9 +382,7 @@ class GLES20Canvas extends HardwareCanvas {
     
     void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint) {
         layer.setLayerPaint(paint);
-
-        final GLES20Layer glLayer = (GLES20Layer) layer;
-        nDrawLayer(mRenderer, glLayer.getLayer(), x, y);
+        nDrawLayer(mRenderer, layer.getLayer(), x, y);
     }
 
     private static native void nDrawLayer(long renderer, long layer, float x, float y);

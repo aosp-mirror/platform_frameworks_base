@@ -123,6 +123,7 @@ extern int register_android_view_DisplayList(JNIEnv* env);
 extern int register_android_view_GraphicBuffer(JNIEnv* env);
 extern int register_android_view_GLES20Canvas(JNIEnv* env);
 extern int register_android_view_GLRenderer(JNIEnv* env);
+extern int register_android_view_HardwareLayer(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
@@ -1127,6 +1128,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_GraphicBuffer),
     REG_JNI(register_android_view_GLES20Canvas),
     REG_JNI(register_android_view_GLRenderer),
+    REG_JNI(register_android_view_HardwareLayer),
     REG_JNI(register_android_view_ThreadedRenderer),
     REG_JNI(register_android_view_Surface),
     REG_JNI(register_android_view_SurfaceControl),

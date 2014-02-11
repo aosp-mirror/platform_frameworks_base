@@ -35,23 +35,24 @@ public class ErrorCalculator {
     private static final boolean LOG_TIMING = false;
     private static final boolean LOG_CALC = false;
 
-    private final RenderScript mRS;
+    private RenderScript mRS;
     private Allocation mIdealPixelsAllocation;
     private Allocation mGivenPixelsAllocation;
     private Allocation mOutputPixelsAllocation;
 
-    private final Allocation mInputRowsAllocation;
-    private final Allocation mOutputRegionsAllocation;
+    private Allocation mInputRowsAllocation;
+    private Allocation mOutputRegionsAllocation;
 
-    private final ScriptC_errorCalculator mScript;
+    private ScriptC_errorCalculator mScript;
 
-    private final int[] mOutputRowRegions;
+    private int[] mOutputRowRegions;
 
     public ErrorCalculator(Context c, Resources resources) {
         int width = resources.getDimensionPixelSize(R.dimen.layer_width);
         int height = resources.getDimensionPixelSize(R.dimen.layer_height);
         mOutputRowRegions = new int[height / REGION_SIZE];
 
+/*
         mRS = RenderScript.create(c);
         int[] rowIndices = new int[height / REGION_SIZE];
         for (int i = 0; i < rowIndices.length; i++)
@@ -67,12 +68,15 @@ public class ErrorCalculator {
         mInputRowsAllocation.copyFrom(rowIndices);
         mOutputRegionsAllocation = Allocation.createSized(mRS, Element.I32(mRS),
                 mOutputRowRegions.length, Allocation.USAGE_SCRIPT);
+*/
     }
 
 
     private static long startMillis, middleMillis;
 
     public float calcErrorRS(Bitmap ideal, Bitmap given) {
+        if (true)
+            return calcError(ideal, given);
         if (LOG_TIMING) {
             startMillis = System.currentTimeMillis();
         }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -344,19 +345,20 @@ public abstract class HardwareRenderer {
      * @param layer The hardware layer that needs an update
      *
      * @see #flushLayerUpdates()
-     * @see #cancelLayerUpdate(HardwareLayer)
      */
     abstract void pushLayerUpdate(HardwareLayer layer);
 
     /**
-     * Cancels a queued layer update. If the specified layer was not
-     * queued for update, this method has no effect.
-     *
-     * @param layer The layer whose update to cancel
-     *
-     * @see #pushLayerUpdate(HardwareLayer)
+     * Tells the HardwareRenderer that a layer was created. The renderer should
+     * make sure to apply any pending layer changes at the start of a new frame
      */
-    abstract void cancelLayerUpdate(HardwareLayer layer);
+    abstract void onLayerCreated(HardwareLayer hardwareLayer);
+
+    /**
+     * Tells the HardwareRenderer that the layer is destroyed. The renderer
+     * should remove the layer from any update queues.
+     */
+    abstract void onLayerDestroyed(HardwareLayer layer);
 
     /**
      * Forces all enqueued layer updates to be executed immediately.
@@ -403,22 +405,19 @@ public abstract class HardwareRenderer {
      * Creates a new hardware layer. A hardware layer built by calling this
      * method will be treated as a texture layer, instead of as a render target.
      *
-     * @param isOpaque Whether the layer should be opaque or not
-     *
      * @return A hardware layer
      */
-    abstract HardwareLayer createHardwareLayer(boolean isOpaque);
+    abstract HardwareLayer createTextureLayer();
 
     /**
      * Creates a new hardware layer.
      *
      * @param width The minimum width of the layer
      * @param height The minimum height of the layer
-     * @param isOpaque Whether the layer should be opaque or not
      *
      * @return A hardware layer
      */
-    abstract HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque);
+    abstract HardwareLayer createDisplayListLayer(int width, int height);
 
     /**
      * Creates a new {@link SurfaceTexture} that can be used to render into the
@@ -430,14 +429,7 @@ public abstract class HardwareRenderer {
      */
     abstract SurfaceTexture createSurfaceTexture(HardwareLayer layer);
 
-    /**
-     * Sets the {@link android.graphics.SurfaceTexture} that will be used to
-     * render into the specified hardware layer.
-     *
-     * @param layer The layer to render into using a {@link android.graphics.SurfaceTexture}
-     * @param surfaceTexture The {@link android.graphics.SurfaceTexture} to use for the layer
-     */
-    abstract void setSurfaceTexture(HardwareLayer layer, SurfaceTexture surfaceTexture);
+    abstract boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap);
 
     /**
      * Detaches the specified functor from the current functor execution queue.

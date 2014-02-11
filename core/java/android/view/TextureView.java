@@ -250,7 +250,7 @@ public class TextureView extends View {
             mSurface.detachFromGLContext();
             // SurfaceTexture owns the texture name and detachFromGLContext
             // should have deleted it
-            mLayer.clearStorage();
+            mLayer.onTextureDestroyed();
 
             boolean shouldRelease = true;
             if (mListener != null) {
@@ -375,7 +375,7 @@ public class TextureView extends View {
                 return null;
             }
 
-            mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(mOpaque);
+            mLayer = mAttachInfo.mHardwareRenderer.createTextureLayer();
             if (!mUpdateSurface) {
                 // Create a new SurfaceTexture for the layer.
                 mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
@@ -416,7 +416,7 @@ public class TextureView extends View {
             updateLayer();
             mMatrixChanged = true;
 
-            mAttachInfo.mHardwareRenderer.setSurfaceTexture(mLayer, mSurface);
+            mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
         }
 
@@ -469,7 +469,8 @@ public class TextureView extends View {
             }
         }
         
-        mLayer.update(getWidth(), getHeight(), mOpaque);
+        mLayer.prepare(getWidth(), getHeight(), mOpaque);
+        mLayer.updateSurfaceTexture();
 
         if (mListener != null) {
             mListener.onSurfaceTextureUpdated(mSurface);
