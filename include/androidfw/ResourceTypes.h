@@ -1545,39 +1545,21 @@ public:
     // Return value: on success: NO_ERROR; caller is responsible for free-ing
     // outData (using free(3)). On failure, any status_t value other than
     // NO_ERROR; the caller should not free outData.
-    status_t createIdmap(const ResTable& overlay, uint32_t targetCrc, uint32_t overlayCrc,
-                         void** outData, size_t* outSize) const;
-
     status_t createIdmap(const ResTable& overlay,
             uint32_t targetCrc, uint32_t overlayCrc,
             const char* targetPath, const char* overlayPath,
-            void** outData, uint32_t* outSize) const
-    {
-        (void)targetPath;
-        (void)overlayPath;
-        return createIdmap(overlay, targetCrc, overlayCrc, outData, outSize);
-    }
+            void** outData, uint32_t* outSize) const;
 
     enum {
-        IDMAP_HEADER_SIZE_BYTES = 3 * sizeof(uint32_t),
+        IDMAP_HEADER_SIZE_BYTES = 3 * sizeof(uint32_t) + 2 * 256,
     };
     // Retrieve idmap meta-data.
     //
     // This function only requires the idmap header (the first
     // IDMAP_HEADER_SIZE_BYTES) bytes of an idmap file.
     static bool getIdmapInfo(const void* idmap, size_t size,
-                             uint32_t* pTargetCrc, uint32_t* pOverlayCrc);
-
-    static bool getIdmapInfo(const void* idmap, size_t size,
             uint32_t* pTargetCrc, uint32_t* pOverlayCrc,
-            String8* pTargetPath, String8* pOverlayPath)
-    {
-        if (*pTargetPath)
-            *pTargetPath = String8();
-        if (*pOverlayPath)
-            *pOverlayPath = String8();
-        return getIdmapInfo(idmap, size, pTargetCrc, pOverlayCrc);
-    }
+            String8* pTargetPath, String8* pOverlayPath);
 
     void print(bool inclValues) const;
     static String8 normalizeForOutput(const char* input);
