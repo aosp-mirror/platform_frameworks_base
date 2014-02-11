@@ -200,7 +200,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Non connecté"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Aucun réseau"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi désactivé"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Diffuser l\'écran"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Caster l\'écran"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
     <string name="quick_settings_inversion_label" msgid="1666358784283020762">"Mode d\'inversion des couleurs"</string>
