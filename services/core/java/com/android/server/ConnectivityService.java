@@ -3567,8 +3567,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             int user = UserHandle.getUserId(Binder.getCallingUid());
             if (ConnectivityManager.isNetworkTypeValid(type) && mNetTrackers[type] != null) {
                 synchronized(mVpns) {
-                    mVpns.get(user).protect(socket,
-                            mNetTrackers[type].getLinkProperties().getInterfaceName());
+                    mVpns.get(user).protect(socket);
                 }
                 return true;
             }
