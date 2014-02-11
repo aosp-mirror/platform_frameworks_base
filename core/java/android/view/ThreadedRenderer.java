@@ -113,8 +113,8 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     boolean safelyRun(Runnable action) {
-        // TODO:
-        return false;
+        nRunWithGlContext(mNativeProxy, action);
+        return true;
     }
 
     @Override
@@ -256,6 +256,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nSetup(long nativeProxy, int width, int height);
     private static native void nDrawDisplayList(long nativeProxy, long displayList,
             int dirtyLeft, int dirtyTop, int dirtyRight, int dirtyBottom);
+    private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvas(long nativeProxy);
 
     private static native void nAttachFunctor(long nativeProxy, long functor);

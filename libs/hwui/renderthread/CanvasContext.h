@@ -65,6 +65,8 @@ public:
     void attachFunctor(Functor* functor);
     void detachFunctor(Functor* functor);
 
+    void runWithGlContext(RenderTask* task);
+
 private:
     void setSurface(EGLNativeWindowType window);
     void swapBuffers();
