@@ -113,24 +113,24 @@ private:
     PageRecord* mCurrentPage;
 };
 
-static jint nativeCreateDocument(JNIEnv* env, jobject thiz) {
-    return reinterpret_cast<jint>(new PdfDocument());
+static jlong nativeCreateDocument(JNIEnv* env, jobject thiz) {
+    return reinterpret_cast<jlong>(new PdfDocument());
 }
 
-static jint nativeStartPage(JNIEnv* env, jobject thiz, jint documentPtr,
+static jlong nativeStartPage(JNIEnv* env, jobject thiz, jlong documentPtr,
         jint pageWidth, jint pageHeight,
         jint contentLeft, jint contentTop, jint contentRight, jint contentBottom) {
     PdfDocument* document = reinterpret_cast<PdfDocument*>(documentPtr);
-    return reinterpret_cast<jint>(document->startPage(pageWidth, pageHeight,
+    return reinterpret_cast<jlong>(document->startPage(pageWidth, pageHeight,
             contentLeft, contentTop, contentRight, contentBottom));
 }
 
-static void nativeFinishPage(JNIEnv* env, jobject thiz, jint documentPtr) {
+static void nativeFinishPage(JNIEnv* env, jobject thiz, jlong documentPtr) {
     PdfDocument* document = reinterpret_cast<PdfDocument*>(documentPtr);
     document->finishPage();
 }
 
-static void nativeWriteTo(JNIEnv* env, jobject thiz, jint documentPtr, jobject out,
+static void nativeWriteTo(JNIEnv* env, jobject thiz, jlong documentPtr, jobject out,
         jbyteArray chunk) {
     PdfDocument* document = reinterpret_cast<PdfDocument*>(documentPtr);
     SkWStream* skWStream = CreateJavaOutputStreamAdaptor(env, out, chunk);
@@ -138,17 +138,17 @@ static void nativeWriteTo(JNIEnv* env, jobject thiz, jint documentPtr, jobject o
     delete skWStream;
 }
 
-static void nativeClose(JNIEnv* env, jobject thiz, jint documentPtr) {
+static void nativeClose(JNIEnv* env, jobject thiz, jlong documentPtr) {
     PdfDocument* document = reinterpret_cast<PdfDocument*>(documentPtr);
     document->close();
 }
 
 static JNINativeMethod gPdfDocument_Methods[] = {
-    {"nativeCreateDocument", "()I", (void*) nativeCreateDocument},
-    {"nativeStartPage", "(IIIIIII)I", (void*) nativeStartPage},
-    {"nativeFinishPage", "(I)V", (void*) nativeFinishPage},
-    {"nativeWriteTo", "(ILjava/io/OutputStream;[B)V", (void*) nativeWriteTo},
-    {"nativeClose", "(I)V", (void*) nativeClose}
+    {"nativeCreateDocument", "()J", (void*) nativeCreateDocument},
+    {"nativeStartPage", "(JIIIIII)J", (void*) nativeStartPage},
+    {"nativeFinishPage", "(J)V", (void*) nativeFinishPage},
+    {"nativeWriteTo", "(JLjava/io/OutputStream;[B)V", (void*) nativeWriteTo},
+    {"nativeClose", "(J)V", (void*) nativeClose}
 };
 
 int register_android_graphics_pdf_PdfDocument(JNIEnv* env) {
