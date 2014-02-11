@@ -4535,8 +4535,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void removeAppFromTaskLocked(AppWindowToken wtoken) {
         final Task task = mTaskIdToTask.get(wtoken.groupId);
-        if (!wtoken.mDeferRemoval && task != null && task.removeAppToken(wtoken)) {
-            removeTaskLocked(task);
+        if (task != null) {
+            task.removeAppToken(wtoken);
         }
     }
 
