@@ -5368,7 +5368,7 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
                 | (0x00ff0000 & ((typeIndex+1)<<16))
                 | (0x0000ffff & (entryIndex));
             resource_name resName;
-            if (!this->getResourceName(resID, true, &resName)) {
+            if (!this->getResourceName(resID, false, &resName)) {
                 ALOGW("idmap: resource 0x%08x has spec but lacks values, skipping\n", resID);
                 // add dummy value, or trimming leading/trailing zeroes later will fail
                 vector.push(0);
