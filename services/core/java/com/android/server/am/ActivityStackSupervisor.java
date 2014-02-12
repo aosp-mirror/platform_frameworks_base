@@ -61,6 +61,8 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.VirtualDisplay;
+import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -81,9 +83,11 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.InputEvent;
 import android.view.Surface;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.TransferPipe;
+import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.WindowManagerService;
@@ -225,6 +229,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Mapping from displayId to display current state */
     private SparseArray<ActivityDisplay> mActivityDisplays = new SparseArray<ActivityDisplay>();
 
+    InputManagerInternal mInputManagerInternal;
+
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
         PowerManager pm = (PowerManager)mService.mContext.getSystemService(Context.POWER_SERVICE);
@@ -255,6 +261,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             createStackOnDisplay(null, HOME_STACK_ID, Display.DEFAULT_DISPLAY);
             mHomeStack = mFocusedStack = mLastFocusedStack = getStack(HOME_STACK_ID);
+
+            mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         }
     }
 
@@ -2940,7 +2948,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         @Override
-        public void attachToDisplay(int displayId) throws RemoteException {
+        public void attachToDisplay(int displayId) {
             synchronized (mService) {
                 ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
                 if (activityDisplay == null) {
@@ -2951,11 +2959,26 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         @Override
-        public int getDisplayId() throws RemoteException {
+        public int getDisplayId() {
             if (mActivityDisplay != null) {
                 return mActivityDisplay.mDisplayId;
             }
             return -1;
+        }
+
+        @Override
+        public boolean injectEvent(InputEvent event) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                if (mActivityDisplay != null) {
+                    return mInputManagerInternal.injectInputEvent(event,
+                            mActivityDisplay.mDisplayId,
+                            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+                }
+                return false;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
 
         private void detachLocked() {
@@ -2971,7 +2994,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         @Override
-        public void detachFromDisplay() throws RemoteException {
+        public void detachFromDisplay() {
             synchronized (mService) {
                 detachLocked();
             }

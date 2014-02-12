@@ -1020,7 +1020,14 @@ void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout
                 sp<InputWindowHandle> windowHandle = connection->inputWindowHandle;
 
                 if (windowHandle != NULL) {
-                    mTouchState.removeWindow(windowHandle);
+                    const InputWindowInfo* info = windowHandle->getInfo();
+                    if (info) {
+                        ssize_t stateIndex = mTouchStatesByDisplay.indexOfKey(info->displayId);
+                        if (stateIndex >= 0) {
+                            mTouchStatesByDisplay.editValueAt(stateIndex).removeWindow(
+                                    windowHandle);
+                        }
+                    }
                 }
 
                 if (connection->status == Connection::STATUS_NORMAL) {
@@ -1161,11 +1168,21 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     InjectionPermission injectionPermission = INJECTION_PERMISSION_UNKNOWN;
     sp<InputWindowHandle> newHoverWindowHandle;
 
-    bool isSplit = mTouchState.split;
-    bool switchedDevice = mTouchState.deviceId >= 0 && mTouchState.displayId >= 0
-            && (mTouchState.deviceId != entry->deviceId
-                    || mTouchState.source != entry->source
-                    || mTouchState.displayId != displayId);
+    // Copy current touch state into mTempTouchState.
+    // This state is always reset at the end of this function, so if we don't find state
+    // for the specified display then our initial state will be empty.
+    const TouchState* oldState = NULL;
+    ssize_t oldStateIndex = mTouchStatesByDisplay.indexOfKey(displayId);
+    if (oldStateIndex >= 0) {
+        oldState = &mTouchStatesByDisplay.valueAt(oldStateIndex);
+        mTempTouchState.copyFrom(*oldState);
+    }
+
+    bool isSplit = mTempTouchState.split;
+    bool switchedDevice = mTempTouchState.deviceId >= 0 && mTempTouchState.displayId >= 0
+            && (mTempTouchState.deviceId != entry->deviceId
+                    || mTempTouchState.source != entry->source
+                    || mTempTouchState.displayId != displayId);
     bool isHoverAction = (maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_ENTER
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_EXIT);
@@ -1175,11 +1192,10 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     bool wrongDevice = false;
     if (newGesture) {
         bool down = maskedAction == AMOTION_EVENT_ACTION_DOWN;
-        if (switchedDevice && mTouchState.down && !down) {
+        if (switchedDevice && mTempTouchState.down && !down) {
 #if DEBUG_FOCUS
             ALOGD("Dropping event because a pointer for a different device is already down.");
 #endif
-            mTempTouchState.copyFrom(mTouchState);
             injectionResult = INPUT_EVENT_INJECTION_FAILED;
             switchedDevice = false;
             wrongDevice = true;
@@ -1191,8 +1207,6 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         mTempTouchState.source = entry->source;
         mTempTouchState.displayId = displayId;
         isSplit = false;
-    } else {
-        mTempTouchState.copyFrom(mTouchState);
     }
 
     if (newGesture || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)) {
@@ -1515,32 +1529,31 @@ Failed:
 
             if (isHoverAction) {
                 // Started hovering, therefore no longer down.
-                if (mTouchState.down) {
+                if (oldState && oldState->down) {
 #if DEBUG_FOCUS
                     ALOGD("Conflicting pointer actions: Hover received while pointer was down.");
 #endif
                     *outConflictingPointerActions = true;
                 }
-                mTouchState.reset();
+                mTempTouchState.reset();
                 if (maskedAction == AMOTION_EVENT_ACTION_HOVER_ENTER
                         || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
-                    mTouchState.deviceId = entry->deviceId;
-                    mTouchState.source = entry->source;
-                    mTouchState.displayId = displayId;
+                    mTempTouchState.deviceId = entry->deviceId;
+                    mTempTouchState.source = entry->source;
+                    mTempTouchState.displayId = displayId;
                 }
             } else if (maskedAction == AMOTION_EVENT_ACTION_UP
                     || maskedAction == AMOTION_EVENT_ACTION_CANCEL) {
                 // All pointers up or canceled.
-                mTouchState.reset();
+                mTempTouchState.reset();
             } else if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
                 // First pointer went down.
-                if (mTouchState.down) {
+                if (oldState && oldState->down) {
 #if DEBUG_FOCUS
                     ALOGD("Conflicting pointer actions: Down received while already down.");
 #endif
                     *outConflictingPointerActions = true;
                 }
-                mTouchState.copyFrom(mTempTouchState);
             } else if (maskedAction == AMOTION_EVENT_ACTION_POINTER_UP) {
                 // One pointer went up.
                 if (isSplit) {
@@ -1559,12 +1572,20 @@ Failed:
                         i += 1;
                     }
                 }
-                mTouchState.copyFrom(mTempTouchState);
-            } else if (maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
-                // Discard temporary touch state since it was only valid for this action.
-            } else {
-                // Save changes to touch state as-is for all other actions.
-                mTouchState.copyFrom(mTempTouchState);
+            }
+
+            // Save changes unless the action was scroll in which case the temporary touch
+            // state was only valid for this one action.
+            if (maskedAction != AMOTION_EVENT_ACTION_SCROLL) {
+                if (mTempTouchState.displayId >= 0) {
+                    if (oldStateIndex >= 0) {
+                        mTouchStatesByDisplay.editValueAt(oldStateIndex).copyFrom(mTempTouchState);
+                    } else {
+                        mTouchStatesByDisplay.add(displayId, mTempTouchState);
+                    }
+                } else if (oldStateIndex >= 0) {
+                    mTouchStatesByDisplay.removeItemsAt(oldStateIndex);
+                }
             }
 
             // Update hover state.
@@ -2316,7 +2337,7 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
             originalMotionEntry->yPrecision,
             originalMotionEntry->downTime,
             originalMotionEntry->displayId,
-            splitPointerCount, splitPointerProperties, splitPointerCoords);
+            splitPointerCount, splitPointerProperties, splitPointerCoords, 0, 0);
 
     if (originalMotionEntry->injectionState) {
         splitMotionEntry->injectionState = originalMotionEntry->injectionState;
@@ -2488,7 +2509,7 @@ void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
                 args->action, args->flags, args->metaState, args->buttonState,
                 args->edgeFlags, args->xPrecision, args->yPrecision, args->downTime,
                 args->displayId,
-                args->pointerCount, args->pointerProperties, args->pointerCoords);
+                args->pointerCount, args->pointerProperties, args->pointerCoords, 0, 0);
 
         needWake = enqueueInboundEventLocked(newEntry);
         mLock.unlock();
@@ -2536,7 +2557,7 @@ void InputDispatcher::notifyDeviceReset(const NotifyDeviceResetArgs* args) {
     }
 }
 
-int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
+int32_t InputDispatcher::injectInputEvent(const InputEvent* event, int32_t displayId,
         int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
         uint32_t policyFlags) {
 #if DEBUG_INBOUND_EVENT_DETAILS
@@ -2587,7 +2608,6 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
 
     case AINPUT_EVENT_TYPE_MOTION: {
         const MotionEvent* motionEvent = static_cast<const MotionEvent*>(event);
-        int32_t displayId = ADISPLAY_ID_DEFAULT;
         int32_t action = motionEvent->getAction();
         size_t pointerCount = motionEvent->getPointerCount();
         const PointerProperties* pointerProperties = motionEvent->getPointerProperties();
@@ -2610,7 +2630,8 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
                 motionEvent->getEdgeFlags(),
                 motionEvent->getXPrecision(), motionEvent->getYPrecision(),
                 motionEvent->getDownTime(), displayId,
-                uint32_t(pointerCount), pointerProperties, samplePointerCoords);
+                uint32_t(pointerCount), pointerProperties, samplePointerCoords,
+                motionEvent->getXOffset(), motionEvent->getYOffset());
         lastInjectedEntry = firstInjectedEntry;
         for (size_t i = motionEvent->getHistorySize(); i > 0; i--) {
             sampleEventTimes += 1;
@@ -2622,7 +2643,8 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
                     motionEvent->getEdgeFlags(),
                     motionEvent->getXPrecision(), motionEvent->getYPrecision(),
                     motionEvent->getDownTime(), displayId,
-                    uint32_t(pointerCount), pointerProperties, samplePointerCoords);
+                    uint32_t(pointerCount), pointerProperties, samplePointerCoords,
+                    motionEvent->getXOffset(), motionEvent->getYOffset());
             lastInjectedEntry->next = nextInjectedEntry;
             lastInjectedEntry = nextInjectedEntry;
         }
@@ -2847,22 +2869,25 @@ void InputDispatcher::setInputWindows(const Vector<sp<InputWindowHandle> >& inpu
             mFocusedWindowHandle = newFocusedWindowHandle;
         }
 
-        for (size_t i = 0; i < mTouchState.windows.size(); i++) {
-            TouchedWindow& touchedWindow = mTouchState.windows.editItemAt(i);
-            if (!hasWindowHandleLocked(touchedWindow.windowHandle)) {
+        for (size_t d = 0; d < mTouchStatesByDisplay.size(); d++) {
+            TouchState& state = mTouchStatesByDisplay.editValueAt(d);
+            for (size_t i = 0; i < state.windows.size(); i++) {
+                TouchedWindow& touchedWindow = state.windows.editItemAt(i);
+                if (!hasWindowHandleLocked(touchedWindow.windowHandle)) {
 #if DEBUG_FOCUS
-                ALOGD("Touched window was removed: %s",
-                        touchedWindow.windowHandle->getName().string());
+                    ALOGD("Touched window was removed: %s",
+                            touchedWindow.windowHandle->getName().string());
 #endif
-                sp<InputChannel> touchedInputChannel =
-                        touchedWindow.windowHandle->getInputChannel();
-                if (touchedInputChannel != NULL) {
-                    CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
-                            "touched window was removed");
-                    synthesizeCancelationEventsForInputChannelLocked(
-                            touchedInputChannel, options);
+                    sp<InputChannel> touchedInputChannel =
+                            touchedWindow.windowHandle->getInputChannel();
+                    if (touchedInputChannel != NULL) {
+                        CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
+                                "touched window was removed");
+                        synthesizeCancelationEventsForInputChannelLocked(
+                                touchedInputChannel, options);
+                    }
+                    state.windows.removeAt(i--);
                 }
-                mTouchState.windows.removeAt(i--);
             }
         }
 
@@ -3003,23 +3028,27 @@ bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
         }
 
         bool found = false;
-        for (size_t i = 0; i < mTouchState.windows.size(); i++) {
-            const TouchedWindow& touchedWindow = mTouchState.windows[i];
-            if (touchedWindow.windowHandle == fromWindowHandle) {
-                int32_t oldTargetFlags = touchedWindow.targetFlags;
-                BitSet32 pointerIds = touchedWindow.pointerIds;
+        for (size_t d = 0; d < mTouchStatesByDisplay.size(); d++) {
+            TouchState& state = mTouchStatesByDisplay.editValueAt(d);
+            for (size_t i = 0; i < state.windows.size(); i++) {
+                const TouchedWindow& touchedWindow = state.windows[i];
+                if (touchedWindow.windowHandle == fromWindowHandle) {
+                    int32_t oldTargetFlags = touchedWindow.targetFlags;
+                    BitSet32 pointerIds = touchedWindow.pointerIds;
 
-                mTouchState.windows.removeAt(i);
+                    state.windows.removeAt(i);
 
-                int32_t newTargetFlags = oldTargetFlags
-                        & (InputTarget::FLAG_FOREGROUND
-                                | InputTarget::FLAG_SPLIT | InputTarget::FLAG_DISPATCH_AS_IS);
-                mTouchState.addOrUpdateWindow(toWindowHandle, newTargetFlags, pointerIds);
+                    int32_t newTargetFlags = oldTargetFlags
+                            & (InputTarget::FLAG_FOREGROUND
+                                    | InputTarget::FLAG_SPLIT | InputTarget::FLAG_DISPATCH_AS_IS);
+                    state.addOrUpdateWindow(toWindowHandle, newTargetFlags, pointerIds);
 
-                found = true;
-                break;
+                    found = true;
+                    goto Found;
+                }
             }
         }
+Found:
 
         if (! found) {
 #if DEBUG_FOCUS
@@ -3063,7 +3092,7 @@ void InputDispatcher::resetAndDropEverythingLocked(const char* reason) {
     drainInboundQueueLocked();
     resetANRTimeoutsLocked();
 
-    mTouchState.reset();
+    mTouchStatesByDisplay.clear();
     mLastHoverWindowHandle.clear();
 }
 
@@ -3098,22 +3127,28 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
     dump.appendFormat(INDENT "FocusedWindow: name='%s'\n",
             mFocusedWindowHandle != NULL ? mFocusedWindowHandle->getName().string() : "<null>");
 
-    dump.appendFormat(INDENT "TouchDown: %s\n", toString(mTouchState.down));
-    dump.appendFormat(INDENT "TouchSplit: %s\n", toString(mTouchState.split));
-    dump.appendFormat(INDENT "TouchDeviceId: %d\n", mTouchState.deviceId);
-    dump.appendFormat(INDENT "TouchSource: 0x%08x\n", mTouchState.source);
-    dump.appendFormat(INDENT "TouchDisplayId: %d\n", mTouchState.displayId);
-    if (!mTouchState.windows.isEmpty()) {
-        dump.append(INDENT "TouchedWindows:\n");
-        for (size_t i = 0; i < mTouchState.windows.size(); i++) {
-            const TouchedWindow& touchedWindow = mTouchState.windows[i];
-            dump.appendFormat(INDENT2 "%d: name='%s', pointerIds=0x%0x, targetFlags=0x%x\n",
-                    i, touchedWindow.windowHandle->getName().string(),
-                    touchedWindow.pointerIds.value,
-                    touchedWindow.targetFlags);
+    if (!mTouchStatesByDisplay.isEmpty()) {
+        dump.appendFormat(INDENT "TouchStatesByDisplay:\n");
+        for (size_t i = 0; i < mTouchStatesByDisplay.size(); i++) {
+            const TouchState& state = mTouchStatesByDisplay.valueAt(i);
+            dump.appendFormat(INDENT2 "%d: down=%s, split=%s, deviceId=%d, source=0x%08x\n",
+                    state.displayId, toString(state.down), toString(state.split),
+                    state.deviceId, state.source);
+            if (!state.windows.isEmpty()) {
+                dump.append(INDENT3 "Windows:\n");
+                for (size_t i = 0; i < state.windows.size(); i++) {
+                    const TouchedWindow& touchedWindow = state.windows[i];
+                    dump.appendFormat(INDENT4 "%d: name='%s', pointerIds=0x%0x, targetFlags=0x%x\n",
+                            i, touchedWindow.windowHandle->getName().string(),
+                            touchedWindow.pointerIds.value,
+                            touchedWindow.targetFlags);
+                }
+            } else {
+                dump.append(INDENT3 "Windows: <none>\n");
+            }
         }
     } else {
-        dump.append(INDENT "TouchedWindows: <none>\n");
+        dump.append(INDENT "TouchStates: <no displays touched>\n");
     }
 
     if (!mWindowHandles.isEmpty()) {
@@ -3898,7 +3933,8 @@ InputDispatcher::MotionEntry::MotionEntry(nsecs_t eventTime,
         int32_t metaState, int32_t buttonState,
         int32_t edgeFlags, float xPrecision, float yPrecision,
         nsecs_t downTime, int32_t displayId, uint32_t pointerCount,
-        const PointerProperties* pointerProperties, const PointerCoords* pointerCoords) :
+        const PointerProperties* pointerProperties, const PointerCoords* pointerCoords,
+        float xOffset, float yOffset) :
         EventEntry(TYPE_MOTION, eventTime, policyFlags),
         eventTime(eventTime),
         deviceId(deviceId), source(source), action(action), flags(flags),
@@ -3908,6 +3944,9 @@ InputDispatcher::MotionEntry::MotionEntry(nsecs_t eventTime,
     for (uint32_t i = 0; i < pointerCount; i++) {
         this->pointerProperties[i].copyFrom(pointerProperties[i]);
         this->pointerCoords[i].copyFrom(pointerCoords[i]);
+        if (xOffset || yOffset) {
+            this->pointerCoords[i].applyOffset(xOffset, yOffset);
+        }
     }
 }
 
@@ -4201,7 +4240,8 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
                     memento.flags, 0, 0, 0,
                     memento.xPrecision, memento.yPrecision, memento.downTime,
                     memento.displayId,
-                    memento.pointerCount, memento.pointerProperties, memento.pointerCoords));
+                    memento.pointerCount, memento.pointerProperties, memento.pointerCoords,
+                    0, 0));
         }
     }
 }
