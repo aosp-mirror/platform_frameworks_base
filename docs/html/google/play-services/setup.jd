@@ -187,14 +187,13 @@ to your <code>gradle.build</code> file's build types. For more information, see 
 </ol>
 
 
-
-
 <h2 id="ensure">Ensure Devices Have the Google Play services APK</h2>
 
 <p>As described in the <a href="{@docRoot}google/play-services/index.html">Google Play services
 introduction</a>, Google Play delivers service updates for users on
-Android 2.3 through the Google Play Store app. However, updates might not reach
-all users immediately.</p>
+Android 2.3 and higher through the Google Play Store app. However, updates might not reach
+all users immediately, so your app should verify the version available before attempting to
+perform API transactions.</p>
 
 <p class="caution">
 <strong>Important:</strong>
@@ -204,77 +203,36 @@ all users immediately.</p>
     {@link android.app.Activity#onResume onResume()} method of the main activity.
 </p>
 
-<p>Here are four scenarios that describe the possible state of the Google Play services APK on
-a user's device:</p>
-<ol>
-    <li>
-        A recent version of the Google Play Store app is installed, and the most recent Google Play
-        services APK has been downloaded.
-    </li>
-    <li>
-        A recent version of the Google Play Store app is installed, but the most recent Google Play
-        services APK has <em>not</em> been downloaded.
-    </li>
-    <li>
-        An old version of the Google Play Store app, which does not proactively download Google Play
-        services updates, is present.
-    </li>
-    <li>
-        The Google Play services APK is missing or disabled on the device, which might happen if the
-        user explicitly uninstalls or disables it.
-    </li>
-</ol>
-<p>
-    Case 1 is the success scenario and is the most common. However, because the other scenarios can
-    still happen, you must handle them every time your app connects to a Google Play service to
-    ensure that the Google Play services APK is present, up-to-date, and enabled.
-</p>
-<p>
-    To help you, the Google Play services client library has utility methods to
-    determine whether or not the Google Play services APK is recent enough to support the
-    version of the client library you are using.  If not, the client library sends users to the
-    Google Play Store to download the recent version of the Google Play services APK.
-</p>
+<p>The Google Play services library includes utility methods that help you determine whether or not
+the Google Play services version on the device supports the version of the client library you are
+using. If the version on the device is too old, the system will take the user to Google Play Store
+in order to install the recent version of the Google Play services.</p>
 
-<p class="note">
-<b>Note:</b>
-    The Google Play services APK is not visible by searching the Google Play Store. The client
-    library provides a deep link into the Google Play Store when it detects that the device has a
-    missing or incompatible Google Play services APK.
-</p>
+<p>Because each app uses Google Play services differently, it's up to you decide the appropriate
+place in your app to check verify the Google Play services version. For example, if Google Play
+services is required for your app at all times, you might want to do it when your app first
+launches. On the other hand, if Google Play services is an optional part of your app, you can check
+the version only once the user navigates to that portion of your app.</p>
 
-<p>
-    It is up to you choose the appropriate place in your app to do the following steps to check for
-    a valid Google Play services APK. For example, if Google Play services is required for your app,
-    you might want to do it when your app first launches. On the other hand, if Google Play services
-    is an optional part of your app, you can do these checks if the user navigates to that portion
-    of your app:
-</p>
-
-<ol>
-    <li>
-        Query for the status of Google Play services on the device with the
-<a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)"
->{@code isGooglePlayServicesAvailable()}</a> method, which returns a result code.
-    </li>
-    <li>
-        If the result code is
+<p>To verify the Google Play services version, call <a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)"
+>{@code isGooglePlayServicesAvailable()}</a>. If the result code is
 <a href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#SUCCESS"
 >{@code SUCCESS}</a>,
-        then the Google Play services APK is up-to-date, and you can proceed as normal.
-    </li>
-    <li>
-        If the result code is
+        then the Google Play services APK is up-to-date and you can continue to make a connection.
+If, however, the result code is
 <a href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#SERVICE_MISSING"
 >{@code SERVICE_MISSING}</a>,
 <a href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#SERVICE_VERSION_UPDATE_REQUIRED"
 >{@code SERVICE_VERSION_UPDATE_REQUIRED}</a>,
         or
 <a href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#SERVICE_DISABLED"
->{@code SERVICE_DISABLED}</a>, then
+>{@code SERVICE_DISABLED}</a>, then the user needs to install an update. So,
   call <a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)"
-  >{@code getErrorDialog()}</a>
-  to display an error message to the user, which allows the user to download the APK
-  from the Google Play Store or enable it in the device's system settings.
-    </li>
-</ol>
+  >{@code GooglePlayServicesUtil.getErrorDialog()}</a> and pass it the result error code.
+This returns a {@link android.app.Dialog} you should show, which provides an appropriate message
+about the error and provides an action
+that takes the user to Google Play Store to install the update.</p>
+
+
+<p>To then begin a connection to Google Play services, read <a
+href="{@docRoot}google/auth/api-client.html">Accessing Google Play Services APIs</a>.</p>
