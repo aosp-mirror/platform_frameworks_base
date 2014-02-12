@@ -1428,10 +1428,13 @@ public class TelephonyManager {
      * @param component the component that should handle the intent.
      * @param callId the unique id of the call. This id is passed to the service via {@link
      *               ThirdPartyCallService#incomingCallAttach incomingCallAttach}.
+     * @param callerDisplayName the name shown to the user. Normally this will be the caller's phone
+     *                          number.
      */
-    public void newIncomingThirdPartyCall(ComponentName component, String callId) {
+    public void newIncomingThirdPartyCall(ComponentName component, String callId,
+            String callerDisplayName) {
         try {
-            getITelephony().newIncomingThirdPartyCall(component, callId);
+            getITelephony().newIncomingThirdPartyCall(component, callId, callerDisplayName);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }

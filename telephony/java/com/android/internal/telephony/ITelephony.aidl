@@ -420,6 +420,9 @@ interface ITelephony {
      * identified by component to handle the call.
      * @param component the component that should handle the intent.
      * @param callId the unique id of the call.
+     * @param callerDisplayName the name shown to the user. Normally this will be the caller's phone
+     *                          number.
      */
-    void newIncomingThirdPartyCall(in ComponentName component, String callId);
+    void newIncomingThirdPartyCall(in ComponentName component, String callId,
+            String callerDisplayName);
 }

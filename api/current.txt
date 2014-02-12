@@ -24518,7 +24518,7 @@ package android.telephony {
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
-    method public void newIncomingThirdPartyCall(android.content.ComponentName, java.lang.String);
+    method public void newIncomingThirdPartyCall(android.content.ComponentName, java.lang.String, java.lang.String);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
@@ -24582,6 +24582,7 @@ package android.telephony {
     method public void hangup();
     method public void incomingCallAccept();
     method public void mute(boolean);
+    method public void sendDtmf(char);
   }
 
   public class ThirdPartyCallService {
@@ -34080,6 +34081,7 @@ package com.android.internal.telephony {
     method public abstract void hangup() throws android.os.RemoteException;
     method public abstract void incomingCallAccept() throws android.os.RemoteException;
     method public abstract void mute(boolean) throws android.os.RemoteException;
+    method public abstract void sendDtmf(char) throws android.os.RemoteException;
   }
 
 }
