@@ -4529,6 +4529,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final Task task = mTaskIdToTask.get(wtoken.groupId);
         if (task != null) {
             task.removeAppToken(wtoken);
+            // Remove after bug resolved.
+            Slog.d(TAG, "removeAppFromTaskLocked: wtoken=" + wtoken
+                    + " numTokens left=" + task.mAppTokens.size()
+                    + " Callers=" + Debug.getCallers(5));
         }
     }
 
