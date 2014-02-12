@@ -549,11 +549,15 @@ is sensitive to delays or lag in sound input or output.</td>
 </td>
     </tr>
     <tr>
-       <td>Bluetooth</td>
-       <td><code>android.hardware.bluetooth</td>
+       <td rowspan="2">Bluetooth</td>
+       <td><code>android.hardware.bluetooth</code></td>
        <td>The application uses Bluetooth radio features in the device.</td>
-       <td>If your app uses Bluetooth Low Energy, also declare
-       {@code android.software.bluetooth_le}.</td>
+       <td></td>
+    </tr>
+    <tr>
+       <td><code>android.hardware.bluetooth_le</code></td>
+       <td>The application uses Bluetooth Low Energy radio features in the device.</td>
+       <td></td>
     </tr>
     <tr>
        <td rowspan="5">Camera</td>
@@ -586,6 +590,13 @@ not required.</td>
 </tr>
 
 <tr>
+  <td>Infrared</td>
+  <td><code>android.hardware.consumerir</code></td>
+  <td>The application uses the consumer IR capabilities on the device.</td>
+  <td></td>
+</tr>
+
+<tr>
   <td rowspan="3">Location</td>
   <td><code>android.hardware.location</code></td>
   <td>The application uses one or more features on the device for determining
@@ -613,13 +624,18 @@ from a Global Positioning System receiver on the device. </td>
   <td></td>
 </tr>
 <tr>
-  <td>NFC</td>
+  <td rowspan="2">NFC</td>
   <td><code>android.hardware.nfc</td>
   <td>The application uses Near Field Communications radio features in the device.</td>
   <td></td>
 </tr>
 <tr>
-  <td rowspan="6">Sensors</td>
+  <td><code>android.hardware.nfc.hce</code></td>
+  <td>The application uses the NFC card emulation feature in the device.</td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="8">Sensors</td>
   <td><code>android.hardware.sensor.accelerometer</code></td>
   <td>The application uses motion readings from an accelerometer on the
 device.</td>
@@ -649,6 +665,16 @@ the device.</td>
 <tr>
   <td><code>android.hardware.sensor.proximity</code></td>
   <td>The application uses the device's proximity sensor.</td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>android.hardware.sensor.stepcounter</code></td>
+  <td>The application uses the device's step counter.</td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>android.hardware.sensor.stepdetector</code></td>
+  <td>The application uses the device's step detector.</td>
   <td></td>
 </tr>
 
@@ -828,10 +854,14 @@ hosts).</td>
 </tr>
 
 <tr>
-  <td>Wifi</td>
+  <td rowspan="2">Wi-Fi</td>
   <td><code>android.hardware.wifi</code></td>
-  <td>The application uses 802.11 networking (wifi) features on the device.</td>
+  <td>The application uses 802.11 networking (Wi-Fi) features on the device.</td>
   <td></td>
+</tr>
+<tr>
+  <td><code>android.hardware.wifi.direct</code></td>
+  <td>The application uses the Wi-Fi Direct networking features on the device.</td>
 </tr>
 
   </table>
@@ -857,11 +887,9 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
   that include a Home screen or similar location where users can embed App Widgets.</td>
 </tr>
 <tr>
-  <td>Bluetooth Low Energy</td>
-  <td><code>android.software.bluetooth_le</code></td>
-  <td><p>The application uses Bluetooth Low Energy APIs and should be installed only on devices
-  that are capable of communicating with other devices via Bluetooth Low Energy.
-   <p>This implicitly also declares the {@code android.hardware.bluetooth} feature.</td>
+  <td>Device Management</td>
+  <td><code>android.software.device_admin</code></td>
+  <td>The application uses device policy enforcement via device administrators.</td>
 </tr>
 <tr>
   <td>Home Screen</td>
@@ -1056,7 +1084,7 @@ filtering based on the <code>CAMERA</code> permission, you would add this
 </tr>
 
 <tr>
-  <td rowspan="3">Wifi</td>
+  <td rowspan="3">Wi-Fi</td>
   <td><code>ACCESS_WIFI_STATE</code></td>
   <td><code>android.hardware.wifi</code></td>
 <!--  <td></td> -->
