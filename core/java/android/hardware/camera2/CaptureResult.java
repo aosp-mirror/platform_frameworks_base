@@ -1536,6 +1536,39 @@ public final class CaptureResult extends CameraMetadata {
             new Key<float[]>("android.sensor.profileToneCurve", float[].class);
 
     /**
+     * <p>The worst-case divergence between Bayer green channels.</p>
+     * <p>This value is an estimate of the worst case split between the
+     * Bayer green channels in the red and blue rows in the sensor color
+     * filter array.</p>
+     * <p>The green split is calculated as follows:</p>
+     * <ol>
+     * <li>A representative 5x5 pixel window W within the active
+     * sensor array is chosen.</li>
+     * <li>The arithmetic mean of the green channels from the red
+     * rows (mean_Gr) within W is computed.</li>
+     * <li>The arithmetic mean of the green channels from the blue
+     * rows (mean_Gb) within W is computed.</li>
+     * <li>The maximum ratio R of the two means is computed as follows:
+     * <code>R = max((mean_Gr + 1)/(mean_Gb + 1), (mean_Gb + 1)/(mean_Gr + 1))</code></li>
+     * </ol>
+     * <p>The ratio R is the green split divergence reported for this property,
+     * which represents how much the green channels differ in the mosaic
+     * pattern.  This value is typically used to determine the treatment of
+     * the green mosaic channels when demosaicing.</p>
+     * <p>The green split value can be roughly interpreted as follows:</p>
+     * <ul>
+     * <li>R &lt; 1.03 is a negligible split (&lt;3% divergence).</li>
+     * <li>1.20 &lt;= R &gt;= 1.03 will require some software
+     * correction to avoid demosaic errors (3-20% divergence).</li>
+     * <li>R &gt; 1.20 will require strong software correction to produce
+     * a usuable image (&gt;20% divergence).</li>
+     * </ul>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    public static final Key<Float> SENSOR_GREEN_SPLIT =
+            new Key<Float>("android.sensor.greenSplit", float.class);
+
+    /**
      * <p>When enabled, the sensor sends a test pattern instead of
      * doing a real exposure from the camera.</p>
      * <p>When a test pattern is enabled, all manual sensor controls specified
