@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -129,6 +130,9 @@ public class GradientDrawable extends Drawable {
     private boolean mMutated;
     private Path mRingPath;
     private boolean mPathIsDirty = true;
+
+    /** Current gradient radius, valid when {@link #mRectIsDirty} is false. */
+    private float mGradientRadius;
 
     /**
      * Controls how the gradient is oriented relative to the drawable's bounds
@@ -401,9 +405,24 @@ public class GradientDrawable extends Drawable {
      * @see #setGradientType(int) 
      */
     public void setGradientRadius(float gradientRadius) {
-        mGradientState.setGradientRadius(gradientRadius);
+        mGradientState.setGradientRadius(gradientRadius, TypedValue.COMPLEX_UNIT_PX);
         mRectIsDirty = true;
         invalidateSelf();
+    }
+
+    /**
+     * Returns the radius of the gradient in pixels. The radius is valid only
+     * when the gradient type is set to {@link #RADIAL_GRADIENT}.
+     *
+     * @return Radius in pixels.
+     */
+    public float getGradientRadius() {
+        if (mGradientState.mGradient != RADIAL_GRADIENT) {
+            return 0;
+        }
+
+        ensureValidRect();
+        return mGradientRadius;
     }
 
     /**
@@ -872,11 +891,19 @@ public class GradientDrawable extends Drawable {
                     x0 = r.left + (r.right - r.left) * st.mCenterX;
                     y0 = r.top + (r.bottom - r.top) * st.mCenterY;
 
-                    final float level = st.mUseLevel ? (float) getLevel() / 10000.0f : 1.0f;
-
-                    mFillPaint.setShader(new RadialGradient(x0, y0,
-                            level * st.mGradientRadius, colors, null,
-                            Shader.TileMode.CLAMP));
+                    float radius = st.mGradientRadius;
+                    if (st.mGradientRadiusUnit == TypedValue.COMPLEX_UNIT_FRACTION) {
+                        radius *= Math.min(st.mWidth, st.mHeight);
+                    } else if (st.mGradientRadiusUnit == TypedValue.COMPLEX_UNIT_FRACTION_PARENT) {
+                        radius *= Math.min(r.width(), r.height());
+                    }
+                
+                    if (st.mUseLevel) {
+                        radius *= getLevel() / 10000.0f;
+                    }
+                    mGradientRadius = radius;
+                    mFillPaint.setShader(new RadialGradient(
+                            x0, y0, mGradientRadius, colors, null, Shader.TileMode.CLAMP));
                 } else if (st.mGradient == SWEEP_GRADIENT) {
                     x0 = r.left + (r.right - r.left) * st.mCenterX;
                     y0 = r.top + (r.bottom - r.top) * st.mCenterY;
@@ -1051,12 +1078,20 @@ public class GradientDrawable extends Drawable {
                         break;
                     }
                 } else {
-                    TypedValue tv = a.peekValue(
+                    final TypedValue tv = a.peekValue(
                             com.android.internal.R.styleable.GradientDrawableGradient_gradientRadius);
                     if (tv != null) {
-                        boolean radiusRel = tv.type == TypedValue.TYPE_FRACTION;
-                        st.mGradientRadius = radiusRel ?
-                                tv.getFraction(1.0f, 1.0f) : tv.getFloat();
+                        final float radius;
+                        final int unit;
+                        if (tv.type == TypedValue.TYPE_FRACTION) {
+                            radius = tv.getFraction(1.0f, 1.0f);
+                            unit = tv.data & TypedValue.COMPLEX_UNIT_MASK;
+                        } else {
+                            radius = tv.getDimension(r.getDisplayMetrics());
+                            unit = TypedValue.COMPLEX_UNIT_PX;
+                        }
+                        st.mGradientRadius = radius;
+                        st.mGradientRadiusUnit = unit;
                     } else if (gradientType == RADIAL_GRADIENT) {
                         throw new XmlPullParserException(
                                 a.getPositionDescription()
@@ -1218,6 +1253,7 @@ public class GradientDrawable extends Drawable {
         private float mCenterX = 0.5f;
         private float mCenterY = 0.5f;
         private float mGradientRadius = 0.5f;
+        private int mGradientRadiusUnit = TypedValue.COMPLEX_UNIT_PX;
         private boolean mUseLevel;
         private boolean mUseLevelForShape;
         private boolean mOpaque;
@@ -1259,6 +1295,7 @@ public class GradientDrawable extends Drawable {
             mCenterX = state.mCenterX;
             mCenterY = state.mCenterY;
             mGradientRadius = state.mGradientRadius;
+            mGradientRadiusUnit = state.mGradientRadiusUnit;
             mUseLevel = state.mUseLevel;
             mUseLevelForShape = state.mUseLevelForShape;
             mOpaque = state.mOpaque;
@@ -1375,8 +1412,9 @@ public class GradientDrawable extends Drawable {
             mHeight = height;
         }
 
-        public void setGradientRadius(float gradientRadius) {
+        public void setGradientRadius(float gradientRadius, int type) {
             mGradientRadius = gradientRadius;
+            mGradientRadiusUnit = type;
         }
     }
 
