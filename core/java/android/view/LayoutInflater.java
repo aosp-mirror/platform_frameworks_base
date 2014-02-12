@@ -90,6 +90,7 @@ public abstract class LayoutInflater {
     private static final String TAG_INCLUDE = "include";
     private static final String TAG_1995 = "blink";
     private static final String TAG_REQUEST_FOCUS = "requestFocus";
+    private static final String TAG_TAG = "tag";
 
     private static final int[] ATTRS_THEME = new int[] {
             com.android.internal.R.attr.theme };
@@ -778,6 +779,8 @@ public abstract class LayoutInflater {
             
             if (TAG_REQUEST_FOCUS.equals(name)) {
                 parseRequestFocus(parser, parent);
+            } else if (TAG_TAG.equals(name)) {
+                parseViewTag(parser, parent, attrs);
             } else if (TAG_INCLUDE.equals(name)) {
                 if (parser.getDepth() == 0) {
                     throw new InflateException("<include /> cannot be the root element");
@@ -797,10 +800,36 @@ public abstract class LayoutInflater {
         if (finishInflate) parent.onFinishInflate();
     }
 
-    private void parseRequestFocus(XmlPullParser parser, View parent)
+    /**
+     * Parses a <code>&lt;request-focus&gt;</code> element and requests focus on
+     * the containing View.
+     */
+    private void parseRequestFocus(XmlPullParser parser, View view)
             throws XmlPullParserException, IOException {
         int type;
-        parent.requestFocus();
+        view.requestFocus();
+        final int currentDepth = parser.getDepth();
+        while (((type = parser.next()) != XmlPullParser.END_TAG ||
+                parser.getDepth() > currentDepth) && type != XmlPullParser.END_DOCUMENT) {
+            // Empty
+        }
+    }
+
+    /**
+     * Parses a <code>&lt;tag&gt;</code> element and sets a keyed tag on the
+     * containing View.
+     */
+    private void parseViewTag(XmlPullParser parser, View view, AttributeSet attrs)
+            throws XmlPullParserException, IOException {
+        int type;
+
+        final TypedArray ta = mContext.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ViewTag);
+        final int key = ta.getResourceId(com.android.internal.R.styleable.ViewTag_id, 0);
+        final CharSequence value = ta.getText(com.android.internal.R.styleable.ViewTag_value);
+        view.setTag(key, value);
+        ta.recycle();
+
         final int currentDepth = parser.getDepth();
         while (((type = parser.next()) != XmlPullParser.END_TAG ||
                 parser.getDepth() > currentDepth) && type != XmlPullParser.END_DOCUMENT) {
