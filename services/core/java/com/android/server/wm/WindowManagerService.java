@@ -8065,6 +8065,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int numTokens = tokens.size();
                 for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
+                    if (wtoken.mDeferRemoval) {
+                        continue;
+                    }
                     i = reAddAppWindowsLocked(displayContent, i, wtoken);
                 }
             }
