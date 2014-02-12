@@ -65,12 +65,6 @@
           <span class="en">Wallet</span>
       </a></div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot?>google/play-services/auth.html">
-          <span class="en">Authorization</span>
-      </a></div>
-  </li>
-
 
 
   <li class="nav-section">
@@ -80,6 +74,18 @@
     <ul>
       <li><a href="<?cs var:toroot?>google/play-services/setup.html">
           <span class="en">Setup</span></a>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot?>google/auth/api-client.html">
+          <span class="en">Accessing Google Play Services APIs</span></a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>google/auth/http-auth.html">
+              <span class="en">Authorizing with Google for REST APIs</span>
+            </a>
+          </li>
+        </ul>
       </li>
       <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
