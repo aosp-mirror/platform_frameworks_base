@@ -424,7 +424,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"upravljanje preverjenih poverilnic"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Aplikaciji dovoli nameščanje in odstranjevanje potrdil overitelja potrdil kot preverjenih poverilnic."</string>
     <string name="permlab_bindIdleService" msgid="7521398788076342815">"vezanje na nedejavne storitve"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"To dovoljenje dovoli sistemu Android vezanje nedejavnih storitev aplikacije."</string>
+    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"To dovoljenje dovoli sistemu Android povezavo z nedejavnimi storitvami aplikacije."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"branje/pisanje v sredstva, ki so v lasti skupine za diagnostiko"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Programu omogoča branje in pisanje na poljuben vir, ki je v lasti skupine za diagnostiko; na primer datoteke v mapi /dev. To lahko vpliva na stabilnost in varnost sistema. To naj uporablja SAMO izdelovalec ali operater za diagnostiko, specifično za strojno opremo."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogočanje ali onemogočanje komponent programa"</string>
