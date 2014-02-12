@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 
 import com.android.internal.telephony.IThirdPartyCallListener;
@@ -27,15 +29,12 @@ import com.android.internal.telephony.IThirdPartyCallListener;
 public class ThirdPartyCallListener {
     private final IThirdPartyCallListener mListener;
 
-    // Call end reason. TODO: rename this to DisconnectCause once they are public.
+    // Call end reason.
     public static final int CALL_END_NORMAL = 1;
     public static final int CALL_END_INCOMING_MISSED = 2;
     public static final int CALL_END_OTHER = 3;
 
     public ThirdPartyCallListener(IThirdPartyCallListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("Invalid listener");
-        }
         mListener = listener;
     }
 
@@ -45,7 +44,9 @@ public class ThirdPartyCallListener {
      */
     public void onCallProviderAttached(ThirdPartyCallProvider callProvider) {
         try {
-            mListener.onCallProviderAttached(callProvider.getCallback());
+            if (mListener != null) {
+                mListener.onCallProviderAttached(callProvider.callback);
+            }
         } catch (RemoteException e) {
         }
     }
@@ -55,7 +56,9 @@ public class ThirdPartyCallListener {
      */
     public void onRingingStarted() {
         try {
-            mListener.onRingingStarted();
+            if (mListener != null) {
+                mListener.onRingingStarted();
+            }
         } catch (RemoteException e) {
         }
     }
@@ -65,7 +68,9 @@ public class ThirdPartyCallListener {
      */
     public void onCallEstablished() {
         try {
-            mListener.onCallEstablished();
+            if (mListener != null) {
+                mListener.onCallEstablished();
+            }
         } catch (RemoteException e) {
         }
     }
@@ -75,7 +80,9 @@ public class ThirdPartyCallListener {
      */
     public void onCallEnded(int reason) {
         try {
-            mListener.onCallEnded(reason);
+            if (mListener != null) {
+                mListener.onCallEnded(reason);
+            }
         } catch (RemoteException e) {
         }
     }
