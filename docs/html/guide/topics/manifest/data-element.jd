@@ -18,7 +18,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Adds a data specification to an intent filter.  The specification can
+<dd itemprop="description">Adds a data specification to an intent filter.  The specification can
 be just a data type (the <code><a href="{@docRoot}guide/topics/manifest/data-element.html#mime">mimeType</a></code> attribute),
 just a URI, or both a data type and a URI.  A URI is specified by separate
 attributes for each of its parts:

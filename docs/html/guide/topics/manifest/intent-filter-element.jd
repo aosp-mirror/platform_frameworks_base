@@ -25,7 +25,7 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Specifies the types of intents that an activity, service, or broadcast 
+<dd itemprop="description">Specifies the types of intents that an activity, service, or broadcast
 receiver can respond to.  An intent filter declares the capabilities of its
 parent component &mdash; what an activity or service can do and what types 
 of broadcasts a receiver can handle.  It opens the component to receiving 

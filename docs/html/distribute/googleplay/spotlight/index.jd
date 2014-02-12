@@ -1,4 +1,7 @@
 page.title=Spotlight
+page.tags="videos, google play, monetize, inapp"
+meta.tags="stories, googleplay, monetizing, landing"
+page.image=/images/video-kiwi.jpg
 walkthru=0
 header.hide=0
 
@@ -26,7 +29,7 @@ header.hide=0
           <div style="width:700px;">
           <p style="margin-top:26px;
                     margin-bottom:12px;">
-          Android-first developer <a href="//play.google.com/store/apps/developer?id=Kiwi,+Inc." target="_android">Kiwi, Inc.</a> has five of the top 25 grossing games on Google Play, including <a href="https://play.google.com/store/apps/details?id=com.kiwi.shipwrecked" target="_android">Shipwrecked: Lost Island</a>, <a href="https://play.google.com/store/apps/details?id=com.kiwi.monsterpark" target="_android">Monsterama Park</a>, and <a href="https://play.google.com/store/apps/details?id=com.kiwi.mysteryestate" target="_android">Hidden Object: Mystery Estate</a>. Hear how Google Play helped them double revenue every six months with features like instant updates, staged rollouts, and more.</p>
+          Android-first developer <a href="//play.google.com/store/apps/developer?id=Kiwi,+Inc." target="_android">Kiwi, Inc.</a> has had 5 titles in the top 25 grossing on Google Play, including <a href="https://play.google.com/store/apps/details?id=com.kiwi.shipwrecked" target="_android">Shipwrecked: Lost Island</a>, <a href="https://play.google.com/store/apps/details?id=com.kiwi.monsterpark" target="_android">Monsterama Park</a>, and <a href="https://play.google.com/store/apps/details?id=com.kiwi.mysteryestate" target="_android">Hidden Object: Mystery Estate</a>. Hear how Google Play helped them double revenue every six months with features like instant updates, staged rollouts, and more.</p>
            </div>
            <iframe style="float:left;
              margin-right:24px;

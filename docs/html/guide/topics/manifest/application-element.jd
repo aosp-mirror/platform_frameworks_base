@@ -47,7 +47,7 @@ page.title=&lt;application&gt;
 <br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>The declaration of the application.  This element contains subelements 
+<dd itemprop="description">The declaration of the application.  This element contains subelements
 that declare each of the application's components and has attributes 
 that can affect all the components.  Many of these attributes (such as 
 {@code icon}, {@code label}, {@code permission}, {@code process}, 
