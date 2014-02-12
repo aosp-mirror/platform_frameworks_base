@@ -20,6 +20,7 @@ import android.app.IActivityContainerCallback;
 import android.content.Intent;
 import android.content.IIntentSender;
 import android.os.IBinder;
+import android.view.InputEvent;
 import android.view.Surface;
 
 /** @hide */
@@ -30,4 +31,5 @@ interface IActivityContainer {
     int startActivity(in Intent intent);
     int startActivityIntentSender(in IIntentSender intentSender);
     int getDisplayId();
+    boolean injectEvent(in InputEvent event);
 }

@@ -27,6 +27,9 @@ static const nsecs_t ARBITRARY_TIME = 1234;
 // An arbitrary device id.
 static const int32_t DEVICE_ID = 1;
 
+// An arbitrary display id.
+static const int32_t DISPLAY_ID = 0;
+
 // An arbitrary injector pid / uid pair that has permission to inject events.
 static const int32_t INJECTOR_PID = 999;
 static const int32_t INJECTOR_UID = 1001;
@@ -126,7 +129,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesKeyEvents) {
     event.initialize(DEVICE_ID, AINPUT_SOURCE_KEYBOARD,
             /*action*/ -1, 0,
             AKEYCODE_A, KEY_A, AMETA_NONE, 0, ARBITRARY_TIME, ARBITRARY_TIME);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject key events with undefined action.";
 
@@ -134,7 +138,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesKeyEvents) {
     event.initialize(DEVICE_ID, AINPUT_SOURCE_KEYBOARD,
             AKEY_EVENT_ACTION_MULTIPLE, 0,
             AKEYCODE_A, KEY_A, AMETA_NONE, 0, ARBITRARY_TIME, ARBITRARY_TIME);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject key events with ACTION_MULTIPLE.";
 }
@@ -154,7 +159,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             /*action*/ -1, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with undefined action.";
 
@@ -164,7 +170,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer down index too large.";
 
@@ -173,7 +180,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer down index too small.";
 
@@ -183,7 +191,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer up index too large.";
 
@@ -192,7 +201,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer up index too small.";
 
@@ -201,7 +211,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 0, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with 0 pointers.";
 
@@ -209,7 +220,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ MAX_POINTERS + 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with more than MAX_POINTERS pointers.";
 
@@ -219,7 +231,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer ids less than 0.";
 
@@ -228,7 +241,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 1, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer ids greater than MAX_POINTER_ID.";
 
@@ -239,7 +253,8 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
             AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
             /*pointerCount*/ 2, pointerProperties, pointerCoords);
-    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
+    ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(
+            &event, DISPLAY_ID,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with duplicate pointer ids.";
 }

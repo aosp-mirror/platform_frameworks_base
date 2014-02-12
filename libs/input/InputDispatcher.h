@@ -297,7 +297,7 @@ public:
      *
      * This method may be called on any thread (usually by the input manager).
      */
-    virtual int32_t injectInputEvent(const InputEvent* event,
+    virtual int32_t injectInputEvent(const InputEvent* event, int32_t displayId,
             int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
             uint32_t policyFlags) = 0;
 
@@ -381,7 +381,7 @@ public:
     virtual void notifySwitch(const NotifySwitchArgs* args);
     virtual void notifyDeviceReset(const NotifyDeviceResetArgs* args);
 
-    virtual int32_t injectInputEvent(const InputEvent* event,
+    virtual int32_t injectInputEvent(const InputEvent* event, int32_t displayId,
             int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
             uint32_t policyFlags);
 
@@ -525,7 +525,8 @@ private:
                 int32_t metaState, int32_t buttonState, int32_t edgeFlags,
                 float xPrecision, float yPrecision,
                 nsecs_t downTime, int32_t displayId, uint32_t pointerCount,
-                const PointerProperties* pointerProperties, const PointerCoords* pointerCoords);
+                const PointerProperties* pointerProperties, const PointerCoords* pointerCoords,
+                float xOffset, float yOffset);
         virtual void appendDescription(String8& msg) const;
 
     protected:
@@ -959,7 +960,7 @@ private:
         bool isSlippery() const;
     };
 
-    TouchState mTouchState;
+    KeyedVector<int32_t, TouchState> mTouchStatesByDisplay;
     TouchState mTempTouchState;
 
     // Focused application.
