@@ -497,7 +497,9 @@ public class GLRenderer extends HardwareRenderer {
 
     @Override
     void onLayerDestroyed(HardwareLayer layer) {
-        mGlCanvas.cancelLayerUpdate(layer);
+        if (mGlCanvas != null) {
+            mGlCanvas.cancelLayerUpdate(layer);
+        }
         mAttachedLayers.remove(layer);
     }
 
