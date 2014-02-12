@@ -17,9 +17,11 @@
 package com.android.internal.telephony;
 
 import android.os.Bundle;
-import java.util.List;
+import android.content.ComponentName;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.CellInfo;
+
+import java.util.List;
 
 /**
  * Interface used to interact with the phone.  Mostly this is used by the
@@ -412,4 +414,12 @@ interface ITelephony {
      * @return true on success; false on any failure.
      */
     boolean setRadioMode(int radioMode);
+
+    /**
+     * Inform the phone about a new incoming third party call. The phone will bind to the service
+     * identified by component to handle the call.
+     * @param component the component that should handle the intent.
+     * @param callId the unique id of the call.
+     */
+    void newIncomingThirdPartyCall(in ComponentName component, String callId);
 }

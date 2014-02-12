@@ -38,9 +38,4 @@ oneway interface IThirdPartyCallProvider {
      * Accepts the incoming call.
      */
     void incomingCallAccept();
-
-    /**
-     * Sends the given DTMF code. The code can be '0'-'9', 'A'-'D', '#', or '*'.
-     */
-    void sendDtmf(char c);
 }

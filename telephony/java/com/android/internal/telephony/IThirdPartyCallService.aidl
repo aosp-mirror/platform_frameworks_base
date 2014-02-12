@@ -28,7 +28,8 @@ oneway interface IThirdPartyCallService {
     void outgoingCallInitiate(IThirdPartyCallListener listener, String number);
 
     /**
-     * Call to attach to an incoming call.
+     * Call to attach to an incoming call. This is in response to a call to
+     * TelephonyManager.newIncomingThirdPartyCall.
      */
     void incomingCallAttach(IThirdPartyCallListener listener, String callId);
 }
