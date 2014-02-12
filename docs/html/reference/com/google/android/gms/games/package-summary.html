@@ -436,6 +436,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -691,20 +701,49 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Data interface for retrieving game information.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/OnGamesLoadedListener.html">OnGamesLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when game metadata has been loaded.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesMetadata.html">GamesMetadata</a></td>
+              <td class="jd-descrcol" width="100%">Entry point for game metadata functionality.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/OnPlayersLoadedListener.html">OnPlayersLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when player data has been loaded.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesMetadata.LoadGamesResult.html">GamesMetadata.LoadGamesResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when game metadata has been loaded.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/OnSignOutCompleteListener.html">OnSignOutCompleteListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving a callback when a sign-out is complete.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Notifications.html">Notifications</a></td>
+              <td class="jd-descrcol" width="100%">Entry point for notifications functionality.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/OnGamesLoadedListener.html">OnGamesLoadedListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/GamesMetadata.LoadGamesResult.html">GamesMetadata.LoadGamesResult</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/OnPlayersLoadedListener.html">OnPlayersLoadedListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/OnSignOutCompleteListener.html">OnSignOutCompleteListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Player.html">Player</a></td>
               <td class="jd-descrcol" width="100%">Data interface for retrieving player information.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.html">Players</a></td>
+              <td class="jd-descrcol" width="100%">Entry point for player functionality.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when player data has been loaded.&nbsp;</td>
           </tr>
   </table>
     </div>
@@ -725,17 +764,39 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Data object representing a set of Game data.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Games.html">Games</a></td>
+              <td class="jd-descrcol" width="100%">Main entry point for the Games APIs.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Games.GamesOptions.html">Games.GamesOptions</a></td>
+              <td class="jd-descrcol" width="100%">API configuration parameters for Games.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Games.GamesOptions.Builder.html">Games.GamesOptions.Builder</a></td>
+              <td class="jd-descrcol" width="100%">&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesActivityResultCodes.html">GamesActivityResultCodes</a></td>
               <td class="jd-descrcol" width="100%">Result codes that can be set as result in Activities from the Client UI started with
  <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html">GamesClient</a></td>
-              <td class="jd-descrcol" width="100%">Main public entry point for Games APIs.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> and <code><a href="/reference/com/google/android/gms/games/Games.html">Games</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.Builder.html">GamesClient.Builder</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.Builder.html">GamesClient.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder class for GamesClient.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html">GamesStatusCodes</a></td>
+              <td class="jd-descrcol" width="100%">Status codes for Games results.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PageDirection.html">PageDirection</a></td>
