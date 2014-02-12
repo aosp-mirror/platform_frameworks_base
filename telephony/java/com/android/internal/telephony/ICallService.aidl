@@ -57,5 +57,5 @@ oneway interface ICallService {
      * and communicate state changes of existing calls. This is the first method that is called
      * after a the framework binds to the call service.
      */
-    void setCallServiceAdapter(ICallServiceAdapter CallServiceAdapter);
+    void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter);
 }
