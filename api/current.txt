@@ -31628,10 +31628,12 @@ package android.widget {
     method public int getCheckedItemPosition();
     method public android.util.SparseBooleanArray getCheckedItemPositions();
     method public int getChoiceMode();
+    method public int getFirstPositionForRow(int);
     method public int getListPaddingBottom();
     method public int getListPaddingLeft();
     method public int getListPaddingRight();
     method public int getListPaddingTop();
+    method public int getRowForPosition(int);
     method public android.view.View getSelectedView();
     method public android.graphics.drawable.Drawable getSelector();
     method public java.lang.CharSequence getTextFilter();
@@ -31677,6 +31679,7 @@ package android.widget {
     method public void setRemoteViewsAdapter(android.content.Intent);
     method public void setScrollIndicators(android.view.View, android.view.View);
     method public void setScrollingCacheEnabled(boolean);
+    method public void setSelectionFromTop(int, int);
     method public void setSelector(int);
     method public void setSelector(android.graphics.drawable.Drawable);
     method public void setSmoothScrollbarEnabled(boolean);
@@ -32792,7 +32795,6 @@ package android.widget {
     method public void setOverscrollHeader(android.graphics.drawable.Drawable);
     method public void setSelection(int);
     method public void setSelectionAfterHeaderView();
-    method public void setSelectionFromTop(int, int);
     method public void smoothScrollByOffset(int);
   }
 
