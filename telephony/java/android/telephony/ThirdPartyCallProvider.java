@@ -29,6 +29,7 @@ public class ThirdPartyCallProvider {
     private static final int MSG_MUTE = 1;
     private static final int MSG_HANGUP = 2;
     private static final int MSG_INCOMING_CALL_ACCEPT = 3;
+    private static final int MSG_SEND_DTMF = 4;
 
     /**
      * Mutes or unmutes the call.
@@ -51,7 +52,18 @@ public class ThirdPartyCallProvider {
         // default implementation empty
     }
 
-    final IThirdPartyCallProvider callback = new IThirdPartyCallProvider.Stub() {
+    /**
+     * Sends the given DTMF code. The code can be '0'-'9', 'A'-'D', '#', or '*'.
+     */
+    public void sendDtmf(char c) {
+        // default implementation empty
+    }
+
+    IThirdPartyCallProvider getCallback() {
+        return mCallback;
+    }
+
+    private final IThirdPartyCallProvider mCallback = new IThirdPartyCallProvider.Stub() {
         @Override
         public void mute(boolean shouldMute) {
             Message.obtain(mHandler, MSG_MUTE, shouldMute ? 1 : 0, 0).sendToTarget();
@@ -65,6 +77,11 @@ public class ThirdPartyCallProvider {
         @Override
         public void incomingCallAccept() {
             Message.obtain(mHandler, MSG_INCOMING_CALL_ACCEPT).sendToTarget();
+        }
+
+        @Override
+        public void sendDtmf(char c) {
+            Message.obtain(mHandler, MSG_SEND_DTMF, (int) c, 0).sendToTarget();
         }
     };
 
@@ -80,6 +97,9 @@ public class ThirdPartyCallProvider {
                     break;
                 case MSG_INCOMING_CALL_ACCEPT:
                     incomingCallAccept();
+                    break;
+                case MSG_SEND_DTMF:
+                    sendDtmf((char) msg.arg1);
                     break;
             }
         }

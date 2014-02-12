@@ -19,7 +19,6 @@ package android.telephony;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.Pair;
 
 import com.android.internal.telephony.IThirdPartyCallListener;
@@ -40,8 +39,7 @@ public class ThirdPartyCallService {
     }
 
     /**
-     * Call to attach to an incoming call. This is in response to a call to {@link
-     * android.telephony.TelephonyManager#newIncomingThirdPartyCall newIncomingThirdPartyCall}.
+     * Call to attach to an incoming call.
      */
     public void incomingCallAttach(ThirdPartyCallListener listener, String callId) {
         // default implementation empty
@@ -51,10 +49,10 @@ public class ThirdPartyCallService {
      * Returns an IBinder instance that can returned from the service's onBind function.
      */
     public IBinder getBinder() {
-        return callback;
+        return mCallback;
     }
 
-    private final IThirdPartyCallService.Stub callback = new IThirdPartyCallService.Stub() {
+    private final IThirdPartyCallService.Stub mCallback = new IThirdPartyCallService.Stub() {
         @Override
         public void outgoingCallInitiate(IThirdPartyCallListener listener, String number) {
             Rlog.w("ThirdPartyPhone", "ThirdPartyCallService.IThirdPartyCallService.out");
