@@ -74,10 +74,36 @@ android {
 revisions of the Build Tools are available in your SDK, refer to the <em>Installed Packages</em>
 listing in the Android SDK Manager.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 19.0.2</a> <em>(February 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <dl>
+      <dt>Fixed RenderScript build issues:</dt>
+      <dd>
+        <ul>
+          <li>Fixed a problem with RenderScript bitcode encoding.
+            (<a href="http://b.android.com/64775">Issue 64775</a>)
+          </li>
+          <li>Fixed a problem with RenderScript missing math symbols
+            (<a href="http://b.android.com/64110">Issue 64110</a>)
+          </li>
+        </ul>
+      </dd>
+    </dl>
+    <p></p>
+
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.0.1</a> <em>(December 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
