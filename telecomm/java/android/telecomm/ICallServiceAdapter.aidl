@@ -47,7 +47,7 @@ oneway interface ICallServiceAdapter {
      *
      * @param callInfo The details of the relevant call.
      */
-    void newIncomingCall(in CallInfo callInfo);
+    void handleIncomingCall(in CallInfo callInfo);
 
     /**
      * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
