@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -709,18 +719,15 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <div class="jd-descr">
+<p>
+  <p class="caution"><strong>
+      This interface is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></code>.
+
+  </p>
 
 
-<h2>Class Overview</h2>
-<p itemprop="articleBody">Listener interface for when moments are loaded.</p>
 
-
-
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener)">loadMoments(OnMomentsLoadedListener)</a></code></li>
-      </ul>
-  </div>
 
 
 </div><!-- jd-descr -->
@@ -789,6 +796,11 @@ onkeyup="return search_changed(event, false, '/')" />
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html#onMomentsLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.moments.MomentBuffer, java.lang.String, java.lang.String)">onMomentsLoaded</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a> momentBuffer, String nextPageToken, String updated)</nobr>
         
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></code>.
+</em></div>
+  
   </td></tr>
 
 
@@ -862,35 +874,13 @@ onkeyup="return search_changed(event, false, '/')" />
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>status</td>
-          <td>The resulting connection status of the
-            <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener)">loadMoments(OnMomentsLoadedListener)</a></code> request.</td>
-        </tr>
-        <tr>
-          <th>momentBuffer</td>
-          <td>The requested moments. The listener must close this object
-            when finished.</td>
-        </tr>
-        <tr>
-          <th>nextPageToken</td>
-          <td>The continuation token, which is used to page through large result
-            sets. Provide this value in a subsequent request to return the next page of
-            results.</td>
-        </tr>
-        <tr>
-          <th>updated</td>
-          <td>The time at which this collection of moments was last updated.
-            Formatted as an RFC 3339 timestamp.
-</td>
-        </tr>
-      </table>
-  </div>
 
     </div>
 </div>

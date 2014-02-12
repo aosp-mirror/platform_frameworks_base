@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -828,7 +838,7 @@ Summary:
             
             static
             
-            void</nobr>
+            int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/MapsInitializer.html#initialize(android.content.Context)">initialize</a></span>(Context context)</nobr>
@@ -1106,7 +1116,7 @@ From class
          
          
          
-        void
+        int
       </span>
       <span class="sympad">initialize</span>
       <span class="normal">(Context context)</span>
@@ -1133,14 +1143,9 @@ From class
       </table>
   </div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th><a href="/reference/com/google/android/gms/common/GooglePlayServicesNotAvailableException.html">GooglePlayServicesNotAvailableException</a></td>
-            <td>if Google Play services is not available.
-</td>
-        </tr>
-      </table>
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>A ConnectionResult error code.
+</li></ul>
   </div>
 
     </div>

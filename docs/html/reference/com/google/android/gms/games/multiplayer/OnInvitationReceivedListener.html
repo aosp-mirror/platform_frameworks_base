@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -672,7 +682,7 @@ Summary:
 
 
   <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -736,13 +746,13 @@ Summary:
   <div id="subclasses-indirect">
       <div id="subclasses-indirect-list"
               class="jd-inheritedlinks"
-
+              
               >
-
-
+          
+            
               <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayerListener.html">TurnBasedMultiplayerListener</a>
-
-
+            
+          
       </div>
       <div id="subclasses-indirect-summary"
               style="display: none;"
@@ -750,8 +760,13 @@ Summary:
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayerListener.html">TurnBasedMultiplayerListener</a></td>
-              <td class="jd-descrcol" width="100%">Helper interface compounding all of the necessary listeners to implement a turn-based multiplayer
- game.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.CancelMatchResult.html">TurnBasedMultiplayer.CancelMatchResult</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.InitiateMatchResult.html">TurnBasedMultiplayer.InitiateMatchResult</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LeaveMatchResult.html">TurnBasedMultiplayer.LeaveMatchResult</a></code>,
+             <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a></code>, <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.UpdateMatchResult.html">TurnBasedMultiplayer.UpdateMatchResult</a></code>,
+             <code><a href="/reference/com/google/android/gms/games/multiplayer/OnInvitationReceivedListener.html">OnInvitationReceivedListener</a></code>, and
+             <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdateReceivedListener.html">OnTurnBasedMatchUpdateReceivedListener</a></code>.
+</em>&nbsp;</td>
           </tr>
   </table>
       </div>
@@ -841,22 +856,22 @@ Summary:
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/OnInvitationReceivedListener.html#onInvitationRemoved(java.lang.String)">onInvitationRemoved</a></span>(String invitationId)</nobr>
-
+        
         <div class="jd-descrdiv">Callback invoked when a previously received invitation has been removed from the local
  device.</div>
-
+  
   </td></tr>
 
 
@@ -951,14 +966,14 @@ Summary:
 
 <A NAME="onInvitationRemoved(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">onInvitationRemoved</span>
@@ -966,12 +981,12 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Callback invoked when a previously received invitation has been removed from the local
  device. For example, this might occur if the inviting player leaves the match.</p></div>
   <div class="jd-tagdata">

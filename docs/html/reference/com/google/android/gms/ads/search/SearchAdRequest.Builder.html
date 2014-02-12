@@ -129,7 +129,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
             <img src="/assets/images/dac_logo.png" width="123" height="25" alt="Android Developers" />
           </a>
           <div class="btn-quicknav" id="btn-quicknav">
-		<a href="#" class="arrow-inactive">Quicknav</a>
+          	<a href="#" class="arrow-inactive">Quicknav</a>
 			      <a href="#" class="arrow-active">Quicknav</a>
           </div>
           </div>
@@ -141,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Проектирование"
                   ko-lang="디자인"
                   ja-lang="設計"
-                  es-lang="Diseñar"
+                  es-lang="Diseñar"               
                   >Design</a></li>
                 <li class="develop"><a href="/develop/index.html"
                   zh-tw-lang="開發"
@@ -149,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Разработка"
                   ko-lang="개발"
                   ja-lang="開発"
-                  es-lang="Desarrollar"
+                  es-lang="Desarrollar"               
                   >Develop</a></li>
                 <li class="distribute last"><a href="/distribute/index.html"
                   zh-tw-lang="發佈"
@@ -157,10 +157,10 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Распространение"
                   ko-lang="배포"
                   ja-lang="配布"
-                  es-lang="Distribuir"
+                  es-lang="Distribuir"               
                   >Distribute</a></li>
             </ul>
-
+            
             <!-- New Search -->
             <div class="menu-container">
             <div class="moremenu">
@@ -181,9 +181,9 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
         <li class="active"><a>Android Developers</a></li>
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
-
-
-
+      
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -201,8 +201,8 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
 
 
       <br class="clearfix" />
@@ -216,7 +216,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
       <form onsubmit="return submit_search()">
         <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
 onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
-onkeydown="return search_changed(event, true, '/')"
+onkeydown="return search_changed(event, true, '/')" 
 onkeyup="return search_changed(event, false, '/')" />
       </form>
       <div class="right"></div>
@@ -257,8 +257,8 @@ onkeyup="return search_changed(event, false, '/')" />
 
   </div>
   <!-- /New Search>
-
-
+          
+          
           <!-- Expanded quicknav -->
            <div id="quicknav" class="col-9">
                 <ul>
@@ -280,7 +280,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Курсы"
                           ko-lang="교육"
                           ja-lang="トレーニング"
-                          es-lang="Capacitación"
+                          es-lang="Capacitación"               
                           >Training</a></li>
                         <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
@@ -288,7 +288,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Руководства по API"
                           ko-lang="API 가이드"
                           ja-lang="API ガイド"
-                          es-lang="Guías de la API"
+                          es-lang="Guías de la API"               
                           >API Guides</a></li>
                         <li><a href="/reference/packages.html"
                           zh-tw-lang="參考資源"
@@ -296,7 +296,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Справочник"
                           ko-lang="참조문서"
                           ja-lang="リファレンス"
-                          es-lang="Referencia"
+                          es-lang="Referencia"               
                           >Reference</a></li>
                         <li><a href="/tools/index.html"
                           zh-tw-lang="相關工具"
@@ -304,16 +304,16 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Инструменты"
                           ko-lang="도구"
                           ja-lang="ツール"
-                          es-lang="Herramientas"
+                          es-lang="Herramientas"               
                           >Tools</a>
                           <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
-
+                        
                           <li><a href="/samples/index.html">Samples</a>
                           </li>
-
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -332,15 +332,15 @@ onkeyup="return search_changed(event, false, '/')" />
         </div>
     </div>
     <!-- /Header -->
-
-
+    
+    
   <div id="searchResults" class="wrap" style="display:none;">
           <h2 id="searchTitle">Results</h2>
           <div id="leftSearchControl" class="search-control">Loading...</div>
   </div>
-
-
-
+    
+    
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap">
@@ -351,7 +351,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Курсы"
                   ko-lang="교육"
                   ja-lang="トレーニング"
-                  es-lang="Capacitación"
+                  es-lang="Capacitación"               
                   >Training</a></li>
                 <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
@@ -359,7 +359,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Руководства по API"
                   ko-lang="API 가이드"
                   ja-lang="API ガイド"
-                  es-lang="Guías de la API"
+                  es-lang="Guías de la API"               
                   >API Guides</a></li>
                 <li class="reference"><a href="/reference/packages.html"
                   zh-tw-lang="參考資源"
@@ -367,7 +367,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Справочник"
                   ko-lang="참조문서"
                   ja-lang="リファレンス"
-                  es-lang="Referencia"
+                  es-lang="Referencia"               
                   >Reference</a></li>
                 <li class="tools"><a href="/tools/index.html"
                   zh-tw-lang="相關工具"
@@ -380,25 +380,25 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
-
+        
     </div>
     <!-- /Sendondary x-nav -->
+  
 
 
 
 
+  
 
 
-
-
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -432,6 +432,16 @@ onkeyup="return search_changed(event, false, '/')" />
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
           <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -631,12 +641,12 @@ onkeyup="return search_changed(event, false, '/')" />
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -646,7 +656,7 @@ onkeyup="return search_changed(event, false, '/')" />
     </script>
 
 
-
+     
 
 
 
@@ -656,12 +666,12 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -677,12 +687,12 @@ Summary:
 
 
   <a href="#pubctors">Ctors</a>
-
+  
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -692,9 +702,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -704,23 +714,23 @@ Summary:
 
 <div id="jd-header">
     public
-    static
-    final
-
+    static 
+    final 
+    
     class
 <h1 itemprop="name">SearchAdRequest.Builder</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
 
-
-
-
-
-
-
+  
+  
+  
 
 
 </div><!-- end header -->
@@ -732,18 +742,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.ads.search.SearchAdRequest.Builder</td>
     </tr>
-
+    
 
 </table>
 
@@ -813,19 +823,19 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#SearchAdRequest.Builder()">SearchAdRequest.Builder</a></span>()</nobr>
-
+        
   </td></tr>
 
 
@@ -842,330 +852,330 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#addNetworkExtras(com.google.android.gms.ads.mediation.NetworkExtras)">addNetworkExtras</a></span>(<a href="/reference/com/google/android/gms/ads/mediation/NetworkExtras.html">NetworkExtras</a> networkExtras)</nobr>
-
+        
         <div class="jd-descrdiv">Add extra parameters to pass to a specific ad network adapter.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice</a></span>(String deviceId)</nobr>
-
+        
         <div class="jd-descrdiv">Causes a device to receive test ads.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html">SearchAdRequest</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#build()">build</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Constructs a <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html">SearchAdRequest</a></code> with the specified attributes.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setAnchorTextColor(int)">setAnchorTextColor</a></span>(int anchorTextColor)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the color of the ad URL.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBackgroundColor(int)">setBackgroundColor</a></span>(int backgroundColor)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the background color of the ad.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBackgroundGradient(int, int)">setBackgroundGradient</a></span>(int top, int bottom)</nobr>
-
+        
         <div class="jd-descrdiv">Sets a gradient for the ad background.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBorderColor(int)">setBorderColor</a></span>(int borderColor)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the border color of the ad container.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBorderThickness(int)">setBorderThickness</a></span>(int borderThickness)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the thickness of the border in pixels around the ad container.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBorderType(int)">setBorderType</a></span>(int borderType)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the type of border around the ad container.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setCallButtonColor(int)">setCallButtonColor</a></span>(int callButtonColor)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the color of the call button when a call extension is shown.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setCustomChannels(java.lang.String)">setCustomChannels</a></span>(String channelIds)</nobr>
-
+        
         <div class="jd-descrdiv">Sets custom channels for the ad request.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setDescriptionTextColor(int)">setDescriptionTextColor</a></span>(int descriptionTextColor)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the color of the ad description.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setFontFace(java.lang.String)">setFontFace</a></span>(String fontFace)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the font used to render the ad.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setHeaderTextColor(int)">setHeaderTextColor</a></span>(int headerTextColor)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the text color of the ad header.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setHeaderTextSize(int)">setHeaderTextSize</a></span>(int headerTextSize)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the font size of the header text in pixels.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setLocation(android.location.Location)">setLocation</a></span>(Location location)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the user's location for targeting purposes.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setQuery(java.lang.String)">setQuery</a></span>(String query)</nobr>
-
+        
         <div class="jd-descrdiv">Sets the query for requesting a search ad.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#tagForChildDirectedTreatment(boolean)">tagForChildDirectedTreatment</a></span>(boolean tagForChildDirectedTreatment)</nobr>
-
+        
         <div class="jd-descrdiv">This method allows you to specify whether you would like your app to be treated as
  child-directed for purposes of the Children’s Online Privacy Protection Act (COPPA) -
  <a href="http://business.ftc.gov/privacy-and-security/childrens-privacy">
  http://business.ftc.gov/privacy-and-security/childrens-privacy</a>.</div>
-
+  
   </td></tr>
 
 
@@ -1200,182 +1210,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1421,27 +1431,27 @@ From class
 
 <A NAME="SearchAdRequest.Builder()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-
+        public 
+         
+         
+         
+         
+        
       </span>
       <span class="sympad">SearchAdRequest.Builder</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1465,14 +1475,14 @@ From class
 
 <A NAME="addNetworkExtras(com.google.android.gms.ads.mediation.NetworkExtras)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">addNetworkExtras</span>
@@ -1480,12 +1490,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Add extra parameters to pass to a specific ad network adapter. <code>networkExtras</code>
  should be an instance of <code>com.google.ads.mediation.NetworkExtras</code>, which is
  provided by ad network adapters.
@@ -1497,14 +1507,14 @@ From class
 
 <A NAME="addTestDevice(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">addTestDevice</span>
@@ -1512,12 +1522,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Causes a device to receive test ads. The <code>deviceId</code> can be obtained by viewing the
  logcat output after creating a new ad. For emulators, use
  <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#DEVICE_ID_EMULATOR">DEVICE_ID_EMULATOR</a></code>.
@@ -1529,14 +1539,14 @@ From class
 
 <A NAME="build()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html">SearchAdRequest</a>
       </span>
       <span class="sympad">build</span>
@@ -1544,12 +1554,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html">SearchAdRequest</a></code> with the specified attributes.
 </p></div>
 
@@ -1559,14 +1569,14 @@ From class
 
 <A NAME="setAnchorTextColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setAnchorTextColor</span>
@@ -1574,12 +1584,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the color of the ad URL. Transparency is not supported. <code><a href="/reference/android/graphics/Color.html#rgb(int, int, int)">rgb(int, int, int)</a></code> can be
  used to specify this color.
 </p></div>
@@ -1590,14 +1600,14 @@ From class
 
 <A NAME="setBackgroundColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setBackgroundColor</span>
@@ -1605,12 +1615,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the background color of the ad. Calling this method will override any previous calls
  to <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBackgroundColor(int)">setBackgroundColor(int)</a></code> or <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBackgroundGradient(int, int)">setBackgroundGradient(int, int)</a></code>. Transparency is not
  supported. <code><a href="/reference/android/graphics/Color.html#rgb(int, int, int)">rgb(int, int, int)</a></code> can be used to specify this color.
@@ -1622,14 +1632,14 @@ From class
 
 <A NAME="setBackgroundGradient(int, int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setBackgroundGradient</span>
@@ -1637,12 +1647,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets a gradient for the ad background. Calling this method will override any previous
  calls to <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBackgroundColor(int)">setBackgroundColor(int)</a></code> or <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBackgroundGradient(int, int)">setBackgroundGradient(int, int)</a></code>. Transparency is
  not supported. <code><a href="/reference/android/graphics/Color.html#rgb(int, int, int)">rgb(int, int, int)</a></code> can be used to specify these colors.</p></div>
@@ -1667,14 +1677,14 @@ From class
 
 <A NAME="setBorderColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setBorderColor</span>
@@ -1682,12 +1692,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the border color of the ad container. Transparency is not supported.
  <code><a href="/reference/android/graphics/Color.html#rgb(int, int, int)">rgb(int, int, int)</a></code> can be used to specify this color. This setting is ignored if
  <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBorderType(int)">setBorderType(int)</a></code> is set to <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_NONE">BORDER_TYPE_NONE</a></code>.
@@ -1699,14 +1709,14 @@ From class
 
 <A NAME="setBorderThickness(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setBorderThickness</span>
@@ -1714,12 +1724,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the thickness of the border in pixels around the ad container. This setting is
  ignored if <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#setBorderType(int)">setBorderType(int)</a></code> is set to <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_NONE">BORDER_TYPE_NONE</a></code>.
 </p></div>
@@ -1730,14 +1740,14 @@ From class
 
 <A NAME="setBorderType(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setBorderType</span>
@@ -1745,12 +1755,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the type of border around the ad container. This value must be one of
  <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_NONE">BORDER_TYPE_NONE</a></code>, <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_DASHED">BORDER_TYPE_DASHED</a></code>, <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_DOTTED">BORDER_TYPE_DOTTED</a></code>,
  <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_SOLID">BORDER_TYPE_SOLID</a></code>.
@@ -1762,14 +1772,14 @@ From class
 
 <A NAME="setCallButtonColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setCallButtonColor</span>
@@ -1777,12 +1787,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the color of the call button when a call extension is shown. This value must be one
  of <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#CALL_BUTTON_COLOR_DARK">CALL_BUTTON_COLOR_DARK</a></code>, <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#CALL_BUTTON_COLOR_LIGHT">CALL_BUTTON_COLOR_LIGHT</a></code>,
  <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#CALL_BUTTON_COLOR_MEDIUM">CALL_BUTTON_COLOR_MEDIUM</a></code>.
@@ -1794,14 +1804,14 @@ From class
 
 <A NAME="setCustomChannels(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setCustomChannels</span>
@@ -1809,12 +1819,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets custom channels for the ad request. Custom channels allow publishers to track the
  performance of specific groups of ads. These custom channels need to created on the
  AdSense website. Reports can then be created based on the channels.</p></div>
@@ -1835,14 +1845,14 @@ From class
 
 <A NAME="setDescriptionTextColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setDescriptionTextColor</span>
@@ -1850,12 +1860,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the color of the ad description. Transparency is not supported. <code><a href="/reference/android/graphics/Color.html#rgb(int, int, int)">rgb(int, int, int)</a></code>
  can be used to specify this color.
 </p></div>
@@ -1866,14 +1876,14 @@ From class
 
 <A NAME="setFontFace(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setFontFace</span>
@@ -1881,12 +1891,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the font used to render the ad. The same font is used in the header, the description
  and the anchor. Fonts are specified using the same value that would be used in CSS (e.g.,
  <code>"arial"</code>).
@@ -1898,14 +1908,14 @@ From class
 
 <A NAME="setHeaderTextColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setHeaderTextColor</span>
@@ -1913,12 +1923,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text color of the ad header. Transparency is not supported. <code><a href="/reference/android/graphics/Color.html#rgb(int, int, int)">rgb(int, int, int)</a></code>
  can be used to specify this color.
 </p></div>
@@ -1929,14 +1939,14 @@ From class
 
 <A NAME="setHeaderTextSize(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setHeaderTextSize</span>
@@ -1944,12 +1954,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the font size of the header text in pixels. The font sizes for the description and
  the anchor are determined from the header size.
 </p></div>
@@ -1960,14 +1970,14 @@ From class
 
 <A NAME="setLocation(android.location.Location)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setLocation</span>
@@ -1975,12 +1985,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the user's location for targeting purposes.
 </p></div>
 
@@ -1990,14 +2000,14 @@ From class
 
 <A NAME="setQuery(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">setQuery</span>
@@ -2005,12 +2015,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the query for requesting a search ad. The query must be set to receive an ad.
 </p></div>
 
@@ -2020,14 +2030,14 @@ From class
 
 <A NAME="tagForChildDirectedTreatment(boolean)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a>
       </span>
       <span class="sympad">tagForChildDirectedTreatment</span>
@@ -2035,12 +2045,12 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>This method allows you to specify whether you would like your app to be treated as
  child-directed for purposes of the Children’s Online Privacy Protection Act (COPPA) -
  <a href="http://business.ftc.gov/privacy-and-security/childrens-privacy">
@@ -2092,17 +2102,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -2110,7 +2120,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -2123,7 +2133,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 
