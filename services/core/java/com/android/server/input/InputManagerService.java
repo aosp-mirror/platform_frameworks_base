@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
@@ -170,7 +171,7 @@ public class InputManagerService extends IInputManager.Stub
             InputWindowHandle inputWindowHandle, boolean monitor);
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
-    private static native int nativeInjectInputEvent(long ptr, InputEvent event,
+    private static native int nativeInjectInputEvent(long ptr, InputEvent event, int displayId,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
     private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles);
@@ -509,6 +510,10 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public boolean injectInputEvent(InputEvent event, int mode) {
+        return injectInputEventInternal(event, Display.DEFAULT_DISPLAY, mode);
+    }
+
+    private boolean injectInputEventInternal(InputEvent event, int displayId, int mode) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
@@ -523,7 +528,7 @@ public class InputManagerService extends IInputManager.Stub
         final long ident = Binder.clearCallingIdentity();
         final int result;
         try {
-            result = nativeInjectInputEvent(mPtr, event, pid, uid, mode,
+            result = nativeInjectInputEvent(mPtr, event, displayId, pid, uid, mode,
                     INJECTION_TIMEOUT_MILLIS, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1588,7 +1593,7 @@ public class InputManagerService extends IInputManager.Stub
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
-                    nativeInjectInputEvent(mPtr, event, 0, 0,
+                    nativeInjectInputEvent(mPtr, event, Display.DEFAULT_DISPLAY, 0, 0,
                             InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0,
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
@@ -1684,6 +1689,11 @@ public class InputManagerService extends IInputManager.Stub
         public void setDisplayViewports(
                 DisplayViewport defaultViewport, DisplayViewport externalTouchViewport) {
             setDisplayViewportsInternal(defaultViewport, externalTouchViewport);
+        }
+
+        @Override
+        public boolean injectInputEvent(InputEvent event, int displayId, int mode) {
+            return injectInputEventInternal(event, displayId, mode);
         }
     }
 }

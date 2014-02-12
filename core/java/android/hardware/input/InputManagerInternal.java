@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.hardware.display.DisplayViewport;
+import android.view.InputEvent;
 
 /**
  * Input manager local system service interface.
@@ -30,4 +31,6 @@ public abstract class InputManagerInternal {
      */
     public abstract void setDisplayViewports(DisplayViewport defaultViewport,
             DisplayViewport externalTouchViewport);
+
+    public abstract boolean injectInputEvent(InputEvent event, int displayId, int mode);
 }
