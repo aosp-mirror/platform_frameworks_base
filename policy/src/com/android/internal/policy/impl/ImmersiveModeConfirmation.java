@@ -19,6 +19,7 @@ package com.android.internal.policy.impl;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,12 +28,12 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -46,8 +47,6 @@ import android.widget.FrameLayout;
 
 import com.android.internal.R;
 
-import java.util.Arrays;
-
 /**
  *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
  *  entering immersive mode.
@@ -56,19 +55,19 @@ public class ImmersiveModeConfirmation {
     private static final String TAG = "ImmersiveModeConfirmation";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_SHOW_EVERY_TIME = false; // super annoying, use with caution
+    private static final String CONFIRMED = "confirmed";
 
     private final Context mContext;
     private final H mHandler;
-    private final ArraySet<String> mConfirmedPackages = new ArraySet<String>();
     private final long mShowDelayMs;
     private final long mPanicThresholdMs;
+    private final SparseBooleanArray mUserPanicResets = new SparseBooleanArray();
 
+    private boolean mConfirmed;
     private ClingWindowView mClingWindow;
-    private String mLastPackage;
-    private String mPromptPackage;
     private long mPanicTime;
-    private String mPanicPackage;
     private WindowManager mWindowManager;
+    private int mCurrentUserId;
 
     public ImmersiveModeConfirmation(Context context) {
         mContext = context;
@@ -86,82 +85,91 @@ public class ImmersiveModeConfirmation {
     }
 
     public void loadSetting() {
-        if (DEBUG) Slog.d(TAG, "loadSetting()");
-        mConfirmedPackages.clear();
-        String packages = null;
+        mConfirmed = false;
+        mCurrentUserId = getCurrentUser();
+        if (DEBUG) Slog.d(TAG, String.format("loadSetting() mCurrentUserId=%d resetForPanic=%s",
+                mCurrentUserId, mUserPanicResets.get(mCurrentUserId, false)));
+        String value = null;
         try {
-            packages = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+            value = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                     UserHandle.USER_CURRENT);
-            if (packages != null) {
-                mConfirmedPackages.addAll(Arrays.asList(packages.split(",")));
-                if (DEBUG) Slog.d(TAG, "Loaded mConfirmedPackages=" + mConfirmedPackages);
-            }
+            mConfirmed = CONFIRMED.equals(value);
+            if (DEBUG) Slog.d(TAG, "Loaded mConfirmed=" + mConfirmed);
         } catch (Throwable t) {
-            Slog.w(TAG, "Error loading confirmations, packages=" + packages, t);
+            Slog.w(TAG, "Error loading confirmations, value=" + value, t);
         }
     }
 
     private void saveSetting() {
         if (DEBUG) Slog.d(TAG, "saveSetting()");
         try {
-            final String packages = TextUtils.join(",", mConfirmedPackages);
+            final String value = mConfirmed ? CONFIRMED : null;
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
-                    packages,
+                    value,
                     UserHandle.USER_CURRENT);
-            if (DEBUG) Slog.d(TAG, "Saved packages=" + packages);
+            if (DEBUG) Slog.d(TAG, "Saved value=" + value);
         } catch (Throwable t) {
-            Slog.w(TAG, "Error saving confirmations, mConfirmedPackages=" + mConfirmedPackages, t);
+            Slog.w(TAG, "Error saving confirmations, mConfirmed=" + mConfirmed, t);
         }
     }
 
     public void immersiveModeChanged(String pkg, boolean isImmersiveMode) {
-        if (pkg == null || PolicyControl.disableImmersiveConfirmation(pkg)) {
-            return;
-        }
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
-            mLastPackage = pkg;
-            if (DEBUG_SHOW_EVERY_TIME || !mConfirmedPackages.contains(pkg)) {
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(H.SHOW, pkg), mShowDelayMs);
+            final boolean disabled = PolicyControl.disableImmersiveConfirmation(pkg);
+            if (DEBUG) Slog.d(TAG, String.format("immersiveModeChanged() disabled=%s mConfirmed=%s",
+                    disabled, mConfirmed));
+            if (!disabled && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)) {
+                mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
         } else {
-            mLastPackage = null;
             mHandler.sendEmptyMessage(H.HIDE);
         }
     }
 
-    public void onPowerKeyDown(boolean isScreenOn, long time, boolean inImmersiveMode) {
-        if (mPanicPackage != null && !isScreenOn && (time - mPanicTime < mPanicThresholdMs)) {
+    public boolean onPowerKeyDown(boolean isScreenOn, long time, boolean inImmersiveMode) {
+        if (!isScreenOn && (time - mPanicTime < mPanicThresholdMs)) {
             // turning the screen back on within the panic threshold
-            unconfirmPackage(mPanicPackage);
+            mHandler.sendEmptyMessage(H.PANIC);
+            return mClingWindow == null;
         }
         if (isScreenOn && inImmersiveMode) {
             // turning the screen off, remember if we were in immersive mode
             mPanicTime = time;
-            mPanicPackage = mLastPackage;
         } else {
             mPanicTime = 0;
-            mPanicPackage = null;
         }
+        return false;
     }
 
     public void confirmCurrentPrompt() {
-        mHandler.post(confirmAction(mPromptPackage));
+        if (mClingWindow != null) {
+            if (DEBUG) Slog.d(TAG, "confirmCurrentPrompt()");
+            mHandler.post(mConfirm);
+        }
     }
 
-    private void unconfirmPackage(String pkg) {
-        if (pkg != null) {
-            if (DEBUG) Slog.d(TAG, "Unconfirming immersive mode confirmation for " + pkg);
-            mConfirmedPackages.remove(pkg);
-            saveSetting();
+    private void handlePanic() {
+        if (DEBUG) Slog.d(TAG, "handlePanic()");
+        if (mUserPanicResets.get(mCurrentUserId, false)) return;  // already reset for panic
+        mUserPanicResets.put(mCurrentUserId, true);
+        mConfirmed = false;
+        saveSetting();
+    }
+
+    private int getCurrentUser() {
+        try {
+            return ActivityManagerNative.getDefault().getCurrentUser().id;
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e); // local call
         }
     }
 
     private void handleHide() {
         if (mClingWindow != null) {
-            if (DEBUG) Slog.d(TAG, "Hiding immersive mode confirmation for " + mPromptPackage);
+            if (DEBUG) Slog.d(TAG, "Hiding immersive mode confirmation");
             mWindowManager.removeView(mClingWindow);
             mClingWindow = null;
         }
@@ -297,11 +305,10 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    private void handleShow(String pkg) {
-        mPromptPackage = pkg;
-        if (DEBUG) Slog.d(TAG, "Showing immersive mode confirmation for " + pkg);
+    private void handleShow() {
+        if (DEBUG) Slog.d(TAG, "Showing immersive mode confirmation");
 
-        mClingWindow = new ClingWindowView(mContext, confirmAction(pkg));
+        mClingWindow = new ClingWindowView(mContext, mConfirm);
 
         // we will be hiding the nav bar, so layout as if it's already hidden
         mClingWindow.setSystemUiVisibility(
@@ -313,32 +320,34 @@ public class ImmersiveModeConfirmation {
         mWindowManager.addView(mClingWindow, lp);
     }
 
-    private Runnable confirmAction(final String pkg) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                if (pkg != null && !mConfirmedPackages.contains(pkg)) {
-                    if (DEBUG) Slog.d(TAG, "Confirming immersive mode for " + pkg);
-                    mConfirmedPackages.add(pkg);
-                    saveSetting();
-                }
-                handleHide();
+    private final Runnable mConfirm = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) Slog.d(TAG, "mConfirm.run()");
+            if (!mConfirmed) {
+                mConfirmed = true;
+                saveSetting();
             }
-        };
-    }
+            handleHide();
+        }
+    };
 
     private final class H extends Handler {
-        private static final int SHOW = 0;
-        private static final int HIDE = 1;
+        private static final int SHOW = 1;
+        private static final int HIDE = 2;
+        private static final int PANIC = 3;
 
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case SHOW:
-                    handleShow((String)msg.obj);
+                    handleShow();
                     break;
                 case HIDE:
                     handleHide();
+                    break;
+                case PANIC:
+                    handlePanic();
                     break;
             }
         }
