@@ -24582,7 +24582,12 @@ package android.telephony {
     method public void hangup();
     method public void incomingCallAccept();
     method public void mute(boolean);
-    method public void sendDtmf(char);
+    method public void sendDtmf(char, android.telephony.ThirdPartyCallSendDtmfCallback);
+  }
+
+  public class ThirdPartyCallSendDtmfCallback {
+    ctor public ThirdPartyCallSendDtmfCallback(com.android.internal.telephony.IThirdPartyCallSendDtmfCallback);
+    method public void onSendDtmfCompleted();
   }
 
   public class ThirdPartyCallService {
@@ -34081,7 +34086,11 @@ package com.android.internal.telephony {
     method public abstract void hangup() throws android.os.RemoteException;
     method public abstract void incomingCallAccept() throws android.os.RemoteException;
     method public abstract void mute(boolean) throws android.os.RemoteException;
-    method public abstract void sendDtmf(char) throws android.os.RemoteException;
+    method public abstract void sendDtmf(char, com.android.internal.telephony.IThirdPartyCallSendDtmfCallback) throws android.os.RemoteException;
+  }
+
+  public abstract interface IThirdPartyCallSendDtmfCallback implements android.os.IInterface {
+    method public abstract void onSendDtmfCompleted() throws android.os.RemoteException;
   }
 
 }
