@@ -9,7 +9,7 @@ page.tags="preferences","sharedpreferences"
   </div>
 </a>
 
-<p>Settings is a place in your app where users indicate their preferences for how your app should
+<p itemprop="description">Settings is a place in your app where users indicate their preferences for how your app should
 behave. This benefits users because:</p>
 
 <ul>

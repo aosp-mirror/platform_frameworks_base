@@ -18,7 +18,7 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
 
 <dt>description:</dt>
-<dd>A name-value pair for an item of additional, arbitrary data that can 
+<dd itemprop="description">A name-value pair for an item of additional, arbitrary data that can
 be supplied to the parent component.  A component element can contain any 
 number of {@code &lt;meta-data&gt;} subelements.  The values from all of
 them are collected in a single {@link android.os.Bundle} object and made 
