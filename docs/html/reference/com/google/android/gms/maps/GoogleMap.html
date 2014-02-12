@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -1368,7 +1378,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#isBuildingsEnabled()">isBuildingsEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns whether 3D buildings are enabled.</div>
+        <div class="jd-descrdiv">Returns whether 3D buildings layer is enabled.</div>
   
   </td></tr>
 
@@ -2600,7 +2610,8 @@ From class
             notified with <code><a href="/reference/com/google/android/gms/maps/GoogleMap.CancelableCallback.html#onFinish()">onFinish()</a></code>. If the animation stops due to
             interruption by a later camera movement or a user gesture,
             <code><a href="/reference/com/google/android/gms/maps/GoogleMap.CancelableCallback.html#onCancel()">onCancel()</a></code> will be called. The callback should not
-            attempt to move or animate the camera in its cancellation method.</td>
+            attempt to move or animate the camera in its cancellation method. If a callback
+            isn't required, leave it as <code>null</code>.</td>
         </tr>
       </table>
   </div>
@@ -3025,7 +3036,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns whether 3D buildings are enabled.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns whether 3D buildings layer is enabled.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>True if buildings are enabled, false otherwise.
@@ -3203,7 +3214,18 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Turns the 3D buildings layer on or off. </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Turns the 3D buildings layer on or off.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>enabled</td>
+          <td><code>true</code> to enable the 3D buildings layer; <code>false</code> to disable 3D
+ buildings.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

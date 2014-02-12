@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -766,23 +776,12 @@ Summary:
 
 
 <div class="jd-descr">
+<p>
+  <p class="caution"><strong>
+      This class is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.
 
-
-<h2>Class Overview</h2>
-<p itemprop="articleBody">The main entry point for Google+ integration.
-
- Use the PlusClient after the asynchronous <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> method
- has been called and your listener's
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(android.os.Bundle)</a></code>
- method is called.
- <p>
- When your app is done using PlusClient, call <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect()</a></code>, even if the async
- result from <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> has not yet been delivered.
- <p>
- You should instantiate this object in your Activity's <code><a href="/reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate(Bundle)</a></code> method and then
- call <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> in <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> and <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect()</a></code> in
- <code><a href="/reference/android/app/Activity.html#onStop()">onStop()</a></code>, regardless of the state.
-</p>
+  </p>
 
 
 
@@ -825,7 +824,10 @@ Summary:
         
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></td>
-      <td class="jd-descrcol" width="100%">Builder to configure a <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> for communicating with the Google+ APIs.&nbsp;</td>
+      <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></code>.
+</em>&nbsp;</td>
     </tr>
     
     
@@ -837,7 +839,10 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a></td>
-      <td class="jd-descrcol" width="100%">Listener interface for when the token revocation request has completed.&nbsp;</td>
+      <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/">ERROR(/Auth.OnAccessRevokedCallback)</a></code>.
+</em>&nbsp;</td>
     </tr>
     
     
@@ -849,7 +854,10 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></td>
-      <td class="jd-descrcol" width="100%">Listener interface for when moments are loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></code>.
+</em>&nbsp;</td>
     </tr>
     
     
@@ -861,7 +869,10 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></td>
-      <td class="jd-descrcol" width="100%">Listener interface for when a collection of people are loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></code>.
+</em>&nbsp;</td>
     </tr>
     
     
@@ -873,7 +884,10 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OrderBy.html">PlusClient.OrderBy</a></td>
-      <td class="jd-descrcol" width="100%">Constants to declare the order to return people in.&nbsp;</td>
+      <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.OrderBy.html">People.OrderBy</a></code>.
+</em>&nbsp;</td>
     </tr>
     
     
@@ -922,7 +936,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#clearDefaultAccount()">clearDefaultAccount</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Remove the default account set in Google Play services for your app.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/">ERROR(/Auth#clearDefaultAccount)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -940,7 +957,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -958,7 +978,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -976,7 +999,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#getAccountName()">getAccountName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the account name resolved by Google Play services.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/">ERROR(/Auth#getAccountName)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -994,7 +1020,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#getCurrentPerson()">getCurrentPerson</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns profile information for the current user.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#getCurrentPerson(com.google.android.gms.common.api.GoogleApiClient)">getCurrentPerson(GoogleApiClient)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1012,8 +1041,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnected()">isConnected</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnected()">isConnected()</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1031,7 +1062,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnecting()">isConnecting</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is attempting to connect to the service.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnecting()">isConnecting()</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1049,8 +1083,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection events.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">isConnectionCallbacksRegistered(GoogleApiClient.ConnectionCallbacks)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1068,8 +1104,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection failed events.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered(GoogleApiClient.OnConnectionFailedListener)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1087,7 +1125,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener, int, java.lang.String, android.net.Uri, java.lang.String, java.lang.String)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, String pageToken, Uri targetUrl, String type, String userId)</nobr>
         
-        <div class="jd-descrdiv">List all of the moments for a particular user.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#load(com.google.android.gms.common.api.GoogleApiClient)">load(GoogleApiClient)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1105,7 +1146,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">List all of the moments for the currently signed-in user.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#load(com.google.android.gms.common.api.GoogleApiClient)">load(GoogleApiClient)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1123,7 +1167,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, Collection&lt;String&gt; personIds)</nobr>
         
-        <div class="jd-descrdiv">Loads a list of specified people.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1141,8 +1188,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String... personIds)</nobr>
         
-        <div class="jd-descrdiv">Helper method for
- <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople(PlusClient.OnPeopleLoadedListener, java.util.Collection)</a></code>.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1160,7 +1209,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String pageToken)</nobr>
         
-        <div class="jd-descrdiv">Loads the list of visible people in the user's circles.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)">loadVisible(GoogleApiClient, int, String)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1178,7 +1230,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int orderBy, String pageToken)</nobr>
         
-        <div class="jd-descrdiv">Loads the list of visible people in the user's circles.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)">loadVisible(GoogleApiClient, int, String)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1196,7 +1251,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">registerConnectionCallbacks(GoogleApiClient.ConnectionCallbacks)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1214,8 +1272,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">registerConnectionFailedListener(GoogleApiClient.OnConnectionFailedListener)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1233,7 +1293,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#removeMoment(java.lang.String)">removeMoment</a></span>(String momentId)</nobr>
         
-        <div class="jd-descrdiv">Delete a moment.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#remove(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">remove(GoogleApiClient, String)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1251,7 +1314,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#revokeAccessAndDisconnect(com.google.android.gms.plus.PlusClient.OnAccessRevokedListener)">revokeAccessAndDisconnect</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Revokes access given to the current application.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/">ERROR(/Auth#revokeAccessAndDisconnect)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1269,7 +1335,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection listener from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">unregisterConnectionCallbacks(GoogleApiClient.ConnectionCallbacks)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1287,7 +1356,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(GoogleApiClient.OnConnectionFailedListener)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1305,7 +1377,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#writeMoment(com.google.android.gms.plus.model.moments.Moment)">writeMoment</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a> moment)</nobr>
         
-        <div class="jd-descrdiv">Writes a moment.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#write(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.plus.model.moments.Moment)">write(GoogleApiClient, Moment)</a></code>.
+</em></div>
   
   </td></tr>
 
@@ -1800,15 +1875,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Remove the default account set in Google Play services for your app.
- Subsequent calls to <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> will return a resolution intent
- that will let the user select a different account.
- <p />
- If the user chooses the same account, no consent will be required since
- access to the app is not revoked.  Users should also be given the option
- to revoke access with <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#revokeAccessAndDisconnect(com.google.android.gms.plus.PlusClient.OnAccessRevokedListener)">revokeAccessAndDisconnect(PlusClient.OnAccessRevokedListener)</a></code>.
-</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/">ERROR(/Auth#clearDefaultAccount)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1836,7 +1909,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. This method returns immediately, and connects to
  the service in the background. If the connection is successful,
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> is called. On a
@@ -1869,7 +1947,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Closes the connection to Google Play services. No calls can be made on this object
  after calling this method.</p></div>
 
@@ -1899,25 +1982,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the account name resolved by Google Play services. The permission
- <code>&lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;</code>
- must be declared in your <code>AndroidManifest.xml</code> to use this method.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The account name. If the user has not selected an account, null is returned.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>SecurityException</td>
-            <td>If your app doesn't have the
-         <code><a href="/reference/android/Manifest.permission.html#GET_ACCOUNTS">GET_ACCOUNTS</a></code> permission.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/">ERROR(/Auth#getAccountName)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1945,22 +2016,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Returns profile information for the current user.  For more information, see:
- <a href="https://developers.google.com/+/api/latest/people/get">
- https://developers.google.com/+/api/latest/people/get</a>.
- <p>
- This method requires the OAuth 2.0 scope <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_PROFILE">PLUS_PROFILE</a></code> or
- <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code>.
- <p>
- This method can return <code>null</code> if the required scopes weren't specified in the
- <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code>, or if there was a network error while connecting.
- </p></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Profile information for the current user, if available, or <code>null</code> otherwise.
-</li></ul>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#getCurrentPerson(com.google.android.gms.common.api.GoogleApiClient)">getCurrentPerson(GoogleApiClient)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1988,7 +2050,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnected()">isConnected()</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is currently connected to the service, so that
  requests to other methods will succeed.  Applications should guard
  client actions caused by the user with a call to this method.</p></div>
@@ -2024,7 +2091,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnecting()">isConnecting()</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is attempting to connect to the service.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2058,7 +2130,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">isConnectionCallbacksRegistered(GoogleApiClient.ConnectionCallbacks)</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
  receive connection events.</p></div>
   <div class="jd-tagdata">
@@ -2102,7 +2179,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered(GoogleApiClient.OnConnectionFailedListener)</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
  receive connection failed events.</p></div>
   <div class="jd-tagdata">
@@ -2146,49 +2228,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>List all of the moments for a particular user.  For more information, see
- <a href="https://developers.google.com/+/api/latest/moments/list">
- https://developers.google.com/+/api/latest/moments/list</a>.
- <p>
- This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
- OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></code> to receive a callback when the moments
-             are loaded.</td>
-        </tr>
-        <tr>
-          <th>maxResults</td>
-          <td>The maximum number of moments to include in the response, which is used
-             for paging. For any response, the actual number returned might be less than the
-             specified maxResults.</td>
-        </tr>
-        <tr>
-          <th>pageToken</td>
-          <td>The continuation token, which is used to page through large result sets.
-             To get the next page of results, set this parameter to the value of
-             nextPageToken from the previous response.</td>
-        </tr>
-        <tr>
-          <th>targetUrl</td>
-          <td>Only moments containing this targetUrl will be returned.</td>
-        </tr>
-        <tr>
-          <th>type</td>
-          <td>Only moments of this type will be returned.</td>
-        </tr>
-        <tr>
-          <th>userId</td>
-          <td>The ID of the user to get moments for. The special value "me" can be used to
-             indicate the authenticated user.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#load(com.google.android.gms.common.api.GoogleApiClient)">load(GoogleApiClient)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2216,24 +2262,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>List all of the moments for the currently signed-in user.  For more information, see
- <a href="https://developers.google.com/+/api/latest/moments/list">
- https://developers.google.com/+/api/latest/moments/list</a>.
- <p>
- This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
- OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></code> to receive a callback when the moments
-             are loaded.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#load(com.google.android.gms.common.api.GoogleApiClient)">load(GoogleApiClient)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2261,31 +2296,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Loads a list of specified people.
- <p>
- This call returns all information in <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code>, but only for the people
- specified and for data that is public in their profiles.
- <p>
- This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
- OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></code> to receive a callback when the people
-             are loaded.</td>
-        </tr>
-        <tr>
-          <th>personIds</td>
-          <td>The ids of people to load. This should match the user id that would be
-             sent to <a href="https://developers.google.com/+/api/latest/people/get">
-             https://developers.google.com/+/api/latest/people/get</a>
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2313,10 +2330,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Helper method for
- <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople(PlusClient.OnPeopleLoadedListener, java.util.Collection)</a></code>.
-</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2344,28 +2364,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Loads the list of visible people in the user's circles.  For more information, see:
- <a href="https://developers.google.com/+/api/latest/people/list">
- https://developers.google.com/+/api/latest/people/list</a>.
- <p>
- Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
- <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
- To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> method.
- <p>
- This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
- OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></code> to receive a callback when the people
-             are loaded.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)">loadVisible(GoogleApiClient, int, String)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2393,34 +2398,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Loads the list of visible people in the user's circles.  For more information, see:
- <a href="https://developers.google.com/+/api/latest/people/list">
- https://developers.google.com/+/api/latest/people/list</a>.
- <p>
- Each <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> will contain the <code>id</code>, <code>displayName</code>,
- <code>image</code>, <code>objectType</code>, and <code>url</code> fields populated.
- To retrieve additional profile data, use the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> method.
- <p>
- This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
- OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></code> to receive a callback when the people
-             are loaded.</td>
-        </tr>
-        <tr>
-          <th>orderBy</td>
-          <td>The order to return people in.  Valid values are:<p>
-             <code><a href="/reference/com/google/android/gms/plus/PlusClient.OrderBy.html#ALPHABETICAL">ALPHABETICAL</a></code> - Order the people by their display name.
-             <code><a href="/reference/com/google/android/gms/plus/PlusClient.OrderBy.html#BEST">BEST</a></code> - Order people based on the relevance to the viewer.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)">loadVisible(GoogleApiClient, int, String)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2448,7 +2432,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">registerConnectionCallbacks(GoogleApiClient.ConnectionCallbacks)</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
  If the service is already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
  method will be called immediately.  Applications should balance calls to this method with
@@ -2500,7 +2489,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">registerConnectionFailedListener(GoogleApiClient.OnConnectionFailedListener)</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection failed events from this
  <code>GooglePlayServicesClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(GooglePlayServicesClient.ConnectionCallbacks)</a></code>, if the service
  is not already connected, the listener's
@@ -2552,23 +2546,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Delete a moment.  For more information, see
- <a href="https://developers.google.com/+/api/latest/moments/remove">
- https://developers.google.com/+/api/latest/moments/remove</a>.
- <p>
- This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
- OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>momentId</td>
-          <td>The ID of the moment to delete.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#remove(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">remove(GoogleApiClient, String)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2596,19 +2580,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Revokes access given to the current application.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a></code> to receive a callback when the token
-            is revoked.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/">ERROR(/Auth#revokeAccessAndDisconnect)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -2636,7 +2614,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">unregisterConnectionCallbacks(GoogleApiClient.ConnectionCallbacks)</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Removes a connection listener from this <code>GooglePlayServicesClient</code>. Note that removing
  a listener does not generate any callbacks.
  <p>
@@ -2679,7 +2662,12 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(GoogleApiClient.OnConnectionFailedListener)</a></code>.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
  Note that removing a listener does not generate any callbacks.
  <p>
@@ -2722,29 +2710,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Writes a moment.  For more information, see
- <a href="https://developers.google.com/+/api/latest/moments/insert">
- https://developers.google.com/+/api/latest/moments/insert</a>.
- <p>
- This is a fire-and-forget method that writes the user's moment asynchronously. If there is
- a network error, Google Play services attempts to send the request again when the device
- comes back online. Requests can fail if there are problems with the account or format of
- specified in <code>moment</code>. To debug, run <code>adb logcat</code> in a terminal and find errors
- related to moments in the output.
- <p>
- This method requires the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code>
- OAuth 2.0 scope specified in the <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>moment</td>
-          <td>The moment description.
-</td>
-        </tr>
-      </table>
-  </div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.html#write(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.plus.model.moments.Moment)">write(GoogleApiClient, Moment)</a></code>.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
