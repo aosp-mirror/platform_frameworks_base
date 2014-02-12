@@ -39,7 +39,7 @@ parent.link=manifest-intro.html
 
 <p>
 <dt>description:</dt>
-<dd>The root element of the AndroidManifest.xml file.  It must 
+<dd itemprop="description">The root element of the AndroidManifest.xml file.  It must
 contain an <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element 
 and specify {@code xmlns:android} and {@code package} attributes.</dd>
 

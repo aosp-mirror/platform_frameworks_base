@@ -34,7 +34,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares a single GL texture compression format that is supported by
+<dd itemprop="description">Declares a single GL texture compression format that is supported by
 the application.
 
 <p>An application "supports" a GL texture compression format if it is capable of

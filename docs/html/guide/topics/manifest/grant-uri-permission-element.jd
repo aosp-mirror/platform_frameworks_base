@@ -13,7 +13,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Specifies which data subsets of the parent content provider permission
+<dd itemprop="description">Specifies which data subsets of the parent content provider permission
 can be granted for.  Data subsets are indicated by the path part of a 
 {@code content:} URI.  (The authority part of the URI identifies the
 content provider.)  

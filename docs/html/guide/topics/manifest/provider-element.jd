@@ -36,7 +36,7 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>
+<dd itemprop="description">
     Declares a content provider component. A content provider is a subclass of 
     {@link android.content.ContentProvider} that supplies structured access to data managed by the 
     application.  All content providers in your application must be defined in a 
