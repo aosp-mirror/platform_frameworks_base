@@ -38,6 +38,7 @@ import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
+import com.android.internal.widget.SwipeDismissLayout;
 
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -266,6 +267,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if ((features & (1 << FEATURE_ACTION_BAR)) != 0 && featureId == FEATURE_NO_TITLE) {
             // Remove the action bar feature if we have no title. No title dominates.
             removeFeature(FEATURE_ACTION_BAR);
+        }
+
+        if ((features & (1 << FEATURE_ACTION_BAR)) != 0 && featureId == FEATURE_SWIPE_TO_DISMISS) {
+            throw new AndroidRuntimeException(
+                    "You cannot combine swipe dismissal and the action bar.");
+        }
+        if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0 && featureId == FEATURE_ACTION_BAR) {
+            throw new AndroidRuntimeException(
+                    "You cannot combine swipe dismissal and the action bar.");
         }
         return super.requestFeature(featureId);
     }
@@ -2838,6 +2848,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             requestFeature(FEATURE_ACTION_MODE_OVERLAY);
         }
 
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowSwipeToDismiss, false)) {
+            requestFeature(FEATURE_SWIPE_TO_DISMISS);
+        }
+
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowFullscreen, false)) {
             setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN & (~getForcedWindowFlags()));
         }
@@ -2964,7 +2978,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         int layoutResource;
         int features = getLocalFeatures();
         // System.out.println("Features: 0x" + Integer.toHexString(features));
-        if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
+        if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
+            layoutResource = com.android.internal.R.layout.screen_swipe_dismiss;
+        } else if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
             if (mIsFloating) {
                 TypedValue res = new TypedValue();
                 getContext().getTheme().resolveAttribute(
@@ -3032,6 +3048,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (progress != null) {
                 progress.setIndeterminate(true);
             }
+        }
+
+        if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
+            registerSwipeCallbacks();
         }
 
         // Remaining setup -- of background and title -- that only applies
@@ -3388,6 +3408,53 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             installDecor();
         }
         return (mRightIconView = (ImageView)findViewById(com.android.internal.R.id.right_icon));
+    }
+
+    private void registerSwipeCallbacks() {
+        SwipeDismissLayout swipeDismiss =
+                (SwipeDismissLayout) findViewById(com.android.internal.R.id.content);
+        swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
+            @Override
+            public void onDismissed(SwipeDismissLayout layout) {
+                Callback cb = getCallback();
+                if (cb != null) {
+                    try {
+                        cb.onWindowDismissed();
+                    } catch (AbstractMethodError e) {
+                        Log.e(TAG, "onWindowDismissed not implemented in " +
+                                cb.getClass().getSimpleName(), e);
+                    }
+                }
+            }
+        });
+        swipeDismiss.setOnSwipeProgressChangedListener(
+                new SwipeDismissLayout.OnSwipeProgressChangedListener() {
+                    private boolean mIsTranslucent = false;
+
+                    @Override
+                    public void onSwipeProgressChanged(
+                            SwipeDismissLayout layout, float progress, float translate) {
+                        WindowManager.LayoutParams newParams = getAttributes();
+                        newParams.x = (int) translate;
+                        setAttributes(newParams);
+
+                        int flags = 0;
+                        if (newParams.x == 0) {
+                            flags = FLAG_FULLSCREEN;
+                        } else {
+                            flags = FLAG_LAYOUT_NO_LIMITS;
+                        }
+                        setFlags(flags, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
+                    }
+
+                    @Override
+                    public void onSwipeCancelled(SwipeDismissLayout layout) {
+                        WindowManager.LayoutParams newParams = getAttributes();
+                        newParams.x = 0;
+                        setAttributes(newParams);
+                        setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
+                    }
+                });
     }
 
     /**
