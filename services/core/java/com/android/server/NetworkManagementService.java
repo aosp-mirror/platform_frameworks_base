@@ -151,6 +151,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private final Handler mMainHandler = new Handler();
 
+    private IBatteryStats mBatteryStats;
+
     private Thread mThread;
     private CountDownLatch mConnectedSignal = new CountDownLatch(1);
 
@@ -224,6 +226,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void systemReady() {
         prepareNativeDaemon();
         if (DBG) Slog.d(TAG, "Prepared");
+    }
+
+    private IBatteryStats getBatteryStats() {
+        synchronized (this) {
+            if (mBatteryStats != null) {
+                return mBatteryStats;
+            }
+            mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
+                    BatteryStats.SERVICE_NAME));
+            return mBatteryStats;
+        }
     }
 
     @Override
@@ -323,6 +336,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * Notify our observers of a change in the data activity state of the interface
      */
     private void notifyInterfaceClassActivity(String label, boolean active) {
+        try {
+            getBatteryStats().noteDataConnectionActive(label, active);
+        } catch (RemoteException e) {
+        }
         final int length = mObservers.beginBroadcast();
         for (int i = 0; i < length; i++) {
             try {
@@ -359,8 +376,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         if (mBandwidthControlEnabled) {
             try {
-                IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME))
-                        .noteNetworkStatsEnabled();
+                getBatteryStats().noteNetworkStatsEnabled();
             } catch (RemoteException e) {
             }
         }
@@ -1192,6 +1208,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 throw e.rethrowAsParcelableException();
             }
             mActiveIdleTimers.put(iface, new IdleTimerParams(timeout, label));
+            // Networks start up.
+            notifyInterfaceClassActivity(label, true);
         }
     }
 

@@ -2352,7 +2352,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (ConnectivityManager.isNetworkTypeMobile(type)) {
             timeout = Settings.Global.getInt(mContext.getContentResolver(),
                                              Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
-                                             0);
+                                             5);
             // Canonicalize mobile network type
             type = ConnectivityManager.TYPE_MOBILE;
         } else if (ConnectivityManager.TYPE_WIFI == type) {

@@ -55,11 +55,9 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.google.android.collect.Sets;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -88,7 +86,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 79 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 84 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -276,6 +274,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mBluetoothOn;
     StopwatchTimer mBluetoothOnTimer;
 
+    int mBluetoothActiveType = -1;
+    final StopwatchTimer[] mBluetoothActiveTimer =
+            new StopwatchTimer[NUM_BLUETOOTH_ACTIVE_TYPES];
+
+    boolean mMobileRadioActive;
+    StopwatchTimer mMobileRadioActiveTimer;
+
     /** Bluetooth headset object */
     BluetoothHeadset mBtHeadset;
 
@@ -309,9 +314,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mDischargeAmountScreenOffSinceCharge;
 
     long mLastWriteTime = 0; // Milliseconds
-
-    private long mRadioDataUptime;
-    private long mRadioDataStart;
 
     private int mBluetoothPingCount;
     private int mBluetoothPingStart = -1;
@@ -1432,44 +1434,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         return kwlt;
     }
 
-    /**
-     * Radio uptime in microseconds when transferring data. This value is very approximate.
-     * @return
-     */
-    private long getCurrentRadioDataUptime() {
-        try {
-            File awakeTimeFile = new File("/sys/devices/virtual/net/rmnet0/awake_time_ms");
-            if (!awakeTimeFile.exists()) return 0;
-            BufferedReader br = new BufferedReader(new FileReader(awakeTimeFile));
-            String line = br.readLine();
-            br.close();
-            return Long.parseLong(line) * 1000;
-        } catch (NumberFormatException nfe) {
-            // Nothing
-        } catch (IOException ioe) {
-            // Nothing
-        }
-        return 0;
-    }
-
-    /**
-     * @deprecated use getRadioDataUptime
-     */
-    public long getRadioDataUptimeMs() {
-        return getRadioDataUptime() / 1000;
-    }
-
-    /**
-     * Returns the duration that the cell radio was up for data transfers.
-     */
-    public long getRadioDataUptime() {
-        if (mRadioDataStart == -1) {
-            return mRadioDataUptime;
-        } else {
-            return getCurrentRadioDataUptime() - mRadioDataStart;
-        }
-    }
-
     private int getCurrentBluetoothPingCount() {
         if (mBtHeadset != null) {
             List<BluetoothDevice> deviceList = mBtHeadset.getConnectedDevices();
@@ -1520,14 +1484,16 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     // Part of initial delta int that specifies the time delta.
-    static final int DELTA_TIME_MASK = 0xfffff;
-    static final int DELTA_TIME_LONG = 0xfffff;   // The delta is a following long
-    static final int DELTA_TIME_INT = 0xffffe;    // The delta is a following int
-    static final int DELTA_TIME_ABS = 0xffffd;    // Following is an entire abs update.
+    static final int DELTA_TIME_MASK = 0x7ffff;
+    static final int DELTA_TIME_LONG = 0x7ffff;   // The delta is a following long
+    static final int DELTA_TIME_INT = 0x7fffe;    // The delta is a following int
+    static final int DELTA_TIME_ABS = 0x7fffd;    // Following is an entire abs update.
     // Flag in delta int: a new battery level int follows.
-    static final int DELTA_BATTERY_LEVEL_FLAG   = 0x00100000;
+    static final int DELTA_BATTERY_LEVEL_FLAG   = 0x00080000;
     // Flag in delta int: a new full state and battery status int follows.
-    static final int DELTA_STATE_FLAG           = 0x00200000;
+    static final int DELTA_STATE_FLAG           = 0x00100000;
+    // Flag in delta int: a new full state2 int follows.
+    static final int DELTA_STATE2_FLAG          = 0x00200000;
     // Flag in delta int: contains a wakelock tag.
     static final int DELTA_WAKELOCK_FLAG        = 0x00400000;
     // Flag in delta int: contains an event description.
@@ -1963,10 +1929,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             mUnpluggables.get(i).unplug(elapsedRealtime, batteryUptime, batteryRealtime);
         }
 
-        // Track radio awake time
-        mRadioDataStart = getCurrentRadioDataUptime();
-        mRadioDataUptime = 0;
-
         // Track bt headset ping count
         mBluetoothPingStart = getCurrentBluetoothPingCount();
         mBluetoothPingCount = 0;
@@ -1976,10 +1938,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
             mUnpluggables.get(i).plug(elapsedRealtime, batteryUptime, batteryRealtime);
         }
-
-        // Track radio awake time
-        mRadioDataUptime = getRadioDataUptime();
-        mRadioDataStart = -1;
 
         // Track bt headset ping count
         mBluetoothPingCount = getBluetoothPingCount();
@@ -2378,6 +2336,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteUserActivityLocked(event);
     }
 
+    public void noteDataConnectionActive(String label, boolean active) {
+        try {
+            int type = Integer.parseInt(label);
+            if (ConnectivityManager.isNetworkTypeMobile(type)) {
+                if (mMobileRadioActive != active) {
+                    if (active) mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
+                    else mHistoryCur.states &= ~HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
+                    if (DEBUG_HISTORY) Slog.v(TAG, "Mobile network active " + active + " to: "
+                            + Integer.toHexString(mHistoryCur.states));
+                    addHistoryRecordLocked(SystemClock.elapsedRealtime());
+                    mMobileRadioActive = active;
+                    if (active) mMobileRadioActiveTimer.startRunningLocked(this);
+                    else mMobileRadioActiveTimer.stopRunningLocked(this);
+                }
+            }
+        } catch (NumberFormatException e) {
+            Slog.w(TAG, "Bad data connection label: " + label, e);
+            return;
+        }
+    }
+
     public void notePhoneOnLocked() {
         if (!mPhoneOn) {
             mHistoryCur.states |= HistoryItem.STATE_PHONE_IN_CALL_FLAG;
@@ -2763,6 +2742,17 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void noteBluetoothActiveStateLocked(int actType) {
+        if (DEBUG) Log.i(TAG, "Bluetooth active -> " + actType);
+        if (mBluetoothActiveType != actType) {
+            if (mBluetoothActiveType >= 0) {
+                mBluetoothActiveTimer[mBluetoothActiveType].stopRunningLocked(this);
+            }
+            mBluetoothActiveType = actType;
+            mBluetoothActiveTimer[actType].startRunningLocked(this);
+        }
+    }
+
     int mWifiFullLockNesting = 0;
 
     public void noteFullWifiLockAcquiredLocked(int uid) {
@@ -2971,6 +2961,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mPhoneDataConnectionsTimer[dataType].getCountLocked(which);
     }
 
+    @Override public long getMobileRadioActiveTime(long batteryRealtime, int which) {
+        return mMobileRadioActiveTimer.getTotalTimeLocked(batteryRealtime, which);
+    }
+
     @Override public long getWifiOnTime(long batteryRealtime, int which) {
         return mWifiOnTimer.getTotalTimeLocked(batteryRealtime, which);
     }
@@ -2981,6 +2975,16 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override public long getBluetoothOnTime(long batteryRealtime, int which) {
         return mBluetoothOnTimer.getTotalTimeLocked(batteryRealtime, which);
+    }
+
+    @Override public long getBluetoothActiveTime(int actType,
+            long batteryRealtime, int which) {
+        return mBluetoothActiveTimer[actType].getTotalTimeLocked(
+                batteryRealtime, which);
+    }
+
+    @Override public int getBluetoothActiveCount(int actType, int which) {
+        return mBluetoothActiveTimer[actType].getCountLocked(which);
     }
 
     @Override
@@ -4966,9 +4970,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
             mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables);
         }
+        mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mUnpluggables);
         mWifiOnTimer = new StopwatchTimer(null, -3, null, mUnpluggables);
         mGlobalWifiRunningTimer = new StopwatchTimer(null, -4, null, mUnpluggables);
         mBluetoothOnTimer = new StopwatchTimer(null, -5, null, mUnpluggables);
+        for (int i=0; i<NUM_BLUETOOTH_ACTIVE_TYPES; i++) {
+            mBluetoothActiveTimer[i] = new StopwatchTimer(null, -500-i, null, mUnpluggables);
+        }
         mAudioOnTimer = new StopwatchTimer(null, -6, null, mUnpluggables);
         mVideoOnTimer = new StopwatchTimer(null, -7, null, mUnpluggables);
         mOnBattery = mOnBatteryInternal = false;
@@ -5225,9 +5233,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i].reset(false);
             mNetworkPacketActivityCounters[i].reset(false);
         }
+        mMobileRadioActiveTimer.reset(this, false);
         mWifiOnTimer.reset(this, false);
         mGlobalWifiRunningTimer.reset(this, false);
         mBluetoothOnTimer.reset(this, false);
+        for (int i=0; i<NUM_BLUETOOTH_ACTIVE_TYPES; i++) {
+            mBluetoothActiveTimer[i].reset(this, false);
+        }
 
         for (int i=0; i<mUidStats.size(); i++) {
             if (mUidStats.valueAt(i).reset()) {
@@ -6119,12 +6131,17 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i].readSummaryFromParcelLocked(in);
             mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
         }
+        mMobileRadioActive = false;
+        mMobileRadioActiveTimer.readSummaryFromParcelLocked(in);
         mWifiOn = false;
         mWifiOnTimer.readSummaryFromParcelLocked(in);
         mGlobalWifiRunning = false;
         mGlobalWifiRunningTimer.readSummaryFromParcelLocked(in);
         mBluetoothOn = false;
         mBluetoothOnTimer.readSummaryFromParcelLocked(in);
+        for (int i=0; i<NUM_BLUETOOTH_ACTIVE_TYPES; i++) {
+            mBluetoothActiveTimer[i].readSummaryFromParcelLocked(in);
+        }
 
         int NKW = in.readInt();
         if (NKW > 10000) {
@@ -6340,9 +6357,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i].writeSummaryFromParcelLocked(out);
             mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);
         }
+        mMobileRadioActiveTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mGlobalWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        for (int i=0; i<NUM_BLUETOOTH_ACTIVE_TYPES; i++) {
+            mBluetoothActiveTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+        }
 
         out.writeInt(mKernelWakelockStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
@@ -6574,12 +6595,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
             mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mUnpluggables, in);
         }
+        mMobileRadioActive = false;
+        mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mUnpluggables, in);
         mWifiOn = false;
         mWifiOnTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
         mGlobalWifiRunning = false;
         mGlobalWifiRunningTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
         mBluetoothOn = false;
         mBluetoothOnTimer = new StopwatchTimer(null, -2, null, mUnpluggables, in);
+        for (int i=0; i<NUM_BLUETOOTH_ACTIVE_TYPES; i++) {
+            mBluetoothActiveTimer[i] = new StopwatchTimer(null, -500-i,
+                    null, mUnpluggables, in);
+        }
         mUptime = in.readLong();
         mUptimeStart = in.readLong();
         mLastUptime = 0;
@@ -6603,9 +6630,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeAmountScreenOff = in.readInt();
         mDischargeAmountScreenOffSinceCharge = in.readInt();
         mLastWriteTime = in.readLong();
-
-        mRadioDataUptime = in.readLong();
-        mRadioDataStart = -1;
 
         mBluetoothPingCount = in.readInt();
         mBluetoothPingStart = -1;
@@ -6685,9 +6709,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i].writeToParcel(out);
             mNetworkPacketActivityCounters[i].writeToParcel(out);
         }
+        mMobileRadioActiveTimer.writeToParcel(out, batteryRealtime);
         mWifiOnTimer.writeToParcel(out, batteryRealtime);
         mGlobalWifiRunningTimer.writeToParcel(out, batteryRealtime);
         mBluetoothOnTimer.writeToParcel(out, batteryRealtime);
+        for (int i=0; i<NUM_BLUETOOTH_ACTIVE_TYPES; i++) {
+            mBluetoothActiveTimer[i].writeToParcel(out, batteryRealtime);
+        }
         out.writeLong(mUptime);
         out.writeLong(mUptimeStart);
         out.writeLong(mRealtime);
@@ -6708,9 +6736,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeAmountScreenOff);
         out.writeInt(mDischargeAmountScreenOffSinceCharge);
         out.writeLong(mLastWriteTime);
-
-        // Write radio uptime for data
-        out.writeLong(getRadioDataUptime());
 
         out.writeInt(getBluetoothPingCount());
 
@@ -6786,12 +6811,18 @@ public final class BatteryStatsImpl extends BatteryStats {
                 pr.println("*** Data connection type #" + i + ":");
                 mPhoneDataConnectionsTimer[i].logState(pr, "  ");
             }
+            pr.println("*** Mobile network active timer:");
+            mMobileRadioActiveTimer.logState(pr, "  ");
             pr.println("*** Wifi timer:");
             mWifiOnTimer.logState(pr, "  ");
             pr.println("*** WifiRunning timer:");
             mGlobalWifiRunningTimer.logState(pr, "  ");
             pr.println("*** Bluetooth timer:");
             mBluetoothOnTimer.logState(pr, "  ");
+            for (int i=0; i<NUM_BLUETOOTH_ACTIVE_TYPES; i++) {
+                pr.println("*** Bluetooth active type #" + i + ":");
+                mBluetoothActiveTimer[i].logState(pr, "  ");
+            }
         }
         super.dumpLocked(context, pw, isUnpluggedOnly, reqUid, historyOnly);
     }

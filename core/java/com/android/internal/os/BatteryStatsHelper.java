@@ -640,7 +640,8 @@ public class BatteryStatsHelper {
         final long mobileTx = mStats.getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, mStatsType);
         final long mobileData = mobileRx + mobileTx;
 
-        final long radioDataUptimeMs = mStats.getRadioDataUptime() / 1000;
+        final long radioDataUptimeMs
+                = mStats.getMobileRadioActiveTime(mBatteryRealtime, mStatsType) / 1000;
         final double mobilePps = radioDataUptimeMs != 0
                 ? mobileData / (double)radioDataUptimeMs
                 : (((double)MOBILE_BPS) / 8 / 2048);
