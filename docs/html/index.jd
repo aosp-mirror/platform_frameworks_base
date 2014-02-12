@@ -57,7 +57,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
                     </div>
                     <div class="content-right col-4">
                     <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />Kiwi, Inc.</h1>
-                    <p>Game developer Kiwi has five of the top 25 grossing titles on Google Play. Hear how Google Play
+                    <p>Game developer Kiwi has had five titles in the top 25 grossing on Google Play. Hear how Google Play
                       has helped them double revenue every six months.</p>
                       <p><a href="{@docRoot}distribute/googleplay/spotlight/index.html" class="button">Watch more videos </a></p>
                     </div>
