@@ -24512,6 +24512,7 @@ package android.telephony {
     method public java.lang.String getSubscriberId();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
+    method public int getWhenToMakeWifiCalls();
     method public boolean hasIccCard();
     method public boolean iccCloseLogicalChannel(int);
     method public int iccOpenLogicalChannel(java.lang.String);

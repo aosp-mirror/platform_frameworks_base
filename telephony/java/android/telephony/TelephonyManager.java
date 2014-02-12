@@ -70,10 +70,10 @@ public class TelephonyManager {
     public interface WifiCallingChoices {
         /** Always use Wi-Fi calling */
         static final int ALWAYS_USE = 0;
-        /** Never use Wi-Fi calling */
-        static final int NEVER_USE = 1;
         /** Ask the user whether to use Wi-Fi on every call */
-        static final int ASK_EVERY_TIME = 2;
+        static final int ASK_EVERY_TIME = 1;
+        /** Never use Wi-Fi calling */
+        static final int NEVER_USE = 2;
     }
 
     /** @hide */
@@ -1631,6 +1631,7 @@ public class TelephonyManager {
             Rlog.e(TAG, "setRadioMode NPE", ex);
         }
         return false;
+    }
 
     /*
      * Obtain the current state of Wi-Fi calling.
