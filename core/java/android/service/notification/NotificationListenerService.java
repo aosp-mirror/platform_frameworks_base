@@ -112,6 +112,7 @@ public abstract class NotificationListenerService extends Service {
      *     {@link android.app.NotificationManager#notify(String, int, android.app.Notification)}.
      */
     public final void cancelNotification(String pkg, String tag, int id) {
+        if (!isBound()) return;
         try {
             getNotificationInterface().cancelNotificationFromListener(mWrapper, pkg, tag, id);
         } catch (android.os.RemoteException ex) {
@@ -131,6 +132,7 @@ public abstract class NotificationListenerService extends Service {
      * {@see #cancelNotification(String, String, int)}
      */
     public final void cancelAllNotifications() {
+        if (!isBound()) return;
         try {
             getNotificationInterface().cancelAllNotificationsFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
@@ -145,6 +147,7 @@ public abstract class NotificationListenerService extends Service {
      * @return An array of active notifications.
      */
     public StatusBarNotification[] getActiveNotifications() {
+        if (!isBound()) return null;
         try {
             return getNotificationInterface().getActiveNotificationsFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
@@ -159,6 +162,14 @@ public abstract class NotificationListenerService extends Service {
             mWrapper = new INotificationListenerWrapper();
         }
         return mWrapper;
+    }
+
+    private boolean isBound() {
+        if (mWrapper == null) {
+            Log.w(TAG, "Notification listener service not yet bound.");
+            return false;
+        }
+        return true;
     }
 
     private class INotificationListenerWrapper extends INotificationListener.Stub {

@@ -725,7 +725,14 @@ public class NotificationManagerService extends SystemService {
 
     // -- APIs to support listeners clicking/clearing notifications --
 
+    private void checkNullListener(INotificationListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Listener must not be null");
+        }
+    }
+
     private NotificationListenerInfo checkListenerToken(INotificationListener listener) {
+        checkNullListener(listener);
         final IBinder token = listener.asBinder();
         final int N = mListeners.size();
         for (int i=0; i<N; i++) {
@@ -1469,6 +1476,7 @@ public class NotificationManagerService extends SystemService {
         public void registerListener(final INotificationListener listener,
                 final ComponentName component, final int userid) {
             checkCallerIsSystem();
+            checkNullListener(listener);
             registerListenerImpl(listener, component, userid);
         }
 
@@ -1477,6 +1485,7 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void unregisterListener(INotificationListener listener, int userid) {
+            checkNullListener(listener);
             // no need to check permissions; if your listener binder is in the list,
             // that's proof that you had permission to add it in the first place
             unregisterListenerImpl(listener, userid);
