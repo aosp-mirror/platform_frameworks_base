@@ -89,7 +89,7 @@ public final class AssetManager {
                 mNumRefs = 0;
                 incRefsLocked(this.hashCode());
             }
-            init();
+            init(false);
             if (localLOGV) Log.v(TAG, "New asset manager: " + this);
             ensureSystemAssets();
         }
@@ -112,7 +112,7 @@ public final class AssetManager {
                 incRefsLocked(this.hashCode());
             }
         }
-        init();
+        init(true);
         if (localLOGV) Log.v(TAG, "New asset manager: " + this);
     }
 
@@ -617,6 +617,16 @@ public final class AssetManager {
 
     private native final int addAssetPathNative(String path);
 
+     /**
+     * Add a set of assets to overlay an already added set of assets.
+     *
+     * This is only intended for application resources. System wide resources
+     * are handled before any Java code is executed.
+     *
+     * {@hide}
+     */
+    public native final int addOverlayPath(String idmapPath);
+
     /**
      * Add multiple sets of assets to the asset manager at once.  See
      * {@link #addAssetPath(String)} for more information.  Returns array of
@@ -754,7 +764,7 @@ public final class AssetManager {
     private native final int[] getArrayStringInfo(int arrayRes);
     /*package*/ native final int[] getArrayIntResource(int arrayRes);
 
-    private native final void init();
+    private native final void init(boolean isSystem);
     private native final void destroy();
 
     private final void incRefsLocked(long id) {
