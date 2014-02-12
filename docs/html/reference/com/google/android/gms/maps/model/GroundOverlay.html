@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -761,8 +771,8 @@ Summary:
  <dt>Position</dt>
  <dd>There are two ways to specify the position of the ground overlay:
  <ul>
- <li>Using an location: You must provide an image of the ground overlay, a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> to which
- the anchor will be fixed and the width of the overlay (in meters). The anchor is by default 50%
+ <li>Using a location: You must provide an image of the ground overlay, a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> to which
+ the anchor will be fixed and the width of the overlay (in meters). The anchor is, by default, 50%
  from the top of the image and 50% from the left of the image. This can be changed. You can
  optionally provide the height of the overlay (in meters). If you do not provide the height of the
  overlay, it will be automatically calculated to preserve the proportions of the image.</li>
@@ -775,9 +785,9 @@ Summary:
  when specifying using a second method.</dd>
  <dt>Image</dt>
  <dd>The image (as an <code><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></code>) to be used for this overlay. The image will be
- scaled to fit the position provided. You cannot change the image used in the ground overlay once
- it has been added to the map. You must specify an image before adding the ground overlay to the
- map; if not an <code><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> will be thrown when it is added to the map.</dd>
+ scaled to fit the position provided. You must specify an image before adding the ground overlay
+ to the map; if not an <code><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> will be thrown when it is added to the
+ map.</dd>
  <dt>Bearing</dt>
  <dd>The amount that the image should be rotated in a clockwise direction. The center of the
  rotation will be the image's anchor. This is optional and the default bearing is 0, i.e., the
@@ -1148,7 +1158,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setImage(com.google.android.gms.maps.model.BitmapDescriptor)">setImage</a></span>(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> icon)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setImage(com.google.android.gms.maps.model.BitmapDescriptor)">setImage</a></span>(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> image)</nobr>
         
         <div class="jd-descrdiv">Sets the image for the Ground Overlay.</div>
   
@@ -2038,7 +2048,7 @@ From class
         void
       </span>
       <span class="sympad">setImage</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> icon)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> image)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2048,9 +2058,18 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the image for the Ground Overlay.  The new image will occupy the same bounds as the
- old image.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the image for the Ground Overlay. The new image will occupy the same bounds as the
+ old image.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>image</td>
+          <td>the <code><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></code> to use for this ground overlay.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

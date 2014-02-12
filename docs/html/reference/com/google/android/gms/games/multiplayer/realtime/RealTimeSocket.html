@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -713,7 +723,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <h2>Class Overview</h2>
 <p itemprop="articleBody">Provides a Socket-like interface for a real-time data connection to a participant in a real-time
- room. Use getSocketForParticipant(GoogleApiClient, String, String) to get an instance.
+ room. Use <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#getSocketForParticipant(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">getSocketForParticipant(GoogleApiClient, String, String)</a></code> to get an instance.
  <p>
  Use <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code> to get a file descriptor for read/write, or
  use <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html#getInputStream()">getInputStream()</a></code> / <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html#getOutputStream()">getOutputStream()</a></code> to get
@@ -726,7 +736,7 @@ onkeyup="return search_changed(event, false, '/')" />
  The Socket-like interface provided is currently modeled on connection-based byte streams, rather
  than preserving packet semantics. That is, multiple writes may be coalesced or individual writes
  divided. Clients should avoid calling <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> with more than
- MAX_UNRELIABLE_MESSAGE_LEN bytes at a time.
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes at a time.
 </p>
 
 
@@ -1034,7 +1044,7 @@ onkeyup="return search_changed(event, false, '/')" />
  <code><a href="/reference/java/io/OutputStream.html#close()">close()</a></code> on the OutputStream will close the socket.
  <p>
  Note: The maximum (unfragmented) packet size supported through this API is
- MAX_UNRELIABLE_MESSAGE_LEN bytes (excluding internal protocol headers).
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes (excluding internal protocol headers).
  Make sure that the byte[] data passed to <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> honors this limit -
  otherwise the packet will be dropped and an error message will be sent to the log.
  <p>
