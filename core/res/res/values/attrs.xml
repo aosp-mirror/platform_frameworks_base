@@ -2257,6 +2257,14 @@
         <attr name="sharedElementName" format="string" />
     </declare-styleable>
 
+    <!-- Attributes that can be assigned to a tag for a particular View. -->
+    <declare-styleable name="ViewTag">
+        <!-- Specifies the key identifying a tag. This must be a resource reference. -->
+        <attr name="id" />
+        <!-- Specifies the value with which to tag the view. -->
+        <attr name="value" />
+    </declare-styleable>
+
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
          of its subclasses.  Also see {@link #ViewGroup_Layout} for
          attributes that this class processes in its children. -->
