@@ -10542,6 +10542,7 @@ package android.graphics.drawable {
     ctor public GradientDrawable();
     ctor public GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation, int[]);
     method public void draw(android.graphics.Canvas);
+    method public float getGradientRadius();
     method public int getOpacity();
     method public android.graphics.drawable.GradientDrawable.Orientation getOrientation();
     method public boolean onStateChange(int[]);
