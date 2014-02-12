@@ -1,0 +1,536 @@
+page.title=Accessing Google Play Services APIs
+page.tags="oauth 2.0","GoogleAuthUtil"
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Starting">Start a Connection</a>
+    <ol>
+      <li><a href="#HandlingFailures">Handle connection failures</a></li>
+      <li><a href="#MaintainingState">Maintain state while resolving an error</a></li>
+    </ol>
+  </li>
+  <li><a href="#Communicating">Communicate with Google Services</a>
+    <ol>
+      <li><a href="#Async">Using asynchronous calls</a></li>
+      <li><a href="#Sync">Using synchronous calls</a></li>
+    </ol>
+  </li>
+</ol>
+</div>
+</div>
+
+
+<p>When you want to make a connection to one of the Google APIs provided in the Google Play services
+library (such as Google+, Games, or Drive), you need to create an instance of <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> ("Google API Client"). The Google API Client provides a common entry point to all
+the Google Play services and manages the network connection between the user's device and each
+Google service.</p>
+
+<div class="sidebox" style="clear:right;width:190px">
+<h2>Connecting to REST APIs</h2>
+<p>If the Google API you want to use is not included in the Google Play services library, you can
+connect using the appropriate REST API, but you must obtain an OAuth 2.0 token. For more
+information, read <a href="{@docRoot}google/auth/http-auth.html">Authorizing with Google
+for REST APIs</a>.</p>
+</div>
+
+<p>This guide shows how you can use Google API Client to:</p>
+<ul>
+<li>Connect to one or more Google Play services asynchronously and handle failures.</li>
+<li>Perform synchronous and asynchronous API calls to any of the Google Play services.</li>
+</ul>
+
+<p class="note">
+<strong>Note:</strong> If you have an existing app that connects to Google Play services with a
+subclass of <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.html">{@code GooglePlayServicesClient}</a>, you should migrate to <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> as soon as possible.</p>
+
+
+<img src="{@docRoot}images/google/GoogleApiClient@2x.png" width="464px" alt="" />
+<p class="img-caption">
+<strong>Figure 1.</strong> An illustration showing how the Google API Client provides an
+interface for connecting and making calls to any of the available Google Play services such as
+Google Play Games and Google Drive.</p>
+
+
+
+<p>To get started, you must first install the Google Play services library (revision 15 or higher) for
+your Android SDK. If you haven't done so already, follow the instructions in <a
+href="{@docRoot}google/play-services/setup.html">Set Up Google
+Play Services SDK</a>.</p>
+
+
+
+
+<h2 id="Starting">Start a Connection</h2>
+
+<p>Once your project is linked to the Google Play services library, create an instance of <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> using the <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">{@code
+GoogleApiClient.Builder}</a> APIs in your activity's {@link
+android.app.Activity#onCreate onCreate()} method. The <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">{@code
+GoogleApiClient.Builder}</a> class
+provides methods that allow you to specify the Google APIs you want to use and your desired OAuth
+2.0 scopes. For example, here's a <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance that connects with the Google
+Drive service:</p>
+<pre>
+GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+    .addApi(Drive.API)
+    .addScope(Drive.SCOPE_FILE)
+    .build();
+</pre>
+
+<p>You can add multiple APIs and multiple scopes to the same <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> by appending
+additional calls to
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api)"
+>{@code addApi()}</a> and
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)"
+>{@code addScope()}</a>.</p>
+
+<p>However, before you can begin a connection by calling <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
+>{@code connect()}</a> on the <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a>, you must specify an implementation for the callback interfaces, <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html"
+>{@code ConnectionCallbacks}</a> and <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html"
+>{@code onConnectionFailedListener}</a>. These interfaces receive callbacks in
+response to the asynchronous <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
+>{@code connect()}</a> method when the connection to Google Play services
+succeeds, fails, or becomes suspended.</p>
+
+<p>For example, here's an activity that implements the callback interfaces and adds them to the Google
+API Client:</p>
+
+<pre>
+import gms.common.api.*;
+import gms.drive.*;
+import android.support.v4.app.FragmentActivity;
+
+public class MyActivity extends FragmentActivity
+        implements ConnectionCallbacks, OnConnectionFailedListener {
+    private GoogleApiClient mGoogleApiClient;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Create a GoogleApiClient instance
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Drive.API)
+                .addScope(Drive.SCOPE_FILE)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        ...
+    }
+
+    &#64;Override
+    public void onConnected(Bundle connectionHint) {
+        // Connected to Google Play services!
+        // The good stuff goes here.
+    }
+
+    &#64;Override
+    public void onConnectionSuspended(int cause) {
+        // The connection has been interrupted.
+        // Disable any UI components that depend on Google APIs
+        // until onConnected() is called.
+    }
+
+    &#64;Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // This callback is important for handling errors that
+        // may occur while attempting to connect with Google.
+        //
+        // More about this in the next section.
+        ...
+    }
+}
+</pre>
+
+<p>With the callback interfaces defined, you're ready to call <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
+>{@code connect()}</a>. To gracefully manage
+the lifecycle of the connection, you should call <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
+>{@code connect()}</a> during the activity's {@link
+android.app.Activity#onStart onStart()} (unless you want to connect later), then call <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()"
+>{@code disconnect()}</a> during the {@link android.app.Activity#onStop onStop()} method. For example:</p>
+<pre>
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        if (!mResolvingError) {  // more about this later
+            mGoogleApiClient.connect();
+        }
+    }
+
+    &#64;Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+</pre>
+
+<p>However, if you run this code, there's a good chance it will fail and your app will receive a call
+to <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
+>{@code onConnectionFailed()}</a> with the <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#SIGN_IN_REQUIRED"
+>{@code SIGN_IN_REQUIRED}</a> error because the user account
+has not been specified. The next section shows how to handle this error and others.</p>
+
+
+
+
+<h3 id="HandlingFailures">Handle connection failures</h3>
+
+<p>When you receive a call to the <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
+>{@code onConnectionFailed()}</a> callback, you should call <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#hasResolution()"
+>{@code hasResolution()}</a> on the provided <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html"
+>{@code ConnectionResult}</a> object. If it returns true, you can
+request the user take immediate action to resolve the error by calling <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)">{@code startResolutionForResult()}</a> on the <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html"
+>{@code ConnectionResult}</a> object. The <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)"
+>{@code startResolutionForResult()}</a> behaves the same as {@link
+android.app.Activity#startActivityForResult startActivityForResult()} and launches the
+appropriate activity for the user
+to resolve the error (such as an activity to select an account).</p>
+
+<p>If <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#hasResolution()"
+>{@code hasResolution()}</a> returns false, you should instead call <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)"
+>{@code GooglePlayServicesUtil.getErrorDialog()}</a>, passing it the error code. This returns a {@link
+android.app.Dialog} provided by Google Play services that's appropriate for the given error. The
+dialog may simply provide a message explaining the error, but it may also provide an action to
+launch an activity that can resolve the error (such as when the user needs to install a newer
+version of Google Play services).</p>
+
+<p>For example, your <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
+>{@code onConnectionFailed()}</a> callback method should now look like this:</p>
+
+<pre>
+public class MyActivity extends FragmentActivity
+        implements ConnectionCallbacks, OnConnectionFailedListener {
+
+    // Request code to use when launching the resolution activity
+    private static final int REQUEST_RESOLVE_ERROR = 1001;
+    // Unique tag for the error dialog fragment
+    private static final String DIALOG_ERROR = "dialog_error";
+    // Bool to track whether the app is already resolving an error
+    private boolean mResolvingError = false;
+
+    ...
+
+    &#64;Override
+    public void onConnectionFailed(ConnectionResult result) {
+        if (mResolvingError) {
+            // Already attempting to resolve an error.
+            return;
+        } else if (result.hasResolution()) {
+            try {
+                mResolvingError = true;
+                result.startResolutionForResult(this, REQUEST_RESOLVE_ERROR);
+            } catch (SendIntentException e) {
+                // There was an error with the resolution intent. Try again.
+                mGoogleApiClient.connect();
+            }
+        } else {
+            // Show dialog using GooglePlayServicesUtil.getErrorDialog()
+            showErrorDialog(result.getErrorCode());
+            mResolvingError = true;
+        }
+    }
+
+    // The rest of this code is all about building the error dialog
+
+    /* Creates a dialog for an error message */
+    private void showErrorDialog(int errorCode) {
+        // Create a fragment for the error dialog
+        ErrorDialogFragment dialogFragment = new ErrorDialogFragment();
+        // Pass the error that should be displayed
+        Bundle args = new Bundle();
+        args.putInt(DIALOG_ERROR, errorCode);
+        dialogFragment.setArguments(args);
+        dialogFragment.show(getSupportFragmentManager(), "errordialog");
+    }
+
+    /* Called from ErrorDialogFragment when the dialog is dismissed. */
+    public void onDialogDismissed() {
+        mResolvingError = false;
+    }
+
+    /* A fragment to display an error dialog */
+    public static class ErrorDialogFragment extends DialogFragment {
+        public ErrorDialogFragment() { }
+
+        &#64;Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Get the error code and retrieve the appropriate dialog
+            int errorCode = this.getArguments().getInt(DIALOG_ERROR);
+            return GooglePlayServicesUtil.getErrorDialog(errorCode,
+                    this.getActivity(), REQUEST_RESOLVE_ERROR);
+        }
+
+        &#64;Override
+        public void onDismiss(DialogInterface dialog) {
+            ((MainActivity)getActivity()).onDialogDismissed();
+        }
+    }
+}
+</pre>
+
+<p>Once the user completes the resolution provided by <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)"
+>{@code startResolutionForResult()}</a> or <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)"
+>{@code GooglePlayServicesUtil.getErrorDialog()}</a>, your activity receives the {@link
+android.app.Activity#onActivityResult onActivityResult()} callback with the {@link
+android.app.Activity#RESULT_OK}
+result code. You can then call <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
+>{@code connect()}</a> again. For example:</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_RESOLVE_ERROR) {
+        mResolvingError = false;
+        if (resultCode == RESULT_OK) {
+            // Make sure the app is not already connected or attempting to connect
+            if (!mGoogleApiClient.isConnecting() &&
+                    !mGoogleApiClient.isConnected()) {
+                mGoogleApiClient.connect();
+            }
+        }
+    }
+}
+</pre>
+
+<p>In the above code, you probably noticed the boolean, {@code mResolvingError}. This keeps track of
+the app state while the user is resolving the error to avoid repetitive attempts to resolve the
+same error. For instance, while the account picker dialog is showing to resolve the <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#SIGN_IN_REQUIRED"
+>{@code SIGN_IN_REQUIRED}</a> error, the user may rotate the screen. This recreates your activity and causes
+your {@link android.app.Activity#onStart onStart()} method to be called again, which then calls <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
+>{@code connect()}</a> again. This results in another call to <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)"
+>{@code startResolutionForResult()}</a>, which
+creates another account picker dialog in front of the existing one.</p>
+
+<p>This boolean is effective only
+if retained across activity instances, though. The next section explains further.</p>
+
+
+
+<h3 id="MaintainingState">Maintain state while resolving an error</h3>
+
+<p>To avoid executing the code in <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
+>{@code onConnectionFailed()}</a> while a previous attempt to resolve an
+error is ongoing, you need to retain a boolean that tracks whether your app is already attempting
+to resolve an error.</p>
+
+<p>As shown in the code above, you should set a boolean to {@code true} each time you call <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)"
+>{@code startResolutionForResult()}</a> or display the dialog from <a
+href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)"
+>{@code GooglePlayServicesUtil.getErrorDialog()}</a>. Then when you
+receive {@link android.app.Activity#RESULT_OK} in the {@link android.app.Activity#onActivityResult
+onActivityResult()} callback, set the boolean to {@code false}.</p>
+
+<p>To keep track of the boolean across activity restarts (such as when the user rotates the screen),
+save the boolean in the activity's saved instance data using {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}:</p>
+
+<pre>
+private static final String STATE_RESOLVING_ERROR = "resolving_error";
+
+&#64;Override
+protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putBoolean(STATE_RESOLVING_ERROR, mResolvingError);
+}
+</pre>
+
+<p>Then recover the saved state during {@link android.app.Activity#onCreate onCreate()}:</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    ...
+    mResolvingError = savedInstanceState != null
+            && savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
+}
+</pre>
+
+<p>Now you're ready to safely run your app and connect to Google Play services.
+How you can perform read and write requests to any of the Google Play services
+using <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> is discussed in the next section.</p>
+
+<p>For more information about each services's APIs available once you're connected,
+consult the corresponding documentation, such as for
+<a href="{@docRoot}google/play-services/games.html">Google Play Games</a> or
+<a href="{@docRoot}google/play-services/drive.html">Google Drive</a>.
+</p>
+
+
+
+
+<h2 id="Communicating">Communicate with Google Services</h2>
+
+<p>Once connected, your client can make read and write calls using the service-specific APIs for which
+your app is authorized, as specified by the APIs and scopes you added to your <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance.</p>
+
+<p class="note">
+<strong>Note:</strong> Before making calls to specific Google services, you may first need to
+register your app in the Google Developer Console. For specific instructions, refer to the
+appropriate getting started guide for the API you're using, such as <a href=
+"https://developers.google.com/drive/android/get-started">Google Drive</a> or <a href=
+"https://developers.google.com/+/mobile/android/getting-started">Google+</a>.</p>
+
+<p>When you perform a read or write request using Google API Client, the immediate result is returned
+as a <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html">{@code
+PendingResult}</a> object. This is an object representing the request, which hasn't yet
+been delivered to the Google service.</p>
+
+<p>For example, here's a request to read a file from Google Drive that provides a
+<a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html">{@code
+PendingResult}</a> object:</p>
+
+<pre>
+Query query = new Query.Builder()
+        .addFilter(Filters.eq(SearchableField.TITLE, filename));
+PendingResult result = Drive.DriveApi.query(mGoogleApiClient, query);
+</pre>
+
+<p>Once you have the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html">{@code
+PendingResult}</a>, you can continue by making the request either asynchronous
+or synchronous.</p>
+
+
+<h3 id="Async">Using asynchronous calls</h3>
+
+<p>To make the request asynchronous, call <a
+href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>)"
+>{@code setResultCallback()}</a> on the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html">{@code
+PendingResult}</a> and
+provide an implementation of the <a
+href="{@docRoot}reference/com/google/android/gms/common/api/ResultCallback.html"
+>{@code ResultCallback}</a> interface. For example, here's the request
+executed asynchronously:</p>
+
+<pre>
+private void loadFile(String filename) {
+    // Create a query for a specific filename in Drive.
+    Query query = new Query.Builder()
+            .addFilter(Filters.eq(SearchableField.TITLE, filename))
+            .build();
+    // Invoke the query asynchronously with a callback method
+    Drive.DriveApi.query(mGoogleApiClient, query)
+            .setResultCallback(new ResultCallback&lt;DriveApi.MetadataBufferResult>() {
+        &#64;Override
+        public void onResult(DriveApi.MetadataBufferResult result) {
+            // Success! Handle the query result.
+            ...
+        }
+    });
+}
+</pre>
+
+<p>When your app receives a <a
+href="{@docRoot}reference/com/google/android/gms/common/api/Result.html">{@code Result}</a>
+object in the <a
+href="{@docRoot}reference/com/google/android/gms/common/api/ResultCallback.html#onResult(R)"
+>{@code onResult()}</a> callback, it is delivered as an instance of the
+appropriate subclass as specified by the API you're using, such as <a
+href="{@docRoot}reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html"
+>{@code DriveApi.MetadataBufferResult}</a>.</p>
+
+
+<h3 id="Sync">Using synchronous calls</h3>
+
+<p>If you want your code to execute in a strictly defined order, perhaps because the result of one
+call is needed as an argument to another, you can make your request synchronous by calling <a
+href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html#await()"
+>{@code await()}</a> on the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html">{@code
+PendingResult}</a>. This blocks the thread and returns the <a
+href="{@docRoot}reference/com/google/android/gms/common/api/Result.html">{@code Result}</a> object
+when the request completes, which is delivered as an instance of the
+appropriate subclass as specified by the API you're using, such as <a
+href="{@docRoot}reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html"
+>{@code DriveApi.MetadataBufferResult}</a>.</p>
+
+<p>Because calling <a
+href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html#await()"
+>{@code await()}</a> blocks the thread until the result arrives, it's important that you
+never perform this call on the UI thread. So, if you want to perform synchronous requests to a
+Google Play service, you should create a new thread, such as with {@link android.os.AsyncTask} in
+which to perform the request. For example, here's how to perform the same file request to Google
+Drive as a synchronous call:</p>
+
+<pre>
+private void loadFile(String filename) {
+    new GetFileTask().execute(filename);
+}
+
+private class GetFileTask extends AsyncTask<String, Void, Void> {
+    protected void doInBackground(String filename) {
+        Query query = new Query.Builder()
+                .addFilter(Filters.eq(SearchableField.TITLE, filename))
+                .build();
+        // Invoke the query synchronously
+        DriveApi.MetadataBufferResult result =
+                Drive.DriveApi.query(mGoogleApiClient, query).await();
+
+        // Continue doing other stuff synchronously
+        ...
+    }
+}
+</pre>
+
+<p class="note">
+<strong>Tip:</strong> You can also enqueue read requests while not connected to Google Play
+services. For example, execute a method to read a file from Google Drive regardless of whether your
+Google API Client is connected yet. Then once a connection is established, the read requests
+execute and you'll receive the results. Any write requests, however, will generate an error if you
+call them while your Google API Client is not connected.</p>
+
