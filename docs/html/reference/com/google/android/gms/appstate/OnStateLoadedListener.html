@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -709,11 +719,15 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <div class="jd-descr">
+<p>
+  <p class="caution"><strong>
+      This interface is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></code>.
 
+  </p>
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Listener for receiving callbacks when app state data has been loaded.
-</p>
+<p itemprop="articleBody">Listener for receiving callbacks when app state data has been loaded.</p>
 
 
 
@@ -880,7 +894,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Called when a conflict is detected while loading app state. To resolve the conflict, call
- <code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#resolveState(com.google.android.gms.appstate.OnStateLoadedListener, int, java.lang.String, byte[])">resolveState(OnStateLoadedListener, int, String, byte[])</a></code> with the new desired data and the value of
+ <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#resolve(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String, byte[])">resolve(GoogleApiClient, int, String, byte[])</a></code> with the new desired data and the value of
  <code>resolvedVersion</code> provided here.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -935,18 +949,18 @@ onkeyup="return search_changed(event, false, '/')" />
       
   <div class="jd-tagdata jd-tagdescr"><p>Called when app state data has been loaded. Possible status codes include:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></code> if the device was unable to
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></code> if the device was unable to
  communicate with the network and has no local data available.</li>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_NETWORK_ERROR_STALE_DATA">STATUS_NETWORK_ERROR_STALE_DATA</a></code> if the device was unable to
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html#STATUS_NETWORK_ERROR_STALE_DATA">STATUS_NETWORK_ERROR_STALE_DATA</a></code> if the device was unable to
  retrieve the latest data from the network.</li>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the client needs to reconnect
  to the service to access this data.</li>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
  service.</li>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_STATE_KEY_NOT_FOUND">STATUS_STATE_KEY_NOT_FOUND</a></code> if the requested state key is not found
- on the server.</li>
- <li><code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_STATE_KEY_LIMIT_EXCEEDED">STATUS_STATE_KEY_LIMIT_EXCEEDED</a></code> if the application already has
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html#STATUS_STATE_KEY_NOT_FOUND">STATUS_STATE_KEY_NOT_FOUND</a></code> if the requested state key is not
+ found on the server.</li>
+ <li><code><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html#STATUS_STATE_KEY_LIMIT_EXCEEDED">STATUS_STATE_KEY_LIMIT_EXCEEDED</a></code> if the application already has
  data present in the maximum number of state keys.</li>
  </ul></p></div>
   <div class="jd-tagdata">

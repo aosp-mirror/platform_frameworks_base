@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -913,6 +923,27 @@ Summary:
         <td class="jd-descrcol" width="100%">Adding KEY_SUPPRESS_PROGRESS will suppress the progress screen shown
  when getting a token when added as a boolean <code>true</code> option while
  calling <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code>.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#OEM_ONLY_KEY_TARGET_ANDROID_ID">OEM_ONLY_KEY_TARGET_ANDROID_ID</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#OEM_ONLY_KEY_VERIFIER">OEM_ONLY_KEY_VERIFIER</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP">OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP</a></td>
+        <td class="jd-descrcol" width="100%"></td>
     </tr>
     
     
@@ -1504,6 +1535,117 @@ From class
 
 
 
+<A NAME="OEM_ONLY_KEY_TARGET_ANDROID_ID"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        OEM_ONLY_KEY_TARGET_ANDROID_ID
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "oauth2_target_device_id"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="OEM_ONLY_KEY_VERIFIER"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        OEM_ONLY_KEY_VERIFIER
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "oauth2_authcode_verifier"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        OEM_ONLY_SCOPE_ACCOUNT_BOOTSTRAP
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "_account_setup"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 
 <!-- Fields -->
 
@@ -1633,7 +1775,7 @@ From class
      Activity.this.startActivityForResult(recoveryIntent, REQUEST_CODE);
  } catch (GoogleAuthException authEx) {
      // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMesssage(), authEx);
+     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
      return;
  } catch (IOException ioEx) {
      Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
@@ -1759,7 +1901,7 @@ From class
      // Continue without token or stop background task.
  } catch (GoogleAuthException authEx) {
      // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMesssage(), authEx);
+     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
  } catch (IOException ioEx) {
      Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
      doExponentialBackoff();
@@ -1870,7 +2012,7 @@ From class
      // Continue without token or stop background task.
  } catch (GoogleAuthException authEx) {
      // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMesssage(), authEx);
+     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
  } catch (IOException ioEx) {
      Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
      doExponentialBackoff();
@@ -1989,7 +2131,7 @@ From class
      // Continue without token or stop background task.
  } catch (GoogleAuthException authEx) {
      // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMesssage(), authEx);
+     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
  } catch (IOException ioEx) {
      Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
      doExponentialBackoff();

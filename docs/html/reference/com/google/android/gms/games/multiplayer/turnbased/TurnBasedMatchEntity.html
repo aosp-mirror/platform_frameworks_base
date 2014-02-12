@@ -129,7 +129,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
             <img src="/assets/images/dac_logo.png" width="123" height="25" alt="Android Developers" />
           </a>
           <div class="btn-quicknav" id="btn-quicknav">
-		<a href="#" class="arrow-inactive">Quicknav</a>
+          	<a href="#" class="arrow-inactive">Quicknav</a>
 			      <a href="#" class="arrow-active">Quicknav</a>
           </div>
           </div>
@@ -141,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Проектирование"
                   ko-lang="디자인"
                   ja-lang="設計"
-                  es-lang="Diseñar"
+                  es-lang="Diseñar"               
                   >Design</a></li>
                 <li class="develop"><a href="/develop/index.html"
                   zh-tw-lang="開發"
@@ -149,7 +149,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Разработка"
                   ko-lang="개발"
                   ja-lang="開発"
-                  es-lang="Desarrollar"
+                  es-lang="Desarrollar"               
                   >Develop</a></li>
                 <li class="distribute last"><a href="/distribute/index.html"
                   zh-tw-lang="發佈"
@@ -157,10 +157,10 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
                   ru-lang="Распространение"
                   ko-lang="배포"
                   ja-lang="配布"
-                  es-lang="Distribuir"
+                  es-lang="Distribuir"               
                   >Distribute</a></li>
             </ul>
-
+            
             <!-- New Search -->
             <div class="menu-container">
             <div class="moremenu">
@@ -181,9 +181,9 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
         <li class="active"><a>Android Developers</a></li>
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
-
-
-
+      
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -201,8 +201,8 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
 
 
       <br class="clearfix" />
@@ -216,7 +216,7 @@ href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,medium
       <form onsubmit="return submit_search()">
         <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
 onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
-onkeydown="return search_changed(event, true, '/')"
+onkeydown="return search_changed(event, true, '/')" 
 onkeyup="return search_changed(event, false, '/')" />
       </form>
       <div class="right"></div>
@@ -257,8 +257,8 @@ onkeyup="return search_changed(event, false, '/')" />
 
   </div>
   <!-- /New Search>
-
-
+          
+          
           <!-- Expanded quicknav -->
            <div id="quicknav" class="col-9">
                 <ul>
@@ -280,7 +280,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Курсы"
                           ko-lang="교육"
                           ja-lang="トレーニング"
-                          es-lang="Capacitación"
+                          es-lang="Capacitación"               
                           >Training</a></li>
                         <li><a href="/guide/index.html"
                           zh-tw-lang="API 指南"
@@ -288,7 +288,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Руководства по API"
                           ko-lang="API 가이드"
                           ja-lang="API ガイド"
-                          es-lang="Guías de la API"
+                          es-lang="Guías de la API"               
                           >API Guides</a></li>
                         <li><a href="/reference/packages.html"
                           zh-tw-lang="參考資源"
@@ -296,7 +296,7 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Справочник"
                           ko-lang="참조문서"
                           ja-lang="リファレンス"
-                          es-lang="Referencia"
+                          es-lang="Referencia"               
                           >Reference</a></li>
                         <li><a href="/tools/index.html"
                           zh-tw-lang="相關工具"
@@ -304,16 +304,16 @@ onkeyup="return search_changed(event, false, '/')" />
                           ru-lang="Инструменты"
                           ko-lang="도구"
                           ja-lang="ツール"
-                          es-lang="Herramientas"
+                          es-lang="Herramientas"               
                           >Tools</a>
                           <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
-
+                        
                           <li><a href="/samples/index.html">Samples</a>
                           </li>
-
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -332,15 +332,15 @@ onkeyup="return search_changed(event, false, '/')" />
         </div>
     </div>
     <!-- /Header -->
-
-
+    
+    
   <div id="searchResults" class="wrap" style="display:none;">
           <h2 id="searchTitle">Results</h2>
           <div id="leftSearchControl" class="search-control">Loading...</div>
   </div>
-
-
-
+    
+    
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap">
@@ -351,7 +351,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Курсы"
                   ko-lang="교육"
                   ja-lang="トレーニング"
-                  es-lang="Capacitación"
+                  es-lang="Capacitación"               
                   >Training</a></li>
                 <li class="guide"><a href="/guide/index.html"
                   zh-tw-lang="API 指南"
@@ -359,7 +359,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Руководства по API"
                   ko-lang="API 가이드"
                   ja-lang="API ガイド"
-                  es-lang="Guías de la API"
+                  es-lang="Guías de la API"               
                   >API Guides</a></li>
                 <li class="reference"><a href="/reference/packages.html"
                   zh-tw-lang="參考資源"
@@ -367,7 +367,7 @@ onkeyup="return search_changed(event, false, '/')" />
                   ru-lang="Справочник"
                   ko-lang="참조문서"
                   ja-lang="リファレンス"
-                  es-lang="Referencia"
+                  es-lang="Referencia"               
                   >Reference</a></li>
                 <li class="tools"><a href="/tools/index.html"
                   zh-tw-lang="相關工具"
@@ -380,25 +380,25 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
-
+        
     </div>
     <!-- /Sendondary x-nav -->
+  
 
 
 
 
+  
 
 
-
-
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -432,6 +432,16 @@ onkeyup="return search_changed(event, false, '/')" />
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
           <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -631,12 +641,12 @@ onkeyup="return search_changed(event, false, '/')" />
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -646,7 +656,7 @@ onkeyup="return search_changed(event, false, '/')" />
     </script>
 
 
-
+     
 
 
 
@@ -656,46 +666,46 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+  
+   
+  
+  
+  
+  
 
+  
+   
+  
+  
+   
+  
+  
+  
 
+  
+   
+  
+  
+  
+  
 
+  
+   
+  
+  
+  
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+   
+  
+  
+   
+  
+  
+   
+  
+  
 
 
 <div class="sum-details-links">
@@ -708,21 +718,21 @@ Summary:
 
 
   <a href="#inhconstants">Inherited Constants</a>
-
+  
 
 
   &#124; <a href="#lfields">Fields</a>
-
+  
 
 
   &#124; <a href="#inhfields">Inherited Fields</a>
-
+  
 
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -732,9 +742,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -744,30 +754,30 @@ Summary:
 
 <div id="jd-header">
     public
-
-    final
-
+     
+    final 
+    
     class
 <h1 itemprop="name">TurnBasedMatchEntity</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
 
-
-
-
-
-
-      implements
-
-        Parcelable
-
-        <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a>
-
-
-
+  
+  
+      implements 
+      
+        Parcelable 
+      
+        <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a> 
+      
+  
+  
 
 
 </div><!-- end header -->
@@ -779,18 +789,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchEntity</td>
     </tr>
-
+    
 
 </table>
 
@@ -873,23 +883,23 @@ android.os.Parcelable
   </div>
   <div id="inherited-constants-android.os.Parcelable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
-
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
-
-
+    
+    
 </table>
   </div>
 </div>
@@ -915,81 +925,81 @@ android.os.Parcelable
   </div>
   <div id="inherited-constants-com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
-
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_ACTIVE">MATCH_STATUS_ACTIVE</a></td>
         <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match has started.</td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_AUTO_MATCHING">MATCH_STATUS_AUTO_MATCHING</a></td>
         <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that one or more slots are waiting to be
  filled by auto-matching.</td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_CANCELED">MATCH_STATUS_CANCELED</a></td>
         <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match was canceled by one of
  the participants.</td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_COMPLETE">MATCH_STATUS_COMPLETE</a></td>
         <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match has finished.</td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_EXPIRED">MATCH_STATUS_EXPIRED</a></td>
         <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match expired.</td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_COMPLETE">MATCH_TURN_STATUS_COMPLETE</a></td>
         <td class="jd-descrcol" width="100%">Turn status constant for matches which have been completed.</td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_INVITED">MATCH_TURN_STATUS_INVITED</a></td>
         <td class="jd-descrcol" width="100%">Turn status constant for matches which the current player has been invited to.</td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_MY_TURN">MATCH_TURN_STATUS_MY_TURN</a></td>
         <td class="jd-descrcol" width="100%">Turn status constant for matches where it is the current player's turn.</td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_THEIR_TURN">MATCH_TURN_STATUS_THEIR_TURN</a></td>
         <td class="jd-descrcol" width="100%">Turn status constant for matches where it is not the current player's turn.</td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_VARIANT_ANY">MATCH_VARIANT_ANY</a></td>
         <td class="jd-descrcol" width="100%">Constant used to indicate that the variant for a match is unspecified.</td>
     </tr>
-
-
+    
+    
 </table>
   </div>
 </div>
@@ -1005,7 +1015,7 @@ android.os.Parcelable
 <table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
 
 
-
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1015,8 +1025,8 @@ android.os.Parcelable
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#CREATOR">CREATOR</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
-
-
+      
+    
 
 </table>
 
@@ -1052,9 +1062,9 @@ android.os.Parcelable
   </div>
   <div id="inherited-fields-com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
-
-
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1064,8 +1074,8 @@ android.os.Parcelable
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_ALL">MATCH_TURN_STATUS_ALL</a></td>
           <td class="jd-descrcol" width="100%">Array of all the turn status constants.</td>
       </tr>
-
-
+      
+    
 </table>
   </div>
 </div>
@@ -1086,537 +1096,537 @@ android.os.Parcelable
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#canRematch()">canRematch</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return whether or not this match can be rematched.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#describeContents()">describeContents</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#equals(java.lang.Object)">equals</a></span>(Object obj)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#freeze()">freeze</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Bundle</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getAutoMatchCriteria()">getAutoMatchCriteria</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Retrieves the automatch criteria used to create or join this match, if any.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getAvailableAutoMatchSlots()">getAvailableAutoMatchSlots</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the maximum number of available automatch slots for this match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getCreationTimestamp()">getCreationTimestamp</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getCreatorId()">getCreatorId</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             byte[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getData()">getData</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the current (game-specific) data for this match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getGame()">getGame</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the timestamp at which the match was last modified.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getLastUpdaterId()">getLastUpdaterId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the ID of the participant who updated the match most recently.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getMatchId()">getMatchId</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getMatchNumber()">getMatchNumber</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the match sequence number for this match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getParticipant(java.lang.String)">getParticipant</a></span>(String participantId)</nobr>
-
+        
         <div class="jd-descrdiv">Get a participant in a match by its ID.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getParticipantId(java.lang.String)">getParticipantId</a></span>(String playerId)</nobr>
-
+        
         <div class="jd-descrdiv">Get the participant ID for a given player.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             ArrayList&lt;String&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getParticipantIds()">getParticipantIds</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Get the IDs of the participants of the given match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getParticipantStatus(java.lang.String)">getParticipantStatus</a></span>(String participantId)</nobr>
-
+        
         <div class="jd-descrdiv">Get the status of a participant in a match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             ArrayList&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getParticipants()">getParticipants</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getPendingParticipantId()">getPendingParticipantId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the ID of the participant that is considered pending.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             byte[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getPreviousMatchData()">getPreviousMatchData</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the match data from the previous match, if available.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getRematchId()">getRematchId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the match ID of the rematch that was created from this match, if any.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getStatus()">getStatus</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getTurnStatus()">getTurnStatus</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getVariant()">getVariant</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getVersion()">getVersion</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the current version of the match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#hashCode()">hashCode</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#isDataValid()">isDataValid</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#isLocallyModified()">isLocallyModified</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return whether or not this match has been locally modified.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#toString()">toString</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel out, int flags)</nobr>
-
+        
   </td></tr>
 
 
@@ -1651,182 +1661,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1853,38 +1863,38 @@ From interface
   </div>
   <div id="inherited-methods-android.os.Parcelable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">describeContents</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
@@ -1911,42 +1921,42 @@ From interface
   </div>
   <div id="inherited-methods-com.google.android.gms.common.data.Freezable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
-
+  
   </td></tr>
 
 
@@ -1973,24 +1983,24 @@ From interface
   </div>
   <div id="inherited-methods-com.google.android.gms.games.multiplayer.Participatable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             ArrayList&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participatable.html#getParticipants()">getParticipants</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object.</div>
-
+  
   </td></tr>
 
 
@@ -2017,406 +2027,406 @@ From interface
   </div>
   <div id="inherited-methods-com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#canRematch()">canRematch</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return whether or not this match can be rematched.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             Bundle</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getAutoMatchCriteria()">getAutoMatchCriteria</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Retrieves the automatch criteria used to create or join this match, if any.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getAvailableAutoMatchSlots()">getAvailableAutoMatchSlots</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the maximum number of available automatch slots for this match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getCreationTimestamp()">getCreationTimestamp</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getCreatorId()">getCreatorId</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             byte[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getData()">getData</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the current (game-specific) data for this match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getGame()">getGame</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the timestamp at which the match was last modified.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getLastUpdaterId()">getLastUpdaterId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the ID of the participant who updated the match most recently.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getMatchId()">getMatchId</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getMatchNumber()">getMatchNumber</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the match sequence number for this match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getParticipant(java.lang.String)">getParticipant</a></span>(String participantId)</nobr>
-
+        
         <div class="jd-descrdiv">Get a participant in a match by its ID.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getParticipantId(java.lang.String)">getParticipantId</a></span>(String playerId)</nobr>
-
+        
         <div class="jd-descrdiv">Get the participant ID for a given player.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             ArrayList&lt;String&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getParticipantIds()">getParticipantIds</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Get the IDs of the participants of the given match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getParticipantStatus(java.lang.String)">getParticipantStatus</a></span>(String participantId)</nobr>
-
+        
         <div class="jd-descrdiv">Get the status of a participant in a match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getPendingParticipantId()">getPendingParticipantId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the ID of the participant that is considered pending.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             byte[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getPreviousMatchData()">getPreviousMatchData</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the match data from the previous match, if available.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getRematchId()">getRematchId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the match ID of the rematch that was created from this match, if any.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getTurnStatus()">getTurnStatus</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getVariant()">getVariant</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getVersion()">getVersion</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return the current version of the match.</div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#isLocallyModified()">isLocallyModified</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">Return whether or not this match has been locally modified.</div>
-
+  
   </td></tr>
 
 
@@ -2460,27 +2470,27 @@ From interface
 
 <A NAME="CREATOR"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntityCreator.html">TurnBasedMatchEntityCreator</a>
       </span>
         CREATOR
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2505,14 +2515,14 @@ From interface
 
 <A NAME="canRematch()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">canRematch</span>
@@ -2520,12 +2530,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return whether or not this match can be rematched. This will return true when the match has
  complete and has not already been rematched.</p></div>
   <div class="jd-tagdata">
@@ -2540,14 +2550,14 @@ From interface
 
 <A NAME="describeContents()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">describeContents</span>
@@ -2555,12 +2565,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2569,14 +2579,14 @@ From interface
 
 <A NAME="equals(java.lang.Object)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">equals</span>
@@ -2584,12 +2594,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2598,14 +2608,14 @@ From interface
 
 <A NAME="freeze()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a>
       </span>
       <span class="sympad">freeze</span>
@@ -2613,12 +2623,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Freeze a volatile representation into an immutable representation. Objects returned from this
  call are safe to cache.
  <p>
@@ -2645,14 +2655,14 @@ From interface
 
 <A NAME="getAutoMatchCriteria()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Bundle
       </span>
       <span class="sympad">getAutoMatchCriteria</span>
@@ -2660,12 +2670,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the automatch criteria used to create or join this match, if any. May be null if
  the match has no automatch properties.</p></div>
   <div class="jd-tagdata">
@@ -2680,14 +2690,14 @@ From interface
 
 <A NAME="getAvailableAutoMatchSlots()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getAvailableAutoMatchSlots</span>
@@ -2695,12 +2705,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the maximum number of available automatch slots for this match. If automatch criteria
  were not specified during match creation, or if all slots have been filled, this will return
  0.</p></div>
@@ -2716,14 +2726,14 @@ From interface
 
 <A NAME="getCreationTimestamp()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
       <span class="sympad">getCreationTimestamp</span>
@@ -2731,12 +2741,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2745,14 +2755,14 @@ From interface
 
 <A NAME="getCreatorId()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getCreatorId</span>
@@ -2760,12 +2770,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2774,14 +2784,14 @@ From interface
 
 <A NAME="getData()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         byte[]
       </span>
       <span class="sympad">getData</span>
@@ -2789,12 +2799,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the current (game-specific) data for this match.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2808,14 +2818,14 @@ From interface
 
 <A NAME="getGame()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/games/Game.html">Game</a>
       </span>
       <span class="sympad">getGame</span>
@@ -2823,12 +2833,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2837,14 +2847,14 @@ From interface
 
 <A NAME="getLastUpdatedTimestamp()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
       <span class="sympad">getLastUpdatedTimestamp</span>
@@ -2852,12 +2862,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the timestamp at which the match was last modified.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2871,14 +2881,14 @@ From interface
 
 <A NAME="getLastUpdaterId()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getLastUpdaterId</span>
@@ -2886,12 +2896,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the ID of the participant who updated the match most recently.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2905,14 +2915,14 @@ From interface
 
 <A NAME="getMatchId()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getMatchId</span>
@@ -2920,12 +2930,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2934,14 +2944,14 @@ From interface
 
 <A NAME="getMatchNumber()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getMatchNumber</span>
@@ -2949,12 +2959,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the match sequence number for this match. This number starts at 1, and increases every
  time a rematch is created.</p></div>
   <div class="jd-tagdata">
@@ -2969,14 +2979,14 @@ From interface
 
 <A NAME="getParticipant(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>
       </span>
       <span class="sympad">getParticipant</span>
@@ -2984,12 +2994,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get a participant in a match by its ID. Note that the participant ID must correspond to a
  participant in this match, or this method will throw an exception.</p></div>
   <div class="jd-tagdata">
@@ -3012,14 +3022,14 @@ From interface
 
 <A NAME="getParticipantId(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getParticipantId</span>
@@ -3027,12 +3037,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the participant ID for a given player. This will only return a non-null ID if the player
  is actually a participant in the match and that player's identity is visible to the current
  player. Note that this will always return non-null for the current player.</p></div>
@@ -3057,14 +3067,14 @@ From interface
 
 <A NAME="getParticipantIds()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         ArrayList&lt;String&gt;
       </span>
       <span class="sympad">getParticipantIds</span>
@@ -3072,12 +3082,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the IDs of the participants of the given match.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3092,14 +3102,14 @@ From interface
 
 <A NAME="getParticipantStatus(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getParticipantStatus</span>
@@ -3107,12 +3117,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the status of a participant in a match. Note that the participant ID must correspond to a
  participant in this match, or this method will throw an exception.</p></div>
   <div class="jd-tagdata">
@@ -3138,14 +3148,14 @@ From interface
 
 <A NAME="getParticipants()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         ArrayList&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;
       </span>
       <span class="sympad">getParticipants</span>
@@ -3153,12 +3163,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object. This is a list of all Participants
  applicable to the given object.</p></div>
   <div class="jd-tagdata">
@@ -3173,14 +3183,14 @@ From interface
 
 <A NAME="getPendingParticipantId()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getPendingParticipantId</span>
@@ -3188,12 +3198,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the ID of the participant that is considered pending. If no participant is considered
  pending (ie, the match is over, etc), this function will return null.</p></div>
   <div class="jd-tagdata">
@@ -3209,14 +3219,14 @@ From interface
 
 <A NAME="getPreviousMatchData()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         byte[]
       </span>
       <span class="sympad">getPreviousMatchData</span>
@@ -3224,12 +3234,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the match data from the previous match, if available. Note that this is only provided
  on the first turn of a rematched match.</p></div>
   <div class="jd-tagdata">
@@ -3244,14 +3254,14 @@ From interface
 
 <A NAME="getRematchId()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getRematchId</span>
@@ -3259,12 +3269,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the match ID of the rematch that was created from this match, if any. This will only
  be non-null if a rematch has been created.</p></div>
   <div class="jd-tagdata">
@@ -3279,14 +3289,14 @@ From interface
 
 <A NAME="getStatus()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getStatus</span>
@@ -3294,12 +3304,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3308,14 +3318,14 @@ From interface
 
 <A NAME="getTurnStatus()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getTurnStatus</span>
@@ -3323,12 +3333,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3337,14 +3347,14 @@ From interface
 
 <A NAME="getVariant()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getVariant</span>
@@ -3352,12 +3362,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3366,14 +3376,14 @@ From interface
 
 <A NAME="getVersion()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getVersion</span>
@@ -3381,12 +3391,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the current version of the match.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3400,14 +3410,14 @@ From interface
 
 <A NAME="hashCode()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">hashCode</span>
@@ -3415,12 +3425,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3429,14 +3439,14 @@ From interface
 
 <A NAME="isDataValid()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">isDataValid</span>
@@ -3444,12 +3454,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Check to see if this object is valid for use. If the object is still volatile, this method
  will indicate whether or not the object can be safely used. The output of a call to
  <code><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze()</a></code> will always be valid.</p></div>
@@ -3465,14 +3475,14 @@ From interface
 
 <A NAME="isLocallyModified()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">isLocallyModified</span>
@@ -3480,16 +3490,16 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return whether or not this match has been locally modified. If this is true, the local device
  has match state which has not successfully synced to the server yet. In this state, further
  mutations to the match will fail with a status of
- STATUS_MATCH_ERROR_LOCALLY_MODIFIED.</p></div>
+ <code><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_LOCALLY_MODIFIED">STATUS_MATCH_ERROR_LOCALLY_MODIFIED</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Whether this match has local modifications or not.
@@ -3502,14 +3512,14 @@ From interface
 
 <A NAME="toString()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">toString</span>
@@ -3517,12 +3527,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3531,14 +3541,14 @@ From interface
 
 <A NAME="writeToParcel(android.os.Parcel, int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">writeToParcel</span>
@@ -3546,12 +3556,12 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3569,17 +3579,17 @@ From interface
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -3587,7 +3597,7 @@ From interface
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -3600,7 +3610,7 @@ From interface
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 
