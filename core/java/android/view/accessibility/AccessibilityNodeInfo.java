@@ -2814,11 +2814,16 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param columnCount The number of columns.
          * @param hierarchical Whether the collection is hierarchical.
          */
-        public static CollectionInfo obtain(int rowCount, int columnCount,
-                boolean hierarchical) {
-            CollectionInfo info = sPool.acquire();
-            return (info != null) ? info : new CollectionInfo(rowCount,
-                    columnCount, hierarchical);
+        public static CollectionInfo obtain(int rowCount, int columnCount, boolean hierarchical) {
+            final CollectionInfo info = sPool.acquire();
+            if (info == null) {
+                return new CollectionInfo(rowCount, columnCount, hierarchical);
+            }
+
+            info.mRowCount = rowCount;
+            info.mColumnCount = columnCount;
+            info.mHierarchical = hierarchical;
+            return info;
         }
 
         /**
@@ -2916,11 +2921,19 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param columnSpan The number of columns the item spans.
          * @param heading Whether the item is a heading.
          */
-        public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
-                int columnIndex, int columnSpan, boolean heading) {
-            CollectionItemInfo info = sPool.acquire();
-            return (info != null) ? info : new CollectionItemInfo(rowIndex,
-                    rowSpan, columnIndex, columnSpan, heading);
+        public static CollectionItemInfo obtain(int rowIndex, int rowSpan, int columnIndex,
+                int columnSpan, boolean heading) {
+            final CollectionItemInfo info = sPool.acquire();
+            if (info == null) {
+                return new CollectionItemInfo(rowIndex, rowSpan, columnIndex, columnSpan, heading);
+            }
+
+            info.mRowIndex = rowIndex;
+            info.mRowSpan = rowSpan;
+            info.mColumnIndex = columnIndex;
+            info.mColumnSpan = columnSpan;
+            info.mHeading = heading;
+            return info;
         }
 
         private boolean mHeading;
