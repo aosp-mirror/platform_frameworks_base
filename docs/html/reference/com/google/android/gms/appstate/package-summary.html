@@ -436,6 +436,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -691,20 +701,53 @@ onkeyup="return search_changed(event, false, '/')" />
               <td class="jd-descrcol" width="100%">Data interface for retrieving app state information.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/OnSignOutCompleteListener.html">OnSignOutCompleteListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving a callback when a sign-out is complete.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a></td>
+              <td class="jd-descrcol" width="100%">Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when a conflict is detected while loading app
+ state.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/OnStateDeletedListener.html">OnStateDeletedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when app state data has been deleted.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateDeletedResult.html">AppStateManager.StateDeletedResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when app state data has been deleted.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/OnStateListLoadedListener.html">OnStateListLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when a list of app state data has been loaded.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateListResult.html">AppStateManager.StateListResult</a></td>
+              <td class="jd-descrcol" width="100%">Result delivered when app state data has been loaded.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></td>
+              <td class="jd-descrcol" width="100%">Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when app state data has been loaded successfully.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></td>
+              <td class="jd-descrcol" width="100%">Result of an operation that could potentially generate a state conflict.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/OnSignOutCompleteListener.html">OnSignOutCompleteListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/OnStateDeletedListener.html">OnStateDeletedListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateDeletedResult.html">AppStateManager.StateDeletedResult</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/OnStateListLoadedListener.html">OnStateListLoadedListener</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateListResult.html">AppStateManager.StateListResult</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/OnStateLoadedListener.html">OnStateLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for receiving callbacks when app state data has been loaded.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></code>.
+</em>&nbsp;</td>
           </tr>
   </table>
     </div>
@@ -722,11 +765,25 @@ onkeyup="return search_changed(event, false, '/')" />
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateClient.html">AppStateClient</a></td>
-              <td class="jd-descrcol" width="100%">Main public API entry point for the AppState client.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.html">AppStateManager</a></code> and <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateClient.Builder.html">AppStateClient.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder class for AppStateClient.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html">AppStateManager</a></td>
+              <td class="jd-descrcol" width="100%">Main public API entry point for the AppState APIs.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateStatusCodes.html">AppStateStatusCodes</a></td>
+              <td class="jd-descrcol" width="100%">Status codes for AppState results.&nbsp;</td>
           </tr>
   </table>
     </div>

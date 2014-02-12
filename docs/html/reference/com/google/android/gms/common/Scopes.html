@@ -435,6 +435,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -813,8 +823,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/Scopes.html#DRIVE_FILE">DRIVE_FILE</a></td>
         <td class="jd-descrcol" width="100%">Scopes for access user-authorized files from Google Drive.</td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/Scopes.html#GAMES">GAMES</a></td>
@@ -832,8 +842,15 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_PROFILE">PLUS_PROFILE</a></td>
-        <td class="jd-descrcol" width="100%">OAuth 2.0 scope for accessing the user's Google+ profile data.</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_ME">PLUS_ME</a></td>
+        <td class="jd-descrcol" width="100%"><p>This scope was previously named PLUS_PROFILE.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/Scopes.html#PROFILE">PROFILE</a></td>
+        <td class="jd-descrcol" width="100%">OAuth 2.0 scope for accessing user's basic profile information.</td>
     </tr>
     
     
@@ -1136,37 +1153,37 @@ From class
 
 <A NAME="DRIVE_FILE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         DRIVE_FILE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Scopes for access user-authorized files from Google Drive.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "https://www.googleapis.com/auth/drive.file"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1257,7 +1274,7 @@ From class
 
 
 
-<A NAME="PLUS_PROFILE"></A>
+<A NAME="PLUS_ME"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1267,7 +1284,7 @@ From class
         final 
         String
       </span>
-        PLUS_PROFILE
+        PLUS_ME
     </h4>
       <div class="api-level">
         
@@ -1277,7 +1294,14 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>OAuth 2.0 scope for accessing the user's Google+ profile data.
+  <div class="jd-tagdata jd-tagdescr"><p><p>This scope was previously named PLUS_PROFILE.</p>
+ <p>When using this scope, it does the following:</p>
+ <ul>
+
+ <li>It lets you know who the currently authenticated user is by letting you replace a
+ Google+ user ID with "me", which represents the authenticated user, in any call to the
+ Google+ API.</li>
+ </ul>
 </p></div>
 
     
@@ -1286,6 +1310,54 @@ From class
         <span>
             
                 "https://www.googleapis.com/auth/plus.me"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="PROFILE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        PROFILE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>OAuth 2.0 scope for accessing user's basic profile information.
+
+ <p>When using this scope, it does the following:</p>
+ <ul>
+ <li>It requests that your app be given access to the authenticated user's basic profile
+ information.</li>
+ <li>It lets you know who the currently authenticated user is by letting you replace a
+ Google+ user ID with "me", which represents the authenticated user, in any call to the
+ Google+ API.</li>
+ <li>It lets your web app access over-the-air Android app installs.</li>
+ </ul>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "profile"
             
         </span>
         </div>

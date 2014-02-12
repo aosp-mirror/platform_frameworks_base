@@ -436,6 +436,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </a></div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/drive.html">
+          <span class="en">Drive</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/cast.html">
+          <span class="en">Cast</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/ads.html">
       <span class="en">Ads</span></a>
     </div>
@@ -687,20 +697,56 @@ onkeyup="return search_changed(event, false, '/')" />
     
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Account.html">Account</a></td>
+              <td class="jd-descrcol" width="100%">The main entry point for Google+ account management.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Moments.html">Moments</a></td>
+              <td class="jd-descrcol" width="100%">Methods and interfaces related to moments in Google+.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></td>
+              <td class="jd-descrcol" width="100%">Information about the set of moments that was loaded.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.html">People</a></td>
+              <td class="jd-descrcol" width="100%">Methods and interfaces related to people in Google+.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></td>
+              <td class="jd-descrcol" width="100%">Information about the set of people that was loaded.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.OrderBy.html">People.OrderBy</a></td>
+              <td class="jd-descrcol" width="100%">Constants to declare the order to return people in.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener interface for when the token revocation request has completed.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/">ERROR(/Auth.OnAccessRevokedCallback)</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener interface for when moments are loaded.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener interface for when a collection of people are loaded.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OrderBy.html">PlusClient.OrderBy</a></td>
-              <td class="jd-descrcol" width="100%">Constants to declare the order to return people in.&nbsp;</td>
+              <td class="jd-descrcol" width="100%"><em>
+      This interface is deprecated.
+    See <code><a href="/reference/com/google/android/gms/plus/People.OrderBy.html">People.OrderBy</a></code>.
+</em>&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a></td>
@@ -717,39 +763,57 @@ onkeyup="return search_changed(event, false, '/')" />
     
   <table class="jd-sumtable-expando">
         <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Plus.html">Plus</a></td>
               <td class="jd-descrcol" width="100%">The main entry point for Google+ integration.&nbsp;</td>
           </tr>
         <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder to configure a <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> for communicating with the Google+ APIs.&nbsp;</td>
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Plus.PlusOptions.html">Plus.PlusOptions</a></td>
+              <td class="jd-descrcol" width="100%">API configuration parameters for Google+.&nbsp;</td>
           </tr>
         <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Plus.PlusOptions.Builder.html">Plus.PlusOptions.Builder</a></td>
+              <td class="jd-descrcol" width="100%">&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-" >
+              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></td>
+              <td class="jd-descrcol" width="100%"><em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></code>.
+</em>&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html">PlusOneButton</a></td>
               <td class="jd-descrcol" width="100%">The +1 button to recommend a URL on Google+.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.DefaultOnPlusOneClickListener.html">PlusOneButton.DefaultOnPlusOneClickListener</a></td>
               <td class="jd-descrcol" width="100%">This is an <code><a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a></code> that will proxy clicks to an
  attached <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a></code>, or default to attempt to start
  the intent using an <code><a href="/reference/android/app/Activity.html">Activity</a></code> context.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html">PlusOneButtonWithPopup</a></td>
               <td class="jd-descrcol" width="100%">+1 button which shows confirmation messages in a PopupWindow.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneDummyView.html">PlusOneDummyView</a></td>
               <td class="jd-descrcol" width="100%">A class used to statically generate dummy views in the event of an error retrieving
  a PlusOneButton from the apk
 &nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-" >
+        <tr class=" api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.html">PlusShare</a></td>
               <td class="jd-descrcol" width="100%">Utility class for including resources in posts shared on Google+ through
  an <code><a href="/reference/android/content/Intent.html#ACTION_SEND">ACTION_SEND</a></code> intent.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-" >
+        <tr class="alt-color api apilevel-" >
               <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html">PlusShare.Builder</a></td>
               <td class="jd-descrcol" width="100%">&nbsp;</td>
           </tr>
