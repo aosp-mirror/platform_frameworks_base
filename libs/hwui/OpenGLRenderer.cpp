@@ -868,11 +868,14 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
 
     const bool fboLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
 
+    SkXfermode::Mode mode = getXfermodeDirect(paint);
+    int alpha = getAlphaDirect(paint);
+
     // Window coordinates of the layer
     Rect clip;
     Rect bounds(left, top, right, bottom);
     calculateLayerBoundsAndClip(bounds, clip, fboLayer);
-    updateSnapshotIgnoreForLayer(bounds, clip, fboLayer, getAlphaDirect(paint));
+    updateSnapshotIgnoreForLayer(bounds, clip, fboLayer, alpha);
 
     // Bail out if we won't draw in this snapshot
     if (currentSnapshot()->isIgnored()) {
@@ -885,11 +888,12 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
         return false;
     }
 
-    layer->setPaint(paint);
+    layer->setAlpha(alpha, mode);
     layer->layer.set(bounds);
     layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->getHeight()),
             bounds.getWidth() / float(layer->getWidth()), 0.0f);
 
+    layer->setColorFilter(getColorFilter(paint));
     layer->setBlend(true);
     layer->setDirty(false);
 
@@ -1007,6 +1011,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     }
 
     if (!fboLayer && layer->getAlpha() < 255) {
+        // TODO: this seems to point to the fact that the layer should store the paint
         SkPaint layerPaint;
         layerPaint.setAlpha(layer->getAlpha());
         layerPaint.setXfermodeMode(SkXfermode::kDstIn_Mode);

@@ -117,7 +117,7 @@ public:
         texture.height = height;
     }
 
-    ANDROID_API void setPaint(const SkPaint* paint);
+    ANDROID_API void setPaint(SkPaint* paint);
 
     inline void setBlend(bool blend) {
         texture.blend = blend;
