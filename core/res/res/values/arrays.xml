@@ -228,9 +228,11 @@
        <item>@drawable/ic_clear</item>
        <item>@drawable/ic_clear_disabled</item>
        <item>@drawable/ic_clear_normal</item>
-       <item>@drawable/ic_search</item>
+       <item>@drawable/ic_search_api_holo_dark</item>
+       <item>@drawable/ic_search_api_holo_light</item>
        <item>@drawable/ic_go</item>
-       <item>@drawable/ic_voice_search</item>
+       <item>@drawable/ic_voice_search_api_holo_dark</item>
+       <item>@drawable/ic_voice_search_api_holo_light</item>
        <item>@drawable/dialog_bottom_holo_dark</item>
        <item>@drawable/dialog_bottom_holo_light</item>
        <item>@drawable/dialog_full_holo_dark</item>
