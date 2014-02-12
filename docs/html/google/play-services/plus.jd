@@ -17,8 +17,8 @@ header.hide=1
   with the same credentials they use on Google every day. Once a user signs in with Google,
   you can create more engaging experiences and drive usage of your app.</p>
   
-  <p>Check out the <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html"
->Google+ Android API reference</a> and visit <a class="external-link"
+  <p>Explore the <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html"
+>Google+ Android API reference</a> or visit <a class="external-link"
 href="https://developers.google.com/+/mobile/android/">developers.google.com/+</a> for more
 information about integrating Google+ into your app.</p>
 </div>

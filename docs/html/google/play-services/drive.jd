@@ -136,12 +136,6 @@ header.hide=1
           "external-link" href=
           "https://developers.google.com/drive/android">developers.google.com/drive</a>.
         </p>
-        <p class="caution">
-          The Google Drive Android API is currently in <strong>developer
-          preview</strong>. Applications compiled using this version of the API will
-          continue to operate on devices using future versions of Google Play services;
-          however, changes to the API are expected in future releases.
-        </p>
       </div>
     </div>
     
