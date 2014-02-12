@@ -17,9 +17,10 @@ header.hide=1
   Let players sign in using their Google+ identities and share their gaming experience with
   friends.
   </p>
-  <p>Visit <a class="external-link"
-    href="https://developers.google.com/games/services/">developers.google.com/games/services</a>
-    for more information about integrating game services into your app.
+  <p>Explore the <a href="{@docRoot}reference/com/google/android/gms/games/package-summary.html">Google
+Play Games Android API reference</a> or visit <a class="external-link" href=
+"https://developers.google.com/games/services/">developers.google.com/games/services</a> for more
+information about integrating game services into your app.
 </p>
 </div>
 </div>
