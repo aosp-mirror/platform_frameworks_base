@@ -284,11 +284,37 @@ static status_t getIdmapPackageId(const uint32_t* map, size_t mapSize, uint32_t 
     if (!assertIdmapHeader(map, mapSize)) {
         return UNKNOWN_ERROR;
     }
+    if (mapSize <= IDMAP_HEADER_SIZE + 1) {
+        ALOGW("corrupt idmap: map size %d too short\n", mapSize);
+        return UNKNOWN_ERROR;
+    }
+    uint32_t typeCount = *(map + IDMAP_HEADER_SIZE);
+    if (typeCount == 0) {
+        ALOGW("corrupt idmap: no types\n");
+        return UNKNOWN_ERROR;
+    }
+    if (IDMAP_HEADER_SIZE + 1 + typeCount > mapSize) {
+        ALOGW("corrupt idmap: number of types %d extends past idmap size %d\n", typeCount, mapSize);
+        return UNKNOWN_ERROR;
+    }
     const uint32_t* p = map + IDMAP_HEADER_SIZE + 1;
+    // find first defined type
     while (*p == 0) {
         ++p;
+        if (--typeCount == 0) {
+            ALOGW("corrupt idmap: types declared, none found\n");
+            return UNKNOWN_ERROR;
+        }
     }
-    *outId = (map[*p + IDMAP_HEADER_SIZE + 2] >> 24) & 0x000000ff;
+
+    // determine package id from first entry of first type
+    const uint32_t offset = *p + IDMAP_HEADER_SIZE + 2;
+    if (offset > mapSize) {
+        ALOGW("corrupt idmap: entry offset %d points outside map size %d\n", offset, mapSize);
+        return UNKNOWN_ERROR;
+    }
+    *outId = (map[offset] >> 24) & 0x000000ff;
+
     return NO_ERROR;
 }
 
@@ -5334,23 +5360,30 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     return NO_ERROR;
 }
 
-status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, uint32_t overlayCrc,
-                               void** outData, size_t* outSize) const
+status_t ResTable::createIdmap(const ResTable& overlay,
+        uint32_t targetCrc, uint32_t overlayCrc,
+        const char* targetPath, const char* overlayPath,
+        void** outData, size_t* outSize) const
 {
     // see README for details on the format of map
     if (mPackageGroups.size() == 0) {
+        ALOGW("idmap: target package has no package groups, cannot create idmap\n");
         return UNKNOWN_ERROR;
     }
     if (mPackageGroups[0]->packages.size() == 0) {
+        ALOGW("idmap: target package has no packages in its first package group, "
+                "cannot create idmap\n");
         return UNKNOWN_ERROR;
     }
 
     Vector<Vector<uint32_t> > map;
+    // overlaid packages are assumed to contain only one package group
     const PackageGroup* pg = mPackageGroups[0];
     const Package* pkg = pg->packages[0];
     size_t typeCount = pkg->types.size();
     // starting size is header + first item (number of types in map)
     *outSize = (IDMAP_HEADER_SIZE + 1) * sizeof(uint32_t);
+    // overlay packages are assumed to contain only one package group
     const String16 overlayPackage(overlay.mPackageGroups[0]->packages[0]->package->name);
     const uint32_t pkg_id = pkg->package->id << 24;
 
@@ -5426,8 +5459,22 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
     }
     uint32_t* data = (uint32_t*)*outData;
     *data++ = htodl(IDMAP_MAGIC);
-    *data++ = htodl(originalCrc);
+    *data++ = htodl(targetCrc);
     *data++ = htodl(overlayCrc);
+    const char* paths[] = { targetPath, overlayPath };
+    for (int j = 0; j < 2; ++j) {
+        char* p = (char*)data;
+        const char* path = paths[j];
+        const size_t I = strlen(path);
+        if (I > 255) {
+            ALOGV("path exceeds expected 255 characters: %s\n", path);
+            return UNKNOWN_ERROR;
+        }
+        for (size_t i = 0; i < 256; ++i) {
+            *p++ = i < I ? path[i] : '\0';
+        }
+        data += 256 / sizeof(uint32_t);
+    }
     const size_t mapSize = map.size();
     *data++ = htodl(mapSize);
     size_t offset = mapSize;
@@ -5441,6 +5488,10 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
             *data++ = htodl(offset);
             offset += N;
         }
+    }
+    if (offset == mapSize) {
+        ALOGW("idmap: no resources in overlay package present in base package\n");
+        return UNKNOWN_ERROR;
     }
     for (size_t i = 0; i < mapSize; ++i) {
         const Vector<uint32_t>& vector = map.itemAt(i);
@@ -5463,14 +5514,25 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
 }
 
 bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
-                            uint32_t* pOriginalCrc, uint32_t* pOverlayCrc)
+                            uint32_t* pTargetCrc, uint32_t* pOverlayCrc,
+                            String8* pTargetPath, String8* pOverlayPath)
 {
     const uint32_t* map = (const uint32_t*)idmap;
     if (!assertIdmapHeader(map, sizeBytes)) {
         return false;
     }
-    *pOriginalCrc = map[1];
-    *pOverlayCrc = map[2];
+    if (pTargetCrc) {
+        *pTargetCrc = map[1];
+    }
+    if (pOverlayCrc) {
+        *pOverlayCrc = map[2];
+    }
+    if (pTargetPath) {
+        pTargetPath->setTo(reinterpret_cast<const char*>(map + 3));
+    }
+    if (pOverlayPath) {
+        pOverlayPath->setTo(reinterpret_cast<const char*>(map + 3 + 256 / sizeof(uint32_t)));
+    }
     return true;
 }
 

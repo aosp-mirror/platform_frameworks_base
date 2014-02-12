@@ -1777,6 +1777,16 @@
         <attr name="publicKey" />
     </declare-styleable>
 
+    <!-- Attributes relating to resource overlay packages. -->
+    <declare-styleable name="AndroidManifestResourceOverlay" parent="AndroidManifest">
+        <!-- Package name of base package whose resources will be overlaid. -->
+        <attr name="targetPackage" />
+
+        <!-- Load order of overlay package. -->
+        <attr name="priority" />
+
+    </declare-styleable>
+
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May
          also include zero or more {@link #IntentCategory <category> and
          {@link #Extra <extra>} tags. -->

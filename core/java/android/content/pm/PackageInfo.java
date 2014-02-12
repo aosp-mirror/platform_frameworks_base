@@ -227,6 +227,14 @@ public class PackageInfo implements Parcelable {
     /** @hide */
     public String requiredAccountType;
 
+    /**
+     * What package, if any, this package will overlay.
+     *
+     * Package name of target package, or null.
+     * @hide
+     */
+    public String overlayTarget;
+
     public PackageInfo() {
     }
 
@@ -270,6 +278,7 @@ public class PackageInfo implements Parcelable {
         dest.writeInt(requiredForAllUsers ? 1 : 0);
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
+        dest.writeString(overlayTarget);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -311,5 +320,6 @@ public class PackageInfo implements Parcelable {
         requiredForAllUsers = source.readInt() != 0;
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
+        overlayTarget = source.readString();
     }
 }
