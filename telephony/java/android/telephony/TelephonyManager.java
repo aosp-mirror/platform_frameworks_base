@@ -62,6 +62,20 @@ public class TelephonyManager {
     private static ITelephonyRegistry sRegistry;
     private final Context mContext;
 
+    /**
+     * The allowed states of Wi-Fi calling.
+     *
+     * @hide
+     */
+    public interface WifiCallingChoices {
+        /** Always use Wi-Fi calling */
+        static final int ALWAYS_USE = 0;
+        /** Never use Wi-Fi calling */
+        static final int NEVER_USE = 1;
+        /** Ask the user whether to use Wi-Fi on every call */
+        static final int ASK_EVERY_TIME = 2;
+    }
+
     /** @hide */
     public TelephonyManager(Context context) {
         Context appContext = context.getApplicationContext();
@@ -1617,5 +1631,31 @@ public class TelephonyManager {
             Rlog.e(TAG, "setRadioMode NPE", ex);
         }
         return false;
+
+    /*
+     * Obtain the current state of Wi-Fi calling.
+     *
+     * @hide
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    public int getWhenToMakeWifiCalls() {
+        try {
+            return getITelephony().getWhenToMakeWifiCalls();
+        } catch (RemoteException ex) {
+            return WifiCallingChoices.NEVER_USE;
+        }
+    }
+
+    /**
+     * Set the current state of Wi-Fi calling.
+     *
+     * @hide
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    public void setWhenToMakeWifiCalls(int state) {
+        try {
+            getITelephony().setWhenToMakeWifiCalls(state);
+        } catch (RemoteException ex) {
+        }
     }
 }

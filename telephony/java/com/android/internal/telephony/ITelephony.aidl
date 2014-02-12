@@ -425,4 +425,18 @@ interface ITelephony {
      */
     void newIncomingThirdPartyCall(in ComponentName component, String callId,
             String callerDisplayName);
+
+    /**
+     * Obtain the current state of Wi-Fi calling.
+     *
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    int getWhenToMakeWifiCalls();
+
+    /**
+     * Set the current state of Wi-Fi calling.
+     *
+     * @see android.telephony.TelephonyManager.WifiCallingChoices
+     */
+    void setWhenToMakeWifiCalls(int state);
 }
