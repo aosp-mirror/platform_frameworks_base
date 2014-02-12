@@ -73,7 +73,11 @@ public:
     ANDROID_API void setDisplayList(DisplayList* displayList,
                 int left, int top, int right, int bottom);
 
-    ANDROID_API void setPaint(const SkPaint* paint);
+    ANDROID_API void setPaint(const SkPaint* paint) {
+        OpenGLRenderer::getAlphaAndModeDirect(paint, &mAlpha, &mMode);
+    }
+
+    ANDROID_API void setColorFilter(SkColorFilter* colorFilter);
 
     ANDROID_API bool apply();
     ANDROID_API void applyDeferred(DeferredLayerUpdater* deferredApply);

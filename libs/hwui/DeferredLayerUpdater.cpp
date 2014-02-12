@@ -32,26 +32,24 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, OpenGLRenderer* rendere
         , mRenderer(renderer)
         , mCaches(Caches::getInstance()) {
     mCaches.resourceCache.incrementRefcount(mLayer);
-    SkRefCnt_SafeAssign(mColorFilter, mLayer->getColorFilter());
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();
+    mColorFilter = mLayer->getColorFilter();
     mAlpha = mLayer->getAlpha();
     mMode = mLayer->getMode();
     mDirtyRect.setEmpty();
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
-    SkSafeUnref(mColorFilter);
+    setColorFilter(NULL);
     if (mLayer) {
         mCaches.resourceCache.decrementRefcount(mLayer);
     }
     delete mRenderer;
 }
 
-void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &mAlpha, &mMode);
-    SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : NULL;
+void DeferredLayerUpdater::setColorFilter(SkColorFilter* colorFilter) {
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
@@ -138,9 +136,8 @@ void DeferredLayerUpdater::applyDeferred(DeferredLayerUpdater* deferredApply) {
     deferredApply->mSurfaceTexture = mSurfaceTexture;
     deferredApply->mNeedsGLContextAttach = mNeedsGLContextAttach;
     deferredApply->mUpdateTexImage = mUpdateTexImage;
+    deferredApply->setColorFilter(mColorFilter);
     deferredApply->setTransform(mTransform);
-
-    SkRefCnt_SafeAssign(deferredApply->mColorFilter, mColorFilter);
 
     mDisplayList = 0;
     mDirtyRect.setEmpty();
