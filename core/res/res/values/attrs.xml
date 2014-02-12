@@ -2457,7 +2457,7 @@
         <!-- Set to true if this input method supports ways to switch to
              a next input method (e.g. a globe key.). When this is true and
              InputMethodManager#shouldOfferSwitchingToNextInputMethod() returns true,
-             the IME has to offer ways to to invoke InputMethodManager#switchToNextInputMethod()
+             the IME has to offer ways to invoke InputMethodManager#switchToNextInputMethod()
              accordingly.
              <p> Note that the system determines the most appropriate next input method
              and subtype in order to provide the consistent user experience in switching
