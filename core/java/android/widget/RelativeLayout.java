@@ -748,13 +748,13 @@ public class RelativeLayout extends ViewGroup {
         // measurement is code for, "we got an unspecified mode in the
         // RelativeLayout's measure spec."
         if (mySize < 0 && !mAllowBrokenMeasureSpecs) {
-            if (childSize >= 0) {
-                // The child specified an exact size.
-                childSpecSize = childSize;
-                childSpecMode = MeasureSpec.EXACTLY;
-            } else if (childStart >= 0 && childEnd >= 0) {
+            if (childStart >= 0 && childEnd >= 0) {
                 // Constraints fixed both edges, so child has an exact size.
                 childSpecSize = Math.max(0, childEnd - childStart);
+                childSpecMode = MeasureSpec.EXACTLY;
+            } else if (childSize >= 0) {
+                // The child specified an exact size.
+                childSpecSize = childSize;
                 childSpecMode = MeasureSpec.EXACTLY;
             } else {
                 // Allow the child to be whatever size it wants.
