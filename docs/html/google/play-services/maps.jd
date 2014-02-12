@@ -17,12 +17,11 @@ header.hide=1
   Google. Identify locations with <b>custom markers</b>, augment the map data
   with <b>image overlays</b>, embed <b>one or more maps</b> as fragments,
   and much more.</p>
-  <p>The <a
+  <p>Explore the <a
 href="{@docRoot}reference/com/google/android/gms/maps/package-summary.html"
->Google Maps Android API reference</a> is available here on developer.android.com, but for more
-information about adding maps to your app, visit:</p>
-  <p><a class="external-link"
-href="https://developers.google.com/maps/documentation/android/">developers.google.com/maps</a></p>
+>Google Maps Android API reference</a> or visit <a class="external-link"
+href="https://developers.google.com/maps/documentation/android/">developers.google.com/maps</a>
+for more information about adding maps to your app.</p>
 </div>
 </div>
 
