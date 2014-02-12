@@ -782,7 +782,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     void addRemoteDisplayTile(QuickSettingsTileView view, RefreshCallback cb) {
         mRemoteDisplayTile = view;
         mRemoteDisplayCallback = cb;
-        final int[] count = new int[1];
         mRemoteDisplayTile.setOnPrepareListener(new QuickSettingsTileView.OnPrepareListener() {
             @Override
             public void onPrepare() {
