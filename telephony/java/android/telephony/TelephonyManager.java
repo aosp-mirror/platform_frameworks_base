@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -1417,21 +1416,6 @@ public class TelephonyManager {
     public void setCellInfoListRate(int rateInMillis) {
         try {
             getITelephony().setCellInfoListRate(rateInMillis);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-    }
-
-    /**
-     * Inform the phone about a new incoming third party call. The phone will bind to the service
-     * identified by component to handle the call.
-     * @param component the component that should handle the intent.
-     * @param callId the unique id of the call. This id is passed to the service via {@link
-     *               ThirdPartyCallService#incomingCallAttach incomingCallAttach}.
-     */
-    public void newIncomingThirdPartyCall(ComponentName component, String callId) {
-        try {
-            getITelephony().newIncomingThirdPartyCall(component, callId);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
