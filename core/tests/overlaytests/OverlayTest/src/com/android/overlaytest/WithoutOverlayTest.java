@@ -2,6 +2,6 @@ package com.android.overlaytest;
 
 public class WithoutOverlayTest extends OverlayBaseTest {
     public WithoutOverlayTest() {
-        mWithOverlay = false;
+        mMode = MODE_NO_OVERLAY;
     }
 }
