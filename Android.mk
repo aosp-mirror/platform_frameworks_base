@@ -554,7 +554,9 @@ sample_groups := -samplegroup Background \
                  -samplegroup Content \
                  -samplegroup Input \
                  -samplegroup Media \
+                 -samplegroup RenderScript \
                  -samplegroup Security \
+                 -samplegroup Sensors \
                  -samplegroup Testing \
                  -samplegroup UI \
                  -samplegroup Views
