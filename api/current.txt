@@ -24243,8 +24243,8 @@ package android.telecomm {
   public abstract interface ICallServiceAdapter implements android.os.IInterface {
     method public abstract void getNextCallId() throws android.os.RemoteException;
     method public abstract void handleFailedOutgoingCall(java.lang.String, java.lang.String) throws android.os.RemoteException;
+    method public abstract void handleIncomingCall(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void handleSuccessfulOutgoingCall(java.lang.String) throws android.os.RemoteException;
-    method public abstract void newIncomingCall(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void setActive(java.lang.String) throws android.os.RemoteException;
     method public abstract void setCompatibleWith(java.lang.String, boolean) throws android.os.RemoteException;
     method public abstract void setDialing(java.lang.String) throws android.os.RemoteException;
