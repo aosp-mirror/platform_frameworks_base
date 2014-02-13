@@ -43,10 +43,10 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.bars.ActionBarLayout;
 import com.android.layoutlib.bridge.bars.NavigationBar;
 import com.android.layoutlib.bridge.bars.StatusBar;
 import com.android.layoutlib.bridge.bars.TitleBar;
+import com.android.layoutlib.bridge.bars.ActionBarLayout;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.Density;
@@ -148,10 +148,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     /**
      * Creates a layout scene with all the information coming from the layout bridge API.
      * <p>
-     * This <b>must</b> be followed by a call to {@link RenderSessionImpl#init()}, which act as a
+     * This <b>must</b> be followed by a call to {@link RenderSessionImpl#init(long)},
+     * which act as a
      * call to {@link RenderSessionImpl#acquire(long)}
      *
-     * @see LayoutBridge#createScene(com.android.layoutlib.api.SceneParams)
+     * @see Bridge#createSession(SessionParams)
      */
     public RenderSessionImpl(SessionParams params) {
         super(new SessionParams(params));
@@ -228,6 +229,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             BridgeContext context = getContext();
             boolean isRtl = Bridge.isLocaleRtl(params.getLocale());
             int layoutDirection = isRtl ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR;
+            ActionBarLayout actionBar = null;
 
             // the view group that receives the window background.
             ViewGroup backgroundView = null;
@@ -338,9 +340,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // if the theme says no title/action bar, then the size will be 0
                 if (mActionBarSize > 0) {
                     try {
-                        ActionBarLayout actionBar = createActionBar(context, params);
+                        actionBar = createActionBar(context, params);
                         backgroundLayout.addView(actionBar);
-                        mContentRoot = (FrameLayout) actionBar.findViewById(android.R.id.content);
+                        actionBar.createMenuPopup();
+                        mContentRoot = actionBar.getContentRoot();
                     } catch (XmlPullParserException e) {
 
                     }
@@ -427,7 +430,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
-     * @see RenderParams#getRenderingMode()
+     * @see SessionParams#getRenderingMode()
      * @see RenderSession#render(long)
      */
     public Result render(boolean freshRender) {
@@ -1381,7 +1384,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     /**
      * Visits all the children of a given ViewGroup and generates a list of {@link ViewInfo}
-     * containing the bounds of all the views. It also initializes the {@link mViewInfoList} with
+     * containing the bounds of all the views. It also initializes the {@link #mViewInfoList} with
      * the children of the {@code mContentRoot}.
      *
      * @param viewGroup the root View
