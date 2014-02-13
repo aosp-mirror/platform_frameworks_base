@@ -1088,6 +1088,14 @@
         android:label="@string/permlab_readPhoneState"
         android:description="@string/permdesc_readPhoneState" />
 
+    <!-- Allows read only access to precise phone state.
+         @hide Pending API council approval -->
+    <permission android:name="android.permission.READ_PRECISE_PHONE_STATE"
+        android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_readPrecisePhoneState"
+        android:description="@string/permdesc_readPrecisePhoneState" />
+
     <!-- Allows read access to privileged phone state.
          @hide Used internally. -->
     <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
