@@ -29,6 +29,7 @@ import java.lang.reflect.Array;
  */
 public class SpannableStringBuilder implements CharSequence, GetChars, Spannable, Editable,
         Appendable, GraphicsOperations {
+    private final static String TAG = "SpannableStringBuilder";
     /**
      * Create a new SpannableStringBuilder with empty contents
      */
@@ -436,9 +437,25 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     // Documentation from interface
-    public SpannableStringBuilder replace(final int start, final int end,
+    public SpannableStringBuilder replace(int start, int end,
             CharSequence tb, int tbstart, int tbend) {
         checkRange("replace", start, end);
+
+        // Sanity check
+        if (start > end) {
+            Log.w(TAG, "Bad arguments to #replace : "
+                    + "start = " + start + ", end = " + end);
+            final int tmp = start;
+            start = end;
+            end = tmp;
+        }
+        if (tbstart > tbend) {
+            Log.w(TAG, "Bad arguments to #replace : "
+                    + "tbstart = " + tbstart + ", tbend = " + tbend);
+            final int tmp = tbstart;
+            tbstart = tbend;
+            tbend = tmp;
+        }
 
         int filtercount = mFilters.length;
         for (int i = 0; i < filtercount; i++) {
@@ -613,8 +630,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         // 0-length Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         if (flagsStart == POINT && flagsEnd == MARK && start == end) {
-            if (send) Log.e("SpannableStringBuilder",
-                    "SPAN_EXCLUSIVE_EXCLUSIVE spans cannot have a zero length");
+            if (send) {
+                Log.e(TAG, "SPAN_EXCLUSIVE_EXCLUSIVE spans cannot have a zero length");
+            }
             // Silently ignore invalid spans when they are created from this class.
             // This avoids the duplication of the above test code before all the
             // calls to setSpan that are done in this class
