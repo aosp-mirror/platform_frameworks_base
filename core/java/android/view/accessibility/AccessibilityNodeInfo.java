@@ -2283,6 +2283,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeInt(mCollectionInfo.getRowCount());
             parcel.writeInt(mCollectionInfo.getColumnCount());
             parcel.writeInt(mCollectionInfo.isHierarchical() ? 1 : 0);
+            parcel.writeInt(mCollectionInfo.getSelectionMode());
         } else {
             parcel.writeInt(0);
         }
@@ -2294,6 +2295,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeInt(mCollectionItemInfo.getRowIndex());
             parcel.writeInt(mCollectionItemInfo.getRowSpan());
             parcel.writeInt(mCollectionItemInfo.isHeading() ? 1 : 0);
+            parcel.writeInt(mCollectionItemInfo.isSelected() ? 1 : 0);
         } else {
             parcel.writeInt(0);
         }
@@ -2420,7 +2422,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             mCollectionInfo = CollectionInfo.obtain(
                     parcel.readInt(),
                     parcel.readInt(),
-                    parcel.readInt() == 1);
+                    parcel.readInt() == 1,
+                    parcel.readInt());
         }
 
         if (parcel.readInt() == 1) {
@@ -2429,6 +2432,7 @@ public class AccessibilityNodeInfo implements Parcelable {
                     parcel.readInt(),
                     parcel.readInt(),
                     parcel.readInt(),
+                    parcel.readInt() == 1,
                     parcel.readInt() == 1);
         }
     }
@@ -2786,6 +2790,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      */
     public static final class CollectionInfo {
+        /** Selection mode where items are not selectable. */
+        public static final int SELECTION_MODE_NONE = 0;
+
+        /** Selection mode where a single item may be selected. */
+        public static final int SELECTION_MODE_SINGLE = 1;
+
+        /** Selection mode where multiple items may be selected. */
+        public static final int SELECTION_MODE_MULTIPLE = 2;
+
         private static final int MAX_POOL_SIZE = 20;
 
         private static final SynchronizedPool<CollectionInfo> sPool =
@@ -2794,17 +2807,17 @@ public class AccessibilityNodeInfo implements Parcelable {
         private int mRowCount;
         private int mColumnCount;
         private boolean mHierarchical;
+        private int mSelectionMode;
 
         /**
          * Obtains a pooled instance that is a clone of another one.
          *
          * @param other The instance to clone.
-         *
          * @hide
          */
         public static CollectionInfo obtain(CollectionInfo other) {
-            return CollectionInfo.obtain(other.mRowCount, other.mColumnCount,
-                    other.mHierarchical);
+            return CollectionInfo.obtain(other.mRowCount, other.mColumnCount, other.mHierarchical,
+                    other.mSelectionMode);
         }
 
         /**
@@ -2814,15 +2827,35 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param columnCount The number of columns.
          * @param hierarchical Whether the collection is hierarchical.
          */
-        public static CollectionInfo obtain(int rowCount, int columnCount, boolean hierarchical) {
-            final CollectionInfo info = sPool.acquire();
+        public static CollectionInfo obtain(int rowCount, int columnCount,
+                boolean hierarchical) {
+            return obtain(rowCount, columnCount, hierarchical, SELECTION_MODE_NONE);
+        }
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param rowCount The number of rows.
+         * @param columnCount The number of columns.
+         * @param hierarchical Whether the collection is hierarchical.
+         * @param selectionMode The collection's selection mode, one of:
+         *            <ul>
+         *            <li>{@link #SELECTION_MODE_NONE}
+         *            <li>{@link #SELECTION_MODE_SINGLE}
+         *            <li>{@link #SELECTION_MODE_MULTIPLE}
+         *            </ul>
+         */
+        public static CollectionInfo obtain(int rowCount, int columnCount,
+                boolean hierarchical, int selectionMode) {
+           final CollectionInfo info = sPool.acquire();
             if (info == null) {
-                return new CollectionInfo(rowCount, columnCount, hierarchical);
+                return new CollectionInfo(rowCount, columnCount, hierarchical, selectionMode);
             }
 
             info.mRowCount = rowCount;
             info.mColumnCount = columnCount;
             info.mHierarchical = hierarchical;
+            info.mSelectionMode = selectionMode;
             return info;
         }
 
@@ -2832,12 +2865,14 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param rowCount The number of rows.
          * @param columnCount The number of columns.
          * @param hierarchical Whether the collection is hierarchical.
+         * @param selectionMode The collection's selection mode.
          */
-        private CollectionInfo(int rowCount, int columnCount,
-                boolean hierarchical) {
+        private CollectionInfo(int rowCount, int columnCount, boolean hierarchical,
+                int selectionMode) {
             mRowCount = rowCount;
             mColumnCount = columnCount;
             mHierarchical = hierarchical;
+            mSelectionMode = selectionMode;
         }
 
         /**
@@ -2868,6 +2903,20 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
+         * Gets the collection's selection mode.
+         *
+         * @return The collection's selection mode, one of:
+         *         <ul>
+         *         <li>{@link #SELECTION_MODE_NONE}
+         *         <li>{@link #SELECTION_MODE_SINGLE}
+         *         <li>{@link #SELECTION_MODE_MULTIPLE}
+         *         </ul>
+         */
+        public int getSelectionMode() {
+            return mSelectionMode;
+        }
+
+        /**
          * Recycles this instance.
          */
         void recycle() {
@@ -2879,6 +2928,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             mRowCount = 0;
             mColumnCount = 0;
             mHierarchical = false;
+            mSelectionMode = SELECTION_MODE_NONE;
         }
     }
 
@@ -2904,12 +2954,11 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Obtains a pooled instance that is a clone of another one.
          *
          * @param other The instance to clone.
-         *
          * @hide
          */
         public static CollectionItemInfo obtain(CollectionItemInfo other) {
-            return CollectionItemInfo.obtain(other.mRowIndex, other.mRowSpan,
-                    other.mColumnIndex, other.mColumnSpan, other.mHeading);
+            return CollectionItemInfo.obtain(other.mRowIndex, other.mRowSpan, other.mColumnIndex,
+                    other.mColumnSpan, other.mHeading, other.mSelected);
         }
 
         /**
@@ -2921,11 +2970,27 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param columnSpan The number of columns the item spans.
          * @param heading Whether the item is a heading.
          */
-        public static CollectionItemInfo obtain(int rowIndex, int rowSpan, int columnIndex,
-                int columnSpan, boolean heading) {
+        public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
+                int columnIndex, int columnSpan, boolean heading) {
+            return obtain(rowIndex, rowSpan, columnIndex, columnSpan, heading, false);
+        }
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
+         * @param heading Whether the item is a heading.
+         * @param selected Whether the item is selected.
+         */
+        public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
+                int columnIndex, int columnSpan, boolean heading, boolean selected) {
             final CollectionItemInfo info = sPool.acquire();
             if (info == null) {
-                return new CollectionItemInfo(rowIndex, rowSpan, columnIndex, columnSpan, heading);
+                return new CollectionItemInfo(
+                        rowIndex, rowSpan, columnIndex, columnSpan, heading, selected);
             }
 
             info.mRowIndex = rowIndex;
@@ -2933,6 +2998,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             info.mColumnIndex = columnIndex;
             info.mColumnSpan = columnSpan;
             info.mHeading = heading;
+            info.mSelected = selected;
             return info;
         }
 
@@ -2941,6 +3007,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         private int mRowIndex;
         private int mColumnSpan;
         private int mRowSpan;
+        private boolean mSelected;
 
         /**
          * Creates a new instance.
@@ -2951,13 +3018,14 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param columnSpan The number of columns the item spans.
          * @param heading Whether the item is a heading.
          */
-        private CollectionItemInfo(int rowIndex, int rowSpan,
-                int columnIndex, int columnSpan, boolean heading) {
+        private CollectionItemInfo(int rowIndex, int rowSpan, int columnIndex, int columnSpan,
+                boolean heading, boolean selected) {
             mRowIndex = rowIndex;
             mRowSpan = rowSpan;
             mColumnIndex = columnIndex;
             mColumnSpan = columnSpan;
             mHeading = heading;
+            mSelected = selected;
         }
 
         /**
@@ -3007,6 +3075,15 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
+         * Gets if the collection item is selected.
+         *
+         * @return If the item is selected.
+         */
+        public boolean isSelected() {
+            return mSelected;
+        }
+
+        /**
          * Recycles this instance.
          */
         void recycle() {
@@ -3020,6 +3097,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             mRowIndex = 0;
             mRowSpan = 0;
             mHeading = false;
+            mSelected = false;
         }
     }
 
