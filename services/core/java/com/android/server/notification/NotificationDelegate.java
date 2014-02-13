@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import android.os.IBinder;
+
 public interface NotificationDelegate {
     void onSetDisabled(int status);
     void onClearAll();
@@ -24,4 +26,5 @@ public interface NotificationDelegate {
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message);
     void onPanelRevealed();
+    boolean allowDisable(int what, IBinder token, String pkg);
 }

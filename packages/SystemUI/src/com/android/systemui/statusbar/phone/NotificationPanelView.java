@@ -56,6 +56,10 @@ public class NotificationPanelView extends PanelView {
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
+        PanelHeaderView header = (PanelHeaderView) findViewById(R.id.header);
+        ZenModeView zenModeView = (ZenModeView) findViewById(R.id.zenmode);
+        zenModeView.setAdapter( new ZenModeViewAdapter(mContext));
+        header.setZenModeView(zenModeView);
     }
 
     @Override

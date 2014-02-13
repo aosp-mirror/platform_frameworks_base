@@ -58,6 +58,12 @@
             android:layout_height="@dimen/notification_panel_header_height"
             />
 
+        <com.android.systemui.statusbar.phone.ZenModeView
+            android:id="@+id/zenmode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
         <TextView
             android:id="@+id/emergency_calls_only"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"

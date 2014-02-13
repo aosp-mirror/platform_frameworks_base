@@ -189,6 +189,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     IconMerger mNotificationIcons;
     // [+>
     View mMoreIcon;
+    // mode indicator icon
+    ImageView mModeIcon;
 
     // expanded notifications
     NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -341,6 +343,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }};
 
     @Override
+    public void setZenMode(int mode) {
+        super.setZenMode(mode);
+        if (mModeIcon == null) return;
+        final boolean limited = mode == Settings.Global.ZEN_MODE_LIMITED;
+        final boolean full = mode == Settings.Global.ZEN_MODE_FULL;
+        mModeIcon.setVisibility(full || limited ? View.VISIBLE : View.GONE);
+        final int icon = limited ? R.drawable.stat_sys_zen_limited : R.drawable.stat_sys_zen_full;
+        if (full || limited) {
+            mModeIcon.setImageResource(icon);
+        }
+    }
+
+    @Override
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
@@ -352,6 +367,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
+        mSettingsObserver.onChange(false); // set up
 
         mHeadsUpObserver.onChange(true); // set up
         if (ENABLE_HEADS_UP) {
@@ -455,6 +471,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationIcons = (IconMerger)mStatusBarView.findViewById(R.id.notificationIcons);
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
+        mModeIcon = (ImageView)mStatusBarView.findViewById(R.id.modeIcon);
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
@@ -909,41 +926,43 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (shadeEntry == null) {
             return;
         }
-        if (mUseHeadsUp && shouldInterrupt(notification)) {
-            if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
-            Entry interruptionCandidate = new Entry(key, notification, null);
-            ViewGroup holder = mHeadsUpNotificationView.getHolder();
-            if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
-                mInterruptingNotificationTime = System.currentTimeMillis();
-                mInterruptingNotificationEntry = interruptionCandidate;
-                shadeEntry.setInterruption();
+        if (!shouldIntercept(notification.getNotification())) {
+            if (mUseHeadsUp && shouldInterrupt(notification)) {
+                if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
+                Entry interruptionCandidate = new Entry(key, notification, null);
+                ViewGroup holder = mHeadsUpNotificationView.getHolder();
+                if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
+                    mInterruptingNotificationTime = System.currentTimeMillis();
+                    mInterruptingNotificationEntry = interruptionCandidate;
+                    shadeEntry.setInterruption();
 
-                // 1. Populate mHeadsUpNotificationView
-                mHeadsUpNotificationView.setNotification(mInterruptingNotificationEntry);
+                    // 1. Populate mHeadsUpNotificationView
+                    mHeadsUpNotificationView.setNotification(mInterruptingNotificationEntry);
 
-                // 2. Animate mHeadsUpNotificationView in
-                mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
+                    // 2. Animate mHeadsUpNotificationView in
+                    mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
 
-                // 3. Set alarm to age the notification off
-                resetHeadsUpDecayTimer();
-            }
-        } else if (notification.getNotification().fullScreenIntent != null) {
-            // Stop screensaver if the notification has a full-screen intent.
-            // (like an incoming phone call)
-            awakenDreams();
+                    // 3. Set alarm to age the notification off
+                    resetHeadsUpDecayTimer();
+                }
+            } else if (notification.getNotification().fullScreenIntent != null) {
+                // Stop screensaver if the notification has a full-screen intent.
+                // (like an incoming phone call)
+                awakenDreams();
 
-            // not immersive & a full-screen alert should be shown
-            if (DEBUG) Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
-            try {
-                notification.getNotification().fullScreenIntent.send();
-            } catch (PendingIntent.CanceledException e) {
-            }
-        } else {
-            // usual case: status bar visible & not immersive
+                // not immersive & a full-screen alert should be shown
+                if (DEBUG) Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
+                try {
+                    notification.getNotification().fullScreenIntent.send();
+                } catch (PendingIntent.CanceledException e) {
+                }
+            } else {
+                // usual case: status bar visible & not immersive
 
-            // show the ticker if there isn't already a heads up
-            if (mInterruptingNotificationEntry == null) {
-                tick(null, notification, true);
+                // show the ticker if there isn't already a heads up
+                if (mInterruptingNotificationEntry == null) {
+                    tick(null, notification, true);
+                }
             }
         }
         addNotificationViews(shadeEntry);
@@ -1094,6 +1113,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                             == Notification.VISIBILITY_SECRET
                     && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId())) {
                 // in "public" mode (atop a secure keyguard), secret notifs are totally hidden
+                continue;
+            }
+            if (shouldIntercept(ent.notification.getNotification())) {
                 continue;
             }
             toShow.add(ent.icon);
@@ -2183,6 +2205,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         pw.println(windowStateToString(mStatusBarWindowState));
         pw.print("  mStatusBarMode=");
         pw.println(BarTransitions.modeToString(mStatusBarMode));
+        pw.print("  mZenMode=");
+        pw.println(Settings.Global.zenModeToString(mZenMode));
         dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
             pw.print("  mNavigationBarWindowState=");

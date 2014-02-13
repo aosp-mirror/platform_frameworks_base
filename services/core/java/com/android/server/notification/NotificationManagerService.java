@@ -154,7 +154,7 @@ public class NotificationManagerService extends SystemService {
     private long[] mFallbackVibrationPattern;
     boolean mSystemReady;
 
-    int mDisabledNotifications;
+    private boolean mDisableNotificationAlerts;
     NotificationRecord mSoundNotification;
     NotificationRecord mVibrateNotification;
 
@@ -201,6 +201,19 @@ public class NotificationManagerService extends SystemService {
     private static final String ATTR_NAME = "name";
 
     final ArrayList<NotificationScorer> mScorers = new ArrayList<NotificationScorer>();
+
+    private int mZenMode;
+    private int mPreZenAlarmVolume = -1;
+    private int mPreZenRingerMode = -1;
+    // temporary, until we update apps to provide metadata
+    private static final Set<String> CALL_PACKAGES = new HashSet<String>(Arrays.asList(
+            "com.google.android.dialer",
+            "com.android.phone"
+            ));
+    private static final Set<String> ALARM_PACKAGES = new HashSet<String>(Arrays.asList(
+            "com.google.android.deskclock"
+            ));
+    private static final String EXTRA_INTERCEPT = "android.intercept";
 
     private class NotificationListenerInfo implements IBinder.DeathRecipient {
         INotificationListener listener;
@@ -869,8 +882,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onSetDisabled(int status) {
             synchronized (mNotificationList) {
-                mDisabledNotifications = status;
-                if ((mDisabledNotifications & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
+                mDisableNotificationAlerts = (status & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
+                if (mDisableNotificationAlerts) {
                     // cancel whatever's going on
                     long identity = Binder.clearCallingIdentity();
                     try {
@@ -967,6 +980,14 @@ public class NotificationManagerService extends SystemService {
             } catch (RemoteException e) {
             }
             Binder.restoreCallingIdentity(ident);
+        }
+
+        @Override
+        public boolean allowDisable(int what, IBinder token, String pkg) {
+            if (mZenMode == Settings.Global.ZEN_MODE_FULL && isCall(pkg, null)) {
+                return false;
+            }
+            return true;
         }
     };
 
@@ -1077,6 +1098,12 @@ public class NotificationManagerService extends SystemService {
         private final Uri ENABLED_NOTIFICATION_LISTENERS_URI
                 = Settings.Secure.getUriFor(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
 
+        private final Uri ZEN_MODE
+                = Settings.Global.getUriFor(Settings.Global.ZEN_MODE);
+
+        private final Uri MODE_RINGER
+                = Settings.Global.getUriFor(Settings.Global.MODE_RINGER);
+
         SettingsObserver(Handler handler) {
             super(handler);
         }
@@ -1087,6 +1114,10 @@ public class NotificationManagerService extends SystemService {
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(ENABLED_NOTIFICATION_LISTENERS_URI,
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(ZEN_MODE,
+                    false, this);
+            resolver.registerContentObserver(MODE_RINGER,
+                    false, this);
             update(null);
         }
 
@@ -1106,6 +1137,12 @@ public class NotificationManagerService extends SystemService {
             }
             if (uri == null || ENABLED_NOTIFICATION_LISTENERS_URI.equals(uri)) {
                 rebindListenerServices();
+            }
+            if (ZEN_MODE.equals(uri)) {
+                updateZenMode();
+            }
+            if (MODE_RINGER.equals(uri)) {
+                updateRingerMode();
             }
         }
     }
@@ -1170,8 +1207,10 @@ public class NotificationManagerService extends SystemService {
         // flag at least once and we'll go back to 0 after that.
         if (0 == Settings.Global.getInt(getContext().getContentResolver(),
                     Settings.Global.DEVICE_PROVISIONED, 0)) {
-            mDisabledNotifications = StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
+            mDisableNotificationAlerts = true;
         }
+        updateRingerMode();
+        updateZenMode();
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -1622,8 +1661,10 @@ public class NotificationManagerService extends SystemService {
 
             pw.println("  mSoundNotification=" + mSoundNotification);
             pw.println("  mVibrateNotification=" + mVibrateNotification);
-            pw.println("  mDisabledNotifications=0x"
-                    + Integer.toHexString(mDisabledNotifications));
+            pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
+            pw.println("  mZenMode=" + Settings.Global.zenModeToString(mZenMode));
+            pw.println("  mPreZenAlarmVolume=" + mPreZenAlarmVolume);
+            pw.println("  mPreZenRingerMode=" + mPreZenRingerMode);
             pw.println("  mSystemReady=" + mSystemReady);
             pw.println("  mArchive=" + mArchive.toString());
             Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
@@ -1767,9 +1808,13 @@ public class NotificationManagerService extends SystemService {
                     return;
                 }
 
-                // Should this notification make noise, vibe, or use the LED?
-                final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD);
+                // Is this notification intercepted by zen mode?
+                final boolean intercept = shouldIntercept(pkg, notification);
+                notification.extras.putBoolean(EXTRA_INTERCEPT, intercept);
 
+                // Should this notification make noise, vibe, or use the LED?
+                final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD) && !intercept;
+                if (DBG) Slog.v(TAG, "canInterrupt=" + canInterrupt + " intercept=" + intercept);
                 synchronized (mNotificationList) {
                     final StatusBarNotification n = new StatusBarNotification(
                             pkg, id, tag, callingUid, callingPid, score, notification, user);
@@ -1851,8 +1896,7 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     // If we're not supposed to beep, vibrate, etc. then don't.
-                    if (((mDisabledNotifications
-                            & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) == 0)
+                    if (!mDisableNotificationAlerts
                             && (!(old != null
                                 && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                             && (r.getUserId() == UserHandle.USER_ALL ||
@@ -1860,7 +1904,7 @@ public class NotificationManagerService extends SystemService {
                             && canInterrupt
                             && mSystemReady
                             && mAudioManager != null) {
-
+                        if (DBG) Slog.v(TAG, "Interrupting!");
                         // sound
 
                         // should we use the default notification sound? (indicated either by
@@ -1905,6 +1949,8 @@ public class NotificationManagerService extends SystemService {
                                     final IRingtonePlayer player =
                                             mAudioManager.getRingtonePlayer();
                                     if (player != null) {
+                                        if (DBG) Slog.v(TAG, "Playing sound " + soundUri
+                                                + " on stream " + audioStreamType);
                                         player.playAsync(soundUri, user, looping, audioStreamType);
                                     }
                                 } catch (RemoteException e) {
@@ -2436,5 +2482,68 @@ public class NotificationManagerService extends SystemService {
         synchronized (mNotificationList) {
             updateLightsLocked();
         }
+    }
+
+    private void updateRingerMode() {
+        final int ringerMode = Settings.Global.getInt(getContext().getContentResolver(),
+                Settings.Global.MODE_RINGER, -1);
+        final boolean nonSilentRingerMode = ringerMode == AudioManager.RINGER_MODE_NORMAL
+                || ringerMode == AudioManager.RINGER_MODE_VIBRATE;
+        if (mZenMode == Settings.Global.ZEN_MODE_FULL && nonSilentRingerMode) {
+            Settings.Global.putInt(getContext().getContentResolver(),
+                    Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
+        }
+    }
+
+    private void updateZenMode() {
+        mZenMode = Settings.Global.getInt(getContext().getContentResolver(),
+                Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
+        if (DBG) Slog.d(TAG, "updateZenMode " + Settings.Global.zenModeToString(mZenMode));
+        if (mAudioManager != null) {
+            if (mZenMode == Settings.Global.ZEN_MODE_FULL) {
+                // calls vibrate if ringer mode = vibrate, so set the ringer mode as well
+                mPreZenRingerMode = mAudioManager.getRingerMode();
+                if (DBG) Slog.d(TAG, "Muting calls mPreZenRingerMode=" + mPreZenRingerMode);
+                mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
+                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                // alarms don't simply respect mute, so set the volume as well
+                mPreZenAlarmVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+                if (DBG) Slog.d(TAG, "Muting alarms mPreZenAlarmVolume=" + mPreZenAlarmVolume);
+                mAudioManager.setStreamMute(AudioManager.STREAM_ALARM, true);
+                mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
+            } else {
+                if (DBG) Slog.d(TAG, "Unmuting calls");
+                mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
+                if (mPreZenRingerMode != -1) {
+                    if (DBG) Slog.d(TAG, "Restoring ringer mode to " + mPreZenRingerMode);
+                    mAudioManager.setRingerMode(mPreZenRingerMode);
+                    mPreZenRingerMode = -1;
+                }
+                if (DBG) Slog.d(TAG, "Unmuting alarms");
+                mAudioManager.setStreamMute(AudioManager.STREAM_ALARM, false);
+                if (mPreZenAlarmVolume != -1) {
+                    if (DBG) Slog.d(TAG, "Restoring STREAM_ALARM to " + mPreZenAlarmVolume);
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mPreZenAlarmVolume, 0);
+                    mPreZenAlarmVolume = -1;
+                }
+            }
+        }
+    }
+
+    private boolean isCall(String pkg, Notification n) {
+        return CALL_PACKAGES.contains(pkg);
+    }
+
+    private boolean isAlarm(String pkg, Notification n) {
+        return ALARM_PACKAGES.contains(pkg);
+    }
+
+    private boolean shouldIntercept(String pkg, Notification n) {
+        if (mZenMode == Settings.Global.ZEN_MODE_LIMITED) {
+            return !isCall(pkg, n) && !isAlarm(pkg, n);
+        } else if (mZenMode == Settings.Global.ZEN_MODE_FULL) {
+            return true;
+        }
+        return false;
     }
 }
