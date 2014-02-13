@@ -170,22 +170,13 @@ class DisplayContent {
     }
 
     void updateDisplayInfo() {
-        // Save old size.
-        int oldWidth = mDisplayInfo.logicalWidth;
-        int oldHeight = mDisplayInfo.logicalHeight;
         mDisplay.getDisplayInfo(mDisplayInfo);
-
         for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mStacks.get(i);
-            if (!stack.isFullscreen()) {
-                stack.resizeBounds(oldWidth, oldHeight, mDisplayInfo.logicalWidth,
-                        mDisplayInfo.logicalHeight);
-            }
+            mStacks.get(i).updateDisplayInfo();
         }
     }
 
     void getLogicalDisplayRect(Rect out) {
-        updateDisplayInfo();
         // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
         final int orientation = mDisplayInfo.rotation;
         boolean rotated = (orientation == Surface.ROTATION_90
@@ -291,11 +282,12 @@ class DisplayContent {
     }
 
     boolean isDimming() {
-        boolean result = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            result |= mStacks.get(stackNdx).isDimming();
+            if (mStacks.get(stackNdx).isDimming()) {
+                return true;
+            }
         }
-        return result;
+        return false;
     }
 
     void stopDimmingIfNeeded() {
