@@ -4986,6 +4986,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " not found.");
             }
             if (stack.setBounds(bounds)) {
+                stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
             }
@@ -9957,6 +9958,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // TODO(multidisplay): rotation on main screen only.
+            displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
                     mFxSession, inTransaction, mPolicy.isDefaultOrientationForced());
             mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
