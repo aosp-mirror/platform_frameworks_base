@@ -230,7 +230,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             mStats.noteUserActivityLocked(uid, event);
         }
     }
-    
+
+    public void noteDataConnectionActive(String label, boolean active) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteDataConnectionActive(label, active);
+        }
+    }
+
     public void notePhoneOn() {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -373,6 +380,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
+    public void noteBluetoothActiveState(int actType) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteBluetoothActiveStateLocked(actType);
+        }
+    }
+
     public void noteFullWifiLockAcquired(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {

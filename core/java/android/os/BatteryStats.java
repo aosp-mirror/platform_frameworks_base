@@ -549,8 +549,9 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_SENSOR_ON_FLAG = 1<<30;
         public static final int STATE_GPS_ON_FLAG = 1<<29;
         public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<28;
-        public static final int STATE_WIFI_SCAN_FLAG = 1<<29;
+        public static final int STATE_WIFI_SCAN_FLAG = 1<<27;
         public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<26;
+        public static final int STATE_MOBILE_RADIO_ACTIVE_FLAG = 1<<25;
         public static final int STATE_WIFI_RUNNING_FLAG = 1<<24;
         // These are on the lower bits used for the command; if they change
         // we need to write another int of data.
@@ -882,6 +883,15 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract int getPhoneSignalStrengthCount(int strengthBin, int which);
 
+    /**
+     * Returns the time in microseconds that the mobile network has been active
+     * (in a high power state).
+     *
+     * {@hide}
+     */
+    public abstract long getMobileRadioActiveTime(long batteryRealtime, int which);
+
+
     public static final int DATA_CONNECTION_NONE = 0;
     public static final int DATA_CONNECTION_GPRS = 1;
     public static final int DATA_CONNECTION_EDGE = 2;
@@ -933,6 +943,7 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE_WIFI_FULL_LOCK_FLAG, "wifi_full_lock", "Wl"),
         new BitDescription(HistoryItem.STATE_WIFI_SCAN_FLAG, "wifi_scan", "Ws"),
         new BitDescription(HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG, "wifi_multicast", "Wm"),
+        new BitDescription(HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG, "mobile_radio", "Pr"),
         new BitDescription(HistoryItem.STATE_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
         new BitDescription(HistoryItem.STATE_PHONE_SCANNING_FLAG, "phone_scanning", "Psc"),
         new BitDescription(HistoryItem.STATE_AUDIO_ON_FLAG, "audio", "a"),
@@ -993,6 +1004,33 @@ public abstract class BatteryStats implements Parcelable {
     
     public abstract int getBluetoothPingCount();
 
+    public static final int BLUETOOTH_INACTIVE = 0;
+    public static final int BLUETOOTH_ACTIVE_LOW = 1;
+    public static final int BLUETOOTH_ACTIVE_MEDIUM = 2;
+    public static final int BLUETOOTH_ACTIVE_HIGH = 3;
+
+    static final String[] BLUETOOTH_ACTIVE_NAMES = {
+        "none", "low", "med", "high"
+    };
+
+    public static final int NUM_BLUETOOTH_ACTIVE_TYPES = BLUETOOTH_ACTIVE_HIGH+1;
+
+    /**
+     * Returns the time in microseconds that Bluetooth has been running in the
+     * given active state.
+     *
+     * {@hide}
+     */
+    public abstract long getBluetoothActiveTime(int activeType,
+            long batteryRealtime, int which);
+
+    /**
+     * Returns the number of times the Bluetooth has entered the given active state.
+     *
+     * {@hide}
+     */
+    public abstract int getBluetoothActiveCount(int activeType, int which);
+
     public static final int NETWORK_MOBILE_RX_DATA = 0;
     public static final int NETWORK_MOBILE_TX_DATA = 1;
     public static final int NETWORK_WIFI_RX_DATA = 2;
@@ -1024,19 +1062,6 @@ public abstract class BatteryStats implements Parcelable {
      * @param curTime the amount of elapsed realtime in microseconds.
      */
     public abstract long getBatteryUptime(long curTime);
-
-    /**
-     * @deprecated use getRadioDataUptime
-     */
-    public long getRadioDataUptimeMs() {
-        return getRadioDataUptime() / 1000;
-    }
-
-    /**
-     * Returns the time that the radio was on for data transfers.
-     * @return the uptime in microseconds while unplugged
-     */
-    public abstract long getRadioDataUptime();
 
     /**
      * Returns the current battery realtime in microseconds.
@@ -1374,7 +1399,7 @@ public abstract class BatteryStats implements Parcelable {
                 wifiRunningTime / 1000, bluetoothOnTime / 1000,
                 mobileRxTotalBytes, mobileTxTotalBytes, wifiRxTotalBytes, wifiTxTotalBytes,
                 fullWakeLockTimeTotal, partialWakeLockTimeTotal,
-                getInputEventCount(which));
+                getInputEventCount(which), getMobileRadioActiveTime(batteryRealtime, which));
         
         // Dump screen brightness stats
         Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
@@ -1395,7 +1420,7 @@ public abstract class BatteryStats implements Parcelable {
             args[i] = getPhoneSignalStrengthCount(i, which);
         }
         dumpLine(pw, 0 /* uid */, category, SIGNAL_STRENGTH_COUNT_DATA, args);
-        
+
         // Dump network type stats
         args = new Object[NUM_DATA_CONNECTION_TYPES];
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
@@ -1408,7 +1433,7 @@ public abstract class BatteryStats implements Parcelable {
         dumpLine(pw, 0 /* uid */, category, DATA_CONNECTION_COUNT_DATA, args);
         
         if (which == STATS_SINCE_UNPLUGGED) {
-            dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(), 
+            dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(),
                     getDischargeCurrentLevel());
         }
         
@@ -1906,9 +1931,8 @@ public abstract class BatteryStats implements Parcelable {
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Radio data uptime when unplugged: ");
-        sb.append(getRadioDataUptime() / 1000);
-        sb.append(" ms");
+        sb.append("  Mobile radio active time: ");
+        formatTimeMs(sb, getMobileRadioActiveTime(batteryRealtime, which) / 1000);
         pw.println(sb.toString());
 
         sb.setLength(0);
