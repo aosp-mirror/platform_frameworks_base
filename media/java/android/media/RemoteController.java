@@ -264,7 +264,7 @@ public final class RemoteController
      * @throws IllegalArgumentException
      */
     public boolean sendMediaKeyEvent(KeyEvent keyEvent) throws IllegalArgumentException {
-        if (!MediaFocusControl.isMediaKeyCode(keyEvent.getKeyCode())) {
+        if (!KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
             throw new IllegalArgumentException("not a media key event");
         }
         final PendingIntent pi;

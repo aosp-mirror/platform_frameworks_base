@@ -62,6 +62,7 @@ import com.android.server.input.InputManagerService;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaRouterService;
+import com.android.server.media.MediaSessionService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
@@ -887,6 +888,13 @@ public final class SystemServer {
                 }
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "MediaSessionService");
+                mSystemServiceManager.startService(MediaSessionService.class);
+            } catch (Throwable e) {
+                reportWtf("starting MediaSessionService", e);
             }
 
             if (!disableNonCoreServices) {
