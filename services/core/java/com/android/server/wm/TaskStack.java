@@ -47,12 +47,17 @@ public class TaskStack {
      * mTaskHistory in the ActivityStack with the same mStackId */
     private final ArrayList<Task> mTasks = new ArrayList<Task>();
 
-    /** Content limits relative to the DisplayContent this sits in. Empty indicates fullscreen,
-     * Nonempty is size of this TaskStack but is also used to scale if DisplayContent changes. */
-    Rect mBounds = new Rect();
+    /** For comparison with DisplayContent bounds. */
+    private Rect mTmpRect = new Rect();
+
+    /** Content limits relative to the DisplayContent this sits in. */
+    private Rect mBounds = new Rect();
+
+    /** Whether mBounds is fullscreen */
+    private boolean mFullscreen = true;
 
     /** Used to support {@link android.view.WindowManager.LayoutParams#FLAG_DIM_BEHIND} */
-    DimLayer mDimLayer;
+    private DimLayer mDimLayer;
 
     /** The particular window with FLAG_DIM_BEHIND set. If null, hide mDimLayer. */
     WindowStateAnimator mDimWinAnimator;
@@ -86,7 +91,7 @@ public class TaskStack {
         return mTasks;
     }
 
-    private void resizeWindows() {
+    void resizeWindows() {
         final boolean underStatusBar = mBounds.top == 0;
 
         final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
@@ -108,7 +113,13 @@ public class TaskStack {
     }
 
     boolean setBounds(Rect bounds) {
-        if (mBounds.equals(bounds)) {
+        boolean oldFullscreen = mFullscreen;
+        if (mDisplayContent != null) {
+            mDisplayContent.getLogicalDisplayRect(mTmpRect);
+            mFullscreen = mTmpRect.equals(bounds);
+        }
+
+        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen) {
             return false;
         }
 
@@ -116,25 +127,22 @@ public class TaskStack {
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
 
-        resizeWindows();
         return true;
     }
 
     void getBounds(Rect out) {
-        if (mDisplayContent != null) {
-            if (mBounds.isEmpty()) {
-                mDisplayContent.getLogicalDisplayRect(out);
-            } else {
-                out.set(mBounds);
-            }
-            out.intersect(mDisplayContent.mContentRect);
-        } else {
-            out.set(mBounds);
+        out.set(mBounds);
+    }
+
+    void updateDisplayInfo() {
+        if (mFullscreen && mDisplayContent != null) {
+            mDisplayContent.getLogicalDisplayRect(mTmpRect);
+            setBounds(mTmpRect);
         }
     }
 
     boolean isFullscreen() {
-        return mBounds.isEmpty();
+        return mFullscreen;
     }
 
     boolean isAnimating() {
@@ -150,19 +158,6 @@ public class TaskStack {
             }
         }
         return false;
-    }
-
-    void resizeBounds(float oldWidth, float oldHeight, float newWidth, float newHeight) {
-        if (oldWidth == newWidth && oldHeight == newHeight) {
-            return;
-        }
-        float widthScale = newWidth / oldWidth;
-        float heightScale = newHeight / oldHeight;
-        mBounds.left = (int)(mBounds.left * widthScale + 0.5);
-        mBounds.top = (int)(mBounds.top * heightScale + 0.5);
-        mBounds.right = (int)(mBounds.right * widthScale + 0.5);
-        mBounds.bottom = (int)(mBounds.bottom * heightScale + 0.5);
-        resizeWindows();
     }
 
     /**
@@ -233,6 +228,7 @@ public class TaskStack {
         mDisplayContent = displayContent;
         mDimLayer = new DimLayer(mService, this, displayContent);
         mAnimationBackgroundSurface = new DimLayer(mService, this, displayContent);
+        updateDisplayInfo();
     }
 
     void detachDisplay() {
