@@ -25,8 +25,7 @@ LOCAL_SHARED_LIBRARIES := \
     libbinder \
     libui \
     libgui \
-    libandroid_runtime \
-    libandroid_runtime_derived
+    libandroid_runtime
 
 LOCAL_STATIC_LIBRARIES := \
     libstorage

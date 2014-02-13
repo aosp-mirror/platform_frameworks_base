@@ -9,7 +9,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	liblog \
 	libbinder \
-	libandroid_runtime_derived
+	libandroid_runtime
 
 LOCAL_MODULE:= app_process
 
@@ -30,7 +30,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	liblog \
 	libbinder \
-	libandroid_runtime_derived
+	libandroid_runtime
 
 LOCAL_MODULE := app_process__asan
 LOCAL_MODULE_TAGS := eng

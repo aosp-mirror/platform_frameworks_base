@@ -227,6 +227,9 @@ int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
 
 // ----------------------------------------------------------------------
 
+/*static*/ JavaVM* AndroidRuntime::mJavaVM = NULL;
+
+
 AndroidRuntime::AndroidRuntime() :
         mExitWithoutCleanup(false)
 {
@@ -252,6 +255,15 @@ AndroidRuntime::AndroidRuntime() :
 AndroidRuntime::~AndroidRuntime()
 {
     SkGraphics::Term();
+}
+
+/*
+ * Register native methods using JNI.
+ */
+/*static*/ int AndroidRuntime::registerNativeMethods(JNIEnv* env,
+    const char* className, const JNINativeMethod* gMethods, int numMethods)
+{
+    return jniRegisterNativeMethods(env, className, gMethods, numMethods);
 }
 
 status_t AndroidRuntime::callMain(const char* className,
@@ -913,6 +925,22 @@ void AndroidRuntime::exit(int code)
 void AndroidRuntime::onVmCreated(JNIEnv* env)
 {
     // If AndroidRuntime had anything to do here, we'd have done it in 'start'.
+}
+
+/*
+ * Get the JNIEnv pointer for this thread.
+ *
+ * Returns NULL if the slot wasn't allocated or populated.
+ */
+/*static*/ JNIEnv* AndroidRuntime::getJNIEnv()
+{
+    JNIEnv* env;
+    JavaVM* vm = AndroidRuntime::getJavaVM();
+    assert(vm != NULL);
+
+    if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK)
+        return NULL;
+    return env;
 }
 
 /*
