@@ -51,6 +51,7 @@ interface IBatteryStats {
     void noteScreenOff();
     void noteInputEvent();
     void noteUserActivity(int uid, int event);
+    void noteDataConnectionActive(String label, boolean active);
     void notePhoneOn();
     void notePhoneOff();
     void notePhoneSignalStrength(in SignalStrength signalStrength);
@@ -63,6 +64,7 @@ interface IBatteryStats {
     void noteWifiStopped(in WorkSource ws);
     void noteBluetoothOn();
     void noteBluetoothOff();
+    void noteBluetoothActiveState(int actType);
     void noteFullWifiLockAcquired(int uid);
     void noteFullWifiLockReleased(int uid);
     void noteWifiScanStarted(int uid);
