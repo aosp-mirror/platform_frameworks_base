@@ -367,11 +367,11 @@ public class TaskStack {
                 (mDisplayContent.mDeferredActions & DisplayContent.DEFER_DETACH) != 0 &&
                 !isAnimating()) {
             mDisplayContent.mDeferredActions &= ~DisplayContent.DEFER_DETACH;
-            mService.detachStack(mStackId);
             if ((mDisplayContent.mDeferredActions & DisplayContent.DEFER_REMOVAL) != 0) {
                 mDisplayContent.mDeferredActions &= ~DisplayContent.DEFER_REMOVAL;
                 mService.onDisplayRemoved(mDisplayContent.getDisplayId());
             }
+            mService.detachStack(mStackId);
         }
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = mTasks.get(taskNdx);
