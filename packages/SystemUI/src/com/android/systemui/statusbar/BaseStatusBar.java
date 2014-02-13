@@ -1136,8 +1136,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             StatusBarNotification notification, boolean isHeadsUp) {
         final RemoteViews contentView = notification.getNotification().contentView;
         final RemoteViews bigContentView = notification.getNotification().bigContentView;
-        final RemoteViews publicContentView
-                = notification.getNotification().publicVersion.contentView;
+        final Notification publicVersion = notification.getNotification().publicVersion;
+        final RemoteViews publicContentView = publicVersion != null ? publicVersion.contentView
+                : null;
 
         // Reapply the RemoteViews
         contentView.reapply(mContext, entry.expanded, mOnClickHandler);
