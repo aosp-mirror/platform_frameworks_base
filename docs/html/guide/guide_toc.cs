@@ -367,6 +367,9 @@
             <li><a href="<?cs var:toroot ?>guide/topics/media/mediaplayer.html">
                   <span class="en">Media Playback</span></a>
                 </li>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/mediarouter.html">
+                  <span class="en">MediaRouter</span></a>
+                </li>
             <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
                    <span class="en">Supported Media Formats</span></a>
                 </li>
