@@ -1,5 +1,6 @@
 page.title=Action Bar
-page.tags=actionbar,navigation
+page.tags="actionbar","navigation"
+page.metaDescription=The Action bar is an essential design element for all apps. Learn about what the action bar can do and how to use it in your apps.
 @jd:body
 
 <img src="{@docRoot}design/media/action_bar_pattern_overview.png">

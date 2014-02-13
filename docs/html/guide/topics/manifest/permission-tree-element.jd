@@ -13,7 +13,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares the base name for a tree of permissions.  The application takes 
+<dd itemprop="description">Declares the base name for a tree of permissions.  The application takes
 ownership of all names within the tree.  It can dynamically add new permissions 
 to the tree by calling <code>{@link android.content.pm.PackageManager#addPermission PackageManager.addPermission()}</code>.  Names within the tree are separated by
 periods ('{@code .}').  For example, if the base name is

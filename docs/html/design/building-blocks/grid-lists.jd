@@ -11,7 +11,7 @@ page.tags=gridview,layout,listview
   </div>
 </a>
 
-<p>Grid lists are an alternative to standard list views. They are best suited for showing data sets
+<p itemprop="description">Grid lists are an alternative to standard list views. They are best suited for showing data sets
 that represent themselves through images. In contrast to simple lists, grid lists may scroll either
 vertically or horizontally.</p>
 

@@ -9,7 +9,7 @@ page.tags=button,input
   </div>
 </a>
 
-<p>A button consists of text and/or an image that clearly communicates what action
+<p itemprop="description">A button consists of text and/or an image that clearly communicates what action
   will occur when the user touches it. A button can have an image, text, or both.
 </p>
 

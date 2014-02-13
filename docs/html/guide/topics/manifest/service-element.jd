@@ -24,7 +24,7 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares a service (a {@link android.app.Service} subclass) as one 
+<dd itemprop="description">Declares a service (a {@link android.app.Service} subclass) as one
 of the application's components.  Unlike activities, services lack a 
 visual user interface.  They're used to implement long-running background 
 operations or a rich communications API that can be called by other 

@@ -9,7 +9,7 @@ page.tags=listview,layout
   </div>
 </a>
 
-<p>Lists present multiple line items in a vertical arrangement. They can be used for data selection as
+<p itemprop="description">Lists present multiple line items in a vertical arrangement. They can be used for data selection as
 well as drilldown navigation.</p>
 
 <div class="vspace size-1">&nbsp;</div>
