@@ -114,4 +114,13 @@ final class DisplayPowerRequest {
                 + ", useAutoBrightness=" + useAutoBrightness
                 + ", blockScreenOn=" + blockScreenOn;
     }
+
+    public static boolean wantScreenOn(int state) {
+        switch(state) {
+            case SCREEN_STATE_DIM:
+            case SCREEN_STATE_BRIGHT:
+                return true;
+        }
+        return false;
+    }
 }
