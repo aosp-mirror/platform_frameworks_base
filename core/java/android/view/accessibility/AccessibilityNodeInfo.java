@@ -282,6 +282,22 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final int ACTION_DISMISS = 0x00100000;
 
+    /**
+     * Action that sets the text of the node. Performing the action without argument, using <code>
+     * null</code> or empty {@link CharSequence} will clear the text. This action will also put the
+     * cursor at the end of text.
+     * <p>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE}<br>
+     * <strong>Example:</strong>
+     * <code><pre><p>
+     *   Bundle arguments = new Bundle();
+     *   arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+     *       "android");
+     *   info.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+     * </code></pre></p>
+     */
+    public static final int ACTION_SET_TEXT = 0x00200000;
+
     // Action arguments
 
     /**
@@ -350,6 +366,18 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final String ACTION_ARGUMENT_SELECTION_END_INT =
             "ACTION_ARGUMENT_SELECTION_END_INT";
+
+    /**
+     * Argument for specifying the text content to set
+     * <p>
+     * <strong>Type:</strong> CharSequence<br>
+     * <strong>Actions:</strong> {@link #ACTION_SET_TEXT}
+     * </p>
+     *
+     * @see #ACTION_SET_TEXT
+     */
+    public static final String ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE =
+            "ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE";
 
     // Focus types
 

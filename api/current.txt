@@ -30251,6 +30251,7 @@ package android.view.accessibility {
     field public static final java.lang.String ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT = "ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT";
     field public static final java.lang.String ACTION_ARGUMENT_SELECTION_END_INT = "ACTION_ARGUMENT_SELECTION_END_INT";
     field public static final java.lang.String ACTION_ARGUMENT_SELECTION_START_INT = "ACTION_ARGUMENT_SELECTION_START_INT";
+    field public static final java.lang.String ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE = "ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE";
     field public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 128; // 0x80
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
     field public static final int ACTION_CLEAR_SELECTION = 8; // 0x8
@@ -30271,6 +30272,7 @@ package android.view.accessibility {
     field public static final int ACTION_SCROLL_FORWARD = 4096; // 0x1000
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final int ACTION_SET_SELECTION = 131072; // 0x20000
+    field public static final int ACTION_SET_TEXT = 2097152; // 0x200000
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
     field public static final int FOCUS_INPUT = 1; // 0x1
