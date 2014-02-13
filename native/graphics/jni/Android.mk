@@ -20,7 +20,6 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
-    libandroid_runtime_derived \
     libskia
 
 LOCAL_C_INCLUDES += \

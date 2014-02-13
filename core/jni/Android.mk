@@ -1,25 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
-	AndroidRuntimeBase.cpp \
-	android_os_Parcel.cpp \
-	android_util_Binder.cpp
-
-LOCAL_SHARED_LIBRARIES:= \
-	libbinder \
-	libcutils \
-	libnativehelper \
-	libutils \
-
-LOCAL_MODULE := libandroid_runtime
-
-include $(BUILD_SHARED_LIBRARY)
-
-################################################################################
-
-include $(CLEAR_VARS)
-
 LOCAL_CFLAGS += -DHAVE_CONFIG_H -DKHTML_NO_EXCEPTIONS -DGKWQ_NO_JAVA
 LOCAL_CFLAGS += -DNO_SUPPORT_JS_BINDING -DQT_NO_WHEELEVENT -DKHTML_NO_XBL
 LOCAL_CFLAGS += -U__APPLE__
@@ -85,6 +66,7 @@ LOCAL_SRC_FILES:= \
 	android_os_Debug.cpp \
 	android_os_MemoryFile.cpp \
 	android_os_MessageQueue.cpp \
+	android_os_Parcel.cpp \
 	android_os_SELinux.cpp \
 	android_os_SystemClock.cpp \
 	android_os_SystemProperties.cpp \
@@ -96,6 +78,7 @@ LOCAL_SRC_FILES:= \
 	android_nio_utils.cpp \
 	android_text_format_Time.cpp \
 	android_util_AssetManager.cpp \
+	android_util_Binder.cpp \
 	android_util_EventLog.cpp \
 	android_util_Log.cpp \
 	android_util_FloatMath.cpp \
@@ -199,7 +182,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SHARED_LIBRARIES := \
 	libmemtrack \
-	libandroid_runtime \
 	libandroidfw \
 	libexpat \
 	libnativehelper \
@@ -259,7 +241,7 @@ ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
 	LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK
 endif
 
-LOCAL_MODULE:= libandroid_runtime_derived
+LOCAL_MODULE:= libandroid_runtime
 
 include external/stlport/libstlport.mk
 include $(BUILD_SHARED_LIBRARY)

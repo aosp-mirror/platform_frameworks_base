@@ -19,8 +19,6 @@
 #ifndef _RUNTIME_ANDROID_RUNTIME_H
 #define _RUNTIME_ANDROID_RUNTIME_H
 
-#include "AndroidRuntimeBase.h"
-
 #include <utils/Errors.h>
 #include <binder/IBinder.h>
 #include <utils/String8.h>
@@ -33,7 +31,7 @@
 
 namespace android {
 
-class AndroidRuntime : public AndroidRuntimeBase
+class AndroidRuntime
 {
 public:
     AndroidRuntime();
@@ -45,6 +43,12 @@ public:
         Application,
         Tool,
     };
+
+    /**
+     * Register a set of methods in the specified class.
+     */
+    static int registerNativeMethods(JNIEnv* env,
+        const char* className, const JNINativeMethod* gMethods, int numMethods);
 
     /**
      * Call a class's static main method with the given arguments,
@@ -100,6 +104,12 @@ public:
     static android_thread_id_t createJavaThread(const char* name, void (*start)(void *),
         void* arg);
 
+    /** return a pointer to the VM running in this process */
+    static JavaVM* getJavaVM() { return mJavaVM; }
+
+    /** return a pointer to the JNIEnv pointer for this thread */
+    static JNIEnv* getJNIEnv();
+
     /** return a new string corresponding to 'className' with all '.'s replaced by '/'s. */
     static char* toSlashClassName(const char* className);
 
@@ -110,6 +120,9 @@ private:
 
     Vector<JavaVMOption> mOptions;
     bool mExitWithoutCleanup;
+
+    /* JNI JavaVM pointer */
+    static JavaVM* mJavaVM;
 
     /*
      * Thread creation helpers.
