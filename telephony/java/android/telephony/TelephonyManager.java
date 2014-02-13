@@ -1812,9 +1812,9 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
      *
-     * @param contents  String containing SAT/USAT response in hexadecimal
-     *                  format starting with command tag. See TS 102 223 for
-     *                  details.
+     * @param content String containing SAT/USAT response in hexadecimal
+     *                format starting with command tag. See TS 102 223 for
+     *                details.
      * @return The APDU response from the ICC card.
      */
     public String sendEnvelope(String content) {
