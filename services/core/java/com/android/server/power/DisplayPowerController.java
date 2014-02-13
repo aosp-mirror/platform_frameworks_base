@@ -35,7 +35,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
-import android.util.FloatMath;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
@@ -64,12 +64,11 @@ import java.io.PrintWriter;
  * For debugging, you can make the electron beam and brightness animations run
  * slower by changing the "animator duration scale" option in Development Settings.
  */
-final class DisplayPowerController {
+final class DisplayPowerController implements AutomaticBrightnessController.Callbacks {
     private static final String TAG = "DisplayPowerController";
 
     private static boolean DEBUG = false;
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
-    private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
 
     // If true, uses the electron beam on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
@@ -77,13 +76,6 @@ final class DisplayPowerController {
     // screen state returns.  Playing the animation can also be somewhat slow.
     private static final boolean USE_ELECTRON_BEAM_ON_ANIMATION = false;
 
-    // If true, enables the use of the screen auto-brightness adjustment setting.
-    private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT =
-            PowerManager.useScreenAutoBrightnessAdjustmentFeature();
-
-    // The maximum range of gamma adjustment possible using the screen
-    // auto-brightness adjustment setting.
-    private static final float SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA = 3.0f;
 
     // The minimum reduction in brightness when dimmed.
     private static final int SCREEN_DIM_MINIMUM_REDUCTION = 10;
@@ -110,7 +102,6 @@ final class DisplayPowerController {
 
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
-    private static final int MSG_LIGHT_SENSOR_DEBOUNCED = 3;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -123,40 +114,9 @@ final class DisplayPowerController {
     // Trigger proximity if distance is less than 5 cm.
     private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
 
-    // Light sensor event rate in milliseconds.
-    private static final int LIGHT_SENSOR_RATE_MILLIS = 1000;
-
-    // A rate for generating synthetic light sensor events in the case where the light
-    // sensor hasn't reported any new data in a while and we need it to update the
-    // debounce filter.  We only synthesize light sensor measurements when needed.
-    private static final int SYNTHETIC_LIGHT_SENSOR_RATE_MILLIS =
-            LIGHT_SENSOR_RATE_MILLIS * 2;
-
     // Brightness animation ramp rate in brightness units per second.
     private static final int BRIGHTNESS_RAMP_RATE_FAST = 200;
     private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
-
-    // IIR filter time constants in milliseconds for computing two moving averages of
-    // the light samples.  One is a long-term average and the other is a short-term average.
-    // We can use these filters to assess trends in ambient brightness.
-    // The short term average gives us a filtered but relatively low latency measurement.
-    // The long term average informs us about the overall trend.
-    private static final long SHORT_TERM_AVERAGE_LIGHT_TIME_CONSTANT = 1000;
-    private static final long LONG_TERM_AVERAGE_LIGHT_TIME_CONSTANT = 5000;
-
-    // Stability requirements in milliseconds for accepting a new brightness
-    // level.  This is used for debouncing the light sensor.  Different constants
-    // are used to debounce the light sensor when adapting to brighter or darker environments.
-    // This parameter controls how quickly brightness changes occur in response to
-    // an observed change in light level that exceeds the hysteresis threshold.
-    private static final long BRIGHTENING_LIGHT_DEBOUNCE = 4000;
-    private static final long DARKENING_LIGHT_DEBOUNCE = 8000;
-
-    // Hysteresis constraints for brightening or darkening.
-    // The recent lux must have changed by at least this fraction relative to the
-    // current ambient lux before a change will be considered.
-    private static final float BRIGHTENING_LIGHT_HYSTERESIS = 0.10f;
-    private static final float DARKENING_LIGHT_HYSTERESIS = 0.20f;
 
     private final Object mLock = new Object();
 
@@ -181,17 +141,11 @@ final class DisplayPowerController {
     // The lights service.
     private final LightsManager mLights;
 
-    // The twilight service.
-    private final TwilightManager mTwilight;
-
     // The sensor manager.
     private final SensorManager mSensorManager;
 
     // The proximity sensor, or null if not available or needed.
     private Sensor mProximitySensor;
-
-    // The light sensor, or null if not available or needed.
-    private Sensor mLightSensor;
 
     // The dim screen brightness.
     private final int mScreenBrightnessDimConfig;
@@ -204,15 +158,6 @@ final class DisplayPowerController {
 
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
-
-    // The auto-brightness spline adjustment.
-    // The brightness values have been scaled to a range of 0..1.
-    private Spline mScreenAutoBrightnessSpline;
-
-    // Amount of time to delay auto-brightness after screen on while waiting for
-    // the light sensor to warm-up in milliseconds.
-    // May be 0 if no warm-up is required.
-    private int mLightSensorWarmUpTimeConfig;
 
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish electron beam animation instead.
@@ -283,66 +228,17 @@ final class DisplayPowerController {
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
 
-    // Set to true if the light sensor is enabled.
-    private boolean mLightSensorEnabled;
-
-    // The time when the light sensor was enabled.
-    private long mLightSensorEnableTime;
-
-    // The currently accepted nominal ambient light level.
-    private float mAmbientLux;
-
-    // True if mAmbientLux holds a valid value.
-    private boolean mAmbientLuxValid;
-
-    // The ambient light level threshold at which to brighten or darken the screen.
-    private float mBrighteningLuxThreshold;
-    private float mDarkeningLuxThreshold;
-
-    // The most recent light sample.
-    private float mLastObservedLux;
-
-    // The time of the most light recent sample.
-    private long mLastObservedLuxTime;
-
-    // The number of light samples collected since the light sensor was enabled.
-    private int mRecentLightSamples;
-
-    // The long-term and short-term filtered light measurements.
-    private float mRecentShortTermAverageLux;
-    private float mRecentLongTermAverageLux;
-
-    // The direction in which the average lux is moving relative to the current ambient lux.
-    //    0 if not changing or within hysteresis threshold.
-    //    1 if brightening beyond hysteresis threshold.
-    //   -1 if darkening beyond hysteresis threshold.
-    private int mDebounceLuxDirection;
-
-    // The time when the average lux last changed direction.
-    private long mDebounceLuxTime;
-
-    // The screen brightness level that has been chosen by the auto-brightness
-    // algorithm.  The actual brightness should ramp towards this value.
-    // We preserve this value even when we stop using the light sensor so
-    // that we can quickly revert to the previous auto-brightness level
-    // while the light sensor warms up.
-    // Use -1 if there is no current auto-brightness value available.
-    private int mScreenAutoBrightness = -1;
-
-    // The last screen auto-brightness gamma.  (For printing in dump() only.)
-    private float mLastScreenAutoBrightnessGamma = 1.0f;
-
     // True if the screen auto-brightness value is actually being used to
     // set the display brightness.
     private boolean mUsingScreenAutoBrightness;
+
+    // The controller for the automatic brightness level.
+    private AutomaticBrightnessController mAutomaticBrightnessController;
 
     // Animators.
     private ObjectAnimator mElectronBeamOnAnimator;
     private ObjectAnimator mElectronBeamOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
-
-    // Twilight changed.  We might recalculate auto-brightness values.
-    private boolean mTwilightChanged;
 
     /**
      * Creates the display power controller.
@@ -359,7 +255,6 @@ final class DisplayPowerController {
         mCallbackHandler = callbackHandler;
 
         mLights = lights;
-        mTwilight = twilight;
         mSensorManager = sensorManager;
 
         final Resources resources = context.getResources();
@@ -367,9 +262,11 @@ final class DisplayPowerController {
         mScreenBrightnessDimConfig = clampAbsoluteBrightness(resources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDim));
 
-        int screenBrightnessMinimum = Math.min(resources.getInteger(
+        int screenBrightnessRangeMinimum = clampAbsoluteBrightness(Math.min(resources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingMinimum),
-                mScreenBrightnessDimConfig);
+                mScreenBrightnessDimConfig));
+
+        mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
 
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
@@ -378,9 +275,11 @@ final class DisplayPowerController {
                     com.android.internal.R.array.config_autoBrightnessLevels);
             int[] screenBrightness = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
+            int lightSensorWarmUpTimeConfig = resources.getInteger(
+                    com.android.internal.R.integer.config_lightSensorWarmupTime);
 
-            mScreenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
-            if (mScreenAutoBrightnessSpline == null) {
+            Spline screenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
+            if (screenAutoBrightnessSpline == null) {
                 Slog.e(TAG, "Error in config.xml.  config_autoBrightnessLcdBacklightValues "
                         + "(size " + screenBrightness.length + ") "
                         + "must be monotic and have exactly one more entry than "
@@ -389,17 +288,17 @@ final class DisplayPowerController {
                         + "Auto-brightness will be disabled.");
                 mUseSoftwareAutoBrightnessConfig = false;
             } else {
-                if (screenBrightness[0] < screenBrightnessMinimum) {
-                    screenBrightnessMinimum = screenBrightness[0];
+                if (screenBrightness[0] < screenBrightnessRangeMinimum) {
+                    screenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightness[0]);
                 }
+                mAutomaticBrightnessController = new AutomaticBrightnessController(this, looper,
+                        twilight, sensorManager, screenAutoBrightnessSpline,
+                        lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
+                        mScreenBrightnessRangeMaximum);
             }
-
-            mLightSensorWarmUpTimeConfig = resources.getInteger(
-                    com.android.internal.R.integer.config_lightSensorWarmupTime);
         }
 
-        mScreenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightnessMinimum);
-        mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
+        mScreenBrightnessRangeMinimum = screenBrightnessRangeMinimum;
 
         mElectronBeamFadesConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
@@ -412,39 +311,6 @@ final class DisplayPowerController {
             }
         }
 
-        if (mUseSoftwareAutoBrightnessConfig
-                && !DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
-            mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        }
-
-        if (mUseSoftwareAutoBrightnessConfig && USE_TWILIGHT_ADJUSTMENT) {
-            mTwilight.registerListener(mTwilightListener, mHandler);
-        }
-    }
-
-    private static Spline createAutoBrightnessSpline(int[] lux, int[] brightness) {
-        try {
-            final int n = brightness.length;
-            float[] x = new float[n];
-            float[] y = new float[n];
-            y[0] = normalizeAbsoluteBrightness(brightness[0]);
-            for (int i = 1; i < n; i++) {
-                x[i] = lux[i - 1];
-                y[i] = normalizeAbsoluteBrightness(brightness[i]);
-            }
-
-            Spline spline = Spline.createMonotoneCubicSpline(x, y);
-            if (DEBUG) {
-                Slog.d(TAG, "Auto-brightness spline: " + spline);
-                for (float v = 1f; v < lux[lux.length - 1] * 1.25f; v *= 1.25f) {
-                    Slog.d(TAG, String.format("  %7.1f: %7.1f", v, spline.interpolate(v)));
-                }
-            }
-            return spline;
-        } catch (IllegalArgumentException ex) {
-            Slog.e(TAG, "Could not create auto-brightness spline.", ex);
-            return null;
-        }
     }
 
     /**
@@ -566,9 +432,7 @@ final class DisplayPowerController {
         // Update the power state request.
         final boolean mustNotify;
         boolean mustInitialize = false;
-        boolean updateAutoBrightness = mTwilightChanged;
         boolean wasDim = false;
-        mTwilightChanged = false;
 
         synchronized (mLock) {
             mPendingUpdatePowerStateLocked = false;
@@ -583,10 +447,6 @@ final class DisplayPowerController {
                 mPendingRequestChangedLocked = false;
                 mustInitialize = true;
             } else if (mPendingRequestChangedLocked) {
-                if (mPowerRequest.screenAutoBrightnessAdjustment
-                        != mPendingRequestLocked.screenAutoBrightnessAdjustment) {
-                    updateAutoBrightness = true;
-                }
                 wasDim = (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM);
                 mPowerRequest.copyFrom(mPendingRequestLocked);
                 mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
@@ -633,18 +493,19 @@ final class DisplayPowerController {
         }
 
         // Turn on the light sensor if needed.
-        if (mLightSensor != null) {
-            setLightSensorEnabled(mPowerRequest.useAutoBrightness
-                    && wantScreenOn(mPowerRequest.screenState), updateAutoBrightness);
+        if (mAutomaticBrightnessController != null) {
+            mAutomaticBrightnessController.updatePowerState(mPowerRequest);
         }
 
         // Set the screen brightness.
-        if (wantScreenOn(mPowerRequest.screenState)) {
+        if (DisplayPowerRequest.wantScreenOn(mPowerRequest.screenState)) {
             int target;
             boolean slow;
-            if (mScreenAutoBrightness >= 0 && mLightSensorEnabled) {
+            int screenAutoBrightness = mAutomaticBrightnessController != null ?
+                    mAutomaticBrightnessController.getAutomaticScreenBrightness() : -1;
+            if (screenAutoBrightness >= 0) {
                 // Use current auto-brightness value.
-                target = mScreenAutoBrightness;
+                target = screenAutoBrightness;
                 slow = mUsingScreenAutoBrightness;
                 mUsingScreenAutoBrightness = true;
             } else {
@@ -674,7 +535,7 @@ final class DisplayPowerController {
 
         // Animate the screen on or off.
         if (!mScreenOffBecauseOfProximity) {
-            if (wantScreenOn(mPowerRequest.screenState)) {
+            if (DisplayPowerRequest.wantScreenOn(mPowerRequest.screenState)) {
                 // Want screen on.
                 // Wait for previous off animation to complete beforehand.
                 // It is relatively short but if we cancel it and switch to the
@@ -751,6 +612,11 @@ final class DisplayPowerController {
         }
     }
 
+    @Override
+    public void updateBrightness() {
+        sendUpdatePowerState();
+    }
+
     private void blockScreenOn() {
         if (!mScreenOnWasBlocked) {
             mScreenOnWasBlocked = true;
@@ -783,25 +649,8 @@ final class DisplayPowerController {
     }
 
     private int clampScreenBrightness(int value) {
-        return clamp(value, mScreenBrightnessRangeMinimum, mScreenBrightnessRangeMaximum);
-    }
-
-    private static int clampAbsoluteBrightness(int value) {
-        return clamp(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
-    }
-
-    private static int clamp(int value, int min, int max) {
-        if (value <= min) {
-            return min;
-        }
-        if (value >= max) {
-            return max;
-        }
-        return value;
-    }
-
-    private static float normalizeAbsoluteBrightness(int value) {
-        return (float)clampAbsoluteBrightness(value) / PowerManager.BRIGHTNESS_ON;
+        return MathUtils.constrain(
+                value, mScreenBrightnessRangeMinimum, mScreenBrightnessRangeMaximum);
     }
 
     private void animateScreenBrightness(int target, int rate) {
@@ -902,270 +751,6 @@ final class DisplayPowerController {
         mPendingProximityDebounceTime = debounceTime;
     }
 
-    private void setLightSensorEnabled(boolean enable, boolean updateAutoBrightness) {
-        if (enable) {
-            if (!mLightSensorEnabled) {
-                updateAutoBrightness = true;
-                mLightSensorEnabled = true;
-                mLightSensorEnableTime = SystemClock.uptimeMillis();
-                mSensorManager.registerListener(mLightSensorListener, mLightSensor,
-                        LIGHT_SENSOR_RATE_MILLIS * 1000, mHandler);
-            }
-        } else {
-            if (mLightSensorEnabled) {
-                mLightSensorEnabled = false;
-                mAmbientLuxValid = false;
-                mRecentLightSamples = 0;
-                mHandler.removeMessages(MSG_LIGHT_SENSOR_DEBOUNCED);
-                mSensorManager.unregisterListener(mLightSensorListener);
-            }
-        }
-        if (updateAutoBrightness) {
-            updateAutoBrightness(false);
-        }
-    }
-
-    private void handleLightSensorEvent(long time, float lux) {
-        mHandler.removeMessages(MSG_LIGHT_SENSOR_DEBOUNCED);
-
-        applyLightSensorMeasurement(time, lux);
-        updateAmbientLux(time);
-    }
-
-    private void applyLightSensorMeasurement(long time, float lux) {
-        // Update our filters.
-        mRecentLightSamples += 1;
-        if (mRecentLightSamples == 1) {
-            mRecentShortTermAverageLux = lux;
-            mRecentLongTermAverageLux = lux;
-        } else {
-            final long timeDelta = time - mLastObservedLuxTime;
-            mRecentShortTermAverageLux += (lux - mRecentShortTermAverageLux)
-                    * timeDelta / (SHORT_TERM_AVERAGE_LIGHT_TIME_CONSTANT + timeDelta);
-            mRecentLongTermAverageLux += (lux - mRecentLongTermAverageLux)
-                    * timeDelta / (LONG_TERM_AVERAGE_LIGHT_TIME_CONSTANT + timeDelta);
-        }
-
-        // Remember this sample value.
-        mLastObservedLux = lux;
-        mLastObservedLuxTime = time;
-    }
-
-    private void setAmbientLux(float lux) {
-        mAmbientLux = lux;
-        mBrighteningLuxThreshold = mAmbientLux * (1.0f + BRIGHTENING_LIGHT_HYSTERESIS);
-        mDarkeningLuxThreshold = mAmbientLux * (1.0f - DARKENING_LIGHT_HYSTERESIS);
-    }
-
-    private void updateAmbientLux(long time) {
-        // If the light sensor was just turned on then immediately update our initial
-        // estimate of the current ambient light level.
-        if (!mAmbientLuxValid) {
-            final long timeWhenSensorWarmedUp =
-                mLightSensorWarmUpTimeConfig + mLightSensorEnableTime;
-            if (time < timeWhenSensorWarmedUp) {
-                mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED,
-                        timeWhenSensorWarmedUp);
-                return;
-            }
-            setAmbientLux(mRecentShortTermAverageLux);
-            mAmbientLuxValid = true;
-            mDebounceLuxDirection = 0;
-            mDebounceLuxTime = time;
-            if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: Initializing: "
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                        + ", mAmbientLux=" + mAmbientLux);
-            }
-            updateAutoBrightness(true);
-        } else if (mRecentShortTermAverageLux > mBrighteningLuxThreshold
-                && mRecentLongTermAverageLux > mBrighteningLuxThreshold) {
-            // The ambient environment appears to be brightening.
-            if (mDebounceLuxDirection <= 0) {
-                mDebounceLuxDirection = 1;
-                mDebounceLuxTime = time;
-                if (DEBUG) {
-                    Slog.d(TAG, "updateAmbientLux: Possibly brightened, waiting for "
-                            + BRIGHTENING_LIGHT_DEBOUNCE + " ms: "
-                            + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                            + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                            + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                            + ", mAmbientLux=" + mAmbientLux);
-                }
-            }
-            long debounceTime = mDebounceLuxTime + BRIGHTENING_LIGHT_DEBOUNCE;
-            if (time < debounceTime) {
-                mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED, debounceTime);
-                return;
-            }
-            setAmbientLux(mRecentShortTermAverageLux);
-            if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: Brightened: "
-                        + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                        + ", mAmbientLux=" + mAmbientLux);
-            }
-            updateAutoBrightness(true);
-        } else if (mRecentShortTermAverageLux < mDarkeningLuxThreshold
-                && mRecentLongTermAverageLux < mDarkeningLuxThreshold) {
-            // The ambient environment appears to be darkening.
-            if (mDebounceLuxDirection >= 0) {
-                mDebounceLuxDirection = -1;
-                mDebounceLuxTime = time;
-                if (DEBUG) {
-                    Slog.d(TAG, "updateAmbientLux: Possibly darkened, waiting for "
-                            + DARKENING_LIGHT_DEBOUNCE + " ms: "
-                            + "mDarkeningLuxThreshold=" + mDarkeningLuxThreshold
-                            + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                            + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                            + ", mAmbientLux=" + mAmbientLux);
-                }
-            }
-            long debounceTime = mDebounceLuxTime + DARKENING_LIGHT_DEBOUNCE;
-            if (time < debounceTime) {
-                mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED, debounceTime);
-                return;
-            }
-            // Be conservative about reducing the brightness, only reduce it a little bit
-            // at a time to avoid having to bump it up again soon.
-            setAmbientLux(Math.max(mRecentShortTermAverageLux, mRecentLongTermAverageLux));
-            if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: Darkened: "
-                        + "mDarkeningLuxThreshold=" + mDarkeningLuxThreshold
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                        + ", mAmbientLux=" + mAmbientLux);
-            }
-            updateAutoBrightness(true);
-        } else if (mDebounceLuxDirection != 0) {
-            // No change or change is within the hysteresis thresholds.
-            mDebounceLuxDirection = 0;
-            mDebounceLuxTime = time;
-            if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: Canceled debounce: "
-                        + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                        + ", mDarkeningLuxThreshold=" + mDarkeningLuxThreshold
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                        + ", mAmbientLux=" + mAmbientLux);
-            }
-        }
-
-        // Now that we've done all of that, we haven't yet posted a debounce
-        // message. So consider the case where current lux is beyond the
-        // threshold. It's possible that the light sensor may not report values
-        // if the light level does not change, so we need to occasionally
-        // synthesize sensor readings in order to make sure the brightness is
-        // adjusted accordingly. Note these thresholds may have changed since
-        // we entered the function because we called setAmbientLux and
-        // updateAutoBrightness along the way.
-        if (mLastObservedLux > mBrighteningLuxThreshold
-                || mLastObservedLux < mDarkeningLuxThreshold) {
-            mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED,
-                    time + SYNTHETIC_LIGHT_SENSOR_RATE_MILLIS);
-        }
-    }
-
-    private void debounceLightSensor() {
-        if (mLightSensorEnabled) {
-            long time = SystemClock.uptimeMillis();
-            if (time >= mLastObservedLuxTime + SYNTHETIC_LIGHT_SENSOR_RATE_MILLIS) {
-                if (DEBUG) {
-                    Slog.d(TAG, "debounceLightSensor: Synthesizing light sensor measurement "
-                            + "after " + (time - mLastObservedLuxTime) + " ms.");
-                }
-                applyLightSensorMeasurement(time, mLastObservedLux);
-            }
-            updateAmbientLux(time);
-        }
-    }
-
-    private void updateAutoBrightness(boolean sendUpdate) {
-        if (!mAmbientLuxValid) {
-            return;
-        }
-
-        float value = mScreenAutoBrightnessSpline.interpolate(mAmbientLux);
-        float gamma = 1.0f;
-
-        if (USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT
-                && mPowerRequest.screenAutoBrightnessAdjustment != 0.0f) {
-            final float adjGamma = FloatMath.pow(SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA,
-                    Math.min(1.0f, Math.max(-1.0f,
-                            -mPowerRequest.screenAutoBrightnessAdjustment)));
-            gamma *= adjGamma;
-            if (DEBUG) {
-                Slog.d(TAG, "updateAutoBrightness: adjGamma=" + adjGamma);
-            }
-        }
-
-        if (USE_TWILIGHT_ADJUSTMENT) {
-            TwilightState state = mTwilight.getCurrentState();
-            if (state != null && state.isNight()) {
-                final long now = System.currentTimeMillis();
-                final float earlyGamma =
-                        getTwilightGamma(now, state.getYesterdaySunset(), state.getTodaySunrise());
-                final float lateGamma =
-                        getTwilightGamma(now, state.getTodaySunset(), state.getTomorrowSunrise());
-                gamma *= earlyGamma * lateGamma;
-                if (DEBUG) {
-                    Slog.d(TAG, "updateAutoBrightness: earlyGamma=" + earlyGamma
-                            + ", lateGamma=" + lateGamma);
-                }
-            }
-        }
-
-        if (gamma != 1.0f) {
-            final float in = value;
-            value = FloatMath.pow(value, gamma);
-            if (DEBUG) {
-                Slog.d(TAG, "updateAutoBrightness: gamma=" + gamma
-                        + ", in=" + in + ", out=" + value);
-            }
-        }
-
-        int newScreenAutoBrightness = clampScreenBrightness(
-                Math.round(value * PowerManager.BRIGHTNESS_ON));
-        if (mScreenAutoBrightness != newScreenAutoBrightness) {
-            if (DEBUG) {
-                Slog.d(TAG, "updateAutoBrightness: mScreenAutoBrightness="
-                        + mScreenAutoBrightness + ", newScreenAutoBrightness="
-                        + newScreenAutoBrightness);
-            }
-
-            mScreenAutoBrightness = newScreenAutoBrightness;
-            mLastScreenAutoBrightnessGamma = gamma;
-            if (sendUpdate) {
-                sendUpdatePowerState();
-            }
-        }
-    }
-
-    private static float getTwilightGamma(long now, long lastSunset, long nextSunrise) {
-        if (lastSunset < 0 || nextSunrise < 0
-                || now < lastSunset || now > nextSunrise) {
-            return 1.0f;
-        }
-
-        if (now < lastSunset + TWILIGHT_ADJUSTMENT_TIME) {
-            return lerp(1.0f, TWILIGHT_ADJUSTMENT_MAX_GAMMA,
-                    (float)(now - lastSunset) / TWILIGHT_ADJUSTMENT_TIME);
-        }
-
-        if (now > nextSunrise - TWILIGHT_ADJUSTMENT_TIME) {
-            return lerp(1.0f, TWILIGHT_ADJUSTMENT_MAX_GAMMA,
-                    (float)(nextSunrise - now) / TWILIGHT_ADJUSTMENT_TIME);
-        }
-
-        return TWILIGHT_ADJUSTMENT_MAX_GAMMA;
-    }
-
-    private static float lerp(float x, float y, float alpha) {
-        return x + (y - x) * alpha;
-    }
-
     private void sendOnStateChangedWithWakelock() {
         mDisplaySuspendBlocker.acquire();
         mCallbackHandler.post(mOnStateChangedRunnable);
@@ -1224,8 +809,6 @@ final class DisplayPowerController {
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
         pw.println("  mUseSoftwareAutoBrightnessConfig="
                 + mUseSoftwareAutoBrightnessConfig);
-        pw.println("  mScreenAutoBrightnessSpline=" + mScreenAutoBrightnessSpline);
-        pw.println("  mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
 
         mHandler.runWithScissors(new Runnable() {
             @Override
@@ -1249,25 +832,7 @@ final class DisplayPowerController {
         pw.println("  mPendingProximityDebounceTime="
                 + TimeUtils.formatUptime(mPendingProximityDebounceTime));
         pw.println("  mScreenOffBecauseOfProximity=" + mScreenOffBecauseOfProximity);
-
-        pw.println("  mLightSensor=" + mLightSensor);
-        pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
-        pw.println("  mLightSensorEnableTime="
-                + TimeUtils.formatUptime(mLightSensorEnableTime));
-        pw.println("  mAmbientLux=" + mAmbientLux);
-        pw.println("  mAmbientLuxValid=" + mAmbientLuxValid);
-        pw.println("  mLastObservedLux=" + mLastObservedLux);
-        pw.println("  mLastObservedLuxTime="
-                + TimeUtils.formatUptime(mLastObservedLuxTime));
-        pw.println("  mRecentLightSamples=" + mRecentLightSamples);
-        pw.println("  mRecentShortTermAverageLux=" + mRecentShortTermAverageLux);
-        pw.println("  mRecentLongTermAverageLux=" + mRecentLongTermAverageLux);
-        pw.println("  mDebounceLuxDirection=" + mDebounceLuxDirection);
-        pw.println("  mDebounceLuxTime=" + TimeUtils.formatUptime(mDebounceLuxTime));
-        pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mUsingScreenAutoBrightness=" + mUsingScreenAutoBrightness);
-        pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
-        pw.println("  mTwilight.getCurrentState()=" + mTwilight.getCurrentState());
 
         if (mElectronBeamOnAnimator != null) {
             pw.println("  mElectronBeamOnAnimator.isStarted()=" +
@@ -1281,6 +846,11 @@ final class DisplayPowerController {
         if (mPowerState != null) {
             mPowerState.dump(pw);
         }
+
+        if (mAutomaticBrightnessController != null) {
+            mAutomaticBrightnessController.dump(pw);
+        }
+
     }
 
     private static String proximityToString(int state) {
@@ -1296,13 +866,37 @@ final class DisplayPowerController {
         }
     }
 
-    private static boolean wantScreenOn(int state) {
-        switch (state) {
-            case DisplayPowerRequest.SCREEN_STATE_BRIGHT:
-            case DisplayPowerRequest.SCREEN_STATE_DIM:
-                return true;
+    private static Spline createAutoBrightnessSpline(int[] lux, int[] brightness) {
+        try {
+            final int n = brightness.length;
+            float[] x = new float[n];
+            float[] y = new float[n];
+            y[0] = normalizeAbsoluteBrightness(brightness[0]);
+            for (int i = 1; i < n; i++) {
+                x[i] = lux[i - 1];
+                y[i] = normalizeAbsoluteBrightness(brightness[i]);
+            }
+
+            Spline spline = Spline.createMonotoneCubicSpline(x, y);
+            if (DEBUG) {
+                Slog.d(TAG, "Auto-brightness spline: " + spline);
+                for (float v = 1f; v < lux[lux.length - 1] * 1.25f; v *= 1.25f) {
+                    Slog.d(TAG, String.format("  %7.1f: %7.1f", v, spline.interpolate(v)));
+                }
+            }
+            return spline;
+        } catch (IllegalArgumentException ex) {
+            Slog.e(TAG, "Could not create auto-brightness spline.", ex);
+            return null;
         }
-        return false;
+    }
+
+    private static float normalizeAbsoluteBrightness(int value) {
+        return (float)clampAbsoluteBrightness(value) / PowerManager.BRIGHTNESS_ON;
+    }
+
+    private static int clampAbsoluteBrightness(int value) {
+        return MathUtils.constrain(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
     }
 
     /**
@@ -1329,10 +923,6 @@ final class DisplayPowerController {
                 case MSG_PROXIMITY_SENSOR_DEBOUNCED:
                     debounceProximitySensor();
                     break;
-
-                case MSG_LIGHT_SENSOR_DEBOUNCED:
-                    debounceLightSensor();
-                    break;
             }
         }
     }
@@ -1351,30 +941,6 @@ final class DisplayPowerController {
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
             // Not used.
-        }
-    };
-
-    private final SensorEventListener mLightSensorListener = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            if (mLightSensorEnabled) {
-                final long time = SystemClock.uptimeMillis();
-                final float lux = event.values[0];
-                handleLightSensorEvent(time, lux);
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            // Not used.
-        }
-    };
-
-    private final TwilightListener mTwilightListener = new TwilightListener() {
-        @Override
-        public void onTwilightStateChanged() {
-            mTwilightChanged = true;
-            updatePowerState();
         }
     };
 }
