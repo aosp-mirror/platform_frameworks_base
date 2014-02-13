@@ -73,6 +73,9 @@ import com.android.server.location.LocationBlacklist;
 import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderInterface;
 import com.android.server.location.LocationProviderProxy;
+import com.android.server.location.LocationRequestStatistics;
+import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
+import com.android.server.location.LocationRequestStatistics.PackageStatistics;
 import com.android.server.location.MockProvider;
 import com.android.server.location.PassiveProvider;
 
@@ -177,6 +180,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     // mapping from provider name to all its UpdateRecords
     private final HashMap<String, ArrayList<UpdateRecord>> mRecordsByProvider =
             new HashMap<String, ArrayList<UpdateRecord>>();
+
+    private final LocationRequestStatistics mRequestStatistics = new LocationRequestStatistics();
 
     // mapping from provider name to last known location
     private final HashMap<String, Location> mLastLocation = new HashMap<String, Location>();
@@ -568,7 +573,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     if (isAllowedByCurrentUserSettingsLocked(updateRecord.mProvider)) {
                         requestingLocation = true;
                         LocationProviderInterface locationProvider
-                            = mProvidersByName.get(updateRecord.mProvider);
+                                = mProvidersByName.get(updateRecord.mProvider);
                         ProviderProperties properties = locationProvider != null
                                 ? locationProvider.getProperties() : null;
                         if (properties != null
@@ -813,7 +818,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     long identity = Binder.clearCallingIdentity();
                     receiver.decrementPendingBroadcastsLocked();
                     Binder.restoreCallingIdentity(identity);
-               }
+                }
             }
         }
     }
@@ -1288,13 +1293,18 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (!records.contains(this)) {
                 records.add(this);
             }
+
+            // Update statistics for historical location requests by package/provider
+            mRequestStatistics.startRequesting(
+                    mReceiver.mPackageName, provider, request.getInterval());
         }
 
         /**
-         * Method to be called when a record will no longer be used.  Calling this multiple times
-         * must have the same effect as calling it once.
+         * Method to be called when a record will no longer be used.
          */
         void disposeLocked(boolean removeReceiver) {
+            mRequestStatistics.stopRequesting(mReceiver.mPackageName, mProvider);
+
             // remove from mRecordsByProvider
             ArrayList<UpdateRecord> globalRecords = mRecordsByProvider.get(this.mProvider);
             if (globalRecords != null) {
@@ -1541,6 +1551,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (oldRecords != null) {
             // Call dispose() on the obsolete update records.
             for (UpdateRecord record : oldRecords.values()) {
+                // Update statistics for historical location requests by package/provider
                 record.disposeLocked(false);
             }
             // Accumulate providers
@@ -1762,7 +1773,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public ProviderProperties getProviderProperties(String provider) {
         if (mProvidersByName.get(provider) == null) {
-          return null;
+            return null;
         }
 
         checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
@@ -1965,7 +1976,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Fetch latest status update time
         long newStatusUpdateTime = p.getStatusUpdateTime();
 
-       // Get latest status
+        // Get latest status
         Bundle extras = new Bundle();
         int status = p.getStatus(extras);
 
@@ -2179,7 +2190,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         if (mContext.checkCallingPermission(ACCESS_MOCK_LOCATION) !=
-            PackageManager.PERMISSION_GRANTED) {
+                PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires ACCESS_MOCK_LOCATION permission");
         }
     }
@@ -2351,12 +2362,19 @@ public class LocationManagerService extends ILocationManager.Stub {
             for (Receiver receiver : mReceivers.values()) {
                 pw.println("    " + receiver);
             }
-            pw.println("  Records by Provider:");
+            pw.println("  Active Records by Provider:");
             for (Map.Entry<String, ArrayList<UpdateRecord>> entry : mRecordsByProvider.entrySet()) {
                 pw.println("    " + entry.getKey() + ":");
                 for (UpdateRecord record : entry.getValue()) {
                     pw.println("      " + record);
                 }
+            }
+            pw.println("  Historical Records by Provider:");
+            for (Map.Entry<PackageProviderKey, PackageStatistics> entry
+                    : mRequestStatistics.statistics.entrySet()) {
+                PackageProviderKey key = entry.getKey();
+                PackageStatistics stats = entry.getValue();
+                pw.println("    " + key.packageName + ": " + key.providerName + ": " + stats);
             }
             pw.println("  Last Known Locations:");
             for (Map.Entry<String, Location> entry : mLastLocation.entrySet()) {
