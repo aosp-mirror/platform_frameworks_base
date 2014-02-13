@@ -127,6 +127,11 @@ public class DimLayer {
 
     void setBounds(Rect bounds) {
         mBounds.set(bounds);
+        if (isDimming() && !mLastBounds.equals(bounds)) {
+            // Clearing mAlpha forces show to redisplay with new size. 
+            mAlpha = 0;
+            show();
+        }
     }
 
     /**
