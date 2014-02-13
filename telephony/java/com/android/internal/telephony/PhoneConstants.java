@@ -74,6 +74,8 @@ public class PhoneConstants {
     public static final String PHONE_NAME_KEY = "phoneName";
     public static final String FAILURE_REASON_KEY = "reason";
     public static final String STATE_CHANGE_REASON_KEY = "reason";
+    public static final String DATA_NETWORK_TYPE_KEY = "networkType";
+    public static final String DATA_FAILURE_CAUSE_KEY = "failCause";
     public static final String DATA_APN_TYPE_KEY = "apnType";
     public static final String DATA_APN_KEY = "apn";
     public static final String DATA_LINK_PROPERTIES_KEY = "linkProperties";

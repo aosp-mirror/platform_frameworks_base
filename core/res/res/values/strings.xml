@@ -1654,6 +1654,14 @@
       connected by a call.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_readPrecisePhoneState">read precise phone states</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readPrecisePhoneState">Allows the app to access the precise
+      phone states.  This permission allows the app to determine the real
+      call status, whether a call is active or in the background, call fails,
+      precise data connection status and data connection fails.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="default">prevent phone from sleeping</string>
