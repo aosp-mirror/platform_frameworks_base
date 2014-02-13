@@ -6,7 +6,7 @@ page.tags=settings,preferences
 
 <p>Some of your users will run into questions or problems along the way. They'll be looking for answers <strong>within your app</strong>, and if they don't find them quickly, they may leave and never come back.</p>
 
-<p>This page covers design patterns for making help accessible in your app and tips for creating help content for users who are eager for assistance.</p>
+<p itemprop="description">This page covers design patterns for making help accessible in your app and tips for creating help content for users who are eager for assistance.</p>
 
 <h2 id="your-app">Designing Help into Your App</h2>
 

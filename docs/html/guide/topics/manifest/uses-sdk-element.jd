@@ -48,7 +48,7 @@ page.tags=api levels,sdk version,minsdkversion,targetsdkversion,maxsdkversion
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Lets you express an application's compatibility with one or more versions of the Android platform,
+<dd itemprop="description"><p>  Lets you express an application's compatibility with one or more versions of the Android platform,
 by means of an API Level integer. The API Level expressed by an application will be compared to the
 API Level of a given Android system, which may vary among different Android devices.
 </p>

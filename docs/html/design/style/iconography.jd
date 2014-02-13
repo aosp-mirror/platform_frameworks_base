@@ -1,5 +1,7 @@
 page.title=Iconography
-page.tags=icons
+page.tags="icons"
+meta.tags="icons, googleplay, listing, branding"
+page.titleFriendly=Guidelines for creating your app's icons
 @jd:body
 
 <img src="{@docRoot}design/media/iconography_overview.png">

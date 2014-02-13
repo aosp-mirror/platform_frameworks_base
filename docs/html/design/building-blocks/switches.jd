@@ -16,7 +16,7 @@ buttons, and on/off switches.</p>
   </div>
 </a>
 
-<p>Checkboxes allow the user to select multiple options from a set. Avoid using a single checkbox to
+<p itemprop="description">Checkboxes allow the user to select multiple options from a set. Avoid using a single checkbox to
 turn an option off or on. Instead, use an on/off switch.</p>
 
   <img src="{@docRoot}design/media/switches_checkboxes.png">

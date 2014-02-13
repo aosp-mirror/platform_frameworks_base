@@ -62,7 +62,7 @@ below.</p>
 href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares a single hardware or software feature that is used by the
+<dd itemprop="description">Declares a single hardware or software feature that is used by the
 application.
 
 <p>The purpose of a <code>&lt;uses-feature&gt;</code> declaration is to inform
