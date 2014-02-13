@@ -312,17 +312,24 @@ public class AccessibilityNodeInfoCache {
                 }
             }
 
+            int disconnectedNodeCount = 0;
             // Check for disconnected nodes or ones from another window.
             for (int i = 0; i < mCacheImpl.size(); i++) {
                 AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
                 if (!seen.contains(info)) {
                     if (info.getWindowId() == windowId) {
-                        Log.e(LOG_TAG, "Disconneced node: " + info);
+                        if (DEBUG) {
+                            Log.e(LOG_TAG, "Disconnected node: " + info);
+                        }
+                        disconnectedNodeCount++;
                     } else {
                         Log.e(LOG_TAG, "Node from: " + info.getWindowId() + " not from:"
                                 + windowId + " " + info);
                     }
                 }
+            }
+            if (disconnectedNodeCount > 0) {
+                Log.e(LOG_TAG, String.format("Found %d disconnected nodes", disconnectedNodeCount));
             }
         }
     }
