@@ -11,7 +11,7 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Adds a category name to an intent filter.  See 
+<dd itemprop="description">Adds a category name to an intent filter.  See
 <a href="{@docRoot}guide/components/intents-filters.html">Intents and 
 Intent Filters</a> for details on intent filters and the role of category
 specifications within a filter.</dd>
