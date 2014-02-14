@@ -3775,13 +3775,8 @@ public class ListView extends AbsListView {
     }
 
     @Override
-    public int getRowForPosition(int position) {
-        return position;
-    }
-
-    @Override
-    public int getFirstPositionForRow(int row) {
-        return row;
+    AbsPositionScroller createPositionScroller() {
+        return new ListViewPositionScroller();
     }
 
     @Override
@@ -3812,5 +3807,25 @@ public class ListView extends AbsListView {
         final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
                 0, 1, position, 1, isHeading, isSelected);
         info.setCollectionItemInfo(itemInfo);
+    }
+
+    /**
+     * Sub-position scroller that understands the layout of a ListView.
+     */
+    class ListViewPositionScroller extends AbsSubPositionScroller {
+        @Override
+        public int getRowForPosition(int position) {
+            return position;
+        }
+
+        @Override
+        public int getFirstPositionForRow(int row) {
+            return row;
+        }
+
+        @Override
+        public int getHeightForRow(int row) {
+            return getHeightForPosition(row);
+        }
     }
 }
