@@ -30266,6 +30266,7 @@ package android.view.accessibility {
     method public int getSelectionMode();
     method public boolean isHierarchical();
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean);
+    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean, int);
     field public static final int SELECTION_MODE_MULTIPLE = 2; // 0x2
     field public static final int SELECTION_MODE_NONE = 0; // 0x0
     field public static final int SELECTION_MODE_SINGLE = 1; // 0x1
@@ -30279,6 +30280,7 @@ package android.view.accessibility {
     method public boolean isHeading();
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
+    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean, boolean);
   }
 
   public static final class AccessibilityNodeInfo.RangeInfo {
