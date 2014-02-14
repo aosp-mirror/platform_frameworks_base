@@ -5757,7 +5757,11 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + " surfaceLayer=" + win.mWinAnimator.mSurfaceLayer);
                     }
                 }
-                rawss = SurfaceControl.screenshot(dw, dh, minLayer, maxLayer);
+                // TODO: Replace 'false' in the following line with a variable that indicates
+                // whether the screenshot should use the identity transformation matrix
+                // (e.g., enable it when taking a screenshot for recents, since we might be in
+                // the middle of the rotation animation, but don't want a rotated recent image).
+                rawss = SurfaceControl.screenshot(dw, dh, minLayer, maxLayer, false);
             }
         } while (!screenshotReady && retryCount <= MAX_SCREENSHOT_RETRIES);
         if (retryCount > MAX_SCREENSHOT_RETRIES)  Slog.i(TAG, "Screenshot max retries " +

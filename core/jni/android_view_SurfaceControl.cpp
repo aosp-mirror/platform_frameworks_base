@@ -72,12 +72,15 @@ public:
     }
 
     status_t update(const sp<IBinder>& display, int width, int height,
-            int minLayer, int maxLayer, bool allLayers) {
+            int minLayer, int maxLayer, bool allLayers,
+            bool useIdentityTransform) {
         status_t res = (width > 0 && height > 0)
                 ? (allLayers
-                        ? mScreenshot.update(display, width, height)
-                        : mScreenshot.update(display, width, height, minLayer, maxLayer))
-                : mScreenshot.update(display);
+                        ? mScreenshot.update(display, width, height,
+                                useIdentityTransform)
+                        : mScreenshot.update(display, width, height,
+                                minLayer, maxLayer, useIdentityTransform))
+                : mScreenshot.update(display, useIdentityTransform);
         if (res != NO_ERROR) {
             return res;
         }
@@ -162,7 +165,8 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
 }
 
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject displayTokenObj,
-        jint width, jint height, jint minLayer, jint maxLayer, bool allLayers) {
+        jint width, jint height, jint minLayer, jint maxLayer, bool allLayers,
+        bool useIdentityTransform) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken == NULL) {
         return NULL;
@@ -170,7 +174,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
 
     ScreenshotPixelRef* pixels = new ScreenshotPixelRef(NULL);
     if (pixels->update(displayToken, width, height,
-            minLayer, maxLayer, allLayers) != NO_ERROR) {
+            minLayer, maxLayer, allLayers, useIdentityTransform) != NO_ERROR) {
         delete pixels;
         return NULL;
     }
@@ -202,7 +206,8 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
 
 static void nativeScreenshot(JNIEnv* env, jclass clazz,
         jobject displayTokenObj, jobject surfaceObj,
-        jint width, jint height, jint minLayer, jint maxLayer, bool allLayers) {
+        jint width, jint height, jint minLayer, jint maxLayer, bool allLayers,
+        bool useIdentityTransform) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken != NULL) {
         sp<Surface> consumer = android_view_Surface_getSurface(env, surfaceObj);
@@ -213,7 +218,8 @@ static void nativeScreenshot(JNIEnv* env, jclass clazz,
             }
             ScreenshotClient::capture(
                     displayToken, consumer->getIGraphicBufferProducer(),
-                    width, height, uint32_t(minLayer), uint32_t(maxLayer));
+                    width, height, uint32_t(minLayer), uint32_t(maxLayer),
+                    useIdentityTransform);
         }
     }
 }
@@ -417,9 +423,9 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRelease },
     {"nativeDestroy", "(J)V",
             (void*)nativeDestroy },
-    {"nativeScreenshot", "(Landroid/os/IBinder;IIIIZ)Landroid/graphics/Bitmap;",
+    {"nativeScreenshot", "(Landroid/os/IBinder;IIIIZZ)Landroid/graphics/Bitmap;",
             (void*)nativeScreenshotBitmap },
-    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/view/Surface;IIIIZ)V",
+    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/view/Surface;IIIIZZ)V",
             (void*)nativeScreenshot },
     {"nativeOpenTransaction", "()V",
             (void*)nativeOpenTransaction },
