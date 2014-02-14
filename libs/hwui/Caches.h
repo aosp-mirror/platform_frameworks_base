@@ -367,7 +367,8 @@ public:
     float propertyLightPosXScale;
     float propertyLightPosYScale;
     float propertyLightPosZScale;
-    int propertyShadowStrength;
+    int propertyAmbientShadowStrength;
+    int propertySpotShadowStrength;
 
 private:
     enum OverdrawColorSet {
