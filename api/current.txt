@@ -31641,12 +31641,10 @@ package android.widget {
     method public int getCheckedItemPosition();
     method public android.util.SparseBooleanArray getCheckedItemPositions();
     method public int getChoiceMode();
-    method public int getFirstPositionForRow(int);
     method public int getListPaddingBottom();
     method public int getListPaddingLeft();
     method public int getListPaddingRight();
     method public int getListPaddingTop();
-    method public int getRowForPosition(int);
     method public android.view.View getSelectedView();
     method public android.graphics.drawable.Drawable getSelector();
     method public java.lang.CharSequence getTextFilter();
