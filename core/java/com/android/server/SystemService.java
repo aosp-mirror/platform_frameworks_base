@@ -85,14 +85,6 @@ public abstract class SystemService {
     }
 
     /**
-     * Services are not yet available. This is a good place to do setup work that does
-     * not require other services.
-     *
-     * @param context The system context.
-     */
-    public void onCreate(Context context) {}
-
-    /**
      * Called when the dependencies listed in the @Service class-annotation are available
      * and after the chosen start phase.
      * When this method returns, the service should be published.
