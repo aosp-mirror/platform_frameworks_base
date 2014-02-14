@@ -333,6 +333,10 @@ final public class MediaCodec {
      * <p>
      * The application is responsible for calling release() on the Surface when
      * done.
+     * <p>
+     * The Surface must be rendered with a hardware-accelerated API, such as OpenGL ES.
+     * {@link android.view.Surface#lockCanvas(android.graphics.Rect)} may fail or produce
+     * unexpected results.
      */
     public native final Surface createInputSurface();
 
