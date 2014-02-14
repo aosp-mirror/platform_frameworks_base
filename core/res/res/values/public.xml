@@ -2108,6 +2108,7 @@
   <public type="attr" name="sharedElementName" />
   <public type="attr" name="transitionGroup" />
   <public type="attr" name="castsShadow" />
+  <public type="attr" name="requiredForProfile"/>
 
   <public type="id" name="shared_element_name" />
 
