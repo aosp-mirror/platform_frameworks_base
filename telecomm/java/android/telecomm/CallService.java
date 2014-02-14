@@ -27,6 +27,8 @@ import android.telecomm.ICallServiceAdapter;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.os.SomeArgs;
+
 /**
  * Base implementation of CallService which can be used to provide calls for the system
  * in-call UI. CallService is a one-way service from the framework's CallsManager to any app
@@ -66,6 +68,12 @@ public abstract class CallService extends Service {
                 case MSG_DISCONNECT:
                     disconnect((String) msg.obj);
                     break;
+                case MSG_CONFIRM_INCOMING_CALL:
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String callId = (String) args.arg1;
+                    String callToken = (String) args.arg2;
+                    confirmIncomingCall(callId, callToken);
+                    break;
                 default:
                     break;
             }
@@ -75,7 +83,7 @@ public abstract class CallService extends Service {
     /**
      * Default ICallService implementation provided to CallsManager via {@link #onBind}.
      */
-    private final class CallServiceWrapper extends ICallService.Stub {
+    private final class CallServiceBinder extends ICallService.Stub {
         @Override
         public void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter) {
             mMessageHandler.obtainMessage(MSG_SET_CALL_SERVICE_ADAPTER, callServiceAdapter)
@@ -96,6 +104,14 @@ public abstract class CallService extends Service {
         public void disconnect(String callId) {
             mMessageHandler.obtainMessage(MSG_DISCONNECT, callId).sendToTarget();
         }
+
+        @Override
+        public void confirmIncomingCall(String callId, String callToken) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = callToken;
+            mMessageHandler.obtainMessage(MSG_CONFIRM_INCOMING_CALL, args).sendToTarget();
+        }
     }
 
     // Only used internally by this class.
@@ -107,27 +123,19 @@ public abstract class CallService extends Service {
             MSG_SET_CALL_SERVICE_ADAPTER = 1,
             MSG_IS_COMPATIBLE_WITH = 2,
             MSG_CALL = 3,
-            MSG_DISCONNECT = 4;
+            MSG_DISCONNECT = 4,
+            MSG_CONFIRM_INCOMING_CALL = 5;
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
      * See {@link #CallServiceMessageHandler}.
      */
-    private final CallServiceMessageHandler mMessageHandler;
+    private final CallServiceMessageHandler mMessageHandler = new CallServiceMessageHandler();
 
     /**
      * Default binder implementation of {@link ICallService} interface.
      */
-    private final CallServiceWrapper mBinder;
-
-    /**
-     * Protected constructor called only by subclasses creates the binder interface and
-     * single-threaded message handler.
-     */
-    protected CallService() {
-        mMessageHandler = new CallServiceMessageHandler();
-        mBinder = new CallServiceWrapper();
-    }
+    private final CallServiceBinder mBinder = new CallServiceBinder();
 
     /** {@inheritDoc} */
     public IBinder onBind(Intent intent) {
@@ -178,4 +186,16 @@ public abstract class CallService extends Service {
      * @param callId The ID of the call to disconnect.
      */
     public abstract void disconnect(String callId);
+
+    /**
+     * Confirms that the specified incoming call is connecting through this call service. Telecomm
+     * receives all incoming calls initially as intents that include information about a call
+     * and a token identifying the call. Before displaying any UI to the user, Telecomm confirms
+     * the existence of the incoming call by binding to the specified call service and calling
+     * this method. Confirmation responses are received through {@link ICallServiceAdapter}.
+     *
+     * @param callId The ID of the call.
+     * @param callToken The call token received through the incoming call intent.
+     */
+    public abstract void confirmIncomingCall(String callId, String callToken);
 }

@@ -74,4 +74,16 @@ oneway interface ICallService {
      * @param callId The identifier of the call to disconnect.
      */
     void disconnect(String callId);
+
+    /**
+     * Confirms that the specified incoming call is connecting through this call service. Telecomm
+     * receives all incoming calls initially as intents that include information about a call
+     * and a token identifying the call. Before displaying any UI to the user, Telecomm confirms
+     * the existence of the incoming call by binding to the specified call service and calling
+     * this method. Confirmation responses are received through {@link ICallServiceAdapter}.
+     *
+     * @param callId The ID of the call.
+     * @param callToken The call token received through the incoming call intent.
+     */
+     void confirmIncomingCall(String callId, String callToken);
 }

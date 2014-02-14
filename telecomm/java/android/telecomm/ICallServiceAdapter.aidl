@@ -25,11 +25,6 @@ import android.telecomm.CallInfo;
 oneway interface ICallServiceAdapter {
 
     /**
-     * Retrieves a new unique call ID for use with newIncomingCall.
-     */
-    void getNextCallId(/* TODO(santoscordon): Needs response object */);
-
-    /**
      * Receives confirmation of a call service's ability to place a call. This method is used in
      * response to {@link ICallService#isCompatibleWith}.
      * TODO(santoscordon): rename to setIsCompatibleWith().
@@ -42,12 +37,15 @@ oneway interface ICallServiceAdapter {
     void setCompatibleWith(String callId, boolean isCompatible);
 
     /**
-     * Tells CallsManager of a new incoming call. CallInfo should be populated using a new call ID
-     * retrieved via {@link #getNextCallId}.
+     * Receives confirmation of the existence of an incoming call connected through the call
+     * service. Invoked by the call service after it receives a confirmation request from Telecomm
+     * through {@link ICallService#confirmIncomingCall}. The call info object must contain all the
+     * updated status of the call and use the same call ID as was passed into
+     * {@link ICallService#confirmIncomingCall}.
      *
      * @param callInfo The details of the relevant call.
      */
-    void handleIncomingCall(in CallInfo callInfo);
+    void handleConfirmedIncomingCall(in CallInfo callInfo);
 
     /**
      * Tells Telecomm that an attempt to place the specified outgoing call succeeded.

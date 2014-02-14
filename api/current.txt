@@ -24186,6 +24186,7 @@ package android.telecomm {
   public abstract class CallService extends android.app.Service {
     ctor protected CallService();
     method public abstract void call(android.telecomm.CallInfo);
+    method public abstract void confirmIncomingCall(java.lang.String, java.lang.String);
     method public abstract void disconnect(java.lang.String);
     method public android.os.IBinder getBinder();
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
@@ -24228,6 +24229,7 @@ package android.telecomm {
 
   public abstract interface ICallService implements android.os.IInterface {
     method public abstract void call(android.telecomm.CallInfo) throws android.os.RemoteException;
+    method public abstract void confirmIncomingCall(java.lang.String, java.lang.String) throws android.os.RemoteException;
     method public abstract void disconnect(java.lang.String) throws android.os.RemoteException;
     method public abstract void isCompatibleWith(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter) throws android.os.RemoteException;
@@ -24241,9 +24243,8 @@ package android.telecomm {
   }
 
   public abstract interface ICallServiceAdapter implements android.os.IInterface {
-    method public abstract void getNextCallId() throws android.os.RemoteException;
+    method public abstract void handleConfirmedIncomingCall(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void handleFailedOutgoingCall(java.lang.String, java.lang.String) throws android.os.RemoteException;
-    method public abstract void handleIncomingCall(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void handleSuccessfulOutgoingCall(java.lang.String) throws android.os.RemoteException;
     method public abstract void setActive(java.lang.String) throws android.os.RemoteException;
     method public abstract void setCompatibleWith(java.lang.String, boolean) throws android.os.RemoteException;
@@ -24745,11 +24746,11 @@ package android.telephony {
     method public boolean hasIccCard();
     method public boolean iccCloseLogicalChannel(int);
     method public int iccOpenLogicalChannel(java.lang.String);
-    method public java.lang.String sendEnvelope(java.lang.String);
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public void newIncomingThirdPartyCall(android.content.ComponentName, java.lang.String, java.lang.String);
+    method public java.lang.String sendEnvelope(java.lang.String);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
