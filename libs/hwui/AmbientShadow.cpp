@@ -21,6 +21,7 @@
 #include <utils/Vector.h>
 
 #include "AmbientShadow.h"
+#include "ShadowTessellator.h"
 #include "Vertex.h"
 
 namespace android {
@@ -34,9 +35,7 @@ namespace uirenderer {
  *                  array.
  * @param vertexCount The length of caster's polygon in terms of number of
  *                    vertices.
- * @param rays The number of rays shooting out from the centroid.
- * @param layers The number of rings outside the polygon.
- * @param strength The darkness of the shadow, the higher, the darker.
+ * @param centroid3d The centroid of the shadow caster.
  * @param heightFactor The factor showing the higher the object, the lighter the
  *                     shadow.
  * @param geomFactor The factor scaling the geometry expansion along the normal.
@@ -45,21 +44,18 @@ namespace uirenderer {
  *               triangle strips mode.
  */
 void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount,
-        int rays, int layers, float strength, float heightFactor, float geomFactor,
+        const Vector3& centroid3d, float heightFactor, float geomFactor,
         VertexBuffer& shadowVertexBuffer) {
-
+    const int rays = SHADOW_RAY_COUNT;
+    const int layers = SHADOW_LAYER_COUNT;
     // Validate the inputs.
-    if (strength <= 0 || heightFactor <= 0 || layers <= 0 || rays <= 0
+    if (vertexCount < 3 || heightFactor <= 0 || layers <= 0 || rays <= 0
         || geomFactor <= 0) {
 #if DEBUG_SHADOW
         ALOGE("Invalid input for createAmbientShadow(), early return!");
 #endif
         return;
     }
-    int rings = layers + 1;
-    int size = rays * rings;
-    Vector2 centroid;
-    calculatePolygonCentroid(vertices, vertexCount, centroid);
 
     Vector<Vector2> dir; // TODO: use C++11 unique_ptr
     dir.setCapacity(rays);
@@ -75,7 +71,7 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
         int edgeIndex;
         float edgeFraction;
         float rayDistance;
-        calculateIntersection(vertices, vertexCount, centroid, dir[i], edgeIndex,
+        calculateIntersection(vertices, vertexCount, centroid3d, dir[i], edgeIndex,
                 edgeFraction, rayDistance);
         rayDist[i] = rayDistance;
         if (edgeIndex < 0 || edgeIndex >= vertexCount) {
@@ -91,8 +87,7 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
 
     // The output buffer length basically is roughly rays * layers, but since we
     // need triangle strips, so we need to duplicate vertices to accomplish that.
-    const int shadowVertexCount = (2 + rays + ((layers) * 2 * (rays + 1)));
-    AlphaVertex* shadowVertices = shadowVertexBuffer.alloc<AlphaVertex>(shadowVertexCount);
+    AlphaVertex* shadowVertices = shadowVertexBuffer.alloc<AlphaVertex>(SHADOW_VERTEX_COUNT);
 
     // Calculate the vertex of the shadows.
     //
@@ -101,110 +96,45 @@ void AmbientShadow::createAmbientShadow(const Vector3* vertices, int vertexCount
     // calculate the normal N, which should be perpendicular to the edge of the
     // polygon (represented by the neighbor intersection points) .
     // Shadow's vertices will be generated as : P + N * scale.
-    int currentIndex = 0;
-    for (int r = 0; r < layers; r++) {
-        int firstInLayer = currentIndex;
-        for (int i = 0; i < rays; i++) {
+    int currentVertexIndex = 0;
+    for (int layerIndex = 0; layerIndex <= layers; layerIndex++) {
+        for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
 
             Vector2 normal(1.0f, 0.0f);
-            calculateNormal(rays, i, dir.array(), rayDist, normal);
+            calculateNormal(rays, rayIndex, dir.array(), rayDist, normal);
 
-            float opacity = strength * (0.5f) / (1 + rayHeight[i] / heightFactor);
+            float opacity = 1.0 / (1 + rayHeight[rayIndex] / heightFactor);
 
             // The vertex should be start from rayDist[i] then scale the
             // normalizeNormal!
-            Vector2 intersection = dir[i] * rayDist[i] + centroid;
+            Vector2 intersection = dir[rayIndex] * rayDist[rayIndex] +
+                    Vector2(centroid3d.x, centroid3d.y);
 
-            // Use 2 rings' vertices to complete one layer's strip
-            for (int j = r; j < (r + 2); j++) {
-                float jf = j / (float)(rings - 1);
-
-                float expansionDist = rayHeight[i] / heightFactor * geomFactor * jf;
-                AlphaVertex::set(&shadowVertices[currentIndex],
-                        intersection.x + normal.x * expansionDist,
-                        intersection.y + normal.y * expansionDist,
-                        (1 - jf) * opacity);
-                currentIndex++;
-            }
+            float layerRatio = layerIndex / (float)(layers);
+            // The higher the intersection is, the further the ambient shadow expanded.
+            float expansionDist = rayHeight[rayIndex] / heightFactor *
+                    geomFactor * (1 - layerRatio);
+            AlphaVertex::set(&shadowVertices[currentVertexIndex++],
+                    intersection.x + normal.x * expansionDist,
+                    intersection.y + normal.y * expansionDist,
+                    layerRatio * opacity);
         }
 
-        // From one layer to the next, we need to duplicate the vertex to
-        // continue as a single strip.
-        shadowVertices[currentIndex] = shadowVertices[firstInLayer];
-        currentIndex++;
-        shadowVertices[currentIndex] = shadowVertices[firstInLayer + 1];
-        currentIndex++;
     }
+    float centroidAlpha = 1.0 / (1 + centroid3d.z / heightFactor);
+    AlphaVertex::set(&shadowVertices[currentVertexIndex++],
+            centroid3d.x, centroid3d.y, centroidAlpha);
 
-    // After all rings are done, we need to jump into the polygon.
-    // In order to keep everything in a strip, we need to duplicate the last one
-    // of the rings and the first one inside the polygon.
-    int lastInRings = currentIndex - 1;
-    shadowVertices[currentIndex] = shadowVertices[lastInRings];
-    currentIndex++;
-
-    // We skip one and fill it back after we finish the internal triangles.
-    currentIndex++;
-    int firstInternal = currentIndex;
-
-    // Combine the internal area of the polygon into a triangle strip, too.
-    // The basic idea is zig zag between the intersection points.
-    // 0 -> (n - 1) -> 1 -> (n - 2) ...
-    for (int k = 0; k < rays; k++) {
-        int  i = k / 2;
-        if ((k & 1) == 1) { // traverse the inside in a zig zag pattern for strips
-            i = rays - i - 1;
-        }
-        float cast = rayDist[i] * (1 + rayHeight[i] / heightFactor);
-        float opacity = strength * (0.5f) / (1 + rayHeight[i] / heightFactor);
-        float t = rayDist[i];
-
-        AlphaVertex::set(&shadowVertices[currentIndex], dir[i].x * t + centroid.x,
-                dir[i].y * t + centroid.y, opacity);
-        currentIndex++;
-    }
-
-    currentIndex = firstInternal - 1;
-    shadowVertices[currentIndex] = shadowVertices[firstInternal];
-}
-
-/**
- * Calculate the centroid of a given polygon.
- *
- * @param vertices The shadow caster's polygon, which is represented in a
- *                 straight Vector3 array.
- * @param vertexCount The length of caster's polygon in terms of number of vertices.
- *
- * @param centroid Return the centroid of the polygon.
- */
-void AmbientShadow::calculatePolygonCentroid(const Vector3* vertices, int vertexCount,
-        Vector2& centroid) {
-    float sumx = 0;
-    float sumy = 0;
-    int p1 = vertexCount - 1;
-    float area = 0;
-    for (int p2 = 0; p2 < vertexCount; p2++) {
-        float x1 = vertices[p1].x;
-        float y1 = vertices[p1].y;
-        float x2 = vertices[p2].x;
-        float y2 = vertices[p2].y;
-        float a = (x1 * y2 - x2 * y1);
-        sumx += (x1 + x2) * a;
-        sumy += (y1 + y2) * a;
-        area += a;
-        p1 = p2;
-    }
-
-    if (area == 0) {
 #if DEBUG_SHADOW
-        ALOGE("Area is 0!");
-#endif
-        centroid.x = vertices[0].x;
-        centroid.y = vertices[0].y;
-    } else {
-        centroid.x = sumx / (3 * area);
-        centroid.y = sumy / (3 * area);
+    if (currentVertexIndex != SHADOW_VERTEX_COUNT) {
+        ALOGE("number of vertex generated for ambient shadow is wrong! "
+              "current: %d , expected: %d", currentVertexIndex, SHADOW_VERTEX_COUNT);
     }
+    for (int i = 0; i < SHADOW_VERTEX_COUNT; i++) {
+        ALOGD("ambient shadow value: i %d, (x:%f, y:%f, a:%f)", i, shadowVertices[i].x,
+                shadowVertices[i].y, shadowVertices[i].alpha);
+    }
+#endif
 }
 
 /**
@@ -238,7 +168,7 @@ void AmbientShadow::calculateRayDirections(int rays, Vector2* dir) {
  * @param outRayDist Return the ray distance from centroid to the intersection.
  */
 void AmbientShadow::calculateIntersection(const Vector3* vertices, int vertexCount,
-        const Vector2& start, const Vector2& dir, int& outEdgeIndex,
+        const Vector3& start, const Vector2& dir, int& outEdgeIndex,
         float& outEdgeFraction, float& outRayDist) {
     float startX = start.x;
     float startY = start.y;

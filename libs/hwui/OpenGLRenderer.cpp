@@ -1907,7 +1907,7 @@ void OpenGLRenderer::setupDrawMeshIndices(const GLvoid* vertices,
     } else {
         force = mCaches.unbindMeshBuffer();
     }
-    mCaches.bindIndicesBuffer();
+    mCaches.bindQuadIndicesBuffer();
 
     mCaches.bindPositionVertexPointer(force, vertices);
     if (mCaches.currentProgram->texCoords >= 0) {
@@ -1917,7 +1917,7 @@ void OpenGLRenderer::setupDrawMeshIndices(const GLvoid* vertices,
 
 void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
     bool force = mCaches.unbindMeshBuffer();
-    mCaches.bindIndicesBuffer();
+    mCaches.bindQuadIndicesBuffer();
     mCaches.bindPositionVertexPointer(force, vertices, gVertexStride);
 }
 
@@ -2392,10 +2392,9 @@ status_t OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* 
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, const SkPaint* paint,
-        bool useOffset) {
+status_t OpenGLRenderer::drawVertexBuffer(VertexBufferMode mode,
+        const VertexBuffer& vertexBuffer, const SkPaint* paint, bool useOffset) {
     // not missing call to quickReject/dirtyLayer, always done at a higher level
-
     if (!vertexBuffer.getVertexCount()) {
         // no vertices to draw
         return DrawGlInfo::kStatusDone;
@@ -2421,19 +2420,24 @@ status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, cons
     bool force = mCaches.unbindMeshBuffer();
     mCaches.bindPositionVertexPointer(true, vertices, isAA ? gAlphaVertexStride : gVertexStride);
     mCaches.resetTexCoordsVertexPointer();
-    mCaches.unbindIndicesBuffer();
+
 
     int alphaSlot = -1;
     if (isAA) {
         void* alphaCoords = ((GLbyte*) vertices) + gVertexAlphaOffset;
         alphaSlot = mCaches.currentProgram->getAttrib("vtxAlpha");
-
         // TODO: avoid enable/disable in back to back uses of the alpha attribute
         glEnableVertexAttribArray(alphaSlot);
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
     }
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getVertexCount());
+    if (mode == kVertexBufferMode_Standard) {
+        mCaches.unbindIndicesBuffer();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getVertexCount());
+    } else {
+        mCaches.bindShadowIndicesBuffer();
+        glDrawElements(GL_TRIANGLE_STRIP, SHADOW_INDEX_COUNT, GL_UNSIGNED_SHORT, 0);
+    }
 
     if (isAA) {
         glDisableVertexAttribArray(alphaSlot);
@@ -2462,7 +2466,7 @@ status_t OpenGLRenderer::drawConvexPath(const SkPath& path, const SkPaint* paint
         dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
     }
 
-    return drawVertexBuffer(vertexBuffer, paint);
+    return drawVertexBuffer(kVertexBufferMode_Standard, vertexBuffer, paint);
 }
 
 /**
@@ -2493,7 +2497,7 @@ status_t OpenGLRenderer::drawLines(const float* points, int count, const SkPaint
     dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
 
     bool useOffset = !paint->isAntiAlias();
-    return drawVertexBuffer(buffer, paint, useOffset);
+    return drawVertexBuffer(kVertexBufferMode_Standard, buffer, paint, useOffset);
 }
 
 status_t OpenGLRenderer::drawPoints(const float* points, int count, const SkPaint* paint) {
@@ -2513,7 +2517,7 @@ status_t OpenGLRenderer::drawPoints(const float* points, int count, const SkPain
     dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
 
     bool useOffset = !paint->isAntiAlias();
-    return drawVertexBuffer(buffer, paint, useOffset);
+    return drawVertexBuffer(kVertexBufferMode_Standard, buffer, paint, useOffset);
 }
 
 status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -3236,13 +3240,20 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
         casterTransform.mapPoint3d(casterPolygon[i]);
     }
 
+    // map the centroid of the caster into 3d
+    Vector2 centroid =  ShadowTessellator::centroid2d(
+            reinterpret_cast<const Vector2*>(casterVertices2d.array()),
+            casterVertexCount);
+    Vector3 centroid3d(centroid.x, centroid.y, 0);
+    casterTransform.mapPoint3d(centroid3d);
+
     // draw caster's shadows
     if (mCaches.propertyAmbientShadowStrength > 0) {
         paint.setARGB(mCaches.propertyAmbientShadowStrength, 0, 0, 0);
         VertexBuffer ambientShadowVertexBuffer;
         ShadowTessellator::tessellateAmbientShadow(casterPolygon, casterVertexCount,
-                ambientShadowVertexBuffer);
-        drawVertexBuffer(ambientShadowVertexBuffer, &paint);
+                centroid3d, ambientShadowVertexBuffer);
+        drawVertexBuffer(kVertexBufferMode_Shadow, ambientShadowVertexBuffer, &paint);
     }
 
     if (mCaches.propertySpotShadowStrength > 0) {
@@ -3254,7 +3265,7 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
                 lightPosScale, *currentTransform(), getWidth(), getHeight(),
                 spotShadowVertexBuffer);
 
-        drawVertexBuffer(spotShadowVertexBuffer, &paint);
+        drawVertexBuffer(kVertexBufferMode_Shadow, spotShadowVertexBuffer, &paint);
     }
 
     return DrawGlInfo::kStatusDrew;

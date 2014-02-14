@@ -28,23 +28,21 @@ class SpotShadow {
 public:
     static void createSpotShadow(const Vector3* poly, int polyLength,
             const Vector3& lightCenter, float lightSize, int lightVertexCount,
-            int rays, int layers, float strength, VertexBuffer& retStrips);
+            VertexBuffer& retStrips);
 
 private:
     static void computeSpotShadow(const Vector3* lightPoly, int lightPolyLength,
             const Vector3& lightCenter, const Vector3* poly, int polyLength,
-            int rays, int layers, float strength, VertexBuffer& retstrips);
+            VertexBuffer& retstrips);
 
     static void computeLightPolygon(int points, const Vector3& lightCenter,
             float size, Vector3* ret);
 
     static int  getStripSize(int rays, int layers);
     static void smoothPolygon(int level, int rays, float* rayDist);
-    static float calculateOpacity(float jf, float deltaDist);
+    static float calculateOpacity(float jf);
     static float rayIntersectPoly(const Vector2* poly, int polyLength,
             const Vector2& point, float dx, float dy);
-
-    static Vector2 centroid2d(const Vector2* poly, int polyLength);
 
     static void xsort(Vector2* points, int pointsLength);
     static int hull(Vector2* points, int pointsLength, Vector2* retPoly);
@@ -65,8 +63,7 @@ private:
             double x3, double y3, double x4, double y4, Vector2& ret);
 
     static void generateTriangleStrip(const Vector2* penumbra, int penumbraLength,
-            const Vector2* umbra, int umbraLength, int rays, int layers,
-            float strength, VertexBuffer& retstrips);
+            const Vector2* umbra, int umbraLength, VertexBuffer& retstrips);
 
     static const double EPSILON = 1e-7;
 
