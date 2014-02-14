@@ -35,22 +35,22 @@ static struct {
 sp<SurfaceComposerClient> android_view_SurfaceSession_getClient(
         JNIEnv* env, jobject surfaceSessionObj) {
     return reinterpret_cast<SurfaceComposerClient*>(
-            env->GetIntField(surfaceSessionObj, gSurfaceSessionClassInfo.mNativeClient));
+            env->GetLongField(surfaceSessionObj, gSurfaceSessionClassInfo.mNativeClient));
 }
 
 
-static jint nativeCreate(JNIEnv* env, jclass clazz) {
+static jlong nativeCreate(JNIEnv* env, jclass clazz) {
     SurfaceComposerClient* client = new SurfaceComposerClient();
     client->incStrong((void*)nativeCreate);
-    return reinterpret_cast<jint>(client);
+    return reinterpret_cast<jlong>(client);
 }
 
-static void nativeDestroy(JNIEnv* env, jclass clazz, jint ptr) {
+static void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
     SurfaceComposerClient* client = reinterpret_cast<SurfaceComposerClient*>(ptr);
     client->decStrong((void*)nativeCreate);
 }
 
-static void nativeKill(JNIEnv* env, jclass clazz, jint ptr) {
+static void nativeKill(JNIEnv* env, jclass clazz, jlong ptr) {
     SurfaceComposerClient* client = reinterpret_cast<SurfaceComposerClient*>(ptr);
     client->dispose();
 }
@@ -58,11 +58,11 @@ static void nativeKill(JNIEnv* env, jclass clazz, jint ptr) {
 
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeCreate", "()I",
+    { "nativeCreate", "()J",
             (void*)nativeCreate },
-    { "nativeDestroy", "(I)V",
+    { "nativeDestroy", "(J)V",
             (void*)nativeDestroy },
-    { "nativeKill", "(I)V",
+    { "nativeKill", "(J)V",
             (void*)nativeKill }
 };
 
@@ -72,7 +72,7 @@ int register_android_view_SurfaceSession(JNIEnv* env) {
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 
     jclass clazz = env->FindClass("android/view/SurfaceSession");
-    gSurfaceSessionClassInfo.mNativeClient = env->GetFieldID(clazz, "mNativeClient", "I");
+    gSurfaceSessionClassInfo.mNativeClient = env->GetFieldID(clazz, "mNativeClient", "J");
     return 0;
 }
 
