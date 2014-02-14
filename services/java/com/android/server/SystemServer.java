@@ -74,7 +74,6 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
-import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usb.UsbService;
 import com.android.server.wallpaper.WallpaperManagerService;
@@ -303,7 +302,6 @@ public final class SystemServer {
         DockObserver dock = null;
         UsbService usb = null;
         SerialService serial = null;
-        TwilightManager twilight = null;
         RecognitionManagerService recognition = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         CommonTimeManagementService commonTimeMgmtService = null;
@@ -460,7 +458,6 @@ public final class SystemServer {
         CountryDetectorService countryDetector = null;
         TextServicesManagerService tsms = null;
         LockSettingsService lockSettings = null;
-        DreamManagerService dreamy = null;
         AssetAtlasService atlas = null;
         MediaRouterService mediaRouter = null;
 
@@ -776,7 +773,6 @@ public final class SystemServer {
             }
 
             mSystemServiceManager.startService(TwilightService.class);
-            twilight = LocalServices.getService(TwilightManager.class);
 
             mSystemServiceManager.startService(UiModeManagerService.class);
 
@@ -852,16 +848,10 @@ public final class SystemServer {
                 }
             }
 
-            if (!disableNonCoreServices &&
-                context.getResources().getBoolean(R.bool.config_dreamsSupported)) {
-                try {
-                    Slog.i(TAG, "Dreams Service");
-                    // Dreams (interactive idle-time views, a/k/a screen savers)
-                    dreamy = new DreamManagerService(context);
-                    ServiceManager.addService(DreamService.DREAM_SERVICE, dreamy);
-                } catch (Throwable e) {
-                    reportWtf("starting DreamManagerService", e);
-                }
+            if (!disableNonCoreServices
+                    && context.getResources().getBoolean(R.bool.config_dreamsSupported)) {
+                // Dreams (interactive idle-time views, a/k/a screen savers)
+                mSystemServiceManager.startService(DreamManagerService.class);
             }
 
             if (!disableNonCoreServices) {
@@ -956,7 +946,7 @@ public final class SystemServer {
 
         try {
             // TODO: use boot phase
-            mPowerManagerService.systemReady(twilight, dreamy);
+            mPowerManagerService.systemReady();
         } catch (Throwable e) {
             reportWtf("making Power Manager Service ready", e);
         }
@@ -993,7 +983,6 @@ public final class SystemServer {
         final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
         final TextServicesManagerService textServiceManagerServiceF = tsms;
         final StatusBarManagerService statusBarF = statusBar;
-        final DreamManagerService dreamyF = dreamy;
         final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
@@ -1104,11 +1093,6 @@ public final class SystemServer {
                         textServiceManagerServiceF.systemRunning();
                 } catch (Throwable e) {
                     reportWtf("Notifying TextServicesManagerService running", e);
-                }
-                try {
-                    if (dreamyF != null) dreamyF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying DreamManagerService running", e);
                 }
                 try {
                     if (atlasF != null) atlasF.systemRunning();

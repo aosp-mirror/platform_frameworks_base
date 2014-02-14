@@ -20,12 +20,12 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.Watchdog;
-import com.android.server.dreams.DreamManagerService;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -57,6 +57,7 @@ import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -181,7 +182,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     private DisplayPowerController mDisplayPowerController;
     private WirelessChargerDetector mWirelessChargerDetector;
     private SettingsObserver mSettingsObserver;
-    private DreamManagerService mDreamManager;
+    private DreamManagerInternal mDreamManager;
     private Light mAttentionLight;
 
     private final Object mLock = new Object();
@@ -433,10 +434,10 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
-    public void systemReady(TwilightManager twilight, DreamManagerService dreamManager) {
+    public void systemReady() {
         synchronized (mLock) {
             mSystemReady = true;
-            mDreamManager = dreamManager;
+            mDreamManager = LocalServices.getService(DreamManagerInternal.class);
 
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
@@ -454,7 +455,8 @@ public final class PowerManagerService extends com.android.server.SystemService
             // The display power controller runs on the power manager service's
             // own handler thread to ensure timely operation.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
-                    mContext, mNotifier, mLightsManager, twilight, sensorManager,
+                    mContext, mNotifier, mLightsManager,
+                    LocalServices.getService(TwilightManager.class), sensorManager,
                     mDisplaySuspendBlocker, mDisplayBlanker,
                     mDisplayPowerControllerCallbacks, mHandler);
 
