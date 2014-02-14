@@ -642,12 +642,13 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
-            public int changeEncryptionPassword(String password) throws RemoteException {
+            public int changeEncryptionPassword(int type, String password) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(type);
                     _data.writeString(password);
                     mRemote.transact(Stub.TRANSACTION_changeEncryptionPassword, _data, _reply, 0);
                     _reply.readException();
@@ -668,6 +669,22 @@ public interface IMountService extends IInterface {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeString(password);
                     mRemote.transact(Stub.TRANSACTION_verifyEncryptionPassword, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            public int getPasswordType() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_getPasswordType, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
                 } finally {
@@ -828,6 +845,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_fixPermissionsSecureContainer = IBinder.FIRST_CALL_TRANSACTION + 33;
 
         static final int TRANSACTION_mkdirs = IBinder.FIRST_CALL_TRANSACTION + 34;
+
+        static final int TRANSACTION_getPasswordType = IBinder.FIRST_CALL_TRANSACTION + 36;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1130,8 +1149,9 @@ public interface IMountService extends IInterface {
                 }
                 case TRANSACTION_changeEncryptionPassword: {
                     data.enforceInterface(DESCRIPTOR);
+                    int type = data.readInt();
                     String password = data.readString();
-                    int result = changeEncryptionPassword(password);
+                    int result = changeEncryptionPassword(type, password);
                     reply.writeNoException();
                     reply.writeInt(result);
                     return true;
@@ -1177,6 +1197,13 @@ public interface IMountService extends IInterface {
                     String callingPkg = data.readString();
                     String path = data.readString();
                     int result = mkdirs(callingPkg, path);
+                    reply.writeNoException();
+                    reply.writeInt(result);
+                    return true;
+                }
+                case TRANSACTION_getPasswordType: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int result = getPasswordType();
                     reply.writeNoException();
                     reply.writeInt(result);
                     return true;
@@ -1375,7 +1402,8 @@ public interface IMountService extends IInterface {
     /**
      * Changes the encryption password.
      */
-    public int changeEncryptionPassword(String password) throws RemoteException;
+    public int changeEncryptionPassword(int type, String password)
+        throws RemoteException;
 
     /**
      * Verify the encryption password against the stored volume.  This method
@@ -1412,4 +1440,10 @@ public interface IMountService extends IInterface {
      * external storage data or OBB directory belonging to calling app.
      */
     public int mkdirs(String callingPkg, String path) throws RemoteException;
+
+    /**
+     * Determines the type of the encryption password
+     * @return PasswordType
+     */
+    public int getPasswordType() throws RemoteException;
 }

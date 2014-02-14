@@ -645,4 +645,14 @@ public class StorageManager {
         return Settings.Global.getLong(mResolver, Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                 DEFAULT_FULL_THRESHOLD_BYTES);
     }
+
+    /// Consts to match the password types in cryptfs.h
+    /** @hide */
+    public static final int CRYPT_TYPE_PASSWORD = 0;
+    /** @hide */
+    public static final int CRYPT_TYPE_DEFAULT = 1;
+    /** @hide */
+    public static final int CRYPT_TYPE_PATTERN = 2;
+    /** @hide */
+    public static final int CRYPT_TYPE_PIN = 3;
 }
