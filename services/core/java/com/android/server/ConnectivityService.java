@@ -1541,14 +1541,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * desired
      * @return {@code true} on success, {@code false} on failure
      */
-    public boolean requestRouteToHost(int networkType, int hostAddress) {
+    public boolean requestRouteToHost(int networkType, int hostAddress, String packageName) {
         InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
 
         if (inetAddress == null) {
             return false;
         }
 
-        return requestRouteToHostAddress(networkType, inetAddress.getAddress());
+        return requestRouteToHostAddress(networkType, inetAddress.getAddress(), packageName);
     }
 
     /**
@@ -1560,7 +1560,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * desired
      * @return {@code true} on success, {@code false} on failure
      */
-    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
+    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress,
+            String packageName) {
         enforceChangePermission();
         if (mProtectedNetworks.contains(networkType)) {
             enforceConnectivityInternalPermission();
@@ -4325,7 +4326,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
                             // Make a route to host so we check the specific interface.
                             if (mCs.requestRouteToHostAddress(ConnectivityManager.TYPE_MOBILE_HIPRI,
-                                    hostAddr.getAddress())) {
+                                    hostAddr.getAddress(), null)) {
                                 // Wait a short time to be sure the route is established ??
                                 log("isMobileOk:"
                                         + " wait to establish route to hostAddr=" + hostAddr);
