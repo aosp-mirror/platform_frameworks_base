@@ -171,6 +171,10 @@ public abstract class BatteryStats implements Parcelable {
     private static final String SIGNAL_STRENGTH_COUNT_DATA = "sgc";
     private static final String DATA_CONNECTION_TIME_DATA = "dct";
     private static final String DATA_CONNECTION_COUNT_DATA = "dcc";
+    private static final String WIFI_STATE_TIME_DATA = "wst";
+    private static final String WIFI_STATE_COUNT_DATA = "wsc";
+    private static final String BLUETOOTH_STATE_TIME_DATA = "bst";
+    private static final String BLUETOOTH_STATE_COUNT_DATA = "bsc";
     private static final String POWER_USE_SUMMARY_DATA = "pws";
     private static final String POWER_USE_ITEM_DATA = "pwi";
 
@@ -275,22 +279,22 @@ public abstract class BatteryStats implements Parcelable {
          */
         public abstract int getUid();
 
-        public abstract void noteWifiRunningLocked();
-        public abstract void noteWifiStoppedLocked();
-        public abstract void noteFullWifiLockAcquiredLocked();
-        public abstract void noteFullWifiLockReleasedLocked();
-        public abstract void noteWifiScanStartedLocked();
-        public abstract void noteWifiScanStoppedLocked();
-        public abstract void noteWifiBatchedScanStartedLocked(int csph);
-        public abstract void noteWifiBatchedScanStoppedLocked();
-        public abstract void noteWifiMulticastEnabledLocked();
-        public abstract void noteWifiMulticastDisabledLocked();
-        public abstract void noteAudioTurnedOnLocked();
-        public abstract void noteAudioTurnedOffLocked();
-        public abstract void noteVideoTurnedOnLocked();
-        public abstract void noteVideoTurnedOffLocked();
-        public abstract void noteActivityResumedLocked();
-        public abstract void noteActivityPausedLocked();
+        public abstract void noteWifiRunningLocked(long elapsedRealtime);
+        public abstract void noteWifiStoppedLocked(long elapsedRealtime);
+        public abstract void noteFullWifiLockAcquiredLocked(long elapsedRealtime);
+        public abstract void noteFullWifiLockReleasedLocked(long elapsedRealtime);
+        public abstract void noteWifiScanStartedLocked(long elapsedRealtime);
+        public abstract void noteWifiScanStoppedLocked(long elapsedRealtime);
+        public abstract void noteWifiBatchedScanStartedLocked(int csph, long elapsedRealtime);
+        public abstract void noteWifiBatchedScanStoppedLocked(long elapsedRealtime);
+        public abstract void noteWifiMulticastEnabledLocked(long elapsedRealtime);
+        public abstract void noteWifiMulticastDisabledLocked(long elapsedRealtime);
+        public abstract void noteAudioTurnedOnLocked(long elapsedRealtime);
+        public abstract void noteAudioTurnedOffLocked(long elapsedRealtime);
+        public abstract void noteVideoTurnedOnLocked(long elapsedRealtime);
+        public abstract void noteVideoTurnedOffLocked(long elapsedRealtime);
+        public abstract void noteActivityResumedLocked(long elapsedRealtime);
+        public abstract void noteActivityPausedLocked(long elapsedRealtime);
         public abstract long getWifiRunningTime(long batteryRealtime, int which);
         public abstract long getFullWifiLockTime(long batteryRealtime, int which);
         public abstract long getWifiScanTime(long batteryRealtime, int which);
@@ -994,6 +998,37 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract long getGlobalWifiRunningTime(long batteryRealtime, int which);
 
+    public static final int WIFI_STATE_OFF = 0;
+    public static final int WIFI_STATE_OFF_SCANNING = 1;
+    public static final int WIFI_STATE_ON_NO_NETWORKS = 2;
+    public static final int WIFI_STATE_ON_DISCONNECTED = 3;
+    public static final int WIFI_STATE_ON_CONNECTED_STA = 4;
+    public static final int WIFI_STATE_ON_CONNECTED_P2P = 5;
+    public static final int WIFI_STATE_ON_CONNECTED_STA_P2P = 6;
+    public static final int WIFI_STATE_SOFT_AP = 7;
+
+    static final String[] WIFI_STATE_NAMES = {
+        "off", "scanning", "no_net", "disconn",
+        "sta", "p2p", "sta_p2p", "soft_ap"
+    };
+
+    public static final int NUM_WIFI_STATES = WIFI_STATE_SOFT_AP+1;
+
+    /**
+     * Returns the time in microseconds that WiFi has been running in the given state.
+     *
+     * {@hide}
+     */
+    public abstract long getWifiStateTime(int wifiState,
+            long batteryRealtime, int which);
+
+    /**
+     * Returns the number of times that WiFi has entered the given state.
+     *
+     * {@hide}
+     */
+    public abstract int getWifiStateCount(int wifiState, int which);
+
     /**
      * Returns the time in microseconds that bluetooth has been on while the device was
      * running on battery.
@@ -1004,16 +1039,16 @@ public abstract class BatteryStats implements Parcelable {
     
     public abstract int getBluetoothPingCount();
 
-    public static final int BLUETOOTH_INACTIVE = 0;
-    public static final int BLUETOOTH_ACTIVE_LOW = 1;
-    public static final int BLUETOOTH_ACTIVE_MEDIUM = 2;
-    public static final int BLUETOOTH_ACTIVE_HIGH = 3;
+    public static final int BLUETOOTH_STATE_INACTIVE = 0;
+    public static final int BLUETOOTH_STATE_LOW = 1;
+    public static final int BLUETOOTH_STATE_MEDIUM = 2;
+    public static final int BLUETOOTH_STATE_HIGH = 3;
 
-    static final String[] BLUETOOTH_ACTIVE_NAMES = {
-        "none", "low", "med", "high"
+    static final String[] BLUETOOTH_STATE_NAMES = {
+        "inactive", "low", "med", "high"
     };
 
-    public static final int NUM_BLUETOOTH_ACTIVE_TYPES = BLUETOOTH_ACTIVE_HIGH+1;
+    public static final int NUM_BLUETOOTH_STATES = BLUETOOTH_STATE_HIGH +1;
 
     /**
      * Returns the time in microseconds that Bluetooth has been running in the
@@ -1021,15 +1056,15 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
-    public abstract long getBluetoothActiveTime(int activeType,
+    public abstract long getBluetoothStateTime(int bluetoothState,
             long batteryRealtime, int which);
 
     /**
-     * Returns the number of times the Bluetooth has entered the given active state.
+     * Returns the number of times that Bluetooth has entered the given active state.
      *
      * {@hide}
      */
-    public abstract int getBluetoothActiveCount(int activeType, int which);
+    public abstract int getBluetoothStateCount(int bluetoothState, int which);
 
     public static final int NETWORK_MOBILE_RX_DATA = 0;
     public static final int NETWORK_MOBILE_TX_DATA = 1;
@@ -1431,7 +1466,29 @@ public abstract class BatteryStats implements Parcelable {
             args[i] = getPhoneDataConnectionCount(i, which);
         }
         dumpLine(pw, 0 /* uid */, category, DATA_CONNECTION_COUNT_DATA, args);
-        
+
+        // Dump wifi state stats
+        args = new Object[NUM_WIFI_STATES];
+        for (int i=0; i<NUM_WIFI_STATES; i++) {
+            args[i] = getWifiStateTime(i, batteryRealtime, which) / 1000;
+        }
+        dumpLine(pw, 0 /* uid */, category, WIFI_STATE_TIME_DATA, args);
+        for (int i=0; i<NUM_WIFI_STATES; i++) {
+            args[i] = getWifiStateCount(i, which);
+        }
+        dumpLine(pw, 0 /* uid */, category, WIFI_STATE_COUNT_DATA, args);
+
+        // Dump bluetooth state stats
+        args = new Object[NUM_BLUETOOTH_STATES];
+        for (int i=0; i<NUM_BLUETOOTH_STATES; i++) {
+            args[i] = getBluetoothStateTime(i, batteryRealtime, which) / 1000;
+        }
+        dumpLine(pw, 0 /* uid */, category, BLUETOOTH_STATE_TIME_DATA, args);
+        for (int i=0; i<NUM_BLUETOOTH_STATES; i++) {
+            args[i] = getBluetoothStateCount(i, which);
+        }
+        dumpLine(pw, 0 /* uid */, category, BLUETOOTH_STATE_COUNT_DATA, args);
+
         if (which == STATS_SINCE_UNPLUGGED) {
             dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(),
                     getDischargeCurrentLevel());
@@ -1941,12 +1998,63 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append("("); sb.append(formatRatioLocked(wifiOnTime, whichBatteryRealtime));
                 sb.append("), Wifi running: "); formatTimeMs(sb, wifiRunningTime / 1000);
                 sb.append("("); sb.append(formatRatioLocked(wifiRunningTime, whichBatteryRealtime));
-                sb.append("), Bluetooth on: "); formatTimeMs(sb, bluetoothOnTime / 1000);
+                sb.append(")");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Wifi states:");
+        didOne = false;
+        for (int i=0; i<NUM_WIFI_STATES; i++) {
+            final long time = getWifiStateTime(i, batteryRealtime, which);
+            if (time == 0) {
+                continue;
+            }
+            sb.append("\n    ");
+            didOne = true;
+            sb.append(WIFI_STATE_NAMES[i]);
+            sb.append(" ");
+            formatTimeMs(sb, time/1000);
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(") ");
+            sb.append(getPhoneDataConnectionCount(i, which));
+            sb.append("x");
+        }
+        if (!didOne) sb.append(" (no activity)");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+                sb.append("  Bluetooth on: "); formatTimeMs(sb, bluetoothOnTime / 1000);
                 sb.append("("); sb.append(formatRatioLocked(bluetoothOnTime, whichBatteryRealtime));
                 sb.append(")");
         pw.println(sb.toString());
-        
-        pw.println(" ");
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Bluetooth states:");
+        didOne = false;
+        for (int i=0; i<NUM_BLUETOOTH_STATES; i++) {
+            final long time = getBluetoothStateTime(i, batteryRealtime, which);
+            if (time == 0) {
+                continue;
+            }
+            sb.append("\n    ");
+            didOne = true;
+            sb.append(BLUETOOTH_STATE_NAMES[i]);
+            sb.append(" ");
+            formatTimeMs(sb, time/1000);
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(") ");
+            sb.append(getPhoneDataConnectionCount(i, which));
+            sb.append("x");
+        }
+        if (!didOne) sb.append(" (no activity)");
+        pw.println(sb.toString());
+
+        pw.println();
 
         if (which == STATS_SINCE_UNPLUGGED) {
             if (getIsOnBattery()) {
