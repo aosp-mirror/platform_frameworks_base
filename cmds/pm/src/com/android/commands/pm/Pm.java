@@ -39,6 +39,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.IUserManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -1011,6 +1012,27 @@ public final class Pm {
 
     public void runCreateUser() {
         String name;
+        int relatedUserId = -1;
+        int flags = 0;
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if ("--relatedTo".equals(opt)) {
+                String optionData = nextOptionData();
+                if (optionData == null || !isNumber(optionData)) {
+                    System.err.println("Error: no USER_ID specified");
+                    showUsage();
+                    return;
+                } else {
+                    relatedUserId = Integer.parseInt(optionData);
+                }
+            } else if ("--managed".equals(opt)) {
+                flags |= UserInfo.FLAG_MANAGED_PROFILE;
+            } else {
+                System.err.println("Error: unknown option " + opt);
+                showUsage();
+                return;
+            }
+        }
         String arg = nextArg();
         if (arg == null) {
             System.err.println("Error: no user name specified.");
@@ -1018,7 +1040,16 @@ public final class Pm {
         }
         name = arg;
         try {
-            final UserInfo info = mUm.createUser(name, 0);
+            UserInfo info = null;
+            if (relatedUserId < 0) {
+                info = mUm.createUser(name, flags);
+            } else {
+                if (Process.myUid() != 0) {
+                    System.err.println("Error: not running as root.");
+                    return;
+                }
+                info = mUm.createRelatedUser(name, flags, relatedUserId);
+            }
             if (info != null) {
                 System.out.println("Success: created user id " + info.id);
             } else {
@@ -1530,7 +1561,7 @@ public final class Pm {
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
         System.err.println("       pm trim-caches DESIRED_FREE_SPACE");
-        System.err.println("       pm create-user USER_NAME");
+        System.err.println("       pm create-user [--relatedTo USER_ID] [--managed] USER_NAME");
         System.err.println("       pm remove-user USER_ID");
         System.err.println("       pm get-max-users");
         System.err.println("");
