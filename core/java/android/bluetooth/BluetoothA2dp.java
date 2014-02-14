@@ -90,6 +90,11 @@ public final class BluetoothA2dp implements BluetoothProfile {
     public static final String ACTION_PLAYING_STATE_CHANGED =
         "android.bluetooth.a2dp.profile.action.PLAYING_STATE_CHANGED";
 
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_AVRCP_CONNECTION_STATE_CHANGED =
+        "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";
+
     /**
      * A2DP sink device is streaming music. This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
@@ -546,5 +551,35 @@ public final class BluetoothA2dp implements BluetoothProfile {
 
     private static void log(String msg) {
       Log.d(TAG, msg);
+    }
+
+    /** @hide */
+    public void sendPassThroughCmd(int keyCode, int keyState) {
+        if (DBG) Log.d(TAG, "sendPassThroughCmd");
+        if (mService != null && isEnabled()) {
+            try {
+                mService.sendPassThroughCmd(keyCode, keyState);
+                return;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error talking to BT service in sendPassThroughCmd()", e);
+                return;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+    }
+
+    /** @hide */
+    public boolean isAvrcpConnected(BluetoothDevice device) {
+        if (DBG) Log.d(TAG, "isAvrcpConnected");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.isAvrcpConnected(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error talking to BT service in isAvrcpConnected()", e);
+                return false;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 }
