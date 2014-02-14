@@ -11323,10 +11323,12 @@ package android.hardware.camera2 {
     method public abstract int setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void stopRepeating() throws android.hardware.camera2.CameraAccessException;
+    field public static final int TEMPLATE_MANUAL = 6; // 0x6
     field public static final int TEMPLATE_PREVIEW = 1; // 0x1
     field public static final int TEMPLATE_RECORD = 3; // 0x3
     field public static final int TEMPLATE_STILL_CAPTURE = 2; // 0x2
     field public static final int TEMPLATE_VIDEO_SNAPSHOT = 4; // 0x4
+    field public static final int TEMPLATE_ZERO_SHUTTER_LAG = 5; // 0x5
   }
 
   public static abstract class CameraDevice.CaptureListener {
