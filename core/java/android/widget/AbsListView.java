@@ -61,6 +61,7 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -1488,6 +1489,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
                 info.setScrollable(true);
             }
+        }
+    }
+
+    int getSelectionModeForAccessibility() {
+        final int choiceMode = getChoiceMode();
+        switch (choiceMode) {
+            case CHOICE_MODE_NONE:
+                return CollectionInfo.SELECTION_MODE_NONE;
+            case CHOICE_MODE_SINGLE:
+                return CollectionInfo.SELECTION_MODE_SINGLE;
+            case CHOICE_MODE_MULTIPLE:
+            case CHOICE_MODE_MULTIPLE_MODAL:
+                return CollectionInfo.SELECTION_MODE_MULTIPLE;
+            default:
+                return CollectionInfo.SELECTION_MODE_NONE;
         }
     }
 

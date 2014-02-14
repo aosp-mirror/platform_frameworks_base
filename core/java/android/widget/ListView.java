@@ -3796,7 +3796,8 @@ public class ListView extends AbsListView {
         info.setClassName(ListView.class.getName());
 
         final int count = getCount();
-        final CollectionInfo collectionInfo = CollectionInfo.obtain(1, count, false);
+        final int selectionMode = getSelectionModeForAccessibility();
+        final CollectionInfo collectionInfo = CollectionInfo.obtain(1, count, false, selectionMode);
         info.setCollectionInfo(collectionInfo);
     }
 
@@ -3807,7 +3808,9 @@ public class ListView extends AbsListView {
 
         final LayoutParams lp = (LayoutParams) view.getLayoutParams();
         final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
-        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(0, 1, position, 1, isHeading);
+        final boolean isSelected = isItemChecked(position);
+        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
+                0, 1, position, 1, isHeading, isSelected);
         info.setCollectionItemInfo(itemInfo);
     }
 }

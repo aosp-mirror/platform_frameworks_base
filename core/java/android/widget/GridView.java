@@ -2327,7 +2327,9 @@ public class GridView extends AbsListView {
 
         final int columnsCount = getNumColumns();
         final int rowsCount = getCount() / columnsCount;
-        final CollectionInfo collectionInfo = CollectionInfo.obtain(columnsCount, rowsCount, false);
+        final int selectionMode = getSelectionModeForAccessibility();
+        final CollectionInfo collectionInfo = CollectionInfo.obtain(
+                columnsCount, rowsCount, false, selectionMode);
         info.setCollectionInfo(collectionInfo);
     }
 
@@ -2354,7 +2356,9 @@ public class GridView extends AbsListView {
 
         final LayoutParams lp = (LayoutParams) view.getLayoutParams();
         final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
-        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(column, 1, row, 1, isHeading);
+        final boolean isSelected = isItemChecked(position);
+        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
+                column, 1, row, 1, isHeading, isSelected);
         info.setCollectionItemInfo(itemInfo);
     }
 }
