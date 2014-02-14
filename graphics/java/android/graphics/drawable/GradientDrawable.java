@@ -113,6 +113,15 @@ public class GradientDrawable extends Drawable {
      */
     public static final int SWEEP_GRADIENT  = 2;
 
+    /** Radius is in pixels. */
+    private static final int RADIUS_TYPE_PIXELS = 0;
+
+    /** Radius is a fraction of the base size. */
+    private static final int RADIUS_TYPE_FRACTION = 1;
+
+    /** Radius is a fraction of the bounds size. */
+    private static final int RADIUS_TYPE_FRACTION_PARENT = 2;
+
     private GradientState mGradientState;
     
     private final Paint mFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -892,18 +901,26 @@ public class GradientDrawable extends Drawable {
                     y0 = r.top + (r.bottom - r.top) * st.mCenterY;
 
                     float radius = st.mGradientRadius;
-                    if (st.mGradientRadiusUnit == TypedValue.COMPLEX_UNIT_FRACTION) {
+                    if (st.mGradientRadiusType == RADIUS_TYPE_FRACTION) {
                         radius *= Math.min(st.mWidth, st.mHeight);
-                    } else if (st.mGradientRadiusUnit == TypedValue.COMPLEX_UNIT_FRACTION_PARENT) {
+                    } else if (st.mGradientRadiusType == RADIUS_TYPE_FRACTION_PARENT) {
                         radius *= Math.min(r.width(), r.height());
                     }
-                
+
                     if (st.mUseLevel) {
                         radius *= getLevel() / 10000.0f;
                     }
+
                     mGradientRadius = radius;
+
+                    if (radius == 0) {
+                        // We can't have a shader with zero radius, so let's
+                        // have a very, very small radius.
+                        radius = 0.001f;
+                    }
+
                     mFillPaint.setShader(new RadialGradient(
-                            x0, y0, mGradientRadius, colors, null, Shader.TileMode.CLAMP));
+                            x0, y0, radius, colors, null, Shader.TileMode.CLAMP));
                 } else if (st.mGradient == SWEEP_GRADIENT) {
                     x0 = r.left + (r.right - r.left) * st.mCenterX;
                     y0 = r.top + (r.bottom - r.top) * st.mCenterY;
@@ -1082,16 +1099,24 @@ public class GradientDrawable extends Drawable {
                             com.android.internal.R.styleable.GradientDrawableGradient_gradientRadius);
                     if (tv != null) {
                         final float radius;
-                        final int unit;
+                        final int radiusType;
                         if (tv.type == TypedValue.TYPE_FRACTION) {
                             radius = tv.getFraction(1.0f, 1.0f);
-                            unit = tv.data & TypedValue.COMPLEX_UNIT_MASK;
+
+                            final int unit = (tv.data >> TypedValue.COMPLEX_UNIT_SHIFT)
+                                    & TypedValue.COMPLEX_UNIT_MASK;
+                            if (unit == TypedValue.COMPLEX_UNIT_FRACTION_PARENT) {
+                                radiusType = RADIUS_TYPE_FRACTION_PARENT;
+                            } else {
+                                radiusType = RADIUS_TYPE_FRACTION;
+                            }
                         } else {
                             radius = tv.getDimension(r.getDisplayMetrics());
-                            unit = TypedValue.COMPLEX_UNIT_PX;
+                            radiusType = RADIUS_TYPE_PIXELS;
                         }
+
                         st.mGradientRadius = radius;
-                        st.mGradientRadiusUnit = unit;
+                        st.mGradientRadiusType = radiusType;
                     } else if (gradientType == RADIAL_GRADIENT) {
                         throw new XmlPullParserException(
                                 a.getPositionDescription()
@@ -1253,7 +1278,7 @@ public class GradientDrawable extends Drawable {
         private float mCenterX = 0.5f;
         private float mCenterY = 0.5f;
         private float mGradientRadius = 0.5f;
-        private int mGradientRadiusUnit = TypedValue.COMPLEX_UNIT_PX;
+        private int mGradientRadiusType = RADIUS_TYPE_PIXELS;
         private boolean mUseLevel;
         private boolean mUseLevelForShape;
         private boolean mOpaque;
@@ -1295,7 +1320,7 @@ public class GradientDrawable extends Drawable {
             mCenterX = state.mCenterX;
             mCenterY = state.mCenterY;
             mGradientRadius = state.mGradientRadius;
-            mGradientRadiusUnit = state.mGradientRadiusUnit;
+            mGradientRadiusType = state.mGradientRadiusType;
             mUseLevel = state.mUseLevel;
             mUseLevelForShape = state.mUseLevelForShape;
             mOpaque = state.mOpaque;
@@ -1414,7 +1439,7 @@ public class GradientDrawable extends Drawable {
 
         public void setGradientRadius(float gradientRadius, int type) {
             mGradientRadius = gradientRadius;
-            mGradientRadiusUnit = type;
+            mGradientRadiusType = type;
         }
     }
 
