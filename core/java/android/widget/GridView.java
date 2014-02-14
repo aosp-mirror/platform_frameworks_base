@@ -35,6 +35,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.animation.GridLayoutAnimationController;
+import android.widget.AbsListView.AbsPositionScroller;
+import android.widget.ListView.ListViewPositionScroller;
 import android.widget.RemoteViews.RemoteView;
 
 import java.lang.annotation.Retention;
@@ -1027,13 +1029,8 @@ public class GridView extends AbsListView {
     }
 
     @Override
-    public int getRowForPosition(int position) {
-        return position / mNumColumns;
-    }
-
-    @Override
-    public int getFirstPositionForRow(int row) {
-        return row * mNumColumns;
+    AbsPositionScroller createPositionScroller() {
+        return new GridViewPositionScroller();
     }
 
     @Override
@@ -2356,5 +2353,34 @@ public class GridView extends AbsListView {
         final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
         final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(column, 1, row, 1, isHeading);
         info.setCollectionItemInfo(itemInfo);
+    }
+
+    /**
+     * Sub-position scroller that understands the layout of a GridView.
+     */
+    class GridViewPositionScroller extends AbsSubPositionScroller {
+        @Override
+        public int getRowForPosition(int position) {
+            return position / mNumColumns;
+        }
+
+        @Override
+        public int getFirstPositionForRow(int row) {
+            return row * mNumColumns;
+        }
+
+        @Override
+        public int getHeightForRow(int row) {
+            final int firstRowPosition = row * mNumColumns;
+            final int lastRowPosition = Math.min(getCount(), firstRowPosition + mNumColumns);
+            int maxHeight = 0;
+            for (int i = firstRowPosition; i < lastRowPosition; i++) {
+                final int height = getHeightForPosition(i);
+                if (height > maxHeight) {
+                    maxHeight = height;
+                }
+            }
+            return maxHeight;
+        }
     }
 }
