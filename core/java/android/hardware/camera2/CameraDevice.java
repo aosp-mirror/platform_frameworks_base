@@ -92,7 +92,6 @@ public interface CameraDevice extends AutoCloseable {
      * AE/AWB/AF should be on auto mode.
      *
      * @see #createCaptureRequest
-     * @hide
      */
     public static final int TEMPLATE_ZERO_SHUTTER_LAG = 5;
 
@@ -105,7 +104,6 @@ public interface CameraDevice extends AutoCloseable {
      * application depending on the intended use case.
      *
      * @see #createCaptureRequest
-     * @hide
      */
     public static final int TEMPLATE_MANUAL = 6;
 
