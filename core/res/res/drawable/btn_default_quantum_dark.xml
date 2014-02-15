@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -18,17 +18,18 @@
     <item>
         <selector>
             <item android:state_window_focused="false" android:state_enabled="true"
-                android:drawable="@drawable/btn_default_normal_holo_light" />
+                android:drawable="@drawable/btn_default_normal_holo_dark" />
             <item android:state_window_focused="false" android:state_enabled="false"
-                android:drawable="@drawable/btn_default_disabled_holo_light" />
+                android:drawable="@drawable/btn_default_disabled_holo_dark" />
             <item android:state_focused="true" android:state_enabled="true"
-                android:drawable="@drawable/btn_default_focused_holo_light" />
+                android:drawable="@drawable/btn_default_focused_holo_dark" />
             <item android:state_enabled="true"
-                android:drawable="@drawable/btn_default_normal_holo_light" />
+                android:drawable="@drawable/btn_default_normal_holo_dark" />
             <item android:state_focused="true"
-                android:drawable="@drawable/btn_default_disabled_focused_holo_light" />
+                android:drawable="@drawable/btn_default_disabled_focused_holo_dark" />
             <item
-                android:drawable="@drawable/btn_default_disabled_holo_light" />
+                android:drawable="@drawable/btn_default_disabled_holo_dark" />
         </selector>
     </item>
+    <item android:drawable="@drawable/btn_default_pressed_holo_dark" />
 </reveal>
