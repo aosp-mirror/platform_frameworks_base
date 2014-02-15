@@ -45,18 +45,13 @@ public class SystemServiceManager {
     }
 
     /**
-     * Starts a service by name if the class exists, otherwise ignores it.
+     * Starts a service by class name.
      *
-     * @return The service instance, or null if not found.
+     * @return The service instance.
      */
     @SuppressWarnings("unchecked")
-    public SystemService startServiceIfExists(String className) {
-        try {
-            return startService((Class<SystemService>)Class.forName(className));
-        } catch (ClassNotFoundException cnfe) {
-            Slog.i(TAG, className + " not available, ignoring.");
-            return null;
-        }
+    public SystemService startService(String className) throws ClassNotFoundException {
+        return startService((Class<SystemService>) Class.forName(className));
     }
 
     /**

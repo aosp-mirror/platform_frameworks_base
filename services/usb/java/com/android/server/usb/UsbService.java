@@ -32,6 +32,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.SystemService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -43,6 +44,28 @@ import java.io.PrintWriter;
  * support is delegated to UsbDeviceManager.
  */
 public class UsbService extends IUsbManager.Stub {
+
+    public static class Lifecycle extends SystemService {
+        private UsbService mUsbService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mUsbService = new UsbService(getContext());
+            publishBinderService(Context.USB_SERVICE, mUsbService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mUsbService.systemReady();
+            }
+        }
+    }
+
     private static final String TAG = "UsbService";
 
     private final Context mContext;
