@@ -122,7 +122,8 @@ public class BaseObj {
             // must include nObjDestroy in the critical section
             ReentrantReadWriteLock.ReadLock rlock = mRS.mRWLock.readLock();
             rlock.lock();
-            if(mRS.isAlive()) {
+            // AllocationAdapters are BaseObjs with an ID of 0 but should not be passed to nObjDestroy
+            if(mRS.isAlive() && mID != 0) {
                 mRS.nObjDestroy(mID);
             }
             rlock.unlock();
