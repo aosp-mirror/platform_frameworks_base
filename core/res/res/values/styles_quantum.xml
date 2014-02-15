@@ -184,7 +184,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.Widget.EditText">
         <item name="android:textColor">@android:color/bright_foreground_light</item>
-        <item name="android:textColorHint">@android:color/hint_foreground_holo_light</item>
+        <item name="android:textColorHint">@android:color/hint_foreground_quantum_light</item>
     </style>
 
     <style name="TextAppearance.Quantum.Widget.PopupMenu" parent="TextAppearance.Widget.PopupMenu">
@@ -251,12 +251,12 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.Widget.Switch" parent="TextAppearance.Quantum.Small">
         <!-- Switch thumb asset presents a dark background. -->
-        <item name="android:textColor">@android:color/secondary_text_holo_dark</item>
+        <item name="android:textColor">@android:color/secondary_text_quantum_dark</item>
     </style>
 
     <style name="TextAppearance.Quantum.Light.Widget.Switch" parent="TextAppearance.Quantum.Small">
         <!-- Switch thumb asset presents a dark background. -->
-        <item name="android:textColor">@android:color/primary_text_holo_dark</item>
+        <item name="android:textColor">@android:color/primary_text_quantum_dark</item>
     </style>
 
     <style name="TextAppearance.Quantum.WindowTitle">
@@ -331,7 +331,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.Light.Widget.EditText">
         <item name="android:textColor">@android:color/bright_foreground_dark</item>
-        <item name="android:textColorHint">@android:color/hint_foreground_holo_dark</item>
+        <item name="android:textColorHint">@android:color/hint_foreground_quantum_dark</item>
     </style>
 
     <style name="TextAppearance.Quantum.Light.Widget.PopupMenu" parent="TextAppearance.Quantum.Widget.PopupMenu"/>
@@ -367,9 +367,9 @@ please see styles_device_defaults.xml.
     <style name="Quantum.Light" />
 
     <style name="Widget.Quantum.Button" parent="Widget.Button">
-        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+        <item name="android:background">@android:drawable/btn_default_quantum_dark</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">@android:color/primary_text_holo_dark</item>
+        <item name="android:textColor">@android:color/primary_text_quantum_dark</item>
         <item name="android:minHeight">48dip</item>
         <item name="android:minWidth">64dip</item>
     </style>
@@ -390,9 +390,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Button.Small">
-        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+        <item name="android:background">@android:drawable/btn_default_quantum_dark</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">@android:color/primary_text_holo_dark</item>
+        <item name="android:textColor">@android:color/primary_text_quantum_dark</item>
         <item name="android:minHeight">48dip</item>
         <item name="android:minWidth">48dip</item>
     </style>
@@ -446,7 +446,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.AbsListView" parent="Widget.AbsListView"/>
 
     <style name="Widget.Quantum.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
+        <item name="android:dropDownSelector">@android:drawable/list_selector_quantum_dark</item>
         <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
     </style>
 
@@ -488,7 +488,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.ImageButton" parent="Widget.ImageButton">
-        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+        <item name="android:background">@android:drawable/btn_default_quantum_dark</item>
     </style>
 
     <style name="Widget.Quantum.NumberPicker" parent="Widget.NumberPicker">
@@ -505,14 +505,14 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.TimePicker" parent="Widget.TimePicker">
         <item name="android:legacyLayout">@android:layout/time_picker_legacy_holo</item>
         <item name="android:internalLayout">@android:layout/time_picker_holo</item>
-        <item name="android:disabledColor">@android:color/timepicker_default_disabled_color_holo_dark</item>
+        <item name="android:disabledColor">@android:color/timepicker_default_disabled_color_quantum_dark</item>
         <item name="android:headerSelectedTextColor">@android:color/holo_blue_light</item>
-        <item name="android:headerUnselectedTextColor">@android:color/timepicker_default_text_color_holo_dark</item>
-        <item name="android:headerBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
-        <item name="android:numbersTextColor">@android:color/timepicker_default_text_color_holo_dark</item>
-        <item name="android:numbersBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
-        <item name="android:amPmTextColor">@android:color/timepicker_default_text_color_holo_dark</item>
-        <item name="android:amPmUnselectedBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
+        <item name="android:headerUnselectedTextColor">@android:color/timepicker_default_text_color_quantum_dark</item>
+        <item name="android:headerBackgroundColor">@android:color/timepicker_default_background_quantum_dark</item>
+        <item name="android:numbersTextColor">@android:color/timepicker_default_text_color_quantum_dark</item>
+        <item name="android:numbersBackgroundColor">@android:color/timepicker_default_background_quantum_dark</item>
+        <item name="android:amPmTextColor">@android:color/timepicker_default_text_color_quantum_dark</item>
+        <item name="android:amPmUnselectedBackgroundColor">@android:color/timepicker_default_background_quantum_dark</item>
         <item name="android:amPmSelectedBackgroundColor">@android:color/holo_blue_light</item>
         <item name="android:numbersSelectorColor">@android:color/holo_blue_light</item>
     </style>
@@ -608,7 +608,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Spinner" parent="Widget.Spinner.DropDown">
         <item name="android:background">@android:drawable/spinner_background_holo_dark</item>
-        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
+        <item name="android:dropDownSelector">@android:drawable/list_selector_quantum_dark</item>
         <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
         <item name="android:dropDownHorizontalOffset">0dip</item>
@@ -683,7 +683,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
     <style name="Widget.Quantum.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
+        <item name="android:dropDownSelector">@android:drawable/list_selector_quantum_dark</item>
         <item name="android:popupBackground">@android:drawable/menu_panel_holo_dark</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
         <item name="android:dropDownHorizontalOffset">0dip</item>
@@ -788,9 +788,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light"/>
 
     <style name="Widget.Quantum.Light.Button" parent="Widget.Button">
-        <item name="android:background">@android:drawable/btn_default_holo_light</item>
+        <item name="android:background">@android:drawable/btn_default_quantum_light</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
-        <item name="android:textColor">@android:color/primary_text_holo_light</item>
+        <item name="android:textColor">@android:color/primary_text_quantum_light</item>
         <item name="android:minHeight">48dip</item>
         <item name="android:minWidth">64dip</item>
     </style>
@@ -806,9 +806,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Quantum.Light.Button.Small">
-        <item name="android:background">@android:drawable/btn_default_holo_light</item>
+        <item name="android:background">@android:drawable/btn_default_quantum_light</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">@android:color/primary_text_holo_light</item>
+        <item name="android:textColor">@android:color/primary_text_quantum_light</item>
         <item name="android:minHeight">48dip</item>
         <item name="android:minWidth">48dip</item>
     </style>
@@ -851,7 +851,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.AbsListView" parent="Widget.AbsListView"/>
 
     <style name="Widget.Quantum.Light.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
-        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
+        <item name="android:dropDownSelector">@android:drawable/list_selector_quantum_light</item>
         <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
     </style>
 
@@ -879,7 +879,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.GridView" parent="Widget.Quantum.GridView"/>
 
     <style name="Widget.Quantum.Light.ImageButton" parent="Widget.Quantum.ImageButton">
-        <item name="android:background">@android:drawable/btn_default_holo_light</item>
+        <item name="android:background">@android:drawable/btn_default_quantum_light</item>
     </style>
 
     <style name="Widget.Quantum.Light.CalendarView" parent="Widget.CalendarView">
@@ -896,14 +896,14 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.TimePicker" parent="Widget.TimePicker">
         <item name="android:legacyLayout">@android:layout/time_picker_legacy_holo</item>
         <item name="android:internalLayout">@android:layout/time_picker_holo</item>
-        <item name="android:disabledColor">@android:color/timepicker_default_disabled_color_holo_light</item>
+        <item name="android:disabledColor">@android:color/timepicker_default_disabled_color_quantum_light</item>
         <item name="android:headerSelectedTextColor">@android:color/holo_blue_light</item>
-        <item name="android:headerUnselectedTextColor">@android:color/timepicker_default_text_color_holo_light</item>
-        <item name="android:headerBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
-        <item name="android:numbersTextColor">@android:color/timepicker_default_text_color_holo_light</item>
-        <item name="android:numbersBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
-        <item name="android:amPmTextColor">@android:color/timepicker_default_text_color_holo_light</item>
-        <item name="android:amPmUnselectedBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
+        <item name="android:headerUnselectedTextColor">@android:color/timepicker_default_text_color_quantum_light</item>
+        <item name="android:headerBackgroundColor">@android:color/timepicker_default_background_quantum_light</item>
+        <item name="android:numbersTextColor">@android:color/timepicker_default_text_color_quantum_light</item>
+        <item name="android:numbersBackgroundColor">@android:color/timepicker_default_background_quantum_light</item>
+        <item name="android:amPmTextColor">@android:color/timepicker_default_text_color_quantum_light</item>
+        <item name="android:amPmUnselectedBackgroundColor">@android:color/timepicker_default_background_quantum_light</item>
         <item name="android:amPmSelectedBackgroundColor">@android:color/holo_blue_light</item>
         <item name="android:numbersSelectorColor">@android:color/holo_blue_light</item>
     </style>
@@ -977,7 +977,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Quantum.Light.Spinner" parent="Widget.Quantum.Spinner">
         <item name="android:background">@android:drawable/spinner_background_holo_light</item>
-        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
+        <item name="android:dropDownSelector">@android:drawable/list_selector_quantum_light</item>
         <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
         <item name="android:dropDownHorizontalOffset">0dip</item>
@@ -1022,7 +1022,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Quantum.Light.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
     <style name="Widget.Quantum.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
-        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
+        <item name="android:dropDownSelector">@android:drawable/list_selector_quantum_light</item>
         <item name="android:popupBackground">@android:drawable/menu_panel_holo_light</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
         <item name="android:dropDownHorizontalOffset">0dip</item>
@@ -1210,25 +1210,25 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Quantum.TimePicker.TimeLabel" parent="TextAppearance.Quantum">
         <item name="android:textSize">@dimen/timepicker_time_label_size</item>
-        <item name="android:textColor">@android:color/timepicker_default_text_color_holo_dark</item>
+        <item name="android:textColor">@android:color/timepicker_default_text_color_quantum_dark</item>
     </style>
 
     <style name="TextAppearance.Quantum.TimePicker.AmPmLabel" parent="TextAppearance.Quantum">
         <item name="android:textSize">@dimen/timepicker_ampm_label_size</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@android:color/timepicker_default_text_color_holo_dark</item>
+        <item name="android:textColor">@android:color/timepicker_default_text_color_quantum_dark</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.Quantum.Light.TimePicker.TimeLabel" parent="TextAppearance.Quantum.Light">
         <item name="android:textSize">@dimen/timepicker_time_label_size</item>
-        <item name="android:textColor">@color/timepicker_default_text_color_holo_light</item>
+        <item name="android:textColor">@color/timepicker_default_text_color_quantum_light</item>
     </style>
 
     <style name="TextAppearance.Quantum.Light.TimePicker.AmPmLabel" parent="TextAppearance.Quantum.Light">
         <item name="android:textSize">@dimen/timepicker_ampm_label_size</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@color/timepicker_default_text_color_holo_light</item>
+        <item name="android:textColor">@color/timepicker_default_text_color_quantum_light</item>
         <item name="android:textStyle">bold</item>
     </style>
 

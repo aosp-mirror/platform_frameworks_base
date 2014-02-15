@@ -77,7 +77,8 @@
        <item>@drawable/btn_default_disabled_focused_holo_dark</item>
        <item>@drawable/btn_default_holo_dark</item>
        <item>@drawable/btn_default_holo_light</item>
-       <item>@drawable/btn_default_quantum</item>
+       <item>@drawable/btn_default_quantum_dark</item>
+       <item>@drawable/btn_default_quantum_light</item>
        <item>@drawable/btn_star_off_normal_holo_light</item>
        <item>@drawable/btn_star_on_normal_holo_light</item>
        <item>@drawable/btn_star_on_disabled_holo_light</item>
@@ -135,7 +136,8 @@
        <item>@drawable/expander_group_holo_light</item>
        <item>@drawable/list_selector_holo_dark</item>
        <item>@drawable/list_selector_holo_light</item>
-       <item>@drawable/list_selector_quantum</item>
+       <item>@drawable/list_selector_quantum_light</item>
+       <item>@drawable/list_selector_quantum_dark</item>
        <item>@drawable/list_section_divider_holo_light</item>
        <item>@drawable/list_section_divider_holo_dark</item>
        <item>@drawable/menu_hardkey_panel_holo_dark</item>
@@ -261,7 +263,8 @@
        <item>@drawable/ab_solid_shadow_holo</item>
        <item>@drawable/item_background_holo_dark</item>
        <item>@drawable/item_background_holo_light</item>
-       <item>@drawable/item_background_quantum</item>
+       <item>@drawable/item_background_quantum_light</item>
+       <item>@drawable/item_background_quantum_dark</item>
        <item>@drawable/fastscroll_thumb_holo</item>
        <item>@drawable/fastscroll_thumb_pressed_holo</item>
        <item>@drawable/fastscroll_thumb_default_holo</item>

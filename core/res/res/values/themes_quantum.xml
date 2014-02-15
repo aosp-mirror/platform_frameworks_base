@@ -42,10 +42,10 @@ please see themes_device_defaults.xml.
          with trailing _dark or _light specifiers if they are not shared between both light and
          dark versions of the theme. -->
     <style name="Theme.Quantum">
-        <item name="colorForeground">@android:color/bright_foreground_holo_dark</item>
-        <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_dark</item>
-        <item name="colorBackground">@android:color/background_holo_dark</item>
-        <item name="colorBackgroundCacheHint">@android:drawable/background_cache_hint_selector_holo_dark</item>
+        <item name="colorForeground">@android:color/bright_foreground_quantum_dark</item>
+        <item name="colorForegroundInverse">@android:color/bright_foreground_quantum_light</item>
+        <item name="colorBackground">@android:color/background_quantum_dark</item>
+        <item name="colorBackgroundCacheHint">@android:drawable/background_cache_hint_selector_quantum_dark</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -59,26 +59,26 @@ please see themes_device_defaults.xml.
         <item name="textAppearance">@android:style/TextAppearance.Quantum</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Quantum.Inverse</item>
 
-        <item name="textColorPrimary">@android:color/primary_text_holo_dark</item>
-        <item name="textColorSecondary">@android:color/secondary_text_holo_dark</item>
-        <item name="textColorTertiary">@android:color/tertiary_text_holo_dark</item>
-        <item name="textColorPrimaryInverse">@android:color/primary_text_holo_light</item>
-        <item name="textColorSecondaryInverse">@android:color/secondary_text_holo_light</item>
-        <item name="textColorTertiaryInverse">@android:color/tertiary_text_holo_light</item>
-        <item name="textColorPrimaryDisableOnly">@android:color/primary_text_disable_only_holo_dark</item>
-        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_disable_only_holo_light</item>
-        <item name="textColorPrimaryNoDisable">@android:color/primary_text_nodisable_holo_dark</item>
-        <item name="textColorSecondaryNoDisable">@android:color/secondary_text_nodisable_holo_dark</item>
-        <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_nodisable_holo_light</item>
-        <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_nodisable_holo_light</item>
-        <item name="textColorHint">@android:color/hint_foreground_holo_dark</item>
-        <item name="textColorHintInverse">@android:color/hint_foreground_holo_light</item>
-        <item name="textColorSearchUrl">@android:color/search_url_text_holo</item>
-        <item name="textColorHighlight">@android:color/highlighted_text_holo_dark</item>
-        <item name="textColorHighlightInverse">@android:color/highlighted_text_holo_light</item>
+        <item name="textColorPrimary">@android:color/primary_text_quantum_dark</item>
+        <item name="textColorSecondary">@android:color/secondary_text_quantum_dark</item>
+        <item name="textColorTertiary">@android:color/tertiary_text_quantum_dark</item>
+        <item name="textColorPrimaryInverse">@android:color/primary_text_quantum_light</item>
+        <item name="textColorSecondaryInverse">@android:color/secondary_text_quantum_light</item>
+        <item name="textColorTertiaryInverse">@android:color/tertiary_text_quantum_light</item>
+        <item name="textColorPrimaryDisableOnly">@android:color/primary_text_disable_only_quantum_dark</item>
+        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_disable_only_quantum_light</item>
+        <item name="textColorPrimaryNoDisable">@android:color/primary_text_nodisable_quantum_dark</item>
+        <item name="textColorSecondaryNoDisable">@android:color/secondary_text_nodisable_quantum_dark</item>
+        <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_nodisable_quantum_light</item>
+        <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_nodisable_quantum_light</item>
+        <item name="textColorHint">@android:color/hint_foreground_quantum_dark</item>
+        <item name="textColorHintInverse">@android:color/hint_foreground_quantum_light</item>
+        <item name="textColorSearchUrl">@android:color/search_url_text_quantum_dark</item>
+        <item name="textColorHighlight">@android:color/highlighted_text_quantum_dark</item>
+        <item name="textColorHighlightInverse">@android:color/highlighted_text_quantum_light</item>
         <item name="textColorLink">@android:color/holo_blue_light</item>
         <item name="textColorLinkInverse">@android:color/holo_blue_light</item>
-        <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_dark</item>
+        <item name="textColorAlertDialogListItem">@android:color/primary_text_quantum_dark</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Quantum.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Quantum.Medium</item>
@@ -112,7 +112,7 @@ please see themes_device_defaults.xml.
         <item name="switchStyle">@android:style/Widget.Quantum.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@android:style/Widget.Quantum.MediaRouteButton</item>
 
-        <item name="selectableItemBackground">@android:drawable/item_background_holo_dark</item>
+        <item name="selectableItemBackground">@android:drawable/item_background_quantum_dark</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Quantum.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
 
@@ -135,7 +135,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_dark</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_dark</item>
 
-        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_holo_dark</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_quantum_dark</item>
 
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background_holo_dark</item>
 
@@ -344,7 +344,7 @@ please see themes_device_defaults.xml.
         <item name="timePickerStyle">@style/Widget.Quantum.TimePicker</item>
 
         <!-- TimePicker background color -->
-        <item name="timePickerHeaderBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
+        <item name="timePickerHeaderBackgroundColor">@android:color/timepicker_default_background_quantum_dark</item>
 
         <!-- TimePicker Header time label text appearance -->
         <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Quantum.TimePicker.TimeLabel</item>
@@ -368,10 +368,10 @@ please see themes_device_defaults.xml.
 
     <!-- Quantum Paper theme (light version). -->
     <style name="Theme.Quantum.Light" parent="Theme.Light">
-        <item name="colorForeground">@android:color/bright_foreground_holo_light</item>
-        <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_light</item>
-        <item name="colorBackground">@android:color/background_holo_light</item>
-        <item name="colorBackgroundCacheHint">@android:drawable/background_cache_hint_selector_holo_light</item>
+        <item name="colorForeground">@android:color/bright_foreground_quantum_light</item>
+        <item name="colorForegroundInverse">@android:color/bright_foreground_quantum_dark</item>
+        <item name="colorBackground">@android:color/background_quantum_light</item>
+        <item name="colorBackgroundCacheHint">@android:drawable/background_cache_hint_selector_quantum_light</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -385,26 +385,26 @@ please see themes_device_defaults.xml.
         <item name="textAppearance">@android:style/TextAppearance.Quantum.Light</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Quantum.Light.Inverse</item>
 
-        <item name="textColorPrimary">@android:color/primary_text_holo_light</item>
-        <item name="textColorSecondary">@android:color/secondary_text_holo_light</item>
-        <item name="textColorTertiary">@android:color/tertiary_text_holo_light</item>
-        <item name="textColorPrimaryInverse">@android:color/primary_text_holo_dark</item>
-        <item name="textColorSecondaryInverse">@android:color/secondary_text_holo_dark</item>
-        <item name="textColorTertiaryInverse">@android:color/tertiary_text_holo_dark</item>
-        <item name="textColorPrimaryDisableOnly">@android:color/primary_text_disable_only_holo_light</item>
-        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_disable_only_holo_dark</item>
-        <item name="textColorPrimaryNoDisable">@android:color/primary_text_nodisable_holo_light</item>
-        <item name="textColorSecondaryNoDisable">@android:color/secondary_text_nodisable_holo_light</item>
-        <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_nodisable_holo_dark</item>
-        <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_nodisable_holo_dark</item>
-        <item name="textColorHint">@android:color/hint_foreground_holo_light</item>
-        <item name="textColorHintInverse">@android:color/hint_foreground_holo_dark</item>
-        <item name="textColorSearchUrl">@android:color/search_url_text_holo</item>
-        <item name="textColorHighlight">@android:color/highlighted_text_holo_light</item>
-        <item name="textColorHighlightInverse">@android:color/highlighted_text_holo_dark</item>
+        <item name="textColorPrimary">@android:color/primary_text_quantum_light</item>
+        <item name="textColorSecondary">@android:color/secondary_text_quantum_light</item>
+        <item name="textColorTertiary">@android:color/tertiary_text_quantum_light</item>
+        <item name="textColorPrimaryInverse">@android:color/primary_text_quantum_dark</item>
+        <item name="textColorSecondaryInverse">@android:color/secondary_text_quantum_dark</item>
+        <item name="textColorTertiaryInverse">@android:color/tertiary_text_quantum_dark</item>
+        <item name="textColorPrimaryDisableOnly">@android:color/primary_text_disable_only_quantum_light</item>
+        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_disable_only_quantum_dark</item>
+        <item name="textColorPrimaryNoDisable">@android:color/primary_text_nodisable_quantum_light</item>
+        <item name="textColorSecondaryNoDisable">@android:color/secondary_text_nodisable_quantum_light</item>
+        <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_nodisable_quantum_dark</item>
+        <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_nodisable_quantum_dark</item>
+        <item name="textColorHint">@android:color/hint_foreground_quantum_light</item>
+        <item name="textColorHintInverse">@android:color/hint_foreground_quantum_dark</item>
+        <item name="textColorSearchUrl">@android:color/search_url_text_quantum_light</item>
+        <item name="textColorHighlight">@android:color/highlighted_text_quantum_light</item>
+        <item name="textColorHighlightInverse">@android:color/highlighted_text_quantum_dark</item>
         <item name="textColorLink">@android:color/holo_blue_light</item>
         <item name="textColorLinkInverse">@android:color/holo_blue_light</item>
-        <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_light</item>
+        <item name="textColorAlertDialogListItem">@android:color/primary_text_quantum_light</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Quantum.Light.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Quantum.Light.Medium</item>
@@ -438,7 +438,7 @@ please see themes_device_defaults.xml.
         <item name="switchStyle">@android:style/Widget.Quantum.Light.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@android:style/Widget.Quantum.Light.MediaRouteButton</item>
 
-        <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
+        <item name="selectableItemBackground">@android:drawable/item_background_quantum_light</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Quantum.Light.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
 
@@ -461,7 +461,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_light</item>
 
-        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_holo_light</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_quantum_light</item>
 
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background_holo_light</item>
 
@@ -669,7 +669,7 @@ please see themes_device_defaults.xml.
         <item name="timePickerStyle">@style/Widget.Quantum.Light.TimePicker</item>
 
         <!-- TimePicker Header background color -->
-        <item name="timePickerHeaderBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
+        <item name="timePickerHeaderBackgroundColor">@android:color/timepicker_default_background_quantum_light</item>
 
         <!-- TimePicker Header time label text appearance -->
         <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Quantum.Light.TimePicker.TimeLabel</item>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,15 +15,6 @@
 -->
 
 <reveal xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <selector>
-            <item android:state_focused="true" android:state_enabled="false"
-                android:drawable="@drawable/list_selector_disabled_holo_light" />
-            <item android:state_focused="true"
-                android:drawable="@drawable/list_focused_holo" />
-            <item
-                android:drawable="@color/transparent" />
-        </selector>
-    </item>
-    <item android:drawable="@drawable/list_selector_background_transition_holo_light" />
+    <item android:drawable="@color/transparent" />
+    <item android:drawable="@color/lighter_gray" />
 </reveal>
