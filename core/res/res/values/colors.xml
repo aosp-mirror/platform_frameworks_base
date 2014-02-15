@@ -123,8 +123,8 @@
     <color name="facelock_spotlight_mask">#CC000000</color>
 
     <!-- For holo theme -->
-      <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
-      <drawable name="screen_background_holo_dark">#ff000000</drawable>
+    <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
+    <drawable name="screen_background_holo_dark">#ff000000</drawable>
     <color name="background_holo_dark">#ff000000</color>
     <color name="background_holo_light">#fff3f3f3</color>
     <color name="bright_foreground_holo_dark">@android:color/background_holo_light</color>
