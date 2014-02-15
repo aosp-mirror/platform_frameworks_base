@@ -31,7 +31,6 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, OpenGLRenderer* rendere
         , mLayer(layer)
         , mRenderer(renderer)
         , mCaches(Caches::getInstance()) {
-    mCaches.resourceCache.incrementRefcount(mLayer);
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();

@@ -34,6 +34,8 @@ namespace uirenderer {
 // of a render pass
 class DeferredLayerUpdater {
 public:
+    // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
+    // and will not call incrementRef on it as a result.
     ANDROID_API DeferredLayerUpdater(Layer* layer, OpenGLRenderer* renderer = 0);
     ANDROID_API ~DeferredLayerUpdater();
 
