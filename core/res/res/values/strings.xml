@@ -1175,10 +1175,14 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
     <string name="permdesc_manageCaCertificates">Allows the app to install and uninstall CA certificates as trusted credentials.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindIdleService">bind to idle services</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindIdleService">This permission allows the Android system to bind to an application\'s idle services.</string>
+    <!-- Title of a permission that is never presented to the user.  This is not a
+         permission that an application must be granted by the user.  Instead, it
+         is part of a mechanism that applications use to indicate to the system
+         that they want to do occasional work while the device is idle.  -->
+    <string name="permlab_bindIdleService">run application during idle time</string>
+    <!-- Description of an application permission, so that the user can understand
+         what is being done if they are curious. -->
+    <string name="permdesc_bindIdleService">This permission allows the Android system to run the application in the background while the device is not in use.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
