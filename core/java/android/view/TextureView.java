@@ -231,26 +231,12 @@ public class TextureView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mLayer != null) {
-            boolean success = executeHardwareAction(new Runnable() {
-                @Override
-                public void run() {
-                    destroySurface();
-                }
-            });
-
-            if (!success) {
-                Log.w(LOG_TAG, "TextureView was not able to destroy its surface: " + this);
-            }
-        }
+        destroySurface();
     }
 
     private void destroySurface() {
         if (mLayer != null) {
-            mSurface.detachFromGLContext();
-            // SurfaceTexture owns the texture name and detachFromGLContext
-            // should have deleted it
-            mLayer.onTextureDestroyed();
+            mLayer.detachSurfaceTexture(mSurface);
 
             boolean shouldRelease = true;
             if (mListener != null) {
@@ -608,14 +594,6 @@ public class TextureView extends View {
      */
     public Bitmap getBitmap(Bitmap bitmap) {
         if (bitmap != null && isAvailable()) {
-            AttachInfo info = mAttachInfo;
-            if (info != null && info.mHardwareRenderer != null &&
-                    info.mHardwareRenderer.isEnabled()) {
-                if (!info.mHardwareRenderer.validate()) {
-                    throw new IllegalStateException("Could not acquire hardware rendering context");
-                }
-            }
-
             applyUpdate();
             applyTransformMatrix();
 

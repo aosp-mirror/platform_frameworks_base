@@ -33,7 +33,7 @@ import android.graphics.SurfaceTexture;
  */
 final class HardwareLayer {
     private static final int LAYER_TYPE_TEXTURE = 1;
-    private static final int LAYER_TYPE_RENDER = 2;
+    private static final int LAYER_TYPE_DISPLAY_LIST = 2;
 
     private HardwareRenderer mRenderer;
     private Finalizer mFinalizer;
@@ -99,6 +99,10 @@ final class HardwareLayer {
         doDestroyLayerUpdater();
     }
 
+    public long getDeferredLayerUpdater() {
+        return mFinalizer.mDeferredUpdater;
+    }
+
     /**
      * Destroys the deferred layer updater but not the backing layer. The
      * backing layer is instead returned and is the caller's responsibility
@@ -120,7 +124,7 @@ final class HardwareLayer {
     }
 
     public DisplayList startRecording() {
-        assertType(LAYER_TYPE_RENDER);
+        assertType(LAYER_TYPE_DISPLAY_LIST);
 
         if (mDisplayList == null) {
             mDisplayList = DisplayList.create("HardwareLayer");
@@ -172,9 +176,17 @@ final class HardwareLayer {
     /**
      * Indicates that this layer has lost its texture.
      */
-    public void onTextureDestroyed() {
+    public void detachSurfaceTexture(final SurfaceTexture surface) {
         assertType(LAYER_TYPE_TEXTURE);
-        nOnTextureDestroyed(mFinalizer.mDeferredUpdater);
+        mRenderer.safelyRun(new Runnable() {
+            @Override
+            public void run() {
+                surface.detachFromGLContext();
+                // SurfaceTexture owns the texture name and detachFromGLContext
+                // should have deleted it
+                nOnTextureDestroyed(mFinalizer.mDeferredUpdater);
+            }
+        });
     }
 
     /**
@@ -226,12 +238,20 @@ final class HardwareLayer {
         return new HardwareLayer(renderer, nCreateTextureLayer(), LAYER_TYPE_TEXTURE);
     }
 
+    static HardwareLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
+        return new HardwareLayer(renderer, layer, LAYER_TYPE_TEXTURE);
+    }
+
     /**
      * This should only be used by HardwareRenderer! Do not call directly
      */
-    static HardwareLayer createRenderLayer(HardwareRenderer renderer,
+    static HardwareLayer createDisplayListLayer(HardwareRenderer renderer,
             int width, int height) {
-        return new HardwareLayer(renderer, nCreateRenderLayer(width, height), LAYER_TYPE_RENDER);
+        return new HardwareLayer(renderer, nCreateRenderLayer(width, height), LAYER_TYPE_DISPLAY_LIST);
+    }
+
+    static HardwareLayer adoptDisplayListLayer(HardwareRenderer renderer, long layer) {
+        return new HardwareLayer(renderer, layer, LAYER_TYPE_DISPLAY_LIST);
     }
 
     /** This also creates the underlying layer */

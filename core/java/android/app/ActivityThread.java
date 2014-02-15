@@ -3949,6 +3949,7 @@ public final class ActivityThread {
         ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(false, config);
 
         // Cleanup hardware accelerated stuff
+        // TODO: Do we actually want to do this in response to all config changes?
         WindowManagerGlobal.getInstance().trimLocalMemory();
 
         freeTextLayoutCachesIfNeeded(configDiff);

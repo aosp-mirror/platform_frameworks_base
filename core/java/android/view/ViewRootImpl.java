@@ -631,16 +631,25 @@ public final class ViewRootImpl implements ViewParent,
             }
         } else {
             invalidateDisplayLists();
-            if (mAttachInfo.mHardwareRenderer != null &&
-                    mAttachInfo.mHardwareRenderer.isEnabled()) {
-                mAttachInfo.mHardwareRenderer.destroyLayers(mView);
+            destroyHardwareLayer(mView);
+        }
+    }
+
+    private static void destroyHardwareLayer(View view) {
+        view.destroyLayer(true);
+
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+
+            int count = group.getChildCount();
+            for (int i = 0; i < count; i++) {
+                destroyHardwareLayer(group.getChildAt(i));
             }
         }
     }
 
     void flushHardwareLayerUpdates() {
-        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled() &&
-                mAttachInfo.mHardwareRenderer.validate()) {
+        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
             mAttachInfo.mHardwareRenderer.flushLayerUpdates();
         }
     }
@@ -2845,10 +2854,6 @@ public final class ViewRootImpl implements ViewParent,
 
     void dispatchDetachedFromWindow() {
         if (mView != null && mView.mAttachInfo != null) {
-            if (mAttachInfo.mHardwareRenderer != null &&
-                    mAttachInfo.mHardwareRenderer.isEnabled()) {
-                mAttachInfo.mHardwareRenderer.validate();
-            }
             mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(false);
             mView.dispatchDetachedFromWindow();
         }

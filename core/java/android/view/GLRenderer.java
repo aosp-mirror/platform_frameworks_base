@@ -477,17 +477,21 @@ public class GLRenderer extends HardwareRenderer {
 
     @Override
     void flushLayerUpdates() {
-        mGlCanvas.flushLayerUpdates();
+        if (validate()) {
+            mGlCanvas.flushLayerUpdates();
+        }
     }
 
     @Override
     HardwareLayer createTextureLayer() {
+        validate();
         return HardwareLayer.createTextureLayer(this);
     }
 
     @Override
     public HardwareLayer createDisplayListLayer(int width, int height) {
-        return HardwareLayer.createRenderLayer(this, width, height);
+        validate();
+        return HardwareLayer.createDisplayListLayer(this, width, height);
     }
 
     @Override
@@ -510,6 +514,9 @@ public class GLRenderer extends HardwareRenderer {
 
     @Override
     boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap) {
+        if (!validate()) {
+            throw new IllegalStateException("Could not acquire hardware rendering context");
+        }
         layer.flushChanges();
         return GLES20Canvas.nCopyLayer(layer.getLayer(), bitmap.mNativeBitmap);
     }
@@ -535,35 +542,6 @@ public class GLRenderer extends HardwareRenderer {
         }
 
         return true;
-    }
-
-    @Override
-    void destroyLayers(final View view) {
-        if (view != null) {
-            safelyRun(new Runnable() {
-                @Override
-                public void run() {
-                    if (mCanvas != null) {
-                        mCanvas.clearLayerUpdates();
-                    }
-                    destroyHardwareLayer(view);
-                    GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
-                }
-            });
-        }
-    }
-
-    private static void destroyHardwareLayer(View view) {
-        view.destroyLayer(true);
-
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-
-            int count = group.getChildCount();
-            for (int i = 0; i < count; i++) {
-                destroyHardwareLayer(group.getChildAt(i));
-            }
-        }
     }
 
     @Override
@@ -1069,7 +1047,6 @@ public class GLRenderer extends HardwareRenderer {
         return true;
     }
 
-    @Override
     boolean validate() {
         return checkRenderContext() != SURFACE_STATE_ERROR;
     }

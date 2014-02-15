@@ -19,7 +19,9 @@
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
+#include <SkBitmap.h>
 #include <utils/Functor.h>
+#include <utils/Vector.h>
 
 #include "RenderTask.h"
 
@@ -28,6 +30,7 @@
 namespace android {
 namespace uirenderer {
 
+class DeferredLayerUpdater;
 class DisplayList;
 class OpenGLRenderer;
 class Rect;
@@ -59,8 +62,11 @@ public:
     bool initialize(EGLNativeWindowType window);
     void updateSurface(EGLNativeWindowType window);
     void setup(int width, int height);
+    void processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters);
     void drawDisplayList(DisplayList* displayList, Rect* dirty);
     void destroyCanvas();
+
+    bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
     void attachFunctor(Functor* functor);
     void detachFunctor(Functor* functor);
@@ -77,6 +83,8 @@ private:
     void handleFunctorStatus(int status, const Rect& redrawClip);
     void removeFunctorsTask();
     void queueFunctorsTask(int delayMs = FUNCTOR_PROCESS_DELAY);
+
+    void requireGlContext();
 
     GlobalContext* mGlobalContext;
     RenderThread& mRenderThread;
