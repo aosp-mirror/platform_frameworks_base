@@ -1788,7 +1788,7 @@ public final class CaptureResult extends CameraMetadata {
      * <p>Each channel's curve is defined by an array of control points:</p>
      * <pre><code>{@link CaptureRequest#TONEMAP_CURVE_RED android.tonemap.curveRed} =
      * [ P0in, P0out, P1in, P1out, P2in, P2out, P3in, P3out, ..., PNin, PNout ]
-     * 2 &amp;lt;= N &amp;lt;= {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</code></pre>
+     * 2 &lt;= N &lt;= {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</code></pre>
      * <p>These are sorted in order of increasing <code>Pin</code>; it is always
      * guaranteed that input values 0.0 and 1.0 are included in the list to
      * define a complete mapping. For input values between control points,
