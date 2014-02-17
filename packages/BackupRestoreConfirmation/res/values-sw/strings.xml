@@ -28,7 +28,7 @@
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"Tafadhali ingiza nenosiri la usimbaji fiche wa kifaa chako hapo chini."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Tafadhali ingiza nenosiri lako la msimbo fiche hapo chini. Pia litatumika kusimba fiche jalidi ya hifadhi."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Tafadhali ingiza nenosiri la kutumia katika kusimba nakala rudufu kamili za data kwa njia fiche. Ikiwa hii itawachwa wazi, nenosiri lako la sasa litatumika:"</string>
-    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ikiwa unataka kusimba fiche data nzima ya kucheleza, ingiza nenosiri la hapo chini:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ikiwa unataka kusimba kwa njia fiche nakala rudufu za data, ingiza nenosiri lililo hapo chini:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ikiwa data iliyorejeshwa upya, tafadhali ingiza nenosiri lililo hapo chini:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Inaanza kuhifadhi..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Imemaliza kuhifadhi"</string>
