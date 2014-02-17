@@ -2966,4 +2966,66 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
+
+    private boolean isProfileOwner(String packageName, int userId) {
+        String profileOwnerPackage = getProfileOwner(userId);
+        // TODO: make public and connect with isProfileOwnerApp in DPM
+        return profileOwnerPackage != null && profileOwnerPackage.equals(packageName);
+    }
+
+    public void addPersistentPreferredActivity(ComponentName admin, IntentFilter filter,
+            ComponentName activity) {
+        int callingUserId = UserHandle.getCallingUserId();
+        Slog.d(LOG_TAG,"called by user " + callingUserId);
+        synchronized (this) {
+            ActiveAdmin aa = getActiveAdminUncheckedLocked(admin, callingUserId);
+            if (aa == null) {
+                throw new SecurityException("No active admin " + admin);
+            } else {
+                if (isProfileOwner(admin.getPackageName(), callingUserId)
+                        || isDeviceOwner(admin.getPackageName())) {
+                    IPackageManager pm = AppGlobals.getPackageManager();
+                    long id = Binder.clearCallingIdentity();
+                    try {
+                        pm.addPersistentPreferredActivity(filter, activity, callingUserId);
+                    } catch (RemoteException re) {
+                        // Shouldn't happen
+                    } finally {
+                        restoreCallingIdentity(id);
+                    }
+                } else {
+                    throw new SecurityException("Admin " + admin +
+                            "is not device owner or profile owner" );
+                }
+            }
+        }
+    }
+
+    public void clearPackagePersistentPreferredActivities(ComponentName admin,
+            String packageName) {
+        int callingUserId = UserHandle.getCallingUserId();
+        Slog.d(LOG_TAG,"called by user " + callingUserId);
+        synchronized (this) {
+            ActiveAdmin aa = getActiveAdminUncheckedLocked(admin, callingUserId);
+            if (aa == null) {
+                throw new SecurityException("No active admin " + admin);
+            } else {
+                if (isProfileOwner(admin.getPackageName(), callingUserId)
+                        || isDeviceOwner(admin.getPackageName())) {
+                    IPackageManager pm = AppGlobals.getPackageManager();
+                    long id = Binder.clearCallingIdentity();
+                    try{
+                        pm.clearPackagePersistentPreferredActivities(packageName, callingUserId);
+                    } catch (RemoteException re) {
+                        // Shouldn't happen
+                    } finally {
+                        restoreCallingIdentity(id);
+                    }
+                } else {
+                    throw new SecurityException("Admin " + admin +
+                            "is not device owner or profile owner" );
+                }
+            }
+        }
+    }
 }

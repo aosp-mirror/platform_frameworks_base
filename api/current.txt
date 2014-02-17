@@ -4750,6 +4750,8 @@ package android.app.admin {
   }
 
   public class DevicePolicyManager {
+    method public void addPersistentPreferredActivity(android.content.ComponentName, android.content.IntentFilter, android.content.ComponentName);
+    method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public boolean getCameraDisabled(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();

@@ -237,6 +237,10 @@ interface IPackageManager {
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
 
+    void addPersistentPreferredActivity(in IntentFilter filter, in ComponentName activity, int userId);
+
+    void clearPackagePersistentPreferredActivities(String packageName, int userId);
+
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
      * is the current "always use this one" setting.

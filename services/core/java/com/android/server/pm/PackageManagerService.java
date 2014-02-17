@@ -2777,6 +2777,63 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    private ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType,
+            int flags, List<ResolveInfo> query, boolean debug, int userId) {
+        final int N = query.size();
+        PersistentPreferredIntentResolver ppir = mSettings.mPersistentPreferredActivities
+                .get(userId);
+        // Get the list of persistent preferred activities that handle the intent
+        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Looking for presistent preferred activities...");
+        List<PersistentPreferredActivity> pprefs = ppir != null
+                ? ppir.queryIntent(intent, resolvedType,
+                        (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId)
+                : null;
+        if (pprefs != null && pprefs.size() > 0) {
+            final int M = pprefs.size();
+            for (int i=0; i<M; i++) {
+                final PersistentPreferredActivity ppa = pprefs.get(i);
+                if (DEBUG_PREFERRED || debug) {
+                    Slog.v(TAG, "Checking PersistentPreferredActivity ds="
+                            + (ppa.countDataSchemes() > 0 ? ppa.getDataScheme(0) : "<none>")
+                            + "\n  component=" + ppa.mComponent);
+                    ppa.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
+                }
+                final ActivityInfo ai = getActivityInfo(ppa.mComponent,
+                        flags | PackageManager.GET_DISABLED_COMPONENTS, userId);
+                if (DEBUG_PREFERRED || debug) {
+                    Slog.v(TAG, "Found persistent preferred activity:");
+                    if (ai != null) {
+                        ai.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
+                    } else {
+                        Slog.v(TAG, "  null");
+                    }
+                }
+                if (ai == null) {
+                    // This previously registered persistent preferred activity
+                    // component is no longer known. Ignore it and do NOT remove it.
+                    continue;
+                }
+                for (int j=0; j<N; j++) {
+                    final ResolveInfo ri = query.get(j);
+                    if (!ri.activityInfo.applicationInfo.packageName
+                            .equals(ai.applicationInfo.packageName)) {
+                        continue;
+                    }
+                    if (!ri.activityInfo.name.equals(ai.name)) {
+                        continue;
+                    }
+                    //  Found a persistent preference that can handle the intent.
+                    if (DEBUG_PREFERRED || debug) {
+                        Slog.v(TAG, "Returning persistent preferred activity: " +
+                                ri.activityInfo.packageName + "/" + ri.activityInfo.name);
+                    }
+                    return ri;
+                }
+            }
+        }
+        return null;
+    }
+
     ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
@@ -2787,6 +2844,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 intent = intent.getSelector();
             }
             if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
+
+            // Try to find a matching persistent preferred activity.
+            ResolveInfo pri = findPersistentPreferredActivityLP(intent, resolvedType, flags, query,
+                    debug, userId);
+
+            // If a persistent preferred activity matched, use it.
+            if (pri != null) {
+                return pri;
+            }
+
             PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
             // Get the list of preferred activities that handle the intent
             if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Looking for preferred activities...");
@@ -10338,6 +10405,71 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return num;
+    }
+
+    @Override
+    public void addPersistentPreferredActivity(IntentFilter filter, ComponentName activity,
+            int userId) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "addPersistentPreferredActivity can only be run by the system");
+        }
+        if (filter.countActions() == 0) {
+            Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
+            return;
+        }
+        synchronized (mPackages) {
+            Slog.i(TAG, "Adding persistent preferred activity " + activity + " for user " + userId +
+                    " :");
+            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+            mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
+                    new PersistentPreferredActivity(filter, activity));
+            mSettings.writePackageRestrictionsLPr(userId);
+        }
+    }
+
+    @Override
+    public void clearPackagePersistentPreferredActivities(String packageName, int userId) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "clearPackagePersistentPreferredActivities can only be run by the system");
+        }
+        ArrayList<PersistentPreferredActivity> removed = null;
+        boolean changed = false;
+        synchronized (mPackages) {
+            for (int i=0; i<mSettings.mPersistentPreferredActivities.size(); i++) {
+                final int thisUserId = mSettings.mPersistentPreferredActivities.keyAt(i);
+                PersistentPreferredIntentResolver ppir = mSettings.mPersistentPreferredActivities
+                        .valueAt(i);
+                if (userId != thisUserId) {
+                    continue;
+                }
+                Iterator<PersistentPreferredActivity> it = ppir.filterIterator();
+                while (it.hasNext()) {
+                    PersistentPreferredActivity ppa = it.next();
+                    // Mark entry for removal only if it matches the package name.
+                    if (ppa.mComponent.getPackageName().equals(packageName)) {
+                        if (removed == null) {
+                            removed = new ArrayList<PersistentPreferredActivity>();
+                        }
+                        removed.add(ppa);
+                    }
+                }
+                if (removed != null) {
+                    for (int j=0; j<removed.size(); j++) {
+                        PersistentPreferredActivity ppa = removed.get(j);
+                        ppir.removeFilter(ppa);
+                    }
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                mSettings.writePackageRestrictionsLPr(userId);
+            }
+        }
     }
 
     @Override
