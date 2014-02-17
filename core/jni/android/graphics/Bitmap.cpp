@@ -466,7 +466,6 @@ static void Bitmap_setAlphaAndPremultiplied(JNIEnv* env, jobject, jlong bitmapHa
     } else {
         bitmap->setAlphaType(kUnpremul_SkAlphaType);
     }
-    bitmap->setIsOpaque(!hasAlpha);
 }
 
 static jboolean Bitmap_hasMipMap(JNIEnv* env, jobject, jlong bitmapHandle) {
