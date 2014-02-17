@@ -1053,7 +1053,7 @@ struct ResTable_config
 
     // The ISO-15924 short name for the script corresponding to this
     // configuration. (eg. Hant, Latn, etc.). Interpreted in conjunction with
-    // the locale field
+    // the locale field.
     char localeScript[4];
 
     // A single BCP-47 variant subtag. Will vary in length between 5 and 8
@@ -1118,14 +1118,23 @@ struct ResTable_config
     bool match(const ResTable_config& settings) const;
 
     // Get the string representation of the locale component of this
-    // Config. This will contain the language along with the prefixed script,
-    // region and variant of this config, separated by underscores.
+    // Config. The maximum size of this representation will be
+    // |RESTABLE_MAX_LOCALE_LEN| (including a terminating '\0').
     //
-    // 'r' is the region prefix, 's' is the script prefix and 'v' is the
-    // variant prefix.
-    //
-    // Example: en_rUS, en_sLatn_rUS, en_vPOSIX.
-    void getLocale(char str[RESTABLE_MAX_LOCALE_LEN]) const;
+    // Example: en-US, en-Latn-US, en-POSIX.
+    void getBcp47Locale(char* out) const;
+
+    // Sets the values of language, region, script and variant to the
+    // well formed BCP-47 locale contained in |in|. The input locale is
+    // assumed to be valid and no validation is performed.
+    void setBcp47Locale(const char* in);
+
+    inline void clearLocale() {
+        locale = 0;
+        memset(localeScript, 0, sizeof(localeScript));
+        memset(localeVariant, 0, sizeof(localeVariant));
+    }
+
     // Get the 2 or 3 letter language code of this configuration. Trailing
     // bytes are set to '\0'.
     size_t unpackLanguage(char language[4]) const;
@@ -1133,12 +1142,16 @@ struct ResTable_config
     // bytes are set to '\0'.
     size_t unpackRegion(char region[4]) const;
 
-    // Sets the language code of this configuration from |language|. If |language|
-    // is a 2 letter code, the trailing byte is expected to be '\0'.
-    void packLanguage(const char language[3]);
-    // Sets the region code of this configuration from |region|. If |region|
-    // is a 2 letter code, the trailing byte is expected to be '\0'.
-    void packRegion(const char region[3]);
+    // Sets the language code of this configuration to the first three
+    // chars at |language|.
+    //
+    // If |language| is a 2 letter code, the trailing byte must be '\0' or
+    // the BCP-47 separator '-'.
+    void packLanguage(const char* language);
+    // Sets the region code of this configuration to the first three bytes
+    // at |region|. If |region| is a 2 letter code, the trailing byte must be '\0'
+    // or the BCP-47 separator '-'.
+    void packRegion(const char* region);
 
     // Returns a positive integer if this config is more specific than |o|
     // with respect to their locales, a negative integer if |o| is more specific

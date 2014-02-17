@@ -517,6 +517,7 @@ int doDump(Bundle* bundle)
     // the API version because key resources like icons will have an implicit
     // version if they are using newer config types like density.
     ResTable_config config;
+    memset(&config, 0, sizeof(ResTable_config));
     config.language[0] = 'e';
     config.language[1] = 'n';
     config.country[0] = 'U';

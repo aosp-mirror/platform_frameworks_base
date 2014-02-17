@@ -149,205 +149,506 @@ static bool isHidden(const char *root, const char *path)
 // =========================================================================
 // =========================================================================
 
-status_t
-AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
+/* static */ void AaptLocaleValue::splitAndLowerCase(const char* const chars,
+        Vector<String8>* parts, const char separator) {
+    const char *p = chars;
+    const char *q;
+    while (NULL != (q = strchr(p, separator))) {
+         String8 val(p, q - p);
+         val.toLower();
+         parts->add(val);
+         p = q+1;
+    }
+
+    if (p < chars + strlen(chars)) {
+        String8 val(p);
+        val.toLower();
+        parts->add(val);
+    }
+}
+
+/* static */
+inline bool isAlpha(const String8& string) {
+     const size_t length = string.length();
+     for (size_t i = 0; i < length; ++i) {
+          if (!isalpha(string[i])) {
+              return false;
+          }
+     }
+
+     return true;
+}
+
+/* static */
+inline bool isNumber(const String8& string) {
+     const size_t length = string.length();
+     for (size_t i = 0; i < length; ++i) {
+          if (!isdigit(string[i])) {
+              return false;
+          }
+     }
+
+     return true;
+}
+
+void AaptLocaleValue::setLanguage(const char* languageChars) {
+     size_t i = 0;
+     while ((*languageChars) != '\0') {
+          language[i++] = tolower(*languageChars);
+          languageChars++;
+     }
+}
+
+void AaptLocaleValue::setRegion(const char* regionChars) {
+    size_t i = 0;
+    while ((*regionChars) != '\0') {
+         region[i++] = toupper(*regionChars);
+         regionChars++;
+    }
+}
+
+void AaptLocaleValue::setScript(const char* scriptChars) {
+    size_t i = 0;
+    while ((*scriptChars) != '\0') {
+         if (i == 0) {
+             script[i++] = toupper(*scriptChars);
+         } else {
+             script[i++] = tolower(*scriptChars);
+         }
+         scriptChars++;
+    }
+}
+
+void AaptLocaleValue::setVariant(const char* variantChars) {
+     size_t i = 0;
+     while ((*variantChars) != '\0') {
+          variant[i++] = *variantChars;
+          variantChars++;
+     }
+}
+
+bool AaptLocaleValue::initFromFilterString(const String8& str) {
+     // A locale (as specified in the filter) is an underscore separated name such
+     // as "en_US", "en_Latn_US", or "en_US_POSIX".
+     Vector<String8> parts;
+     splitAndLowerCase(str.string(), &parts, '_');
+
+     const int numTags = parts.size();
+     bool valid = false;
+     if (numTags >= 1) {
+         const String8& lang = parts[0];
+         if (isAlpha(lang) && (lang.length() == 2 || lang.length() == 3)) {
+             setLanguage(lang.string());
+             valid = true;
+         }
+     }
+
+     if (!valid || numTags == 1) {
+         return valid;
+     }
+
+     // At this point, valid == true && numTags > 1.
+     const String8& part2 = parts[1];
+     if ((part2.length() == 2 && isAlpha(part2)) ||
+         (part2.length() == 3 && isNumber(part2))) {
+         setRegion(part2.string());
+     } else if (part2.length() == 4 && isAlpha(part2)) {
+         setScript(part2.string());
+     } else if (part2.length() >= 5 && part2.length() <= 8) {
+         setVariant(part2.string());
+     } else {
+         valid = false;
+     }
+
+     if (!valid || numTags == 2) {
+         return valid;
+     }
+
+     // At this point, valid == true && numTags > 1.
+     const String8& part3 = parts[2];
+     if (((part3.length() == 2 && isAlpha(part3)) ||
+         (part3.length() == 3 && isNumber(part3))) && script[0]) {
+         setRegion(part3.string());
+     } else if (part3.length() >= 5 && part3.length() <= 8) {
+         setVariant(part3.string());
+     } else {
+         valid = false;
+     }
+
+     if (!valid || numTags == 3) {
+         return valid;
+     }
+
+     const String8& part4 = parts[3];
+     if (part4.length() >= 5 && part4.length() <= 8) {
+         setVariant(part4.string());
+     } else {
+         valid = false;
+     }
+
+     if (!valid || numTags > 4) {
+         return false;
+     }
+
+     return true;
+}
+
+int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int startIndex) {
+    const int size = parts.size();
+    int currentIndex = startIndex;
+
+    String8 part = parts[currentIndex];
+    if (part[0] == 'b' && part[1] == '+') {
+        // This is a "modified" BCP-47 language tag. Same semantics as BCP-47 tags,
+        // except that the separator is "+" and not "-".
+        Vector<String8> subtags;
+        AaptLocaleValue::splitAndLowerCase(part.string(), &subtags, '+');
+        subtags.removeItemsAt(0);
+        if (subtags.size() == 1) {
+            setLanguage(subtags[0]);
+        } else if (subtags.size() == 2) {
+            setLanguage(subtags[0]);
+
+            // The second tag can either be a region, a variant or a script.
+            switch (subtags[1].size()) {
+                case 2:
+                case 3:
+                    setRegion(subtags[1]);
+                    break;
+                case 4:
+                    setScript(subtags[1]);
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    setVariant(subtags[1]);
+                    break;
+                default:
+                    fprintf(stderr, "ERROR: Invalid BCP-47 tag in directory name %s\n",
+                            part.string());
+                    return -1;
+            }
+        } else if (subtags.size() == 3) {
+            // The language is always the first subtag.
+            setLanguage(subtags[0]);
+
+            // The second subtag can either be a script or a region code.
+            // If its size is 4, it's a script code, else it's a region code.
+            bool hasRegion = false;
+            if (subtags[1].size() == 4) {
+                setScript(subtags[1]);
+            } else if (subtags[1].size() == 2 || subtags[1].size() == 3) {
+                setRegion(subtags[1]);
+                hasRegion = true;
+            } else {
+                fprintf(stderr, "ERROR: Invalid BCP-47 tag in directory name %s\n", part.string());
+                return -1;
+            }
+
+            // The third tag can either be a region code (if the second tag was
+            // a script), else a variant code.
+            if (subtags[2].size() > 4) {
+                setVariant(subtags[2]);
+            } else {
+                setRegion(subtags[2]);
+            }
+        } else if (subtags.size() == 4) {
+            setLanguage(subtags[0]);
+            setScript(subtags[1]);
+            setRegion(subtags[2]);
+            setVariant(subtags[3]);
+        } else {
+            fprintf(stderr, "ERROR: Invalid BCP-47 tag in directory name: %s\n", part.string());
+            return -1;
+        }
+
+        return ++currentIndex;
+    } else {
+        if ((part.length() == 2 || part.length() == 3) && isAlpha(part)) {
+            setLanguage(part);
+            if (++currentIndex == size) {
+                return size;
+            }
+        } else {
+            return currentIndex;
+        }
+
+        part = parts[currentIndex];
+        if (part.string()[0] == 'r' && part.length() == 3) {
+            setRegion(part.string() + 1);
+            if (++currentIndex == size) {
+                return size;
+            }
+        }
+    }
+
+    return currentIndex;
+}
+
+
+String8 AaptLocaleValue::toDirName() const {
+    String8 dirName("");
+    if (language[0]) {
+        dirName += language;
+    } else {
+        return dirName;
+    }
+
+    if (script[0]) {
+        dirName += "-s";
+        dirName += script;
+    }
+
+    if (region[0]) {
+        dirName += "-r";
+        dirName += region;
+    }
+
+    if (variant[0]) {
+        dirName += "-v";
+        dirName += variant;
+    }
+
+    return dirName;
+}
+
+void AaptLocaleValue::initFromResTable(const ResTable_config& config) {
+    config.unpackLanguage(language);
+    config.unpackRegion(region);
+    if (config.localeScript[0]) {
+        memcpy(script, config.localeScript, sizeof(config.localeScript));
+    }
+
+    if (config.localeVariant[0]) {
+        memcpy(variant, config.localeVariant, sizeof(config.localeVariant));
+    }
+}
+
+void AaptLocaleValue::writeTo(ResTable_config* out) const {
+    out->packLanguage(language);
+    out->packRegion(region);
+
+    if (script[0]) {
+        memcpy(out->localeScript, script, sizeof(out->localeScript));
+    }
+
+    if (variant[0]) {
+        memcpy(out->localeVariant, variant, sizeof(out->localeVariant));
+    }
+}
+
+
+/* static */ bool
+AaptGroupEntry::parseFilterNamePart(const String8& part, int* axis, AxisValue* value)
 {
     ResTable_config config;
+    memset(&config, 0, sizeof(ResTable_config));
 
     // IMSI - MCC
     if (getMccName(part.string(), &config)) {
         *axis = AXIS_MCC;
-        *value = config.mcc;
-        return 0;
+        value->intValue = config.mcc;
+        return true;
     }
 
     // IMSI - MNC
     if (getMncName(part.string(), &config)) {
         *axis = AXIS_MNC;
-        *value = config.mnc;
-        return 0;
+        value->intValue = config.mnc;
+        return true;
     }
 
     // locale - language
-    if (part.length() == 2 && isalpha(part[0]) && isalpha(part[1])) {
-        *axis = AXIS_LANGUAGE;
-        *value = part[1] << 8 | part[0];
-        return 0;
-    }
-
-    // locale - language_REGION
-    if (part.length() == 5 && isalpha(part[0]) && isalpha(part[1])
-            && part[2] == '_' && isalpha(part[3]) && isalpha(part[4])) {
-        *axis = AXIS_LANGUAGE;
-        *value = (part[4] << 24) | (part[3] << 16) | (part[1] << 8) | (part[0]);
-        return 0;
+    if (value->localeValue.initFromFilterString(part)) {
+        *axis = AXIS_LOCALE;
+        return true;
     }
 
     // layout direction
     if (getLayoutDirectionName(part.string(), &config)) {
         *axis = AXIS_LAYOUTDIR;
-        *value = (config.screenLayout&ResTable_config::MASK_LAYOUTDIR);
-        return 0;
+        value->intValue = (config.screenLayout&ResTable_config::MASK_LAYOUTDIR);
+        return true;
     }
 
     // smallest screen dp width
     if (getSmallestScreenWidthDpName(part.string(), &config)) {
         *axis = AXIS_SMALLESTSCREENWIDTHDP;
-        *value = config.smallestScreenWidthDp;
-        return 0;
+        value->intValue = config.smallestScreenWidthDp;
+        return true;
     }
 
     // screen dp width
     if (getScreenWidthDpName(part.string(), &config)) {
         *axis = AXIS_SCREENWIDTHDP;
-        *value = config.screenWidthDp;
-        return 0;
+        value->intValue = config.screenWidthDp;
+        return true;
     }
 
     // screen dp height
     if (getScreenHeightDpName(part.string(), &config)) {
         *axis = AXIS_SCREENHEIGHTDP;
-        *value = config.screenHeightDp;
-        return 0;
+        value->intValue = config.screenHeightDp;
+        return true;
     }
 
     // screen layout size
     if (getScreenLayoutSizeName(part.string(), &config)) {
         *axis = AXIS_SCREENLAYOUTSIZE;
-        *value = (config.screenLayout&ResTable_config::MASK_SCREENSIZE);
-        return 0;
+        value->intValue = (config.screenLayout&ResTable_config::MASK_SCREENSIZE);
+        return true;
     }
 
     // screen layout long
     if (getScreenLayoutLongName(part.string(), &config)) {
         *axis = AXIS_SCREENLAYOUTLONG;
-        *value = (config.screenLayout&ResTable_config::MASK_SCREENLONG);
-        return 0;
+        value->intValue = (config.screenLayout&ResTable_config::MASK_SCREENLONG);
+        return true;
     }
 
     // orientation
     if (getOrientationName(part.string(), &config)) {
         *axis = AXIS_ORIENTATION;
-        *value = config.orientation;
-        return 0;
+        value->intValue = config.orientation;
+        return true;
     }
 
     // ui mode type
     if (getUiModeTypeName(part.string(), &config)) {
         *axis = AXIS_UIMODETYPE;
-        *value = (config.uiMode&ResTable_config::MASK_UI_MODE_TYPE);
-        return 0;
+        value->intValue = (config.uiMode&ResTable_config::MASK_UI_MODE_TYPE);
+        return true;
     }
 
     // ui mode night
     if (getUiModeNightName(part.string(), &config)) {
         *axis = AXIS_UIMODENIGHT;
-        *value = (config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT);
-        return 0;
+        value->intValue = (config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT);
+        return true;
     }
 
     // density
     if (getDensityName(part.string(), &config)) {
         *axis = AXIS_DENSITY;
-        *value = config.density;
-        return 0;
+        value->intValue = config.density;
+        return true;
     }
 
     // touchscreen
     if (getTouchscreenName(part.string(), &config)) {
         *axis = AXIS_TOUCHSCREEN;
-        *value = config.touchscreen;
-        return 0;
+        value->intValue = config.touchscreen;
+        return true;
     }
 
     // keyboard hidden
     if (getKeysHiddenName(part.string(), &config)) {
         *axis = AXIS_KEYSHIDDEN;
-        *value = config.inputFlags;
-        return 0;
+        value->intValue = config.inputFlags;
+        return true;
     }
 
     // keyboard
     if (getKeyboardName(part.string(), &config)) {
         *axis = AXIS_KEYBOARD;
-        *value = config.keyboard;
-        return 0;
+        value->intValue = config.keyboard;
+        return true;
     }
 
     // navigation hidden
     if (getNavHiddenName(part.string(), &config)) {
         *axis = AXIS_NAVHIDDEN;
-        *value = config.inputFlags;
+        value->intValue = config.inputFlags;
         return 0;
     }
 
     // navigation
     if (getNavigationName(part.string(), &config)) {
         *axis = AXIS_NAVIGATION;
-        *value = config.navigation;
-        return 0;
+        value->intValue = config.navigation;
+        return true;
     }
 
     // screen size
     if (getScreenSizeName(part.string(), &config)) {
         *axis = AXIS_SCREENSIZE;
-        *value = config.screenSize;
-        return 0;
+        value->intValue = config.screenSize;
+        return true;
     }
 
     // version
     if (getVersionName(part.string(), &config)) {
         *axis = AXIS_VERSION;
-        *value = config.version;
-        return 0;
+        value->intValue = config.version;
+        return true;
     }
 
-    return 1;
+    return false;
 }
 
-uint32_t
+AxisValue
 AaptGroupEntry::getConfigValueForAxis(const ResTable_config& config, int axis)
 {
+    AxisValue value;
     switch (axis) {
         case AXIS_MCC:
-            return config.mcc;
+            value.intValue = config.mcc;
+            break;
         case AXIS_MNC:
-            return config.mnc;
-        case AXIS_LANGUAGE:
-            return (((uint32_t)config.country[1]) << 24) | (((uint32_t)config.country[0]) << 16)
-                | (((uint32_t)config.language[1]) << 8) | (config.language[0]);
+            value.intValue = config.mnc;
+            break;
+        case AXIS_LOCALE:
+            value.localeValue.initFromResTable(config);
+            break;
         case AXIS_LAYOUTDIR:
-            return config.screenLayout&ResTable_config::MASK_LAYOUTDIR;
+            value.intValue = config.screenLayout&ResTable_config::MASK_LAYOUTDIR;
+            break;
         case AXIS_SCREENLAYOUTSIZE:
-            return config.screenLayout&ResTable_config::MASK_SCREENSIZE;
+            value.intValue = config.screenLayout&ResTable_config::MASK_SCREENSIZE;
+            break;
         case AXIS_ORIENTATION:
-            return config.orientation;
+            value.intValue = config.orientation;
+            break;
         case AXIS_UIMODETYPE:
-            return (config.uiMode&ResTable_config::MASK_UI_MODE_TYPE);
+            value.intValue = (config.uiMode&ResTable_config::MASK_UI_MODE_TYPE);
+            break;
         case AXIS_UIMODENIGHT:
-            return (config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT);
+            value.intValue = (config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT);
+            break;
         case AXIS_DENSITY:
-            return config.density;
+            value.intValue = config.density;
+            break;
         case AXIS_TOUCHSCREEN:
-            return config.touchscreen;
+            value.intValue = config.touchscreen;
+            break;
         case AXIS_KEYSHIDDEN:
-            return config.inputFlags;
+            value.intValue = config.inputFlags;
+            break;
         case AXIS_KEYBOARD:
-            return config.keyboard;
+            value.intValue = config.keyboard;
+            break;
         case AXIS_NAVIGATION:
-            return config.navigation;
+            value.intValue = config.navigation;
+            break;
         case AXIS_SCREENSIZE:
-            return config.screenSize;
+            value.intValue = config.screenSize;
+            break;
         case AXIS_SMALLESTSCREENWIDTHDP:
-            return config.smallestScreenWidthDp;
+            value.intValue = config.smallestScreenWidthDp;
+            break;
         case AXIS_SCREENWIDTHDP:
-            return config.screenWidthDp;
+            value.intValue = config.screenWidthDp;
+            break;
         case AXIS_SCREENHEIGHTDP:
-            return config.screenHeightDp;
+            value.intValue = config.screenHeightDp;
+            break;
         case AXIS_VERSION:
-            return config.version;
+            value.intValue = config.version;
+            break;
     }
-    return 0;
+
+    return value;
 }
 
 bool
@@ -371,24 +672,14 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
     mParamsChanged = true;
 
     Vector<String8> parts;
+    AaptLocaleValue::splitAndLowerCase(dir, &parts, '-');
 
-    String8 mcc, mnc, loc, layoutsize, layoutlong, orient, den;
+    String8 mcc, mnc, layoutsize, layoutlong, orient, den;
     String8 touch, key, keysHidden, nav, navHidden, size, layoutDir, vers;
     String8 uiModeType, uiModeNight, smallestwidthdp, widthdp, heightdp;
 
-    const char *p = dir;
-    const char *q;
-    while (NULL != (q = strchr(p, '-'))) {
-        String8 val(p, q-p);
-        val.toLower();
-        parts.add(val);
-        //printf("part: %s\n", parts[parts.size()-1].string());
-        p = q+1;
-    }
-    String8 val(p);
-    val.toLower();
-    parts.add(val);
-    //printf("part: %s\n", parts[parts.size()-1].string());
+    AaptLocaleValue locale;
+    int numLocaleComponents = 0;
 
     const int N = parts.size();
     int index = 0;
@@ -429,38 +720,18 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         }
         part = parts[index];
     } else {
-        //printf("not mcc: %s\n", part.string());
+        //printf("not mnc: %s\n", part.string());
     }
 
-    // locale - language
-    if (part.length() == 2 && isalpha(part[0]) && isalpha(part[1])) {
-        loc = part;
-
-        index++;
-        if (index == N) {
-            goto success;
-        }
-        part = parts[index];
-    } else {
-        //printf("not language: %s\n", part.string());
+    index = locale.initFromDirName(parts, index);
+    if (index == -1) {
+        return false;
+    }
+    if (index >= N){
+        goto success;
     }
 
-    // locale - region
-    if (loc.length() > 0
-            && part.length() == 3 && part[0] == 'r' && part[0] && part[1]) {
-        loc += "-";
-        part.toUpper();
-        loc += part.string() + 1;
-
-        index++;
-        if (index == N) {
-            goto success;
-        }
-        part = parts[index];
-    } else {
-        //printf("not region: %s\n", part.string());
-    }
-
+    part = parts[index];
     if (getLayoutDirectionName(part.string())) {
         layoutDir = part;
 
@@ -679,7 +950,7 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
 success:
     this->mcc = mcc;
     this->mnc = mnc;
-    this->locale = loc;
+    this->locale = locale;
     this->screenLayoutSize = layoutsize;
     this->screenLayoutLong = layoutlong;
     this->smallestScreenWidthDp = smallestwidthdp;
@@ -711,7 +982,7 @@ AaptGroupEntry::toString() const
     s += ",";
     s += this->mnc;
     s += ",";
-    s += this->locale;
+    s += locale.toDirName();
     s += ",";
     s += layoutDirection;
     s += ",";
@@ -765,12 +1036,15 @@ AaptGroupEntry::toDirName(const String8& resType) const
         }
         s += mnc;
     }
-    if (this->locale != "") {
-        if (s.length() > 0) {
-            s += "-";
-        }
-        s += locale;
+
+    const String8 localeComponent = locale.toDirName();
+    if (localeComponent != "") {
+         if (s.length() > 0) {
+             s += "-";
+         }
+         s += localeComponent;
     }
+
     if (this->layoutDirection != "") {
         if (s.length() > 0) {
             s += "-";
@@ -940,55 +1214,6 @@ bool AaptGroupEntry::getMncName(const char* name,
     }
 
     return true;
-}
-
-/*
- * Does this directory name fit the pattern of a locale dir ("en-rUS" or
- * "default")?
- *
- * TODO: Should insist that the first two letters are lower case, and the
- * second two are upper.
- */
-bool AaptGroupEntry::getLocaleName(const char* fileName,
-                                   ResTable_config* out)
-{
-    if (strcmp(fileName, kWildcardName) == 0
-            || strcmp(fileName, kDefaultLocale) == 0) {
-        if (out) {
-            out->language[0] = 0;
-            out->language[1] = 0;
-            out->country[0] = 0;
-            out->country[1] = 0;
-        }
-        return true;
-    }
-
-    if (strlen(fileName) == 2 && isalpha(fileName[0]) && isalpha(fileName[1])) {
-        if (out) {
-            out->language[0] = fileName[0];
-            out->language[1] = fileName[1];
-            out->country[0] = 0;
-            out->country[1] = 0;
-        }
-        return true;
-    }
-
-    if (strlen(fileName) == 5 &&
-        isalpha(fileName[0]) &&
-        isalpha(fileName[1]) &&
-        fileName[2] == '-' &&
-        isalpha(fileName[3]) &&
-        isalpha(fileName[4])) {
-        if (out) {
-            out->language[0] = fileName[0];
-            out->language[1] = fileName[1];
-            out->country[0] = fileName[3];
-            out->country[1] = fileName[4];
-        }
-        return true;
-    }
-
-    return false;
 }
 
 bool AaptGroupEntry::getLayoutDirectionName(const char* name, ResTable_config* out)
@@ -1496,18 +1721,18 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     return v;
 }
 
-const ResTable_config& AaptGroupEntry::toParams() const
+const ResTable_config AaptGroupEntry::toParams() const
 {
     if (!mParamsChanged) {
         return mParams;
     }
 
     mParamsChanged = false;
-    ResTable_config& params(mParams);
-    memset(&params, 0, sizeof(params));
+    ResTable_config& params = mParams;
+    memset(&params, 0, sizeof(ResTable_config));
     getMccName(mcc.string(), &params);
     getMncName(mnc.string(), &params);
-    getLocaleName(locale.string(), &params);
+    locale.writeTo(&params);
     getLayoutDirectionName(layoutDirection.string(), &params);
     getSmallestScreenWidthDpName(smallestScreenWidthDp.string(), &params);
     getScreenWidthDpName(screenWidthDp.string(), &params);
@@ -1992,7 +2217,9 @@ status_t AaptSymbols::applyJavaSymbols(const sp<AaptSymbols>& javaSymbols)
 
 AaptAssets::AaptAssets()
     : AaptDir(String8(), String8()),
-      mChanged(false), mHaveIncludedAssets(false), mRes(NULL)
+      mHavePrivateSymbols(false),
+      mChanged(false), mHaveIncludedAssets(false),
+      mRes(NULL)
 {
 }
 
@@ -2502,9 +2729,9 @@ status_t AaptAssets::filter(Bundle* bundle)
             // If our preferred density is hdpi but we only have mdpi and xhdpi resources, we
             // pick xhdpi.
             uint32_t preferredDensity = 0;
-            const SortedVector<uint32_t>* preferredConfigs = prefFilter.configsForAxis(AXIS_DENSITY);
+            const SortedVector<AxisValue>* preferredConfigs = prefFilter.configsForAxis(AXIS_DENSITY);
             if (preferredConfigs != NULL && preferredConfigs->size() > 0) {
-                preferredDensity = (*preferredConfigs)[0];
+                preferredDensity = (*preferredConfigs)[0].intValue;
             }
 
             // Now deal with preferred configurations.
