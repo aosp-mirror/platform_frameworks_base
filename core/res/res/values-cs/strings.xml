@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Umožňuje aplikaci používat libovolný nainstalovaný dekodér médií k dekódování při přehrávání."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"správa důvěryhodných identifikačních údajů"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Umožňuje aplikaci instalovat a odinstalovat certifikáty CA jako důvěryhodné identifikační údaje."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"napojit se na nečinné služby"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Toto oprávnění umožní systému Android vázat se na nečinné služby aplikace."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"spustit aplikaci během nečinnosti"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Toto oprávnění umožňuje systému Android spustit aplikaci na pozadí, když zařízení není používáno."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat POUZE výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivace či deaktivace komponent aplikací"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním smí bez upozornění přepínat sítě, zapínat a vypínat bezdrátový modul telefonu a podobně."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čtení stavu a identity telefonu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Toto oprávnění umožňuje aplikaci zjistit telefonní číslo telefonu, identifikační čísla zařízení, zda zrovna probíhá hovor, a vzdálené číslo, ke kterému je hovor připojen."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"čtení přesných stavů telefonů"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Umožňuje aplikaci používat přesné stavy telefonů. Toto oprávnění aplikaci umožňuje zjistit skutečný stav volání, zda je volání aktivní nebo na pozadí, zda volání selhalo, přesný stav datového připojení a zda datové připojení selhalo."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"bránění přechodu tabletu do režimu spánku"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"bránění přechodu telefonu do režimu spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikaci zabránit přechodu tabletu do režimu spánku."</string>

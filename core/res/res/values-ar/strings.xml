@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"السماح للتطبيق باستخدام أي برنامج فك تشفير وسائط مثبت لفك التشفير من أجل التشغيل."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"إدارة بيانات الاعتماد الموثوقة"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏السماح للتطبيق بتثبيت شهادات CA وإلغاء تثبيتها باعتبارها بيانات اعتماد محل ثقة."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"الالتزام بالخدمات الخاملة"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"‏يتيح هذا الإذن لنظام Android الارتباط بخدمات وضع الخمول لأحد التطبيقات."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"تشغيل التطبيق أثناء وقت الخمول"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏يتيح هذا الإذن لنظام Android تشغيل التطبيق في الخلفية في حين أن الجهاز ليس قيد الاستخدام."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"قراءة/كتابة إلى الموارد المملوكة بواسطة التشخيص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏للسماح للتطبيق بالقراءة والكتابة إلى أي مورد مملوك بواسطة مجموعة التشخيصات؛ على سبيل المثال، الملفات في /dev. من المحتمل أن يؤثر ذلك في استقرار النظام وأمانه. يجب ألا يستخدم ذلك سوى للتشخيصات الخاصة بالنظام من قِبل المصنِّع أو المشغِّل."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"تمكين مكونات التطبيق أو تعطيلها"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"للسماح للتطبيق بالتحكم في ميزات الهاتف بالجهاز. يمكن لأحد التطبيقات بهذا الإذن تبديل الشبكات وتشغيل لاسلكي الهاتف وإيقاف تشغيله وما إلى ذلك بدون إعلامك على الإطلاق."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"قراءة حالة الهاتف والهوية"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"قراءة حالات الهاتف الدقيقة"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"للسماح للتطبيق بالوصول إلى حالات الهاتف الدقيقة. يتيح هذا الإذن للتطبيق تحديد حالة المكالمة الفعلية، سواء أكانت مكالمة نشطة أم في الخلفية، وإخفاق الاتصال، وحالة اتصال البيانات الدقيقة، وإخفاق اتصال البيانات."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"منع الجهاز اللوحي من الدخول في وضع السكون"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"منع الهاتف من الدخول في وضع السكون"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"للسماح للتطبيق بمنع الجهاز اللوحي من الانتقال إلى وضع السكون."</string>

@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permet que l\'aplicació utilitzi qualsevol descodificador de mitjans instal·lat per descodificar per a la reproducció."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestiona les credencials de confiança"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permet que l\'aplicació instal·li i desinstal·li certificats de CA com a credencials de confiança."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"vincula als serveis inactius"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Amb aquest permís, el sistema Android podrà vincular-se amb els serveis inactius d\'una aplicació."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"executar l\'aplicació durant el temps d\'inactivitat"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Aquest permís permet que el sistema Android executi l\'aplicació en segon pla mentre el dispositiu no està en ús."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"llegir/escriure recursos propietat de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet que l\'aplicació llegeixi i escrigui a qualsevol recurs propietat del grup diag; per exemple, els fitxers de /dev. Això podria afectar l\'estabilitat i la seguretat del sistema. NOMÉS l\'hauria d\'utilitzar el fabricant o l\'operador per a diagnòstics específics de maquinari."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activa o desactiva els components de l\'aplicació"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permet que l\'aplicació controli les funcions de telèfon del dispositiu. Una aplicació amb aquest permís pot canviar de xarxa, activar i desactivar el senyal mòbil i dur a terme accions semblants sense notificar-t\'ho."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"veure l\'estat i la identitat del telèfon"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"llegeix els estats exactes del telèfon"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Permet que l\'aplicació accedeixi als estats exactes del telèfon. Amb aquest permís, l\'aplicació pot determinar l\'estat real de la trucada, si la trucada està activa o en segon pla, si s\'ha produït algun error, l\'estat exacte de la connexió de dades i els errors de la connexió de dades."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode d\'inactivitat"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir que el telèfon entri en mode de repòs"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>

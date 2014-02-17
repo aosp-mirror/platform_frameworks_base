@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Mengizinkan apl menggunakan pengawasandi media apa pun yang terpasang guna mengawasandikan media untuk diputar."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"kelola kredensial tepercaya"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Izinkan aplikasi memasang dan mencopot pemasangan sertifikat CA sebagai kredensial tepercaya."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"mengikat ke layanan yang sedang menganggur"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Izin ini memungkinkan sistem Android mengikat layanan waktu menganggur aplikasi."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"menjalankan aplikasi selama waktu nganggur"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Izin ini memungkinkan sistem Android menjalankan aplikasi di latar belakang saat perangkat tidak digunakan."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"baca/tulis ke sumber daya yang dimiliki oleh diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Mengizinkan apl membaca dan menulis ke sumber daya apa pun yang dimiliki oleh grup diag; misalnya, file dalam /dev. Izin ini berpotensi memengaruhi kestabilan dan keamanan sistem. Sebaiknya ini HANYA digunakan untuk diagnosis khusus perangkat keras oleh pabrikan atau operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"mengaktifkan atau menonaktifkan komponen apl"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Mengizinkan apl mengontrol fitur telepon perangkat. Apl dengan izin ini dapat mengalihkan jaringan, menyalakan dan mematikan radio ponsel, dan melakukan hal serupa lainnya tanpa pernah memberi tahu Anda."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"baca identitas dan status ponsel"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang tersambung oleh sebuah panggilan."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"membaca keadaan ponsel dengan akurat"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Memungkinkan aplikasi mengakses keadaan ponsel dengan akurat. Izin ini memungkinkan aplikasi menentukan status panggilan yang sebenarnya, apakah panggilan sedang aktif atau di latar belakang, kegagalan panggilan, status sambungan data yang akurat, dan kegagalan sambungan data."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"cegah tablet dari tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"mencegah ponsel menjadi tidak aktif"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Mengizinkan apl mencegah tablet tidur."</string>

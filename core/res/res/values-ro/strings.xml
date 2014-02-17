@@ -423,8 +423,10 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite aplicaţiei să utilizeze orice decodor media instalat pentru a decodifica redarea."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestionarea acreditărilor de încredere"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite aplicației să instaleze și să dezinstaleze certificate CA ca acreditări de încredere."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"asociați cu serviciile inactive"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Această autorizare permite sistemului Android să se conecteze la serviciile inactive ale unei aplicații."</string>
+    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
+    <skip />
+    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite aplicaţiei să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată NUMAI de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>
@@ -563,6 +565,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permite aplicaţiei să controleze funcţiile de telefon ale dispozitivului. O aplicaţie cu această permisiune poate să schimbe reţeaua, să închidă şi să deschidă radioul şi să efectueze alte acţiuni similare, fără să vă înştiinţeze."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"citeşte starea şi identitatea telefonului"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicaţiei să acceseze funcţiile de telefon ale dispozitivului. Cu această permisiune aplicaţia stabileşte numărul de telefon şi ID-urile de dispozitiv, dacă un apel este activ, precum şi numărul de la distanţă conectat printr-un apel."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"accesați stările exacte ale telefonului"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Permite aplicației să acceseze stările exacte ale telefonului. Cu această permisiune, aplicația poate să determine starea reală a apelului, dacă apelul este activ sau în fundal, dacă apelul nu reușește, starea exactă și întreruperile conexiunii de date."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"împiedicarea computerului tablet PC să intre în repaus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"împiedicare intrare telefon în repaus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite aplicaţiei să împiedice intrarea tabletei în stare de repaus."</string>

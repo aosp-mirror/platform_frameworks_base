@@ -678,9 +678,9 @@
     <skip />
     <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
     <skip />
-    <!-- no translation found for permlab_bindIdleService (7521398788076342815) -->
+    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
     <skip />
-    <!-- no translation found for permdesc_bindIdleService (7747505810143356528) -->
+    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
     <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leger/scriver en resursas che appartegnan a diagnostics"</string>
     <!-- no translation found for permdesc_diagnostic (6608295692002452283) -->
@@ -934,6 +934,10 @@
     <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
     <skip />
     <!-- no translation found for permdesc_readPhoneState (1639212771826125528) -->
+    <skip />
+    <!-- no translation found for permlab_readPrecisePhoneState (5476483020282007597) -->
+    <skip />
+    <!-- no translation found for permdesc_readPrecisePhoneState (6648009074263855418) -->
     <skip />
     <!-- no translation found for permlab_wakeLock (1531731435011495015) -->
     <skip />

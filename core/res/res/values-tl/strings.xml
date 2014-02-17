@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Pinapayagan ang app na gumamit ng anumang naka-install na media decoder upang mag-decode para sa pag-playback."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"mga pinamamahalaang pinagkakatiwalaang kredensyal"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Pinapayagan ang app na mag-install at mag-uninstall ng mga CA certificate bilang mga pinagkakatiwalaang kredensyal."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"sumailalim sa mga idle na serbisyo"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Nagbibigay-daan ang pahintulot na ito sa Android system na sumailalim sa mga idle na serbisyo ng isang application."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"paganahin ang application habang idle"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Nagbibigay-daan ang pahintulot na ito sa Android system na paganahin ang application sa background habang hindi ginagamit ang device."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"magbasa/magsulat sa mga mapagkukunang pag-aari ng diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Pinapayagan ang app na magbasa at magsulat sa anumang mapagkukunang pag-aari ng pangkat ng diag; halimbawa, mga file sa /dev. Maaaring potensyal na maapektuhan nito ang katatagan at seguridad ng system. Dapat LAMANG itong gamitin para sa diagnostics na tukoy sa hardware ng tagagawa o operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"paganahin o huwag paganahin ang mga bahagi ng app"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Pinapayagan ang app na kontrolin ang mga tampok ng telepono ng device. Maaaring lumipat ng mga network ang isang app na mayroong ganitong pahintulot, i-on o i-off ang radyo ng telepono at mga kaparehong bagay nang hindi ka nano-notify."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"basahin ang katayuan at pagkakakilanlan ng telepono"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pinapayagan ang app na i-access ang mga tampok ng telepono ng device. Pinapayagan ng pahintulot na ito ang app na tukuyin ang numero ng telepono at  mga ID ng device, kung aktibo man ang isang tawag, at ang malayuang numerong ikinonekta ng isang tawag."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"basahin ang tiyak na katayuan ng telepono"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Binibigyang-daan ang app na ma-access ang tumpak na katayuan ng telepono. Nagbibigay-daan ang pahintulot na ito sa app na matukoy ang tunay na status ng tawag, kung aktibo ang isang tawag o nasa background, mga hindi natuloy na tawag, tumpak na status ng koneksyon sa data at hindi natuloy na pagkonekta sa data."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"pigilan ang tablet mula sa pag-sleep"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"pigilan ang telepono mula sa paghinto"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Pinapayagan ang app na pigilan ang tablet mula sa pag-sleep."</string>

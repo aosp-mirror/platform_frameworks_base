@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ivumela uhlelo lokusebenza ukusebenzisa noma isiphi isiqophi semidiya esifakiwe ukuqopha ukudlala."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"phatha ukuqinisekisa okuthenjiwe"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Ivumela uhlelo lokusebenza ukuthi lifake liphinde likhiphe izitifiketi ze-CA njengokuqinisekiswa okuthenjiwe."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"bophezela kumasevisi angenzi lutho"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Le mvume ivumela isistimu ye-Android ukuthi ibophezeleke kumasevisi angenzi lutho wohlelo lokusebenza."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"qalisa uhlelo lokusebenza ngesikhathi sokungenzi lutho"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Le mvume ivumela isistimu ye-Android ukuthi iqalise uhlelo lokusebenza ngemuva ngenkathi idivayisi ingasebenzi."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"funda/bhalela emithombweni ephethwe idayegi"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ivumela uhlelo lokusebenza ukufunda nokubhala kunoma yimuphi umthombo weqembu ledayegi; ngokwesibonelo, amafayela akwi/dev. Lokhu kungase kuthinte kakhulu ukuba nokuphepha kohlelo. Lokhu kumele kusebenziselwe KUPHELA ukuhlola ihadiwe okucacile ngumkhiqizi noma u-opheretha."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"vumela noma vimbela izingxenye zensiza"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Ivumela ukuthi uhlelo lokusebenza ilawule okuqukethwe ocingweni edivayisini. Insiza enalemvume ingaguquguqula amanethwekhi, ivule umsakazo wocingo iphinde iwucishe kanye nokunye okufana nalokho ngaphandle kokukwazisa."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"funda isimo sefoni kanye nesazisi"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ivumela uhlelo lokusebenza ukufinyelela izici zefoni zedivayisi. Le mvume ivumela uhlelo lokusebenza ukucacisa inombolo yefoni nobunikazi bedivayisi, ukuthi noma ikholi iyasebenza, futhi nenombolo yesilawuli kude zixhunywe ngekholi."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"funda izimo zefoni ezinembile"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Ivumelanisa uhlelo lokusebenza ukuthi lufinyelele kuzimo ezinembile zefoni. Le mvume ivumela uhlelo lokusebenza ukuthi linqume isimo sekholi sangempela, noma ikholi isebenza noma ingemuva, ikholi ihluleka, isimo esinembile sokuxhumeka kwedatha nokuhluleka kokuxhumeka kwedatha."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"gwema ithebhulethi ukuba ingalali"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"gwema ifoni ukuba ingalali"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ivumela uhlelo lokusebenza ukuthi linqande ithebulethi yakho ukuthi ilale."</string>

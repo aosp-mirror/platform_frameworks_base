@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Laat die program toe om enige geïnstalleer mediadekodeerder te gebruik om te kan dekodeer vir terugspeel."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"bestuur vertroude eiebewyse"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Laat die program CA-sertifikate as vertroude eiebewyse installeer en deïnstalleer."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"bind aan ledige dienste"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Hierdie toestemming laat die Android-stelsel toe om aan \'n program se ledige dienste te bind."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"laat program gedurende ledige tyd loop"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Met hierdie toestemming kan die Android-stelsel die program in die agtergrond laat loop terwyl die toestel nie gebruik word nie."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lees/skryf na bronne wat diag besit"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Laat die program toe om na enige hulpbron wat deur die diag-groep besit word, te skryf, byvoorbeeld lêers in /dev. Dit kan potensieel stelselstabiliteit en sekuriteit affekteer. Dit moet NET gebruik word vir hardewarespesifieke diagnose deur die vervaardiger of operateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktiveer of deaktiveer programkomponente"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Laat die program toe om die foonkenmerke van die toestel te beheer. \'n Program met hierdie toestemming kan tussen netwerke wissel, die foonradio aan en af skakel, en dies meer, sonder om jou ooit te laat weet."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lees foonstatus en identiteit"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"lees presiese foonstate"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Gee die program toegang tot presiese foonstate. Hierdie toestemming laat die program toe om die werklike oproepstatus te bepaal, of \'n oproep aktief is en of dit in die agtergrond is. Dit kan ook mislukte oproepe, presiese dataverbindingstatus en mislukte dataverbindings bepaal."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"verhoed dat tablet slaap"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"verhoed foon om te slaap"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Laat die program toe om die tablet te keer om te slaap."</string>

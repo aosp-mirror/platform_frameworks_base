@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Lehetővé teszi egy alkalmazás számára bármely telepített médiadekóder használatát a lejátszás dekódolásához."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"megbízható tanúsítványok kezelése"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Lehetővé teszi az alkalmazás számára a CA tanúsítványok telepítését és eltávolítását."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"csatolás tétlen szolgáltatásokhoz"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Ez az engedély lehetővé teszi az Android számára, hogy összekapcsolódjon egy alkalmazás tétlen szolgáltatásaival."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"alkalmazás futtatása tétlen időszakban"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Ezzel az engedéllyel az Android a háttérben futtathatja az alkalmazást, amikor az eszközt nem használják."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"a diag tulajdonában lévő erőforrások olvasása és írása"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lehetővé teszi egy alkalmazás számára, hogy olvassa és írja a diagnosztikai csoport minden erőforrását, például a /dev könyvtárban lévő fájlokat. Ez potenciálisan befolyásolhatja a rendszer stabilitását és biztonságát, ezért CSAK a gyártó vagy a szolgáltató használhatja hardverspecifikus diagnosztizálásra."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"alkalmazáskomponensek be- és kikapcsolása"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Lehetővé teszi az alkalmazás számára, hogy az eszköz telefonálási funkcióit vezérelje. Egy ilyen engedéllyel rendelkező alkalmazás váltani tud a hálózatok között, be- és kikapcsolhatja a telefon rádióját, és hasonlókat tehet anélkül, hogy valaha értesítené Önt."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonállapot és azonosító olvasása"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen az eszköz telefonálási funkcióihoz. Az engedéllyel rendelkező alkalmazás meghatározhatja a telefonszámot és eszközazonosítókat, hogy egy hívás aktív-e, valamint híváskor a másik fél telefonszámát."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"pontos telefonállapot megállapítása"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Engedélyezi, hogy az alkalmazás hozzáférjen a pontos telefonállapothoz. Az ilyen engedéllyel rendelkező alkalmazás képes meghatározni a valós hívási állapotot: hogy egy hívás aktív-e vagy a háttérben van, a hívás meghiúsult-e, illetve a pontos adatkapcsoltot és az adatkapcsolati műveletek meghiúsulását."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"táblagép alvás üzemmódjának megakadályozása"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefon alvó üzemmódjának megakadályozása"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a táblagép alvó üzemmódra váltson."</string>

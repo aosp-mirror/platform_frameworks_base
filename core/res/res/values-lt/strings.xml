@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Leidžiama programai naudoti bet kurį įdiegtą medijos dekoderį norint iššifruoti atkūrimą."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"tvarkyti patikimus prisijungimo duomenis"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Programoje galima įdiegti ir iš jos pašalinti CA sertifikatus kaip patikimus prisijungimo duomenis."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"susaistyti su neaktyviomis paslaugomis"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Šiuo leidimu „Android“ sistemai leidžiama susaistyti su neaktyviomis programos paslaugomis."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"paleisti programą, kai įrenginys yra neaktyvus"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Šiuo leidimu sistemai „Android“ leidžiama fone paleisti programą, kai įrenginys yra nenaudojamas."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"skaityti / rašyti ištekliuose, priklausančiuose diagnostikai"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Leidžiama programai skaityti ir rašyti visuose diagnostikos grupei priklausančiuose ištekliuose, pvz., failuose, esančiuose /dev. Tai gali paveikti sistemos stabilumą ir saugą. Tai turėtų būti naudojama TIK gamintojui ar operatoriui atliekant aparatinės įrangos diagnostiką."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Leidžiama programai valdyti įrenginio telefono funkcijas. Šį leidimą turinti programa gali perjungti tinklus, įjungti ir išjungti telefono radiją ir atlikti panašius veiksmus jūsų neįspėdama."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"skaityti telefono būseną ir tapatybę"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leidžiama programai pasiekti telefono funkcijas įrenginyje. Šis leidimas suteikia teisę programai nustatyti telefono numerį ir įrenginio ID, tai, ar skambutis aktyvus, ir skambučiu prijungtą nuotolinį numerį."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"skaityti tikslias telefono būsenas"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Programai leidžiama pasiekti tikslias telefono būsenas. Šiuo leidimu programai leidžiama nustatyti tikrą skambučio būseną, ar skambutis yra aktyvus, ar vyksta fone, ar paskambinti nepavyksta, tikslią duomenų ryšio būseną ir ar nepavyksta užmegzto duomenų ryšio."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"neleisti planšetiniam kompiuteriui užmigti"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"neleisti telefonui snausti"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Leidžiama programai neleisti planšetiniam kompiuteriui užmigti."</string>

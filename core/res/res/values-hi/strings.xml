@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ऐप्स  को प्लेबैक डीकोड करने के लिए किसी भी इंस्टॉल किए गए डीकोडर का उपयोग करने देता है."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"विश्वसनीय क्रेडेंशियल प्रबंधित करें"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"ऐप्स  को CA प्रमाणपत्रों को विश्वसनीय क्रेडेंशियल के रूप में इंस्टॉल और अनइंस्टॉल करने दें"</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"निष्क्रिय सेवाओं से आबद्ध करें"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"यह अनुमति Android सिस्टम को किसी एप्लिकेशन की निष्क्रिय सेवाओं से आबद्ध होने देती है."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"निष्क्रिय समय के दौरान एप्लिकेशन चलाएं"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"यह अनुमति Android सिस्टम को उपकरण के उपयोग में नहीं रहने पर एप्लिकेशन को पृष्ठभूमि में चलाने देती है."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"निदान के स्‍वामित्‍व वाले संसाधनों को पढ़ें/लिखें"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ऐप्स को diag समूह के स्‍वामित्‍व वाले किसी संसाधन को पढ़ने और उसमें लिखने देता है; उदाहरण के लिए, /dev की फ़ाइलें. यह सिस्‍टम की स्‍थिरता और सुरक्षा को संभावित रूप से प्रभावित कर सकता है. इसका उपयोग निर्माता या ऑपरेटर द्वारा केवल हार्डवेयर-विशिष्ट निदान के लिए किया जाना चाहिए."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ऐप्स घटकों को सक्षम या अक्षम करें"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"ऐप्स को उपकरण की फ़ोन सुविधाएं नियंत्रित करने देता है. इस अनुमति वाला कोई ऐप्स आपको सूचित किए बिना नेटवर्क स्‍विच कर सकता है, फ़ोन का रेडियो चालू और बंद कर सकता है और ऐसे ही अन्य कार्य कर सकता है."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फ़ोन की स्‍थिति और पहचान पढ़ें"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ऐप्स  को उपकरण की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति ऐप्स  को फ़ोन नंबर और उपकरण आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर निर्धारित करने देती है."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"सटीक फ़ोन स्थितियों को पढ़ना"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"ऐप्स को सटीक फ़ोन स्थितियों की एक्सेस देती है. यह अनुमति ऐप्स को कॉल की वास्तविक स्थिति, चाहे वह कॉल सक्रिय हो या पृष्ठभूमि में हो, कॉल विफलताओं, सटीक डेटा कनेक्शन की स्थिति और डेटा कनेक्शन विफलताओं का पता लगाने देती है."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टेबलेट को निष्‍क्रिय होने से रोकें"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"फ़ोन को निष्‍क्रिय होने से रोकें"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ऐप्स  को टेबलेट को प्रयोग में नहीं हो जाने से रोकता है."</string>

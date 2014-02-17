@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Võimaldab rakendusel taasesituseks kasutada mis tahes installitud meediumidekooderit."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"usaldusväärsete mandaatide haldamine"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Lubab rakendusel installida ja desinstallida usaldusväärsete mandaatidena CA-sertifikaate."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"sidumine tegevusetute teenustega"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"See luba võimaldab Androidi süsteemil siduda end rakenduse passiivsete teenustega."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"rakenduse käitamine tegevusetul ajal"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"See luba võimaldab Android-süsteemil käitada rakendust taustal siis, kui seadet ei kasutata."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"loe/kirjuta valija allikaid"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Võimaldab rakendusel lugeda valimisrühma mis tahes ressurssi ja sellesse kirjutada (näiteks kaustas /dev olevad failid). See võib mõjutada süsteemi stabiilsust ja turvet. Seda tohiks kasutada tootja või operaator AINULT riistvaraspetsiifiliseks diagnostikaks."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"Rakenduse komponentide lubamine või keelamine"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Võimaldab rakendusel juhtida seadme telefonifunktsioone. Selle loaga rakendus saab vahetada võrke, lülitada telefoniraadiot sisse ja välja ning teha muudki ilma teid teavitamata."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lugege telefoni olekut ja identiteeti"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"telefoni täpsete olekute lugemine"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Lubab rakendusel hankida juurdepääsu telefoni täpsetele olekutele. Selle loa korral saab rakendus tuvastada kõne tõelise oleku, kas kõne on aktiivne või taustal, kõnede ebaõnnestumised, täpse andmesideühenduse oleku ja andmesideühenduse ebaõnnestumised."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tahvelarvuti uinumise vältimine"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"väldi telefoni uinumist"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Võimaldab rakendusel vältida tahvelarvuti uinumist."</string>

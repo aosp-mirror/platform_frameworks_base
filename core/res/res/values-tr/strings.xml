@@ -423,8 +423,10 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Uygulamaya, oynatma kodunu çözmek için herhangi bir yüklü medya kod çözücüyü kullanma izni verir."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"güvenilen kimlik bilgilerini yönetme"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Uygulamaya, güvenilir kimlik bilgileri olarak CA sertifikaları yükleme veya sertifikaların yüklemelerini kaldırma izni verir."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"boşta kalma hizmetlerine bağlan"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Bu izin, Android sistemin, bir uygulamanın boşta kalma hizmetlerine bağlanmasına olanak sağlar."</string>
+    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
+    <skip />
+    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Uygulamaya, tanılama grubunun sahip olduğu tüm kaynaklara (örneğin /dev içindeki dosyalar) okuma ve yazma izni verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
@@ -563,6 +565,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Uygulamaya, cihazın telefon özelliklerini kontrol etme izni verir. Bu izne sahip bir uygulama sizi hiç uyarmadan ağlar arasında geçiş, telefonun radyosunu açıp kapatma ve benzeri işlemler yapabilir."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonun durumunu ve kimliğini okuma"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Uygulamaya cihazdaki telefon özelliklerine erişme izni verir. Bu izin, uygulamanın telefon numarasını ve cihaz kimliğini, etkin bir çağrı olup olmadığını ve çağrıda bağlanılan karşı tarafın numarasını öğrenmesine olanak sağlar."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"telefon durum bilgilerini hassas bir şekilde oku"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Uygulamanın, telefonun durum bilgilerine hassas bir şekilde erişmesine izin verir. Bu izin sayesinde uygulama, gerçek çağrı durumunu, çağrının aktif mi yoksa arka planda mı olduğunu, çağrının başarısız olup olmadığını, veri bağlantısı durumuyla ilgili hassas bilgileri ve veri bağlantısının başarısız olup olmadığını belirleyebilir."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tabletin uykuya geçmesini önle"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonun uykuya geçmesini önleme"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Uygulamaya, tabletin uykuya geçmesini önleme izni verir."</string>
