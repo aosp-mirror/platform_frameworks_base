@@ -386,17 +386,8 @@ void AssetManager::setConfiguration(const ResTable_config& config, const char* l
     if (locale) {
         setLocaleLocked(locale);
     } else if (config.language[0] != 0) {
-        char spec[9];
-        spec[0] = config.language[0];
-        spec[1] = config.language[1];
-        if (config.country[0] != 0) {
-            spec[2] = '_';
-            spec[3] = config.country[0];
-            spec[4] = config.country[1];
-            spec[5] = 0;
-        } else {
-            spec[3] = 0;
-        }
+        char spec[RESTABLE_MAX_LOCALE_LEN];
+        config.getBcp47Locale(spec);
         setLocaleLocked(spec);
     } else {
         updateResourceParamsLocked();
@@ -668,20 +659,11 @@ void AssetManager::updateResourceParamsLocked() const
         return;
     }
 
-    size_t llen = mLocale ? strlen(mLocale) : 0;
-    mConfig->language[0] = 0;
-    mConfig->language[1] = 0;
-    mConfig->country[0] = 0;
-    mConfig->country[1] = 0;
-    if (llen >= 2) {
-        mConfig->language[0] = mLocale[0];
-        mConfig->language[1] = mLocale[1];
+    if (mLocale) {
+        mConfig->setBcp47Locale(mLocale);
+    } else {
+        mConfig->clearLocale();
     }
-    if (llen >= 5) {
-        mConfig->country[0] = mLocale[3];
-        mConfig->country[1] = mLocale[4];
-    }
-    mConfig->size = sizeof(*mConfig);
 
     res->setParameters(mConfig);
 }

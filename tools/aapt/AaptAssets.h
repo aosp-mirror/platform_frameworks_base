@@ -13,7 +13,6 @@
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
-#include <utils/String8.h>
 #include <utils/Vector.h>
 #include "ZipFile.h"
 
@@ -34,8 +33,7 @@ enum {
     AXIS_NONE = 0,
     AXIS_MCC = 1,
     AXIS_MNC,
-    AXIS_LANGUAGE,
-    AXIS_REGION,
+    AXIS_LOCALE,
     AXIS_SCREENLAYOUTSIZE,
     AXIS_SCREENLAYOUTLONG,
     AXIS_ORIENTATION,
@@ -58,6 +56,73 @@ enum {
     AXIS_END = AXIS_VERSION,
 };
 
+struct AaptLocaleValue {
+     char language[4];
+     char region[4];
+     char script[4];
+     char variant[8];
+
+     AaptLocaleValue() {
+         memset(this, 0, sizeof(AaptLocaleValue));
+     }
+
+     // Initialize this AaptLocaleValue from a config string.
+     bool initFromFilterString(const String8& config);
+
+     int initFromDirName(const Vector<String8>& parts, const int startIndex);
+
+     // Initialize this AaptLocaleValue from a ResTable_config.
+     void initFromResTable(const ResTable_config& config);
+
+     void writeTo(ResTable_config* out) const;
+
+     String8 toDirName() const;
+
+     int compare(const AaptLocaleValue& other) const {
+         return memcmp(this, &other, sizeof(AaptLocaleValue));
+     }
+
+     static void splitAndLowerCase(const char* const chars, Vector<String8>* parts,
+             const char separator);
+
+     inline bool operator<(const AaptLocaleValue& o) const { return compare(o) < 0; }
+     inline bool operator<=(const AaptLocaleValue& o) const { return compare(o) <= 0; }
+     inline bool operator==(const AaptLocaleValue& o) const { return compare(o) == 0; }
+     inline bool operator!=(const AaptLocaleValue& o) const { return compare(o) != 0; }
+     inline bool operator>=(const AaptLocaleValue& o) const { return compare(o) >= 0; }
+     inline bool operator>(const AaptLocaleValue& o) const { return compare(o) > 0; }
+private:
+     void setLanguage(const char* language);
+     void setRegion(const char* language);
+     void setScript(const char* script);
+     void setVariant(const char* variant);
+};
+
+struct AxisValue {
+    // Used for all axes except AXIS_LOCALE, which is represented
+    // as a AaptLocaleValue value.
+    int intValue;
+    AaptLocaleValue localeValue;
+
+    AxisValue() : intValue(0) {
+    }
+
+    inline int compare(const AxisValue &other) const  {
+        if (intValue != other.intValue) {
+            return intValue - other.intValue;
+        }
+
+        return localeValue.compare(other.localeValue);
+    }
+
+    inline bool operator<(const AxisValue& o) const { return compare(o) < 0; }
+    inline bool operator<=(const AxisValue& o) const { return compare(o) <= 0; }
+    inline bool operator==(const AxisValue& o) const { return compare(o) == 0; }
+    inline bool operator!=(const AxisValue& o) const { return compare(o) != 0; }
+    inline bool operator>=(const AxisValue& o) const { return compare(o) >= 0; }
+    inline bool operator>(const AxisValue& o) const { return compare(o) > 0; }
+};
+
 /**
  * This structure contains a specific variation of a single file out
  * of all the variations it can have that we can have.
@@ -65,22 +130,38 @@ enum {
 struct AaptGroupEntry
 {
 public:
-    AaptGroupEntry() : mParamsChanged(true) { }
-    AaptGroupEntry(const String8& _locale, const String8& _vendor)
-        : locale(_locale), vendor(_vendor), mParamsChanged(true) { }
+    AaptGroupEntry() : mParamsChanged(true) {
+        memset(&mParams, 0, sizeof(ResTable_config));
+    }
 
     bool initFromDirName(const char* dir, String8* resType);
 
-    static status_t parseNamePart(const String8& part, int* axis, uint32_t* value);
+    static bool parseFilterNamePart(const String8& part, int* axis, AxisValue* value);
 
-    static uint32_t getConfigValueForAxis(const ResTable_config& config, int axis);
+    static AxisValue getConfigValueForAxis(const ResTable_config& config, int axis);
 
     static bool configSameExcept(const ResTable_config& config,
             const ResTable_config& otherConfig, int axis);
 
+    int compare(const AaptGroupEntry& o) const;
+
+    const ResTable_config toParams() const;
+
+    inline bool operator<(const AaptGroupEntry& o) const { return compare(o) < 0; }
+    inline bool operator<=(const AaptGroupEntry& o) const { return compare(o) <= 0; }
+    inline bool operator==(const AaptGroupEntry& o) const { return compare(o) == 0; }
+    inline bool operator!=(const AaptGroupEntry& o) const { return compare(o) != 0; }
+    inline bool operator>=(const AaptGroupEntry& o) const { return compare(o) >= 0; }
+    inline bool operator>(const AaptGroupEntry& o) const { return compare(o) > 0; }
+
+    String8 toString() const;
+    String8 toDirName(const String8& resType) const;
+
+    const String8& getVersionString() const { return version; }
+
+private:
     static bool getMccName(const char* name, ResTable_config* out = NULL);
     static bool getMncName(const char* name, ResTable_config* out = NULL);
-    static bool getLocaleName(const char* name, ResTable_config* out = NULL);
     static bool getScreenLayoutSizeName(const char* name, ResTable_config* out = NULL);
     static bool getScreenLayoutLongName(const char* name, ResTable_config* out = NULL);
     static bool getOrientationName(const char* name, ResTable_config* out = NULL);
@@ -99,26 +180,9 @@ public:
     static bool getLayoutDirectionName(const char* name, ResTable_config* out = NULL);
     static bool getVersionName(const char* name, ResTable_config* out = NULL);
 
-    int compare(const AaptGroupEntry& o) const;
-
-    const ResTable_config& toParams() const;
-
-    inline bool operator<(const AaptGroupEntry& o) const { return compare(o) < 0; }
-    inline bool operator<=(const AaptGroupEntry& o) const { return compare(o) <= 0; }
-    inline bool operator==(const AaptGroupEntry& o) const { return compare(o) == 0; }
-    inline bool operator!=(const AaptGroupEntry& o) const { return compare(o) != 0; }
-    inline bool operator>=(const AaptGroupEntry& o) const { return compare(o) >= 0; }
-    inline bool operator>(const AaptGroupEntry& o) const { return compare(o) > 0; }
-
-    String8 toString() const;
-    String8 toDirName(const String8& resType) const;
-
-    const String8& getVersionString() const { return version; }
-
-private:
     String8 mcc;
     String8 mnc;
-    String8 locale;
+    AaptLocaleValue locale;
     String8 vendor;
     String8 smallestScreenWidthDp;
     String8 screenWidthDp;
