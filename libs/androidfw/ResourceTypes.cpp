@@ -66,11 +66,6 @@ namespace android {
 // size measured in sizeof(uint32_t)
 #define IDMAP_HEADER_SIZE (ResTable::IDMAP_HEADER_SIZE_BYTES / sizeof(uint32_t))
 
-static void printToLogFunc(int32_t cookie, const char* txt)
-{
-    ALOGV("[cookie=%d] %s", cookie, txt);
-}
-
 // Standard C isspace() is only required to look at the low byte of its input, so
 // produces incorrect results for UTF-16 characters.  For safety's sake, assume that
 // any high-byte UTF-16 code point is not whitespace.
@@ -1565,6 +1560,71 @@ void ResTable_config::copyFromDeviceNoSwap(const ResTable_config& o) {
     }
 }
 
+/* static */ size_t unpackLanguageOrRegion(const char in[2], const char base,
+        char out[4]) {
+  if (in[0] & 0x80) {
+      // The high bit is "1", which means this is a packed three letter
+      // language code.
+
+      // The smallest 5 bits of the second char are the first alphabet.
+      const uint8_t first = in[1] & 0x1f;
+      // The last three bits of the second char and the first two bits
+      // of the first char are the second alphabet.
+      const uint8_t second = ((in[1] & 0xe0) >> 5) + ((in[0] & 0x03) << 3);
+      // Bits 3 to 7 (inclusive) of the first char are the third alphabet.
+      const uint8_t third = (in[0] & 0x7c) >> 2;
+
+      out[0] = first + base;
+      out[1] = second + base;
+      out[2] = third + base;
+      out[3] = 0;
+
+      return 3;
+  }
+
+  if (in[0]) {
+      memcpy(out, in, 2);
+      memset(out + 2, 0, 2);
+      return 2;
+  }
+
+  memset(out, 0, 4);
+  return 0;
+}
+
+/* static */ void packLanguageOrRegion(const char in[3], const char base,
+        char out[2]) {
+  if (in[2] == 0) {
+      out[0] = in[0];
+      out[1] = in[1];
+  } else {
+      uint8_t first = (in[0] - base) & 0x00ef;
+      uint8_t second = (in[1] - base) & 0x00ef;
+      uint8_t third = (in[2] - base) & 0x00ef;
+
+      out[0] = (0x80 | (third << 2) | (second >> 3));
+      out[1] = ((second << 5) | first);
+  }
+}
+
+
+void ResTable_config::packLanguage(const char language[3]) {
+    packLanguageOrRegion(language, 'a', this->language);
+}
+
+void ResTable_config::packRegion(const char region[3]) {
+    packLanguageOrRegion(region, '0', this->country);
+}
+
+size_t ResTable_config::unpackLanguage(char language[4]) const {
+    return unpackLanguageOrRegion(this->language, 'a', language);
+}
+
+size_t ResTable_config::unpackRegion(char region[4]) const {
+    return unpackLanguageOrRegion(this->country, '0', region);
+}
+
+
 void ResTable_config::copyFromDtoH(const ResTable_config& o) {
     copyFromDeviceNoSwap(o);
     size = sizeof(ResTable_config);
@@ -1594,10 +1654,30 @@ void ResTable_config::swapHtoD() {
     screenHeightDp = htods(screenHeightDp);
 }
 
+/* static */ inline int compareLocales(const ResTable_config &l, const ResTable_config &r) {
+    if (l.locale != r.locale) {
+        // NOTE: This is the old behaviour with respect to comparison orders.
+        // The diff value here doesn't make much sense (given our bit packing scheme)
+        // but it's stable, and that's all we need.
+        return l.locale - r.locale;
+    }
+
+    // The language & region are equal, so compare the scripts and variants.
+    int script = memcmp(l.localeScript, r.localeScript, sizeof(l.localeScript));
+    if (script) {
+        return script;
+    }
+
+    // The language, region and script are equal, so compare variants.
+    //
+    // This should happen very infrequently (if at all.)
+    return memcmp(l.localeVariant, r.localeVariant, sizeof(l.localeVariant));
+}
+
 int ResTable_config::compare(const ResTable_config& o) const {
     int32_t diff = (int32_t)(imsi - o.imsi);
     if (diff != 0) return diff;
-    diff = (int32_t)(locale - o.locale);
+    diff = compareLocales(*this, o);
     if (diff != 0) return diff;
     diff = (int32_t)(screenType - o.screenType);
     if (diff != 0) return diff;
@@ -1624,18 +1704,15 @@ int ResTable_config::compareLogical(const ResTable_config& o) const {
     if (mnc != o.mnc) {
         return mnc < o.mnc ? -1 : 1;
     }
-    if (language[0] != o.language[0]) {
-        return language[0] < o.language[0] ? -1 : 1;
+
+    int diff = compareLocales(*this, o);
+    if (diff < 0) {
+        return -1;
     }
-    if (language[1] != o.language[1]) {
-        return language[1] < o.language[1] ? -1 : 1;
+    if (diff > 0) {
+        return 1;
     }
-    if (country[0] != o.country[0]) {
-        return country[0] < o.country[0] ? -1 : 1;
-    }
-    if (country[1] != o.country[1]) {
-        return country[1] < o.country[1] ? -1 : 1;
-    }
+
     if ((screenLayout & MASK_LAYOUTDIR) != (o.screenLayout & MASK_LAYOUTDIR)) {
         return (screenLayout & MASK_LAYOUTDIR) < (o.screenLayout & MASK_LAYOUTDIR) ? -1 : 1;
     }
@@ -1682,7 +1759,6 @@ int ResTable_config::diff(const ResTable_config& o) const {
     int diffs = 0;
     if (mcc != o.mcc) diffs |= CONFIG_MCC;
     if (mnc != o.mnc) diffs |= CONFIG_MNC;
-    if (locale != o.locale) diffs |= CONFIG_LOCALE;
     if (orientation != o.orientation) diffs |= CONFIG_ORIENTATION;
     if (density != o.density) diffs |= CONFIG_DENSITY;
     if (touchscreen != o.touchscreen) diffs |= CONFIG_TOUCHSCREEN;
@@ -1697,7 +1773,42 @@ int ResTable_config::diff(const ResTable_config& o) const {
     if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
     if (smallestScreenWidthDp != o.smallestScreenWidthDp) diffs |= CONFIG_SMALLEST_SCREEN_SIZE;
     if (screenSizeDp != o.screenSizeDp) diffs |= CONFIG_SCREEN_SIZE;
+
+    const int diff = compareLocales(*this, o);
+    if (diff) diffs |= CONFIG_LOCALE;
+
     return diffs;
+}
+
+int ResTable_config::isLocaleMoreSpecificThan(const ResTable_config& o) const {
+    if (locale || o.locale) {
+        if (language[0] != o.language[0]) {
+            if (!language[0]) return -1;
+            if (!o.language[0]) return 1;
+        }
+
+        if (country[0] != o.country[0]) {
+            if (!country[0]) return -1;
+            if (!o.country[0]) return 1;
+        }
+    }
+
+    // There isn't a well specified "importance" order between variants and
+    // scripts. We can't easily tell whether, say "en-Latn-US" is more or less
+    // specific than "en-US-POSIX".
+    //
+    // We therefore arbitrarily decide to give priority to variants over
+    // scripts since it seems more useful to do so. We will consider
+    // "en-US-POSIX" to be more specific than "en-Latn-US".
+
+    const int score = ((localeScript[0] != 0) ? 1 : 0) +
+        ((localeVariant[0] != 0) ? 2 : 0);
+
+    const int oScore = ((o.localeScript[0] != 0) ? 1 : 0) +
+        ((o.localeVariant[0] != 0) ? 2 : 0);
+
+    return score - oScore;
+
 }
 
 bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
@@ -1717,14 +1828,13 @@ bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
     }
 
     if (locale || o.locale) {
-        if (language[0] != o.language[0]) {
-            if (!language[0]) return false;
-            if (!o.language[0]) return true;
+        const int diff = isLocaleMoreSpecificThan(o);
+        if (diff < 0) {
+            return false;
         }
 
-        if (country[0] != o.country[0]) {
-            if (!country[0]) return false;
-            if (!o.country[0]) return true;
+        if (diff > 0) {
+            return true;
         }
     }
 
@@ -1857,6 +1967,18 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
 
             if ((country[0] != o.country[0]) && requested->country[0]) {
                 return (country[0]);
+            }
+        }
+
+        if (localeScript[0] || o.localeScript[0]) {
+            if (localeScript[0] != o.localeScript[0] && requested->localeScript[0]) {
+                return localeScript[0];
+            }
+        }
+
+        if (localeVariant[0] || o.localeVariant[0]) {
+            if (localeVariant[0] != o.localeVariant[0] && requested->localeVariant[0]) {
+                return localeVariant[0];
             }
         }
 
@@ -2080,17 +2202,23 @@ bool ResTable_config::match(const ResTable_config& settings) const {
         }
     }
     if (locale != 0) {
+        // Don't consider the script & variants when deciding matches.
+        //
+        // If we two configs differ only in their script or language, they
+        // can be weeded out in the isMoreSpecificThan test.
         if (language[0] != 0
             && (language[0] != settings.language[0]
                 || language[1] != settings.language[1])) {
             return false;
         }
+
         if (country[0] != 0
             && (country[0] != settings.country[0]
                 || country[1] != settings.country[1])) {
             return false;
         }
     }
+
     if (screenConfig != 0) {
         const int layoutDir = screenLayout&MASK_LAYOUTDIR;
         const int setLayoutDir = settings.screenLayout&MASK_LAYOUTDIR;
@@ -2192,16 +2320,42 @@ bool ResTable_config::match(const ResTable_config& settings) const {
     return true;
 }
 
-void ResTable_config::getLocale(char str[6]) const {
-    memset(str, 0, 6);
+void ResTable_config::getLocale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
+    memset(str, 0, RESTABLE_MAX_LOCALE_LEN);
+
+    // This represents the "any" locale value, which has traditionally been
+    // represented by the empty string.
+    if (!language[0] && !country[0]) {
+        return;
+    }
+
+    size_t charsWritten = 0;
     if (language[0]) {
-        str[0] = language[0];
-        str[1] = language[1];
-        if (country[0]) {
-            str[2] = '_';
-            str[3] = country[0];
-            str[4] = country[1];
+        unpackLanguage(str);
+    }
+
+    if (country[0]) {
+        if (charsWritten) {
+            str[charsWritten++] = '_';
+            str[charsWritten++] = 'r';
         }
+        charsWritten += unpackRegion(str + charsWritten);
+    }
+
+    if (localeScript[0]) {
+        if (charsWritten) {
+            str[charsWritten++] = '_';
+            str[charsWritten++] = '_s';
+        }
+        memcpy(str + charsWritten, localeScript, sizeof(localeScript));
+    }
+
+    if (localeVariant[0]) {
+        if (charsWritten) {
+            str[charsWritten++] = '_';
+            str[charsWritten++] = 'v';
+        }
+        memcpy(str + charsWritten, localeVariant, sizeof(localeVariant));
     }
 }
 
@@ -2216,14 +2370,10 @@ String8 ResTable_config::toString() const {
         if (res.size() > 0) res.append("-");
         res.appendFormat("%dmnc", dtohs(mnc));
     }
-    if (language[0] != 0) {
-        if (res.size() > 0) res.append("-");
-        res.append(language, 2);
-    }
-    if (country[0] != 0) {
-        if (res.size() > 0) res.append("-");
-        res.append(country, 2);
-    }
+    char localeStr[RESTABLE_MAX_LOCALE_LEN];
+    getLocale(localeStr);
+    res.append(localeStr);
+
     if ((screenLayout&MASK_LAYOUTDIR) != 0) {
         if (res.size() > 0) res.append("-");
         switch (screenLayout&ResTable_config::MASK_LAYOUTDIR) {
@@ -5002,8 +5152,9 @@ void ResTable::getLocales(Vector<String8>* locales) const
     getConfigurations(&configs);
     ALOGV("called getConfigurations size=%d", (int)configs.size());
     const size_t I = configs.size();
+
+    char locale[RESTABLE_MAX_LOCALE_LEN];
     for (size_t i=0; i<I; i++) {
-        char locale[6];
         configs[i].getLocale(locale);
         const size_t J = locales->size();
         size_t j;
@@ -5663,9 +5814,9 @@ void ResTable::print(bool inclValues) const
         printf("mError=0x%x (%s)\n", mError, strerror(mError));
     }
 #if 0
-    printf("mParams=%c%c-%c%c,\n",
-            mParams.language[0], mParams.language[1],
-            mParams.country[0], mParams.country[1]);
+    char localeStr[RESTABLE_MAX_LOCALE_LEN];
+    mParams.getLocale(localeStr);
+    printf("mParams=%s,\n" localeStr);
 #endif
     size_t pgCount = mPackageGroups.size();
     printf("Package Groups (%d)\n", (int)pgCount);
@@ -5794,7 +5945,7 @@ void ResTable::print(bool inclValues) const
                             continue;
                         }
                         
-                        uint16_t esize = dtohs(ent->size);
+                        uintptr_t esize = dtohs(ent->size);
                         if ((esize&0x3) != 0) {
                             printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void*)esize);
                             continue;
