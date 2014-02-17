@@ -1592,9 +1592,9 @@ void ResTable_config::copyFromDeviceNoSwap(const ResTable_config& o) {
   return 0;
 }
 
-/* static */ void packLanguageOrRegion(const char in[3], const char base,
+/* static */ void packLanguageOrRegion(const char* in, const char base,
         char out[2]) {
-  if (in[2] == 0) {
+  if (in[2] == 0 || in[2] == '-') {
       out[0] = in[0];
       out[1] = in[1];
   } else {
@@ -1608,11 +1608,11 @@ void ResTable_config::copyFromDeviceNoSwap(const ResTable_config& o) {
 }
 
 
-void ResTable_config::packLanguage(const char language[3]) {
+void ResTable_config::packLanguage(const char* language) {
     packLanguageOrRegion(language, 'a', this->language);
 }
 
-void ResTable_config::packRegion(const char region[3]) {
+void ResTable_config::packRegion(const char* region) {
     packLanguageOrRegion(region, '0', this->country);
 }
 
@@ -2320,7 +2320,7 @@ bool ResTable_config::match(const ResTable_config& settings) const {
     return true;
 }
 
-void ResTable_config::getLocale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
+void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
     memset(str, 0, RESTABLE_MAX_LOCALE_LEN);
 
     // This represents the "any" locale value, which has traditionally been
@@ -2331,32 +2331,81 @@ void ResTable_config::getLocale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
 
     size_t charsWritten = 0;
     if (language[0]) {
-        unpackLanguage(str);
-    }
-
-    if (country[0]) {
-        if (charsWritten) {
-            str[charsWritten++] = '_';
-            str[charsWritten++] = 'r';
-        }
-        charsWritten += unpackRegion(str + charsWritten);
+        charsWritten += unpackLanguage(str);
     }
 
     if (localeScript[0]) {
         if (charsWritten) {
-            str[charsWritten++] = '_';
-            str[charsWritten++] = '_s';
+            str[charsWritten++] = '-';
         }
         memcpy(str + charsWritten, localeScript, sizeof(localeScript));
+        charsWritten += sizeof(localeScript);
+    }
+
+    if (country[0]) {
+        if (charsWritten) {
+            str[charsWritten++] = '-';
+        }
+        charsWritten += unpackRegion(str + charsWritten);
     }
 
     if (localeVariant[0]) {
         if (charsWritten) {
-            str[charsWritten++] = '_';
-            str[charsWritten++] = 'v';
+            str[charsWritten++] = '-';
         }
         memcpy(str + charsWritten, localeVariant, sizeof(localeVariant));
     }
+}
+
+/* static */ inline bool assignLocaleComponent(ResTable_config* config,
+        const char* start, size_t size) {
+
+  switch (size) {
+       case 0:
+           return false;
+       case 2:
+       case 3:
+           config->language[0] ? config->packRegion(start) : config->packLanguage(start);
+           break;
+       case 4:
+           config->localeScript[0] = toupper(start[0]);
+           for (size_t i = 1; i < 4; ++i) {
+               config->localeScript[i] = tolower(start[i]);
+           }
+           break;
+       case 5:
+       case 6:
+       case 7:
+       case 8:
+           for (size_t i = 0; i < size; ++i) {
+               config->localeVariant[i] = tolower(start[i]);
+           }
+           break;
+       default:
+           return false;
+  }
+
+  return true;
+}
+
+void ResTable_config::setBcp47Locale(const char* in) {
+    locale = 0;
+    memset(localeScript, 0, sizeof(localeScript));
+    memset(localeVariant, 0, sizeof(localeVariant));
+
+    const char* separator = in;
+    const char* start = in;
+    while ((separator = strchr(start, '-')) != NULL) {
+        const size_t size = separator - start;
+        if (!assignLocaleComponent(this, start, size)) {
+            fprintf(stderr, "Invalid BCP-47 locale string: %s", in);
+        }
+
+        start = (separator + 1);
+    }
+
+    const size_t size = in + strlen(in) - start;
+    assignLocaleComponent(this, start, size);
 }
 
 String8 ResTable_config::toString() const {
@@ -2371,7 +2420,7 @@ String8 ResTable_config::toString() const {
         res.appendFormat("%dmnc", dtohs(mnc));
     }
     char localeStr[RESTABLE_MAX_LOCALE_LEN];
-    getLocale(localeStr);
+    getBcp47Locale(localeStr);
     res.append(localeStr);
 
     if ((screenLayout&MASK_LAYOUTDIR) != 0) {
@@ -5126,18 +5175,20 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
                 const size_t L = type->configs.size();
                 for (size_t l=0; l<L; l++) {
                     const ResTable_type* config = type->configs[l];
-                    const ResTable_config* cfg = &config->config;
+                    ResTable_config cfg;
+                    memset(&cfg, 0, sizeof(ResTable_config));
+                    cfg.copyFromDtoH(config->config);
                     // only insert unique
                     const size_t M = configs->size();
                     size_t m;
                     for (m=0; m<M; m++) {
-                        if (0 == (*configs)[m].compare(*cfg)) {
+                        if (0 == (*configs)[m].compare(cfg)) {
                             break;
                         }
                     }
                     // if we didn't find it
                     if (m == M) {
-                        configs->add(*cfg);
+                        configs->add(cfg);
                     }
                 }
             }
@@ -5155,7 +5206,7 @@ void ResTable::getLocales(Vector<String8>* locales) const
 
     char locale[RESTABLE_MAX_LOCALE_LEN];
     for (size_t i=0; i<I; i++) {
-        configs[i].getLocale(locale);
+        configs[i].getBcp47Locale(locale);
         const size_t J = locales->size();
         size_t j;
         for (j=0; j<J; j++) {
@@ -5815,7 +5866,7 @@ void ResTable::print(bool inclValues) const
     }
 #if 0
     char localeStr[RESTABLE_MAX_LOCALE_LEN];
-    mParams.getLocale(localeStr);
+    mParams.getBcp47Locale(localeStr);
     printf("mParams=%s,\n" localeStr);
 #endif
     size_t pgCount = mPackageGroups.size();
