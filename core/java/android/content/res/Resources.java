@@ -1625,7 +1625,7 @@ public class Resources {
 
             String locale = null;
             if (mConfiguration.locale != null) {
-                locale = mConfiguration.locale.toLanguageTag();
+                locale = localeToLanguageTag(mConfiguration.locale);
             }
             int width, height;
             if (mMetrics.widthPixels >= mMetrics.heightPixels) {
@@ -1704,6 +1704,12 @@ public class Resources {
                 }
             }
         }
+    }
+
+    // Locale.toLanguageTag() is not available in Java6. LayoutLib overrides
+    // this method to enable users to use Java6.
+    private String localeToLanguageTag(Locale locale) {
+        return locale.toLanguageTag();
     }
 
     /**
