@@ -546,6 +546,9 @@ public final class JsonReader implements Closeable {
     public void skipValue() throws IOException {
         skipping = true;
         try {
+            if (!hasNext() || peek() == JsonToken.END_DOCUMENT) {
+                throw new IllegalStateException("No element left to skip");
+            }
             int count = 0;
             do {
                 JsonToken token = advance();
