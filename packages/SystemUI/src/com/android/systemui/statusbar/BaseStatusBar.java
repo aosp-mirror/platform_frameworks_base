@@ -46,6 +46,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -131,7 +132,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
     protected int mRowHeight;
-    private boolean mPublicMode = false;
+
+    // public mode, private notifications, etc
+    private boolean mLockscreenPublicMode = false;
+    private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
 
     // UI-specific methods
 
@@ -159,7 +163,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mDeviceProvisioned;
     }
 
-    private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
+    private final ContentObserver mProvisioningObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
             final boolean provisioned = 0 != Settings.Global.getInt(
@@ -168,6 +172,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
             }
+        }
+    };
+
+    private final ContentObserver mLockscreenSettingsObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            // We don't know which user changed LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+            // so we just dump our cache ...
+            mUsersAllowingPrivateNotifications.clear();
+            // ... and refresh all the notifications
+            updateNotificationIcons();
         }
     };
 
@@ -228,6 +243,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
+                true,
+                mLockscreenSettingsObserver,
+                UserHandle.USER_ALL);
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -550,12 +571,35 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public abstract void resetHeadsUpDecayTimer();
 
-    public void setPublicMode(boolean publicMode) {
-        mPublicMode = publicMode;
+    /**
+     * Save the current "public" (locked and secure) state of the lockscreen.
+     */
+    public void setLockscreenPublicMode(boolean publicMode) {
+        mLockscreenPublicMode = publicMode;
     }
 
-    public boolean isPublicMode() {
-        return mPublicMode;
+    public boolean isLockscreenPublicMode() {
+        return mLockscreenPublicMode;
+    }
+
+    /**
+     * Has the given user chosen to allow their private (full) notifications to be shown even
+     * when the lockscreen is in "public" (secure & locked) mode?
+     */
+    public boolean userAllowsPrivateNotificationsInPublic(int userHandle) {
+        if (userHandle == UserHandle.USER_ALL) {
+            return true;
+        }
+
+        if (mUsersAllowingPrivateNotifications.indexOfKey(userHandle) < 0) {
+            final boolean allowed = 0 != Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, userHandle);
+            mUsersAllowingPrivateNotifications.append(userHandle, allowed);
+            return allowed;
+        }
+
+        return mUsersAllowingPrivateNotifications.get(userHandle);
     }
 
     protected class H extends Handler {
