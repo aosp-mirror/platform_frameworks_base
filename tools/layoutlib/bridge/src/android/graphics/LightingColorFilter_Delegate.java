@@ -60,11 +60,5 @@ public class LightingColorFilter_Delegate extends ColorFilter_Delegate {
         return sManager.addNewDelegate(newDelegate);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static int nCreateLightingFilter(long nativeFilter, int mul, int add) {
-        // pass
-        return 0;
-    }
-
     // ---- Private delegate/helper methods ----
 }
