@@ -421,7 +421,10 @@ public class SurfaceView extends View {
         mWindowType = type;
     }
 
-    private void updateWindow(boolean force, boolean redrawNeeded) {
+    /**
+     * @hide
+     */
+    protected void updateWindow(boolean force, boolean redrawNeeded) {
         if (!mHaveFrame) {
             return;
         }

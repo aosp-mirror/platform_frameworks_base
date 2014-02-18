@@ -167,6 +167,13 @@ public class SurfaceControl {
     public static final int FX_SURFACE_DIM = 0x00020000;
 
     /**
+     * Surface creation flag: Creates a video plane Surface.
+     * This surface is backed by a hardware video plane. It is an error to lock
+     * a video plane surface, since it doesn't have a backing store.
+     */
+    public static final int FX_SURFACE_VIDEO_PLANE = 0x00040000;
+
+    /**
      * Mask used for FX values above.
      *
      */
