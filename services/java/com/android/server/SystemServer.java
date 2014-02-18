@@ -533,7 +533,7 @@ public final class SystemServer {
                 }
 
                 try {
-                    if (pm.hasSystemFeature("android.software.device_admin")) {
+                    if (pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
                         mSystemServiceManager.startServiceIfExists(
                                 DEVICE_POLICY_MANAGER_SERVICE_CLASS);
                     }
@@ -785,7 +785,7 @@ public final class SystemServer {
 
             if (!disableNonCoreServices) {
                 try {
-                    if (pm.hasSystemFeature("android.software.backup")) {
+                    if (pm.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {
                         mSystemServiceManager.startServiceIfExists(BACKUP_MANAGER_SERVICE_CLASS);
                     }
                 } catch (Throwable e) {
@@ -793,7 +793,7 @@ public final class SystemServer {
                 }
 
                 try {
-                    if (pm.hasSystemFeature("android.software.app_widgets")) {
+                    if (pm.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)) {
                         mSystemServiceManager.startServiceIfExists(APPWIDGET_SERVICE_CLASS);
                     }
                 } catch (Throwable e) {
@@ -879,7 +879,7 @@ public final class SystemServer {
             }
 
             try {
-                if (pm.hasSystemFeature("android.software.print")) {
+                if (pm.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
                     mSystemServiceManager.startServiceIfExists(PRINT_MANAGER_SERVICE_CLASS);
                 }
             } catch (Throwable e) {

@@ -1249,6 +1249,20 @@ public abstract class PackageManager {
     public static final String FEATURE_TELEVISION = "android.hardware.type.television";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports printing.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_PRINTING = "android.software.print";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device can perform backup and restore operations on installed applications.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_BACKUP = "android.software.backup";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */
