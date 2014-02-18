@@ -1033,8 +1033,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (!notificationIsForCurrentUser(ent.notification)) continue;
             final int vis = ent.notification.getNotification().visibility;
             if (vis != Notification.VISIBILITY_SECRET) {
-                // when isPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
-                ent.row.setShowingPublic(isPublicMode() && vis == Notification.VISIBILITY_PRIVATE);
+                // when isLockscreenPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
+                ent.row.setShowingPublic(isLockscreenPublicMode()
+                        && vis == Notification.VISIBILITY_PRIVATE
+                        && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId()));
                 toShow.add(ent.row);
             }
         }
@@ -1087,9 +1089,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (!((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
             if (!notificationIsForCurrentUser(ent.notification)) continue;
-            if (isPublicMode()
+            if (isLockscreenPublicMode()
                     && ent.notification.getNotification().visibility
-                            == Notification.VISIBILITY_SECRET) {
+                            == Notification.VISIBILITY_SECRET
+                    && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId())) {
                 // in "public" mode (atop a secure keyguard), secret notifs are totally hidden
                 continue;
             }
@@ -1343,10 +1346,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         } else if ((diff & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) {
             if ((state & StatusBarManager.DISABLE_PRIVATE_NOTIFICATIONS) != 0) {
                 // we are outside a secure keyguard, so we need to switch to "public" mode
-                setPublicMode(true);
+                setLockscreenPublicMode(true);
             } else {
                 // user has authenticated the device; full notifications may be shown
-                setPublicMode(false);
+                setLockscreenPublicMode(false);
             }
             updateNotificationIcons();
         }

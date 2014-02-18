@@ -3484,6 +3484,14 @@ public final class Settings {
                 "lock_screen_allow_notifications";
 
         /**
+         * When set in conjunction with {@link #LOCK_SCREEN_ALLOW_NOTIFICATIONS}, shows
+         * notifications in their "private" form (same as when the device is unlocked).
+         * @hide
+         */
+        public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
+                "lock_screen_allow_private_notifications";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has
