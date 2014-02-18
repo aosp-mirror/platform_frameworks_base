@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Aplikaciji omogućuje korištenje bilo kojim instaliranim dekoderom medija za dekodiranje radi reprodukcije."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"upravljanje pouzdanim vjerodajnicama"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Omogućuje aplikaciji instaliranje i deinstaliranje CA certifikata kao pouzdanih vjerodajnica."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"veži uz usluge u mirovanju"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"To dopuštenje omogućuje sustavu Android da se veže uz aplikacijine usluge u mirovanju."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"izvodi aplikaciju tijekom mirovanja"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"To dopuštenje omogućuje sustavu Android da izvodi aplikaciju u pozadini dok se uređaj ne upotrebljava."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"pisanje/čitanje u resursima čije je vlasnik dijagnostika"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Aplikaciji omogućuje čitanje i pisanje na bilo koji resurs u vlasništvu dijag. grupe; na primjer, datoteke u sustavu /dev. To bi moglo utjecati na stabilnost sustava i sigurnost. Dozvolu bi trebao upotrebljavati proizvođač ili operater SAMO za dijagnostiku koja se odnosi na hardver."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogućavanje ili onemogućavanje komponenti aplikacije"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Omogućuje aplikaciji upravljanje telefonskim značajkama uređaja. Aplikacija s tom dozvolom može izmjenjivati mreže, uključiti i isključiti radiouređaj telefona i tome slično, a da vas o tome uopće ne obavijesti."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čitanje statusa i identiteta telefona"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Aplikaciji omogućuje pristup telefonskim značajkama uređaja. Ta dozvola aplikaciji omogućuje utvrđivanje telefonskog broja i ID-ova uređaja, je li poziv aktivan te udaljeni broj koji je povezan pozivom."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"čitaj precizna stanja telefona"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Omogućuje aplikaciji pristup preciznim stanjima telefona. To dopuštenje omogućuje aplikaciji da odredi stvarni status poziva, je li poziv aktivan ili u pozadini, neuspjele pozive, precizne podatke o statusu veze te neuspjela uspostavljanja podatkovnih veza."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"spriječi mirovanje tabletnog uređaja"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"sprečava telefon da prijeđe u stanje mirovanja"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Aplikaciji omogućuje sprječavanje prelaska tabletnog računala u mirovanje."</string>

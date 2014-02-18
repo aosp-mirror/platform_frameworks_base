@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Hiermee kan de app alle geïnstalleerde mediadecoders gebruiken om te decoderen voor het afspelen."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"vertrouwde inloggegevens beheren"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Hiermee kan de app CA-certificaten installeren en verwijderen als vertrouwde inloggegevens."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"koppelen aan inactieve services"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Met deze toestemming kan het Android-systeem koppelen aan de inactieve services van een app."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"app uitvoeren tijdens inactiviteit"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Met dit recht kan het Android-systeem de app op de achtergrond uitvoeren terwijl het apparaat niet wordt gebruikt."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lezen/schrijven naar bronnen van diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Hiermee kan de app lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of provider."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"componenten van apps in- of uitschakelen"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Hiermee kan de app de telefoonfuncties van het apparaat beheren. Een app met deze toestemming kan schakelen tussen netwerken, kan de radio van de telefoon in- en uitschakelen en dergelijke acties uitvoeren zonder dat u hiervan op de hoogte wordt gesteld."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefoonstatus en -identiteit lezen"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze toestemming kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een oproep actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"exacte telefoonstatus lezen"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Toestaan dat de app toegang krijgt tot de exacte telefoonstatus. Hiermee kan de app bepalen wat de echte oproepstatus is, of een oproep actief is of zich op de achtergrond bevindt, of er mislukte oproepen zijn, wat de exacte status van de gegevensverbinding is en of er mislukte gegevensverbindingen zijn."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"voorkomen dat tablet overschakelt naar slaapmodus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Hiermee kan de app voorkomen dat de tablet overschakelt naar de slaapmodus."</string>

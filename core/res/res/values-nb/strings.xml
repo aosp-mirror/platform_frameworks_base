@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Lar appen bruke en hvilken som helst installert mediedekoder for å dekode for avspilling."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrer pålitelig legitimasjon"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Lar appen installere og avinstallere CA-sertifikater som pålitelig legitimasjon."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"knytt til inaktive tjenester"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Denne tillatelsen gjør at Android-systemet kan binde seg til appers inaktive tjenester."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"kjør appen når den ikke er i bruk"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Denne tillatelsen gjør at Android-systemet kan kjøre appen i bakgrunnen mens enheten ikke er i bruk."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lar appen lese og skrive til alle ressurser som eies av gruppen «diag», som for eksempel filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør BARE brukes av produsenten eller operatøren til maskinvarespesifikk diagnostikk."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Lar appen kontrollere telefonfunksjonene til enheten. En app som har denne tillatelsen kan bytte nettverk, slå telefonens radio på og av og lignende, uten å varsle deg i det hele tatt."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lese telefonstatus og -identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"lese nøyaktige telefontilstander"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Gir appen tillatelse til å bruke nøyaktige telefontilstander. Denne tillatelsen gjør at appen kan fastslå den faktiske anropstatusen, om et anrop er aktivt eller i bakgrunnen, anropsfeil, nøyaktig status for datatilkobling og datatilkoblingsfeil."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"hindre nettbrettet fra å gå over til sovemodus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"forhindre telefonen fra å sove"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Lar appen hindre nettbrettet fra å gå over i sovemodus."</string>

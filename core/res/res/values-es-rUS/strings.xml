@@ -423,8 +423,10 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite que la aplicación use cualquier decodificador de archivos multimedia instalado para la reproducción."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrar credenciales de confianza"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que la aplicación instale y desinstale certificados de CA como credenciales de confianza."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"vincular con servicios inactivos"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Este permiso autoriza al sistema Android a vincularse con los servicios inactivos de una aplicación."</string>
+    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
+    <skip />
+    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer y escribir a recursos dentro del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite que la aplicación lea y escriba en cualquier recurso propiedad del grupo de diagnóstico como, por ejemplo, archivos in/dev. Este permiso podría afectar la seguridad y estabilidad del sistema. SOLO se debe utilizar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activar o desactivar componentes de la aplicación"</string>
@@ -563,6 +565,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permite que la aplicación controle las funciones de teléfono del dispositivo. Una aplicación con este permiso puede cambiar redes, encender y apagar la radio del teléfono y tareas similares sin siquiera notificártelo."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"leer la identidad y el estado del dispositivo"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"Leer estados precisos del teléfono"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Permite que la aplicación acceda a los estados precisos del teléfono y determine el estado real de la llamada, si hay una llamada activa o en segundo plano, si se produjeron fallos en la llamada, el estado preciso de la conexión de datos y si hubo fallos relacionados con la conexión de datos."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evitar que el tablet entre en estado de inactividad"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"evitar que el dispositivo entre en estado de inactividad"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que la aplicación evite que la tablet entre en estado de inactividad."</string>

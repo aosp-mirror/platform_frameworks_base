@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ermöglicht der App, alle installierten Mediendecodierer zur Wiedergabe zu verwenden."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"Vertrauenswürdige Anmeldedaten verwalten"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Ermöglicht der App, CA-Zertifikate als vertrauenswürdige Anmeldedaten zu installieren und zu deinstallieren."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"An inaktive Dienste binden"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Mit dieser Berechtigung kann sich das Android-System an die inaktiven Dienste einer App binden."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"App bei Inaktivität ausführen"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Diese Berechtigung ermöglicht es dem Android-System, die App im Hintergrund auszuführen, wenn das Gerät nicht verwendet wird."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lese-/Schreibberechtigung für zu Diagnosegruppe gehörige Elemente"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ermöglicht der App, alle Elemente in der Diagnosegruppe zu lesen und zu bearbeiten, etwa Dateien in \"/dev\". Dies könnte eine potenzielle Gefährdung für die Stabilität und Sicherheit des Systems darstellen und sollte NUR für hardwarespezifische Diagnosen des Herstellers oder Mobilfunkanbieters verwendet werden."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"App-Komponenten aktivieren oder deaktivieren"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Ermöglicht der App, die Telefonfunktionen des Geräts zu steuern. Eine App mit dieser Berechtigung kann das Netzwerk wechseln oder das Radio des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"Telefonstatus und Identität abrufen"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ermöglicht der App, auf die Telefonfunktionen des Geräts zuzugreifen. Die Berechtigung erlaubt der App, die Telefonnummer und Geräte-IDs zu erfassen, festzustellen, ob gerade ein Gespräch geführt wird, und die Rufnummer verbundener Anrufer zu lesen."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"Genaue Telefonstatusangaben abrufen"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Ermöglicht der App, auf die genauen Telefonstatusangaben zuzugreifen. Diese Erlaubnis ermöglicht der App, den tatsächlichen Rufstatus zu ermitteln, das bedeutet, ob ein Anruf aktiv ist oder im Hintergrund abläuft, ob bei einem Anruf ein Fehler aufgetreten ist, wie der genaue Datenverbindungsstatus lautet oder ob bei der Datenverbindung ein Fehler aufgetreten ist."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Ruhezustand des Tablets deaktivieren"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"Ruhezustand deaktivieren"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ermöglicht der App, den Ruhezustand des Tablets zu deaktivieren"</string>

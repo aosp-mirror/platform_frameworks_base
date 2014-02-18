@@ -423,8 +423,10 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允许该应用使用任何已安装的媒体解码器进行解码，以便播放媒体。"</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理受信任的凭据"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允许应用安装和卸载 CA 证书（作为受信任的凭据）。"</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"绑定到闲置服务"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"此权限允许Android系统绑定至应用的闲置服务。"</string>
+    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
+    <skip />
+    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允许应用读取/写入诊断组拥有的所有资源（例如 /dev 中的文件）。这可能会影响系统的稳定性和安全性。此权限仅供制造商或运营商诊断硬件方面的问题时使用。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用组件"</string>
@@ -563,6 +565,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"允许应用控制设备的电话功能。拥有此权限的应用可在不通知您的情况下执行切换网络、开关手机无线装置等此类操作。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"读取手机状态和身份"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允许该应用访问设备的电话功能。此权限可让该应用确定本机号码和设备 ID、是否正处于通话状态以及拨打的号码。"</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"读取确切的手机状态"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"允许应用获取确切的手机状态。此权限可让应用确定实际通话状态、通话是在界面上进行还是在后台进行、通话未接通次数、确切的数据网络连接状态，以及数据网络连接失败次数。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"阻止平板电脑进入休眠状态"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手机休眠"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"允许应用阻止平板电脑进入休眠状态。"</string>

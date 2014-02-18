@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ļauj lietotnei izmantot jebkuru instalētu multivides failu dekodētāju, lai dekodētu failus atskaņošanai."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"Uzticamo akreditācijas datu pārvaldība"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Ļauj lietotnei instalēt un atinstalēt CA sertifikātus kā uzticamus akreditācijas datus."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"saistīšana ar neaktīviem pakalpojumiem"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Pamatojoties uz šo atļauju, Android sistēma var izveidot saiti ar lietojumprogrammas neaktīvajiem pakalpojumiem."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"Lietojumprogrammas darbība dīkstāves laikā"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Ar šo atļauju Android sistēmā lietojumprogramma darbojas fonā, kad ierīce netiek lietota."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lasīt grupas “diag” resursus un rakstīt tajos"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ļauj lietotnei lasīt un rakstīt jebkurā resursā, kas pieder diagnostikas grupai, piemēram, failiem mapē /dev. Tas var ietekmēt sistēmas stabilitāti un drošību. Var izmantot ražotājs vai operators TIKAI konkrētas aparatūras diagnostikai."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"iespējot vai atspējot lietotnes komponentus"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Ļauj lietotnei kontrolēt ierīces tālruņa funkcijas. Lietotne, kurai ir šī atļauja, var pārslēgt tīklus, ieslēgt un izslēgt tālruņa radio un veikt tamlīdzīgas darbības, nebrīdinot jūs."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lasīt tālruņa statusu un identitāti"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ļauj lietotnei piekļūt ierīces tālruņa funkcijām. Ar šo atļauju lietotne var noteikt tālruņa numuru un ierīču ID, zvana statusu un attālo numuru, ar ko ir izveidots savienojums, veicot zvanu."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"precīzu tālruņa statusa datu lasīšana"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Ļauj lietotnei piekļūt precīziem datiem par tālruņa statusu. Izmantojot šo atļauju, lietotne var noteikt zvana faktisko statusu, vai zvans ir aktīvs vai notiek fonā, vai zvans nav izdevies, kā arī precīzu datu savienojuma statusu un neizdevušos datu savienojumus."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"novērst planšetdatora pāriešanu miega režīmā"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"novērst tālruņa pāriešanu miega režīmā"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ļauj lietotnei novērst planšetdatora pāriešanu miega režīmā."</string>

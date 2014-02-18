@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"애플리케이션에서 설치된 모든 미디어 디코더를 사용하여 재생하는 데 디코딩할 수 있도록 허용합니다."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"신뢰할 수 있는 자격증명 관리"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"앱에서 CA 인증서를 신뢰할 수 있는 자격증명으로 설치 및 제거하도록 허용합니다."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"유휴 서비스에 연결"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"이 권한을 부여하면 Android 시스템이 애플리케이션의 유휴 서비스에 연결할 수 있습니다."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"유휴 시간 동안 애플리케이션 실행"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"이 권한을 부여하면 기기를 사용하지 않는 동안 Android 시스템이 백그라운드에서 애플리케이션을 실행할 수 있게 됩니다."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"앱이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 허용합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"앱 구성요소 사용 또는 사용 안함"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"앱이 기기의 휴대전화 기능을 관리할 수 있도록 허용합니다. 이 권한을 갖는 앱은 사용자에게 알리지 않고 네트워크를 전환하거나 무선 기능을 켜고 끄는 등의 작업을 수행할 수 있습니다."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"휴대전화 상태 및 ID 읽기"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"앱이 기기의 휴대전화 기능에 액세스할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 전화번호 및 기기의 ID, 활성 통화인지 여부, 통화가 연결된 원격 번호 등을 확인할 수 있습니다."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"정확한 전화 상태 읽기"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"앱이 정확한 전화 상태에 액세스할 수 있도록 허용합니다. 이 권한을 부여하면 앱이 실제 통화 상태, 활성 통화 또는 백그라운드 상태인지 여부, 통화 실패, 정확한 데이터 연결 상태 및 데이터 연결 실패 등을 판단합니다."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"앱이 태블릿의 절전 모드 전환을 막도록 허용합니다."</string>

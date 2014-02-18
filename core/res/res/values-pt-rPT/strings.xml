@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite que a aplicação utilize qualquer descodificador de multimédia instalado para descodificar a reprodução."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gerir credenciais fidedignas"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que a aplicação instale e desinstale certificados da AC (Autoridade de certificação) como credenciais fidedignas."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"associar a serviços inativos"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"Esta autorização permite que o sistema Android seja vinculado aos serviços inativos de uma aplicação."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"executar aplicação durante o tempo de inatividade"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Esta autorização permite ao sistema Android executar a aplicação em segundo plano enquanto o dispositivo não estiver a ser utilizado."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ler/escrever em recursos propriedade de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite à aplicação ler e escrever em qualquer recurso que seja propriedade do grupo diag; por exemplo, ficheiros em /dev. Isto pode potencialmente afetar a estabilidade e a segurança do sistema e deve ser utilizado APENAS para diagnósticos específicos do hardware pelo fabricante ou pelo operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ativar ou desativar componentes da aplicação"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permite que a aplicação controle as funcionalidades de telefone do aparelho. Uma aplicação com esta permissão pode alternar entre redes, ligar/desligar o rádio do telefone e outras coisas semelhantes sem sequer o notificar."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ler o estado e a identidade do telemóvel"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que a aplicação aceda às funcionalidades de telefone do dispositivo. Esta autorização permite que a aplicação determine o número de telefone e IDs do dispositivo, se alguma chamada está ativa e qual o número remoto ligado por uma chamada."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"ler os estados precisos do telemóvel"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Permite que a aplicação aceda ao estados precisos do telemóvel. Esta autorização permite que a aplicação determine o estado real da chamada, se uma chamada está ativa ou em segundo plano, falhas em chamadas, o estado preciso da ligação de dados e falhas de ligação de dados."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir que o tablet entre em inactividade"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inactividade do telefone"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que a aplicação impeça o tablet de entrar no modo de suspensão."</string>

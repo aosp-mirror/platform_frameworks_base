@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ለመልሰህ አጫውት ፍታን በማንኛውም የተጫኑ በማህደረ መረጃ ዲኮደር ለመጠቀም  ለመተግበሪያ ይፈቅዳል።"</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"የታመኑ ምስክርነቶችን ያስተዳድሩ"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"መተግበሪያው CA የምስክር ወረቀቶችን እንደሚታመኑ ምስክርነቶች አንዲጭን እና እንዲያራግፍ ይፍቀዱ።"</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"ከስራ ፈት አገልግሎቶች ጋር ይሰሩ"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"ይህ ፍቃድ የAndroid ስርዓቱ የአንድ መተግበሪያ ስራ-ፈት አገልግሎቶችን እንዲያስር ያስችለዋል።"</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"ስራ በተፈታበት ጊዜ ላይ መተግበሪያውን አሂድ"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"ይህ ፍቃድ መሣሪያው ስራ ላይ ባልሆነ ጊዜ የAndroid ስርዓቱ መተግበሪያውን በጀርባ ውስጥ እንዲያሂደው ያስችለዋል።"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"በdiag ባለቤትነት ያሉ ንብረቶችን አንብብ/ፃፍ"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"በዲያግ ቡድን ባለቤትነት ወደ አለ ማንኛውም ንብረት ለምሳሌ በ/dev ያሉ ፋይሎች ለማንበብ እና ለመፃፍ ለመተግበሪያው ይፈቅዳሉ። ይህ በመሰረቱ የስርዓት መረጋጋትን እና ደህንነትን ሊጎዳ ይችላል። ይህ ውስን የሀርድዌር-ተኮር ዲያግኖስቲክስ በአምራቹ ወይም ከዋኙ ብቻ መሆን አለበት።"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"የመተግበሪያ ምንዝሮችን አንቃ ወይም አቦዝን"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"የመገልገያ መሳሪያውን የስልክ ባህሪያት ለመቆጣጠር ለመተግበሪያው ይፈቅዳል፡፡ ከዚህ ፍቃድ ጋር መተግበሪያ አውታረ መረቦችን ሊለውጥ ይችላል፤አንተን ምንም ሳያሳውቅ የስልኩን ሬድዮ አብራ እና አጥፋ እና የመሳሰሉትን ሊያበራ ይችላል፡፡"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"የስልክ ሁኔታና ማንነት አንብብ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"መተግበሪያው የመሳሪያውን የስልክ ባህሪያት ላይ እንዲደርስ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው የስልክ ቁጥሩን እና የመሳሪያውን መታወቂያዎች፣ ጥሪ የነቃ እንደሆነ፣ እና በጥሪ የተገናኘውን የሩቅ ቁጥር እንዲወስን ይፈቅድለታል።"</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"ትክክለኛዎቹን የስልክ ሁኔታዎች ያነብባል"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"መተግበሪያው ትክክለኛዎቹ የስልክ ሁኔታዎችን እንዲደርስባቸው ያስችለዋል። ይህ ፍቃድ መተግበሪያው የእውነተኛ ጥሪው ሁኔታ፣ አንድ ጥሪ ገባሪ ወይም ጀርባ ላይ ይሁን፣ ያልተሳኩ ጥሪዎች፣ ትክክለኛው የውሂብ ግንኙነት ሁኔታ እና የውሂብ ግንኙነት አለመሳካቶችን እንዲያውቅ ያስችለዋል።"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ጡባዊ ከማንቀላፋት ተከላከል"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ስልክ ከማንቀላፋት ተከላከል"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ጡባዊውን ከመተኛት መከልከል ለመተግበሪያው ይፈቅዳሉ።"</string>

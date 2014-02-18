@@ -423,8 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"הרשאה זו מאפשרת לאפליקציה להשתמש בכל מפענח מדיה מותקן כדי לבצע פענוח להשמעה."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"ניהול פרטי כניסה מהימנים"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏מאפשרת לאפליקציה להתקין ולהסיר אישורי CA כפרטי כניסה מהימנים."</string>
-    <string name="permlab_bindIdleService" msgid="7521398788076342815">"אגד עם שירותים במצב לא פעיל"</string>
-    <string name="permdesc_bindIdleService" msgid="7747505810143356528">"‏ההרשאה הזו מאפשרת למערכת Android לאגד אל שירותי אפליקציה במצב לא פעיל."</string>
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"הרצת אפליקציה בזמן מצב לא פעיל"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏ההרשאה הזו מאפשרת למערכת Android להריץ את האפליקציה ברקע כשהמכשיר אינו בשימוש."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"‏קרא/כתוב במשאבים בבעלות diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏מאפשר לאפליקציה לקרוא ולכתוב בכל משאב שבבעלות קבוצת ה-diag; לדוגמה, קבצים ב-‎/dev. פעולה זו עשויה להשפיע על היציבות והאבטחה של המערכת. אפשרות זו צריכה לשמש רק את היצרן או המפעיל, לצורך אבחונים ספציפיים לחומרה."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"הפעלה או השבתה של רכיבי אפליקציות"</string>
@@ -563,6 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"מאפשר לאפליקציה לשלוט בתכונות הטלפון של המכשיר. אפליקציה בעלת הרשאה זו יכולה לעבור בין רשתות, להפעיל ולכבות את הרדיו בטלפון ולבצע פעולות נוספות דומות מבלי ליידע אותך."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"קריאת הסטטוס והזהות של הטלפון"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"מאפשר לאפליקציה לגשת לתכונות הטלפון של המכשיר. אישור זה מתיר לאפליקציה לגלות את מספר הטלפון ואת זיהויי המכשיר, האם שיחה פעילה ואת המספר המרוחק המחובר באמצעות שיחה."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"קריאת מצבי טלפון מדויקים"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"מאפשר לאפליקציה לגשת למצבי הטלפון המדויקים. ההרשאה הזו מאפשרית לאפליקציה לדעת מה סטטוס השיחה בפועל, האם שיחה פעילה או ברקע, כשלי שיחות, סטטוס מדויק על חיבור נתונים וכשלים בחיבור נתונים."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"מנע מהטאבלט לעבור למצב שינה"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"מניעת מעבר הטלפון למצב שינה"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"מאפשר לאפליקציה למנוע מהטאבלט לעבור למצב שינה."</string>
