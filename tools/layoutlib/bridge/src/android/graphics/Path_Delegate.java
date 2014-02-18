@@ -490,20 +490,6 @@ public final class Path_Delegate {
         return new float[0];
     }
 
-    @LayoutlibDelegate
-    /*package*/ static long native_trim(long nPath, long nTargetPath, long nPathMeasure,
-            float trimStart, float trimEnd, float trimOffset) {
-        // TODO: add trim.
-        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.trim() not supported", null);
-        return nPathMeasure;
-
-    }
-
-    @LayoutlibDelegate
-    private static void native_destroyMeasure(long nPathMeasure) {
-        // Do nothing.
-    }
-
     // ---- Private helper methods ----
 
     private void set(Path_Delegate delegate) {
