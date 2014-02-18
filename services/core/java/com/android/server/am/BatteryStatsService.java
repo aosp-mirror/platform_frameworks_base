@@ -337,6 +337,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    public void noteWifiState(int wifiState, String accessPoint) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiStateLocked(wifiState, accessPoint);
+        }
+    }
+
     public void noteBluetoothOn() {
         enforceCallingPermission();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -380,10 +387,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
-    public void noteBluetoothActiveState(int actType) {
+    public void noteBluetoothState(int bluetoothState) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteBluetoothActiveStateLocked(actType);
+            mStats.noteBluetoothStateLocked(bluetoothState);
         }
     }
 
