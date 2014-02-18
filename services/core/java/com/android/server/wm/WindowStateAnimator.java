@@ -490,6 +490,7 @@ class WindowStateAnimator {
         private final Rect mWindowCrop = new Rect();
         private boolean mShown = false;
         private int mLayerStack;
+        private boolean mIsOpaque;
         private final String mName;
 
         public SurfaceTrace(SurfaceSession s,
@@ -575,6 +576,16 @@ class WindowStateAnimator {
         }
 
         @Override
+        public void setOpaque(boolean isOpaque) {
+            if (isOpaque != mIsOpaque) {
+                Slog.v(SURFACE_TAG, "setOpaque(" + isOpaque + "): OLD:" + this
+                        + ". Called by " + Debug.getCallers(3));
+                mIsOpaque = isOpaque;
+            }
+            super.setOpaque(isOpaque);
+        }
+
+        @Override
         public void hide() {
             if (mShown) {
                 Slog.v(SURFACE_TAG, "hide: OLD:" + this + ". Called by " + Debug.getCallers(3));
@@ -620,7 +631,8 @@ class WindowStateAnimator {
                     + mName + " (" + mLayerStack + "): shown=" + mShown + " layer=" + mLayer
                     + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
                     + " " + mSize.x + "x" + mSize.y
-                    + " crop=" + mWindowCrop.toShortString();
+                    + " crop=" + mWindowCrop.toShortString()
+                    + " opaque=" + mIsOpaque;
         }
     }
 
@@ -1337,8 +1349,7 @@ class WindowStateAnimator {
             Slog.w(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-            ">>> OPEN TRANSACTION setTransparentRegion");
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setTransparentRegion");
         SurfaceControl.openTransaction();
         try {
             if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
@@ -1364,8 +1375,7 @@ class WindowStateAnimator {
                 // transformation is being applied by the animation.
                 return;
             }
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    ">>> OPEN TRANSACTION setWallpaperOffset");
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
             SurfaceControl.openTransaction();
             try {
                 if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
@@ -1380,6 +1390,22 @@ class WindowStateAnimator {
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION setWallpaperOffset");
             }
+        }
+    }
+
+    void setOpaque(boolean isOpaque) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setOpaque");
+        SurfaceControl.openTransaction();
+        try {
+            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "isOpaque=" + isOpaque,
+                    null);
+            mSurfaceControl.setOpaque(isOpaque);
+        } finally {
+            SurfaceControl.closeTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaque");
         }
     }
 
