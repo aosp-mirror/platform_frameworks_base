@@ -7290,6 +7290,7 @@ package android.content.pm {
     field public static final java.lang.String EXTRA_VERIFICATION_RESULT = "android.content.pm.extra.VERIFICATION_RESULT";
     field public static final java.lang.String FEATURE_APP_WIDGETS = "android.software.app_widgets";
     field public static final java.lang.String FEATURE_AUDIO_LOW_LATENCY = "android.hardware.audio.low_latency";
+    field public static final java.lang.String FEATURE_BACKUP = "android.software.backup";
     field public static final java.lang.String FEATURE_BLUETOOTH = "android.hardware.bluetooth";
     field public static final java.lang.String FEATURE_BLUETOOTH_LE = "android.hardware.bluetooth_le";
     field public static final java.lang.String FEATURE_CAMERA = "android.hardware.camera";
@@ -7311,6 +7312,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_MICROPHONE = "android.hardware.microphone";
     field public static final java.lang.String FEATURE_NFC = "android.hardware.nfc";
     field public static final java.lang.String FEATURE_NFC_HOST_CARD_EMULATION = "android.hardware.nfc.hce";
+    field public static final java.lang.String FEATURE_PRINTING = "android.software.print";
     field public static final java.lang.String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
     field public static final java.lang.String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
     field public static final java.lang.String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
