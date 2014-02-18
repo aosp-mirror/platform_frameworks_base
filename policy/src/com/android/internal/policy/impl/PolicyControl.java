@@ -61,16 +61,17 @@ public class PolicyControl {
     private static Filter sImmersiveStatusFilter;
     private static Filter sImmersiveNavigationFilter;
 
-    public static int getSystemUiVisibility(WindowState win) {
-        int vis = win.getSystemUiVisibility();
-        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(win)) {
+    public static int getSystemUiVisibility(WindowState win, LayoutParams attrs) {
+        attrs = attrs != null ? attrs : win.getAttrs();
+        int vis = win != null ? win.getSystemUiVisibility() : attrs.systemUiVisibility;
+        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
             vis &= ~(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.STATUS_BAR_TRANSLUCENT);
         }
-        if (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(win)) {
+        if (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(attrs)) {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -81,20 +82,22 @@ public class PolicyControl {
     }
 
     public static int getWindowFlags(WindowState win, LayoutParams attrs) {
-        int flags = (attrs != null ? attrs : win.getAttrs()).flags;
-        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(win)) {
+        attrs = attrs != null ? attrs : win.getAttrs();
+        int flags = attrs.flags;
+        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
             flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
             flags &= ~(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
                     | WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         }
-        if (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(win)) {
+        if (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(attrs)) {
             flags &= ~WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
         }
         return flags;
     }
 
     public static int adjustClearableFlags(WindowState win, int clearableFlags) {
-        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(win)) {
+        final LayoutParams attrs = win != null ? win.getAttrs() : null;
+        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
             clearableFlags &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
         }
         return clearableFlags;
@@ -187,9 +190,7 @@ public class PolicyControl {
             mBlacklist = blacklist;
         }
 
-        boolean matches(WindowState win) {
-            if (win == null) return false;
-            LayoutParams attrs = win.getAttrs();
+        boolean matches(LayoutParams attrs) {
             if (attrs == null) return false;
             boolean isApp = attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                     && attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
