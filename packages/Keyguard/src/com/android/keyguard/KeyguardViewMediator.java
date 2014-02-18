@@ -151,13 +151,13 @@ public class KeyguardViewMediator {
 
     /**
      * Allow the user to expand the status bar when a SECURE keyguard is engaged
-     * and {@link Settings.Secure#LOCK_SCREEN_ALLOW_NOTIFICATIONS} is set
+     * and {@link Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS} is set
      * (private notifications will be masked).
      */
     private static final boolean ENABLE_SECURE_STATUS_BAR_EXPAND = true;
 
     /**
-     * Default value of {@link Settings.Secure#LOCK_SCREEN_ALLOW_NOTIFICATIONS}.
+     * Default value of {@link Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS}.
      */
     private static final boolean ALLOW_NOTIFICATIONS_DEFAULT = false;
 
@@ -258,7 +258,7 @@ public class KeyguardViewMediator {
     private int mLockSoundStreamId;
 
     /**
-     * Tracks value of {@link Settings.Secure#LOCK_SCREEN_ALLOW_NOTIFICATIONS}.
+     * Tracks value of {@link Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS}.
      */
     private boolean mAllowNotificationsWhenSecure;
 
@@ -913,9 +913,9 @@ public class KeyguardViewMediator {
 
         // note whether notification access should be allowed
         mAllowNotificationsWhenSecure = ENABLE_SECURE_STATUS_BAR_EXPAND
-                && 0 != Settings.Secure.getInt(
+                && 0 != Settings.Global.getInt(
                         mContext.getContentResolver(),
-                        Settings.Secure.LOCK_SCREEN_ALLOW_NOTIFICATIONS,
+                        Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                         ALLOW_NOTIFICATIONS_DEFAULT ? 1 : 0);
 
         // if the keyguard is already showing, don't bother
