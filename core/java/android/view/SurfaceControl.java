@@ -103,18 +103,18 @@ public class SurfaceControl {
      * surfaces are pre-multiplied, which means that each color component is
      * already multiplied by its alpha value. In this case the blending
      * equation used is:
-     *
-     *    DEST = SRC + DEST * (1-SRC_ALPHA)
-     *
+     * <p>
+     *    <code>DEST = SRC + DEST * (1-SRC_ALPHA)</code>
+     * <p>
      * By contrast, non pre-multiplied surfaces use the following equation:
-     *
-     *    DEST = SRC * SRC_ALPHA * DEST * (1-SRC_ALPHA)
-     *
+     * <p>
+     *    <code>DEST = SRC * SRC_ALPHA * DEST * (1-SRC_ALPHA)</code>
+     * <p>
      * pre-multiplied surfaces must always be used if transparent pixels are
      * composited on top of each-other into the surface. A pre-multiplied
      * surface can never lower the value of the alpha component of a given
      * pixel.
-     *
+     * <p>
      * In some rare situations, a non pre-multiplied surface is preferable.
      *
      */
@@ -125,7 +125,17 @@ public class SurfaceControl {
      * even if its pixel format is set to translucent. This can be useful if an
      * application needs full RGBA 8888 support for instance but will
      * still draw every pixel opaque.
-     *
+     * <p>
+     * This flag is ignored if setAlpha() is used to make the surface non-opaque.
+     * Combined effects are (assuming a buffer format with an alpha channel):
+     * <ul>
+     * <li>OPAQUE + alpha(1.0) == opaque composition
+     * <li>OPAQUE + alpha(0.x) == blended composition
+     * <li>!OPAQUE + alpha(1.0) == blended composition
+     * <li>!OPAQUE + alpha(0.x) == blended composition
+     * </ul>
+     * If the underlying buffer lacks an alpha channel, the OPAQUE flag is effectively
+     * set automatically.
      */
     public static final int OPAQUE = 0x00000400;
 
@@ -166,8 +176,15 @@ public class SurfaceControl {
     /**
      * Surface flag: Hide the surface.
      * Equivalent to calling hide().
+     * Updates the value set during Surface creation (see {@link #HIDDEN}).
      */
     public static final int SURFACE_HIDDEN = 0x01;
+
+    /**
+     * Surface flag: composite without blending when possible.
+     * Updates the value set during Surface creation (see {@link #OPAQUE}).
+     */
+    public static final int SURFACE_OPAQUE = 0x02;
 
 
     /* built-in physical display ids (keep in sync with ISurfaceComposer.h)
@@ -189,14 +206,14 @@ public class SurfaceControl {
 
     /**
      * Create a surface with a name.
-     *
+     * <p>
      * The surface creation flags specify what kind of surface to create and
      * certain options such as whether the surface can be assumed to be opaque
      * and whether it should be initially hidden.  Surfaces should always be
      * created with the {@link #HIDDEN} flag set to ensure that they are not
      * made visible prematurely before all of the surface's properties have been
      * configured.
-     *
+     * <p>
      * Good practice is to first create the surface with the {@link #HIDDEN} flag
      * specified, open a transaction, set the surface layer, layer stack, alpha,
      * and position, call {@link #show} if appropriate, and close the transaction.
@@ -339,6 +356,10 @@ public class SurfaceControl {
         nativeSetTransparentRegionHint(mNativeObject, region);
     }
 
+    /**
+     * Sets an alpha value for the entire Surface.  This value is combined with the
+     * per-pixel alpha.  It may be used with opaque Surfaces.
+     */
     public void setAlpha(float alpha) {
         checkNotReleased();
         nativeSetAlpha(mNativeObject, alpha);
@@ -349,6 +370,13 @@ public class SurfaceControl {
         nativeSetMatrix(mNativeObject, dsdx, dtdx, dsdy, dtdy);
     }
 
+    /**
+     * Sets and clears flags, such as {@link #SURFACE_HIDDEN}.  The new value will be:
+     * <p>
+     *   <code>newFlags = (oldFlags & ~mask) | (flags & mask)</code>
+     * <p>
+     * Note this does not take the same set of flags as the constructor.
+     */
     public void setFlags(int flags, int mask) {
         checkNotReleased();
         nativeSetFlags(mNativeObject, flags, mask);
@@ -367,6 +395,19 @@ public class SurfaceControl {
     public void setLayerStack(int layerStack) {
         checkNotReleased();
         nativeSetLayerStack(mNativeObject, layerStack);
+    }
+
+    /**
+     * Sets the opacity of the surface.  Setting the flag is equivalent to creating the
+     * Surface with the {@link #OPAQUE} flag.
+     */
+    public void setOpaque(boolean isOpaque) {
+        checkNotReleased();
+        if (isOpaque) {
+            nativeSetFlags(mNativeObject, SURFACE_OPAQUE, SURFACE_OPAQUE);
+        } else {
+            nativeSetFlags(mNativeObject, 0, SURFACE_OPAQUE);
+        }
     }
 
     /*
