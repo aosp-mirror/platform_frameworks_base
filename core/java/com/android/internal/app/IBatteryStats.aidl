@@ -62,9 +62,10 @@ interface IBatteryStats {
     void noteWifiRunning(in WorkSource ws);
     void noteWifiRunningChanged(in WorkSource oldWs, in WorkSource newWs);
     void noteWifiStopped(in WorkSource ws);
+    void noteWifiState(int wifiState, String accessPoint);
     void noteBluetoothOn();
     void noteBluetoothOff();
-    void noteBluetoothActiveState(int actType);
+    void noteBluetoothState(int bluetoothState);
     void noteFullWifiLockAcquired(int uid);
     void noteFullWifiLockReleased(int uid);
     void noteWifiScanStarted(int uid);
