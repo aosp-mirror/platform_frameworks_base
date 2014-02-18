@@ -7155,7 +7155,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             float endSubRow = targetRow;
             if (boundPosition != INVALID_POSITION) {
                 final int boundRow = getRowForPosition(boundPosition);
-                if (boundRow >= firstRow && boundRow < lastRow) {
+                if (boundRow >= firstRow && boundRow < lastRow && boundRow != targetRow) {
                     endSubRow = computeBoundSubRow(targetRow, boundRow);
                 }
             }
@@ -7185,15 +7185,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         private float computeBoundSubRow(int targetRow, int boundRow) {
-            // Compute the target and offset as a sub-position.
+            // If the final offset is greater than 0, we're aiming above the
+            // suggested target row. Compute the actual target row and offset
+            // within that row by subtracting the height of each preceeding row.
             int remainingOffset = mOffset;
-            int targetHeight = getHeightForRow(targetRow - 1);
-            while (remainingOffset > 0) {
-                remainingOffset -= targetHeight;
+            int targetHeight = getHeightForRow(targetRow);
+            while (targetRow > 0 && remainingOffset > targetHeight) {
                 targetRow--;
-                targetHeight = getHeightForRow(targetRow - 1);
+                remainingOffset -= targetHeight;
+                targetHeight = getHeightForRow(targetRow);
             }
 
+            // Compute the offset within the actual target row.
             final float targetOffsetRatio;
             if (targetHeight == 0) {
                 targetOffsetRatio = 1;
@@ -7201,6 +7204,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 targetOffsetRatio = remainingOffset / (float) targetHeight;
             }
 
+            // The final offset has been accounted for, reset it.
             final float targetSubRow = targetRow - targetOffsetRatio;
             mOffset = 0;
 
