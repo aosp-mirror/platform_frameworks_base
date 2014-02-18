@@ -163,8 +163,10 @@ static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject thi
         return NULL;
 
     int fd = usb_device_get_fd(device);
-    if (fd < 0)
+    if (fd < 0) {
+        usb_device_close(device);
         return NULL;
+    }
     int newFD = dup(fd);
     usb_device_close(device);
 
