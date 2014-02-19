@@ -128,16 +128,20 @@ public class AlertController {
 
     private Handler mHandler;
 
-    View.OnClickListener mButtonHandler = new View.OnClickListener() {
+    private final View.OnClickListener mButtonHandler = new View.OnClickListener() {
+        @Override
         public void onClick(View v) {
-            Message m = null;
+            final Message m;
             if (v == mButtonPositive && mButtonPositiveMessage != null) {
                 m = Message.obtain(mButtonPositiveMessage);
             } else if (v == mButtonNegative && mButtonNegativeMessage != null) {
                 m = Message.obtain(mButtonNegativeMessage);
             } else if (v == mButtonNeutral && mButtonNeutralMessage != null) {
                 m = Message.obtain(mButtonNeutralMessage);
+            } else {
+                m = null;
             }
+
             if (m != null) {
                 m.sendToTarget();
             }
@@ -425,12 +429,13 @@ public class AlertController {
             customView = null;
         }
 
-        if (customView == null || !canTextInput(customView)) {
+        final boolean hasCustomView = customView != null;
+        if (!hasCustomView || !canTextInput(customView)) {
             mWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                     WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         }
 
-        if (customView != null) {
+        if (hasCustomView) {
             final FrameLayout custom = (FrameLayout) mWindow.findViewById(R.id.custom);
             custom.addView(customView, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
@@ -445,12 +450,11 @@ public class AlertController {
         } else {
             customPanel.setVisibility(View.GONE);
         }
-        
-        /* Only display the divider if we have a title and a 
-         * custom view or a message.
-         */
+
+        // Only display the divider if we have a title and a custom view or a
+        // message.
         if (hasTitle) {
-            View divider = null;
+            final View divider;
             if (mMessage != null || customView != null || mListView != null) {
                 divider = mWindow.findViewById(R.id.titleDivider);
             } else {
@@ -461,8 +465,9 @@ public class AlertController {
                 divider.setVisibility(View.VISIBLE);
             }
         }
-        
-        setBackground(topPanel, contentPanel, customPanel, hasButtons, a, hasTitle, buttonPanel);
+
+        setBackground(a, topPanel, contentPanel, customPanel, buttonPanel, hasTitle, hasCustomView,
+                hasButtons);
         a.recycle();
     }
 
@@ -620,76 +625,64 @@ public class AlertController {
         }
     }
 
-    private void setBackground(LinearLayout topPanel, LinearLayout contentPanel,
-            View customPanel, boolean hasButtons, TypedArray a, boolean hasTitle, 
-            View buttonPanel) {
-        
-        /* Get all the different background required */
-        int fullDark = a.getResourceId(
-                R.styleable.AlertDialog_fullDark, R.drawable.popup_full_dark);
-        int topDark = a.getResourceId(
-                R.styleable.AlertDialog_topDark, R.drawable.popup_top_dark);
-        int centerDark = a.getResourceId(
-                R.styleable.AlertDialog_centerDark, R.drawable.popup_center_dark);
-        int bottomDark = a.getResourceId(
-                R.styleable.AlertDialog_bottomDark, R.drawable.popup_bottom_dark);
-        int fullBright = a.getResourceId(
-                R.styleable.AlertDialog_fullBright, R.drawable.popup_full_bright);
-        int topBright = a.getResourceId(
+    private void setBackground(TypedArray a, View topPanel, View contentPanel, View customPanel,
+            View buttonPanel, boolean hasTitle, boolean hasCustomView, boolean hasButtons) {
+        final int topBright = a.getResourceId(
                 R.styleable.AlertDialog_topBright, R.drawable.popup_top_bright);
-        int centerBright = a.getResourceId(
+        final int topDark = a.getResourceId(
+                R.styleable.AlertDialog_topDark, R.drawable.popup_top_dark);
+        final int centerBright = a.getResourceId(
                 R.styleable.AlertDialog_centerBright, R.drawable.popup_center_bright);
-        int bottomBright = a.getResourceId(
-                R.styleable.AlertDialog_bottomBright, R.drawable.popup_bottom_bright);
-        int bottomMedium = a.getResourceId(
-                R.styleable.AlertDialog_bottomMedium, R.drawable.popup_bottom_medium);
-        
-        /*
-         * We now set the background of all of the sections of the alert.
+        final int centerDark = a.getResourceId(
+                R.styleable.AlertDialog_centerDark, R.drawable.popup_center_dark);
+
+        /* We now set the background of all of the sections of the alert.
          * First collect together each section that is being displayed along
          * with whether it is on a light or dark background, then run through
          * them setting their backgrounds.  This is complicated because we need
          * to correctly use the full, top, middle, and bottom graphics depending
          * on how many views they are and where they appear.
          */
-        
-        View[] views = new View[4];
-        boolean[] light = new boolean[4];
+
+        final View[] views = new View[4];
+        final boolean[] light = new boolean[4];
         View lastView = null;
         boolean lastLight = false;
-        
+
         int pos = 0;
         if (hasTitle) {
             views[pos] = topPanel;
             light[pos] = false;
             pos++;
         }
-        
+
         /* The contentPanel displays either a custom text message or
          * a ListView. If it's text we should use the dark background
          * for ListView we should use the light background. If neither
          * are there the contentPanel will be hidden so set it as null.
          */
-        views[pos] = (contentPanel.getVisibility() == View.GONE) 
-                ? null : contentPanel;
+        views[pos] = contentPanel.getVisibility() == View.GONE ? null : contentPanel;
         light[pos] = mListView != null;
         pos++;
-        if (customPanel != null) {
+
+        if (hasCustomView) {
             views[pos] = customPanel;
             light[pos] = mForceInverseBackground;
             pos++;
         }
+
         if (hasButtons) {
             views[pos] = buttonPanel;
             light[pos] = true;
         }
-        
+
         boolean setView = false;
-        for (pos=0; pos<views.length; pos++) {
-            View v = views[pos];
+        for (pos = 0; pos < views.length; pos++) {
+            final View v = views[pos];
             if (v == null) {
                 continue;
             }
+
             if (lastView != null) {
                 if (!setView) {
                     lastView.setBackgroundResource(lastLight ? topBright : topDark);
@@ -698,23 +691,34 @@ public class AlertController {
                 }
                 setView = true;
             }
+
             lastView = v;
             lastLight = light[pos];
         }
-        
+
         if (lastView != null) {
             if (setView) {
-                
-                /* ListViews will use the Bright background but buttons use
-                 * the Medium background.
-                 */ 
+                final int bottomBright = a.getResourceId(
+                        R.styleable.AlertDialog_bottomBright, R.drawable.popup_bottom_bright);
+                final int bottomMedium = a.getResourceId(
+                        R.styleable.AlertDialog_bottomMedium, R.drawable.popup_bottom_medium);
+                final int bottomDark = a.getResourceId(
+                        R.styleable.AlertDialog_bottomDark, R.drawable.popup_bottom_dark);
+
+                // ListViews will use the Bright background, but buttons use the
+                // Medium background.
                 lastView.setBackgroundResource(
                         lastLight ? (hasButtons ? bottomMedium : bottomBright) : bottomDark);
             } else {
+                final int fullBright = a.getResourceId(
+                        R.styleable.AlertDialog_fullBright, R.drawable.popup_full_bright);
+                final int fullDark = a.getResourceId(
+                        R.styleable.AlertDialog_fullDark, R.drawable.popup_full_dark);
+
                 lastView.setBackgroundResource(lastLight ? fullBright : fullDark);
             }
         }
-        
+
         /* TODO: uncomment section below. The logic for this should be if 
          * it's a Contextual menu being displayed AND only a Cancel button 
          * is shown then do this.
@@ -739,12 +743,14 @@ public class AlertController {
             mListView.addFooterView(buttonPanel);
             */
 //        }
-        
-        if ((mListView != null) && (mAdapter != null)) {
-            mListView.setAdapter(mAdapter);
-            if (mCheckedItem > -1) {
-                mListView.setItemChecked(mCheckedItem, true);
-                mListView.setSelection(mCheckedItem);
+
+        final ListView listView = mListView;
+        if (listView != null && mAdapter != null) {
+            listView.setAdapter(mAdapter);
+            final int checkedItem = mCheckedItem;
+            if (checkedItem > -1) {
+                listView.setItemChecked(checkedItem, true);
+                listView.setSelection(checkedItem);
             }
         }
     }
@@ -969,7 +975,8 @@ public class AlertController {
             
             if (mOnClickListener != null) {
                 listView.setOnItemClickListener(new OnItemClickListener() {
-                    public void onItemClick(AdapterView parent, View v, int position, long id) {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                         mOnClickListener.onClick(dialog.mDialogInterface, position);
                         if (!mIsSingleChoice) {
                             dialog.mDialogInterface.dismiss();
@@ -978,7 +985,8 @@ public class AlertController {
                 });
             } else if (mOnCheckboxClickListener != null) {
                 listView.setOnItemClickListener(new OnItemClickListener() {
-                    public void onItemClick(AdapterView parent, View v, int position, long id) {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                         if (mCheckedItems != null) {
                             mCheckedItems[position] = listView.isItemChecked(position);
                         }
