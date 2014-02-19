@@ -230,6 +230,7 @@ public final class ViewRootImpl implements ViewParent,
     QueuedInputEvent mPendingInputEventTail;
     int mPendingInputEventCount;
     boolean mProcessInputEventsScheduled;
+    boolean mUnbufferedInputDispatch;
     String mPendingInputEventQueueLengthCounterName = "pq";
 
     InputStage mFirstInputStage;
@@ -1000,7 +1001,9 @@ public final class ViewRootImpl implements ViewParent,
             mTraversalBarrier = mHandler.getLooper().postSyncBarrier();
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
-            scheduleConsumeBatchedInput();
+            if (!mUnbufferedInputDispatch) {
+                scheduleConsumeBatchedInput();
+            }
         }
     }
 
@@ -2598,7 +2601,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         final AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
-        final Rect bounds = mView.mAttachInfo.mTmpInvalRect;
+        final Rect bounds = mAttachInfo.mTmpInvalRect;
         if (provider == null) {
             host.getBoundsOnScreen(bounds);
         } else if (mAccessibilityFocusedVirtualView != null) {
@@ -3876,6 +3879,18 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
+        protected void onDeliverToNext(QueuedInputEvent q) {
+            if (mUnbufferedInputDispatch
+                    && q.mEvent instanceof MotionEvent
+                    && ((MotionEvent)q.mEvent).isTouchEvent()
+                    && isTerminalInputEvent(q.mEvent)) {
+                mUnbufferedInputDispatch = false;
+                scheduleConsumeBatchedInput();
+            }
+            super.onDeliverToNext(q);
+        }
+
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
 
@@ -3988,10 +4003,15 @@ public final class ViewRootImpl implements ViewParent,
         private int processPointerEvent(QueuedInputEvent q) {
             final MotionEvent event = (MotionEvent)q.mEvent;
 
-            if (mView.dispatchPointerEvent(event)) {
-                return FINISH_HANDLED;
+            mAttachInfo.mUnbufferedDispatchRequested = false;
+            boolean handled = mView.dispatchPointerEvent(event);
+            if (mAttachInfo.mUnbufferedDispatchRequested && !mUnbufferedInputDispatch) {
+                mUnbufferedInputDispatch = true;
+                if (mConsumeBatchedInputScheduled) {
+                    scheduleConsumeBatchedInputImmediately();
+                }
             }
-            return FORWARD;
+            return handled ? FINISH_HANDLED : FORWARD;
         }
 
         private int processTrackballEvent(QueuedInputEvent q) {
@@ -5256,6 +5276,8 @@ public final class ViewRootImpl implements ViewParent,
                 writer.print(" mRemoved="); writer.println(mRemoved);
         writer.print(innerPrefix); writer.print("mConsumeBatchedInputScheduled=");
                 writer.println(mConsumeBatchedInputScheduled);
+        writer.print(innerPrefix); writer.print("mConsumeBatchedInputImmediatelyScheduled=");
+                writer.println(mConsumeBatchedInputImmediatelyScheduled);
         writer.print(innerPrefix); writer.print("mPendingInputEventCount=");
                 writer.println(mPendingInputEventCount);
         writer.print(innerPrefix); writer.print("mProcessInputEventsScheduled=");
@@ -5635,6 +5657,7 @@ public final class ViewRootImpl implements ViewParent,
     private void finishInputEvent(QueuedInputEvent q) {
         Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, "deliverInputEvent",
                 q.mEvent.getSequenceNumber());
+
         if (q.mReceiver != null) {
             boolean handled = (q.mFlags & QueuedInputEvent.FLAG_FINISHED_HANDLED) != 0;
             q.mReceiver.finishInputEvent(q.mEvent, handled);
@@ -5674,15 +5697,25 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    void scheduleConsumeBatchedInputImmediately() {
+        if (!mConsumeBatchedInputImmediatelyScheduled) {
+            unscheduleConsumeBatchedInput();
+            mConsumeBatchedInputImmediatelyScheduled = true;
+            mHandler.post(mConsumeBatchedInputImmediatelyRunnable);
+        }
+    }
+
     void doConsumeBatchedInput(long frameTimeNanos) {
         if (mConsumeBatchedInputScheduled) {
             mConsumeBatchedInputScheduled = false;
             if (mInputEventReceiver != null) {
-                if (mInputEventReceiver.consumeBatchedInputEvents(frameTimeNanos)) {
+                if (mInputEventReceiver.consumeBatchedInputEvents(frameTimeNanos)
+                        && frameTimeNanos != -1) {
                     // If we consumed a batch here, we want to go ahead and schedule the
                     // consumption of batched input events on the next frame. Otherwise, we would
                     // wait until we have more input events pending and might get starved by other
-                    // things occurring in the process.
+                    // things occurring in the process. If the frame time is -1, however, then
+                    // we're in a non-batching mode, so there's no need to schedule this.
                     scheduleConsumeBatchedInput();
                 }
             }
@@ -5710,7 +5743,11 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void onBatchedInputEventPending() {
-            scheduleConsumeBatchedInput();
+            if (mUnbufferedInputDispatch) {
+                super.onBatchedInputEventPending();
+            } else {
+                scheduleConsumeBatchedInput();
+            }
         }
 
         @Override
@@ -5730,6 +5767,16 @@ public final class ViewRootImpl implements ViewParent,
     final ConsumeBatchedInputRunnable mConsumedBatchedInputRunnable =
             new ConsumeBatchedInputRunnable();
     boolean mConsumeBatchedInputScheduled;
+
+    final class ConsumeBatchedInputImmediatelyRunnable implements Runnable {
+        @Override
+        public void run() {
+            doConsumeBatchedInput(-1);
+        }
+    }
+    final ConsumeBatchedInputImmediatelyRunnable mConsumeBatchedInputImmediatelyRunnable =
+            new ConsumeBatchedInputImmediatelyRunnable();
+    boolean mConsumeBatchedInputImmediatelyScheduled;
 
     final class InvalidateOnAnimationRunnable implements Runnable {
         private boolean mPosted;

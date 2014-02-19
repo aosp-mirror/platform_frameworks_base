@@ -9234,6 +9234,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Request unbuffered dispatch of the given stream of MotionEvents to this View.
+     *
+     * Until this View receives a corresponding {@link MotionEvent#ACTION_UP}, ask that the input
+     * system not batch {@link MotionEvent}s but instead deliver them as soon as they're
+     * available. This method should only be called for touch events.
+     *
+     * <p class="note">This api is not intended for most applications. Buffered dispatch
+     * provides many of benefits, and just requesting unbuffered dispatch on most MotionEvent
+     * streams will not improve your input latency. Side effects include: increased latency,
+     * jittery scrolls and inability to take advantage of system resampling. Talk to your input
+     * professional to see if {@link #requestUnbufferedDispatch(MotionEvent)} is right for
+     * you.</p>
+     */
+    public final void requestUnbufferedDispatch(MotionEvent event) {
+        final int action = event.getAction();
+        if (mAttachInfo == null
+                || action != MotionEvent.ACTION_DOWN && action != MotionEvent.ACTION_MOVE
+                || !event.isTouchEvent()) {
+            return;
+        }
+        mAttachInfo.mUnbufferedDispatchRequested = true;
+    }
+
+    /**
      * Set flags controlling behavior of this view.
      *
      * @param flags Constant indicating the value which should be set
@@ -19738,6 +19762,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Indicates whether the view's window is currently in touch mode.
          */
         boolean mInTouchMode;
+
+        /**
+         * Indicates whether the view has requested unbuffered input dispatching for the current
+         * event stream.
+         */
+        boolean mUnbufferedDispatchRequested;
 
         /**
          * Indicates that ViewAncestor should trigger a global layout change
