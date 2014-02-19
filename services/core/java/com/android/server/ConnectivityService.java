@@ -2632,7 +2632,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
        final int mtu = nt.getLinkProperties().getMtu();
 
        if (mtu < 68 || mtu > 10000) {
-           loge("Unexpected mtu value: " + nt);
+           loge("Unexpected mtu value: " + mtu + ", " + nt);
            return;
        }
 
