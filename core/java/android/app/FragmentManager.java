@@ -972,7 +972,7 @@ final class FragmentManagerImpl extends FragmentManager {
                                         if (fragment.mAnimatingAway != null) {
                                             fragment.mAnimatingAway = null;
                                             moveToState(fragment, fragment.mStateAfterAnimating,
-                                                    0, 0, true);
+                                                    0, 0, false);
                                         }
                                     }
                                 });
