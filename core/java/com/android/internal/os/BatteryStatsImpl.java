@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
+import android.os.BadParcelableException;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.FileUtils;
@@ -86,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 84 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 85 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -6026,7 +6027,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             stream.close();
 
             readSummaryFromParcel(in);
-        } catch(java.io.IOException e) {
+        } catch(Exception e) {
             Slog.e("BatteryStats", "Error reading battery statistics", e);
         }
 
@@ -6234,6 +6235,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         sNumSpeedSteps = in.readInt();
+        if (sNumSpeedSteps < 0 || sNumSpeedSteps > 100) {
+            throw new BadParcelableException("Bad speed steps in data: " + sNumSpeedSteps);
+        }
 
         final int NU = in.readInt();
         if (NU > 10000) {
