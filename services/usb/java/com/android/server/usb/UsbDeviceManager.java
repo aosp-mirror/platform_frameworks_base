@@ -810,7 +810,7 @@ public class UsbDeviceManager {
                     if (mOemModeMap == null) {
                         mOemModeMap = new HashMap<String, List<Pair<String, String>>>();
                     }
-                    List overrideList = mOemModeMap.get(items[0]);
+                    List<Pair<String, String>> overrideList = mOemModeMap.get(items[0]);
                     if (overrideList == null) {
                         overrideList = new LinkedList<Pair<String, String>>();
                         mOemModeMap.put(items[0], overrideList);

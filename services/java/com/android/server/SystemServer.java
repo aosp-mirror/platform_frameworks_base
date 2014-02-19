@@ -110,6 +110,8 @@ public final class SystemServer {
             "com.android.server.appwidget.AppWidgetService";
     private static final String PRINT_MANAGER_SERVICE_CLASS =
             "com.android.server.print.PrintManagerService";
+    private static final String USB_SERVICE_CLASS =
+            "com.android.server.usb.UsbService$Lifecycle";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -530,8 +532,7 @@ public final class SystemServer {
 
                 try {
                     if (pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
-                        mSystemServiceManager.startServiceIfExists(
-                                DEVICE_POLICY_MANAGER_SERVICE_CLASS);
+                        mSystemServiceManager.startService(DEVICE_POLICY_MANAGER_SERVICE_CLASS);
                     }
                 } catch (Throwable e) {
                     reportWtf("starting DevicePolicyService", e);
@@ -754,10 +755,11 @@ public final class SystemServer {
 
             if (!disableNonCoreServices) {
                 try {
-                    Slog.i(TAG, "USB Service");
-                    // Manage USB host and device support
-                    usb = new UsbService(context);
-                    ServiceManager.addService(Context.USB_SERVICE, usb);
+                    if (pm.hasSystemFeature(PackageManager.FEATURE_USB_HOST) ||
+                            pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY)) {
+                        // Manage USB host and device support
+                        mSystemServiceManager.startService(USB_SERVICE_CLASS);
+                    }
                 } catch (Throwable e) {
                     reportWtf("starting UsbService", e);
                 }
@@ -779,7 +781,7 @@ public final class SystemServer {
             if (!disableNonCoreServices) {
                 try {
                     if (pm.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {
-                        mSystemServiceManager.startServiceIfExists(BACKUP_MANAGER_SERVICE_CLASS);
+                        mSystemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
                     }
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting Backup Service", e);
@@ -787,7 +789,7 @@ public final class SystemServer {
 
                 try {
                     if (pm.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)) {
-                        mSystemServiceManager.startServiceIfExists(APPWIDGET_SERVICE_CLASS);
+                        mSystemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
                     }
                 } catch (Throwable e) {
                     reportWtf("starting AppWidget Service", e);
@@ -873,7 +875,7 @@ public final class SystemServer {
 
             try {
                 if (pm.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
-                    mSystemServiceManager.startServiceIfExists(PRINT_MANAGER_SERVICE_CLASS);
+                    mSystemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
                 }
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
@@ -965,7 +967,6 @@ public final class SystemServer {
         }
 
         // These are needed to propagate to the runnable below.
-        final Context contextF = context;
         final MountService mountServiceF = mountService;
         final BatteryService batteryF = battery;
         final NetworkManagementService networkManagementF = networkManagement;
@@ -973,7 +974,6 @@ public final class SystemServer {
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
-        final UsbService usbF = usb;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
         final RecognitionManagerService recognitionF = recognition;
@@ -993,132 +993,138 @@ public final class SystemServer {
         // where third party code can really run (but before it has actually
         // started launching the initial applications), for us to complete our
         // initialization.
+        final Handler handler = new Handler();
         mActivityManagerService.systemReady(new Runnable() {
+            @Override
             public void run() {
-                Slog.i(TAG, "Making services ready");
+                // We initiate all boot phases on the SystemServer thread.
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Slog.i(TAG, "Making services ready");
+                        mSystemServiceManager.startBootPhase(
+                                SystemService.PHASE_ACTIVITY_MANAGER_READY);
 
-                try {
-                    mActivityManagerService.startObservingNativeCrashes();
-                } catch (Throwable e) {
-                    reportWtf("observing native crashes", e);
-                }
-                try {
-                    startSystemUi(contextF);
-                } catch (Throwable e) {
-                    reportWtf("starting System UI", e);
-                }
-                try {
-                    if (mountServiceF != null) mountServiceF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Mount Service ready", e);
-                }
-                try {
-                    if (batteryF != null) batteryF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Battery Service ready", e);
-                }
-                try {
-                    if (networkManagementF != null) networkManagementF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Network Managment Service ready", e);
-                }
-                try {
-                    if (networkStatsF != null) networkStatsF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Network Stats Service ready", e);
-                }
-                try {
-                    if (networkPolicyF != null) networkPolicyF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Network Policy Service ready", e);
-                }
-                try {
-                    if (connectivityF != null) connectivityF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Connectivity Service ready", e);
-                }
-                try {
-                    if (dockF != null) dockF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Dock Service ready", e);
-                }
-                try {
-                    if (usbF != null) usbF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making USB Service ready", e);
-                }
-                try {
-                    if (recognitionF != null) recognitionF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Recognition Service ready", e);
-                }
-                Watchdog.getInstance().start();
+                        try {
+                            mActivityManagerService.startObservingNativeCrashes();
+                        } catch (Throwable e) {
+                            reportWtf("observing native crashes", e);
+                        }
+                        try {
+                            startSystemUi(context);
+                        } catch (Throwable e) {
+                            reportWtf("starting System UI", e);
+                        }
+                        try {
+                            if (mountServiceF != null) mountServiceF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Mount Service ready", e);
+                        }
+                        try {
+                            if (batteryF != null) batteryF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Battery Service ready", e);
+                        }
+                        try {
+                            if (networkManagementF != null) networkManagementF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Network Managment Service ready", e);
+                        }
+                        try {
+                            if (networkStatsF != null) networkStatsF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Network Stats Service ready", e);
+                        }
+                        try {
+                            if (networkPolicyF != null) networkPolicyF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Network Policy Service ready", e);
+                        }
+                        try {
+                            if (connectivityF != null) connectivityF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Connectivity Service ready", e);
+                        }
+                        try {
+                            if (dockF != null) dockF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Dock Service ready", e);
+                        }
+                        try {
+                            if (recognitionF != null) recognitionF.systemReady();
+                        } catch (Throwable e) {
+                            reportWtf("making Recognition Service ready", e);
+                        }
+                        Watchdog.getInstance().start();
 
-                // It is now okay to let the various system services start their
-                // third party code...
-                mSystemServiceManager.startBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+                        // It is now okay to let the various system services start their
+                        // third party code...
+                        mSystemServiceManager.startBootPhase(
+                                SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
 
-                try {
-                    if (wallpaperF != null) wallpaperF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying WallpaperService running", e);
-                }
-                try {
-                    if (immF != null) immF.systemRunning(statusBarF);
-                } catch (Throwable e) {
-                    reportWtf("Notifying InputMethodService running", e);
-                }
-                try {
-                    if (locationF != null) locationF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying Location Service running", e);
-                }
-                try {
-                    if (countryDetectorF != null) countryDetectorF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying CountryDetectorService running", e);
-                }
-                try {
-                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying NetworkTimeService running", e);
-                }
-                try {
-                    if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying CommonTimeManagementService running", e);
-                }
-                try {
-                    if (textServiceManagerServiceF != null)
-                        textServiceManagerServiceF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying TextServicesManagerService running", e);
-                }
-                try {
-                    if (atlasF != null) atlasF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying AssetAtlasService running", e);
-                }
-                try {
-                    // TODO(BT) Pass parameter to input manager
-                    if (inputManagerF != null) inputManagerF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying InputManagerService running", e);
-                }
+                        try {
+                            if (wallpaperF != null) wallpaperF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying WallpaperService running", e);
+                        }
+                        try {
+                            if (immF != null) immF.systemRunning(statusBarF);
+                        } catch (Throwable e) {
+                            reportWtf("Notifying InputMethodService running", e);
+                        }
+                        try {
+                            if (locationF != null) locationF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying Location Service running", e);
+                        }
+                        try {
+                            if (countryDetectorF != null) countryDetectorF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying CountryDetectorService running", e);
+                        }
+                        try {
+                            if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying NetworkTimeService running", e);
+                        }
+                        try {
+                            if (commonTimeMgmtServiceF != null) {
+                                commonTimeMgmtServiceF.systemRunning();
+                            }
+                        } catch (Throwable e) {
+                            reportWtf("Notifying CommonTimeManagementService running", e);
+                        }
+                        try {
+                            if (textServiceManagerServiceF != null)
+                                textServiceManagerServiceF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying TextServicesManagerService running", e);
+                        }
+                        try {
+                            if (atlasF != null) atlasF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying AssetAtlasService running", e);
+                        }
+                        try {
+                            // TODO(BT) Pass parameter to input manager
+                            if (inputManagerF != null) inputManagerF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying InputManagerService running", e);
+                        }
+                        try {
+                            if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying TelephonyRegistry running", e);
+                        }
+                        try {
+                            if (mediaRouterF != null) mediaRouterF.systemRunning();
+                        } catch (Throwable e) {
+                            reportWtf("Notifying MediaRouterService running", e);
+                        }
 
-                try {
-                    if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying TelephonyRegistry running", e);
-                }
-
-                try {
-                    if (mediaRouterF != null) mediaRouterF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying MediaRouterService running", e);
-                }
-
-                mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
+                        mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
+                    }
+                });
             }
         });
     }
