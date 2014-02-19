@@ -84,9 +84,9 @@ public class ImmersiveModeConfirmation {
         return exit != null ? exit.getDuration() : 0;
     }
 
-    public void loadSetting() {
+    public void loadSetting(int currentUserId) {
         mConfirmed = false;
-        mCurrentUserId = getCurrentUser();
+        mCurrentUserId = currentUserId;
         if (DEBUG) Slog.d(TAG, String.format("loadSetting() mCurrentUserId=%d resetForPanic=%s",
                 mCurrentUserId, mUserPanicResets.get(mCurrentUserId, false)));
         String value = null;
@@ -157,14 +157,6 @@ public class ImmersiveModeConfirmation {
         mUserPanicResets.put(mCurrentUserId, true);
         mConfirmed = false;
         saveSetting();
-    }
-
-    private int getCurrentUser() {
-        try {
-            return ActivityManagerNative.getDefault().getCurrentUser().id;
-        } catch (RemoteException e) {
-            throw new IllegalStateException(e); // local call
-        }
     }
 
     private void handleHide() {
