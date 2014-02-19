@@ -62,11 +62,14 @@ public abstract class CallService extends Service {
                 case MSG_DISCONNECT:
                     disconnect((String) msg.obj);
                     break;
-                case MSG_CONFIRM_INCOMING_CALL:
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    String callId = (String) args.arg1;
-                    String callToken = (String) args.arg2;
-                    confirmIncomingCall(callId, callToken);
+                case MSG_SET_INCOMING_CALL_ID:
+                    setIncomingCallId((String) msg.obj);
+                    break;
+                case MSG_ANSWER:
+                    answer((String) msg.obj);
+                    break;
+                case MSG_REJECT:
+                    reject((String) msg.obj);
                     break;
                 default:
                     break;
@@ -100,11 +103,18 @@ public abstract class CallService extends Service {
         }
 
         @Override
-        public void confirmIncomingCall(String callId, String callToken) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.arg2 = callToken;
-            mMessageHandler.obtainMessage(MSG_CONFIRM_INCOMING_CALL, args).sendToTarget();
+        public void setIncomingCallId(String callId) {
+            mMessageHandler.obtainMessage(MSG_SET_INCOMING_CALL_ID, callId).sendToTarget();
+        }
+
+        @Override
+        public void answer(String callId) {
+            mMessageHandler.obtainMessage(MSG_ANSWER, callId).sendToTarget();
+        }
+
+        @Override
+        public void reject(String callId) {
+            mMessageHandler.obtainMessage(MSG_REJECT, callId).sendToTarget();
         }
     }
 
@@ -118,7 +128,9 @@ public abstract class CallService extends Service {
             MSG_IS_COMPATIBLE_WITH = 2,
             MSG_CALL = 3,
             MSG_DISCONNECT = 4,
-            MSG_CONFIRM_INCOMING_CALL = 5;
+            MSG_SET_INCOMING_CALL_ID = 5,
+            MSG_ANSWER = 6,
+            MSG_REJECT = 7;
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
@@ -183,14 +195,29 @@ public abstract class CallService extends Service {
     public abstract void disconnect(String callId);
 
     /**
-     * Confirms that the specified incoming call is connecting through this call service. Telecomm
-     * receives all incoming calls initially as intents that include information about a call
-     * and a token identifying the call. Before displaying any UI to the user, Telecomm confirms
-     * the existence of the incoming call by binding to the specified call service and calling
-     * this method. Confirmation responses are received through {@link ICallServiceAdapter}.
+     * Receives a new call ID to use with an incoming call. Invoked by Telecomm after it is notified
+     * that this call service has a pending incoming call, see
+     * {@link TelecommConstants#ACTION_INCOMING_CALL}. The call service must first give Telecomm
+     * additional information about the call through {@link ICallServiceAdapter#handleIncomingCall}.
+     * Following that, the call service can update the call at will using the specified call ID.
      *
      * @param callId The ID of the call.
-     * @param callToken The call token received through the incoming call intent.
      */
-    public abstract void confirmIncomingCall(String callId, String callToken);
+    public abstract void setIncomingCallId(String callId);
+
+    /**
+     * Answers a ringing call identified by callId. Telecomm invokes this method as a result of the
+     * user hitting the "answer" button in the incoming call screen.
+     *
+     * @param callId The ID of the call.
+     */
+    public abstract void answer(String callId);
+
+    /**
+     * Rejects a ringing call identified by callId. Telecomm invokes this method as a result of the
+     * user hitting the "reject" button in the incoming call screen.
+     *
+     * @param callId The ID of the call.
+     */
+    public abstract void reject(String callId);
 }

@@ -24216,13 +24216,15 @@ package android.telecomm {
 
   public abstract class CallService extends android.app.Service {
     ctor public CallService();
+    method public abstract void answer(java.lang.String);
     method public abstract void call(android.telecomm.CallInfo);
-    method public abstract void confirmIncomingCall(java.lang.String, java.lang.String);
     method public abstract void disconnect(java.lang.String);
     method public final android.os.IBinder getBinder();
     method public abstract void isCompatibleWith(android.telecomm.CallInfo);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void reject(java.lang.String);
     method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter);
+    method public abstract void setIncomingCallId(java.lang.String);
   }
 
   public final class CallServiceDescriptor implements android.os.Parcelable {
@@ -24232,6 +24234,7 @@ package android.telecomm {
     method public android.content.ComponentName getServiceComponent();
     method public static android.telecomm.CallServiceDescriptor.Builder newBuilder(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FLAG_MOBILE = 4; // 0x4
     field public static final int FLAG_PSTN = 2; // 0x2
     field public static final int FLAG_WIFI = 1; // 0x1
@@ -24274,11 +24277,13 @@ package android.telecomm {
   }
 
   public abstract interface ICallService implements android.os.IInterface {
+    method public abstract void answer(java.lang.String) throws android.os.RemoteException;
     method public abstract void call(android.telecomm.CallInfo) throws android.os.RemoteException;
-    method public abstract void confirmIncomingCall(java.lang.String, java.lang.String) throws android.os.RemoteException;
     method public abstract void disconnect(java.lang.String) throws android.os.RemoteException;
     method public abstract void isCompatibleWith(android.telecomm.CallInfo) throws android.os.RemoteException;
+    method public abstract void reject(java.lang.String) throws android.os.RemoteException;
     method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter) throws android.os.RemoteException;
+    method public abstract void setIncomingCallId(java.lang.String) throws android.os.RemoteException;
   }
 
   public static abstract class ICallService.Stub extends android.os.Binder implements android.telecomm.ICallService {
@@ -24289,8 +24294,8 @@ package android.telecomm {
   }
 
   public abstract interface ICallServiceAdapter implements android.os.IInterface {
-    method public abstract void handleConfirmedIncomingCall(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void handleFailedOutgoingCall(java.lang.String, java.lang.String) throws android.os.RemoteException;
+    method public abstract void handleIncomingCall(android.telecomm.CallInfo) throws android.os.RemoteException;
     method public abstract void handleSuccessfulOutgoingCall(java.lang.String) throws android.os.RemoteException;
     method public abstract void setActive(java.lang.String) throws android.os.RemoteException;
     method public abstract void setCompatibleWith(java.lang.String, boolean) throws android.os.RemoteException;

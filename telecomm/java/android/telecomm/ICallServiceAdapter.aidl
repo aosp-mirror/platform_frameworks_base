@@ -37,15 +37,15 @@ oneway interface ICallServiceAdapter {
     void setCompatibleWith(String callId, boolean isCompatible);
 
     /**
-     * Receives confirmation of the existence of an incoming call connected through the call
-     * service. Invoked by the call service after it receives a confirmation request from Telecomm
-     * through {@link ICallService#confirmIncomingCall}. The call info object must contain all the
-     * updated status of the call and use the same call ID as was passed into
-     * {@link ICallService#confirmIncomingCall}.
+     * Provides Telecomm with the details of an incoming call. An invocation of this method must
+     * follow {@link CallService#setIncomingCallId} and use the call ID specified therein. Upon
+     * the invocation of this method, Telecomm will bring up the incoming-call interface where the
+     * user can elect to answer or reject a call.
+     * TODO(santoscordon): Consider renaming from handle* to notify*.
      *
      * @param callInfo The details of the relevant call.
      */
-    void handleConfirmedIncomingCall(in CallInfo callInfo);
+    void handleIncomingCall(in CallInfo callInfo);
 
     /**
      * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
