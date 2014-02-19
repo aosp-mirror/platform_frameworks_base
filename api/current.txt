@@ -17149,11 +17149,9 @@ package android.opengl {
     method public static void glGenTextures(int, java.nio.IntBuffer);
     method public static void glGenerateMipmap(int);
     method public static void glGetActiveAttrib(int, int, int, int[], int, int[], int, int[], int, byte[], int);
-    method public static void glGetActiveAttrib(int, int, int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, byte);
     method public static java.lang.String glGetActiveAttrib(int, int, int[], int, int[], int);
     method public static java.lang.String glGetActiveAttrib(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static void glGetActiveUniform(int, int, int, int[], int, int[], int, int[], int, byte[], int);
-    method public static void glGetActiveUniform(int, int, int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, byte);
     method public static java.lang.String glGetActiveUniform(int, int, int[], int, int[], int);
     method public static java.lang.String glGetActiveUniform(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static void glGetAttachedShaders(int, int, int[], int, int[], int);
@@ -17179,7 +17177,6 @@ package android.opengl {
     method public static void glGetShaderPrecisionFormat(int, int, int[], int, int[], int);
     method public static void glGetShaderPrecisionFormat(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static void glGetShaderSource(int, int, int[], int, byte[], int);
-    method public static void glGetShaderSource(int, int, java.nio.IntBuffer, byte);
     method public static java.lang.String glGetShaderSource(int);
     method public static void glGetShaderiv(int, int, int[], int);
     method public static void glGetShaderiv(int, int, java.nio.IntBuffer);
