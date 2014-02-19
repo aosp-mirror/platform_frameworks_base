@@ -5809,6 +5809,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int end = text.partialEndOffset;
                 if (end > N) end = N;
                 removeParcelableSpans(content, start, end);
+                // If start > end, content.replace will swap them before using them.
                 content.replace(start, end, text.text);
             }
         }
