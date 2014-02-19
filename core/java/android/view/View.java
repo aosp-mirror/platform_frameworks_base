@@ -13670,19 +13670,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
-                if (attachInfo.mHardwareRenderer != null &&
-                        attachInfo.mHardwareRenderer.isEnabled() &&
-                        attachInfo.mHardwareRenderer.validate()) {
-                    getHardwareLayer();
-                    // TODO: We need a better way to handle this case
-                    // If views have registered pre-draw listeners they need
-                    // to be notified before we build the layer. Those listeners
-                    // may however rely on other events to happen first so we
-                    // cannot just invoke them here until they don't cancel the
-                    // current frame
-                    if (!attachInfo.mTreeObserver.hasOnPreDrawListeners()) {
-                        attachInfo.mViewRootImpl.dispatchFlushHardwareLayerUpdates();
-                    }
+                getHardwareLayer();
+                // TODO: We need a better way to handle this case
+                // If views have registered pre-draw listeners they need
+                // to be notified before we build the layer. Those listeners
+                // may however rely on other events to happen first so we
+                // cannot just invoke them here until they don't cancel the
+                // current frame
+                if (!attachInfo.mTreeObserver.hasOnPreDrawListeners()) {
+                    attachInfo.mViewRootImpl.dispatchFlushHardwareLayerUpdates();
                 }
                 break;
             case LAYER_TYPE_SOFTWARE:
@@ -13702,8 +13698,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 !mAttachInfo.mHardwareRenderer.isEnabled()) {
             return null;
         }
-
-        if (!mAttachInfo.mHardwareRenderer.validate()) return null;
 
         final int width = mRight - mLeft;
         final int height = mBottom - mTop;

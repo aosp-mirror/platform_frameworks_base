@@ -76,13 +76,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void destroyLayers(View view) {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
     void destroyHardwareResources(View view) {
-        // TODO: canvas.clearLayerUpdates()
         destroyResources(view);
         // TODO: GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
     }
@@ -103,12 +97,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void invalidate(Surface surface) {
         updateSurface(surface);
-    }
-
-    @Override
-    boolean validate() {
-        // TODO Remove users of this API
-        return false;
     }
 
     @Override
@@ -150,26 +138,6 @@ public class ThreadedRenderer extends HardwareRenderer {
         return false;
     }
 
-    @Override
-    void pushLayerUpdate(HardwareLayer layer) {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
-    void onLayerCreated(HardwareLayer layer) {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
-    void onLayerDestroyed(HardwareLayer layer) {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
-    void flushLayerUpdates() {
-        throw new NoSuchMethodError();
-    }
-
     /**
      * TODO: Remove
      * Temporary hack to allow RenderThreadTest prototype app to trigger
@@ -203,26 +171,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    HardwareLayer createTextureLayer() {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
-    HardwareLayer createDisplayListLayer(int width, int height) {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
-    SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
-    boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap) {
-        throw new NoSuchMethodError();
-    }
-
-    @Override
     void detachFunctor(long functor) {
         nDetachFunctor(mNativeProxy, functor);
     }
@@ -230,6 +178,56 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void attachFunctor(AttachInfo attachInfo, long functor) {
         nAttachFunctor(mNativeProxy, functor);
+    }
+
+    @Override
+    HardwareLayer createDisplayListLayer(int width, int height) {
+        long layer = nCreateDisplayListLayer(mNativeProxy, width, height);
+        return HardwareLayer.adoptDisplayListLayer(this, layer);
+    }
+
+    @Override
+    HardwareLayer createTextureLayer() {
+        long layer = nCreateTextureLayer(mNativeProxy);
+        return HardwareLayer.adoptTextureLayer(this, layer);
+    }
+
+    @Override
+    SurfaceTexture createSurfaceTexture(final HardwareLayer layer) {
+        final SurfaceTexture[] ret = new SurfaceTexture[1];
+        nRunWithGlContext(mNativeProxy, new Runnable() {
+            @Override
+            public void run() {
+                ret[0] = layer.createSurfaceTexture();
+            }
+        });
+        return ret[0];
+    }
+
+    @Override
+    boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
+        return nCopyLayerInto(mNativeProxy,
+                layer.getDeferredLayerUpdater(), bitmap.mNativeBitmap);
+    }
+
+    @Override
+    void pushLayerUpdate(HardwareLayer layer) {
+        // TODO: Remove this, it's not needed outside of GLRenderer
+    }
+
+    @Override
+    void onLayerCreated(HardwareLayer layer) {
+        // TODO: Is this actually useful?
+    }
+
+    @Override
+    void flushLayerUpdates() {
+        // TODO: Figure out what this should do or remove it
+    }
+
+    @Override
+    void onLayerDestroyed(HardwareLayer layer) {
+        nDestroyLayer(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
     @Override
@@ -261,4 +259,9 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native void nAttachFunctor(long nativeProxy, long functor);
     private static native void nDetachFunctor(long nativeProxy, long functor);
+
+    private static native long nCreateDisplayListLayer(long nativeProxy, int width, int height);
+    private static native long nCreateTextureLayer(long nativeProxy);
+    private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
+    private static native void nDestroyLayer(long nativeProxy, long layer);
 }

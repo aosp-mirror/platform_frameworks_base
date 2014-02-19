@@ -24,6 +24,8 @@
 
 #include "RenderThread.h"
 #include "../Caches.h"
+#include "../DeferredLayerUpdater.h"
+#include "../LayerRenderer.h"
 #include "../OpenGLRenderer.h"
 #include "../Stencil.h"
 
@@ -371,6 +373,17 @@ void CanvasContext::setup(int width, int height) {
     mCanvas->setViewport(width, height);
 }
 
+void CanvasContext::processLayerUpdates(const Vector<DeferredLayerUpdater*>* layerUpdaters) {
+    mGlobalContext->makeCurrent(mEglSurface);
+    for (size_t i = 0; i < layerUpdaters->size(); i++) {
+        DeferredLayerUpdater* update = layerUpdaters->itemAt(i);
+        LOG_ALWAYS_FATAL_IF(!update->apply(), "Failed to update layer!");
+        if (update->backingLayer()->deferredUpdateScheduled) {
+            mCanvas->pushLayerUpdate(update->backingLayer());
+        }
+    }
+}
+
 void CanvasContext::drawDisplayList(DisplayList* displayList, Rect* dirty) {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawDisplayList called on a context with no canvas or surface!");
@@ -462,14 +475,23 @@ void CanvasContext::queueFunctorsTask(int delayMs) {
     mRenderThread.queueDelayed(&mInvokeFunctorsTask, delayMs);
 }
 
+bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
+    requireGlContext();
+    layer->apply();
+    return LayerRenderer::copyLayer(layer->backingLayer(), bitmap);
+}
+
 void CanvasContext::runWithGlContext(RenderTask* task) {
+    requireGlContext();
+    task->run();
+}
+
+void CanvasContext::requireGlContext() {
     if (mEglSurface != EGL_NO_SURFACE) {
         mGlobalContext->makeCurrent(mEglSurface);
     } else {
         mGlobalContext->usePBufferSurface();
     }
-
-    task->run();
 }
 
 } /* namespace renderthread */

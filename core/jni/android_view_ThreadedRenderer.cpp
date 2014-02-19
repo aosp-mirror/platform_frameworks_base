@@ -76,20 +76,20 @@ static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject claz
 
 static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     delete proxy;
 }
 
 static jboolean android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     sp<ANativeWindow> window = android_view_Surface_getNativeWindow(env, jsurface);
     return proxy->initialize(window.get());
 }
 
 static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     sp<ANativeWindow> window;
     if (jsurface) {
         window = android_view_Surface_getNativeWindow(env, jsurface);
@@ -99,43 +99,72 @@ static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject cla
 
 static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jint width, jint height) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->setup(width, height);
 }
 
 static void android_view_ThreadedRenderer_drawDisplayList(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong displayListPtr, jint dirtyLeft, jint dirtyTop,
         jint dirtyRight, jint dirtyBottom) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
-    DisplayList* displayList = reinterpret_cast<DisplayList*>( displayListPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DisplayList* displayList = reinterpret_cast<DisplayList*>(displayListPtr);
     proxy->drawDisplayList(displayList, dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
 }
 
 static void android_view_ThreadedRenderer_destroyCanvas(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->destroyCanvas();
 }
 
 static void android_view_ThreadedRenderer_attachFunctor(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong functorPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
     proxy->attachFunctor(functor);
 }
 
 static void android_view_ThreadedRenderer_detachFunctor(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong functorPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
     proxy->detachFunctor(functor);
 }
 
 static void android_view_ThreadedRenderer_runWithGlContext(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jrunnable) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>( proxyPtr);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     RenderTask* task = new JavaTask(env, jrunnable);
     proxy->runWithGlContext(task);
+}
+
+static jlong android_view_ThreadedRenderer_createDisplayListLayer(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jint width, jint height) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = proxy->createDisplayListLayer(width, height);
+    return reinterpret_cast<jlong>(layer);
+}
+
+static jlong android_view_ThreadedRenderer_createTextureLayer(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = proxy->createTextureLayer();
+    return reinterpret_cast<jlong>(layer);
+}
+
+static jboolean android_view_ThreadedRenderer_copyLayerInto(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong layerPtr, jlong bitmapPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
+    return proxy->copyLayerInto(layer, bitmap);
+}
+
+static void android_view_ThreadedRenderer_destroyLayer(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong layerPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    proxy->destroyLayer(layer);
 }
 
 #endif
@@ -159,6 +188,10 @@ static JNINativeMethod gMethods[] = {
     { "nAttachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_attachFunctor},
     { "nDetachFunctor", "(JJ)V", (void*) android_view_ThreadedRenderer_detachFunctor},
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
+    { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
+    { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
+    { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
+    { "nDestroyLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_destroyLayer },
 #endif
 };
 
