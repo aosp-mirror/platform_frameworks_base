@@ -454,6 +454,7 @@ public class DeviceStorageMonitorService extends SystemService {
         notification.tickerText = title;
         notification.flags |= Notification.FLAG_NO_CLEAR;
         notification.setLatestEventInfo(context, title, details, intent);
+        notification.visibility = Notification.VISIBILITY_PUBLIC;
         mNotificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
                 UserHandle.ALL);
         context.sendStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
