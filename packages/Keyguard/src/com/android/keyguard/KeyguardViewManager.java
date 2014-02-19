@@ -330,7 +330,7 @@ public class KeyguardViewManager {
 
     private boolean allowNotificationsOnSecureKeyguard() {
         ContentResolver cr = mContext.getContentResolver();
-        return Settings.Secure.getInt(cr, Settings.Secure.LOCK_SCREEN_ALLOW_NOTIFICATIONS, 0) == 1;
+        return Settings.Global.getInt(cr, Settings.Global.LOCK_SCREEN_SHOW_NOTIFICATIONS, 0) == 1;
     }
 
     private KeyguardViewBase inflateKeyguardView(Bundle options, int layoutId) {
