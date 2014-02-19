@@ -24194,22 +24194,22 @@ package android.telecomm {
     method public abstract void setCallServiceAdapter(android.telecomm.ICallServiceAdapter);
   }
 
-  public final class CallServiceInfo implements android.os.Parcelable {
+  public final class CallServiceDescriptor implements android.os.Parcelable {
     method public int describeContents();
     method public java.lang.String getCallServiceId();
     method public int getNetworkType();
     method public android.content.ComponentName getServiceComponent();
-    method public static android.telecomm.CallServiceInfo.Builder newBuilder(android.content.Context);
+    method public static android.telecomm.CallServiceDescriptor.Builder newBuilder(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int FLAG_MOBILE = 4; // 0x4
     field public static final int FLAG_PSTN = 2; // 0x2
     field public static final int FLAG_WIFI = 1; // 0x1
   }
 
-  public static class CallServiceInfo.Builder {
-    method public android.telecomm.CallServiceInfo build();
-    method public android.telecomm.CallServiceInfo.Builder setCallService(java.lang.Class<? extends android.telecomm.CallService>);
-    method public android.telecomm.CallServiceInfo.Builder setNetworkType(int);
+  public static class CallServiceDescriptor.Builder {
+    method public android.telecomm.CallServiceDescriptor build();
+    method public android.telecomm.CallServiceDescriptor.Builder setCallService(java.lang.Class<? extends android.telecomm.CallService>);
+    method public android.telecomm.CallServiceDescriptor.Builder setNetworkType(int);
   }
 
   public abstract class CallServiceProvider extends android.app.Service {
@@ -24268,7 +24268,7 @@ package android.telecomm {
   }
 
   public abstract interface ICallServiceLookupResponse implements android.os.IInterface {
-    method public abstract void setCallServices(java.util.List<android.telecomm.CallServiceInfo>) throws android.os.RemoteException;
+    method public abstract void setCallServiceDescriptors(java.util.List<android.telecomm.CallServiceDescriptor>) throws android.os.RemoteException;
   }
 
   public static abstract class ICallServiceLookupResponse.Stub extends android.os.Binder implements android.telecomm.ICallServiceLookupResponse {
@@ -24290,7 +24290,7 @@ package android.telecomm {
   }
 
   public abstract interface ICallServiceSelectionResponse implements android.os.IInterface {
-    method public abstract void setSelectedCallServiceInfos(java.util.List<android.telecomm.CallServiceInfo>) throws android.os.RemoteException;
+    method public abstract void setSelectedCallServiceDescriptors(java.util.List<android.telecomm.CallServiceDescriptor>) throws android.os.RemoteException;
   }
 
   public static abstract class ICallServiceSelectionResponse.Stub extends android.os.Binder implements android.telecomm.ICallServiceSelectionResponse {
@@ -24302,7 +24302,7 @@ package android.telecomm {
 
   public abstract interface ICallServiceSelector implements android.os.IInterface {
     method public abstract void isSwitchable(android.telecomm.CallInfo, android.telecomm.ICallSwitchabilityResponse) throws android.os.RemoteException;
-    method public abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceInfo>, android.telecomm.ICallServiceSelectionResponse) throws android.os.RemoteException;
+    method public abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>, android.telecomm.ICallServiceSelectionResponse) throws android.os.RemoteException;
   }
 
   public static abstract class ICallServiceSelector.Stub extends android.os.Binder implements android.telecomm.ICallServiceSelector {

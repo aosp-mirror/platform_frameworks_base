@@ -17,7 +17,7 @@
 package android.telecomm;
 
 import android.os.IBinder;
-import android.telecomm.CallServiceInfo;
+import android.telecomm.CallServiceDescriptor;
 import java.util.List;
 
 /**
@@ -29,8 +29,9 @@ oneway interface ICallServiceSelectionResponse {
      * Records the sorted set of call services that are preferred by the corresponding
      * call-service selector.
      *
-     * @param selectedCallServiceInfos The prioritized list of preferred CallServices to use for
-     *        completing the call.
+     * @param selectedCallServiceDescriptors The prioritized list of preferred call-service
+     *        descriptors to use for completing the call.
      */
-    void setSelectedCallServiceInfos(in List<CallServiceInfo> selectedCallServiceInfos);
+    void setSelectedCallServiceDescriptors(
+            in List<CallServiceDescriptor> selectedCallServiceDescriptors);
 }

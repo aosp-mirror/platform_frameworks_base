@@ -16,4 +16,4 @@
 
 package android.telecomm;
 
-parcelable CallServiceInfo;
+parcelable CallServiceDescriptor;

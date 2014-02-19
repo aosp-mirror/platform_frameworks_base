@@ -49,13 +49,14 @@ public abstract class CallServiceSelector extends Service {
         }
 
         @Override
-        public void select(CallInfo callInfo, List<CallServiceInfo> callServiceInfos,
+        public void select(CallInfo callInfo, List<CallServiceDescriptor> descriptors,
                 ICallServiceSelectionResponse response) throws RemoteException {
+
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
             try {
-                response.setSelectedCallServiceInfos(
-                        CallServiceSelector.this.select(callInfo, callServiceInfos));
+                response.setSelectedCallServiceDescriptors(
+                        CallServiceSelector.this.select(callInfo, descriptors));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -91,10 +92,10 @@ public abstract class CallServiceSelector extends Service {
      * This method is not called on the UI thread and is safe to block.
      *
      * @param callInfo The call being placed using the {@link CallService}s.
-     * @param callServiceInfos The details of the available {@link CallService}s with which to place
+     * @param descriptors The descriptors of the available {@link CallService}s with which to place
      *         the call.
-     * @return A list of prioritized {@link CallServiceInfo}s to use to complete the given call.
+     * @return A list of prioritized call-service descriptors to use to complete the given call.
      */
-    protected abstract List<CallServiceInfo> select(
-            CallInfo callInfo, List<CallServiceInfo> callServiceInfos);
+    protected abstract List<CallServiceDescriptor> select(
+            CallInfo callInfo, List<CallServiceDescriptor> descriptors);
 }

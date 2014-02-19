@@ -21,11 +21,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-
 import android.telecomm.ICallService;
 import android.telecomm.ICallServiceAdapter;
-import android.util.Log;
-import android.util.Pair;
 
 import com.android.internal.os.SomeArgs;
 
@@ -47,7 +44,6 @@ import com.android.internal.os.SomeArgs;
  * TODO(santoscordon): Improve paragraph above once the final design is in place.
  */
 public abstract class CallService extends Service {
-    private static final String TAG = CallService.class.getSimpleName();
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -128,7 +124,7 @@ public abstract class CallService extends Service {
 
     /**
      * Message handler for consolidating binder callbacks onto a single thread.
-     * See {@link #CallServiceMessageHandler}.
+     * See {@link CallServiceMessageHandler}.
      */
     private final CallServiceMessageHandler mMessageHandler = new CallServiceMessageHandler();
 
@@ -138,6 +134,7 @@ public abstract class CallService extends Service {
     private final CallServiceBinder mBinder = new CallServiceBinder();
 
     /** {@inheritDoc} */
+    @Override
     public IBinder onBind(Intent intent) {
         return getBinder();
     }
@@ -173,8 +170,8 @@ public abstract class CallService extends Service {
      * SIP address, or some other kind of user ID.  Note that the set of handle types is
      * dynamically extensible since call providers should be able to implement arbitrary
      * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
-     * call service respond via {@link ICallServiceAdapter#newOutgoingCall} if it can successfully
-     * make the call.
+     * call service respond via {@link ICallServiceAdapter#handleIncomingCall} if it can
+     * successfully make the call.
      *
      * @param callInfo The details of the relevant call.
      */

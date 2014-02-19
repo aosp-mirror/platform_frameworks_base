@@ -28,8 +28,8 @@ import java.util.UUID;
  * An immutable object containing information about a given {@link CallService}. Instances are
  * created using the enclosed {@link Builder}.
  */
-public final class CallServiceInfo implements Parcelable {
-    private static final String TAG = CallServiceInfo.class.getSimpleName();
+public final class CallServiceDescriptor implements Parcelable {
+    private static final String TAG = CallServiceDescriptor.class.getSimpleName();
 
     /**
      * A placeholder value indicating an invalid network type.
@@ -77,7 +77,11 @@ public final class CallServiceInfo implements Parcelable {
      */
     private final int mNetworkType;
 
-    private CallServiceInfo(String callServiceId, ComponentName componentName, int networkType) {
+    private CallServiceDescriptor(
+            String callServiceId,
+            ComponentName componentName,
+            int networkType) {
+
         mCallServiceId = callServiceId;
         mComponentName = componentName;
         mNetworkType = networkType;
@@ -113,8 +117,8 @@ public final class CallServiceInfo implements Parcelable {
     }
 
     /**
-     * Creates {@link CallServiceInfo} instances. Builders should be created with the
-     * {@link CallServiceInfo#newBuilder(Context)} method.
+     * Creates {@link CallServiceDescriptor} instances. Builders should be created with the
+     * {@link CallServiceDescriptor#newBuilder(Context)} method.
      */
     public static class Builder {
         /** The {@link Context} to use to verify {@link ComponentName} ownership. */
@@ -131,7 +135,7 @@ public final class CallServiceInfo implements Parcelable {
         }
 
         /**
-         * Set which {@link CallService} this {@link CallServiceInfo} is describing.
+         * Set which {@link CallService} this {@link CallServiceDescriptor} is describing.
          *
          * @param callServiceClass The {@link CallService} class
          * @return This {@link Builder} for method chaining.
@@ -143,7 +147,7 @@ public final class CallServiceInfo implements Parcelable {
 
         /**
          * Which network type the backing {@link CallService} requires. This must be one of the
-         * {@link CallServiceInfo}.TYPE_* fields.
+         * {@link CallServiceDescriptor}.TYPE_* fields.
          *
          * @param networkType Which network type the backing {@link CallService} requires.
          * @return This {@link Builder} for method chaining.
@@ -154,9 +158,9 @@ public final class CallServiceInfo implements Parcelable {
         }
 
         /**
-         * @return A constructed {@link CallServiceInfo} object.
+         * @return A constructed {@link CallServiceDescriptor} object.
          */
-        public CallServiceInfo build() {
+        public CallServiceDescriptor build() {
             // STOPSHIP: Verify validity of ComponentName (permissions, intents, etc)
 
             // Make sure that they passed in a valid network flag combination
@@ -168,7 +172,8 @@ public final class CallServiceInfo implements Parcelable {
             }
 
             // TODO: Should we use a sha1 of the ComponentName? Would prevent duplicates.
-            return new CallServiceInfo(UUID.randomUUID().toString(), mComponentName, mNetworkType);
+            return new CallServiceDescriptor(
+                UUID.randomUUID().toString(), mComponentName, mNetworkType);
         }
     }
 
@@ -184,20 +189,20 @@ public final class CallServiceInfo implements Parcelable {
         dest.writeInt(mNetworkType);
     }
 
-    static final Creator<CallServiceInfo> CREATOR = new Creator<CallServiceInfo>() {
+    static final Creator<CallServiceDescriptor> CREATOR = new Creator<CallServiceDescriptor>() {
         @Override
-        public CallServiceInfo createFromParcel(Parcel source) {
+        public CallServiceDescriptor createFromParcel(Parcel source) {
             String id = source.readString();
             ComponentName componentName = source.readParcelable(
-                    CallServiceInfo.class.getClassLoader());
+                    CallServiceDescriptor.class.getClassLoader());
             int networkType = source.readInt();
 
-            return new CallServiceInfo(id, componentName, networkType);
+            return new CallServiceDescriptor(id, componentName, networkType);
         }
 
         @Override
-        public CallServiceInfo[] newArray(int size) {
-            return new CallServiceInfo[size];
+        public CallServiceDescriptor[] newArray(int size) {
+            return new CallServiceDescriptor[size];
         }
     };
 }

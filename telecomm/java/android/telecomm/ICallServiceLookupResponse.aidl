@@ -17,19 +17,19 @@
 package android.telecomm;
 
 import android.os.IBinder;
-import android.telecomm.CallServiceInfo;
+import android.telecomm.CallServiceDescriptor;
 import java.util.List;
 
 /**
- * Used by {@link ICallServiceProvider} to return a list of {@link ICallService} implementations.
+ * Used by {@link ICallServiceProvider} to return a list of {@link CallServiceDescriptor}s.
  */
 oneway interface ICallServiceLookupResponse {
     /**
-     * Forwards the list of {@link ICallService}s as a list of {@link CallServiceInfo}s to be
-     * processed by Telecomm which will choose which call service, among potentially many, to
-     * place a call.
+     * Passes the sorted list of preferred {@link CallServiceDescriptor}s back to Telecomm.  Used
+     * in the context of attempting to place a pending outgoing call.
      *
-     * @param callServices The set of call service descriptors from {@link ICallServiceProvider}.
+     * @param callServiceDescriptors The set of call-service descriptors from
+     * {@link ICallServiceProvider}.
      */
-    void setCallServices(in List<CallServiceInfo> callServices);
+    void setCallServiceDescriptors(in List<CallServiceDescriptor> callServiceDescriptors);
 }

@@ -17,7 +17,7 @@
 package android.telecomm;
 
 import android.telecomm.CallInfo;
-import android.telecomm.CallServiceInfo;
+import android.telecomm.CallServiceDescriptor;
 import android.telecomm.ICallService;
 import android.telecomm.ICallServiceSelectionResponse;
 import android.telecomm.ICallSwitchabilityResponse;
@@ -65,17 +65,17 @@ import java.util.List;
 oneway interface ICallServiceSelector {
 
     /**
-     * Initiates the process to retrieve the sorted set of call service IDs that are preferred by
+     * Initiates the process to retrieve the sorted set of call services that are preferred by
      * this call-service selector.
      *
      * @param callInfo The details of the relevant call.
-     * @param callServiceIds The list of call-service IDs.
+     * @param callServiceDescriptors The list of call-service descriptors to select from.
      * @param response The response object through which the selected service IDs are passed back
      *         to Telecomm.
      */
     void select(
             in CallInfo callInfo,
-            in List<CallServiceInfo> callServiceInfos,
+            in List<CallServiceDescriptor> callServiceDescriptors,
             in ICallServiceSelectionResponse response);
 
     /**
