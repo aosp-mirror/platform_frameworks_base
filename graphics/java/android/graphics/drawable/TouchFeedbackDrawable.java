@@ -338,11 +338,16 @@ public class TouchFeedbackDrawable extends Drawable {
         return dirtyBounds;
     }
 
-    private static class TouchFeedbackState extends ConstantState {
-        private ColorStateList mColorStateList;
-        private Xfermode mXfermode;
-        private int mTargetDensity;
-        private boolean mProjected;
+    @Override
+    public ConstantState getConstantState() {
+        return mState;
+    }
+
+    static class TouchFeedbackState extends ConstantState {
+        ColorStateList mColorStateList;
+        Xfermode mXfermode;
+        int mTargetDensity;
+        boolean mProjected;
 
         public TouchFeedbackState(TouchFeedbackState orig) {
             if (orig != null) {
