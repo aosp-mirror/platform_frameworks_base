@@ -1426,7 +1426,7 @@ public class MediaScanner
         }
 
         int firstSlash = path.lastIndexOf('/');
-        if (firstSlash == 0) {
+        if (firstSlash <= 0) {
             return false;
         }
         String parent = path.substring(0,  firstSlash);
