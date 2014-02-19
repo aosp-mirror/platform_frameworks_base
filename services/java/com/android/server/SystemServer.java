@@ -112,6 +112,10 @@ public final class SystemServer {
             "com.android.server.print.PrintManagerService";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
+    private static final String WIFI_SERVICE_CLASS =
+            "com.android.server.wifi.WifiService";
+    private static final String WIFI_P2P_SERVICE_CLASS =
+            "com.android.server.wifi.p2p.WifiP2pService";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -600,17 +604,13 @@ public final class SystemServer {
                 }
 
                 try {
-                    Slog.i(TAG, "Wi-Fi P2pService");
-                    mSystemServiceManager.startServiceIfExists(
-                            "com.android.server.wifi.p2p.WifiP2pService");
+                    mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi P2pService", e);
                 }
 
                 try {
-                    Slog.i(TAG, "Wi-Fi Service");
-                    mSystemServiceManager.startServiceIfExists(
-                            "com.android.server.wifi.WifiService");
+                    mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting Wi-Fi Service", e);
                 }
