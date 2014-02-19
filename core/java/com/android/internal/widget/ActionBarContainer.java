@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -50,7 +51,8 @@ public class ActionBarContainer extends FrameLayout {
     public ActionBarContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        setBackgroundDrawable(null);
+        // Set a transparent background so that we project appropriately.
+        setBackground(new ActionBarBackgroundDrawable());
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.ActionBar);
@@ -242,24 +244,6 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     @Override
-    public void onDraw(Canvas canvas) {
-        if (getWidth() == 0 || getHeight() == 0) {
-            return;
-        }
-
-        if (mIsSplit) {
-            if (mSplitBackground != null) mSplitBackground.draw(canvas);
-        } else {
-            if (mBackground != null) {
-                mBackground.draw(canvas);
-            }
-            if (mStackedBackground != null && mIsStacked) {
-                mStackedBackground.draw(canvas);
-            }
-        }
-    }
-
-    @Override
     public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
         // No starting an action mode for an action bar child! (Where would it go?)
         return null;
@@ -290,12 +274,13 @@ public class ActionBarContainer extends FrameLayout {
     public void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
 
-        final boolean hasTabs = mTabContainer != null && mTabContainer.getVisibility() != GONE;
+        final View tabContainer = mTabContainer;
+        final boolean hasTabs = tabContainer != null && tabContainer.getVisibility() != GONE;
 
-        if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
+        if (tabContainer != null && tabContainer.getVisibility() != GONE) {
             final int containerHeight = getMeasuredHeight();
-            final int tabHeight = mTabContainer.getMeasuredHeight();
-            mTabContainer.layout(l, containerHeight - tabHeight, r, containerHeight);
+            final int tabHeight = tabContainer.getMeasuredHeight();
+            tabContainer.layout(l, containerHeight - tabHeight, r, containerHeight);
         }
 
         boolean needsInvalidate = false;
@@ -306,19 +291,54 @@ public class ActionBarContainer extends FrameLayout {
             }
         } else {
             if (mBackground != null) {
-                mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
-                        mActionBarView.getRight(), mActionBarView.getBottom());
+                final ActionBarView actionBarView = mActionBarView;
+                mBackground.setBounds(actionBarView.getLeft(), actionBarView.getTop(),
+                        actionBarView.getRight(), actionBarView.getBottom());
                 needsInvalidate = true;
             }
-            if ((mIsStacked = hasTabs && mStackedBackground != null)) {
-                mStackedBackground.setBounds(mTabContainer.getLeft(), mTabContainer.getTop(),
-                        mTabContainer.getRight(), mTabContainer.getBottom());
+            mIsStacked = hasTabs;
+            if (hasTabs && mStackedBackground != null) {
+                mStackedBackground.setBounds(tabContainer.getLeft(), tabContainer.getTop(),
+                        tabContainer.getRight(), tabContainer.getBottom());
                 needsInvalidate = true;
             }
         }
 
         if (needsInvalidate) {
             invalidate();
+        }
+    }
+
+    /**
+     * Dummy drawable so that we don't break background display lists and
+     * projection surfaces.
+     */
+    private class ActionBarBackgroundDrawable extends Drawable {
+        @Override
+        public void draw(Canvas canvas) {
+            if (mIsSplit) {
+                if (mSplitBackground != null) mSplitBackground.draw(canvas);
+            } else {
+                if (mBackground != null) {
+                    mBackground.draw(canvas);
+                }
+                if (mStackedBackground != null && mIsStacked) {
+                    mStackedBackground.draw(canvas);
+                }
+            }
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter cf) {
+        }
+
+        @Override
+        public int getOpacity() {
+            return 0;
         }
     }
 }

@@ -18,7 +18,6 @@ package android.graphics.drawable;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
@@ -233,15 +232,13 @@ public class RevealDrawable extends LayerDrawable {
 
         getDrawable(0).draw(canvas);
 
+        final Rect bounds = getBounds();
         final ArrayList<Ripple> activeRipples = mActiveRipples;
-        if (layerCount == 1 || activeRipples == null || activeRipples.isEmpty()) {
+        if (layerCount == 1 || bounds.isEmpty() || activeRipples == null
+                || activeRipples.isEmpty()) {
             // Nothing to reveal, we're done here.
             return;
         }
-
-        final Rect bounds = getBounds();
-        final int width = bounds.width();
-        final int height = bounds.height();
 
         if (mRipplePaint == null) {
             mRipplePaint = new Paint();
@@ -260,7 +257,11 @@ public class RevealDrawable extends LayerDrawable {
                 n--;
             } else {
                 if (layerSaveCount < 0) {
-                    layerSaveCount = canvas.saveLayer(0, 0, width, height, null, 0);
+                    layerSaveCount = canvas.saveLayer(
+                            bounds.left, bounds.top, bounds.right, bounds.bottom, null, 0);
+                    // Ripples must be clipped to bounds, otherwise SRC_IN will
+                    // miss them and we'll get artifacts.
+                    canvas.clipRect(bounds);
                 }
 
                 needsMask |= ripple.draw(canvas, mRipplePaint);
@@ -279,7 +280,8 @@ public class RevealDrawable extends LayerDrawable {
 
                 // TODO: When Drawable.setXfermode() is supported by all drawables,
                 // we won't need an extra layer.
-                canvas.saveLayer(0, 0, width, height, mMaskingPaint, 0);
+                canvas.saveLayer(
+                        bounds.left, bounds.top, bounds.right, bounds.bottom, mMaskingPaint, 0);
                 getDrawable(1).draw(canvas);
             }
 
