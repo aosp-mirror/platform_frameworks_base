@@ -205,7 +205,7 @@ public final class PendingIntent implements Parcelable {
      * <p class="note">For security reasons, the {@link android.content.Intent}
      * you supply here should almost always be an <em>explicit intent</em>,
      * that is specify an explicit component to be delivered to through
-     * {@link Intent#setClass(android.content.Context, Class)} Intent.setClass</p>
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
@@ -236,7 +236,7 @@ public final class PendingIntent implements Parcelable {
      * <p class="note">For security reasons, the {@link android.content.Intent}
      * you supply here should almost always be an <em>explicit intent</em>,
      * that is specify an explicit component to be delivered to through
-     * {@link Intent#setClass(android.content.Context, Class)} Intent.setClass</p>
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
@@ -328,7 +328,7 @@ public final class PendingIntent implements Parcelable {
      * <p class="note">For security reasons, the {@link android.content.Intent} objects
      * you supply here should almost always be <em>explicit intents</em>,
      * that is specify an explicit component to be delivered to through
-     * {@link Intent#setClass(android.content.Context, Class)} Intent.setClass</p>
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
@@ -378,7 +378,7 @@ public final class PendingIntent implements Parcelable {
      * <p class="note">For security reasons, the {@link android.content.Intent} objects
      * you supply here should almost always be <em>explicit intents</em>,
      * that is specify an explicit component to be delivered to through
-     * {@link Intent#setClass(android.content.Context, Class)} Intent.setClass</p>
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
@@ -448,7 +448,7 @@ public final class PendingIntent implements Parcelable {
      * <p class="note">For security reasons, the {@link android.content.Intent}
      * you supply here should almost always be an <em>explicit intent</em>,
      * that is specify an explicit component to be delivered to through
-     * {@link Intent#setClass(android.content.Context, Class)} Intent.setClass</p>
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
      *
      * @param context The Context in which this PendingIntent should perform
      * the broadcast.
@@ -502,7 +502,7 @@ public final class PendingIntent implements Parcelable {
      * <p class="note">For security reasons, the {@link android.content.Intent}
      * you supply here should almost always be an <em>explicit intent</em>,
      * that is specify an explicit component to be delivered to through
-     * {@link Intent#setClass(android.content.Context, Class)} Intent.setClass</p>
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
      *
      * @param context The Context in which this PendingIntent should start
      * the service.
