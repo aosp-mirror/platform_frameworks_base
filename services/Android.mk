@@ -8,13 +8,23 @@ LOCAL_MODULE := services
 
 LOCAL_SRC_FILES := $(call all-java-files-under,java)
 
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    services.core \
-    services.accessibility \
-    services.appwidget \
-    services.backup \
-    services.devicepolicy \
-    services.print
+# Uncomment to enable output of certain warnings (deprecated, unchecked)
+# LOCAL_JAVACFLAGS := -Xlint
+
+# Services that will be built as part of services.jar
+# These should map to directory names relative to this
+# Android.mk.
+services := \
+    core \
+    accessibility \
+    appwidget \
+    backup \
+    devicepolicy \
+    print \
+    usb
+
+# The convention is to name each service module 'services.$(module_name)'
+LOCAL_STATIC_JAVA_LIBRARIES := $(addprefix services.,$(services))
 
 include $(BUILD_JAVA_LIBRARY)
 
@@ -39,7 +49,16 @@ LOCAL_MODULE:= libandroid_servers
 
 include $(BUILD_SHARED_LIBRARY)
 
+# =============================================================
+
 ifeq (,$(ONE_SHOT_MAKEFILE))
-include $(call all-makefiles-under, $(LOCAL_PATH))
+# A full make is happening, so make everything.
+include $(call all-makefiles-under,$(LOCAL_PATH))
+else
+# If we ran an mm[m] command, we still want to build the individual
+# services that we depend on. This differs from the above condition
+# by only including service makefiles and not any tests or other
+# modules.
+include $(patsubst %,$(LOCAL_PATH)/%/Android.mk,$(services))
 endif
 
