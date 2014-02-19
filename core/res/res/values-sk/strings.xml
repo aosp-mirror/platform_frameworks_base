@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Umožňuje aplikácii používať na reprodukciu ľubovoľný nainštalovaný dekódovač na dekódovanie."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"spravovať dôveryhodné poverenia"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Umožňuje aplikácii inštalovať a odinštalovať certifikáty CA ako dôveryhodné poverenia."</string>
-    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"spustiť aplikáciu počas nečinnosti"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Toto povolenie umožňuje systému Android spustiť aplikáciu na pozadí, keď sa zariadenie nepoužíva."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čítanie alebo zápis do prostriedkov funkcie diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Umožňuje aplikácii čítať ľubovoľné prostriedky v skupine diag, napr. súbory v priečinku /dev, a zapisovať do nich. Môže dôjsť k ovplyvneniu stability a bezpečnosti systému. Toto nastavenie by mal používať IBA výrobca či operátor na diagnostiku hardvéru."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"povoliť alebo zakázať súčasti aplikácie"</string>
