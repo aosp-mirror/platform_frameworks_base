@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Tillåter att appen använder installerade medieavkodare för att avkoda media för uppspelning."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"hantera betrodda uppgifter"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Tillåter att appen installerar och avinstallerar CA-certifikat som betrodda uppgifter."</string>
-    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"kör appen när enheten är inaktiv"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Med den här behörigheten tillåts Android-systemet att köra appen i bakgrunden när enheten inte används."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"läsa/skriva till resurser som ägs av diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Tillåter att appen läser och skriver till en resurs som ägs av diag-gruppen, till exempel filer i /dev. Detta kan eventuellt påverka systemets stabilitet och säkerhet. Detta bör ENDAST användas av tillverkaren eller operatören för maskinvaruspecifik diagnostik."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivera eller inaktivera appkomponenter"</string>

@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Sallii sovelluksen käyttää mitä tahansa asennettua tietovälineen koodin purkajaa toistoa varten."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"hallinnoi luotettavia varmenteita"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Antaa sovellukselle luvan asentaa ja poistaa luotettavia CA-varmenteita."</string>
-    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"suorita sovellus laitteen ollessa käyttämättömänä"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Tämä oikeus sallii Android-järjestelmän siirtää sovelluksen suorituksen taustalle, kun laite ei ole käytössä."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lue diag:in omistamia resursseja / kirjoita resursseihin"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Antaa sovelluksen lukea ja kirjoittaa diag-ryhmän omistamiin resursseihin, esimerkiksi /dev-hakemistossa oleviin tiedostoihin. Tämä voi vaikuttaa järjestelmän vakauteen ja turvallisuuteen. Tämä lupa tulee myöntää VAIN valmistajan tai operaattorin laitteistotesteille."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"sovelluskomponenttien ottaminen käyttöön tai pois käytöstä"</string>
@@ -565,10 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Antaa sovelluksen hallita laitteen puhelinominaisuuksia. Jos sovelluksella on tämä oikeus, se voi esimerkiksi vaihtaa verkkoa tai ottaa puhelinradion käyttöön tai poistaa sen käytöstä ilmoittamatta käyttäjälle."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lue puhelimen tila ja identiteetti"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Antaa sovelluksen käyttää laitteen puhelinominaisuuksia. Sovellus voi määrittää puhelinnumeron ja laitteen tunnuksen, puhelun tilan sekä soitetun numeron."</string>
-    <!-- no translation found for permlab_readPrecisePhoneState (5476483020282007597) -->
-    <skip />
-    <!-- no translation found for permdesc_readPrecisePhoneState (6648009074263855418) -->
-    <skip />
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"lue puhelimen tarkat tilat"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Antaa sovelluksen käyttää puhelimen tarkkoja tiloja. Tämän oikeus antaa sovelluksen määrittää puhelun todellisen tilan, eli onko puhelu aktiivinen vai taustalla, puhelujen epäonnistumiset, tietoliikenneyhteyden tarkan tilan ja tietoliikenneyhteyden muodostuksen epäonnistumiset."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"estä tablet-laitetta menemästä virransäästötilaan"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"estä puhelinta menemästä virransäästötilaan"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Antaa sovelluksen estää tablet-laitetta siirtymästä virransäästötilaan."</string>

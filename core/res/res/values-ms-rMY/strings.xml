@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Membenarkan apl untuk menggunakan sebarang penyahkod media yang dipasangkan untuk menyahkod main semula."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"urus bukti kelayakan yang dipercayai"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Membenarkan apl memasang dan menyahpasang sijil CA sebagai bukti kelayakan yang dipercayai."</string>
-    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"jalankan aplikasi pada masa melahu"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Kebenaran ini membolehkan sistem Android menjalankan aplikasi di latar belakang semasa peranti tidak digunakan."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"baca/tulis ke sumber yang dimiliki oleh diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Membenarkan apl membaca dan menulis ke sebarang sumber yang dimiliki oleh kumpulan diag; contohnya, fail dalam /dev. Hal ini berpotensi menjejaskan kestabilan dan keselamatan sistem. Perkara ini seharusnya HANYA digunakan untuk diagnosis khusus perkakasan oleh pengilang atau pengendali."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"dayakan atau lumpuhkan komponen apl"</string>
@@ -565,10 +563,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Membenarkan apl untuk mengawal ciri-ciri telefon peranti. Apl dengan kebenaran ini boleh menukar rangkaian, menghidupkan dan mematikan radio telefon dan sebagainya tanpa memberitahu anda."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"baca status dan identiti telefon"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Membenarkan apl mengakses ciri telefon pada peranti. Kebenaran ini membolehkan apl menentukan nombor telefon dan ID peranti, sama ada panggilan aktif dan nombor jauh yang dihubungkan dengan panggilan."</string>
-    <!-- no translation found for permlab_readPrecisePhoneState (5476483020282007597) -->
-    <skip />
-    <!-- no translation found for permdesc_readPrecisePhoneState (6648009074263855418) -->
-    <skip />
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"baca keadaan telefon yang tepat"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Membenarkan apl mengakses keadaan telefon yang tepat. Kebenaran ini membolehkan apl menentukan status panggilan sebenar, sama ada panggilan aktif atau di latar belakang, kegagalan panggilan, status sambungan data yang tepat dan kegagalan sambungan data."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"menghalang tablet daripada tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"halang telefon daripada tidur"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Membenarkan apl menghalang tablet daripada tidur."</string>

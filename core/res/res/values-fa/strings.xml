@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"‏اجازه می‎دهد برنامه از هر رمزگشای رسانه نصب شده‌ای استفاده کند تا برای پخش رمزگشایی شود."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"مدیریت اطلاعات کاربری مورد اعتماد"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏به برنامه امکان می‌دهد گواهینامه‌های CA را به عنوان اطلاعات کاربری مورد اعتماد نصب یا حذف نصب کند."</string>
-    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"اجرای برنامه در هنگام بی‌حرکت بودن دستگاه"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏این مجوز به سیستم Android امکان می‌دهد تا وقتی دستگاه استفاده نمی‌شود برنامه را در پس‌زمینه اجرا کند."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"خواندن/نوشتن منابع متعلق به تشخیص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏به برنامه اجازه می‌دهد هر منبعی را که متعلق به گروه تشخیص است بخواند و در آن بنویسد؛ به‌عنوان مثال، فایل‌های /dev. این امر به‌صورت بالقوه می‌تواند بر پایدار بودن و امنیت سیستم تأثیر بگذارد. این تنها باید برای تشخیص‎‌های مختص سخت‌افزار توسط تولیدکننده یا اپراتور استفاده شود."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"فعال یا غیر فعال کردن اجزای برنامه"</string>

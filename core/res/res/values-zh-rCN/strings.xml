@@ -423,10 +423,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允许该应用使用任何已安装的媒体解码器进行解码，以便播放媒体。"</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理受信任的凭据"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允许应用安装和卸载 CA 证书（作为受信任的凭据）。"</string>
-    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
-    <skip />
+    <string name="permlab_bindIdleService" msgid="816311765497613780">"在设备处于闲置状态时运行应用"</string>
+    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"当设备处于闲置状态时，此权限允许Android系统在后台运行该应用。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允许应用读取/写入诊断组拥有的所有资源（例如 /dev 中的文件）。这可能会影响系统的稳定性和安全性。此权限仅供制造商或运营商诊断硬件方面的问题时使用。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用组件"</string>
