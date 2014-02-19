@@ -969,6 +969,23 @@ public final class CameraCharacteristics extends CameraMetadata {
             new Key<android.hardware.camera2.Size>("android.sensor.info.pixelArraySize", android.hardware.camera2.Size.class);
 
     /**
+     * <p>Maximum raw value output by sensor.</p>
+     * <p>This specifies the fully-saturated encoding level for the raw
+     * sample values from the sensor.  This is typically caused by the
+     * sensor becoming highly non-linear or clipping. The minimum for
+     * each channel is specified by the offset in the
+     * {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} tag.</p>
+     * <p>The white level is typically determined either by sensor bit depth
+     * (10-14 bits is expected), or by the point where the sensor response
+     * becomes too non-linear to be useful.  The default value for this is
+     * maximum representable value for a 16-bit raw sample (2^16 - 1).</p>
+     *
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     */
+    public static final Key<Integer> SENSOR_INFO_WHITE_LEVEL =
+            new Key<Integer>("android.sensor.info.whiteLevel", int.class);
+
+    /**
      * <p>Gain factor from electrons to raw units when
      * ISO=100</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
@@ -985,10 +1002,13 @@ public final class CameraCharacteristics extends CameraMetadata {
      * <p>A fixed black level offset for each of the color filter arrangement
      * (CFA) mosaic channels.</p>
      * <p>This tag specifies the zero light value for each of the CFA mosaic
-     * channels in the camera sensor.</p>
+     * channels in the camera sensor.  The maximal value output by the
+     * sensor is represented by the value in {@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}.</p>
      * <p>The values are given in row-column scan order, with the first value
      * corresponding to the element of the CFA in row=0, column=0.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
      */
     public static final Key<int[]> SENSOR_BLACK_LEVEL_PATTERN =
             new Key<int[]>("android.sensor.blackLevelPattern", int[].class);
