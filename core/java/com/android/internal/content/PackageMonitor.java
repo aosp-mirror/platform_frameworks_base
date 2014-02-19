@@ -242,7 +242,11 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     public boolean anyPackagesDisappearing() {
         return mDisappearingPackages != null;
     }
-    
+
+    public boolean isReplacing() {
+        return mChangeType == PACKAGE_UPDATING;
+    }
+
     public boolean isPackageModified(String packageName) {
         if (mModifiedPackages != null) {
             for (int i=mModifiedPackages.length-1; i>=0; i--) {

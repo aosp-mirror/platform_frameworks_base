@@ -36,7 +36,9 @@ import android.content.ReceiverCallNotAllowedException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ILauncherApps;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
@@ -602,6 +604,14 @@ class ContextImpl extends Context {
         registerService(CAMERA_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
                 return new CameraManager(ctx);
+            }
+        });
+
+        registerService(LAUNCHER_APPS_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(LAUNCHER_APPS_SERVICE);
+                ILauncherApps service = ILauncherApps.Stub.asInterface(b);
+                return new LauncherApps(ctx, service);
             }
         });
 

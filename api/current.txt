@@ -6476,6 +6476,7 @@ package android.content {
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
+    field public static final java.lang.String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final java.lang.String LOCATION_SERVICE = "location";
     field public static final java.lang.String MEDIA_ROUTER_SERVICE = "media_router";
@@ -7648,6 +7649,32 @@ package android.content.pm {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class LauncherActivityInfo {
+    method public int getApplicationFlags();
+    method public android.graphics.drawable.Drawable getBadgedIcon(int);
+    method public android.content.ComponentName getComponentName();
+    method public long getFirstInstallTime();
+    method public android.graphics.drawable.Drawable getIcon(int);
+    method public java.lang.CharSequence getLabel();
+    method public android.os.UserHandle getUser();
+  }
+
+  public class LauncherApps {
+    method public synchronized void addOnAppsChangedListener(android.content.pm.LauncherApps.OnAppsChangedListener);
+    method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
+    method public synchronized void removeOnAppsChangedListener(android.content.pm.LauncherApps.OnAppsChangedListener);
+    method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
+    method public void startActivityForProfile(android.content.ComponentName, android.graphics.Rect, android.os.Bundle, android.os.UserHandle);
+  }
+
+  public static abstract interface LauncherApps.OnAppsChangedListener {
+    method public abstract void onPackageAdded(android.os.UserHandle, java.lang.String);
+    method public abstract void onPackageChanged(android.os.UserHandle, java.lang.String);
+    method public abstract void onPackageRemoved(android.os.UserHandle, java.lang.String);
+    method public abstract void onPackagesAvailable(android.os.UserHandle, java.lang.String[], boolean);
+    method public abstract void onPackagesUnavailable(android.os.UserHandle, java.lang.String[], boolean);
   }
 
   public class PackageInfo implements android.os.Parcelable {
@@ -19898,6 +19925,7 @@ package android.os {
     method public int getUserCount();
     method public android.os.UserHandle getUserForSerialNumber(long);
     method public java.lang.String getUserName();
+    method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method public android.os.Bundle getUserRestrictions(android.os.UserHandle);
     method public boolean isUserAGoat();

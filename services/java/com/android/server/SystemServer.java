@@ -70,6 +70,7 @@ import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.Installer;
+import com.android.server.pm.LauncherAppsService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
@@ -921,6 +922,14 @@ public final class SystemServer {
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting TrustManagerService", e);
                 }
+            }
+
+            try {
+                Slog.i(TAG, "LauncherAppsService");
+                LauncherAppsService las = new LauncherAppsService(context);
+                ServiceManager.addService(Context.LAUNCHER_APPS_SERVICE, las);
+            } catch (Throwable t) {
+                reportWtf("starting LauncherAppsService", t);
             }
         }
 

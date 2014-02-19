@@ -1999,6 +1999,7 @@ public abstract class Context {
             BLUETOOTH_SERVICE,
             //@hide: SIP_SERVICE,
             USB_SERVICE,
+            LAUNCHER_APPS_SERVICE,
             //@hide: SERIAL_SERVICE,
             INPUT_SERVICE,
             DISPLAY_SERVICE,
@@ -2560,6 +2561,16 @@ public abstract class Context {
      * @see android.os.UserManager
      */
     public static final String USER_SERVICE = "user";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.content.pm.LauncherApps} for querying and monitoring launchable apps across
+     * profiles of a user.
+     *
+     * @see #getSystemService
+     * @see android.content.pm.LauncherApps
+     */
+    public static final String LAUNCHER_APPS_SERVICE = "launcherapps";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
