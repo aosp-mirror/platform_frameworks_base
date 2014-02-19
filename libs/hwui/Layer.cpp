@@ -131,8 +131,9 @@ void Layer::removeFbo(bool flush) {
     }
 }
 
-void Layer::setPaint(SkPaint* paint) {
+void Layer::setPaint(const SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
+    setColorFilter((paint) ? paint->getColorFilter() : NULL);
 }
 
 void Layer::setColorFilter(SkColorFilter* filter) {
