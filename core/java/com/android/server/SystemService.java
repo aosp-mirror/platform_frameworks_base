@@ -49,9 +49,32 @@ public abstract class SystemService {
      * Boot Phases
      */
     public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100; // maybe should be a dependency?
+
+    /**
+     * After receiving this boot phase, services can obtain lock settings data.
+     */
     public static final int PHASE_LOCK_SETTINGS_READY = 480;
+
+    /**
+     * After receiving this boot phase, services can safely call into core system services
+     * such as the PowerManager or PackageManager.
+     */
     public static final int PHASE_SYSTEM_SERVICES_READY = 500;
+
+    /**
+     * After receiving this boot phase, services can broadcast Intents.
+     */
+    public static final int PHASE_ACTIVITY_MANAGER_READY = 550;
+
+    /**
+     * After receiving this boot phase, services can start/bind to third party apps.
+     * Apps will be able to make Binder calls into services at this point.
+     */
     public static final int PHASE_THIRD_PARTY_APPS_CAN_START = 600;
+
+    /**
+     * After receiving this boot phase, services must have finished all boot-related work.
+     */
     public static final int PHASE_BOOT_COMPLETE = 1000;
 
     private final Context mContext;
