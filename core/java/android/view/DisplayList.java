@@ -484,9 +484,9 @@ public class DisplayList {
      *
      * If set to true, camera distance will be ignored. Defaults to false.
      */
-    public void setSharesGlobalCamera(boolean sharesGlobalCamera) {
+    public void setUsesGlobalCamera(boolean usesGlobalCamera) {
         if (hasNativeDisplayList()) {
-            nSetSharesGlobalCamera(mFinalizer.mNativeDisplayList, sharesGlobalCamera);
+            nSetUsesGlobalCamera(mFinalizer.mNativeDisplayList, usesGlobalCamera);
         }
     }
 
@@ -1116,7 +1116,7 @@ public class DisplayList {
     private static native void nSetOutline(long displayList, long nativePath);
     private static native void nSetClipToOutline(long displayList, boolean clipToOutline);
     private static native void nSetCastsShadow(long displayList, boolean castsShadow);
-    private static native void nSetSharesGlobalCamera(long displayList, boolean sharesGlobalCamera);
+    private static native void nSetUsesGlobalCamera(long displayList, boolean usesGlobalCamera);
     private static native void nSetAlpha(long displayList, float alpha);
     private static native void nSetHasOverlappingRendering(long displayList,
             boolean hasOverlappingRendering);
