@@ -1018,7 +1018,7 @@ public final class ProcessStats implements Parcelable {
                     for (int iproc=pkgState.mProcesses.size()-1; iproc>=0; iproc--) {
                         final ProcessState ps = pkgState.mProcesses.valueAt(iproc);
                         if (ps.isInUse()) {
-                            pkgState.mProcesses.valueAt(iproc).resetSafely(now);
+                            ps.resetSafely(now);
                             ps.mCommonProcess.mTmpNumInUse++;
                             ps.mCommonProcess.mTmpFoundSubProc = ps;
                         } else {
@@ -1029,7 +1029,7 @@ public final class ProcessStats implements Parcelable {
                     for (int isvc=pkgState.mServices.size()-1; isvc>=0; isvc--) {
                         final ServiceState ss = pkgState.mServices.valueAt(isvc);
                         if (ss.isInUse()) {
-                            pkgState.mServices.valueAt(isvc).resetSafely(now);
+                            ss.resetSafely(now);
                         } else {
                             pkgState.mServices.removeAt(isvc);
                         }
@@ -3142,7 +3142,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         public boolean isInUse() {
-            return mOwner != null;
+            return mOwner != null || mRestarting;
         }
 
         void add(ServiceState other) {
