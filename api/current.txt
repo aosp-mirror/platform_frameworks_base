@@ -11306,6 +11306,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PHYSICAL_SIZE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PIXEL_ARRAY_SIZE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_SENSITIVITY_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_WHITE_LEVEL;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_MAX_ANALOG_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS;
