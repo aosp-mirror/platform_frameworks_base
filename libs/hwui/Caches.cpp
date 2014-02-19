@@ -685,7 +685,8 @@ void Caches::initTempProperties() {
     propertyDirtyViewport = false;
     propertyEnable3d = false;
     propertyCameraDistance = 1.0f;
-    propertyShadowStrength = 0x3f;
+    propertyAmbientShadowStrength = 0x3f;
+    propertySpotShadowStrength = 0x3f;
 
     propertyLightPosXScale = 0.5f;
     propertyLightPosYScale = 0.0f;
@@ -704,9 +705,13 @@ void Caches::setTempProperty(const char* name, const char* value) {
         propertyDirtyViewport = true;
         ALOGD("camera dist multiplier = %.2f", propertyCameraDistance);
         return;
-    } else if (!strcmp(name, "shadowStrength")) {
-        propertyShadowStrength = atoi(value);
-        ALOGD("shadow strength = 0x%x out of 0xff", propertyShadowStrength);
+    } else if (!strcmp(name, "ambientShadowStrength")) {
+        propertyAmbientShadowStrength = atoi(value);
+        ALOGD("ambient shadow strength = 0x%x out of 0xff", propertyAmbientShadowStrength);
+        return;
+    } else if (!strcmp(name, "spotShadowStrength")) {
+        propertySpotShadowStrength = atoi(value);
+        ALOGD("spot shadow strength = 0x%x out of 0xff", propertySpotShadowStrength);
         return;
     } else if (!strcmp(name, "lightPosXScale")) {
         propertyLightPosXScale = fmin(fmax(atof(value), 0.0), 1.0);

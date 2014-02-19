@@ -3214,7 +3214,6 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     mCaches.enableScissor();
 
     SkPaint paint;
-    paint.setARGB(mCaches.propertyShadowStrength, 0, 0, 0);
     paint.setAntiAlias(true); // want to use AlphaVertex
 
     // tessellate caster outline into a 2d polygon
@@ -3238,19 +3237,25 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransform, float casterAlp
     }
 
     // draw caster's shadows
-    VertexBuffer ambientShadowVertexBuffer;
-    ShadowTessellator::tessellateAmbientShadow(casterPolygon, casterVertexCount,
-            ambientShadowVertexBuffer);
-    drawVertexBuffer(ambientShadowVertexBuffer, &paint);
+    if (mCaches.propertyAmbientShadowStrength > 0) {
+        paint.setARGB(mCaches.propertyAmbientShadowStrength, 0, 0, 0);
+        VertexBuffer ambientShadowVertexBuffer;
+        ShadowTessellator::tessellateAmbientShadow(casterPolygon, casterVertexCount,
+                ambientShadowVertexBuffer);
+        drawVertexBuffer(ambientShadowVertexBuffer, &paint);
+    }
 
-    VertexBuffer spotShadowVertexBuffer;
-    Vector3 lightPosScale(mCaches.propertyLightPosXScale,
-            mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
-    ShadowTessellator::tessellateSpotShadow(casterPolygon, casterVertexCount,
-            lightPosScale, *currentTransform(), getWidth(), getHeight(),
-            spotShadowVertexBuffer);
+    if (mCaches.propertySpotShadowStrength > 0) {
+        paint.setARGB(mCaches.propertySpotShadowStrength, 0, 0, 0);
+        VertexBuffer spotShadowVertexBuffer;
+        Vector3 lightPosScale(mCaches.propertyLightPosXScale,
+                mCaches.propertyLightPosYScale, mCaches.propertyLightPosZScale);
+        ShadowTessellator::tessellateSpotShadow(casterPolygon, casterVertexCount,
+                lightPosScale, *currentTransform(), getWidth(), getHeight(),
+                spotShadowVertexBuffer);
 
-    drawVertexBuffer(spotShadowVertexBuffer, &paint);
+        drawVertexBuffer(spotShadowVertexBuffer, &paint);
+    }
 
     return DrawGlInfo::kStatusDrew;
 }
