@@ -24184,7 +24184,7 @@ package android.telecomm {
   }
 
   public abstract class CallService extends android.app.Service {
-    ctor protected CallService();
+    ctor public CallService();
     method public abstract void call(android.telecomm.CallInfo);
     method public abstract void confirmIncomingCall(java.lang.String, java.lang.String);
     method public abstract void disconnect(java.lang.String);
@@ -24216,6 +24216,13 @@ package android.telecomm {
     ctor protected CallServiceProvider();
     method public abstract void lookupCallServices(android.telecomm.ICallServiceLookupResponse);
     method public android.os.IBinder onBind(android.content.Intent);
+  }
+
+  public abstract class CallServiceSelector extends android.app.Service {
+    ctor protected CallServiceSelector();
+    method protected abstract boolean isSwitchable(android.telecomm.CallInfo);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected abstract java.util.List<android.telecomm.CallServiceInfo> select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceInfo>);
   }
 
   public final class CallState extends java.lang.Enum {
