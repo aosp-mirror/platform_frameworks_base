@@ -2546,15 +2546,41 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * Compares two sets of signatures. Returns:
+     * <br />
+     * {@link PackageManager#SIGNATURE_NEITHER_SIGNED}: if both signature sets are null,
+     * <br />
+     * {@link PackageManager#SIGNATURE_FIRST_NOT_SIGNED}: if the first signature set is null,
+     * <br />
+     * {@link PackageManager#SIGNATURE_SECOND_NOT_SIGNED}: if the second signature set is null,
+     * <br />
+     * {@link PackageManager#SIGNATURE_MATCH}: if the two signature sets are identical,
+     * <br />
+     * {@link PackageManager#SIGNATURE_NO_MATCH}: if the two signature sets differ.
+     */
     static int compareSignatures(Signature[] s1, Signature[] s2) {
         if (s1 == null) {
             return s2 == null
                     ? PackageManager.SIGNATURE_NEITHER_SIGNED
                     : PackageManager.SIGNATURE_FIRST_NOT_SIGNED;
         }
+
         if (s2 == null) {
             return PackageManager.SIGNATURE_SECOND_NOT_SIGNED;
         }
+
+        if (s1.length != s2.length) {
+            return PackageManager.SIGNATURE_NO_MATCH;
+        }
+
+        // Since both signature sets are of size 1, we can compare without HashSets.
+        if (s1.length == 1) {
+            return s1[0].equals(s2[0]) ?
+                    PackageManager.SIGNATURE_MATCH :
+                    PackageManager.SIGNATURE_NO_MATCH;
+        }
+
         HashSet<Signature> set1 = new HashSet<Signature>();
         for (Signature sig : s1) {
             set1.add(sig);
