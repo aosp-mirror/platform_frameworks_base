@@ -196,8 +196,8 @@ public:
         mCastsShadow = castsShadow;
     }
 
-    void setSharesGlobalCamera(bool sharesGlobalCamera) {
-        mSharesGlobalCamera = sharesGlobalCamera;
+    void setUsesGlobalCamera(bool usesGlobalCamera) {
+        mUsesGlobalCamera = usesGlobalCamera;
     }
 
     void setProjectBackwards(bool shouldProject) {
@@ -621,7 +621,7 @@ private:
     SkPath mOutline;
     bool mClipToOutline;
     bool mCastsShadow;
-    bool mSharesGlobalCamera; // TODO: respect value when rendering
+    bool mUsesGlobalCamera; // TODO: respect value when rendering
     float mAlpha;
     bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY, mTranslationZ;
