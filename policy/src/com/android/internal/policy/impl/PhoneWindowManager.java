@@ -1168,7 +1168,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateRotation = true;
             }
             if (mImmersiveModeConfirmation != null) {
-                mImmersiveModeConfirmation.loadSetting();
+                mImmersiveModeConfirmation.loadSetting(mCurrentUserId);
             }
             PolicyControl.reloadFromSetting(mContext);
         }
