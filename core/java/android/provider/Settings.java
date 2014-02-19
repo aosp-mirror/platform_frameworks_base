@@ -3476,16 +3476,8 @@ public final class Settings {
             "lock_screen_owner_info_enabled";
 
         /**
-         * This preference enables expanding the notification panel even over a securely
-         * locked screen, showing only "public" notifications in this case.
-         * @hide
-         */
-        public static final String LOCK_SCREEN_ALLOW_NOTIFICATIONS =
-                "lock_screen_allow_notifications";
-
-        /**
-         * When set in conjunction with {@link #LOCK_SCREEN_ALLOW_NOTIFICATIONS}, shows
-         * notifications in their "private" form (same as when the device is unlocked).
+         * When set by a user, allows notifications to be shown atop a securely locked screen
+         * in their full "private" form (same as when the device is unlocked).
          * @hide
          */
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
@@ -6081,6 +6073,15 @@ public final class Settings {
          * @hide
          */
         public static final String POLICY_CONTROL = "policy_control";
+
+
+        /**
+         * This preference enables notification display even over a securely
+         * locked screen.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
+                "lock_screen_show_notifications";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
