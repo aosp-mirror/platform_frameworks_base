@@ -503,7 +503,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             boolean slow;
             int screenAutoBrightness = mAutomaticBrightnessController != null ?
                     mAutomaticBrightnessController.getAutomaticScreenBrightness() : -1;
-            if (screenAutoBrightness >= 0) {
+            if (screenAutoBrightness >= 0 && mPowerRequest.useAutoBrightness) {
                 // Use current auto-brightness value.
                 target = screenAutoBrightness;
                 slow = mUsingScreenAutoBrightness;
