@@ -24570,32 +24570,6 @@ package android.telephony {
     field public static final int SIM_STATE_UNKNOWN = 0; // 0x0
   }
 
-  public class ThirdPartyCallListener {
-    ctor public ThirdPartyCallListener(com.android.internal.telephony.IThirdPartyCallListener);
-    method public void onCallEnded(int);
-    method public void onCallEstablished();
-    method public void onCallProviderAttached(android.telephony.ThirdPartyCallProvider);
-    method public void onRingingStarted();
-    field public static final int CALL_END_INCOMING_MISSED = 2; // 0x2
-    field public static final int CALL_END_NORMAL = 1; // 0x1
-    field public static final int CALL_END_OTHER = 3; // 0x3
-  }
-
-  public class ThirdPartyCallProvider {
-    ctor public ThirdPartyCallProvider();
-    method public void hangup();
-    method public void incomingCallAccept();
-    method public void mute(boolean);
-    method public void sendDtmf(char);
-  }
-
-  public class ThirdPartyCallService {
-    ctor public ThirdPartyCallService();
-    method public android.os.IBinder getBinder();
-    method public void incomingCallAttach(android.telephony.ThirdPartyCallListener, java.lang.String);
-    method public void outgoingCallInitiate(android.telephony.ThirdPartyCallListener, java.lang.String);
-  }
-
 }
 
 package android.telephony.cdma {
@@ -34075,24 +34049,6 @@ package android.widget {
     method public void setOnZoomOutClickListener(android.view.View.OnClickListener);
     method public void setZoomSpeed(long);
     method public void show();
-  }
-
-}
-
-package com.android.internal.telephony {
-
-  public abstract interface IThirdPartyCallListener implements android.os.IInterface {
-    method public abstract void onCallEnded(int) throws android.os.RemoteException;
-    method public abstract void onCallEstablished() throws android.os.RemoteException;
-    method public abstract void onCallProviderAttached(com.android.internal.telephony.IThirdPartyCallProvider) throws android.os.RemoteException;
-    method public abstract void onRingingStarted() throws android.os.RemoteException;
-  }
-
-  public abstract interface IThirdPartyCallProvider implements android.os.IInterface {
-    method public abstract void hangup() throws android.os.RemoteException;
-    method public abstract void incomingCallAccept() throws android.os.RemoteException;
-    method public abstract void mute(boolean) throws android.os.RemoteException;
-    method public abstract void sendDtmf(char) throws android.os.RemoteException;
   }
 
 }
