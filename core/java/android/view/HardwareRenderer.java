@@ -234,13 +234,6 @@ public abstract class HardwareRenderer {
     abstract void updateSurface(Surface surface) throws OutOfResourcesException;
 
     /**
-     * Destroys the layers used by the specified view hierarchy.
-     *
-     * @param view The root of the view hierarchy
-     */
-    abstract void destroyLayers(View view);
-
-    /**
      * Destroys all hardware rendering resources associated with the specified
      * view hierarchy.
      *
@@ -255,15 +248,6 @@ public abstract class HardwareRenderer {
      * @param surface The surface to hardware accelerate
      */
     abstract void invalidate(Surface surface);
-
-    /**
-     * This method should be invoked to ensure the hardware renderer is in
-     * valid state (for instance, to ensure the correct EGL context is bound
-     * to the current thread.)
-     *
-     * @return true if the renderer is now valid, false otherwise
-     */
-    abstract boolean validate();
 
     /**
      * This method ensures the hardware renderer is in a valid state

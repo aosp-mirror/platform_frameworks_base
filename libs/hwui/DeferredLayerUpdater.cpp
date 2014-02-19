@@ -123,27 +123,5 @@ void DeferredLayerUpdater::doUpdateTexImage() {
     }
 }
 
-void DeferredLayerUpdater::applyDeferred(DeferredLayerUpdater* deferredApply) {
-    // Default assignment operator doesn't quite work, and fails due to mCaches anyway
-    deferredApply->mWidth = mWidth;
-    deferredApply->mHeight = mHeight;
-    deferredApply->mBlend = mBlend;
-    deferredApply->mAlpha = mAlpha;
-    deferredApply->mMode = mMode;
-    deferredApply->mDirtyRect.set(mDirtyRect);
-    deferredApply->mDisplayList = mDisplayList;
-    deferredApply->mSurfaceTexture = mSurfaceTexture;
-    deferredApply->mNeedsGLContextAttach = mNeedsGLContextAttach;
-    deferredApply->mUpdateTexImage = mUpdateTexImage;
-    deferredApply->setColorFilter(mColorFilter);
-    deferredApply->setTransform(mTransform);
-
-    mDisplayList = 0;
-    mDirtyRect.setEmpty();
-    mTransform = 0;
-    mNeedsGLContextAttach = false;
-    mUpdateTexImage = false;
-}
-
 } /* namespace uirenderer */
 } /* namespace android */

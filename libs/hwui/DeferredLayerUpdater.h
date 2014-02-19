@@ -82,7 +82,6 @@ public:
     ANDROID_API void setColorFilter(SkColorFilter* colorFilter);
 
     ANDROID_API bool apply();
-    ANDROID_API void applyDeferred(DeferredLayerUpdater* deferredApply);
 
     ANDROID_API Layer* backingLayer() {
         return mLayer;

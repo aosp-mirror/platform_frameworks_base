@@ -21,15 +21,19 @@
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
+#include <SkBitmap.h>
 #include <utils/Condition.h>
 #include <utils/Functor.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
+#include <utils/Vector.h>
 
 namespace android {
 namespace uirenderer {
 
+class DeferredLayerUpdater;
 class DisplayList;
+class Layer;
 class Rect;
 
 namespace renderthread {
@@ -64,12 +68,19 @@ public:
 
     ANDROID_API void runWithGlContext(RenderTask* task);
 
+    ANDROID_API DeferredLayerUpdater* createDisplayListLayer(int width, int height);
+    ANDROID_API DeferredLayerUpdater* createTextureLayer();
+    ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
+    ANDROID_API void destroyLayer(DeferredLayerUpdater* layer);
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
 
     Mutex mSyncMutex;
     Condition mSyncCondition;
+
+    Vector<DeferredLayerUpdater*> mLayers;
 
     void destroyContext();
 

@@ -22,7 +22,9 @@
 #include "RenderTask.h"
 #include "RenderThread.h"
 
+#include "../DeferredLayerUpdater.h"
 #include "../DisplayList.h"
+#include "../LayerRenderer.h"
 #include "../Rect.h"
 
 namespace android {
@@ -31,6 +33,7 @@ namespace renderthread {
 
 #define ARGS(method) method ## Args
 
+#define CREATE_BRIDGE0(name) CREATE_BRIDGE(name,,,,,,,,)
 #define CREATE_BRIDGE1(name, a1) CREATE_BRIDGE(name, a1,,,,,,,)
 #define CREATE_BRIDGE2(name, a1, a2) CREATE_BRIDGE(name, a1,a2,,,,,,)
 #define CREATE_BRIDGE3(name, a1, a2, a3) CREATE_BRIDGE(name, a1,a2,a3,,,,,)
@@ -114,13 +117,14 @@ void RenderProxy::setup(int width, int height) {
     post(task);
 }
 
-CREATE_BRIDGE3(drawDisplayList, CanvasContext* context, DisplayList* displayList,
-        Rect dirty) {
+CREATE_BRIDGE4(drawDisplayList, CanvasContext* context, DisplayList* displayList,
+        Rect dirty, const Vector<DeferredLayerUpdater*>* layerUpdates) {
     Rect* dirty = &args->dirty;
     if (dirty->bottom == -1 && dirty->left == -1 &&
             dirty->top == -1 && dirty->right == -1) {
         dirty = 0;
     }
+    args->context->processLayerUpdates(args->layerUpdates);
     args->context->drawDisplayList(args->displayList, dirty);
     return NULL;
 }
@@ -131,6 +135,7 @@ void RenderProxy::drawDisplayList(DisplayList* displayList,
     args->context = mContext;
     args->displayList = displayList;
     args->dirty.set(dirtyLeft, dirtyTop, dirtyRight, dirtyBottom);
+    args->layerUpdates = &mLayers;
     // TODO: Switch to post() once some form of thread safety strategy is in place
     postAndWait(task);
 }
@@ -180,6 +185,70 @@ void RenderProxy::runWithGlContext(RenderTask* gltask) {
     args->context = mContext;
     args->task = gltask;
     postAndWait(task);
+}
+
+CREATE_BRIDGE2(createDisplayListLayer, int width, int height) {
+    Layer* layer = LayerRenderer::createRenderLayer(args->width, args->height);
+    if (!layer) return 0;
+
+    OpenGLRenderer* renderer = new LayerRenderer(layer);
+    renderer->initProperties();
+    return new DeferredLayerUpdater(layer, renderer);
+}
+
+DeferredLayerUpdater* RenderProxy::createDisplayListLayer(int width, int height) {
+    SETUP_TASK(createDisplayListLayer);
+    args->width = width;
+    args->height = height;
+    void* retval = postAndWait(task);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
+    mLayers.push(layer);
+    return layer;
+}
+
+CREATE_BRIDGE0(createTextureLayer) {
+    Layer* layer = LayerRenderer::createTextureLayer();
+    if (!layer) return 0;
+    return new DeferredLayerUpdater(layer);
+}
+
+DeferredLayerUpdater* RenderProxy::createTextureLayer() {
+    SETUP_TASK(createTextureLayer);
+    void* retval = postAndWait(task);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(retval);
+    mLayers.push(layer);
+    return layer;
+}
+
+CREATE_BRIDGE1(destroyLayer, Layer* layer) {
+    LayerRenderer::destroyLayer(args->layer);
+    return NULL;
+}
+
+CREATE_BRIDGE3(copyLayerInto, CanvasContext* context, DeferredLayerUpdater* layer,
+        SkBitmap* bitmap) {
+    bool success = args->context->copyLayerInto(args->layer, args->bitmap);
+    return (void*) success;
+}
+
+bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
+    SETUP_TASK(copyLayerInto);
+    args->context = mContext;
+    args->layer = layer;
+    args->bitmap = bitmap;
+    return (bool) postAndWait(task);
+}
+
+void RenderProxy::destroyLayer(DeferredLayerUpdater* layer) {
+    for (size_t i = 0; i < mLayers.size(); i++) {
+        if (mLayers[i] == layer) {
+            mLayers.removeAt(i);
+            break;
+        }
+    }
+    SETUP_TASK(destroyLayer);
+    args->layer = layer->detachBackingLayer();
+    post(task);
 }
 
 MethodInvokeRenderTask* RenderProxy::createTask(RunnableMethod method) {
