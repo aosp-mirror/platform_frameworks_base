@@ -39,8 +39,8 @@ import java.util.ArrayList;
  * A MediaSession is created by calling
  * {@link MediaSessionManager#createSession(String)}. Once a session is created
  * apps that have the MEDIA_CONTENT_CONTROL permission can interact with the
- * session through {@link MediaSessionManager#listActiveSessions()}. The owner
- * of the session may also use {@link #getSessionToken()} to allow apps without
+ * session through {@link MediaSessionManager#getActiveSessions()}. The owner of
+ * the session may also use {@link #getSessionToken()} to allow apps without
  * this permission to create a {@link MediaController} to interact with this
  * session.
  * <p>
