@@ -28,7 +28,7 @@ namespace uirenderer {
 // Lifecycle
 ///////////////////////////////////////////////////////////////////////////////
 
-void AssetAtlas::init(sp<GraphicBuffer> buffer, int* map, int count) {
+void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
     if (mImage) {
         return;
     }
@@ -108,14 +108,19 @@ private:
 /**
  * TODO: This method does not take the rotation flag into account
  */
-void AssetAtlas::createEntries(Caches& caches, int* map, int count) {
+void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
     const float width = float(mTexture->width);
     const float height = float(mTexture->height);
 
     for (int i = 0; i < count; ) {
-        SkBitmap* bitmap = (SkBitmap*) map[i++];
-        int x = map[i++];
-        int y = map[i++];
+        SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(map[i++]);
+        // NOTE: We're converting from 64 bit signed values to 32 bit
+        // signed values. This is guaranteed to be safe because the "x"
+        // and "y" coordinate values are guaranteed to be representable
+        // with 32 bits. The array is 64 bits wide so that it can carry
+        // pointers on 64 bit architectures.
+        const int x = static_cast<int>(map[i++]);
+        const int y = static_cast<int>(map[i++]);
         bool rotated = map[i++] > 0;
 
         // Bitmaps should never be null, we're just extra paranoid
