@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <linux/ioctl.h>
 #include <linux/android_alarm.h>
+#include <linux/rtc.h>
 
 namespace android {
 
@@ -58,6 +59,7 @@ public:
     virtual ~AlarmImpl();
 
     virtual int set(int type, struct timespec *ts) = 0;
+    virtual int setTime(struct timeval *tv) = 0;
     virtual int waitForAlarm() = 0;
 
 protected:
@@ -71,6 +73,7 @@ public:
     AlarmImplAlarmDriver(int fd) : AlarmImpl(&fd, 1) { }
 
     int set(int type, struct timespec *ts);
+    int setTime(struct timeval *tv);
     int waitForAlarm();
 };
 
@@ -82,6 +85,7 @@ public:
     ~AlarmImplTimerFd();
 
     int set(int type, struct timespec *ts);
+    int setTime(struct timeval *tv);
     int waitForAlarm();
 
 private:
@@ -105,6 +109,19 @@ AlarmImpl::~AlarmImpl()
 int AlarmImplAlarmDriver::set(int type, struct timespec *ts)
 {
     return ioctl(fds[0], ANDROID_ALARM_SET(type), ts);
+}
+
+int AlarmImplAlarmDriver::setTime(struct timeval *tv)
+{
+    struct timespec ts;
+    int res;
+
+    ts.tv_sec = tv->tv_sec;
+    ts.tv_nsec = tv->tv_usec * 1000;
+    res = ioctl(fds[0], ANDROID_ALARM_SET_RTC, &ts);
+    if (res < 0)
+        ALOGV("ANDROID_ALARM_SET_RTC ioctl failed: %s\n", strerror(errno));
+    return res;
 }
 
 int AlarmImplAlarmDriver::waitForAlarm()
@@ -140,6 +157,50 @@ int AlarmImplTimerFd::set(int type, struct timespec *ts)
     return timerfd_settime(fds[type], TFD_TIMER_ABSTIME, &spec, NULL);
 }
 
+int AlarmImplTimerFd::setTime(struct timeval *tv)
+{
+    struct rtc_time rtc;
+    struct tm tm, *gmtime_res;
+    int fd;
+    int res;
+
+    fd = open("/dev/rtc0", O_RDWR);
+    if (fd < 0) {
+        ALOGV("Unable to open RTC driver: %s\n", strerror(errno));
+        return -1;
+    }
+
+    res = settimeofday(tv, NULL);
+    if (res < 0) {
+        ALOGV("settimeofday() failed: %s\n", strerror(errno));
+        goto done;
+    }
+
+    gmtime_res = gmtime_r(&tv->tv_sec, &tm);
+    if (!gmtime_res) {
+        ALOGV("gmtime_r() failed: %s\n", strerror(errno));
+        res = -1;
+        goto done;
+    }
+
+    memset(&rtc, 0, sizeof(rtc));
+    rtc.tm_sec = tm.tm_sec;
+    rtc.tm_min = tm.tm_min;
+    rtc.tm_hour = tm.tm_hour;
+    rtc.tm_mday = tm.tm_mday;
+    rtc.tm_mon = tm.tm_mon;
+    rtc.tm_year = tm.tm_year;
+    rtc.tm_wday = tm.tm_wday;
+    rtc.tm_yday = tm.tm_yday;
+    rtc.tm_isdst = tm.tm_isdst;
+    res = ioctl(fd, RTC_SET_TIME, &rtc);
+    if (res < 0)
+        ALOGV("RTC_SET_TIME ioctl failed: %s\n", strerror(errno));
+done:
+    close(fd);
+    return res;
+}
+
 int AlarmImplTimerFd::waitForAlarm()
 {
     epoll_event events[N_ANDROID_TIMERFDS];
@@ -166,6 +227,30 @@ int AlarmImplTimerFd::waitForAlarm()
     }
 
     return result;
+}
+
+static jint android_server_AlarmManagerService_setKernelTime(JNIEnv*, jobject, jlong nativeData, jlong millis)
+{
+    AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
+    struct timeval tv;
+    int ret;
+
+    if (millis <= 0 || millis / 1000LL >= INT_MAX) {
+        return -1;
+    }
+
+    tv.tv_sec = (time_t) (millis / 1000LL);
+    tv.tv_usec = (suseconds_t) ((millis % 1000LL) * 1000LL);
+
+    ALOGD("Setting time of day to sec=%d\n", (int) tv.tv_sec);
+
+    ret = impl->setTime(&tv);
+
+    if(ret < 0) {
+        ALOGW("Unable to set rtc to %ld: %s\n", tv.tv_sec, strerror(errno));
+        ret = -1;
+    }
+    return ret;
 }
 
 static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv*, jobject, jlong, jint minswest)
@@ -309,6 +394,7 @@ static JNINativeMethod sMethods[] = {
     {"close", "(J)V", (void*)android_server_AlarmManagerService_close},
     {"set", "(JIJJ)V", (void*)android_server_AlarmManagerService_set},
     {"waitForAlarm", "(J)I", (void*)android_server_AlarmManagerService_waitForAlarm},
+    {"setKernelTime", "(JJ)I", (void*)android_server_AlarmManagerService_setKernelTime},
     {"setKernelTimezone", "(JI)I", (void*)android_server_AlarmManagerService_setKernelTimezone},
 };
 
