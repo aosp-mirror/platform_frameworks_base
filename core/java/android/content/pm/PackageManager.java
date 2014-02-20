@@ -1249,6 +1249,15 @@ public abstract class PackageManager {
     public static final String FEATURE_TELEVISION = "android.hardware.type.television";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This is a device dedicated to showing UI
+     * on a watch. A watch here is defined to be a device worn on the body, perhaps on
+     * the wrist. The user is very close when interacting with the device.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WATCH = "android.hardware.type.watch";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports printing.
      */
