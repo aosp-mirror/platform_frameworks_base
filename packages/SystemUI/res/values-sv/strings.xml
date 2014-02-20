@@ -23,7 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ta bort"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Ta bort från listan"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Inga nya appar"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Inga aktiva appar"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvisa nya appar"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 ny app"</item>

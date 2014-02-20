@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odstrániť zo zoznamu"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informácie o aplikácii"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Žiadne nedávne aplikácie"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Odmietnuť nové aplikácie"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zatvoriť nedávne aplikácie"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 nová aplikácia"</item>
     <item quantity="other" msgid="1040784359794890744">"Počet nových aplikácií: %d"</item>

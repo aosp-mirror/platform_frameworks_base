@@ -64,7 +64,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gemmer skærmbillede..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Gemmer skærmbillede..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Skærmbilledet gemmes."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skærmbilledet er taget."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skærmbilledet er gemt."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Tryk for at se dit skærmbillede."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Skærmbilledet kunne ikke tages."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Skærmbilledet kunne ikke gemmes. Eksternt lager kan være i brug."</string>
@@ -136,7 +136,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemindstillinger."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Underretninger."</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd meddelelse."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd underretning."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS aktiveret."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS samler data."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter aktiveret."</string>

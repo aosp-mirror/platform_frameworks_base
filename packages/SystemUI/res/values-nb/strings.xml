@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"Sys.gr.snitt"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Fjern"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om app"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Ingen nylige apper"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvis nylige apper"</string>
   <plurals name="status_bar_accessibility_recent_apps">
@@ -167,7 +167,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posisjon angitt av GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktive stedsforespørsler"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Fjern alle varslinger."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Info om app"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Info om appen"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skjermen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skjermen er låst i liggende retning."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skjermen er låst i stående retning."</string>
@@ -196,7 +196,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ikke tilkoblet"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ingen nettverk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi er av"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Send skjermen"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Cast skjermen"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Nettverket kan\nvære overvåket"</string>

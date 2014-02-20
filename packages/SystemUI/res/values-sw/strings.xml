@@ -125,7 +125,7 @@
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
-    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Inatumia data nje mtandao wako"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Inatumia data nje mtandao wako wa kawaida"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ukingo"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Hakuna SIM."</string>
@@ -174,7 +174,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Hali ya ndege"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Inachaji, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Imechajiwa"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Betri imejaa"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (Vifaa <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth Imezimwa"</string>
