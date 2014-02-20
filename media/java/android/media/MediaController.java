@@ -101,7 +101,7 @@ public final class MediaController {
      * sent using this method.
      *
      * @param keycode The media button keycode, such as
-     *            {@link KeyEvent#KEYCODE_MEDIA_BUTTON_PLAY}.
+     *            {@link KeyEvent#KEYCODE_MEDIA_PLAY}.
      */
     public void sendMediaButton(int keycode) {
         if (!KeyEvent.isMediaKey(keycode)) {
