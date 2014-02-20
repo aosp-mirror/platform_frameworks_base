@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 
 /**
@@ -114,6 +115,14 @@ public class UserInfo implements Parcelable {
 
     public boolean isManagedProfile() {
         return (flags & FLAG_MANAGED_PROFILE) == FLAG_MANAGED_PROFILE;
+    }
+
+    /**
+     * @return true if this user can be switched to.
+     **/
+    public boolean supportsSwitchTo() {
+        // TODO remove fw.show_hidden_users when we have finished developing managed profiles.
+        return !isManagedProfile() || SystemProperties.getBoolean("fw.show_hidden_users", false);
     }
 
     public UserInfo() {

@@ -1181,6 +1181,8 @@
 
     <!--  Maximum number of supported users -->
     <integer name="config_multiuserMaximumUsers">1</integer>
+    <!-- Whether UI for multi user should be shown -->
+    <bool name="config_enableMultiUserUI">false</bool>
 
     <!-- Minimum span needed to begin a touch scaling gesture.
          If the span is equal to or greater than this size, a scaling gesture
