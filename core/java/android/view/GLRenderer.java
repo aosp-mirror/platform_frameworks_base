@@ -499,12 +499,17 @@ public class GLRenderer extends HardwareRenderer {
         mAttachedLayers.add(hardwareLayer);
     }
 
+    boolean hasContext() {
+        return sEgl != null && mEglContext != null
+                && mEglContext.equals(sEgl.eglGetCurrentContext());
+    }
+
     @Override
     void onLayerDestroyed(HardwareLayer layer) {
         if (mGlCanvas != null) {
             mGlCanvas.cancelLayerUpdate(layer);
         }
-        if (Looper.myLooper() == Looper.getMainLooper() && validate()) {
+        if (hasContext()) {
             long backingLayer = layer.detachBackingLayer();
             nDestroyLayer(backingLayer);
         }
