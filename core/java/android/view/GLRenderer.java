@@ -504,6 +504,10 @@ public class GLRenderer extends HardwareRenderer {
         if (mGlCanvas != null) {
             mGlCanvas.cancelLayerUpdate(layer);
         }
+        if (Looper.myLooper() == Looper.getMainLooper() && validate()) {
+            long backingLayer = layer.detachBackingLayer();
+            nDestroyLayer(backingLayer);
+        }
         mAttachedLayers.remove(layer);
     }
 
@@ -1448,6 +1452,8 @@ public class GLRenderer extends HardwareRenderer {
      *         false otherwise
      */
     static native boolean isBackBufferPreserved();
+
+    static native void nDestroyLayer(long layerPtr);
 
     class DrawPerformanceDataProvider extends GraphDataProvider {
         private final int mGraphType;
