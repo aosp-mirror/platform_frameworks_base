@@ -115,20 +115,6 @@ public interface WindowManagerPolicy {
     public final static int ACTION_PASS_TO_USER = 0x00000001;
 
     /**
-     * This key event should wake the device.
-     * To be returned from {@link #interceptKeyBeforeQueueing}.
-     * Do not return this and {@link #ACTION_GO_TO_SLEEP} or {@link #ACTION_PASS_TO_USER}.
-     */
-    public final static int ACTION_WAKE_UP = 0x00000002;
-
-    /**
-     * This key event should put the device to sleep (and engage keyguard if necessary)
-     * To be returned from {@link #interceptKeyBeforeQueueing}.
-     * Do not return this and {@link #ACTION_WAKE_UP} or {@link #ACTION_PASS_TO_USER}.
-     */
-    public final static int ACTION_GO_TO_SLEEP = 0x00000004;
-
-    /**
      * Interface to the Window Manager state associated with a particular
      * window.  You can hold on to an instance of this interface from the call
      * to prepareAddWindow() until removeWindow().
@@ -751,8 +737,7 @@ public interface WindowManagerPolicy {
      * @param policyFlags The policy flags associated with the key.
      * @param isScreenOn True if the screen is already on
      *
-     * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
-     *      {@link #ACTION_WAKE_UP} and {@link #ACTION_GO_TO_SLEEP} flags.
+     * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
 
@@ -765,10 +750,9 @@ public interface WindowManagerPolicy {
      * because it's the most fragile.
      * @param policyFlags The policy flags associated with the motion.
      *
-     * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
-     *      {@link #ACTION_WAKE_UP} and {@link #ACTION_GO_TO_SLEEP} flags.
+     * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
-    public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags);
+    public int interceptMotionBeforeQueueingWhenScreenOff(long whenNanos, int policyFlags);
 
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.
