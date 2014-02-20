@@ -179,13 +179,13 @@
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"បាន​បញ្ចូល​ពេញ"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ប៊្លូធូស"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ប៊្លូធូស (ឧបករណ៍ <xliff:g id="NUMBER">%d</xliff:g>)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"បិទ​ប៊្លូធូស"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"​ប៊្លូធូស​បាន​បិទ"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ពន្លឺ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"បង្វិល​​ស្វ័យ​ប្រវត្តិ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"បាន​ចាក់​សោ​ការ​បង្វិល"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បិទ"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"សម្រាប់​តែ​ការ​ហៅ​ពេល​អាសន្ន"</string>
@@ -195,7 +195,7 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"វ៉ាយហ្វាយ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"មិន​បាន​តភ្ជាប់"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"គ្មាន​បណ្ដាញ"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"បិទ​វ៉ាយហ្វាយ"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"ចាត់​ថ្នាក់​អេក្រង់"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ពន្លឺ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ស្វ័យប្រវត្តិ"</string>
