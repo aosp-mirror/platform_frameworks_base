@@ -39,9 +39,11 @@ public class SurfaceControl {
     private static native void nativeDestroy(long nativeObject);
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
-            int width, int height, int minLayer, int maxLayer, boolean allLayers);
+            int width, int height, int minLayer, int maxLayer, boolean allLayers,
+            boolean useIdentityTransform);
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
-            int width, int height, int minLayer, int maxLayer, boolean allLayers);
+            int width, int height, int minLayer, int maxLayer, boolean allLayers,
+            boolean useIdentityTransform);
 
     private static native void nativeOpenTransaction();
     private static native void nativeCloseTransaction();
@@ -554,10 +556,15 @@ public class SurfaceControl {
      * include in the screenshot.
      * @param maxLayer The highest (top-most Z order) surface layer to
      * include in the screenshot.
+     * @param useIdentityTransform Replace whatever transformation (rotation,
+     * scaling, translation) the surface layers are currently using with the
+     * identity transformation while taking the screenshot.
      */
     public static void screenshot(IBinder display, Surface consumer,
-            int width, int height, int minLayer, int maxLayer) {
-        screenshot(display, consumer, width, height, minLayer, maxLayer, false);
+            int width, int height, int minLayer, int maxLayer,
+            boolean useIdentityTransform) {
+        screenshot(display, consumer, width, height, minLayer, maxLayer, false,
+                useIdentityTransform);
     }
 
     /**
@@ -572,7 +579,7 @@ public class SurfaceControl {
      */
     public static void screenshot(IBinder display, Surface consumer,
             int width, int height) {
-        screenshot(display, consumer, width, height, 0, 0, true);
+        screenshot(display, consumer, width, height, 0, 0, true, false);
     }
 
     /**
@@ -582,7 +589,7 @@ public class SurfaceControl {
      * @param consumer The {@link Surface} to take the screenshot into.
      */
     public static void screenshot(IBinder display, Surface consumer) {
-        screenshot(display, consumer, 0, 0, 0, 0, true);
+        screenshot(display, consumer, 0, 0, 0, 0, true, false);
     }
 
 
@@ -602,15 +609,20 @@ public class SurfaceControl {
      * include in the screenshot.
      * @param maxLayer The highest (top-most Z order) surface layer to
      * include in the screenshot.
+     * @param useIdentityTransform Replace whatever transformation (rotation,
+     * scaling, translation) the surface layers are currently using with the
+     * identity transformation while taking the screenshot.
      * @return Returns a Bitmap containing the screen contents, or null
      * if an error occurs. Make sure to call Bitmap.recycle() as soon as
      * possible, once its content is not needed anymore.
      */
-    public static Bitmap screenshot(int width, int height, int minLayer, int maxLayer) {
+    public static Bitmap screenshot(int width, int height, int minLayer, int maxLayer,
+            boolean useIdentityTransform) {
         // TODO: should take the display as a parameter
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, width, height, minLayer, maxLayer, false);
+        return nativeScreenshot(displayToken, width, height, minLayer, maxLayer, false,
+                useIdentityTransform);
     }
 
     /**
@@ -629,17 +641,19 @@ public class SurfaceControl {
         // TODO: should take the display as a parameter
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, width, height, 0, 0, true);
+        return nativeScreenshot(displayToken, width, height, 0, 0, true, false);
     }
 
     private static void screenshot(IBinder display, Surface consumer,
-            int width, int height, int minLayer, int maxLayer, boolean allLayers) {
+            int width, int height, int minLayer, int maxLayer, boolean allLayers,
+            boolean useIdentityTransform) {
         if (display == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
         if (consumer == null) {
             throw new IllegalArgumentException("consumer must not be null");
         }
-        nativeScreenshot(display, consumer, width, height, minLayer, maxLayer, allLayers);
+        nativeScreenshot(display, consumer, width, height, minLayer, maxLayer, allLayers,
+                useIdentityTransform);
     }
 }
