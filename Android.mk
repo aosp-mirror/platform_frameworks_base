@@ -260,12 +260,17 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
+	media/java/android/media/IMediaController.aidl \
+	media/java/android/media/IMediaControllerCallback.aidl \
 	media/java/android/media/IMediaHTTPConnection.aidl \
 	media/java/android/media/IMediaHTTPService.aidl \
 	media/java/android/media/IMediaRouterClient.aidl \
 	media/java/android/media/IMediaRouterService.aidl \
 	media/java/android/media/IMediaScannerListener.aidl \
 	media/java/android/media/IMediaScannerService.aidl \
+	media/java/android/media/IMediaSession.aidl \
+	media/java/android/media/IMediaSessionCallback.aidl \
+	media/java/android/media/IMediaSessionManager.aidl \
 	media/java/android/media/IRemoteControlClient.aidl \
 	media/java/android/media/IRemoteControlDisplay.aidl \
 	media/java/android/media/IRemoteDisplayCallback.aidl \

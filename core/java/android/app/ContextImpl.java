@@ -17,6 +17,7 @@
 package android.app;
 
 import android.os.Build;
+
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.Preconditions;
 
@@ -62,6 +63,7 @@ import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaRouter;
+import android.media.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkPolicyManager;
@@ -587,6 +589,12 @@ class ContextImpl extends Context {
             public Object createService(ContextImpl ctx) {
                 return new ConsumerIrManager(ctx);
             }});
+
+        registerService(MEDIA_SESSION_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                return new MediaSessionManager(ctx);
+            }
+        });
     }
 
     static ContextImpl getImpl(Context context) {

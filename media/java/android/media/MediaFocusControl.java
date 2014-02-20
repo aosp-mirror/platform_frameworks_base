@@ -262,7 +262,7 @@ public class MediaFocusControl implements OnFinished {
                 final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
                 while (displayIterator.hasNext()) {
                     final DisplayInfoForServer di =
-                            (DisplayInfoForServer) displayIterator.next();
+                            displayIterator.next();
                     if (di.mClientNotifListComp != null) {
                         boolean wasEnabled = di.mEnabled;
                         di.mEnabled = isComponentInStringArray(di.mClientNotifListComp,
@@ -538,7 +538,7 @@ public class MediaFocusControl implements OnFinished {
             //  evaluated it, traversal order doesn't matter here)
             Iterator<FocusRequester> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
-                FocusRequester fr = (FocusRequester)stackIterator.next();
+                FocusRequester fr = stackIterator.next();
                 if(fr.hasSameClient(clientToRemove)) {
                     Log.i(TAG, "AudioFocus  removeFocusStackEntry(): removing entry for "
                             + clientToRemove);
@@ -562,7 +562,7 @@ public class MediaFocusControl implements OnFinished {
         //  evaluated it, traversal order doesn't matter here)
         Iterator<FocusRequester> stackIterator = mFocusStack.iterator();
         while(stackIterator.hasNext()) {
-            FocusRequester fr = (FocusRequester)stackIterator.next();
+            FocusRequester fr = stackIterator.next();
             if(fr.hasSameBinder(cb)) {
                 Log.i(TAG, "AudioFocus  removeFocusStackEntry(): removing entry for " + cb);
                 stackIterator.remove();
@@ -930,33 +930,11 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
-    protected static boolean isMediaKeyCode(int keyCode) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_MUTE:
-            case KeyEvent.KEYCODE_HEADSETHOOK:
-            case KeyEvent.KEYCODE_MEDIA_PLAY:
-            case KeyEvent.KEYCODE_MEDIA_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_STOP:
-            case KeyEvent.KEYCODE_MEDIA_NEXT:
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-            case KeyEvent.KEYCODE_MEDIA_REWIND:
-            case KeyEvent.KEYCODE_MEDIA_RECORD:
-            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-            case KeyEvent.KEYCODE_MEDIA_CLOSE:
-            case KeyEvent.KEYCODE_MEDIA_EJECT:
-            case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     private static boolean isValidMediaKeyEvent(KeyEvent keyEvent) {
         if (keyEvent == null) {
             return false;
         }
-        return MediaFocusControl.isMediaKeyCode(keyEvent.getKeyCode());
+        return KeyEvent.isMediaKey(keyEvent.getKeyCode());
     }
 
     /**
@@ -1383,7 +1361,7 @@ public class MediaFocusControl implements OnFinished {
         synchronized(mRCStack) {
             final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                final DisplayInfoForServer di = displayIterator.next();
                 pw.println("  IRCD: " + di.mRcDisplay +
                         "  -- w:" + di.mArtworkExpectedWidth +
                         "  -- h:" + di.mArtworkExpectedHeight +
@@ -1410,7 +1388,7 @@ public class MediaFocusControl implements OnFinished {
                 // (using an iterator on the stack so we can safely remove an entry after having
                 //  evaluated it, traversal order doesn't matter here)
                 while(stackIterator.hasNext()) {
-                    RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
+                    RemoteControlStackEntry rcse = stackIterator.next();
                     if (removeAll && packageName.equals(rcse.mMediaIntent.getCreatorPackage())) {
                         // a stack entry is from the package being removed, remove it from the stack
                         stackIterator.remove();
@@ -2075,7 +2053,7 @@ public class MediaFocusControl implements OnFinished {
                 // remove the display from the list
                 final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
                 while (displayIterator.hasNext()) {
-                    final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                    final DisplayInfoForServer di = displayIterator.next();
                     if (di.mRcDisplay == mRcDisplay) {
                         if (DEBUG_RC) Log.w(TAG, " RCD removed from list");
                         displayIterator.remove();
@@ -2099,7 +2077,7 @@ public class MediaFocusControl implements OnFinished {
     private void plugRemoteControlDisplaysIntoClient_syncRcStack(IRemoteControlClient rcc) {
         final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
         while (displayIterator.hasNext()) {
-            final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+            final DisplayInfoForServer di = displayIterator.next();
             try {
                 rcc.plugRemoteControlDisplay(di.mRcDisplay, di.mArtworkExpectedWidth,
                         di.mArtworkExpectedHeight);
@@ -2137,7 +2115,7 @@ public class MediaFocusControl implements OnFinished {
     private boolean rcDisplayIsPluggedIn_syncRcStack(IRemoteControlDisplay rcd) {
         final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
         while (displayIterator.hasNext()) {
-            final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+            final DisplayInfoForServer di = displayIterator.next();
             if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                 return true;
             }
@@ -2216,7 +2194,7 @@ public class MediaFocusControl implements OnFinished {
             boolean displayWasPluggedIn = false;
             final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext() && !displayWasPluggedIn) {
-                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                final DisplayInfoForServer di = displayIterator.next();
                 if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                     displayWasPluggedIn = true;
                     di.release();
@@ -2258,7 +2236,7 @@ public class MediaFocusControl implements OnFinished {
             final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
             boolean artworkSizeUpdate = false;
             while (displayIterator.hasNext() && !artworkSizeUpdate) {
-                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                final DisplayInfoForServer di = displayIterator.next();
                 if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                     if ((di.mArtworkExpectedWidth != w) || (di.mArtworkExpectedHeight != h)) {
                         di.mArtworkExpectedWidth = w;
@@ -2305,7 +2283,7 @@ public class MediaFocusControl implements OnFinished {
             // (display stack traversal order doesn't matter).
             final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
-                final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
+                final DisplayInfoForServer di = displayIterator.next();
                 if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
                     di.mWantsPositionSync = wantsSync;
                     rcdRegistered = true;

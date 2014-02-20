@@ -1840,7 +1840,7 @@ public abstract class Context {
      * @hide like {@link #stopService(Intent)} but for a specific user.
      */
     public abstract boolean stopServiceAsUser(Intent service, UserHandle user);
-    
+
     /**
      * Connect to an application service, creating it if needed.  This defines
      * a dependency between your application and the service.  The given
@@ -1989,7 +1989,8 @@ public abstract class Context {
             USER_SERVICE,
             //@hide: APP_OPS_SERVICE
             CAMERA_SERVICE,
-            PRINT_SERVICE
+            PRINT_SERVICE,
+            MEDIA_SESSION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2348,6 +2349,15 @@ public abstract class Context {
      * @see android.media.MediaRouter
      */
     public static final String MEDIA_ROUTER_SERVICE = "media_router";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.media.MediaSessionManager} for managing media Sessions.
+     *
+     * @see #getSystemService
+     * @see android.media.MediaSessionManager
+     */
+    public static final String MEDIA_SESSION_SERVICE = "media_session";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
