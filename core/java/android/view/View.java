@@ -11554,6 +11554,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     receiver.damageInParent();
                 }
             }
+
+            // Damage the entire IsolatedZVolume recieving this view's shadow.
+            if (getCastsShadow() && getTranslationZ() != 0) {
+                damageIsolatedZVolume();
+            }
         }
     }
 
@@ -11578,6 +11583,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private boolean isProjectionReceiver() {
         return mBackground != null;
+    }
+
+    /**
+     * Damage area of the screen covered by the current isolated Z volume
+     *
+     * This method will guarantee that any changes to shadows cast by a View
+     * are damaged on the screen for future redraw.
+     */
+    private void damageIsolatedZVolume() {
+        final AttachInfo ai = mAttachInfo;
+        if (ai != null) {
+            ViewParent p = getParent();
+            while (p != null) {
+                if (p instanceof ViewGroup) {
+                    final ViewGroup vg = (ViewGroup) p;
+                    if (vg.hasIsolatedZVolume()) {
+                        vg.damageInParent();
+                        return;
+                    }
+                }
+                p = p.getParent();
+            }
+        }
     }
 
     /**
@@ -11608,12 +11636,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             damageInParent();
         }
+        if (invalidateParent && getCastsShadow() && getTranslationZ() != 0) {
+            damageIsolatedZVolume();
+        }
     }
 
     /**
      * Tells the parent view to damage this view's bounds.
+     *
+     * @hide
      */
-    private void damageInParent() {
+    protected void damageInParent() {
         final AttachInfo ai = mAttachInfo;
         final ViewParent p = mParent;
         if (p != null && ai != null) {
