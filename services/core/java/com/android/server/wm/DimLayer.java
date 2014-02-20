@@ -125,12 +125,53 @@ public class DimLayer {
         }
     }
 
+    /**
+     * @param layer The new layer value.
+     * @param inTransaction Whether the call is made within a surface transaction.
+     */
+    void adjustSurface(int layer, boolean inTransaction) {
+        final int dw, dh;
+        final float xPos, yPos;
+        if (!mStack.isFullscreen()) {
+            dw = mBounds.width();
+            dh = mBounds.height();
+            xPos = mBounds.left;
+            yPos = mBounds.top;
+        } else {
+            // Set surface size to screen size.
+            final DisplayInfo info = mDisplayContent.getDisplayInfo();
+            // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose
+            // a corner.
+            dw = (int) (info.logicalWidth * 1.5);
+            dh = (int) (info.logicalHeight * 1.5);
+            // back off position so 1/4 of Surface is before and 1/4 is after.
+            xPos = -1 * dw / 6;
+            yPos = -1 * dh / 6;
+        }
+
+        try {
+            if (!inTransaction) {
+                SurfaceControl.openTransaction();
+            }
+            mDimSurface.setPosition(xPos, yPos);
+            mDimSurface.setSize(dw, dh);
+            mDimSurface.setLayer(layer);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Failure setting size or layer", e);
+        } finally {
+            if (!inTransaction) {
+                SurfaceControl.closeTransaction();
+            }
+        }
+        mLastBounds.set(mBounds);
+        mLayer = layer;
+    }
+
+    // Assumes that surface transactions are currently closed.
     void setBounds(Rect bounds) {
         mBounds.set(bounds);
         if (isDimming() && !mLastBounds.equals(bounds)) {
-            // Clearing mAlpha forces show to redisplay with new size. 
-            mAlpha = 0;
-            show();
+            adjustSurface(mLayer, false);
         }
     }
 
@@ -169,35 +210,8 @@ public class DimLayer {
             return;
         }
 
-        final int dw, dh;
-        final float xPos, yPos;
-        if (!mStack.isFullscreen()) {
-            dw = mBounds.width();
-            dh = mBounds.height();
-            xPos = mBounds.left;
-            yPos = mBounds.top;
-        } else {
-            // Set surface size to screen size.
-            final DisplayInfo info = mDisplayContent.getDisplayInfo();
-            // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose a
-            // corner.
-            dw = (int) (info.logicalWidth * 1.5);
-            dh = (int) (info.logicalHeight * 1.5);
-            // back off position so 1/4 of Surface is before and 1/4 is after.
-            xPos = -1 * dw / 6;
-            yPos = -1 * dh / 6;
-        }
-
         if (!mLastBounds.equals(mBounds) || mLayer != layer) {
-            try {
-                mDimSurface.setPosition(xPos, yPos);
-                mDimSurface.setSize(dw, dh);
-                mDimSurface.setLayer(layer);
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Failure setting size or layer", e);
-            }
-            mLastBounds.set(mBounds);
-            mLayer = layer;
+            adjustSurface(layer, true);
         }
 
         long curTime = SystemClock.uptimeMillis();
