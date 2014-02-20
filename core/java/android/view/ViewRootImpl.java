@@ -5537,24 +5537,23 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void deliverInputEvent(QueuedInputEvent q) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent");
-        try {
-            if (mInputEventConsistencyVerifier != null) {
-                mInputEventConsistencyVerifier.onInputEvent(q.mEvent, 0);
-            }
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent",
+                q.mEvent.getSequenceNumber());
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onInputEvent(q.mEvent, 0);
+        }
 
-            InputStage stage = q.shouldSkipIme() ? mFirstPostImeInputStage : mFirstInputStage;
-            if (stage != null) {
-                stage.deliver(q);
-            } else {
-                finishInputEvent(q);
-            }
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        InputStage stage = q.shouldSkipIme() ? mFirstPostImeInputStage : mFirstInputStage;
+        if (stage != null) {
+            stage.deliver(q);
+        } else {
+            finishInputEvent(q);
         }
     }
 
     private void finishInputEvent(QueuedInputEvent q) {
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, "deliverInputEvent",
+                q.mEvent.getSequenceNumber());
         if (q.mReceiver != null) {
             boolean handled = (q.mFlags & QueuedInputEvent.FLAG_FINISHED_HANDLED) != 0;
             q.mReceiver.finishInputEvent(q.mEvent, handled);
